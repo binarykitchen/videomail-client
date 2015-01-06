@@ -1,0 +1,39 @@
+{
+  "name": "videomail-client",
+  "version": "1.0.0",
+  "description": "Record videos from your webcam inside the browser! And encode them through the Videomail API.",
+  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
+  "contributors": [
+    {
+      "name": "Michael Heuberger",
+      "email": "michael.heuberger@binarykitchen.com"
+    }
+  ],
+  "homepage": "https://videomail.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binarykitchen/videomail-client.git"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "main": "src/videomail.js",
+  "scripts": {
+    "postinstall": "npm prune"
+   },
+  "engines": {
+    "node": ">=0.10.31",
+    "npm": ">=1.4.23"
+  },
+  "keywords": [
+    "webcam",
+    "video",
+    "videomail",
+    "encoder",
+    "getusermedia",
+    "recorder"
+  ],
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
