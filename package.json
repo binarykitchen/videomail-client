@@ -33,6 +33,13 @@
     "recorder"
   ],
   "dependencies": {
+    "typedarray-to-buffer": "^3.0.1",
+    "ua-parser-js": "^0.7.3",
+    "es5-shim": "^4.0.5",
+    "create-error": "^0.3.1",
+    "websocket-stream": "^1.1.1",
+    "superagent": "^0.21.0",
+    "merge-recursive": "^0.0.3"
   },
   "devDependencies": {
   }
