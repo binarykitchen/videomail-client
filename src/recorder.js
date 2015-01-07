@@ -2,10 +2,11 @@ var websocket    = require('websocket-stream'),
     util         = require('util'),
     EventEmitter = require('events').EventEmitter,
 
-    Browser      = require('./util/browser'),
-    Humanize     = require('./util/humanize'),
-    UserMedia    = require('./util/userMedia'),
-    Frame        = require('./util/items/frame')
+    Browser         = require('./util/browser'),
+    Humanize        = require('./util/humanize'),
+    UserMedia       = require('./util/userMedia'),
+    VideomailError  = require('./util/videomailError'),
+    Frame           = require('./util/items/frame')
 
 var Recorder = function(recorderElement, replayElement, options) {
 
@@ -143,8 +144,8 @@ var Recorder = function(recorderElement, replayElement, options) {
                 preview(command.args)
                 break
             case 'error':
-                this.emit('error', new VideomailError('Oh f**k! Server error', {
-                    explanation: command.args.err
+                this.emit('error', new VideomailError('Oh f**k, server error!', {
+                    explanation: command.args.err || '(No explanation given)'
                 }))
                 break
             case 'confirmFrame':
@@ -491,7 +492,7 @@ var Recorder = function(recorderElement, replayElement, options) {
         if (options.audio.enabled)
             videomail.sampleRate = userMedia.getAudioSampleRate()
 
-        Videomail.post(videomail, options, function(err, response) {
+        window.Videomail.post(videomail, options, function(err, response) {
             submitting = false
 
             if (err) {
