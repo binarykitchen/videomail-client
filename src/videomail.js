@@ -8,6 +8,9 @@ var merge           = require('merge-recursive'),
     Browser         = require('./util/browser'),
     standardize     = require('./util/standardize'),
 
+    CountdownTimer  = require('./util/timers/countdown'),
+    RecordTimer     = require('./util/timers/record'),
+
     browser         = new Browser(),
     resource        = new Resource()
 
@@ -18,6 +21,7 @@ function factory() {
     return {
         globalOptions: {
             logger:         console,
+            debug:          false,
             timeout:        10000,
             baseUrl:        'https://videomail.io',
             socketUrl:      'wss://videomail.io',
@@ -27,7 +31,9 @@ function factory() {
                 enabled: false
             },
             video: {
-                fps: 15
+                fps:            15,
+                limitSeconds:   60,
+                countdown:      3
             },
             image: {
                 quality:    .8,
@@ -141,6 +147,23 @@ function factory() {
 
         createError: function(err) {
             return VideomailError.create(err)
+        },
+
+        createRecordTimer: function(localOptions) {
+            localOptions = merge.recursive(this.globalOptions, localOptions)
+
+            return new RecordTimer({
+                debug:          localOptions.debug,
+                limitSeconds:   localOptions.video.limitSeconds
+            })
+        },
+
+        createCountdownTimer: function(localOptions) {
+            localOptions = merge.recursive(this.globalOptions, localOptions)
+
+            return new CountdownTimer({
+                countdown: localOptions.video.countdown
+            })
         }
     }
 }
