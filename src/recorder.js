@@ -16,8 +16,6 @@ var Recorder = function(recorderElement, replayElement, options) {
 
         wantedInterval  = 1e3 / options.video.fps,
 
-        paused,
-
         lastAnimationTimestamp,
 
         intervalSum,
@@ -366,6 +364,8 @@ var Recorder = function(recorderElement, replayElement, options) {
     }
 
     this.reset = function() {
+        debug('reset()')
+
         rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
         // pause video to make sure it won't consume any memory
@@ -378,8 +378,6 @@ var Recorder = function(recorderElement, replayElement, options) {
         setWebMSource(null)
 
         canvas = ctx = sampleProgress = frameProgress = null
-
-        paused = false
     }
 
     this.isConnected = function() {

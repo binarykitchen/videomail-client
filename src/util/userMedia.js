@@ -102,7 +102,7 @@ module.exports = function(rawVisualUserMedia, options) {
             setVisualStream(null)
         }
 
-        recordAudio  = false
+        paused = recordAudio  = false
 
         if (recorder)
             recorder.onaudioprocess = undefined
