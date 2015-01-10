@@ -48,15 +48,13 @@ module.exports = function(options) {
 
             if (isNear(remainingSeconds)) {
 
-                recordNote.className = 'near'
-                recordTimer.className = 'near'
+                recordNote.className = recordTimer.className = 'near'
 
                 options.debug('End is near, ' + countdown + ' seconds to go')
 
             } else if (endIsNigh(remainingSeconds)) {
 
-                recordNote.className = 'nigh'
-                recordTimer.className = 'nigh'
+                recordNote.className = recordTimer.className = 'nigh'
 
                 options.debug('End is nigh, ' + countdown + ' seconds to go')
             }
