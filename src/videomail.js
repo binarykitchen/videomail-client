@@ -71,7 +71,7 @@ function factory() {
                 cb           = localOptions
                 localOptions = this.globalOptions
             } else
-                localOptions = merge.recursive(this.globalOptions, localOptions)
+                localOptions = merge.recursive(this.globalOptions, localOptions || {})
 
             if (!err && !recorderId) {
                 err = new VideomailError('The recorder ID is missing!')
@@ -150,7 +150,7 @@ function factory() {
         },
 
         createRecordTimer: function(localOptions) {
-            localOptions = merge.recursive(this.globalOptions, localOptions)
+            localOptions = merge.recursive(this.globalOptions, localOptions || {})
 
             return new RecordTimer({
                 debug:          localOptions.debug,
@@ -159,7 +159,7 @@ function factory() {
         },
 
         createCountdownTimer: function(localOptions) {
-            localOptions = merge.recursive(this.globalOptions, localOptions)
+            localOptions = merge.recursive(this.globalOptions, localOptions || {})
 
             return new CountdownTimer({
                 countdown: localOptions.video.countdown
