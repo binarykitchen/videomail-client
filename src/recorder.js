@@ -109,7 +109,7 @@ var Recorder = function(recorderElement, replayElement, options) {
 
         setTimeout(function() {
             replayElement.load()
-        }, 100)
+        }, 50)
     }
 
     function updateFrameProgress(args) {
@@ -189,6 +189,14 @@ var Recorder = function(recorderElement, replayElement, options) {
         }
     }
 
+    function initEvents() {
+        debug('initEvents()')
+
+        window.addEventListener('beforeunload', function(e) {
+            self.unload(e)
+        })
+    }
+
     function initSocket(cb) {
         if (!connected && !unloaded) {
 
@@ -213,7 +221,7 @@ var Recorder = function(recorderElement, replayElement, options) {
             stream.on('error', function(err) {
                 // workaround for bug https://github.com/maxogden/websocket-stream/issues/50
 
-                if (stream.destroyed) {
+                if (stream && stream.destroyed) {
                     self.unload(err)
 
                     self.emit('error', new VideomailError('Unable to connect', {
@@ -241,7 +249,7 @@ var Recorder = function(recorderElement, replayElement, options) {
                 }, 2e3)
             })
 
-            var checkConnection = function () {
+            var checkConnection = function() {
                 if (!connected) {
                     connected = true
 
@@ -259,10 +267,6 @@ var Recorder = function(recorderElement, replayElement, options) {
             stream.on('data', function(data) {
                 executeCommand.call(self, data)
             })
-
-            window.addEventListener('beforeunload', function(e) {
-                self.unload(e)
-            })
         }
     }
 
@@ -272,10 +276,10 @@ var Recorder = function(recorderElement, replayElement, options) {
             type    = 'video/' + type,
             source
 
-        if (sources.length) {
+        if (l) {
             var i
 
-            for(i = 0; i < l && !source; i++) {
+            for (i = 0; i < l && !source; i++) {
                 if (sources[i].getAttribute('type') === type)
                     source = sources[i]
             }
@@ -506,6 +510,7 @@ var Recorder = function(recorderElement, replayElement, options) {
         })
     }
 
+    initEvents()
     initSocket()
 }
 
