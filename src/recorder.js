@@ -15,8 +15,10 @@ var Recorder = function(recorderElement, replayElement, options) {
         browser   = new Browser(),
 
         wantedInterval  = 1e3 / options.video.fps,
+        debug           = options.debug,
 
         lastAnimationTimestamp,
+        userMediaTimeout,
 
         intervalSum,
         bytesSum,
@@ -36,13 +38,7 @@ var Recorder = function(recorderElement, replayElement, options) {
         unloaded,
         stopTime,
         stream,
-        connected,
-        debug
-
-    if (options.debug)
-        debug = options.logger.debug.bind(options.logger)
-    else
-        debug = function() {}
+        connected
 
     function onAudioSample(audioSample) {
         samplesCount++
@@ -58,9 +54,16 @@ var Recorder = function(recorderElement, replayElement, options) {
         this.emit('ready')
     }
 
+    function clearUserMediaTimeout() {
+        userMediaTimeout && clearTimeout(userMediaTimeout)
+        userMediaTimeout = null
+    }
+
     function loadUserMedia() {
+        debug('loadUserMedia()')
+
         try {
-            var userMediaTimeout = setTimeout(function() {
+            userMediaTimeout = setTimeout(function() {
                 if (!self.isReady())
                     self.emit('error', browser.getNoAccessIssue())
             }, 5e3)
@@ -70,7 +73,7 @@ var Recorder = function(recorderElement, replayElement, options) {
                 audio: options.audio.enabled
             }, function(localStream) {
 
-                clearTimeout(userMediaTimeout)
+                clearUserMediaTimeout()
 
                 userMedia.init(
                     localStream,
@@ -79,7 +82,7 @@ var Recorder = function(recorderElement, replayElement, options) {
                 )
 
             }, function(err) {
-                clearTimeout(userMediaTimeout)
+                clearUserMediaTimeout()
                 self.emit('error', err)
             })
 
@@ -195,7 +198,6 @@ var Recorder = function(recorderElement, replayElement, options) {
             stream = websocket(options.socketUrl)
 
             /*
-
             // useful for debugging streams
 
             if (!stream.originalEmit)
@@ -206,15 +208,16 @@ var Recorder = function(recorderElement, replayElement, options) {
                 var args = [].splice.call(arguments, 0)
                 return stream.originalEmit.apply(stream, args)
             }
-
             */
 
             stream.on('error', function(err) {
                 // workaround for bug https://github.com/maxogden/websocket-stream/issues/50
 
                 if (stream.destroyed) {
+                    self.unload(err)
+
                     self.emit('error', new VideomailError('Unable to connect', {
-                        explanation: 'Looks like the videomail server is down.'
+                        explanation: 'A websocket connection has been refused. Probably you are already connected in another instance?'
                     }))
                 } else {
                     self.emit('error', err ? err : 'Unhandled websocket error')
@@ -350,6 +353,8 @@ var Recorder = function(recorderElement, replayElement, options) {
 
         this.reset()
 
+        clearUserMediaTimeout()
+
         if (submitting)
             // server will disconnect socket automatically after submitting
             connected = false
@@ -455,16 +460,16 @@ var Recorder = function(recorderElement, replayElement, options) {
 
                     stream.write(buffer)
 
+                    /*
                     if (options.debug) {
                         bytesSum += buffer.length
 
-                        /*
                         debug(
                             'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
                             interval + '/' + intervalThreshold + '/' + wantedInterval
                         )
-                        */
                     }
+                    */
                 }
             }
         }

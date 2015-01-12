@@ -17,7 +17,7 @@ module.exports = function(options) {
     }
 
     function thresholdReached(secs, threshold) {
-        return secs >= options.limitSeconds * threshold
+        return secs >= options.video.limitSeconds * threshold
     }
 
     function isNear(secs) {
@@ -44,7 +44,7 @@ module.exports = function(options) {
             secs = countdown - mins * 60
 
         if (!nearComputed || !endNighComputed) {
-            var remainingSeconds = options.limitSeconds - countdown
+            var remainingSeconds = options.video.limitSeconds - countdown
 
             if (isNear(remainingSeconds)) {
 
@@ -74,7 +74,7 @@ module.exports = function(options) {
     }
 
     this.start = function(cb) {
-        countdown     = options.limitSeconds
+        countdown     = options.video.limitSeconds
         nearComputed  = endNighComputed = false
 
         recordNote.classList.remove('hide')

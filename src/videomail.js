@@ -45,6 +45,17 @@ function factory() {
             this.globalOptions = merge.recursive(this.globalOptions, newGlobalOptions)
         },
 
+        getOptions: function(localOptions) {
+            localOptions = merge.recursive(this.globalOptions, localOptions || {})
+
+            if (localOptions.debug)
+                localOptions.debug = localOptions.logger.debug.bind(localOptions.logger)
+            else
+                localOptions.debug = function() {}
+
+            return localOptions
+        },
+
         /* comment back later when we want to automatically build the html elements in a new version
         build: function(containerId, localOptions, cb) {
             builder = builder || new Builder()
@@ -69,9 +80,9 @@ function factory() {
 
             if (!cb) {
                 cb           = localOptions
-                localOptions = this.globalOptions
+                localOptions = this.getOptions()
             } else
-                localOptions = merge.recursive(this.globalOptions, localOptions || {})
+                localOptions = this.getOptions(localOptions)
 
             if (!err && !recorderId) {
                 err = new VideomailError('The recorder ID is missing!')
@@ -150,20 +161,11 @@ function factory() {
         },
 
         createRecordTimer: function(localOptions) {
-            localOptions = merge.recursive(this.globalOptions, localOptions || {})
-
-            return new RecordTimer({
-                debug:          localOptions.debug,
-                limitSeconds:   localOptions.video.limitSeconds
-            })
+            return new RecordTimer(this.getOptions(localOptions))
         },
 
         createCountdownTimer: function(localOptions) {
-            localOptions = merge.recursive(this.globalOptions, localOptions || {})
-
-            return new CountdownTimer({
-                countdown: localOptions.video.countdown
-            })
+            return new CountdownTimer(this.getOptions(localOptions))
         }
     }
 }

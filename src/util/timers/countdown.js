@@ -14,7 +14,7 @@ module.exports = function(options) {
     }
 
     this.start = function(cb) {
-        countdown = options.countdown
+        countdown = options.video.countdown
 
         countdownElement.innerHTML = countdown
         countdownElement.classList.remove('hide')
