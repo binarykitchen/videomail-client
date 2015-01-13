@@ -2,9 +2,9 @@ var PausableTimer = require('./pausable')
 
 module.exports = function(options) {
 
-    var recordNote  = document.getElementById('recordNote'),
-        recordTimer = document.getElementById('recordTimer'),
-        paused      = document.getElementById('paused'),
+    var recordNote  = document.querySelector('#' + options.selectors.containerId + ' .recordNote'),
+        recordTimer = document.querySelector('#' + options.selectors.containerId + ' .recordTimer'),
+        paused      = document.querySelector('#' + options.selectors.containerId + ' .paused'),
 
         nearComputed    = false,
         endNighComputed = false,

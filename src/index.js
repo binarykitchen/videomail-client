@@ -16,6 +16,13 @@ var merge           = require('merge-recursive'),
 
     // , builder
 
+// todo: consider using a web component instead!
+
+function insertCss() {
+    var css = '.videomail{position:relative}.videomail .hide{display:none}.videomail .replay,.videomail .userMedia{width:100%!important;height:100%!important}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer{margin:0}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute;font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%)}.videomail .paused{opacity:.75;text-align:center}.videomail .countdown{opacity:.7;text-align:center}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:rgba(10,10,10,.85);padding:.4em .4em .3em;transition:all 1s ease}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:blink 1s infinite;animation:blink 1s infinite}.videomail .notifier{display:table-cell;vertical-align:middle;overflow:hidden;box-sizing:border-box}'
+    require('insert-css')(css)
+}
+
 function factory() {
 
     return {
@@ -27,6 +34,12 @@ function factory() {
             socketUrl:      'wss://videomail.io',
             reconnect:      true,
             cache:          true,
+            insertCss:      true,
+            selectors: {
+                containerId:    'videomail',
+                replayClass:    'replay',
+                userMediaClass: 'userMedia',
+            },
             audio: {
                 enabled: false
             },
@@ -72,10 +85,11 @@ function factory() {
         },
         */
 
-        init: function(recorderId, playerId, localOptions, cb) {
+        init: function(localOptions, cb) {
 
             var replayElement,
                 recorderElement,
+                containerElement,
                 err
 
             if (!cb) {
@@ -84,26 +98,29 @@ function factory() {
             } else
                 localOptions = this.getOptions(localOptions)
 
-            if (!err && !recorderId) {
-                err = new VideomailError('The recorder ID is missing!')
-            } else {
-                replayElement = document.querySelector('video#' + playerId)
-            }
+            containerElement = document.getElementById(localOptions.selectors.containerId)
 
-            if (!err && !playerId) {
-                err = new VideomailError('The player ID is missing!')
-            } else {
-                recorderElement = document.querySelector('video#' + recorderId)
-            }
-
-            if (!err && !recorderElement)
-                err = new VideomailError('Invalid recorder ID!', {
-                    explanation: 'No video with the ID ' + recorderElement + ' could be found.'
+            if (!err && !containerElement)
+                err = new VideomailError('The container ID is invalid!', {
+                    explanation: 'No tag with the ID ' + localOptions.selectors.containerId + ' could be found.'
                 })
+            else
+                containerElement.classList.add('videomail')
+
+            if (!err)
+                replayElement = containerElement.querySelector('video.' + localOptions.selectors.replayClass)
 
             if (!err && !replayElement)
-                err = new VideomailError('Invalid player ID!', {
-                    explanation: 'No video with the ID ' + playerId + ' could be found.'
+                err = new VideomailError('Invalid replay video class!', {
+                    explanation: 'No video with the class ' + localOptions.selectors.replayClass + ' could be found.'
+                })
+
+            if (!err)
+                recorderElement = containerElement.querySelector('video.' + localOptions.selectors.userMediaClass)
+
+            if (!err && !recorderElement)
+                err = new VideomailError('Invalid recorder video class!', {
+                    explanation: 'No video with the class ' + localOptions.selectors.userMediaClass + ' could be found.'
                 })
 
             if (!err)
@@ -117,7 +134,10 @@ function factory() {
 
             if (err)
                 cb(err)
+
             else {
+                localOptions.insertCss && insertCss()
+
                 var recorder = new Recorder(recorderElement, replayElement, localOptions)
 
                 if (localOptions.load)

@@ -1,6 +1,6 @@
 module.exports = function(options) {
 
-    var countdownElement = document.getElementById('countdown'),
+    var countdownElement = document.querySelector('#' + options.selectors.containerId + ' .countdown'),
 
         countdown,
         intervalId
