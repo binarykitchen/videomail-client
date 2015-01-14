@@ -228,10 +228,12 @@ var Recorder = function(recorderElement, replayElement, options) {
                         explanation: 'A websocket connection has been refused. Probably you are already connected in another instance?'
                     }))
                 } else {
-                    // related to https://github.com/maxogden/websocket-stream/issues/58#issuecomment-69711544
-                    // todo: examine the stream attributes and figure out out to surpress it ...
-                    console.log('Stream debug info', stream)
-                    self.emit('error', err ? err : 'Unhandled websocket error')
+
+                    // ignore error if there is no stream, see race condition at
+                    // https://github.com/maxogden/websocket-stream/issues/58#issuecomment-69711544
+
+                    if (stream)
+                        self.emit('error', err ? err : 'Unhandled websocket error')
                 }
             })
 

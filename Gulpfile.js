@@ -22,7 +22,8 @@ gulp.task('stylus', function(cb) {
             'iOS >= 6', 'android >= 4'
         ))
         .pipe(plugins.minifyCss())
-        .pipe(plugins.rename({suffix: '.min'}))
+        .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
+        .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
         .pipe(gulp.dest('src/assets/css'))
         .on('end', function() {
             cb()

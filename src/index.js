@@ -1,8 +1,8 @@
 var merge           = require('merge-recursive'),
+    insertCss       = require('insert-css'),
 
     Recorder        = require('./recorder'),
     Resource        = require('./resource'),
-    // Builder         = require('./builder'),
 
     VideomailError  = require('./util/videomailError'),
     Browser         = require('./util/browser'),
@@ -11,16 +11,15 @@ var merge           = require('merge-recursive'),
     CountdownTimer  = require('./util/timers/countdown'),
     RecordTimer     = require('./util/timers/record'),
 
+    css             = require('./assets/css/main.min.css.js'),
+
     browser         = new Browser(),
     resource        = new Resource()
 
-    // , builder
-
 // todo: consider using a web component instead!
 
-function insertCss() {
-    var css = '.videomail{position:relative}.videomail .hide{display:none}.videomail .replay,.videomail .userMedia{width:100%!important;height:100%!important}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer{margin:0}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute;font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%)}.videomail .paused{opacity:.75;text-align:center}.videomail .countdown{opacity:.7;text-align:center}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:rgba(10,10,10,.85);padding:.4em .4em .3em;transition:all 1s ease}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:blink 1s infinite;animation:blink 1s infinite}.videomail .notifier{display:table-cell;vertical-align:middle;overflow:hidden;box-sizing:border-box}'
-    require('insert-css')(css)
+function prependDefaultCss() {
+    insertCss(css, {prepend: true})
 }
 
 function factory() {
@@ -68,22 +67,6 @@ function factory() {
 
             return localOptions
         },
-
-        /* comment back later when we want to automatically build the html elements in a new version
-        build: function(containerId, localOptions, cb) {
-            builder = builder || new Builder()
-
-            var self = this
-
-            builder.construct(containerId, localOptions, function(err, recorderId, playerId) {
-                if (err) {
-                    cb(err)
-                } else {
-                    self.init(recorderId, playerId, localOptions, cb)
-                }
-            })
-        },
-        */
 
         init: function(localOptions, cb) {
 
@@ -136,7 +119,7 @@ function factory() {
                 cb(err)
 
             else {
-                localOptions.insertCss && insertCss()
+                localOptions.insertCss && prependDefaultCss()
 
                 var recorder = new Recorder(recorderElement, replayElement, localOptions)
 
