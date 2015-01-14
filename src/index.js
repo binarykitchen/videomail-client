@@ -1,8 +1,9 @@
 var merge           = require('merge-recursive'),
-    insertCss       = require('insert-css'),
 
-    Recorder        = require('./recorder'),
+    Container       = require('./wrappers/container'),
+
     Resource        = require('./resource'),
+    Controller      = require('./controller'),
 
     VideomailError  = require('./util/videomailError'),
     Browser         = require('./util/browser'),
@@ -11,16 +12,10 @@ var merge           = require('merge-recursive'),
     CountdownTimer  = require('./util/timers/countdown'),
     RecordTimer     = require('./util/timers/record'),
 
-    css             = require('./assets/css/main.min.css.js'),
-
     browser         = new Browser(),
     resource        = new Resource()
 
 // todo: consider using a web component instead!
-
-function prependDefaultCss() {
-    insertCss(css, {prepend: true})
-}
 
 function factory() {
 
@@ -70,71 +65,35 @@ function factory() {
 
         init: function(localOptions, cb) {
 
-            var replayElement,
-                recorderElement,
-                containerElement,
-                err
-
             if (!cb) {
                 cb           = localOptions
                 localOptions = this.getOptions()
             } else
                 localOptions = this.getOptions(localOptions)
 
-            containerElement = document.getElementById(localOptions.selectors.containerId)
+            var container = new Container(localOptions)
 
-            if (!err && !containerElement)
-                err = new VideomailError('The container ID is invalid!', {
-                    explanation: 'No tag with the ID ' + localOptions.selectors.containerId + ' could be found.'
-                })
-            else
-                containerElement.classList.add('videomail')
+            container.build(function(err) {
 
-            if (!err)
-                replayElement = containerElement.querySelector('video.' + localOptions.selectors.replayClass)
+                if (err)
+                    cb(err)
+                else {
 
-            if (!err && !replayElement)
-                err = new VideomailError('Invalid replay video class!', {
-                    explanation: 'No video with the class ' + localOptions.selectors.replayClass + ' could be found.'
-                })
+                    var controller = new Controller(container)
 
-            if (!err)
-                recorderElement = containerElement.querySelector('video.' + localOptions.selectors.userMediaClass)
+                    if (localOptions.load)
+                        Videomail.get(localOptions.load, localOptions, function(err, videomail) {
 
-            if (!err && !recorderElement)
-                err = new VideomailError('Invalid recorder video class!', {
-                    explanation: 'No video with the class ' + localOptions.selectors.userMediaClass + ' could be found.'
-                })
-
-            if (!err)
-                err = browser.checkRecordingCapabilities()
-
-            if (!err)
-                err = browser.checkPlaybackCapabilities(replayElement)
-
-            if (!err)
-                err = browser.checkBufferTypes()
-
-            if (err)
-                cb(err)
-
-            else {
-                localOptions.insertCss && prependDefaultCss()
-
-                var recorder = new Recorder(recorderElement, replayElement, localOptions)
-
-                if (localOptions.load)
-                    Videomail.get(localOptions.load, localOptions, function(err, videomail) {
-
-                        if (err) {
-                            recorder.unload(err)
-                            cb(err)
-                        } else
-                            cb(null, recorder, videomail)
-                    })
-                else
-                    cb(null, recorder)
-            }
+                            if (err) {
+                                container.unload(err)
+                                cb(err)
+                            } else
+                                cb(null, controller, videomail)
+                        })
+                    else
+                        cb(null, controller)
+                }
+            })
         },
 
         get: function(identifier, options, cb) {

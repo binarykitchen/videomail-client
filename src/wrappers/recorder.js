@@ -2,20 +2,23 @@ var websocket    = require('websocket-stream'),
     util         = require('util'),
     EventEmitter = require('events').EventEmitter,
 
-    Browser         = require('./util/browser'),
-    Humanize        = require('./util/humanize'),
-    UserMedia       = require('./util/userMedia'),
-    VideomailError  = require('./util/videomailError'),
-    Frame           = require('./util/items/frame')
+    Browser         = require('./../util/browser'),
+    Humanize        = require('./../util/humanize'),
+    UserMedia       = require('./../util/userMedia'),
+    VideomailError  = require('./../util/videomailError'),
 
-var Recorder = function(recorderElement, replayElement, options) {
+    Frame           = require('./../util/items/frame')
+
+var Recorder = function(container, replay, options) {
 
     var self      = this,
-        userMedia = new UserMedia(recorderElement, options),
         browser   = new Browser(),
 
         wantedInterval  = 1e3 / options.video.fps,
         debug           = options.debug,
+
+        recorderElement,
+        userMedia,
 
         lastAnimationTimestamp,
         userMediaTimeout,
@@ -92,8 +95,8 @@ var Recorder = function(recorderElement, replayElement, options) {
     }
 
     function preview(args) {
-        setMp4Source(args.mp4)
-        setWebMSource(args.webm)
+        replay.setMp4Source(args.mp4)
+        replay.setWebMSource(args.webm)
 
         self.emit('preview', args.key)
 
@@ -108,7 +111,7 @@ var Recorder = function(recorderElement, replayElement, options) {
         }
 
         setTimeout(function() {
-            replayElement.load()
+            replay.load()
         }, 50)
     }
 
@@ -275,52 +278,6 @@ var Recorder = function(recorderElement, replayElement, options) {
         }
     }
 
-    function getVideoSource(type) {
-        var sources = replayElement.getElementsByTagName('source'),
-            l       = sources.length,
-            type    = 'video/' + type,
-            source
-
-        if (l) {
-            var i
-
-            for (i = 0; i < l && !source; i++) {
-                if (sources[i].getAttribute('type') === type)
-                    source = sources[i]
-            }
-        }
-
-        return source
-    }
-
-    function setVideoSource(type, src) {
-        var source = getVideoSource(type)
-
-        if (!source) {
-            if (src) {
-                var source = document.createElement('source')
-
-                source.setAttribute('src', src)
-                source.setAttribute('type', 'video/' + type)
-
-                replayElement.appendChild(source)
-            }
-        } else {
-            if (src)
-                source.setAttribute('src', src)
-            else
-                replayElement.removeChild(source)
-        }
-    }
-
-    function setMp4Source(src) {
-        setVideoSource('mp4', src)
-    }
-
-    function setWebMSource(src) {
-        setVideoSource('webm', src)
-    }
-
     this.stop = function() {
         this.reset()
 
@@ -330,7 +287,7 @@ var Recorder = function(recorderElement, replayElement, options) {
 
         var args = {
             framesCount:  framesCount,
-            videoType:    browser.getVideoType(replayElement),
+            videoType:    replay.getVideoType(),
             avgFps:       avgFps
         }
 
@@ -382,14 +339,10 @@ var Recorder = function(recorderElement, replayElement, options) {
 
         rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
-        // pause video to make sure it won't consume any memory
-        replayElement.pause()
+        replay.reset()
 
         // important to free memory
         userMedia.stop()
-
-        setMp4Source(null)
-        setWebMSource(null)
 
         canvas = ctx = sampleProgress = frameProgress = null
     }
@@ -515,8 +468,41 @@ var Recorder = function(recorderElement, replayElement, options) {
         })
     }
 
-    initEvents()
-    initSocket()
+    this.build = function(cb) {
+        recorderElement = container.querySelector('video.' + options.selectors.userMediaClass)
+
+        if (!recorderElement)
+            cb(new VideomailError('Invalid recorder video class!', {
+                explanation: 'No video with the class ' + options.selectors.userMediaClass + ' could be found.'
+            }))
+        else {
+
+            var err = browser.checkRecordingCapabilities()
+
+            if (!err)
+                err = browser.checkBufferTypes()
+
+            if (err)
+                cb(err)
+
+            else {
+                userMedia = new UserMedia(recorderElement, options)
+
+                initEvents()
+                initSocket()
+
+                cb()
+            }
+        }
+    }
+
+    this.hide = function() {
+        recorderElement.classList.add('hide')
+    }
+
+    this.show = function() {
+        recorderElement.classList.remove('hide')
+    }
 }
 
 util.inherits(Recorder, EventEmitter)
