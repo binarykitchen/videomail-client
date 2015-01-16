@@ -49,6 +49,18 @@ module.exports = function(options) {
         })
     }
 
+    function displayError(err) {
+        options.logger.error(err)
+
+        recorder.reset()
+
+        self.block(VideomailError.create(err))
+    }
+
+    function initEvents() {
+        recorder.on('error', displayError)
+    }
+
     this.build = function(cb) {
 
         containerElement = document.getElementById(options.selectors.containerId)
@@ -58,9 +70,22 @@ module.exports = function(options) {
                 explanation: 'No tag with the ID ' + options.selectors.containerId + ' could be found.'
             }))
         else {
+            if (!containerElement.style.width && options.video.width)
+                containerElement.style.width = options.video.width + 'px'
+
+            if (!containerElement.style.height && options.video.height)
+                containerElement.style.height = options.video.height + 'px'
+
             options.insertCss && prependDefaultCss()
 
-            buildChildren(cb)
+            buildChildren(function(err) {
+                if (err)
+                    cb(err)
+                else {
+                    initEvents()
+                    cb()
+                }
+            })
         }
     }
 

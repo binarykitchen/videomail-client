@@ -40,7 +40,9 @@ function factory() {
             video: {
                 fps:            15,
                 limitSeconds:   60,
-                countdown:      3
+                countdown:      3,
+                width:          320,
+                height:         240
             },
             image: {
                 quality:    .8,
@@ -70,6 +72,12 @@ function factory() {
                 localOptions = this.getOptions()
             } else
                 localOptions = this.getOptions(localOptions)
+
+            if (!cb)
+                 cb = function(err) {
+                    if (err)
+                        localOptions.logger.err(err)
+                 }
 
             var container = new Container(localOptions)
 
@@ -134,12 +142,12 @@ function factory() {
 
 // UMD (Universal Module Definition)
 // Inspired by https://github.com/es-shims/es5-shim
-;(function(root, navigator, factory) {
-    standardize(root, navigator)
+;(function(navigator, factory) {
+    standardize(this, navigator)
 
-    if (typeof exports === 'object') {
-        module.exports = factory()
-    } else {
-        root.Videomail = factory()
-    }
-}(this, navigator, factory))
+    this.Videomail = factory()
+
+    if (typeof exports === 'object')
+        module.exports = this.Videomail
+
+}(navigator, factory))

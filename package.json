@@ -18,7 +18,8 @@
   "readmeFilename": "README.md",
   "main": "src/index.js",
   "scripts": {
-    "postinstall": "npm prune"
+    "postinstall": "npm prune",
+    "test": "tape test/unit/*.js"
   },
   "engines": {
     "node": ">=0.10.30",
@@ -43,8 +44,12 @@
     "websocket-stream": "^1.3.1"
   },
   "devDependencies": {
+    "browserify": "^8.1.1",
+    "del": "^1.1.1",
     "gulp": "^3.8.10",
-    "gulp-autoprefixer": "^2.0.0",
+    "gulp-autoprefixer": "^2.1.0",
+    "gulp-concat": "^2.4.3",
+    "gulp-connect": "^2.2.0",
     "gulp-inject-string": "0.0.2",
     "gulp-load-plugins": "^0.8.0",
     "gulp-minify-css": "^0.3.12",
@@ -52,6 +57,10 @@
     "gulp-rename": "^1.2.0",
     "gulp-stylus": "^2.0.0",
     "gulp-todo": "^2.3.1",
-    "nib": "^1.0.4"
+    "gulp-util": "^3.0.2",
+    "nib": "^1.0.4",
+    "tape": "^3.2.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.0.0"
   }
 }

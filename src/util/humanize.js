@@ -34,14 +34,12 @@ module.exports = {
             time
 
         function add(what, suffix) {
-            if (what) {
-                if (time)
-                    time += ' + '
-                else
-                    time = ''
+            if (time)
+                time += ' + '
+            else
+                time = ''
 
-                time += what + ' ' + suffix
-            }
+            time += what + ' ' + suffix
         }
 
         add(hrs,    'hrs')

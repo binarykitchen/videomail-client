@@ -9,15 +9,29 @@ module.exports = function(container, options) {
 
         replayElement
 
+    function buildElement() {
+        replayElement =  document.createElement('VIDEO')
+        replayElement.classList.add(options.selectors.replayClass, 'hide')
+
+        replayElement.autoplay = false
+        replayElement.controls = 'controls'
+
+        container.appendChild(replayElement)
+    }
+
     this.build = function(cb) {
         replayElement = container.querySelector('video.' + options.selectors.replayClass)
 
         if (!replayElement)
-            cb(new VideomailError('Invalid replay video class!', {
-                explanation: 'No video with the class ' + options.selectors.replayClass + ' could be found.'
-            }))
-        else
-            cb(browser.checkPlaybackCapabilities(replayElement))
+            buildElement()
+
+        if (!replayElement.width && options.video.width)
+            replayElement.width = options.video.width
+
+        if (!replayElement.height && options.video.height)
+            replayElement.height = options.video.height
+
+        cb(browser.checkPlaybackCapabilities(replayElement))
     }
 
     this.getVideoSource = function(type) {

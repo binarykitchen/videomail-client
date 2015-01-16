@@ -468,31 +468,40 @@ var Recorder = function(container, replay, options) {
         })
     }
 
+    function buildElement() {
+        recorderElement =  document.createElement('VIDEO')
+        recorderElement.classList.add(options.selectors.userMediaClass)
+
+        container.appendChild(recorderElement)
+    }
+
     this.build = function(cb) {
-        recorderElement = container.querySelector('video.' + options.selectors.userMediaClass)
+        var err = browser.checkRecordingCapabilities()
 
-        if (!recorderElement)
-            cb(new VideomailError('Invalid recorder video class!', {
-                explanation: 'No video with the class ' + options.selectors.userMediaClass + ' could be found.'
-            }))
+        if (!err)
+            err = browser.checkBufferTypes()
+
+        if (err)
+            cb(err)
+
         else {
+            recorderElement = container.querySelector('video.' + options.selectors.userMediaClass)
 
-            var err = browser.checkRecordingCapabilities()
+            if (!recorderElement)
+                buildElement()
 
-            if (!err)
-                err = browser.checkBufferTypes()
+            if (!recorderElement.width && options.video.width)
+                recorderElement.width = options.video.width
 
-            if (err)
-                cb(err)
+            if (!recorderElement.height && options.video.height)
+                recorderElement.height = options.video.height
 
-            else {
-                userMedia = new UserMedia(recorderElement, options)
+            userMedia = new UserMedia(recorderElement, options)
 
-                initEvents()
-                initSocket()
+            initEvents()
+            initSocket()
 
-                cb()
-            }
+            cb()
         }
     }
 
