@@ -23,8 +23,8 @@ module.exports = {
 
     toTime: function(t) {
 
-        var ms = t % 1000
-        t = (t - ms) / 1000
+        var ms = t % 1e3
+        t = (t - ms) / 1e3
 
         var secs = t % 60
         t = (t - secs) / 60
@@ -42,10 +42,10 @@ module.exports = {
             time += what + ' ' + suffix
         }
 
-        add(hrs,    'hrs')
-        add(mins,   'mins')
-        add(secs,   'secs')
-        add(ms,     'ms')
+        add(hrs,  'hrs')
+        add(mins, 'mins')
+        add(secs, 'secs')
+        add(ms,   'ms')
 
         return time
     }
