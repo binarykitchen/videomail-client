@@ -1,5 +1,7 @@
 module.exports = function(window, navigator) {
 
+    // todo: add https://github.com/eligrey/classList.js when package.json is avail
+
     require('es5-shim')
 
     navigator.getUserMedia =
