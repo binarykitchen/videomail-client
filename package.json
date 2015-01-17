@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Record videos from your webcam inside the browser! And encode them through the Videomail API.",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -62,18 +62,5 @@
     "tape": "^3.2.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0"
-  },
-  "testling": {
-    "files": "test/unit/*.test.js",
-    "browsers": [
-      "ie/6..latest",
-      "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/latest",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
-      "android-browser/latest"
-    ]
   }
 }

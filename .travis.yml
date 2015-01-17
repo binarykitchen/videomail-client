@@ -1,0 +1,8 @@
+language: node_js
+deploy:
+  provider: npm
+  email: michael.heuberger@binarykitchen.com
+  api_key:
+    secure: hEKBf8ualSpwmKTNedNTTLUc1Z5tH0PQWsGH6HDsGQ6vcTQSsYwF5fx486DJ56+q6ex1StDjEPvPNewr/fTnVVEK8qwzoz8vOYMA0zkhhYcVpPok1EQDq+houl1jtAcHwwn6wgIcKT3gvQkIO60BSyouF3A/em246yvmGvabzeo=
+  on:
+    repo: binarykitchen/videomail-client

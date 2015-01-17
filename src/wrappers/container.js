@@ -49,11 +49,15 @@ module.exports = function(options) {
         })
     }
 
+    this.reset = function() {
+        this.endWaiting()
+        recorder.reset()
+    }
+
     function displayError(err) {
         options.logger.error(err)
 
-        recorder.reset()
-
+        self.reset()
         self.block(VideomailError.create(err))
     }
 
@@ -79,9 +83,10 @@ module.exports = function(options) {
             options.insertCss && prependDefaultCss()
 
             buildChildren(function(err) {
-                if (err)
+                if (err) {
+                    displayError(err)
                     cb(err)
-                else {
+                } else {
                     initEvents()
                     cb()
                 }
@@ -114,7 +119,6 @@ module.exports = function(options) {
     this.block          = notifier.block.bind(notifier)
     this.stopRecording  = recorder.stop.bind(recorder)
     this.setExplanation = notifier.setExplanation
-    this.resetRecorder  = recorder.reset
     this.pause          = recorder.pause
     this.resume         = recorder.resume
     this.record         = recorder.record
