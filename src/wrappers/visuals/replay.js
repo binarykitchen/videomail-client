@@ -1,5 +1,4 @@
-var VideomailError = require('./../util/videomailError'),
-    Browser        = require('./../util/browser'),
+var Browser        = require('./../../util/browser'),
 
     browser = new Browser()
 
@@ -10,8 +9,10 @@ module.exports = function(container, options) {
         replayElement
 
     function buildElement() {
-        replayElement =  document.createElement('VIDEO')
-        replayElement.classList.add(options.selectors.replayClass, 'hide')
+        replayElement = document.createElement('VIDEO')
+        replayElement.classList.add(options.selectors.replayClass)
+
+        self.hide()
 
         replayElement.autoplay = false
         replayElement.controls = 'controls'
@@ -19,11 +20,24 @@ module.exports = function(container, options) {
         container.appendChild(replayElement)
     }
 
+    function initEvents() {
+        replayElement.addEventListener('click', function() {
+            if (this.paused)
+                this.play()
+            else
+                self.pause()
+        })
+    }
+
     this.build = function(cb) {
         replayElement = container.querySelector('video.' + options.selectors.replayClass)
 
         if (!replayElement)
             buildElement()
+        else
+            this.hide()
+
+        initEvents()
 
         if (!replayElement.width && options.video.width)
             replayElement.width = options.video.width

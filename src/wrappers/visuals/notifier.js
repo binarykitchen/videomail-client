@@ -1,4 +1,4 @@
-module.exports = function(container) {
+module.exports = function(visuals) {
 
     var notifyElement,
         messageElement,
@@ -14,17 +14,18 @@ module.exports = function(container) {
         explanationElement.innerHTML = explanation
     }
 
-    this.build = function(cb) {
-        notifyElement = container.querySelector('.notifier')
+    this.build = function() {
+        notifyElement = visuals.querySelector('.notifier')
 
         if (!notifyElement) {
             notifyElement = document.createElement('DIV')
-            notifyElement.classList.add('notifier', 'hide')
+            notifyElement.classList.add('notifier')
 
-            container.appendChild(notifyElement)
-        }
+            this.hide()
 
-        cb()
+            visuals.appendChild(notifyElement)
+        } else
+            this.hide()
     }
 
     this.hide = function() {
@@ -57,11 +58,11 @@ module.exports = function(container) {
         messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
         explanation && this.setExplanation(explanation)
 
-        container.hideReplay()
-        container.hideRecorder()
+        visuals.hideReplay()
+        visuals.hideRecorder()
 
         this.show()
 
-        container.endWaiting()
+        visuals.endWaiting()
     }
 }

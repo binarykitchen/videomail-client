@@ -33,6 +33,14 @@ function factory() {
                 containerId:    'videomail',
                 replayClass:    'replay',
                 userMediaClass: 'userMedia',
+                visualsClass:   'visuals',
+                buttonsClass:   'buttons',
+
+                recordButtonClass: 'record',
+                pauseButtonClass:  'pause',
+                resumeButtonClass: 'resume',
+                stopButtonClass:   'stop',
+                backButtonClass:   'back',
             },
             audio: {
                 enabled: false
@@ -47,6 +55,9 @@ function factory() {
             image: {
                 quality:    .8,
                 types:      ['webp', 'jpeg']
+            },
+            text: {
+                paused: 'Paused'
             }
         },
 
@@ -67,7 +78,7 @@ function factory() {
 
         init: function(localOptions, cb) {
 
-            if (!cb) {
+            if (!cb && typeof localOptions === 'function') {
                 cb           = localOptions
                 localOptions = this.getOptions()
             } else
@@ -75,8 +86,7 @@ function factory() {
 
             if (!cb)
                  cb = function(err) {
-                    if (err)
-                        localOptions.logger.err(err)
+                    err && localOptions.logger.err(err)
                  }
 
             var container = new Container(localOptions)

@@ -1,5 +1,6 @@
 module.exports = function(container) {
 
+    /*
     this.beginWaiting   = container.beginWaiting
     this.endWaiting     = container.endWaiting
     this.notify         = container.notify
@@ -13,7 +14,7 @@ module.exports = function(container) {
     this.showReplay     = container.showReplay
     this.showRecorder   = container.showRecorder
     this.reset          = container.reset
-    this.stopRecording  = container.stopRecording
+    this.stop           = container.stop
     this.pause          = container.pause
     this.record         = container.record
     this.resume         = container.resume
@@ -24,4 +25,5 @@ module.exports = function(container) {
     this.isConnected    = container.isConnected
     this.isValid        = container.isValid
     this.isPaused       = container.isPaused
+    */
 }

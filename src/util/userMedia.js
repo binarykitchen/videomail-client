@@ -19,7 +19,7 @@ module.exports = function(rawVisualUserMedia, options) {
             volume     = audioContext.createGain()
 
         // set recording volume to max (0 .. 1)
-        volume.gain.value = .9;
+        volume.gain.value = .9
 
         /*
         From the spec: This value controls how frequently the audioprocess event is

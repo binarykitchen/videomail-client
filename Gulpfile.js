@@ -66,7 +66,7 @@ gulp.task('browserify', ['clean:js'], function(cb) {
 
 gulp.task('connect', ['build'], function() {
     plugins.connect.server({
-        root:       ['test/scenarios/', 'build'],
+        root:       ['examples', 'build'],
         port:       8080,
         livereload: true
     })
@@ -82,6 +82,6 @@ gulp.task('watch', ['connect'], function() {
     gulp.watch(['test/scenarios/*.html'],       ['reload'])
 })
 
-gulp.task('scenarios', ['connect', 'watch'])
-gulp.task('build',   ['stylus', 'browserify'])
-gulp.task('default', ['stylus', 'todo'])
+gulp.task('examples',  ['connect', 'watch'])
+gulp.task('build',     ['stylus', 'browserify'])
+gulp.task('default',   ['stylus', 'todo'])

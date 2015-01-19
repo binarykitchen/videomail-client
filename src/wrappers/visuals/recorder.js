@@ -2,12 +2,11 @@ var websocket    = require('websocket-stream'),
     util         = require('util'),
     EventEmitter = require('events').EventEmitter,
 
-    Browser         = require('./../util/browser'),
-    Humanize        = require('./../util/humanize'),
-    UserMedia       = require('./../util/userMedia'),
-    VideomailError  = require('./../util/videomailError'),
-
-    Frame           = require('./../util/items/frame')
+    Browser         = require('./../../util/browser'),
+    Humanize        = require('./../../util/humanize'),
+    UserMedia       = require('./../../util/userMedia'),
+    VideomailError  = require('./../../util/videomailError'),
+    Frame           = require('./../../util/items/frame')
 
 var Recorder = function(container, replay, options) {
 
@@ -140,6 +139,8 @@ var Recorder = function(container, replay, options) {
             throw ex
         }
 
+        debug('Server says: %s', command.command, command.args, result ? '= ' + result : result)
+
         switch (command.command) {
             case 'ready':
                 loadUserMedia()
@@ -168,8 +169,6 @@ var Recorder = function(container, replay, options) {
                 this.emit('error', 'Unknown server command: ' + command.command)
                 break
         }
-
-        debug('$ %s', command.command, command.args, result ? '= ' + result : result)
     }
 
     function writeCommand(command, args) {
@@ -243,16 +242,12 @@ var Recorder = function(container, replay, options) {
             stream.on('end', function() {
                 connected = false
 
-                debug('Stream ended')
-
-                self.emit('end')
+                self.emit('ended')
 
                 // try to reconnect
                 options.reconnect && setTimeout(function() {
                     initSocket(function() {
-                        debug('Reconnected')
-
-                        self.emit('reconnect')
+                        self.emit('reconnected')
                     })
                 }, 2e3)
             })
@@ -261,9 +256,7 @@ var Recorder = function(container, replay, options) {
                 if (!connected) {
                     connected = true
 
-                    debug('Connected')
-
-                    self.emit('connect')
+                    self.emit('connected')
 
                     cb && cb()
                 }
@@ -279,6 +272,8 @@ var Recorder = function(container, replay, options) {
     }
 
     this.stop = function() {
+        debug('stop()')
+
         this.reset()
 
         stopTime = Date.now()
@@ -297,9 +292,12 @@ var Recorder = function(container, replay, options) {
         }
 
         writeCommand('stop', args)
+
+        this.emit('stopped')
     }
 
     this.back = function() {
+        this.show()
         this.reset()
 
         writeCommand('back')
@@ -317,6 +315,7 @@ var Recorder = function(container, replay, options) {
 
         debug('unload()', cause)
 
+        this.removeAllListeners()
         this.reset()
 
         clearUserMediaTimeout()
@@ -378,7 +377,8 @@ var Recorder = function(container, replay, options) {
 
     this.record = function() {
 
-        if (unloaded) return false
+        if (unloaded)
+            return false
 
         debug('record()')
 
@@ -422,10 +422,10 @@ var Recorder = function(container, replay, options) {
 
                     stream.write(buffer)
 
+                    bytesSum += buffer.length
+
                     /*
                     if (options.debug) {
-                        bytesSum += buffer.length
-
                         debug(
                             'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
                             interval + '/' + intervalThreshold + '/' + wantedInterval
@@ -511,6 +511,17 @@ var Recorder = function(container, replay, options) {
 
     this.show = function() {
         recorderElement.classList.remove('hide')
+    }
+
+    if (options.debug) {
+        if (!this.originalEmit)
+            this.originalEmit = this.emit
+
+        this.emit = function(event) {
+            debug('Recorder emits: ' + event)
+            var args = [].splice.call(arguments, 0)
+            return this.originalEmit.apply(this, args)
+        }
     }
 }
 

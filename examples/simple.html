@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+    </head>
+    <body>
+        <h1>Very simple with default options</h1>
+        <div id="videomail">
+            <div class='visuals'>
+                <p class="recordNote hide"></p>
+                <p class="recordTimer hide"></p>
+                <p class="paused hide"></p>
+                <p class="countdown hide"></p>
+            </div>
+        </div>
+        <script async src="/js/bundle.js"></script>
+        <script>
+            window.addEventListener('load', function() {
+                Videomail.init({
+                    debug: true
+                })
+            })
+        </script>
+    </body>
+</html>

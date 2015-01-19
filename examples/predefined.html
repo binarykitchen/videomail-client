@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+    </head>
+    <body>
+        <h1>Accept existing HTML and customize CSS classes</h1>
+        <div id="videomail2" class="videomail">
+            <div class='da_window'>
+                <noscript>Please enable Javascript</noscript>
+                <p class="recordNote"></p>
+                <p class="recordTimer"></p>
+                <p class="paused"></p>
+                <p class="countdown"></p>
+                <div class="notifier"></div>
+                <video class="replay" controls></video>
+                <video class="webcam"></video>
+            </div>
+        </div>
+        <script async src="/js/bundle.js"></script>
+        <script>
+            window.addEventListener('load', function() {
+                Videomail.init({
+                    selectors: {
+                        containerId:    'videomail2',
+                        userMediaClass: 'webcam',
+                        visualsClass:   'da_window',
+                    }
+                })
+            })
+        </script>
+    </body>
+</html>

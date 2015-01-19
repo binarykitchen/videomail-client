@@ -105,6 +105,9 @@ module.exports = function(options) {
         if (pausableTimer) {
             pausableTimer.pause()
 
+            if (!paused.innerHTML)
+                paused.innerHTML = options.text.paused
+
             paused.classList.remove('hide')
             recordNote.classList.add('hide')
         }

@@ -1,21 +1,15 @@
-var insertCss       = require('insert-css'),
+var insertCss      = require('insert-css'),
+
+    Visuals        = require('./visuals'),
+    Buttons        = require('./buttons'),
 
     VideomailError = require('./../util/videomailError'),
-
-    css            = require('./../assets/css/main.min.css.js'),
-
-    Replay         = require('./replay'),
-    Recorder       = require('./recorder'),
-    Notifier       = require('./notifier')
+    css            = require('./../assets/css/main.min.css.js')
 
 module.exports = function(options) {
 
-    var self     = this,
-
-        replay   = new Replay(this, options),
-        recorder = new Recorder(this, replay, options),
-        notifier = new Notifier(this),
-
+    var visuals     = new Visuals(this, options),
+        buttons     = new Buttons(this, options),
         htmlElement = document.querySelector('html'),
 
         containerElement
@@ -27,46 +21,11 @@ module.exports = function(options) {
     function buildChildren(cb) {
         containerElement.classList.add('videomail')
 
-        var noScriptElement = self.querySelector('noscript')
-
-        if (!noScriptElement) {
-            noScriptElement = document.createElement('NOSCRIPT')
-            noScriptElement.innerHTML = 'Please enable Javascript'
-
-            containerElement.appendChild(noScriptElement)
-        }
-
-        notifier.build(function(err) {
-            if (err)
-                cb(err)
-            else
-                replay.build(function(err) {
-                    if (err)
-                        cb(err)
-                    else
-                        recorder.build(cb)
-                })
-        })
-    }
-
-    this.reset = function() {
-        this.endWaiting()
-        recorder.reset()
-    }
-
-    function displayError(err) {
-        options.logger.error(err)
-
-        self.reset()
-        self.block(VideomailError.create(err))
-    }
-
-    function initEvents() {
-        recorder.on('error', displayError)
+        visuals.build(cb)
+        buttons.build(cb)
     }
 
     this.build = function(cb) {
-
         containerElement = document.getElementById(options.selectors.containerId)
 
         if (!containerElement)
@@ -74,23 +33,8 @@ module.exports = function(options) {
                 explanation: 'No tag with the ID ' + options.selectors.containerId + ' could be found.'
             }))
         else {
-            if (!containerElement.style.width && options.video.width)
-                containerElement.style.width = options.video.width + 'px'
-
-            if (!containerElement.style.height && options.video.height)
-                containerElement.style.height = options.video.height + 'px'
-
             options.insertCss && prependDefaultCss()
-
-            buildChildren(function(err) {
-                if (err) {
-                    displayError(err)
-                    cb(err)
-                } else {
-                    initEvents()
-                    cb()
-                }
-            })
+            buildChildren(cb)
         }
     }
 
@@ -110,29 +54,37 @@ module.exports = function(options) {
         containerElement.appendChild(child)
     }
 
-    this.isReplayShown  = replay.isShown
-    this.hideReplay     = replay.hide
-    this.showReplay     = replay.show
-    this.hideRecorder   = recorder.hide
-    this.showRecorder   = recorder.show
-    this.notify         = notifier.notify.bind(notifier)
-    this.block          = notifier.block.bind(notifier)
-    this.stopRecording  = recorder.stop.bind(recorder)
-    this.setExplanation = notifier.setExplanation
-    this.pause          = recorder.pause
-    this.resume         = recorder.resume
-    this.record         = recorder.record
-    this.hideNotifier   = notifier.hide
-    this.showNotifier   = notifier.show
-    this.unload         = recorder.unload.bind(recorder)
-    this.back           = recorder.back.bind(recorder)
-    this.isReady        = recorder.isReady
-    this.isConnected    = recorder.isConnected
-    this.isValid        = recorder.isValid
-    this.isPaused       = recorder.isPaused
+    this.reset = function() {
+        visuals.reset()
+        buttons.reset()
+    }
+
+    this.record         = visuals.record
+    this.pause          = visuals.pause
+    this.resume         = visuals.resume
+    this.stop           = visuals.stop
+    this.back           = visuals.back
+
+    /*
+    this.isReplayShown  = visuals.isShown
+    this.hideReplay     = visuals.hideReplay
+    this.showReplay     = visuals.show
+    this.hideRecorder   = visuals.hide
+    this.showRecorder   = visuals.showRecorder
+    this.notify         = visuals.notify
+    this.block          = visuals.block
+    this.setExplanation = visuals.setExplanation
+    this.hideNotifier   = visuals.hideNotifier
+    this.showNotifier   = visuals.show
+    this.unload         = visuals.unload
+    this.isReady        = visuals.isReady
+    this.isConnected    = visuals.isConnected
+    this.isValid        = visuals.isValid
+    this.isPaused       = visuals.isPaused
+    */
 
     // todo: remove later because it exposes too much
     this.getRecorder = function() {
-        return recorder
+        return visuals.getRecorder()
     }
 }

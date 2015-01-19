@@ -1,6 +1,6 @@
 var test     = require('tape'),
 
-    humanize = require('./../../src/util/humanize')
+    humanize = require('./../src/util/humanize')
 
 test('humanize:', function(t) {
 
