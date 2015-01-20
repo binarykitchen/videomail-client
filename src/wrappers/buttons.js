@@ -1,6 +1,8 @@
 module.exports = function(container, options) {
 
-    var buttonsElement,
+    var self = this,
+
+        buttonsElement,
 
         recordButton,
         pauseButton,
@@ -8,32 +10,39 @@ module.exports = function(container, options) {
         stopButton,
         backButton
 
-    function makeButton(buttonClass, text) {
+    function adjustButton(buttonElement, show) {
+        buttonElement.disabled = true
+        buttonElement.type     = 'button'
+
+        !show && buttonElement.classList.add('hide')
+
+        return buttonElement
+    }
+
+    function makeButton(buttonClass, text, show) {
         var buttonElement = buttonsElement.querySelector('button.' + buttonClass)
 
         if (!buttonElement) {
             buttonElement = document.createElement('BUTTON')
 
             buttonElement.classList.add(buttonClass)
-            buttonElement.classList.add('hide')
+            buttonElement = adjustButton(buttonElement, show)
 
             buttonElement.innerHTML = text
-            buttonElement.disabled  = true
 
             buttonsElement.appendChild(buttonElement)
-        } else {
-            buttonElement.disabled = true
-            buttonElement.classList.add('hide')
-        }
+        } else
+            buttonElement = adjustButton(buttonElement, show)
 
         return buttonElement
     }
 
     function buildButtons() {
-        recordButton = makeButton(options.selectors.recordButtonClass,   'Record')
+        recordButton = makeButton(options.selectors.recordButtonClass,   'Record', true)
+        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
+
         pauseButton  = makeButton(options.selectors.pauseButtonClass,    'Pause')
         resumeButton = makeButton(options.selectors.resumeButtonClass,   'Resume')
-        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop')
         backButton   = makeButton(options.selectors.backButtonClass,     'Back')
     }
 
@@ -54,7 +63,7 @@ module.exports = function(container, options) {
     }
 
     function onError() {
-        backButton.classList.add('hide')
+        self.reset()
     }
 
     function onPreview() {
