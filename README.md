@@ -3,23 +3,25 @@ videomail-client
 
 [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 
-A revolutionary node.js module which enables you to record videos directly in the browser, wohooo! Finally you can encode any webcam recordings into MP4 and WebM within seconds. This without the need for Flash, Java nor anything else.
+A revolutionary node.js module which enables you to record videos directly in the browser, wohooo!
 
-** Demo / Fully working version
+Finally you can encode any webcam recordings into MP4 and WebM within seconds. This without the need for Flash, Java nor any other crap.
 
-You can check out the full version with all its features on https://videomail.io itself.
+## Demo / Fully working version
 
-That demo runs on AngularJS where I just do a `require('videomail-client')`, initialise it with `Videomail.init(...)` and deploy all that through Browserify. Awesome stuff!
+Check out the full version with all its features on https://videomail.io itself.
 
-** Examples
+That site runs on AngularJS where I just `require('videomail-client')`, initialise like `Videomail.init(...)` and deploy all that through Browserify. Awesome stuff!
 
-To run the examples in your local browser, just do this
+## Examples
 
-1. Run `npm install`
-2. Ignite static server with `gulp examples`; and
+To run the examples in your local browser, just do this:
+
+1. `npm install`
+2. Ignite static server with `gulp examples` and
 3. Open `http://localhost:8080` in your browser
 
-** Dead simple example
+## Dead simple example
 
 ```html
 <html>
@@ -41,11 +43,13 @@ To run the examples in your local browser, just do this
 </html>
 ```
 
-** Options
+This will load your webcam, fill the placeholder with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy.
+
+## Options
 
 These are the default options:
 
-```json
+```js
 {
     logger:         console,
     debug:          false,
@@ -90,27 +94,33 @@ These are the default options:
 
 You can change any of these through the `Videomail.init({ ... })` call.
 
-** Whitelist
+## Whitelist
 
-Examples will work right away on localhost on port 8080. This because localhost is whitelisted on the remote Videomail server.
+Examples will work right away on localhost at port 8080. This because localhost is whitelisted on the remote Videomail server.
 
 In other words, if you deploy your piece on your own remote server, it won't work because that URL is not on the Videomail whitelist. To fix that, just reach me at https://binarykitchen.com/contact
 
 Like that I can make sure that my hard work won't be misused for bad stuff.
 
-** Backward compatibility
+## Backward compatibility
 
-Forget IE and Safari because they still doesn't support `getUserMedia()`, *chuckle* - whereas Firefox >= 33, Chrome >= 31, Opera >= 26, Chrome for Android >= 39 and Android Browser >= 37 will work like a charm.
+Forget IE, Safari and iPhones because they still doesn't support `getUserMedia()`, *chuckle* - whereas these browsers do work fine like a charm:
 
-** Development
+* Firefox >= 33
+* Chrome >= 31
+* Opera >= 26
+* Chrome for Android >= 39
+* Android Browser >= 37
+
+## Development
 
 This is just the beginning. I will add a lot more over time.
 
 Bear with me, there are lots of problems to crack, especially the audio part. Working on it ...
 
-** Thanks
+## Thanks
 
-These guys helped me a lot and inspired me for this mad project:
+These guys helped and/or inspired me for this mad project:
 
 * Dominic Tarr
 * Heath Sadler
