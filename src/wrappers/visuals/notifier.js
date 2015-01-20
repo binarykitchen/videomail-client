@@ -30,7 +30,12 @@ module.exports = function(visuals) {
 
     this.hide = function() {
         notifyElement.classList.add('hide')
-        notifyElement.innerHTML = null
+
+        if (messageElement)
+            messageElement.innerHTML = null
+
+        if (explanationElement)
+            explanationElement.innerHTML = null
     }
 
     this.show = function() {
@@ -55,11 +60,11 @@ module.exports = function(visuals) {
             notifyElement.appendChild(messageElement)
         }
 
-        messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
-        explanation && this.setExplanation(explanation)
-
         visuals.hideReplay()
         visuals.hideRecorder()
+
+        messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
+        explanation && this.setExplanation(explanation)
 
         this.show()
 

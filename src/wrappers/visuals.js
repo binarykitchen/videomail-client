@@ -91,11 +91,6 @@ module.exports = function(container, options) {
         })
     }
 
-    this.reset = function() {
-        this.endWaiting()
-        recorder.reset()
-    }
-
     this.querySelector = function(selector) {
         return visualsElement.querySelector(selector)
     }
@@ -104,23 +99,24 @@ module.exports = function(container, options) {
         visualsElement.appendChild(child)
     }
 
-    this.beginWaiting = function() {
-        container.beginWaiting()
+    this.reset = function() {
+        this.endWaiting()
+        recorder.reset()
     }
 
     this.endWaiting = function() {
         container.endWaiting()
     }
 
+    this.stop = function() {
+        this.beginWaiting()
+        recorder.stop()
+    }
+
     this.back = function() {
         replay.hide()
         notifier.hide()
         recorder.back()
-    }
-
-    this.stop = function() {
-        this.beginWaiting()
-        recorder.stop()
     }
 
     this.hideReplay     = replay.hide
@@ -130,6 +126,7 @@ module.exports = function(container, options) {
     this.resume         = recorder.resume
 
     /*
+
     this.isReplayShown  = replay.isShown
     this.showReplay     = replay.show
     this.showRecorder   = recorder.show

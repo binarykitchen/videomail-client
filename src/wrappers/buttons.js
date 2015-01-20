@@ -53,6 +53,10 @@ module.exports = function(container, options) {
         stopButton.classList.remove('hide')
     }
 
+    function onError() {
+        backButton.classList.add('hide')
+    }
+
     function onPreview() {
         recordButton.classList.add('hide')
         stopButton.classList.add('hide')
@@ -121,6 +125,10 @@ module.exports = function(container, options) {
 
         recorder.on('preview', function() {
             onPreview()
+        })
+
+        recorder.on('error', function() {
+            onError()
         })
 
         // User actions

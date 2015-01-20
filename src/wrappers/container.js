@@ -54,11 +54,6 @@ module.exports = function(options) {
         containerElement.appendChild(child)
     }
 
-    this.reset = function() {
-        visuals.reset()
-        buttons.reset()
-    }
-
     this.record         = visuals.record
     this.pause          = visuals.pause
     this.resume         = visuals.resume

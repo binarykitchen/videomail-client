@@ -1,4 +1,4 @@
-var Browser        = require('./../../util/browser'),
+var Browser = require('./../../util/browser'),
 
     browser = new Browser()
 

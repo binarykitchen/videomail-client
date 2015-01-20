@@ -1,14 +1,11 @@
 
 var gulp            = require('gulp'),
-    util            = require('gulp-util'),
     plugins         = require('gulp-load-plugins')(),
     nib             = require('nib'),
     browserify      = require('browserify'),
     source          = require('vinyl-source-stream'),
     buffer          = require('vinyl-buffer'),
     del             = require('del')
-
-// todo: add mocha test runner along with lots of solid tests!
 
 gulp.task('clean:js', function(cb) {
     del(['build/js/**/*.*'], cb)
@@ -55,7 +52,7 @@ gulp.task('browserify', ['clean:js'], function(cb) {
     bundler
         .bundle()
         .on('error',    cb)
-        .on('log',      util.log)
+        .on('log',      plugins.util.log)
         .pipe(source('./src/')) // gives streaming vinyl file object
         .pipe(buffer()) // required because the next steps do not support streams
         .pipe(plugins.concat('bundle.js'))

@@ -1,14 +1,14 @@
 var merge           = require('merge-recursive'),
 
-    Container       = require('./wrappers/container'),
 
     Resource        = require('./resource'),
     Controller      = require('./controller'),
 
+    Container       = require('./wrappers/container'),
+
     VideomailError  = require('./util/videomailError'),
     Browser         = require('./util/browser'),
     standardize     = require('./util/standardize'),
-
     CountdownTimer  = require('./util/timers/countdown'),
     RecordTimer     = require('./util/timers/record'),
 
@@ -23,7 +23,7 @@ function factory() {
         globalOptions: {
             logger:         console,
             debug:          false,
-            timeout:        10000,
+            timeout:        6000,
             baseUrl:        'https://videomail.io',
             socketUrl:      'wss://videomail.io',
             reconnect:      true,
