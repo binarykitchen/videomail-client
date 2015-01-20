@@ -11,7 +11,7 @@ Finally you can encode any webcam recordings into MP4 and WebM within seconds. T
 
 Check out the full version with all its features on https://videomail.io itself.
 
-That site runs on AngularJS where I just `require('videomail-client')`, initialise like `Videomail.init(...)` and deploy all that through Browserify. Awesome stuff!
+That site runs on AngularJS where I just `require('videomail-client')`, initialise it with `Videomail.init()` and bundle all that through Browserify. Awesome stuff!
 
 ## Examples
 
@@ -118,13 +118,13 @@ This is just the beginning. I will add a lot more over time.
 
 Bear with me, there are lots of problems to crack, especially the audio part. Working on it ...
 
-## Thanks
+## Credits
 
 These guys helped and/or inspired me for this mad project:
 
-* Dominic Tarr
 * Heath Sadler
 * Isaac Johnston
+* Dominic Tarr
 * Sonia Pivac
 * Daniel Noelpp
 * Nicholas Buchanan
