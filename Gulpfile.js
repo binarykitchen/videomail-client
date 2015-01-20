@@ -8,7 +8,7 @@ var gulp            = require('gulp'),
     del             = require('del')
 
 gulp.task('clean:js', function(cb) {
-    del(['build/js/**/*.*'], cb)
+    del(['dist/*.js'], cb)
 })
 
 gulp.task('stylus', function() {
@@ -55,15 +55,15 @@ gulp.task('browserify', ['clean:js'], function(cb) {
         .on('log',      plugins.util.log)
         .pipe(source('./src/')) // gives streaming vinyl file object
         .pipe(buffer()) // required because the next steps do not support streams
-        .pipe(plugins.concat('bundle.js'))
-        .pipe(gulp.dest('build/js'))
+        .pipe(plugins.concat('videomail-client.js'))
+        .pipe(gulp.dest('dist'))
         .pipe(plugins.connect.reload())
         .on('end', cb)
 })
 
 gulp.task('connect', ['build'], function() {
     plugins.connect.server({
-        root:       ['examples', 'build'],
+        root:       ['examples', 'dist'],
         port:       8080,
         livereload: true
     })
@@ -76,9 +76,9 @@ gulp.task('reload', function() {
 gulp.task('watch', ['connect'], function() {
     gulp.watch(['src/assets/styl/**/*.styl'],   ['stylus'])
     gulp.watch(['src/**/*.js'],                 ['browserify'])
-    gulp.watch(['test/scenarios/*.html'],       ['reload'])
+    gulp.watch(['examples/*.html'],             ['reload'])
 })
 
 gulp.task('examples',  ['connect', 'watch'])
 gulp.task('build',     ['stylus', 'browserify'])
-gulp.task('default',   ['stylus', 'todo'])
+gulp.task('default',   ['stylus', 'browserify', 'todo'])

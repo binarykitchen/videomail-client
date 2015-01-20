@@ -17,6 +17,8 @@ var merge           = require('merge-recursive'),
 
 // todo: consider using a web component instead!
 
+// add new option to disable pause
+
 function factory() {
 
     return {

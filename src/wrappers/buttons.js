@@ -39,9 +39,8 @@ module.exports = function(container, options) {
 
     function buildButtons() {
         recordButton = makeButton(options.selectors.recordButtonClass,   'Record', true)
-        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
-
         pauseButton  = makeButton(options.selectors.pauseButtonClass,    'Pause')
+        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
         resumeButton = makeButton(options.selectors.resumeButtonClass,   'Resume')
         backButton   = makeButton(options.selectors.backButtonClass,     'Back')
     }
