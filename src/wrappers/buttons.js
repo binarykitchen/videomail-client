@@ -170,7 +170,7 @@ var Buttons = function(container, options) {
         stopButton.disabled = backButton.disabled = true
     }
 
-    this.build = function() {
+    this.build = function(cb) {
 
         buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
@@ -183,6 +183,8 @@ var Buttons = function(container, options) {
 
         buildButtons()
         initEvents()
+
+        cb()
     }
 }
 

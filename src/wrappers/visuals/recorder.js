@@ -518,7 +518,7 @@ var Recorder = function(container, replay, options) {
             this.originalEmit = this.emit
 
         this.emit = function(event) {
-            debug('Recorder emits: ' + event)
+            debug('Recorder emits: %s', event)
             var args = [].splice.call(arguments, 0)
             return this.originalEmit.apply(this, args)
         }
