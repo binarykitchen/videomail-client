@@ -1,8 +1,6 @@
 var merge           = require('merge-recursive'),
 
-
     Resource        = require('./resource'),
-    Controller      = require('./controller'),
 
     Container       = require('./wrappers/container'),
 
@@ -92,13 +90,11 @@ function factory() {
 
             var container = new Container(localOptions)
 
-            container.build(function(err) {
+            container.build(function(err, controller) {
 
                 if (err)
                     cb(err)
                 else {
-
-                    var controller = new Controller(container)
 
                     if (localOptions.load)
                         Videomail.get(localOptions.load, localOptions, function(err, videomail) {

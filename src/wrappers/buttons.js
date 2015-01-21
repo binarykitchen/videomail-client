@@ -1,4 +1,7 @@
-module.exports = function(container, options) {
+var util         = require('util'),
+    EventEmitter = require('events').EventEmitter
+
+var Buttons = function(container, options) {
 
     var self = this,
 
@@ -43,8 +46,8 @@ module.exports = function(container, options) {
         if (options.enablePause)
             pauseButton = makeButton(options.selectors.pauseButtonClass, 'Pause')
 
-        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
         resumeButton = makeButton(options.selectors.resumeButtonClass,   'Resume')
+        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
         backButton   = makeButton(options.selectors.backButtonClass,     'Back')
     }
 
@@ -127,22 +130,13 @@ module.exports = function(container, options) {
 
     function initEvents() {
 
-        // Events from other actions such as server commands
-        var recorder = container.getRecorder()
-
-        recorder.on('ready', function() {
+        self.on('ready', function() {
             onReady()
-        })
-
-        recorder.on('stopped', function() {
+        }).on('stopped', function() {
             onStopped()
-        })
-
-        recorder.on('preview', function() {
+        }).on('preview', function() {
             onPreview()
-        })
-
-        recorder.on('error', function() {
+        }).on('error', function() {
             onError()
         })
 
@@ -191,3 +185,7 @@ module.exports = function(container, options) {
         initEvents()
     }
 }
+
+util.inherits(Buttons, EventEmitter)
+
+module.exports = Buttons

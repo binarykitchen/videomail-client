@@ -1,14 +1,18 @@
 var insertCss      = require('insert-css'),
+    forward        = require('forward-emitter'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
+
+    Controller     = require('./../controller'),
 
     VideomailError = require('./../util/videomailError'),
     css            = require('./../assets/css/main.min.css.js')
 
 module.exports = function(options) {
 
-    var visuals     = new Visuals(this, options),
+    var controller  = new Controller(this),
+        visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         htmlElement = document.querySelector('html'),
 
@@ -21,8 +25,16 @@ module.exports = function(options) {
     function buildChildren(cb) {
         containerElement.classList.add('videomail')
 
-        visuals.build(cb)
-        buttons.build(cb)
+        // https://github.com/STRML/forward-emitter
+        forward(visuals.getRecorder(), controller)
+        forward(visuals.getRecorder(), buttons)
+
+        visuals.build(function(err) {
+            if (err)
+                cb(err)
+            else
+                buttons.build(cb)
+        })
     }
 
     this.build = function(cb) {
@@ -34,7 +46,13 @@ module.exports = function(options) {
             }))
         else {
             options.insertCss && prependDefaultCss()
-            buildChildren(cb)
+
+            buildChildren(function(err) {
+                if (err)
+                    cb(err)
+                else
+                    cb(null, controller)
+            })
         }
     }
 
@@ -77,9 +95,4 @@ module.exports = function(options) {
     this.isValid        = visuals.isValid
     this.isPaused       = visuals.isPaused
     */
-
-    // todo: remove later because it exposes too much
-    this.getRecorder = function() {
-        return visuals.getRecorder()
-    }
 }

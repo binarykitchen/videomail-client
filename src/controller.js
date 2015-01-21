@@ -1,4 +1,7 @@
-module.exports = function(container) {
+var util         = require('util'),
+    EventEmitter = require('events').EventEmitter
+
+var Controller = function(container) {
 
     /*
     this.beginWaiting   = container.beginWaiting
@@ -27,3 +30,7 @@ module.exports = function(container) {
     this.isPaused       = container.isPaused
     */
 }
+
+util.inherits(Controller, EventEmitter)
+
+module.exports = Controller
