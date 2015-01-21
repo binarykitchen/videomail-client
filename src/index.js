@@ -17,8 +17,6 @@ var merge           = require('merge-recursive'),
 
 // todo: consider using a web component instead!
 
-// add new option to disable pause
-
 function factory() {
 
     return {
@@ -31,6 +29,7 @@ function factory() {
             reconnect:      true,
             cache:          true,
             insertCss:      true,
+            enablePause:    true,
             selectors: {
                 containerId:    'videomail',
                 replayClass:    'replay',

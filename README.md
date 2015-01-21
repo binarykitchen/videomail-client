@@ -3,9 +3,7 @@ videomail-client
 
 [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 
-A revolutionary node.js module which enables you to record videos directly in the browser, wohooo!
-
-Finally you can encode any webcam recordings into MP4 and WebM within seconds. This without the need for Flash, Java nor any other crap.
+Finally you can encode any webcam recordings from your browser window into MP4 and WebM within seconds. This without the need for Flash, Java nor any other. Just JavaScript.
 
 ## Demo / Fully working version
 

@@ -38,8 +38,11 @@ module.exports = function(container, options) {
     }
 
     function buildButtons() {
-        recordButton = makeButton(options.selectors.recordButtonClass,   'Record', true)
-        pauseButton  = makeButton(options.selectors.pauseButtonClass,    'Pause')
+        recordButton = makeButton(options.selectors.recordButtonClass, 'Record', true)
+
+        if (options.enablePause)
+            pauseButton = makeButton(options.selectors.pauseButtonClass, 'Pause')
+
         stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
         resumeButton = makeButton(options.selectors.resumeButtonClass,   'Resume')
         backButton   = makeButton(options.selectors.backButtonClass,     'Back')
@@ -76,8 +79,10 @@ module.exports = function(container, options) {
     function record() {
         recordButton.classList.add('hide')
 
-        pauseButton.classList.remove('hide')
-        pauseButton.disabled = false
+        if (pauseButton) {
+            pauseButton.classList.remove('hide')
+            pauseButton.disabled = false
+        }
 
         stopButton.disabled = false
 
@@ -85,7 +90,7 @@ module.exports = function(container, options) {
     }
 
     function pause() {
-        pauseButton.classList.add('hide')
+        pauseButton && pauseButton.classList.add('hide')
 
         resumeButton.classList.remove('hide')
         resumeButton.disabled = false
@@ -98,8 +103,10 @@ module.exports = function(container, options) {
 
         resumeButton.classList.add('hide')
 
-        pauseButton.disabled = false
-        pauseButton.classList.remove('hide')
+        if (pauseButton) {
+            pauseButton.disabled = false
+            pauseButton.classList.remove('hide')
+        }
     }
 
     function stop() {
@@ -107,7 +114,7 @@ module.exports = function(container, options) {
 
         stopButton.disabled = true
 
-        pauseButton.classList.add('hide')
+        pauseButton && pauseButton.classList.add('hide')
         resumeButton.classList.add('hide')
     }
 
@@ -144,7 +151,7 @@ module.exports = function(container, options) {
             record()
         })
 
-        pauseButton.addEventListener('click', function() {
+        pauseButton && pauseButton.addEventListener('click', function() {
             pause()
         })
 
@@ -162,9 +169,11 @@ module.exports = function(container, options) {
     }
 
     this.reset = function() {
-        recordButton.disabled = pauseButton.disabled =
-        resumeButton.disabled = stopButton.disabled =
-        backButton.disabled   = true
+        if (pauseButton)
+            pauseButton.disabled = true
+
+        recordButton.disabled = resumeButton.disabled =
+        stopButton.disabled = backButton.disabled = true
     }
 
     this.build = function() {
