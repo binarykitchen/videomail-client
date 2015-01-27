@@ -3,6 +3,10 @@ var util         = require('util'),
 
 var Controller = function(container) {
 
+    this.unload = function() {
+        container.unload()
+    }
+
     /*
     this.beginWaiting   = container.beginWaiting
     this.endWaiting     = container.endWaiting
@@ -23,7 +27,6 @@ var Controller = function(container) {
     this.resume         = container.resume
     this.back           = container.back
     this.isReady        = container.isReady
-    this.unload         = container.unload
     this.isReplayShown  = container.isReplayShown
     this.isConnected    = container.isConnected
     this.isValid        = container.isValid

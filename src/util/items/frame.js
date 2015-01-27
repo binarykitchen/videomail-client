@@ -1,15 +1,15 @@
 var toBuffer  = require('typedarray-to-buffer'),
-    isBrowser = typeof(document) !== 'undefined' && document.createElement,
+    isBrowser = typeof(document) !== 'undefined' && typeof(document.createElement) === 'function',
 
     // cached, set only once for browser envs
     verifiedImageType
 
-var Frame = function(canvas, options) {
+module.exports = function(canvas, options) {
 
     var self    = this,
         quality = parseFloat(options.image.quality)
 
-    // validate some options
+    // validate some options this class needs
     if (options.image.types.length > 2) throw new Error('Too many image types are specified!')
     if (options.image.types.length < 1) throw new Error('No image type is specified!')
 
@@ -123,8 +123,19 @@ var Frame = function(canvas, options) {
     // this method is proven to be fast, see
     // http://jsperf.com/data-uri-to-buffer-performance/3
     function uriToBuffer(uri) {
-        var bytes = Frame.atob(uri.split(',')[1]),
-            arr   = new Uint8Array(bytes.length)
+
+        var uri = uri.split(',')[1],
+            bytes
+
+        // Beware that the atob function might be a static one for server side tests
+        if (typeof(atob) === 'function')
+            bytes = atob(uri)
+        else if (typeof(self.constructor.atob) === 'function')
+            bytes = self.constructor.atob(uri)
+        else
+            throw new Error('atob function is missing')
+
+        var arr   = new Uint8Array(bytes.length)
 
         // http://mrale.ph/blog/2014/12/24/array-length-caching.html
         for (var i = 0, l = bytes.length; i < l; i++) {
@@ -138,8 +149,10 @@ var Frame = function(canvas, options) {
         var imageType = self.getImageType(),
             buffer
 
-        if (imageType)
-            buffer = uriToBuffer(canvas.toDataURL(imageType, quality))
+        if (imageType) {
+            var uri = canvas.toDataURL(imageType, quality)
+            buffer = uriToBuffer(uri)
+        }
 
         return buffer
     }
@@ -195,8 +208,3 @@ var Frame = function(canvas, options) {
         }
     }
 }
-
-// Assign static function so that this can be altered during server side tests
-Frame.atob = isBrowser && typeof(atob) !== 'undefined' ? atob.bind(window) : null
-
-module.exports = Frame

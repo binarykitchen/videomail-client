@@ -8,6 +8,9 @@ module.exports = function(float32Array) {
     // inspired by:
     // http://blog.groupbuddies.com/posts/39-tutorial-html-audio-capture-streaming-to-node-js-no-browser-extensions
 
+    if (float32Array.constructor !== Float32Array)
+        throw new Error('The parameter is not a Float32Array')
+
     /*
         Raw WebAudio samples are in Float32Array's.
         If you choose to send them like this, you need to know that endianness does matter!

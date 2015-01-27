@@ -8,10 +8,15 @@ var websocket    = require('websocket-stream'),
     VideomailError  = require('./../../util/videomailError'),
     Frame           = require('./../../util/items/frame')
 
-var Recorder = function(container, replay, options) {
+var Recorder = function(visuals, replay, options) {
 
-    var self      = this,
-        browser   = new Browser(),
+    // validate some options this class needs
+    if (options.video.fps   < 1)  throw new Error('FPS is too small')
+    if (options.video.width < 1)  throw new Error('Video width is too small')
+    if (options.video.height < 1) throw new Error('Video height is too small')
+
+    var self            = this,
+        browser         = new Browser(),
 
         wantedInterval  = 1e3 / options.video.fps,
         debug           = options.debug,
@@ -48,7 +53,7 @@ var Recorder = function(container, replay, options) {
     }
 
     function onUserMediaReady() {
-        debug('onUserMediaReady()')
+        debug('Recorder: onUserMediaReady()')
 
         samplesCount = framesCount = 0
         submitting   = false
@@ -62,7 +67,7 @@ var Recorder = function(container, replay, options) {
     }
 
     function loadUserMedia() {
-        debug('loadUserMedia()')
+        debug('Recorder: loadUserMedia()')
 
         try {
             userMediaTimeout = setTimeout(function() {
@@ -86,6 +91,10 @@ var Recorder = function(container, replay, options) {
             }, function(err) {
                 clearUserMediaTimeout()
                 self.emit('error', err)
+
+                setTimeout(function() {
+                    loadUserMedia() // try again
+                }, 5e3)
             })
 
         } catch (exc) {
@@ -191,18 +200,14 @@ var Recorder = function(container, replay, options) {
         }
     }
 
-    function initEvents() {
-        debug('initEvents()')
-
-        window.addEventListener('beforeunload', function(e) {
-            self.unload(e)
-        })
+    function isNotifying() {
+        return visuals.isNotifying()
     }
 
     function initSocket(cb) {
         if (!connected && !unloaded) {
 
-            debug('initSocket()')
+            debug('Recorder: initialising web socket to %s', options.socketUrl)
 
             // https://github.com/maxogden/websocket-stream#binary-sockets
             stream = websocket(options.socketUrl)
@@ -303,10 +308,6 @@ var Recorder = function(container, replay, options) {
         writeCommand('back')
     }
 
-    this.pause = function() {
-        userMedia.pause()
-    }
-
     this.unload = function(e) {
         var cause
 
@@ -338,6 +339,8 @@ var Recorder = function(container, replay, options) {
 
         rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
+        rafId = null
+
         replay.reset()
 
         // important to free memory
@@ -358,10 +361,13 @@ var Recorder = function(container, replay, options) {
         return userMedia.isReady()
     }
 
-    this.pause = function() {
-        debug('pause()')
+    this.pause = function(e) {
+        debug('pause()', e)
 
+        // recordTimer.pause()
         userMedia.pause()
+
+        this.emit('paused')
     }
 
     this.isPaused = function() {
@@ -370,6 +376,8 @@ var Recorder = function(container, replay, options) {
 
     this.resume = function() {
         debug('resume()')
+
+        this.emit('resuming')
 
         lastAnimationTimestamp = Date.now()
         userMedia.resume()
@@ -380,7 +388,9 @@ var Recorder = function(container, replay, options) {
         if (unloaded)
             return false
 
-        debug('record()')
+        debug('Recorder: record()')
+
+        this.emit('recording')
 
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')
@@ -420,7 +430,8 @@ var Recorder = function(container, replay, options) {
 
                     buffer = frame.toBuffer()
 
-                    stream.write(buffer)
+                    // stream might become null while unloading
+                    stream && stream.write(buffer)
 
                     bytesSum += buffer.length
 
@@ -472,7 +483,7 @@ var Recorder = function(container, replay, options) {
         recorderElement =  document.createElement('VIDEO')
         recorderElement.classList.add(options.selectors.userMediaClass)
 
-        container.appendChild(recorderElement)
+        visuals.appendChild(recorderElement)
     }
 
     this.build = function(cb) {
@@ -485,7 +496,7 @@ var Recorder = function(container, replay, options) {
             cb(err)
 
         else {
-            recorderElement = container.querySelector('video.' + options.selectors.userMediaClass)
+            recorderElement = visuals.querySelector('video.' + options.selectors.userMediaClass)
 
             if (!recorderElement)
                 buildElement()
@@ -498,11 +509,18 @@ var Recorder = function(container, replay, options) {
 
             userMedia = new UserMedia(recorderElement, options)
 
-            initEvents()
             initSocket()
 
             cb()
         }
+    }
+
+    this.isPaused = function() {
+        return userMedia.isPaused()
+    }
+
+    this.isRecording = function() {
+        return !!rafId && !this.isPaused() && !isNotifying()
     }
 
     this.hide = function() {
@@ -518,7 +536,11 @@ var Recorder = function(container, replay, options) {
             this.originalEmit = this.emit
 
         this.emit = function(event) {
-            debug('Recorder emits: %s', event)
+
+            // not interested in this one event
+            if (event != 'removeListener')
+                debug('Recorder emits: %s', event)
+
             var args = [].splice.call(arguments, 0)
             return this.originalEmit.apply(this, args)
         }

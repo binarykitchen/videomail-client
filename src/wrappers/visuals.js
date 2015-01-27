@@ -1,6 +1,9 @@
-var Replay         = require('./visuals/replay'),
-    Recorder       = require('./visuals/recorder'),
-    Notifier       = require('./visuals/notifier'),
+var async = require('async'),
+
+    Replay          = require('./visuals/replay'),
+    Recorder        = require('./visuals/recorder'),
+    Notifier        = require('./visuals/notifier'),
+    RecorderInsides = require('./visuals/inside/recorderInsides'),
 
     VideomailError = require('./../util/videomailError')
 
@@ -8,8 +11,10 @@ module.exports = function(container, options) {
 
     var self = this,
 
-        replay   = new Replay(this, options),
-        recorder = new Recorder(this, replay, options),
+        replay          = new Replay(this, options),
+        recorder        = new Recorder(this, replay, options),
+        recorderInsides = new RecorderInsides(this, options),
+
         notifier = new Notifier(this),
 
         visualsElement
@@ -28,13 +33,12 @@ module.exports = function(container, options) {
     function buildChildren(cb) {
         buildNoScriptTag()
         notifier.build()
+        recorderInsides.build()
 
-        replay.build(function(err) {
-            if (err)
-                cb(err)
-            else
-                recorder.build(cb)
-        })
+        async.parallel([
+            replay.build.bind(replay),
+            recorder.build
+        ], cb)
     }
 
     function displayError(err) {
@@ -80,14 +84,14 @@ module.exports = function(container, options) {
         if (!visualsElement.style.height && options.video.height)
             visualsElement.style.height = options.video.height + 'px'
 
+        initEvents()
+
         buildChildren(function(err) {
             if (err) {
                 displayError(err)
                 cb(err)
-            } else {
-                initEvents()
+            } else
                 cb()
-            }
         })
     }
 
@@ -109,8 +113,9 @@ module.exports = function(container, options) {
     }
 
     this.stop = function() {
-        this.beginWaiting()
+        container.beginWaiting()
         recorder.stop()
+        recorderInsides.hidePause()
     }
 
     this.back = function() {
@@ -119,28 +124,41 @@ module.exports = function(container, options) {
         recorder.back()
     }
 
-    this.hideReplay     = replay.hide
-    this.hideRecorder   = recorder.hide
-    this.record         = recorder.record
-    this.pause          = recorder.pause
-    this.resume         = recorder.resume
+    this.unload = function() {
+        recorder.unload()
+    }
 
-    /*
+    this.isNotifying = function() {
+        return notifier.isVisible()
+    }
 
-    this.isReplayShown  = replay.isShown
-    this.showReplay     = replay.show
-    this.showRecorder   = recorder.show
-    this.notify         = notifier.notify.bind(notifier)
-    this.block          = notifier.block.bind(notifier)
-    this.setExplanation = notifier.setExplanation
-    this.hideNotifier   = notifier.hide
-    this.showNotifier   = notifier.show
-    this.unload         = recorder.unload.bind(recorder)
-    this.isReady        = recorder.isReady
-    this.isConnected    = recorder.isConnected
-    this.isValid        = recorder.isValid
-    this.isPaused       = recorder.isPaused
-    */
+    this.pause = function() {
+        recorder.pause()
+        recorderInsides.showPause()
+    }
+
+    this.resume = function() {
+        recorder.resume()
+        recorderInsides.hidePause()
+    }
+
+    this.pauseOrResume = function() {
+        if (!this.isNotifying() && !replay.isShown()) {
+            if (this.isRecording())
+                this.pause()
+
+            else if (recorder.isPaused())
+                this.resume()
+
+            else if (recorder.isReady())
+                this.record()
+        }
+    }
+
+    this.hideReplay     = replay.hide.bind(replay)
+    this.hideRecorder   = recorder.hide.bind(recorder)
+    this.record         = recorder.record.bind(recorder)
+    this.isRecording    = recorder.isRecording.bind(recorder)
 
     // todo: remove later because it exposes too much
     this.getRecorder = function() {

@@ -2,7 +2,7 @@ var Browser = require('./../../util/browser'),
 
     browser = new Browser()
 
-module.exports = function(container, options) {
+module.exports = function(visuals, options) {
 
     var self = this,
 
@@ -17,7 +17,7 @@ module.exports = function(container, options) {
         replayElement.autoplay = false
         replayElement.controls = 'controls'
 
-        container.appendChild(replayElement)
+        visuals.appendChild(replayElement)
     }
 
     function initEvents() {
@@ -30,7 +30,7 @@ module.exports = function(container, options) {
     }
 
     this.build = function(cb) {
-        replayElement = container.querySelector('video.' + options.selectors.replayClass)
+        replayElement = visuals.querySelector('video.' + options.selectors.replayClass)
 
         if (!replayElement)
             buildElement()

@@ -132,8 +132,8 @@ module.exports = function(rawVisualUserMedia, options) {
     this.createCanvas = function() {
         var canvas = document.createElement('canvas')
 
-        canvas.width  = rawVisualUserMedia.width
-        canvas.height = rawVisualUserMedia.height
+        canvas.width  = rawVisualUserMedia.width  || rawVisualUserMedia.clientWidth
+        canvas.height = rawVisualUserMedia.height || rawVisualUserMedia.clientHeight
 
         return canvas
     }

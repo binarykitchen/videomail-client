@@ -124,6 +124,7 @@ These guys helped and/or inspired me for this mad project:
 * Isaac Johnston
 * Dominic Tarr
 * Sonia Pivac
+* Zack Best
 * Daniel Noelpp
 * Nicholas Buchanan
 * Kelvin Wong

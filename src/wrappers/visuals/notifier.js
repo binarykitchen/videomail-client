@@ -42,6 +42,10 @@ module.exports = function(visuals) {
         notifyElement.classList.remove('hide')
     }
 
+    this.isVisible = function() {
+        return !notifyElement.classList.contains('hide')
+    }
+
     this.block = function(err) {
         var message     = err.message ? err.message : err.toString(),
             explanation = err.explanation ? err.explanation : null

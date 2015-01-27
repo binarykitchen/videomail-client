@@ -1,4 +1,5 @@
 var merge           = require('merge-recursive'),
+    async           = require('async'),
 
     Resource        = require('./resource'),
 
@@ -19,15 +20,17 @@ function factory() {
 
     return {
         globalOptions: {
-            logger:         console,
-            debug:          false,
-            timeout:        6000,
-            baseUrl:        'https://videomail.io',
-            socketUrl:      'wss://videomail.io',
-            reconnect:      true,
-            cache:          true,
-            insertCss:      true,
-            enablePause:    true,
+            logger:             console,
+            debug:              false,
+            timeout:            6000,
+            baseUrl:            'https://videomail.io',
+            socketUrl:          'wss://videomail.io',
+            reconnect:          true,
+            cache:              true,
+            insertCss:          true,
+            enablePause:        true,
+            enableAutoPause:    true,
+            enablePauseOnSpace: true,
             selectors: {
                 containerId:    'videomail',
                 replayClass:    'replay',
@@ -85,28 +88,28 @@ function factory() {
 
             if (!cb)
                  cb = function(err) {
-                    err && localOptions.logger.err(err)
+                    err && localOptions.logger.error(err)
                  }
 
-            var container = new Container(localOptions)
+            async.series({
+                controller: function(cb) {
+                    var container = new Container(localOptions)
+                    container.build(cb)
+                },
 
-            container.build(function(err, controller) {
-
-                if (err)
-                    cb(err)
-                else {
-
+                videomail: function(cb) {
                     if (localOptions.load)
-                        Videomail.get(localOptions.load, localOptions, function(err, videomail) {
-
-                            if (err) {
-                                container.unload(err)
-                                cb(err)
-                            } else
-                                cb(null, controller, videomail)
-                        })
+                        Videomail.get(localOptions.load, localOptions, cb)
                     else
-                        cb(null, controller)
+                        cb()
+                }
+
+            }, function(err, results) {
+                if (err) {
+                    results.controller.unload(err)
+                    cb(err)
+                } else {
+                    cb(null, results.controller, results.videomail)
                 }
             })
         },

@@ -1,5 +1,6 @@
 var insertCss      = require('insert-css'),
     forward        = require('forward-emitter'),
+    async          = require('async'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
@@ -11,7 +12,9 @@ var insertCss      = require('insert-css'),
 
 module.exports = function(options) {
 
-    var controller  = new Controller(this),
+    var self = this,
+
+        controller  = new Controller(this),
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         htmlElement = document.querySelector('html'),
@@ -29,12 +32,36 @@ module.exports = function(options) {
         forward(visuals.getRecorder(), controller)
         forward(visuals.getRecorder(), buttons)
 
-        visuals.build(function(err) {
-            if (err)
-                cb(err)
-            else
-                buttons.build(cb)
+        async.series([
+            visuals.build,
+            buttons.build
+        ], cb)
+    }
+
+    function initEvents() {
+        window.addEventListener('beforeunload', function(e) {
+            self.unload(e)
         })
+
+        if (options.enablePause && options.enableAutoPause)
+            window.addEventListener('blur', function(e) {
+                self.isRecording() && self.pause(e)
+            })
+
+        if (options.enablePause && options.enablePauseOnSpace)
+            window.addEventListener('keypress', function(e) {
+                var tagName = e.target.tagName
+
+                if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
+
+                    var code = e.keyCode ? e.keyCode : e.which
+
+                    if (code == 32) {
+                        e.preventDefault()
+                        visuals.pauseOrResume()
+                    }
+                }
+            })
     }
 
     this.build = function(cb) {
@@ -50,8 +77,10 @@ module.exports = function(options) {
             buildChildren(function(err) {
                 if (err)
                     cb(err)
-                else
+                else {
+                    initEvents()
                     cb(null, controller)
+                }
             })
         }
     }
@@ -72,27 +101,22 @@ module.exports = function(options) {
         containerElement.appendChild(child)
     }
 
-    this.record         = visuals.record
-    this.pause          = visuals.pause
-    this.resume         = visuals.resume
-    this.stop           = visuals.stop
-    this.back           = visuals.back
+    this.unload = function() {
+        visuals.unload()
+        this.endWaiting()
+    }
 
-    /*
-    this.isReplayShown  = visuals.isShown
-    this.hideReplay     = visuals.hideReplay
-    this.showReplay     = visuals.show
-    this.hideRecorder   = visuals.hide
-    this.showRecorder   = visuals.showRecorder
-    this.notify         = visuals.notify
-    this.block          = visuals.block
-    this.setExplanation = visuals.setExplanation
-    this.hideNotifier   = visuals.hideNotifier
-    this.showNotifier   = visuals.show
-    this.unload         = visuals.unload
-    this.isReady        = visuals.isReady
-    this.isConnected    = visuals.isConnected
-    this.isValid        = visuals.isValid
-    this.isPaused       = visuals.isPaused
-    */
+    this.isNotifying = function() {
+        return visuals.isNotifying()
+    }
+
+    this.pause = function() {
+        visuals.pause()
+    }
+
+    this.isRecording    = visuals.isRecording.bind(visuals)
+    this.record         = visuals.record.bind(visuals)
+    this.resume         = visuals.resume.bind(visuals)
+    this.stop           = visuals.stop.bind(visuals)
+    this.back           = visuals.back.bind(visuals)
 }

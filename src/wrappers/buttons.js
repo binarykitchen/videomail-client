@@ -23,7 +23,7 @@ var Buttons = function(container, options) {
     }
 
     function makeButton(buttonClass, text, show) {
-        var buttonElement = buttonsElement.querySelector('button.' + buttonClass)
+        var buttonElement = buttonsElement.querySelector('.' + buttonClass)
 
         if (!buttonElement) {
             buttonElement = document.createElement('BUTTON')
@@ -79,7 +79,13 @@ var Buttons = function(container, options) {
         backButton.disabled = false
     }
 
-    function record() {
+    function onPaused() {
+        pauseButton && pauseButton.classList.add('hide')
+        resumeButton.classList.remove('hide')
+        resumeButton.disabled = false
+    }
+
+    function onRecording() {
         recordButton.classList.add('hide')
 
         if (pauseButton) {
@@ -88,22 +94,9 @@ var Buttons = function(container, options) {
         }
 
         stopButton.disabled = false
-
-        container.record()
     }
 
-    function pause() {
-        pauseButton && pauseButton.classList.add('hide')
-
-        resumeButton.classList.remove('hide')
-        resumeButton.disabled = false
-
-        container.pause()
-    }
-
-    function resume() {
-        container.resume()
-
+    function onResuming() {
         resumeButton.classList.add('hide')
 
         if (pauseButton) {
@@ -138,19 +131,25 @@ var Buttons = function(container, options) {
             onPreview()
         }).on('error', function() {
             onError()
+        }).on('paused', function() {
+            onPaused()
+        }).on('recording', function() {
+            onRecording()
+        }).on('resuming', function() {
+            onResuming()
         })
 
         // User actions
         recordButton.addEventListener('click', function() {
-            record()
+            container.record()
         })
 
         pauseButton && pauseButton.addEventListener('click', function() {
-            pause()
+            container.pause()
         })
 
         resumeButton.addEventListener('click', function() {
-            resume()
+            container.resume()
         })
 
         stopButton.addEventListener('click', function() {
