@@ -5,7 +5,7 @@ var Countdown   = require('./recorder/countdown'),
 
 module.exports = function(visuals, options) {
 
-    var countdown   = new Countdown(visuals),
+    var countdown   = new Countdown(visuals, options),
         pausedNote  = new PausedNote(visuals, options),
         recordNote  = new RecordNote(visuals),
         recordTimer = new RecordTimer(visuals)
@@ -23,5 +23,13 @@ module.exports = function(visuals, options) {
 
     this.hidePause = function() {
         pausedNote.hide()
+    }
+
+    this.startCountdown = function(cb) {
+        countdown.start(cb)
+    }
+
+    this.isCountingDown = function() {
+        return countdown.isCountingDown()
     }
 }

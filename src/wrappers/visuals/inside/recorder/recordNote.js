@@ -1,9 +1,9 @@
-module.exports = function(recorder) {
+module.exports = function(visuals) {
 
     var recordNote
 
     this.build = function() {
-        recordNote = recorder.querySelector('.recordNote')
+        recordNote = visuals.querySelector('.recordNote')
 
         if (!recordNote) {
             recordNote = document.createElement('p')
@@ -11,7 +11,7 @@ module.exports = function(recorder) {
 
             this.hide()
 
-            recorder.appendChild(recordNote)
+            visuals.appendChild(recordNote)
         } else
             this.hide()
     }

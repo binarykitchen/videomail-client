@@ -1,7 +1,7 @@
 var websocket    = require('websocket-stream'),
     util         = require('util'),
-    EventEmitter = require('events').EventEmitter,
 
+    EventEmitter    = require('./../../util/eventEmitter'),
     Browser         = require('./../../util/browser'),
     Humanize        = require('./../../util/humanize'),
     UserMedia       = require('./../../util/userMedia'),
@@ -9,6 +9,8 @@ var websocket    = require('websocket-stream'),
     Frame           = require('./../../util/items/frame')
 
 var Recorder = function(visuals, replay, options) {
+
+    EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
     if (options.video.fps   < 1)  throw new Error('FPS is too small')
@@ -279,6 +281,8 @@ var Recorder = function(visuals, replay, options) {
     this.stop = function() {
         debug('stop()')
 
+        this.emit('stopping')
+
         this.reset()
 
         stopTime = Date.now()
@@ -297,8 +301,6 @@ var Recorder = function(visuals, replay, options) {
         }
 
         writeCommand('stop', args)
-
-        this.emit('stopped')
     }
 
     this.back = function() {
@@ -314,7 +316,7 @@ var Recorder = function(visuals, replay, options) {
         if (e)
             cause = e.name || e.statusText || e.toString()
 
-        debug('unload()', cause)
+        debug('Recorder: unload()', cause)
 
         this.removeAllListeners()
         this.reset()
@@ -375,7 +377,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.resume = function() {
-        debug('resume()')
+        debug('Recorder: resume()')
 
         this.emit('resuming')
 
@@ -424,7 +426,8 @@ var Recorder = function(visuals, replay, options) {
 
                     intervalSum += interval
 
-                    ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
+                    // ctx might become null when unloading
+                    ctx && ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
 
                     framesCount++
 
@@ -529,21 +532,6 @@ var Recorder = function(visuals, replay, options) {
 
     this.show = function() {
         recorderElement.classList.remove('hide')
-    }
-
-    if (options.debug) {
-        if (!this.originalEmit)
-            this.originalEmit = this.emit
-
-        this.emit = function(event) {
-
-            // not interested in this one event
-            if (event != 'removeListener')
-                debug('Recorder emits: %s', event)
-
-            var args = [].splice.call(arguments, 0)
-            return this.originalEmit.apply(this, args)
-        }
     }
 }
 

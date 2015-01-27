@@ -8,7 +8,6 @@ var merge           = require('merge-recursive'),
     VideomailError  = require('./util/videomailError'),
     Browser         = require('./util/browser'),
     standardize     = require('./util/standardize'),
-    CountdownTimer  = require('./util/timers/countdown'),
     RecordTimer     = require('./util/timers/record'),
 
     browser         = new Browser(),
@@ -30,7 +29,7 @@ function factory() {
             insertCss:          true,
             enablePause:        true,
             enableAutoPause:    true,
-            enablePauseOnSpace: true,
+            enableSpace:        true,
             selectors: {
                 containerId:    'videomail',
                 replayClass:    'replay',
@@ -142,10 +141,6 @@ function factory() {
 
         createRecordTimer: function(localOptions) {
             return new RecordTimer(this.getOptions(localOptions))
-        },
-
-        createCountdownTimer: function(localOptions) {
-            return new CountdownTimer(this.getOptions(localOptions))
         }
     }
 }

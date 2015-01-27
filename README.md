@@ -3,17 +3,24 @@ videomail-client
 
 [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 
-Finally you can encode any webcam recordings from your browser window into MP4 and WebM within seconds. This without the need for Flash, Java nor any other. Just JavaScript.
+Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other. Just JavaScript.
 
 ## Demo / Fully working version
 
 Check out the full version with all its features on https://videomail.io itself.
 
-That site runs on AngularJS where I just `require('videomail-client')`, initialise it with `Videomail.init()` and bundle all that through Browserify. Awesome stuff!
+That site runs on AngularJS where I only have these two code lines ...
+
+```js
+require('videomail-client') // loads Videomail into global scope (in the browser it's `window`)
+Videomail.init()            // initialises with defaults into the HTML tag with the id='videomail'
+```
+
+... and bundle all that through Browserify. Awesome stuff!
 
 ## Examples
 
-To run the examples in your local browser, just do this:
+To run the examples in the repo in your local browser, just do this:
 
 1. `npm install`
 2. Ignite static server with `gulp examples` and
@@ -26,10 +33,8 @@ To run the examples in your local browser, just do this:
     <body>
         <!--Placeholder for the webcam video, will be automatically filled-->
         <div id="videomail"></div>
-
         <!--Include the browserified version of this library-->
         <script async src="/dist/videomail-client.js"></script>
-
         <script>
             window.addEventListener('load', function() {
                 Videomail.init({
@@ -43,20 +48,25 @@ To run the examples in your local browser, just do this:
 
 This will load your webcam, fill the placeholder with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy.
 
+With the debug option you see additional information in the console. This to enhance DX just in case.
+
 ## Options
 
 These are the default options:
 
 ```js
 {
-    logger:         console,
-    debug:          false,
-    timeout:        6000,
-    baseUrl:        'https://videomail.io',
-    socketUrl:      'wss://videomail.io',
-    reconnect:      true,
-    cache:          true,
-    insertCss:      true,
+    logger:             console,
+    debug:              false,
+    timeout:            6000,
+    baseUrl:            'https://videomail.io',
+    socketUrl:          'wss://videomail.io',
+    reconnect:          true,
+    cache:              true,
+    insertCss:          true,
+    enablePause:        true,
+    enableAutoPause:    true,
+    enablePauseOnSpace: true,
     selectors: {
         containerId:    'videomail',
         replayClass:    'replay',
@@ -114,7 +124,7 @@ Forget IE, Safari and iPhones because they still doesn't support `getUserMedia()
 
 This is just the beginning. I will add a lot more over time.
 
-Bear with me, there are lots of problems to crack, especially the audio part. Working on it ...
+Bear with me, there are lots of problems to crack, especially with the audio part. Working on it ...
 
 ## Credits
 

@@ -1,11 +1,11 @@
-module.exports = function(recorder, options) {
+module.exports = function(visuals, options) {
 
     if (!options.text.paused) throw new Error('Paused text cannot be empty')
 
     var pausedElement
 
     this.build = function() {
-        pausedElement = recorder.querySelector('.paused')
+        pausedElement = visuals.querySelector('.paused')
 
         if (!pausedElement) {
             pausedElement = document.createElement('p')
@@ -15,7 +15,7 @@ module.exports = function(recorder, options) {
 
             pausedElement.innerHTML = options.text.paused
 
-            recorder.appendChild(pausedElement)
+            visuals.appendChild(pausedElement)
         } else {
             this.hide()
             pausedElement.innerHTML = options.text.paused

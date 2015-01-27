@@ -1,13 +1,17 @@
-var async = require('async'),
+var async        = require('async'),
+    util         = require('util'),
 
     Replay          = require('./visuals/replay'),
     Recorder        = require('./visuals/recorder'),
     Notifier        = require('./visuals/notifier'),
     RecorderInsides = require('./visuals/inside/recorderInsides'),
 
-    VideomailError = require('./../util/videomailError')
+    EventEmitter    = require('./../util/eventEmitter'),
+    VideomailError  = require('./../util/videomailError')
 
-module.exports = function(container, options) {
+var Visuals = function(container, options) {
+
+    EventEmitter.call(this, options, 'Visuals')
 
     var self = this,
 
@@ -15,7 +19,7 @@ module.exports = function(container, options) {
         recorder        = new Recorder(this, replay, options),
         recorderInsides = new RecorderInsides(this, options),
 
-        notifier = new Notifier(this),
+        notifier        = new Notifier(this),
 
         visualsElement
 
@@ -63,6 +67,10 @@ module.exports = function(container, options) {
             replay.show()
             self.endWaiting()
         })
+    }
+
+    function isRecordable() {
+        return !self.isNotifying() && !replay.isShown() && !recorderInsides.isCountingDown()
     }
 
     this.build = function(cb) {
@@ -143,7 +151,7 @@ module.exports = function(container, options) {
     }
 
     this.pauseOrResume = function() {
-        if (!this.isNotifying() && !replay.isShown()) {
+        if (isRecordable()) {
             if (this.isRecording())
                 this.pause()
 
@@ -155,9 +163,23 @@ module.exports = function(container, options) {
         }
     }
 
+    this.recordOrStop = function() {
+        if (isRecordable()) {
+            if (this.isRecording())
+                this.stop()
+
+            else if (recorder.isReady())
+                this.record()
+        }
+    }
+
+    this.record = function() {
+        this.emit('countdown')
+        recorderInsides.startCountdown(recorder.record.bind(recorder))
+    }
+
     this.hideReplay     = replay.hide.bind(replay)
     this.hideRecorder   = recorder.hide.bind(recorder)
-    this.record         = recorder.record.bind(recorder)
     this.isRecording    = recorder.isRecording.bind(recorder)
 
     // todo: remove later because it exposes too much
@@ -165,3 +187,7 @@ module.exports = function(container, options) {
         return recorder
     }
 }
+
+util.inherits(Visuals, EventEmitter)
+
+module.exports = Visuals

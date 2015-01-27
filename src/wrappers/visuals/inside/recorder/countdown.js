@@ -1,9 +1,40 @@
-module.exports = function(recorder) {
+module.exports = function(visuals, options) {
 
-    var countdownElement
+    var self = this,
+
+        countdownElement,
+        intervalId,
+        countdown
+
+    function fire(cb) {
+        clearInterval(intervalId)
+
+        intervalId = null
+
+        self.hide()
+
+        cb()
+    }
+
+    function countBackward(cb) {
+        countdown--
+
+        if (countdown < 1)
+            fire(cb)
+        else
+            countdownElement.innerHTML = countdown
+    }
+
+    this.start = function(cb) {
+        countdownElement.innerHTML = countdown = options.video.countdown
+
+        this.show()
+
+        intervalId = setInterval(countBackward.bind(this, cb), 1e3)
+    }
 
     this.build = function() {
-        countdownElement = recorder.querySelector('.countdown')
+        countdownElement = visuals.querySelector('.countdown')
 
         if (!countdownElement) {
             countdownElement = document.createElement('p')
@@ -11,7 +42,7 @@ module.exports = function(recorder) {
 
             this.hide()
 
-            recorder.appendChild(countdownElement)
+            visuals.appendChild(countdownElement)
         } else
             this.hide()
     }
@@ -22,5 +53,9 @@ module.exports = function(recorder) {
 
     this.show = function() {
         countdownElement.classList.remove('hide')
+    }
+
+    this.isCountingDown = function() {
+        return !! intervalId
     }
 }

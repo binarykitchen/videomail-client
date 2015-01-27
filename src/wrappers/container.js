@@ -29,8 +29,9 @@ module.exports = function(options) {
         containerElement.classList.add('videomail')
 
         // https://github.com/STRML/forward-emitter
-        forward(visuals.getRecorder(), controller)
+        forward(visuals.getRecorder(), controller) // todo: double check if this is really needed
         forward(visuals.getRecorder(), buttons)
+        forward(visuals,               buttons)
 
         async.series([
             visuals.build,
@@ -48,7 +49,7 @@ module.exports = function(options) {
                 self.isRecording() && self.pause(e)
             })
 
-        if (options.enablePause && options.enablePauseOnSpace)
+        if (options.enableSpace)
             window.addEventListener('keypress', function(e) {
                 var tagName = e.target.tagName
 
@@ -58,7 +59,11 @@ module.exports = function(options) {
 
                     if (code == 32) {
                         e.preventDefault()
-                        visuals.pauseOrResume()
+
+                        if (options.enablePause)
+                            visuals.pauseOrResume()
+                        else
+                            visuals.recordOrStop()
                     }
                 }
             })

@@ -1,9 +1,9 @@
-module.exports = function(recorder) {
+module.exports = function(visuals) {
 
     var recordTimerElement
 
     this.build = function() {
-        recordTimerElement = recorder.querySelector('.recordTimer')
+        recordTimerElement = visuals.querySelector('.recordTimer')
 
         if (!recordTimerElement) {
             recordTimerElement = document.createElement('p')
@@ -11,7 +11,7 @@ module.exports = function(recorder) {
 
             this.hide()
 
-            recorder.appendChild(recordTimerElement)
+            visuals.appendChild(recordTimerElement)
         } else
             this.hide()
     }

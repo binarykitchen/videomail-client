@@ -13,11 +13,19 @@ var Buttons = function(container, options) {
         stopButton,
         backButton
 
+    function hide(buttonElement) {
+        buttonElement.classList.add('hide')
+    }
+
+    function show(buttonElement) {
+        buttonElement.classList.remove('hide')
+    }
+
     function adjustButton(buttonElement, show) {
         buttonElement.disabled = true
         buttonElement.type     = 'button'
 
-        !show && buttonElement.classList.add('hide')
+        !show && hide(buttonElement)
 
         return buttonElement
     }
@@ -46,25 +54,25 @@ var Buttons = function(container, options) {
         if (options.enablePause)
             pauseButton = makeButton(options.selectors.pauseButtonClass, 'Pause')
 
-        resumeButton = makeButton(options.selectors.resumeButtonClass,   'Resume')
-        stopButton   = makeButton(options.selectors.stopButtonClass,     'Stop', true)
-        backButton   = makeButton(options.selectors.backButtonClass,     'Back')
+        resumeButton = makeButton(options.selectors.resumeButtonClass, 'Resume')
+
+        // show stop only when pause is enabled - looks better that way otherwise button
+        // move left and right between record and stop
+        stopButton = makeButton(options.selectors.stopButtonClass, 'Stop', options.enablePause)
+
+        backButton = makeButton(options.selectors.backButtonClass, 'Back')
     }
 
     function onReady() {
         stopButton.disabled = true
 
-        backButton.classList.add('hide')
-        recordButton.classList.remove('hide')
-        stopButton.classList.remove('hide')
+        if (options.enablePause)
+            show(stopButton)
+
+        hide(backButton)
+        show(recordButton)
 
         recordButton.disabled = false
-    }
-
-    function onStopped() {
-        backButton.classList.add('hide')
-        resumeButton.classList.add('hide')
-        stopButton.classList.remove('hide')
     }
 
     function onError() {
@@ -72,46 +80,49 @@ var Buttons = function(container, options) {
     }
 
     function onPreview() {
-        recordButton.classList.add('hide')
-        stopButton.classList.add('hide')
+        hide(recordButton)
+        hide(stopButton)
 
-        backButton.classList.remove('hide')
+        show(backButton)
         backButton.disabled = false
     }
 
     function onPaused() {
-        pauseButton && pauseButton.classList.add('hide')
-        resumeButton.classList.remove('hide')
+        pauseButton && hide(pauseButton)
+        show(resumeButton)
         resumeButton.disabled = false
     }
 
     function onRecording() {
-        recordButton.classList.add('hide')
+        hide(recordButton)
 
         if (pauseButton) {
-            pauseButton.classList.remove('hide')
+            show(pauseButton)
             pauseButton.disabled = false
         }
 
         stopButton.disabled = false
+        show(stopButton)
     }
 
     function onResuming() {
-        resumeButton.classList.add('hide')
+        hide(resumeButton)
 
         if (pauseButton) {
             pauseButton.disabled = false
-            pauseButton.classList.remove('hide')
+            show(pauseButton)
         }
     }
 
-    function stop() {
-        container.stop()
-
+    function onStopping() {
         stopButton.disabled = true
 
-        pauseButton && pauseButton.classList.add('hide')
-        resumeButton.classList.add('hide')
+        pauseButton && hide(pauseButton)
+        hide(resumeButton)
+    }
+
+    function onCountdown() {
+        recordButton.disabled = true
     }
 
     function back() {
@@ -125,8 +136,6 @@ var Buttons = function(container, options) {
 
         self.on('ready', function() {
             onReady()
-        }).on('stopped', function() {
-            onStopped()
         }).on('preview', function() {
             onPreview()
         }).on('error', function() {
@@ -137,6 +146,10 @@ var Buttons = function(container, options) {
             onRecording()
         }).on('resuming', function() {
             onResuming()
+        }).on('stopping', function() {
+            onStopping()
+        }).on('countdown', function() {
+            onCountdown()
         })
 
         // User actions
@@ -153,7 +166,7 @@ var Buttons = function(container, options) {
         })
 
         stopButton.addEventListener('click', function() {
-            stop()
+            container.stop()
         })
 
         backButton.addEventListener('click', function() {
