@@ -5,31 +5,47 @@ var Countdown   = require('./recorder/countdown'),
 
 module.exports = function(visuals, options) {
 
-    var countdown   = new Countdown(visuals, options),
-        pausedNote  = new PausedNote(visuals, options),
-        recordNote  = new RecordNote(visuals),
-        recordTimer = new RecordTimer(visuals)
+    var recordNote  = new RecordNote(visuals),
+        recordTimer = new RecordTimer(visuals),
+
+        countdown,
+        pausedNote
+
+    if (options.video.countdown)
+        countdown = new Countdown(visuals, options)
+
+    if (options.enablePause)
+        pausedNote = new PausedNote(visuals, options)
 
     this.build = function() {
-        countdown.build()
-        pausedNote.build()
+        countdown && countdown.build()
+        pausedNote&& pausedNote.build()
+
         recordNote.build()
         recordTimer.build()
     }
 
     this.showPause = function() {
-        pausedNote.show()
+        pausedNote && pausedNote.show()
     }
 
     this.hidePause = function() {
-        pausedNote.hide()
+        pausedNote && pausedNote.hide()
     }
 
     this.startCountdown = function(cb) {
-        countdown.start(cb)
+        countdown && countdown.start(cb)
     }
 
     this.isCountingDown = function() {
-        return countdown.isCountingDown()
+        return countdown && countdown.isCountingDown()
+    }
+
+    this.showRecordNote = function() {
+        recordNote.show()
+    }
+
+    this.hideRecordNote = function() {
+        recordNote.hide()
     }
 }

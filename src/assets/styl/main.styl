@@ -1,3 +1,9 @@
+bright-orange-color = #eb9369
+orange-color        = #ea4b2a
+green-color         = #00d814
+
+@import 'keyframes/*'
+
 .videomail
 
     .visuals
@@ -36,10 +42,17 @@
 
     .recordTimer
     .recordNote
-        right         .7em
-        background    rgba(10, 10, 10, .85)
-        padding       .4em .4em .3em
-        transition    all 1s ease
+        right           .7em
+        background      rgba(10, 10, 10, .8)
+        padding         .4em .4em .3em
+        transition      all 1s ease
+        color           green-color
+
+        &.near
+            color bright-orange-color
+
+        &.nigh
+            color orange-color
 
     .recordTimer
         top .7em

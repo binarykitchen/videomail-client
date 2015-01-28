@@ -67,6 +67,22 @@ var Visuals = function(container, options) {
             replay.show()
             self.endWaiting()
         })
+
+        recorder.on('recording', function() {
+            recorderInsides.showRecordNote()
+        })
+
+        recorder.on('resuming', function() {
+            recorderInsides.showRecordNote()
+        })
+
+        recorder.on('stopping', function() {
+            recorderInsides.hideRecordNote()
+        })
+
+        recorder.on('paused', function() {
+            recorderInsides.hideRecordNote()
+        })
     }
 
     function isRecordable() {
@@ -174,8 +190,11 @@ var Visuals = function(container, options) {
     }
 
     this.record = function() {
-        this.emit('countdown')
-        recorderInsides.startCountdown(recorder.record.bind(recorder))
+        if (options.video.countdown) {
+            this.emit('countdown')
+            recorderInsides.startCountdown(recorder.record.bind(recorder))
+        } else
+            recorder.record()
     }
 
     this.hideReplay     = replay.hide.bind(replay)
