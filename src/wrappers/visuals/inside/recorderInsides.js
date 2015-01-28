@@ -1,12 +1,19 @@
-var Countdown   = require('./recorder/countdown'),
+var util         = require('util'),
+    EventEmitter = require('./../../../util/eventEmitter'),
+
+    Countdown   = require('./recorder/countdown'),
     PausedNote  = require('./recorder/pausedNote'),
     RecordNote  = require('./recorder/recordNote'),
     RecordTimer = require('./recorder/recordTimer')
 
-module.exports = function(visuals, options) {
+var RecorderInsides = function(visuals, options) {
 
-    var recordNote  = new RecordNote(visuals),
-        recordTimer = new RecordTimer(visuals),
+    EventEmitter.call(this, options, 'RecorderInsides')
+
+    var self = this,
+
+        recordNote  = new RecordNote(visuals),
+        recordTimer = new RecordTimer(visuals, recordNote, options),
 
         countdown,
         pausedNote
@@ -17,12 +24,48 @@ module.exports = function(visuals, options) {
     if (options.enablePause)
         pausedNote = new PausedNote(visuals, options)
 
+    function startRecording(cb) {
+        recordTimer.start(cb)
+    }
+
+    function resumeRecording() {
+        recordTimer.resume()
+    }
+
+    function stopRecording() {
+        recordTimer.stop()
+    }
+
+    function pauseRecording() {
+        recordTimer.pause()
+    }
+
+    function initEvents() {
+        self
+            .on('recording', function() {
+                startRecording(function() {
+                    visuals.stop()
+                })
+            })
+            .on('resuming', function() {
+                resumeRecording()
+            })
+            .on('stopping', function() {
+                stopRecording()
+            })
+            .on('paused', function() {
+                pauseRecording()
+            })
+    }
+
     this.build = function() {
         countdown && countdown.build()
         pausedNote&& pausedNote.build()
 
         recordNote.build()
         recordTimer.build()
+
+        initEvents()
     }
 
     this.showPause = function() {
@@ -40,12 +83,8 @@ module.exports = function(visuals, options) {
     this.isCountingDown = function() {
         return countdown && countdown.isCountingDown()
     }
-
-    this.showRecordNote = function() {
-        recordNote.show()
-    }
-
-    this.hideRecordNote = function() {
-        recordNote.hide()
-    }
 }
+
+util.inherits(RecorderInsides, EventEmitter)
+
+module.exports = RecorderInsides

@@ -60,7 +60,8 @@ var Recorder = function(visuals, replay, options) {
         samplesCount = framesCount = 0
         submitting   = false
 
-        this.emit('ready')
+        show()
+        self.emit('ready')
     }
 
     function clearUserMediaTimeout() {
@@ -108,6 +109,7 @@ var Recorder = function(visuals, replay, options) {
         replay.setMp4Source(args.mp4)
         replay.setWebMSource(args.webm)
 
+        self.hide()
         self.emit('preview', args.key)
 
         if (options.debug) {
@@ -304,7 +306,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.back = function() {
-        this.show()
+        show()
         this.reset()
 
         writeCommand('back')
@@ -489,6 +491,10 @@ var Recorder = function(visuals, replay, options) {
         visuals.appendChild(recorderElement)
     }
 
+    function show() {
+        recorderElement.classList.remove('hide')
+    }
+
     this.build = function(cb) {
         var err = browser.checkRecordingCapabilities()
 
@@ -528,10 +534,6 @@ var Recorder = function(visuals, replay, options) {
 
     this.hide = function() {
         recorderElement.classList.add('hide')
-    }
-
-    this.show = function() {
-        recorderElement.classList.remove('hide')
     }
 }
 

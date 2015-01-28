@@ -1,26 +1,40 @@
 module.exports = function(visuals) {
 
-    var recordNote
+    var recordNoteElement
 
     this.build = function() {
-        recordNote = visuals.querySelector('.recordNote')
+        recordNoteElement = visuals.querySelector('.recordNote')
 
-        if (!recordNote) {
-            recordNote = document.createElement('p')
-            recordNote.classList.add('recordNote')
+        if (!recordNoteElement) {
+            recordNoteElement = document.createElement('p')
+            recordNoteElement.classList.add('recordNote')
 
             this.hide()
 
-            visuals.appendChild(recordNote)
+            visuals.appendChild(recordNoteElement)
         } else
             this.hide()
     }
 
+    this.stop = function() {
+        this.hide()
+        recordNoteElement.classList.remove('near')
+        recordNoteElement.classList.remove('nigh')
+    }
+
+    this.setNear = function() {
+        recordNoteElement.classList.add('near')
+    }
+
+    this.setNigh = function() {
+        recordNoteElement.classList.add('nigh')
+    }
+
     this.hide = function() {
-        recordNote.classList.add('hide')
+        recordNoteElement.classList.add('hide')
     }
 
     this.show = function() {
-        recordNote.classList.remove('hide')
+        recordNoteElement.classList.remove('hide')
     }
 }

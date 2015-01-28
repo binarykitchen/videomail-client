@@ -8,7 +8,6 @@ var merge           = require('merge-recursive'),
     VideomailError  = require('./util/videomailError'),
     Browser         = require('./util/browser'),
     standardize     = require('./util/standardize'),
-    RecordTimer     = require('./util/timers/record'),
 
     browser         = new Browser(),
     resource        = new Resource()
@@ -48,7 +47,7 @@ function factory() {
             },
             video: {
                 fps:            15,
-                limitSeconds:   60,
+                limitSeconds:   30,
                 countdown:      3,
                 width:          320,
                 height:         240
@@ -137,10 +136,6 @@ function factory() {
 
         createError: function(err) {
             return VideomailError.create(err)
-        },
-
-        createRecordTimer: function(localOptions) {
-            return new RecordTimer(this.getOptions(localOptions))
         }
     }
 }

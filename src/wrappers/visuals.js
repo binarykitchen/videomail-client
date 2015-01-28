@@ -1,13 +1,13 @@
 var async        = require('async'),
     util         = require('util'),
+    forward      = require('forward-emitter'),
 
     Replay          = require('./visuals/replay'),
     Recorder        = require('./visuals/recorder'),
     Notifier        = require('./visuals/notifier'),
     RecorderInsides = require('./visuals/inside/recorderInsides'),
 
-    EventEmitter    = require('./../util/eventEmitter'),
-    VideomailError  = require('./../util/videomailError')
+    EventEmitter    = require('./../util/eventEmitter')
 
 var Visuals = function(container, options) {
 
@@ -19,7 +19,7 @@ var Visuals = function(container, options) {
         recorder        = new Recorder(this, replay, options),
         recorderInsides = new RecorderInsides(this, options),
 
-        notifier        = new Notifier(this),
+        notifier        = new Notifier(this, options),
 
         visualsElement
 
@@ -35,6 +35,10 @@ var Visuals = function(container, options) {
     }
 
     function buildChildren(cb) {
+        forward(self.getRecorder(), recorderInsides)
+        forward(self.getRecorder(), notifier)
+        forward(self.getRecorder(), replay)
+
         buildNoScriptTag()
         notifier.build()
         recorderInsides.build()
@@ -47,42 +51,18 @@ var Visuals = function(container, options) {
 
     function displayError(err) {
         options.logger.error(err)
-
         self.reset()
-        notifier.block(VideomailError.create(err))
     }
 
     function initEvents() {
-        recorder.on('error', displayError)
-
-        recorder.on('ready', function() {
-            notifier.hide()
-            recorder.show()
-            self.endWaiting()
-        })
-
-        recorder.on('preview', function() {
-            notifier.hide()
-            recorder.hide()
-            replay.show()
-            self.endWaiting()
-        })
-
-        recorder.on('recording', function() {
-            recorderInsides.showRecordNote()
-        })
-
-        recorder.on('resuming', function() {
-            recorderInsides.showRecordNote()
-        })
-
-        recorder.on('stopping', function() {
-            recorderInsides.hideRecordNote()
-        })
-
-        recorder.on('paused', function() {
-            recorderInsides.hideRecordNote()
-        })
+        recorder
+            .on('error', displayError)
+            .on('ready', function() {
+                self.endWaiting()
+            })
+            .on('preview', function() {
+                self.endWaiting()
+            })
     }
 
     function isRecordable() {
@@ -197,14 +177,13 @@ var Visuals = function(container, options) {
             recorder.record()
     }
 
-    this.hideReplay     = replay.hide.bind(replay)
-    this.hideRecorder   = recorder.hide.bind(recorder)
-    this.isRecording    = recorder.isRecording.bind(recorder)
-
-    // todo: remove later because it exposes too much
     this.getRecorder = function() {
         return recorder
     }
+
+    this.hideReplay   = replay.hide.bind(replay)
+    this.hideRecorder = recorder.hide.bind(recorder)
+    this.isRecording  = recorder.isRecording.bind(recorder)
 }
 
 util.inherits(Visuals, EventEmitter)

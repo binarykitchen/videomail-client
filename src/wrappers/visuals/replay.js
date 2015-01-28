@@ -1,8 +1,12 @@
-var Browser = require('./../../util/browser'),
+var util            = require('util'),
+    Browser         = require('./../../util/browser'),
+    EventEmitter    = require('./../../util/eventEmitter'),
 
     browser = new Browser()
 
-module.exports = function(visuals, options) {
+var Replay = function(visuals, options) {
+
+    EventEmitter.call(this, options, 'Replay')
 
     var self = this,
 
@@ -27,6 +31,15 @@ module.exports = function(visuals, options) {
             else
                 self.pause()
         })
+
+        self
+            .on('preview', function() {
+                show()
+            })
+    }
+
+    function show() {
+        replayElement.classList.remove('hide')
     }
 
     this.build = function(cb) {
@@ -118,11 +131,11 @@ module.exports = function(visuals, options) {
         replayElement.classList.add('hide')
     }
 
-    this.show = function() {
-        replayElement.classList.remove('hide')
-    }
-
     this.isShown = function() {
         return !replayElement.classList.contains('hide')
     }
 }
+
+util.inherits(Replay, EventEmitter)
+
+module.exports = Replay

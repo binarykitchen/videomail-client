@@ -1,8 +1,42 @@
-module.exports = function(visuals) {
+var util           = require('util'),
+    EventEmitter   = require('./../../util/eventEmitter'),
+    VideomailError = require('./../../util/videomailError')
 
-    var notifyElement,
+var Notifier = function(visuals, options) {
+
+    EventEmitter.call(this, options, 'Notifier')
+
+    var self = this,
+
+        notifyElement,
         messageElement,
         explanationElement
+
+    function block(err) {
+        var message     = err.message ? err.message : err.toString(),
+            explanation = err.explanation ? err.explanation : null
+
+        self.notify(message, explanation, {
+            blocking: true
+        })
+    }
+
+    function initEvents() {
+        self
+            .on('ready', function() {
+                self.hide()
+            })
+            .on('preview', function() {
+                self.hide()
+            })
+            .on('error', function(err) {
+                block(VideomailError.create(err))
+            })
+    }
+
+    function show() {
+        notifyElement.classList.remove('hide')
+    }
 
     this.setExplanation = function(explanation) {
 
@@ -26,6 +60,8 @@ module.exports = function(visuals) {
             visuals.appendChild(notifyElement)
         } else
             this.hide()
+
+        initEvents()
     }
 
     this.hide = function() {
@@ -38,21 +74,8 @@ module.exports = function(visuals) {
             explanationElement.innerHTML = null
     }
 
-    this.show = function() {
-        notifyElement.classList.remove('hide')
-    }
-
     this.isVisible = function() {
         return !notifyElement.classList.contains('hide')
-    }
-
-    this.block = function(err) {
-        var message     = err.message ? err.message : err.toString(),
-            explanation = err.explanation ? err.explanation : null
-
-        this.notify(message, explanation, {
-            blocking: true
-        })
     }
 
     this.notify = function(message, explanation, options) {
@@ -70,8 +93,12 @@ module.exports = function(visuals) {
         messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
         explanation && this.setExplanation(explanation)
 
-        this.show()
+        show()
 
         visuals.endWaiting()
     }
 }
+
+util.inherits(Notifier, EventEmitter)
+
+module.exports = Notifier
