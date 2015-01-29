@@ -1,7 +1,7 @@
 var merge           = require('merge-recursive'),
     async           = require('async'),
 
-    Resource        = require('./resource'),
+    //Resource        = require('./resource'),
 
     Container       = require('./wrappers/container'),
 
@@ -9,8 +9,8 @@ var merge           = require('merge-recursive'),
     Browser         = require('./util/browser'),
     standardize     = require('./util/standardize'),
 
-    browser         = new Browser(),
-    resource        = new Resource()
+    //resource        = new Resource(),
+    browser         = new Browser()
 
 // todo: consider using a web component instead!
 
@@ -53,7 +53,7 @@ function factory() {
                 height:         240
             },
             image: {
-                quality:    .8,
+                quality:    .6,
                 types:      ['webp', 'jpeg']
             },
             text: {
@@ -112,6 +112,7 @@ function factory() {
             })
         },
 
+        /*
         get: function(identifier, options, cb) {
             if (!cb) {
                 cb      = options
@@ -129,6 +130,7 @@ function factory() {
 
             resource.post(videomail, options, cb)
         },
+        */
 
         canRecord: function() {
             return browser.canRecord()

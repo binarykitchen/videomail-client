@@ -1,4 +1,4 @@
-var PausableTimer = require('./../../../../util/timers/pausable')
+var pauseable = require('pauseable')
 
 module.exports = function(visuals, recordNote, options) {
 
@@ -7,7 +7,7 @@ module.exports = function(visuals, recordNote, options) {
         nearComputed    = false,
         endNighComputed = false,
 
-        pausableTimer,
+        timer,
         countdown
 
     function pad(n) {
@@ -44,7 +44,7 @@ module.exports = function(visuals, recordNote, options) {
 
     function update(cb) {
         // stop any existing ones first
-        pausableTimer && pausableTimer.stop()
+        timer && timer.clear()
 
         var mins = parseInt(countdown / 60, 10),
             secs = countdown - mins * 60
@@ -71,14 +71,14 @@ module.exports = function(visuals, recordNote, options) {
         recordTimerElement.innerHTML = mins + ':' + pad(secs)
 
         // do not use 1000 but few milliseconds less due to CPU usage
-        pausableTimer = new PausableTimer(980, function() {
+        timer = pauseable.setTimeout(function() {
             countdown--
 
             if (countdown < 0)
                 cb()
             else
                 update(cb)
-        })
+        }, 980)
     }
 
     function hide() {
@@ -86,6 +86,8 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     function show() {
+        recordTimerElement.classList.remove('near')
+        recordTimerElement.classList.remove('nigh')
         recordTimerElement.classList.remove('hide')
     }
 
@@ -100,18 +102,18 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.pause = function() {
-        pausableTimer.pause()
+        timer.pause()
         recordNote.hide()
     }
 
     this.resume = function() {
-        pausableTimer.resume()
+        timer.resume()
         recordNote.show()
     }
 
     this.stop = function() {
         hide()
-        pausableTimer.stop()
+        timer.clear()
         recordNote.stop()
     }
 

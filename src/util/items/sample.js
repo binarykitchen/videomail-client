@@ -1,5 +1,7 @@
 var toBuffer = require('typedarray-to-buffer')
 
+// todo: turn this into an npm module, but only when it's working
+
 module.exports = function(float32Array) {
 
     // todo: change to MP3 to save lots of bytes but that's for the future

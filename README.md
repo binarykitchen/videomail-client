@@ -7,7 +7,7 @@ Finally you can encode any webcam recordings from your browser into MP4 and WebM
 
 ## Demo / Fully working version
 
-Check out the full version with all its features on https://videomail.io itself.
+Check out the full version with all its features on [Videomail](https://videomail.io) itself.
 
 That site runs on AngularJS where I only have these two code lines ...
 
@@ -91,7 +91,7 @@ These are the default options:
         height:         240
     },
     image: {
-        quality:    .8,
+        quality:    .6,
         types:      ['webp', 'jpeg']
     },
     text: {
@@ -122,21 +122,29 @@ Forget IE, Safari and iPhones because they still doesn't support `getUserMedia()
 
 Source: http://caniuse.com/#search=getUserMedia
 
-## Development
+## Unfinished Metamorphosis (aka Development)
 
 This is just the beginning. I will add a lot more over time.
 
-Bear with me, there are lots of problems to crack, especially with the audio part. Working on it ...
+It makes heavy use of other npm modules. I try to plug together as many well-known, robust but tiny modules as possible.
+
+Bear with me, there are lots of problems to crack, especially with the audio part and some unit tests are missing. Working on it ...
 
 ## Credits
 
 These guys helped and/or inspired me for this mad project:
 
 * Heath Sadler
+* Zack Best
+* Sonia Pivac
 * Isaac Johnston
 * Dominic Tarr
-* Sonia Pivac
-* Zack Best
 * Daniel Noelpp
 * Nicholas Buchanan
 * Kelvin Wong
+
+They all deserve lots of love.
+
+## Final philosophy
+
+This planet is completely sold. Talk is overrated. My primary goal is not to turn this into a commercial product but to promote a cool language: Sign Language!

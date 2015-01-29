@@ -1,12 +1,12 @@
 var websocket    = require('websocket-stream'),
+    Frame        = require('canvas-to-buffer'),
     util         = require('util'),
 
     EventEmitter    = require('./../../util/eventEmitter'),
     Browser         = require('./../../util/browser'),
     Humanize        = require('./../../util/humanize'),
     UserMedia       = require('./../../util/userMedia'),
-    VideomailError  = require('./../../util/videomailError'),
-    Frame           = require('./../../util/items/frame')
+    VideomailError  = require('./../../util/videomailError')
 
 var Recorder = function(visuals, replay, options) {
 

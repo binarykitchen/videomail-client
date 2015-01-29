@@ -54,7 +54,8 @@ var Buttons = function(container, options) {
         if (options.enablePause)
             pauseButton = makeButton(options.selectors.pauseButtonClass, 'Pause')
 
-        resumeButton = makeButton(options.selectors.resumeButtonClass, 'Resume')
+        if (options.enablePause)
+            resumeButton = makeButton(options.selectors.resumeButtonClass, 'Resume')
 
         // show stop only when pause is enabled - looks better that way otherwise button
         // move left and right between record and stop
