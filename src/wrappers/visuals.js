@@ -112,13 +112,16 @@ var Visuals = function(container, options) {
         recorder.reset()
     }
 
+    this.beginWaiting = function() {
+        container.beginWaiting()
+    }
+
     this.endWaiting = function() {
         container.endWaiting()
     }
 
-    this.stop = function() {
-        container.beginWaiting()
-        recorder.stop()
+    this.stop = function(limitReached) {
+        recorder.stop(limitReached)
         recorderInsides.hidePause()
     }
 

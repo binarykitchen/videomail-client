@@ -3,7 +3,7 @@ videomail-client
 
 [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 
-Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other. Just JavaScript.
+Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
 
 ## Demo / Fully working version
 
@@ -12,8 +12,11 @@ Check out the full version with all its features on [Videomail](https://videomai
 That site runs on AngularJS where I only have these two code lines ...
 
 ```js
-require('videomail-client') // loads Videomail into global scope
-Videomail.init()            // initialises with defaults into the tag with id='videomail'
+// loads Videomail into global scope
+require('videomail-client')
+
+// initialises with defaults into the tag with id='videomail'
+Videomail.init()
 ```
 
 ... and bundle all that through Browserify. Awesome stuff!
@@ -44,11 +47,11 @@ To run the examples in the repo in your local browser, just do this:
 </html>
 ```
 
-This will load your webcam, fill the placeholder with the id="videomail" with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy.
+This will load your webcam, fill the placeholder with the `id="videomail"` with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy.
 
 That file at `videomail-client.js` is already browserified and included in the `dist` folder for you.
 
-With the debug option you see additional information in the console. This to enhance DX just in case.
+With the `debug` option you see additional information in the console. This to enhance DX.
 
 ## Options
 
@@ -104,15 +107,15 @@ You can change any of these through the `Videomail.init({ ... })` call.
 
 ## Whitelist
 
-Examples will work right away on http://localhost:8080. This because localhost is whitelisted on the remote Videomail server.
+Examples will work right away on [http://localhost:8080](http://localhost:8080). This because localhost is whitelisted on the remote Videomail server.
 
-In other words, if you deploy your piece on your own remote server, it won't work because that URL is not on the Videomail whitelist. To fix that, just reach me at https://binarykitchen.com/contact
+In other words, if you deploy your piece on your own remote server, it won't work because that URL is not on the Videomail whitelist. To fix that, just reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact).
 
 Like that I can make sure that my hard work won't be misused for bad stuff.
 
 ## Backward compatibility
 
-Forget IE, Safari and iPhones because they still doesn't support `getUserMedia()`, *chuckle* - whereas these browsers do work fine like a charm:
+Forget IE, Safari and iPhones because they still don't support `getUserMedia()`, *chuckle* - whereas these browsers do work fine like a charm:
 
 * Firefox >= 33
 * Chrome >= 31
@@ -120,7 +123,7 @@ Forget IE, Safari and iPhones because they still doesn't support `getUserMedia()
 * Chrome for Android >= 39
 * Android Browser >= 37
 
-Source: http://caniuse.com/#search=getUserMedia
+Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
 
 ## Unfinished Metamorphosis (aka Development)
 

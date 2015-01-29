@@ -21,6 +21,23 @@ var Notifier = function(visuals, options) {
         })
     }
 
+    function onStopping(limitReached) {
+        var lead = ''
+
+        visuals.beginWaiting()
+
+        if (limitReached) {
+            options.debug('Limit reached')
+            lead += 'Limit reached.<br/>'
+        }
+
+        lead += 'Processing …'
+
+        self.notify(lead, null, {
+            processing: true
+        })
+    }
+
     function initEvents() {
         self
             .on('ready', function() {
@@ -31,6 +48,9 @@ var Notifier = function(visuals, options) {
             })
             .on('error', function(err) {
                 block(VideomailError.create(err))
+            })
+            .on('stopping', function(limitReached) {
+                onStopping(limitReached)
             })
     }
 
@@ -80,7 +100,8 @@ var Notifier = function(visuals, options) {
 
     this.notify = function(message, explanation, options) {
 
-        var blocking = options.blocking ? options.blocking : false
+        var blocking   = options.blocking ? options.blocking : false,
+            processing = options.processing ? options.processing : false
 
         if (!messageElement) {
             messageElement = document.createElement('H2')
@@ -95,7 +116,7 @@ var Notifier = function(visuals, options) {
 
         show()
 
-        visuals.endWaiting()
+        !processing && visuals.endWaiting()
     }
 }
 

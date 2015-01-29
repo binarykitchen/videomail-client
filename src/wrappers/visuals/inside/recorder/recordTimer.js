@@ -75,7 +75,7 @@ module.exports = function(visuals, recordNote, options) {
             countdown--
 
             if (countdown < 0)
-                cb()
+                cb(true)
             else
                 update(cb)
         }, 980)
@@ -92,7 +92,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.start = function(cb) {
-        countdown    = options.video.limitSeconds
+        countdown    = options.video.limitSeconds - 1
         nearComputed = endNighComputed = false
 
         show()

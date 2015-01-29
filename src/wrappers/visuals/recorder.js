@@ -280,10 +280,10 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
-    this.stop = function() {
+    this.stop = function(limitReached) {
         debug('stop()')
 
-        this.emit('stopping')
+        this.emit('stopping', limitReached)
 
         this.reset()
 

@@ -4,7 +4,7 @@
         <title>videomail-client examples</title>
     </head>
     <body>
-        <h1>Fluent: High FPS, short duration without auto-pause</h1>
+        <h1>High quality: High FPS, near HD quality, short duration without auto-pause</h1>
         <div id="videomail"></div>
         <script async src="/videomail-client.js"></script>
         <script>
@@ -15,7 +15,10 @@
                     video: {
                         countdown:    false,
                         fps:          30,
-                        limitSeconds: 5
+                        limitSeconds: 3
+                    },
+                    image: {
+                        quality: .9,
                     }
                 })
             })

@@ -43,8 +43,8 @@ var RecorderInsides = function(visuals, options) {
     function initEvents() {
         self
             .on('recording', function() {
-                startRecording(function() {
-                    visuals.stop()
+                startRecording(function(limitReached) {
+                    visuals.stop(limitReached)
                 })
             })
             .on('resuming', function() {
