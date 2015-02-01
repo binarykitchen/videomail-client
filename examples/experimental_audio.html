@@ -4,23 +4,25 @@
         <title>videomail-client examples</title>
     </head>
     <body>
-        <h1>High quality: High FPS, near HD quality, short duration and without auto-pause</h1>
+        <h1>BETA! With audio (experimental) and without auto-pause</h1>
         <div id="videomail"></div>
+        <p>Due to massive loads on the server side, audio is disabled until there are more servers.</p>
+        <p>Furthermore, beware that audio is not working properly. There are many problems to solve.</p>
         <script async src="/videomail-client.js"></script>
         <script>
             window.addEventListener('load', function() {
                 Videomail.init({
                     debug:           true,
                     enableAutoPause: false,
-                    video: {
-                        countdown:    false,
-                        fps:          30,
-                        limitSeconds: 3,
-                        width:        640,
-                        height:       480
+                    audio: {
+                        enabled: true
                     },
                     image: {
-                        quality: .9,
+                        quality: .4
+                    },
+                    video: {
+                        limitSeconds:   15,
+                        countdown:      0
                     }
                 })
             })

@@ -56,6 +56,6 @@ module.exports = function(visuals, options) {
     }
 
     this.isCountingDown = function() {
-        return !! intervalId
+        return !!intervalId
     }
 }

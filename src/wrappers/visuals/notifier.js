@@ -10,7 +10,8 @@ var Notifier = function(visuals, options) {
 
         notifyElement,
         messageElement,
-        explanationElement
+        explanationElement,
+        entertainTimeoutId
 
     function block(err) {
         var message     = err.message ? err.message : err.toString(),
@@ -28,14 +29,29 @@ var Notifier = function(visuals, options) {
 
         if (limitReached) {
             options.debug('Limit reached')
-            lead += 'Limit reached.<br/>'
+            lead += options.text.limitReached + '.<br/>'
         }
 
-        lead += 'Processing …'
+        lead += options.text.processing + ' …'
 
         self.notify(lead, null, {
-            processing: true
+            processing: true,
+            entertain:  options.notifier.entertain
         })
+    }
+
+    function onProgress(frameProgress, sampleProgress) {
+        var overallProgress
+
+        if (options.audio.enabled) {
+            overallProgress = 'Video: ' + frameProgress
+
+            if (sampleProgress)
+                 overallProgress += ', Audio: ' + sampleProgress
+        } else
+            overallProgress = frameProgress
+
+        self.setExplanation(overallProgress)
     }
 
     function initEvents() {
@@ -52,10 +68,36 @@ var Notifier = function(visuals, options) {
             .on('stopping', function(limitReached) {
                 onStopping(limitReached)
             })
+            .on('progress', function(frameProgress, sampleProgress) {
+                onProgress(frameProgress, sampleProgress)
+            })
     }
 
     function show() {
         notifyElement.classList.remove('hide')
+    }
+
+    function runEntertainment() {
+        if (options.notifier.entertain) {
+
+            var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
+
+            notifyElement.className = 'notifier entertain ' + options.notifier.entertainClass + randomBackgroundClass
+
+            entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
+        } else
+            cancelEntertainment()
+    }
+
+    function cancelEntertainment() {
+        notifyElement.className = 'notifier'
+        clearInterval(entertainTimeoutId)
+    }
+
+    function setMessage(message, options) {
+        var blocking = options.blocking ? options.blocking : false
+
+        messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
     }
 
     this.setExplanation = function(explanation) {
@@ -81,10 +123,18 @@ var Notifier = function(visuals, options) {
         } else
             this.hide()
 
+        if (!notifyElement.width && options.video.width)
+            notifyElement.width = options.video.width
+
+        if (!notifyElement.height && options.video.height)
+            notifyElement.height = options.video.height
+
         initEvents()
     }
 
     this.hide = function() {
+        cancelEntertainment()
+
         notifyElement.classList.add('hide')
 
         if (messageElement)
@@ -100,19 +150,29 @@ var Notifier = function(visuals, options) {
 
     this.notify = function(message, explanation, options) {
 
-        var blocking   = options.blocking ? options.blocking : false,
-            processing = options.processing ? options.processing : false
+        var processing = options.processing ? options.processing : false,
+            entertain  = options.entertain  ? options.entertain  : false
 
         if (!messageElement) {
             messageElement = document.createElement('H2')
-            notifyElement.appendChild(messageElement)
+
+            if (explanationElement)
+                notifyElement.insertBefore(messageElement, explanationElement)
+            else
+                notifyElement.appendChild(messageElement)
         }
 
         visuals.hideReplay()
         visuals.hideRecorder()
 
-        messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
+        setMessage(message, options)
+
         explanation && this.setExplanation(explanation)
+
+        if (entertain)
+            runEntertainment()
+        else
+            cancelEntertainment()
 
         show()
 

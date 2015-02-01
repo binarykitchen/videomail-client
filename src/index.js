@@ -20,7 +20,7 @@ function factory() {
         globalOptions: {
             logger:             console,
             debug:              false,
-            timeout:            6000,
+            timeout:            5000,
             baseUrl:            'https://videomail.io',
             socketUrl:          'wss://videomail.io',
             reconnect:          true,
@@ -57,7 +57,15 @@ function factory() {
                 types:      ['webp', 'jpeg']
             },
             text: {
-                paused: 'Paused'
+                paused:         'Paused',
+                processing:     'Processing',
+                limitReached:   'Limit reached'
+            },
+            notifier: {
+                entertain:         false,
+                entertainClass:    'bg',
+                entertainLimit:    7,
+                entertainInterval: 15000
             }
         },
 

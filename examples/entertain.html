@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+
+        <style type="text/css">
+
+            .entertain {
+                background-repeat:   no-repeat;
+                background-position: center center;
+                background-size:     cover;
+                background-color:    transparent;
+                vertical-align:      top;
+                padding:             1em;
+                color:               #fff;
+                text-shadow:         -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;
+            }
+
+            .bg1 {
+                background-image: url('/img/wait/wait1.gif');
+            }
+
+            .bg2 {
+                background-image: url('/img/wait/wait2.gif');
+            }
+
+            .bg3 {
+                background-image: url('/img/wait/wait3.gif');
+            }
+
+            .bg4 {
+                background-image: url('/img/wait/wait4.gif');
+            }
+
+            .bg5 {
+                background-size:  contain;
+                background-image: url('/img/wait/wait5.gif');
+            }
+
+            .bg6 {
+                background-image: url('/img/wait/wait6.gif');
+            }
+
+            .bg7 {
+                background-image: url('/img/wait/wait7.gif');
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>Entertain user while waiting</h1>
+        <div id="videomail"></div>
+        <script async src="/videomail-client.js"></script>
+        <script>
+            window.addEventListener('load', function() {
+                Videomail.init({
+                    debug:              true,
+                    enableAutoPause:    false,
+                    video: {
+                        fps:            30,
+                        limitSeconds:   60,
+                        countdown:      false
+                    },
+                    image: {
+                        quality: .9
+                    },
+                    notifier: {
+                        entertain:         true,
+                        entertainClass:    'bg',
+                        entertainLimit:    7,
+                        entertainInterval: 2000
+                    }
+                })
+            })
+        </script>
+    </body>
+</html>

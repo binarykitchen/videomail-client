@@ -1,7 +1,5 @@
-videomail-client
+videomail-client ✉ [![NPM version][npm-version-image]][npm-url] [![NPM downloads][npm-downloads-image]][npm-url] [![Dependency Status][dependencies-image]][dependencies-url] [![MIT License][license-image]][license-url] [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 ================
-
-[![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 
 Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
 
@@ -15,7 +13,7 @@ That site runs on AngularJS where I only have these two code lines ...
 // loads Videomail into global scope
 require('videomail-client')
 
-// initialises with defaults into the tag with id='videomail'
+// initialises with defaults into the HTML container with id='videomail'
 Videomail.init()
 ```
 
@@ -47,9 +45,9 @@ To run the examples in the repo in your local browser, just do this:
 </html>
 ```
 
-This will load your webcam, fill the placeholder with the `id="videomail"` with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy.
+This will load your webcam, fill that placeholder containing the `id="videomail"` with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy. It does all the hard work for you.
 
-That file at `videomail-client.js` is already browserified and included in the `dist` folder for you.
+The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
 
 With the `debug` option you see additional information in the console. This to enhance DX.
 
@@ -61,7 +59,7 @@ These are the default options:
 {
     logger:             console,
     debug:              false,
-    timeout:            6000,
+    timeout:            5000,
     baseUrl:            'https://videomail.io',
     socketUrl:          'wss://videomail.io',
     reconnect:          true,
@@ -69,7 +67,7 @@ These are the default options:
     insertCss:          true,
     enablePause:        true,
     enableAutoPause:    true,
-    enablePauseOnSpace: true,
+    enableSpace:        true,
     selectors: {
         containerId:    'videomail',
         replayClass:    'replay',
@@ -88,7 +86,7 @@ These are the default options:
     },
     video: {
         fps:            15,
-        limitSeconds:   60,
+        limitSeconds:   30,
         countdown:      3,
         width:          320,
         height:         240
@@ -98,12 +96,22 @@ These are the default options:
         types:      ['webp', 'jpeg']
     },
     text: {
-        paused: 'Paused'
+        paused:         'Paused',
+        processing:     'Processing',
+        limitReached:   'Limit reached'
+    },
+    notifier: {
+        entertain:         false,
+        entertainClass:    'bg',
+        entertainLimit:    7,
+        entertainInterval: 15000
     }
 }
 ```
 
 You can change any of these through the `Videomail.init({ ... })` call.
+
+If you look into the `/examples` folder, you'll spot great examples on how to alter these options the correct way.
 
 ## Whitelist
 
@@ -133,6 +141,12 @@ It makes heavy use of other npm modules. I try to plug together as many well-kno
 
 Bear with me, there are lots of problems to crack, especially with the audio part and some unit tests are missing. Working on it ...
 
+## Coming soon / Planned
+
+1. `post()`, `delete()`, `get()` and `list()` operations
+2. E2E tests
+3. Fix audio recording
+
 ## Credits
 
 These guys helped and/or inspired me for this mad project:
@@ -142,7 +156,7 @@ These guys helped and/or inspired me for this mad project:
 * Sonia Pivac
 * Isaac Johnston
 * Dominic Tarr
-* Daniel Noelpp
+* Daniel Ly
 * Nicholas Buchanan
 * Kelvin Wong
 
@@ -150,4 +164,4 @@ They all deserve lots of love.
 
 ## Final philosophy
 
-This planet is completely sold. Talk is overrated. My primary goal is not to turn this into a commercial product but to promote a cool language: Sign Language!
+This planet is completely sold. Talk is overrated. My primary goal is not to turn this into a commercial product but to promote a cool language: Sign Language.
