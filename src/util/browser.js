@@ -1,21 +1,22 @@
 var UAParser        = require('ua-parser-js'),
     VideomailError  = require('./videomailError')
 
-module.exports = function() {
+module.exports = function(uaString) {
 
     var firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
         chromeDownload   = 'http://www.google.com/chrome/',
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
         browseHappyLink  = 'http://browsehappy.com',
+        ua               = uaString || (typeof window !== 'undefined' && window.navigator.userAgent),
 
-        ua = new UAParser(window.navigator.userAgent).getResult(),
+        uaParser = new UAParser(ua).getResult(),
 
-        isIOS         = ua.os.name === 'iOS',
-        isChrome      = ua.browser.name === 'Chrome',
-        isChromium    = ua.browser.name === 'Chromium',
-        firefox       = ua.browser.name === 'Firefox',
-        isIE          = /IE/.test(ua.browser.name),
-        isSafari      = /Safari/.test(ua.browser.name),
+        isIOS         = uaParser.os.name === 'iOS',
+        isChrome      = uaParser.browser.name === 'Chrome',
+        isChromium    = uaParser.browser.name === 'Chromium',
+        firefox       = uaParser.browser.name === 'Firefox',
+        isIE          = /IE/.test(uaParser.browser.name),
+        isSafari      = /Safari/.test(uaParser.browser.name),
         chromeBased   = isChrome || isChromium,
 
         videoType
@@ -82,14 +83,14 @@ module.exports = function() {
     function canPlayType(video, type) {
         var canPlayType
 
-        if (video.canPlayType)
+        if (video && video.canPlayType)
             canPlayType = video.canPlayType('video/' + type)
 
         return canPlayType
     }
 
     this.canRecord = function() {
-        var getUserMediaType = typeof navigator.getUserMedia
+        var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia
 
         return getUserMediaType !== "undefined" && getUserMediaType == 'function'
     }
@@ -125,7 +126,7 @@ module.exports = function() {
     this.checkBufferTypes = function() {
         var err
 
-        if (typeof window.atob === 'undefined')
+        if (typeof window === 'undefined' || typeof window.atob === 'undefined')
             err = new VideomailError('atob is not supported')
 
         else if (typeof window.ArrayBuffer === 'undefined')

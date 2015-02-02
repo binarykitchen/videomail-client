@@ -2,7 +2,7 @@ var test    = require('tape'),
 
     Sample  = require('./../src/util/items/sample')
 
-test('sample:', function(t) {
+test('Audio Sample:', function(t) {
 
     t.test('arguments', function(tt) {
 
