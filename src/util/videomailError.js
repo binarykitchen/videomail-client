@@ -1,5 +1,5 @@
 // https://github.com/tgriesser/create-error
-var createError        = require('create-error'),
+var createError = require('create-error'),
 
     VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
@@ -7,17 +7,22 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
     'explanation': undefined
 })
 
+// static and public attribute of this class
+VideomailError.PERMISSION_DENIED = 'PERMISSION_DENIED'
+VideomailError.NOT_CONNECTED     = 'Not connected'
+
 // static function to convert an error into a videomail error
 
 VideomailError.create = function(err) {
 
-    if (err.name === VIDEOMAIL_ERR_NAME)
+    if (err && err.name === VIDEOMAIL_ERR_NAME)
         return err
 
     // Require Browser here, not at the top of the file to avoid
     // recursion. Because the Browser class is requiring this file as well.
     var Browser = require('./browser'),
         browser = new Browser(),
+
         errType,
         message,
         explanation
@@ -68,7 +73,7 @@ VideomailError.create = function(err) {
         case VideomailError.NOT_CONNECTED:
             message     = 'Unable to transfer data'
             explanation = 'Unable to maintain a binary websocket to the server. Either the server or ' +
-                          ' your connection is down. Trying to reconnect every two seconds …'
+                          'your connection is down. Trying to reconnect every two seconds …'
             break
 
         case 'NO_VIDEO_FEED':
@@ -87,7 +92,11 @@ VideomailError.create = function(err) {
             break
 
         default:
-            message = err.toString()
+            if (typeof err === 'string')
+                message = err
+            else
+                message = err && err.message && err.toString()
+
             break
     }
 

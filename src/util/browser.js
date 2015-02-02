@@ -92,7 +92,7 @@ module.exports = function(uaString) {
     this.canRecord = function() {
         var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia
 
-        return getUserMediaType !== "undefined" && getUserMediaType == 'function'
+        return getUserMediaType !== 'undefined' && getUserMediaType == 'function'
     }
 
     this.checkRecordingCapabilities = function() {
@@ -141,8 +141,7 @@ module.exports = function(uaString) {
     this.getVideoType = function(video) {
 
         if (!videoType) {
-
-            //  there is a bug in canPlayType within chrome for mp4
+            // there is a bug in canPlayType within chrome for mp4
             if (canPlayType(video, 'mp4') && !chromeBased)
                 videoType = 'mp4'
 
