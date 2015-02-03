@@ -7,6 +7,9 @@ var Controller = function(container) {
         container.unload()
     }
 
+    this.isValid     = container.isValid
+    this.isReady     = container.isReady
+
     /*
     this.beginWaiting   = container.beginWaiting
     this.endWaiting     = container.endWaiting
@@ -26,10 +29,6 @@ var Controller = function(container) {
     this.record         = container.record
     this.resume         = container.resume
     this.back           = container.back
-    this.isReady        = container.isReady
-    this.isReplayShown  = container.isReplayShown
-    this.isConnected    = container.isConnected
-    this.isValid        = container.isValid
     this.isPaused       = container.isPaused
     */
 }

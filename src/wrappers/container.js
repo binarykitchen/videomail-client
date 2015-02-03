@@ -119,6 +119,14 @@ module.exports = function(options) {
         visuals.pause()
     }
 
+    this.isValid = function() {
+        return visuals.isValid() && buttons.isBackButtonEnabled()
+    }
+
+    this.isReady = function() {
+        return buttons.isRecordButtonEnabled()
+    }
+
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)
     this.resume         = visuals.resume.bind(visuals)

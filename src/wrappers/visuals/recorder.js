@@ -339,7 +339,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.reset = function() {
-        debug('reset()')
+        debug('Recorder: reset()')
 
         rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
@@ -353,12 +353,8 @@ var Recorder = function(visuals, replay, options) {
         canvas = ctx = sampleProgress = frameProgress = null
     }
 
-    this.isConnected = function() {
-        return connected
-    }
-
     this.isValid = function() {
-        return framesCount > 0 && canvas === null
+        return connected && framesCount > 0 && canvas === null
     }
 
     this.isReady = function() {

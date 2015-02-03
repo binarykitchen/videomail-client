@@ -136,6 +136,7 @@ var Notifier = function(visuals, options) {
         cancelEntertainment()
 
         notifyElement.classList.add('hide')
+        notifyElement.classList.remove('blocking')
 
         if (messageElement)
             messageElement.innerHTML = null
@@ -151,7 +152,8 @@ var Notifier = function(visuals, options) {
     this.notify = function(message, explanation, options) {
 
         var processing = options.processing ? options.processing : false,
-            entertain  = options.entertain  ? options.entertain  : false
+            entertain  = options.entertain  ? options.entertain  : false,
+            blocking   = options.blocking   ? options.blocking  : false
 
         if (!messageElement) {
             messageElement = document.createElement('H2')
@@ -160,6 +162,13 @@ var Notifier = function(visuals, options) {
                 notifyElement.insertBefore(messageElement, explanationElement)
             else
                 notifyElement.appendChild(messageElement)
+        }
+
+        if (blocking) {
+            notifyElement.classList.add('blocking')
+            this.emit('blocking', options)
+        } else {
+            this.emit('notifying', options)
         }
 
         visuals.hideReplay()

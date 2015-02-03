@@ -50,6 +50,12 @@ var Replay = function(visuals, options) {
         else
             this.hide()
 
+        if (!replayElement.width && options.video.width)
+            replayElement.width = options.video.width
+
+        if (!replayElement.height && options.video.height)
+            replayElement.height = options.video.height
+
         initEvents()
 
         cb(browser.checkPlaybackCapabilities(replayElement))

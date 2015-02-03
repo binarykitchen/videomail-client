@@ -185,6 +185,14 @@ var Buttons = function(container, options) {
         recordButton.disabled = stopButton.disabled = backButton.disabled = true
     }
 
+    this.isBackButtonEnabled = function() {
+        return !backButton.disabled
+    }
+
+    this.isRecordButtonEnabled = function() {
+        return !recordButton.disabled
+    }
+
     this.build = function(cb) {
 
         buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)

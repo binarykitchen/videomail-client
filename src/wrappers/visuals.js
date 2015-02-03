@@ -77,7 +77,13 @@ var Visuals = function(container, options) {
             visualsElement = document.createElement('DIV')
             visualsElement.classList.add(options.selectors.visualsClass)
 
-            container.appendChild(visualsElement)
+            var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+
+            // make sure it's placed before the buttons
+            if (buttonsElement)
+                container.insertBefore(visualsElement, buttonsElement)
+            else
+                container.appendChild(visualsElement)
         }
 
         visualsElement.classList.add('visuals')
@@ -139,6 +145,10 @@ var Visuals = function(container, options) {
         return notifier.isVisible()
     }
 
+    this.isReplayShown = function() {
+        return replay.isShown()
+    }
+
     this.pause = function() {
         recorder.pause()
         recorderInsides.showPause()
@@ -182,6 +192,10 @@ var Visuals = function(container, options) {
 
     this.getRecorder = function() {
         return recorder
+    }
+
+    this.isValid = function() {
+        return recorder.isValid() && this.isReplayShown()
     }
 
     this.hideReplay   = replay.hide.bind(replay)
