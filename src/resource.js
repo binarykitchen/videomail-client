@@ -1,13 +1,10 @@
-/*
 var superagent = require('superagent')
 
-// this is not finished yet ...
-
-module.exports = function() {
+module.exports = function(options) {
 
     var cache = {}
 
-    function fetch(identifier, options, cb) {
+    function fetch(identifier, cb) {
         superagent
             .get('/videomail/' + identifier + '/snapshot')
             .set('Accept', 'application/json')
@@ -39,14 +36,14 @@ module.exports = function() {
             })
     }
 
-    this.get = function(identifier, options, cb) {
+    this.get = function(identifier, cb) {
         if (options.cache && cache[identifier])
             cb(null, cache[identifier])
         else
             fetch(identifier, options, cb)
     }
 
-    this.post = function(videomail, options, cb) {
+    this.post = function(videomail, cb) {
         superagent
             .post(options.baseUrl + '/videomail/')
             .send(videomail)
@@ -64,4 +61,3 @@ module.exports = function() {
             })
     }
 }
-*/

@@ -280,6 +280,14 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
+    this.getAvgFps = function() {
+        return avgFps
+    }
+
+    this.getAudioSampleRate = function() {
+        return userMedia.getAudioSampleRate()
+    }
+
     this.stop = function(limitReached) {
         debug('stop()')
 
@@ -340,6 +348,8 @@ var Recorder = function(visuals, replay, options) {
 
     this.reset = function() {
         debug('Recorder: reset()')
+
+        this.emit('resetting')
 
         rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
@@ -453,33 +463,6 @@ var Recorder = function(visuals, replay, options) {
         rafId = window.requestAnimationFrame(draw)
     }
 
-    this.submit = function(data, cb) {
-        submitting = true
-
-        var videomail = {
-            avgFps:  avgFps,
-            from:    data.from,
-            key:     data.key,
-            alias:   data.alias,
-            to:      data.to,
-            subject: data.subject,
-            body:    data.body
-        }
-
-        if (options.audio.enabled)
-            videomail.sampleRate = userMedia.getAudioSampleRate()
-
-        window.Videomail.post(videomail, options, function(err, response) {
-            submitting = false
-
-            if (err) {
-                self.unload(err)
-                cb(err)
-            } else
-                cb(null, response)
-        })
-    }
-
     function buildElement() {
         recorderElement =  document.createElement('VIDEO')
         recorderElement.classList.add(options.selectors.userMediaClass)
@@ -489,6 +472,16 @@ var Recorder = function(visuals, replay, options) {
 
     function show() {
         recorderElement.classList.remove('hide')
+    }
+
+    function initEvents() {
+        self.on('submitting', function() {
+            submitting = true
+        })
+
+        self.on('submitted', function() {
+            submitting = false
+        })
     }
 
     this.build = function(cb) {
@@ -514,6 +507,7 @@ var Recorder = function(visuals, replay, options) {
 
             userMedia = new UserMedia(recorderElement, options)
 
+            initEvents()
             initSocket()
 
             cb()

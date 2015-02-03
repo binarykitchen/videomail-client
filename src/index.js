@@ -1,15 +1,12 @@
 var merge           = require('merge-recursive'),
     async           = require('async'),
 
-    //Resource        = require('./resource'),
-
     Container       = require('./wrappers/container'),
 
     VideomailError  = require('./util/videomailError'),
     Browser         = require('./util/browser'),
     standardize     = require('./util/standardize'),
 
-    //resource        = new Resource(),
     browser         = new Browser()
 
 // todo: consider using a web component instead!
@@ -29,6 +26,7 @@ function factory() {
             enablePause:        true,
             enableAutoPause:    true,
             enableSpace:        true,
+            disableSubmit:      false,
             selectors: {
                 containerId:    'videomail',
                 replayClass:    'replay',
@@ -41,6 +39,7 @@ function factory() {
                 resumeButtonClass: 'resume',
                 stopButtonClass:   'stop',
                 backButtonClass:   'back',
+                submitButtonClass: 'submit'
             },
             audio: {
                 enabled: false
@@ -120,30 +119,12 @@ function factory() {
             })
         },
 
-        /*
-        get: function(identifier, options, cb) {
-            if (!cb) {
-                cb      = options
-                options = this.globalOptions
-            }
-
-            resource.get(identifier, options, cb)
-        },
-
-        post: function(videomail, options, cb) {
-            if (!cb) {
-                cb      = options
-                options = this.globalOptions
-            }
-
-            resource.post(videomail, options, cb)
-        },
-        */
-
+        // todo: remove later
         canRecord: function() {
             return browser.canRecord()
         },
 
+        // todo: remove later
         createError: function(err) {
             return VideomailError.create(err)
         }

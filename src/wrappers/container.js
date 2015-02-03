@@ -14,7 +14,7 @@ module.exports = function(options) {
 
     var self = this,
 
-        controller  = new Controller(this),
+        controller  = new Controller(this, options),
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         htmlElement = document.querySelector('html'),
@@ -110,8 +110,8 @@ module.exports = function(options) {
         containerElement.insertBefore(child, reference)
     }
 
-    this.unload = function() {
-        visuals.unload()
+    this.unload = function(e) {
+        visuals.unload(e)
         this.endWaiting()
     }
 
@@ -131,9 +131,24 @@ module.exports = function(options) {
         return buttons.isRecordButtonEnabled()
     }
 
+    this.getAvgFps = function() {
+        return visuals.getAvgFps()
+    }
+
+    this.getAudioSampleRate = function() {
+        return visuals.getAudioSampleRate()
+    }
+
+    // remove when this is fixed
+    // https://github.com/STRML/forward-emitter/issues/1
+    this.emit = function(event, anything) {
+        visuals.emit(event, anything)
+    }
+
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)
     this.resume         = visuals.resume.bind(visuals)
     this.stop           = visuals.stop.bind(visuals)
     this.back           = visuals.back.bind(visuals)
+    this.submit         = controller.submit.bind(controller)
 }

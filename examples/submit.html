@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+    </head>
+    <body>
+        <h1>Submit record and display it</h1>
+        <div id="videomail">
+            <div class="all_my_buttons">
+                <button class='record'>&#9673; Record</button>
+                <button class='pause'>&#9553; Pause</button>
+                <button class='resume'>&#9673; Resume</button>
+                <button class='stop'>&#10006; Stop</button>
+                <button class='back'>&#x25c0; Back</button>
+                <button class='submit'>✉ Submit</button>
+            </div>
+        </div>
+        <script async src="/videomail-client.js"></script>
+        <script>
+            window.addEventListener('load', function() {
+
+                Videomail.init({
+                    debug: true,
+                    selectors: {
+                        buttonsClass: 'all_my_buttons',
+                    },
+                    video: {
+                        countdown: false
+                    }
+                })
+            })
+        </script>
+    </body>
+</html>

@@ -77,6 +77,7 @@ These are the default options:
     enablePause:        true,
     enableAutoPause:    true,
     enableSpace:        true,
+    disableSubmit:      false,
     selectors: {
         containerId:    'videomail',
         replayClass:    'replay',
@@ -89,6 +90,7 @@ These are the default options:
         resumeButtonClass: 'resume',
         stopButtonClass:   'stop',
         backButtonClass:   'back',
+        submitButtonClass: 'submit'
     },
     audio: {
         enabled: false
@@ -101,7 +103,7 @@ These are the default options:
         height:         240
     },
     image: {
-        quality:    .6,
+        quality:    .5,
         types:      ['webp', 'jpeg']
     },
     text: {
@@ -124,11 +126,19 @@ If you look into the `/examples` folder, you'll spot great examples on how to al
 
 ## API
 
-### Videomail
+* <a href="#init">`client.init()`</a>
+* <a href="#onEvent">`controller.on()`</a>
+* <a href="#isReady">`controller.isReady()`</a>
+* <a href="#isValid">`controller.isValid()`</a>
 
-#### init()
+<a name="init"></a>
+### client.init(options, callback)
 
 The init function accepts a JSON with options and its optional callback returns either an error or an instance of the videomail controller.
+
+Both arguments are optional.
+
+Example:
 
 ```js
 Videomail.init({
@@ -140,9 +150,8 @@ Videomail.init({
 
 The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors.
 
-### Videomail Controller
-
-#### Events
+<a name="onEvent"></a>
+### `controller.on([event], callback)`
 
 The videomail controller emits lots of useful events for your app. Here an example:
 
@@ -154,14 +163,17 @@ Videomail.init({
         // enable a button somewhere
     })
 })
+```
 
-Supported events: `connected`, `ready`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused` and `resuming`.
+Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused`, `resuming`, `submitting` and `submitted`.
 
-### isReady()
+<a name="isReady"></a>
+### `controller.isReady()`
 
 Tells if the controller is ready to start a recording.
 
-### isValid()
+<a name="isValid"></a>
+### `controller.isValid()`
 
 Returns a boolean saying whether there are any valid recordings, ready to submit.
 

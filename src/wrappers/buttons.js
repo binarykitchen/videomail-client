@@ -1,5 +1,5 @@
 var util         = require('util'),
-    EventEmitter = require('events').EventEmitter
+    EventEmitter = require('./../util/eventEmitter')
 
 var Buttons = function(container, options) {
 
@@ -11,7 +11,8 @@ var Buttons = function(container, options) {
         pauseButton,
         resumeButton,
         stopButton,
-        backButton
+        backButton,
+        submitButton
 
     function hide(buttonElement) {
         buttonElement.classList.add('hide')
@@ -62,6 +63,9 @@ var Buttons = function(container, options) {
         stopButton = makeButton(options.selectors.stopButtonClass, 'Stop', options.enablePause)
 
         backButton = makeButton(options.selectors.backButtonClass, 'Back')
+
+        if (!options.disableSubmit)
+            submitButton = makeButton(options.selectors.submitButtonClass, 'Submit', true)
     }
 
     function onReady() {
@@ -74,10 +78,18 @@ var Buttons = function(container, options) {
         show(recordButton)
 
         recordButton.disabled = false
+
+        if (submitButton)
+            submitButton.disabled = true
     }
 
     function onError() {
         self.reset()
+    }
+
+    function onResetting() {
+        if (submitButton)
+            submitButton.disabled = true
     }
 
     function onPreview() {
@@ -86,6 +98,9 @@ var Buttons = function(container, options) {
 
         show(backButton)
         backButton.disabled = false
+
+        if (submitButton)
+            submitButton.disabled = false
     }
 
     function onPaused() {
@@ -126,11 +141,20 @@ var Buttons = function(container, options) {
         recordButton.disabled = true
     }
 
+    function onSubmitting() {
+        backButton.disabled = true
+    }
+
     function back() {
         backButton.disabled = true
 
         container.beginWaiting()
         container.back()
+    }
+
+    function submit() {
+        submitButton.disabled = true
+        container.submit()
     }
 
     function initEvents() {
@@ -151,6 +175,10 @@ var Buttons = function(container, options) {
             onStopping()
         }).on('countdown', function() {
             onCountdown()
+        }).on('submitting', function() {
+            onSubmitting()
+        }).on('resetting', function() {
+            onResetting()
         })
 
         // User actions
@@ -172,6 +200,10 @@ var Buttons = function(container, options) {
 
         backButton.addEventListener('click', function() {
             back()
+        })
+
+        submitButton && submitButton.addEventListener('click', function() {
+            submit()
         })
     }
 

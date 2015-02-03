@@ -1,7 +1,11 @@
 var util         = require('util'),
-    EventEmitter = require('events').EventEmitter
 
-var Controller = function(container) {
+    EventEmitter = require('./util/eventEmitter'),
+    Resource     = require('./resource')
+
+var Controller = function(container, options) {
+
+    var resource = new Resource(options)
 
     this.unload = function() {
         container.unload()
@@ -15,9 +19,50 @@ var Controller = function(container) {
         return container.isReady()
     }
 
+    this.submit = function(videomail, cb) {
+
+        container.beginWaiting()
+
+        if (!cb) {
+            cb        = videomail
+            videomail = null
+        }
+
+        if (!videomail)
+            videomail = {}
+
+        videomail.avgFps = container.getAvgFps()
+
+        if (options.audio.enabled)
+            videomail.sampleRate = container.getAudioSampleRate()
+
+        container.emit('submitting')
+
+        resource.post(videomail, function(err, response) {
+
+            container.endWaiting()
+
+            if (err) {
+                container.emit('error', err)
+                cb && cb(err)
+            } else
+                container.emit('submitted')
+                cb && cb(null, response)
+        })
+    }
+
     /*
-    this.beginWaiting   = container.beginWaiting
-    this.endWaiting     = container.endWaiting
+    get: function(identifier, options, cb) {
+        if (!cb) {
+            cb      = options
+            options = this.globalOptions
+        }
+
+        resource.get(identifier, options, cb)
+    },
+    */
+
+    /*
     this.notify         = container.notify
     this.getRecorder    = container.getRecorder
     this.block          = container.block

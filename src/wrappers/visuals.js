@@ -49,14 +49,14 @@ var Visuals = function(container, options) {
         ], cb)
     }
 
-    function displayError(err) {
+    function processError(err) {
         options.logger.error(err)
         self.reset()
     }
 
     function initEvents() {
         recorder
-            .on('error', displayError)
+            .on('error', processError)
             .on('ready', function() {
                 self.endWaiting()
             })
@@ -98,7 +98,7 @@ var Visuals = function(container, options) {
 
         buildChildren(function(err) {
             if (err) {
-                displayError(err)
+                processError(err)
                 cb(err)
             } else
                 cb()
@@ -137,8 +137,8 @@ var Visuals = function(container, options) {
         recorder.back()
     }
 
-    this.unload = function() {
-        recorder.unload()
+    this.unload = function(e) {
+        recorder.unload(e)
     }
 
     this.isNotifying = function() {
@@ -196,6 +196,14 @@ var Visuals = function(container, options) {
 
     this.isValid = function() {
         return recorder.isValid() && this.isReplayShown()
+    }
+
+    this.getAvgFps = function() {
+        return recorder.getAvgFps()
+    }
+
+    this.getAudioSampleRate = function() {
+        return recorder.getAudioSampleRate()
     }
 
     this.hideReplay   = replay.hide.bind(replay)
