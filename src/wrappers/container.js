@@ -106,6 +106,10 @@ module.exports = function(options) {
         containerElement.appendChild(child)
     }
 
+    this.insertBefore = function(child, reference) {
+        containerElement.insertBefore(child, reference)
+    }
+
     this.unload = function() {
         visuals.unload()
         this.endWaiting()

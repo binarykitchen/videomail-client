@@ -122,6 +122,49 @@ You can change any of these through the `Videomail.init({ ... })` call.
 
 If you look into the `/examples` folder, you'll spot great examples on how to alter these options the correct way.
 
+## API
+
+### Videomail
+
+#### init()
+
+The init function accepts a JSON with options and its optional callback returns either an error or an instance of the videomail controller.
+
+```js
+Videomail.init({
+    debug: true
+}, function(err, controller) {
+
+})
+```
+
+The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors.
+
+### Videomail Controller
+
+#### Events
+
+The videomail controller emits lots of useful events for your app. Here an example:
+
+```js
+Videomail.init({
+    debug: true
+}, function(err, controller) {
+    controller.on('ready', function() {
+        // enable a button somewhere
+    })
+})
+
+Supported events: `connected`, `ready`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused` and `resuming`.
+
+### isReady()
+
+Tells if the controller is ready to start a recording.
+
+### isValid()
+
+Returns a boolean saying whether there are any valid recordings, ready to submit.
+
 ## Whitelist
 
 Examples will work right away on [http://localhost:8080](http://localhost:8080). This because localhost is whitelisted on the remote Videomail server.

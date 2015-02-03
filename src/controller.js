@@ -7,8 +7,13 @@ var Controller = function(container) {
         container.unload()
     }
 
-    this.isValid     = container.isValid
-    this.isReady     = container.isReady
+    this.isValid = function() {
+        return container.isValid()
+    }
+
+    this.isReady = function() {
+        return container.isReady()
+    }
 
     /*
     this.beginWaiting   = container.beginWaiting
