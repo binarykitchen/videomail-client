@@ -53,7 +53,7 @@ function factory() {
                 height:         240
             },
             image: {
-                quality:    .6,
+                quality:    .5,
                 types:      ['webp', 'jpeg']
             },
             text: {

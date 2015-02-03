@@ -119,7 +119,7 @@ var Buttons = function(container, options) {
         stopButton.disabled = true
 
         pauseButton && hide(pauseButton)
-        hide(resumeButton)
+        resumeButton && hide(resumeButton)
     }
 
     function onCountdown() {
@@ -162,7 +162,7 @@ var Buttons = function(container, options) {
             container.pause()
         })
 
-        resumeButton.addEventListener('click', function() {
+        resumeButton && resumeButton.addEventListener('click', function() {
             container.resume()
         })
 
@@ -179,8 +179,10 @@ var Buttons = function(container, options) {
         if (pauseButton)
             pauseButton.disabled = true
 
-        recordButton.disabled = resumeButton.disabled =
-        stopButton.disabled = backButton.disabled = true
+        if (resumeButton)
+            resumeButton.disabled = true
+
+        recordButton.disabled = stopButton.disabled = backButton.disabled = true
     }
 
     this.build = function(cb) {

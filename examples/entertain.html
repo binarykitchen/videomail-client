@@ -48,14 +48,14 @@
         </style>
     </head>
     <body>
-        <h1>Entertain user while waiting</h1>
+        <h1>Entertain user while waiting and disable pause/resume buttons</h1>
         <div id="videomail"></div>
         <script async src="/videomail-client.js"></script>
         <script>
             window.addEventListener('load', function() {
                 Videomail.init({
-                    debug:              true,
-                    enableAutoPause:    false,
+                    debug:       true,
+                    enablePause: false,
                     video: {
                         fps:            30,
                         limitSeconds:   60,
