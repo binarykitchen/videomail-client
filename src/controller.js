@@ -32,6 +32,7 @@ var Controller = function(container, options) {
             videomail = {}
 
         videomail.avgFps = container.getAvgFps()
+        videomail.key    = container.getVideomailKey()
 
         if (options.audio.enabled)
             videomail.sampleRate = container.getAudioSampleRate()

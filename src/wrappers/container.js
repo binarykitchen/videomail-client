@@ -135,6 +135,10 @@ module.exports = function(options) {
         return visuals.getAvgFps()
     }
 
+    this.getVideomailKey = function() {
+        return visuals.getVideomailKey()
+    }
+
     this.getAudioSampleRate = function() {
         return visuals.getAudioSampleRate()
     }

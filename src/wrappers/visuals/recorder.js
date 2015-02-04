@@ -13,9 +13,9 @@ var Recorder = function(visuals, replay, options) {
     EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
-    if (options.video.fps   < 1)  throw new Error('FPS is too small')
-    if (options.video.width < 1)  throw new Error('Video width is too small')
-    if (options.video.height < 1) throw new Error('Video height is too small')
+    if (!options.video.fps)     throw new Error('FPS must be defined')
+    if (!options.video.width)   throw new Error('Video width is too small')
+    if (!options.video.height)  throw new Error('Video height is too small')
 
     var self            = this,
         browser         = new Browser(),
@@ -47,7 +47,8 @@ var Recorder = function(visuals, replay, options) {
         unloaded,
         stopTime,
         stream,
-        connected
+        connected,
+        key
 
     function onAudioSample(audioSample) {
         samplesCount++
@@ -106,6 +107,8 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function preview(args) {
+        key = args.key
+
         replay.setMp4Source(args.mp4)
         replay.setWebMSource(args.webm)
 
@@ -284,6 +287,10 @@ var Recorder = function(visuals, replay, options) {
         return avgFps
     }
 
+    this.getKey = function() {
+        return key
+    }
+
     this.getAudioSampleRate = function() {
         return userMedia.getAudioSampleRate()
     }
@@ -360,7 +367,7 @@ var Recorder = function(visuals, replay, options) {
         // important to free memory
         userMedia.stop()
 
-        canvas = ctx = sampleProgress = frameProgress = null
+        key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
     }
 
     this.isValid = function() {

@@ -202,6 +202,10 @@ var Visuals = function(container, options) {
         return recorder.getAvgFps()
     }
 
+    this.getVideomailKey = function() {
+        return recorder.getKey()
+    }
+
     this.getAudioSampleRate = function() {
         return recorder.getAudioSampleRate()
     }
