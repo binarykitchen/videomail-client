@@ -39,7 +39,8 @@ function factory() {
                 resumeButtonClass: 'resume',
                 stopButtonClass:   'stop',
                 backButtonClass:   'back',
-                submitButtonClass: 'submit'
+                submitButtonClass: 'submit',
+                submitButtonId:    'submitBtn'
             },
             audio: {
                 enabled: false

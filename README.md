@@ -36,7 +36,7 @@ To run the examples in the repo in your local browser, just do this:
 2. Ignite static server with `gulp examples` and
 3. Open `http://localhost:8080` in your browser
 
-## Dead simple example
+## Dead simple example (just record and replay)
 
 ```html
 <html>
@@ -46,7 +46,8 @@ To run the examples in the repo in your local browser, just do this:
         <script>
             window.addEventListener('load', function() {
                 Videomail.init({
-                    debug: true
+                    debug:          true,
+                    disableSubmit:  true
                 })
             })
         </script>
@@ -58,7 +59,7 @@ This will load your webcam, fill that placeholder containing the `id="videomail"
 
 The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
 
-With the `debug` option you see additional information in the console. This to enhance DX.
+With the `debug` option you see additional information in the console. This to enhance DX. If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent.
 
 ## Options
 
@@ -132,7 +133,7 @@ If you look into the `/examples` folder, you'll spot great examples on how to al
 * <a href="#isValid">`controller.isValid()`</a>
 
 <a name="init"></a>
-### client.init(options, callback)
+### client.init([options,] [callback])
 
 The init function accepts a JSON with options and its optional callback returns either an error or an instance of the videomail controller.
 
@@ -144,14 +145,14 @@ Example:
 Videomail.init({
     debug: true
 }, function(err, controller) {
-
+    ...
 })
 ```
 
 The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors.
 
 <a name="onEvent"></a>
-### `controller.on([event], callback)`
+### controller.on([event,] [callback])
 
 The videomail controller emits lots of useful events for your app. Here an example:
 

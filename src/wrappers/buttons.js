@@ -31,8 +31,13 @@ var Buttons = function(container, options) {
         return buttonElement
     }
 
-    function makeButton(buttonClass, text, show) {
-        var buttonElement = buttonsElement.querySelector('.' + buttonClass)
+    function makeButton(buttonClass, text, show, id) {
+        var buttonElement
+
+        if (id)
+            buttonElement = document.getElementById(id)
+        else
+            buttonElement = buttonsElement.querySelector('.' + buttonClass)
 
         if (!buttonElement) {
             buttonElement = document.createElement('BUTTON')
@@ -65,7 +70,12 @@ var Buttons = function(container, options) {
         backButton = makeButton(options.selectors.backButtonClass, 'Back')
 
         if (!options.disableSubmit)
-            submitButton = makeButton(options.selectors.submitButtonClass, 'Submit', true)
+            submitButton = makeButton(
+                options.selectors.submitButtonClass,
+                'Submit',
+                true,
+                options.selectors.submitButtonId
+            )
     }
 
     function onReady() {
