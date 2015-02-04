@@ -14,8 +14,8 @@ var Notifier = function(visuals, options) {
         entertainTimeoutId
 
     function block(err) {
-        var message     = err.message ? err.message : err.toString(),
-            explanation = err.explanation ? err.explanation : null
+        var message     = err.message ? err.message.toString() : err.toString(),
+            explanation = err.explanation ? err.explanation.toString() : null
 
         self.notify(message, explanation, {
             blocking: true
