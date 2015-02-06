@@ -22,16 +22,16 @@ var Buttons = function(container, options) {
         buttonElement.classList.remove('hide')
     }
 
-    function adjustButton(buttonElement, show) {
+    function adjustButton(buttonElement, show, type) {
         buttonElement.disabled = true
-        buttonElement.type     = 'button'
+        buttonElement.type     = type || 'button'
 
         !show && hide(buttonElement)
 
         return buttonElement
     }
 
-    function makeButton(buttonClass, text, show, id) {
+    function makeButton(buttonClass, text, show, id, type) {
         var buttonElement
 
         if (id)
@@ -43,13 +43,13 @@ var Buttons = function(container, options) {
             buttonElement = document.createElement('BUTTON')
 
             buttonElement.classList.add(buttonClass)
-            buttonElement = adjustButton(buttonElement, show)
+            buttonElement = adjustButton(buttonElement, show, type)
 
             buttonElement.innerHTML = text
 
             buttonsElement.appendChild(buttonElement)
         } else
-            buttonElement = adjustButton(buttonElement, show)
+            buttonElement = adjustButton(buttonElement, show, type)
 
         return buttonElement
     }
@@ -74,7 +74,8 @@ var Buttons = function(container, options) {
                 options.selectors.submitButtonClass,
                 'Submit',
                 true,
-                options.selectors.submitButtonId
+                options.selectors.submitButtonId,
+                'submit'
             )
     }
 
@@ -109,7 +110,7 @@ var Buttons = function(container, options) {
         show(backButton)
         backButton.disabled = false
 
-        if (submitButton)
+        if (submitButton && container.validate())
             submitButton.disabled = false
     }
 
@@ -155,6 +156,16 @@ var Buttons = function(container, options) {
         backButton.disabled = true
     }
 
+    function onInvalid() {
+        if (submitButton)
+            submitButton.disabled = true
+    }
+
+    function onValid() {
+        if (submitButton)
+            submitButton.disabled = false
+    }
+
     function back() {
         backButton.disabled = true
 
@@ -189,6 +200,10 @@ var Buttons = function(container, options) {
             onSubmitting()
         }).on('resetting', function() {
             onResetting()
+        }).on('invalid', function() {
+            onInvalid()
+        }).on('valid', function() {
+            onValid()
         })
 
         // User actions

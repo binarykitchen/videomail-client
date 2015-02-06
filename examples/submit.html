@@ -2,10 +2,17 @@
 <html>
     <head>
         <title>videomail-client examples</title>
+
+        <style type="text/css">
+            input {
+                margin: 1em 0;
+            }
+        </style>
     </head>
     <body>
-        <h1>Submit record and display it</h1>
-        <div id="videomail">
+        <h1>Wrap into a form, custom validation, have a submit button and display the record</h1>
+        <form id="videomail">
+            <input name='title' type='text' placeholder='Enter a title' required/>
             <div class="all_my_buttons">
                 <button class='record'>&#9673; Record</button>
                 <button class='pause'>&#9553; Pause</button>
@@ -14,11 +21,10 @@
                 <button class='back'>&#x25c0; Back</button>
                 <button id='submitBtn'>✉ Submit</button>
             </div>
-        </div>
+        </form>
         <script async src="/videomail-client.js"></script>
         <script>
             window.addEventListener('load', function() {
-
                 Videomail.init({
                     debug: true,
                     selectors: {

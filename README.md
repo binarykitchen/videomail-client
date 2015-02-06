@@ -67,19 +67,23 @@ These are the default options:
 
 ```js
 {
-    logger:             console,
-    debug:              false,
-    timeout:            5000,
-    baseUrl:            'https://videomail.io',
-    socketUrl:          'wss://videomail.io',
-    reconnect:          true,
-    cache:              true,
-    insertCss:          true,
-    enablePause:        true,
-    enableAutoPause:    true,
-    enableSpace:        true,
-    disableSubmit:      false,
-    selectors: {
+    logger:                 console,                // define logging instance
+    debug:                  false,                  // set true to log more info
+    timeout:                5000,                   // increase if connection is slow
+    baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos
+    socketUrl:              'wss://videomail.io',   // leave as it, permanent url to send frames
+    siteName:               'videomail-client-demo',// Required for the API. If you change it, contact me
+    reconnect:              true,                   // automatically reconnects
+    cache:                  true,                   // reduces GET queries when loading videos
+    insertCss:              true,                   // inserts predefined CSS, see examples
+    enablePause:            true,                   // enable pause/resume button
+    enableAutoPause:        true,                   // automatically pauses when window becomes inactive
+    enableSpace:            true,                   // hitting space can pause recording
+    disableSubmit:          false,                  // set this to true if you do not want to submit videos,
+                                                    // but just want to record and replay these temporarily
+    enableAutoValidation:   true,                   // automatically validates all form inputs if any exist
+
+    selectors: {                                    // default CSS selectors you can alter, see examples
         containerId:    'videomail',
         replayClass:    'replay',
         userMediaClass: 'userMedia',
@@ -91,29 +95,32 @@ These are the default options:
         resumeButtonClass: 'resume',
         stopButtonClass:   'stop',
         backButtonClass:   'back',
-        submitButtonClass: 'submit'
+        submitButtonClass: 'submit',
+
+        submitButtonId:    'submitBtn',
+        formId:            null
     },
     audio: {
-        enabled: false
+        enabled: false                              // experimental, not working properly yet
     },
     video: {
-        fps:            15,
-        limitSeconds:   30,
-        countdown:      3,
+        fps:            15,                         // depends on your connection
+        limitSeconds:   30,                         // recording automatically stops after that limit
+        countdown:      3,                          // set it to 0 or false to disable it
         width:          320,
         height:         240
     },
     image: {
         quality:    .5,
-        types:      ['webp', 'jpeg']
+        types:      ['webp', 'jpeg']                // recommended settings to make most of all browsers
     },
     text: {
-        paused:         'Paused',
+        paused:         'Paused',                   // alter these text if you have internationalisation
         processing:     'Processing',
         limitReached:   'Limit reached'
     },
     notifier: {
-        entertain:         false,
+        entertain:         false,                   // when true, user is entertained while waiting, see examples
         entertainClass:    'bg',
         entertainLimit:    7,
         entertainInterval: 15000
@@ -182,7 +189,7 @@ Returns a boolean saying whether there are any valid recordings, ready to submit
 
 Examples will work right away on [http://localhost:8080](http://localhost:8080). This because localhost is whitelisted on the remote Videomail server.
 
-In other words, if you deploy your piece on your own remote server, it won't work because that URL is not on the Videomail whitelist. To fix that, just reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact).
+In other words, if you deploy your piece on your own remote server, it won't work because that URL is not on the Videomail whitelist. To fix that, just reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
 Like that I can make sure that my hard work won't be misused for bad stuff.
 

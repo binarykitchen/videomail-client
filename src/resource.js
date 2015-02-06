@@ -24,6 +24,7 @@ module.exports = function(options) {
         superagent
             .get('/videomail/' + identifier + '/snapshot')
             .set('Accept', 'application/json')
+            .set('X-Videomail-Site-Name', options.siteName)
             .timeout(options.timeout)
             .end(function(err, res) {
 
@@ -52,9 +53,9 @@ module.exports = function(options) {
     this.post = function(videomail, cb) {
         superagent
             .post(options.baseUrl + '/videomail/')
+            .set('X-Videomail-Site-Name', options.siteName)
             .send(videomail)
             .timeout(options.timeout)
-            // .set('X-API-Key', 'foobar') for later
             .end(function(err, res) {
 
                 err = packError(err, res)

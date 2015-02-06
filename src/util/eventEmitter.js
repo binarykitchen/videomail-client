@@ -10,10 +10,11 @@ var VideomailEventEmitter = function(options, name) {
 
         this.emit = function(event) {
 
-            if (event != 'removeListener' && event != 'newListener')
-                options.debug('%s emits: %s', name, event)
-
             var args = [].splice.call(arguments, 0)
+
+            if (event != 'removeListener' && event != 'newListener')
+                options.debug('%s emits: %s', name, event, args.slice(1))
+
             return this.originalEmit.apply(this, args)
         }
     }

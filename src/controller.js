@@ -11,12 +11,8 @@ var Controller = function(container, options) {
         container.unload()
     }
 
-    this.isValid = function() {
-        return container.isValid()
-    }
-
-    this.isReady = function() {
-        return container.isReady()
+    this.validate = function() {
+        return container.validate()
     }
 
     this.submit = function(videomail, cb) {

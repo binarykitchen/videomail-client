@@ -4,6 +4,7 @@ var insertCss      = require('insert-css'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
+    Form           = require('./form'),
 
     Controller     = require('./../controller'),
 
@@ -19,10 +20,35 @@ module.exports = function(options) {
         buttons     = new Buttons(this, options),
         htmlElement = document.querySelector('html'),
 
-        containerElement
+        containerElement,
+        form
 
     function prependDefaultCss() {
         insertCss(css, {prepend: true})
+    }
+
+    function getFormElement() {
+        var formElement
+
+        if (containerElement.tagName === 'FORM')
+            formElement = containerElement
+        else if (options.selectors.formId)
+            formElement = document.getElementById(options.selectors.formId)
+
+        return formElement
+    }
+
+    function buildForm(cb) {
+        var formElement = getFormElement()
+
+        if (formElement) {
+            form = new Form(self, formElement, options)
+
+            forward(form, controller)
+
+            form.build(cb)
+        } else
+            cb()
     }
 
     function buildChildren(cb) {
@@ -79,7 +105,10 @@ module.exports = function(options) {
         else {
             options.insertCss && prependDefaultCss()
 
-            buildChildren(function(err) {
+            async.series([
+                buildForm,
+                buildChildren
+            ], function(err) {
                 if (err)
                     cb(err)
                 else {
@@ -123,8 +152,35 @@ module.exports = function(options) {
         visuals.pause()
     }
 
-    this.isValid = function() {
-        return visuals.isValid() && buttons.isBackButtonEnabled()
+    this.validate = function() {
+        var valid
+
+        if (!this.isNotifying()) {
+            this.emit('validating')
+
+            var visualsValid = visuals.validate() && buttons.isBackButtonEnabled(),
+                whyInvalid
+
+            if (form) {
+                valid = form.validate()
+
+                if (valid) {
+                    if (!visualsValid && this.isReady()) {
+                        valid      = false
+                        whyInvalid = 'requiresRecord'
+                    }
+                } else
+                    whyInvalid = 'badFormData'
+            } else
+                valid = visualsValid
+
+            if (valid)
+                this.emit('valid')
+            else
+                this.emit('invalid', whyInvalid)
+        }
+
+        return valid
     }
 
     this.isReady = function() {

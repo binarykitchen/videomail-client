@@ -370,7 +370,7 @@ var Recorder = function(visuals, replay, options) {
         key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
     }
 
-    this.isValid = function() {
+    this.validate = function() {
         return connected && framesCount > 0 && canvas === null
     }
 

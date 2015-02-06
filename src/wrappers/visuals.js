@@ -194,8 +194,8 @@ var Visuals = function(container, options) {
         return recorder
     }
 
-    this.isValid = function() {
-        return recorder.isValid() && this.isReplayShown()
+    this.validate = function() {
+        return recorder.validate() && this.isReplayShown()
     }
 
     this.getAvgFps = function() {
