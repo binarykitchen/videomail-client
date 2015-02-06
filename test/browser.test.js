@@ -5,12 +5,10 @@ var test    = require('tape'),
 test('Browser:', function(t) {
 
     t.test('without arguments', function(tt) {
-        tt.plan(12)
+        tt.plan(11)
 
         var browser = new Browser(),
             err
-
-        tt.equal(browser.canRecord(), false)
 
         err = browser.checkRecordingCapabilities()
         tt.equal(err.message, 'No webcam support')
@@ -36,12 +34,10 @@ test('Browser:', function(t) {
     })
 
     t.test('fake old Firefox', function(tt) {
-        tt.plan(12)
+        tt.plan(11)
 
         var browser = new Browser('Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:23.0) Gecko/20131011 Firefox/23.0'),
             err
-
-        tt.equal(browser.canRecord(), false)
 
         err = browser.checkRecordingCapabilities()
         tt.equal(err.message, 'No webcam support')
@@ -67,12 +63,10 @@ test('Browser:', function(t) {
     })
 
     t.test('fake old Chrome', function(tt) {
-        tt.plan(12)
+        tt.plan(11)
 
         var browser = new Browser('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.8 (KHTML, like Gecko) Chrome/17.0.940.0 Safari/535.8'),
             err
-
-        tt.equal(browser.canRecord(), false)
 
         err = browser.checkRecordingCapabilities()
         tt.equal(err.message, 'No webcam support')
@@ -98,12 +92,10 @@ test('Browser:', function(t) {
     })
 
     t.test('fake old IE', function(tt) {
-        tt.plan(12)
+        tt.plan(11)
 
         var browser = new Browser('Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; Media Center PC 4.0; SLCC1; .NET CLR 3.0.04320)'),
             err
-
-        tt.equal(browser.canRecord(), false)
 
         err = browser.checkRecordingCapabilities()
         tt.equal(err.message, 'No webcam support')
@@ -129,12 +121,10 @@ test('Browser:', function(t) {
     })
 
     t.test('fake old Safari', function(tt) {
-        tt.plan(12)
+        tt.plan(11)
 
         var browser = new Browser('Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_8; en-us) AppleWebKit/532.0+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9'),
             err
-
-        tt.equal(browser.canRecord(), false)
 
         err = browser.checkRecordingCapabilities()
         tt.equal(err.message, 'No webcam support')

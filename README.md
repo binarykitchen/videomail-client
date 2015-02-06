@@ -170,20 +170,25 @@ Videomail.init({
     controller.on('ready', function() {
         // enable a button somewhere
     })
+
+    controller.on('submitted', function(response) {
+        // continue with your own app logic
+    })
 })
 ```
 
 Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused`, `resuming`, `submitting` and `submitted`.
 
-<a name="isReady"></a>
-### `controller.isReady()`
+Some of these events have parameters.
 
-Tells if the controller is ready to start a recording.
+<a name="unload"></a>
+### `controller.unload()`
 
-<a name="isValid"></a>
-### `controller.isValid()`
+Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with AngularJS' destroy event, for example:
 
-Returns a boolean saying whether there are any valid recordings, ready to submit.
+```js
+$scope.$on('$destroy', controller.unload.bind(controller))
+```
 
 ## Whitelist
 

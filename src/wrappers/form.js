@@ -3,8 +3,15 @@ var util         = require('util'),
 
 var Form = function(container, formElement, options) {
 
-    this.validate = function() {
-        return formElement.checkValidity()
+    function getData() {
+        var limit = formElement.elements.length,
+            data  = {}
+
+        for (var i = 0; i < limit; i++) {
+            data[formElement.elements[i].name] = formElement.elements[i].value
+        }
+
+        return data
     }
 
     function setDisabled(disabled) {
@@ -43,7 +50,16 @@ var Form = function(container, formElement, options) {
             }
         }
 
+        formElement.addEventListener('submit', function(e) {
+            e.preventDefault()
+            container.submit(getData())
+        })
+
         cb()
+    }
+
+    this.validate = function() {
+        return formElement.checkValidity()
     }
 
     this.getSubmitButton = function() {

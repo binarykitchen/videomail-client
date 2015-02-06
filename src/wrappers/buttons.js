@@ -157,7 +157,8 @@ var Buttons = function(container, options) {
     }
 
     function onSubmitting() {
-        backButton.disabled = true
+        submitButton.disabled = true
+        backButton.disabled   = true
     }
 
     function onInvalid() {
@@ -178,7 +179,6 @@ var Buttons = function(container, options) {
     }
 
     function submit() {
-        submitButton.disabled = true
         container.submit()
     }
 
@@ -231,7 +231,9 @@ var Buttons = function(container, options) {
             back()
         })
 
-        submitButton && submitButton.addEventListener('click', function() {
+        // no need to listen to the submit event when it's already listened
+        // within the form element class
+        !container.hasForm() && submitButton && submitButton.addEventListener('click', function() {
             submit()
         })
     }

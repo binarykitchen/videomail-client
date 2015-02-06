@@ -7,6 +7,7 @@ var insertCss      = require('insert-css'),
     Form           = require('./form'),
 
     Controller     = require('./../controller'),
+    Resource       = require('./../resource'),
 
     VideomailError = require('./../util/videomailError'),
     css            = require('./../assets/css/main.min.css.js')
@@ -15,9 +16,10 @@ module.exports = function(options) {
 
     var self = this,
 
-        controller  = new Controller(this, options),
+        controller  = new Controller(this),
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
+        resource    = new Resource(options),
         htmlElement = document.querySelector('html'),
 
         containerElement,
@@ -188,27 +190,43 @@ module.exports = function(options) {
     }
 
     this.disableForm = function() {
-        form.disable()
+        form && form.disable()
     }
 
     this.enableForm = function() {
-        form.enable()
+        form && form.enable()
+    }
+
+    this.hasForm = function() {
+        return !!form
     }
 
     this.isReady = function() {
         return buttons.isRecordButtonEnabled()
     }
 
-    this.getAvgFps = function() {
-        return visuals.getAvgFps()
-    }
+    this.submit = function(videomail) {
 
-    this.getVideomailKey = function() {
-        return visuals.getVideomailKey()
-    }
+        this.beginWaiting()
 
-    this.getAudioSampleRate = function() {
-        return visuals.getAudioSampleRate()
+        videomail.avgFps = visuals.getAvgFps()
+        videomail.key    = visuals.getVideomailKey()
+
+        if (options.audio.enabled)
+            videomail.sampleRate = visuals.getAudioSampleRate()
+
+        this.disableForm()
+        this.emit('submitting')
+
+        resource.post(videomail, function(err, response) {
+
+            self.endWaiting()
+
+            if (err)
+                self.emit('error', err)
+            else
+                self.emit('submitted', response)
+        })
     }
 
     // remove when this is fixed
@@ -225,5 +243,4 @@ module.exports = function(options) {
     this.resume         = visuals.resume.bind(visuals)
     this.stop           = visuals.stop.bind(visuals)
     this.back           = visuals.back.bind(visuals)
-    this.submit         = controller.submit.bind(controller)
 }

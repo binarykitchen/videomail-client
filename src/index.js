@@ -2,12 +2,7 @@ var merge           = require('merge-recursive'),
     async           = require('async'),
 
     Container       = require('./wrappers/container'),
-
-    VideomailError  = require('./util/videomailError'),
-    Browser         = require('./util/browser'),
-    standardize     = require('./util/standardize'),
-
-    browser         = new Browser()
+    standardize     = require('./util/standardize')
 
 // todo: consider using a web component instead!
 
@@ -124,16 +119,6 @@ function factory() {
                     cb(null, results.controller, results.videomail)
                 }
             })
-        },
-
-        // todo: remove later
-        canRecord: function() {
-            return browser.canRecord()
-        },
-
-        // todo: remove later
-        createError: function(err) {
-            return VideomailError.create(err)
         }
     }
 }

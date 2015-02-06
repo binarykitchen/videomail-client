@@ -89,7 +89,7 @@ module.exports = function(uaString) {
         return canPlayType
     }
 
-    this.canRecord = function() {
+    function canRecord() {
         var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia
 
         return getUserMediaType !== 'undefined' && getUserMediaType == 'function'
@@ -98,7 +98,7 @@ module.exports = function(uaString) {
     this.checkRecordingCapabilities = function() {
         var err
 
-        if (!this.canRecord())
+        if (!canRecord())
             err = new VideomailError('No webcam support', {
                 explanation: getUserMediaWarning()
             })
