@@ -33,6 +33,7 @@ var Controller = function(container, options) {
         if (options.audio.enabled)
             videomail.sampleRate = container.getAudioSampleRate()
 
+        container.disableForm()
         container.emit('submitting')
 
         resource.post(videomail, function(err, response) {

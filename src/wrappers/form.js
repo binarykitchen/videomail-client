@@ -47,7 +47,7 @@ var Form = function(container, formElement, options) {
     }
 
     this.getSubmitButton = function() {
-        return formElement.querySelector("button[type='submit']")
+        return formElement.querySelector("[type='submit']")
     }
 }
 
