@@ -59,9 +59,15 @@ var Visuals = function(container, options) {
             .on('error', processError)
             .on('ready', function() {
                 self.endWaiting()
+                container.enableForm()
             })
             .on('preview', function() {
                 self.endWaiting()
+            })
+
+        notifier
+            .on('blocking', function() {
+                container.disableForm()
             })
     }
 

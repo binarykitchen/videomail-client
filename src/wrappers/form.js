@@ -7,7 +7,24 @@ var Form = function(container, formElement, options) {
         return formElement.checkValidity()
     }
 
+    function setDisabled(disabled) {
+        var limit = formElement.elements.length
+
+        for (var i = 0; i < limit; i++) {
+            formElement.elements[i].disabled = disabled
+        }
+    }
+
+    this.disable = function() {
+        setDisabled(true)
+    }
+
+    this.enable = function() {
+        setDisabled(false)
+    }
+
     this.build = function(cb) {
+
         if (options.enableAutoValidation) {
             var textElements = formElement.querySelectorAll('input, textarea')
 
@@ -27,6 +44,10 @@ var Form = function(container, formElement, options) {
         }
 
         cb()
+    }
+
+    this.getSubmitButton = function() {
+        return formElement.querySelector("button[type='submit']")
     }
 }
 

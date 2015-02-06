@@ -45,8 +45,8 @@ function factory() {
                 backButtonClass:   'back',
                 submitButtonClass: 'submit',
 
-                submitButtonId:    'submitBtn',
-                formId:            null
+                formId:            null,                    // automatically detects form if any
+                submitButtonId:    null                     // automatically detects submit button in the form
             },
             audio: {
                 enabled: false                              // experimental, not working properly yet

@@ -19,7 +19,7 @@
                 <button class='resume'>&#9673; Resume</button>
                 <button class='stop'>&#10006; Stop</button>
                 <button class='back'>&#x25c0; Back</button>
-                <button id='submitBtn'>✉ Submit</button>
+                <button type='submit'>✉ Submit</button>
             </div>
         </form>
         <script async src="/videomail-client.js"></script>
@@ -28,7 +28,8 @@
                 Videomail.init({
                     debug: true,
                     selectors: {
-                        buttonsClass: 'all_my_buttons',
+                        buttonsClass:   'all_my_buttons',
+                        submitButtonId: 'submitBtn'
                     },
                     video: {
                         countdown: false

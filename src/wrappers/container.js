@@ -32,6 +32,7 @@ module.exports = function(options) {
 
         if (containerElement.tagName === 'FORM')
             formElement = containerElement
+
         else if (options.selectors.formId)
             formElement = document.getElementById(options.selectors.formId)
 
@@ -43,6 +44,9 @@ module.exports = function(options) {
 
         if (formElement) {
             form = new Form(self, formElement, options)
+
+            var submitButton = form.getSubmitButton()
+            submitButton && buttons.setSubmitButton(submitButton)
 
             forward(form, controller)
 
@@ -183,6 +187,14 @@ module.exports = function(options) {
         return valid
     }
 
+    this.disableForm = function() {
+        form.disable()
+    }
+
+    this.enableForm = function() {
+        form.enable()
+    }
+
     this.isReady = function() {
         return buttons.isRecordButtonEnabled()
     }
@@ -202,7 +214,10 @@ module.exports = function(options) {
     // remove when this is fixed
     // https://github.com/STRML/forward-emitter/issues/1
     this.emit = function(event, anything) {
-        visuals.emit(event, anything)
+        if (anything)
+            visuals.emit(event, anything)
+        else
+            visuals.emit(event)
     }
 
     this.isRecording    = visuals.isRecording.bind(visuals)

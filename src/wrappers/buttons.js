@@ -69,14 +69,18 @@ var Buttons = function(container, options) {
 
         backButton = makeButton(options.selectors.backButtonClass, 'Back')
 
-        if (!options.disableSubmit)
-            submitButton = makeButton(
-                options.selectors.submitButtonClass,
-                'Submit',
-                true,
-                options.selectors.submitButtonId,
-                'submit'
-            )
+        if (!options.disableSubmit) {
+            if (!submitButton)
+                submitButton = makeButton(
+                    options.selectors.submitButtonClass,
+                    'Submit',
+                    true,
+                    options.selectors.submitButtonId,
+                    'submit'
+                )
+            else
+                submitButton.disabled = true
+        }
     }
 
     function onReady() {
@@ -248,6 +252,10 @@ var Buttons = function(container, options) {
 
     this.isRecordButtonEnabled = function() {
         return !recordButton.disabled
+    }
+
+    this.setSubmitButton = function(newSubmitButton) {
+        submitButton = newSubmitButton
     }
 
     this.build = function(cb) {
