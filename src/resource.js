@@ -1,4 +1,5 @@
-var superagent = require('superagent')
+var superagent      = require('superagent'),
+    SITE_NAME_LABEL = 'X-Videomail-Site-Name'
 
 module.exports = function(options) {
 
@@ -24,7 +25,7 @@ module.exports = function(options) {
         superagent
             .get('/videomail/' + identifier + '/snapshot')
             .set('Accept', 'application/json')
-            .set('X-Videomail-Site-Name', options.siteName)
+            .set(SITE_NAME_LABEL, options.siteName)
             .timeout(options.timeout)
             .end(function(err, res) {
 
@@ -47,13 +48,13 @@ module.exports = function(options) {
         if (options.cache && cache[identifier])
             cb(null, cache[identifier])
         else
-            fetch(identifier, options, cb)
+            fetch(identifier, cb)
     }
 
     this.post = function(videomail, cb) {
         superagent
             .post(options.baseUrl + '/videomail/')
-            .set('X-Videomail-Site-Name', options.siteName)
+            .set(SITE_NAME_LABEL, options.siteName)
             .send(videomail)
             .timeout(options.timeout)
             .end(function(err, res) {

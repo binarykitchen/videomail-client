@@ -2,7 +2,13 @@ var merge           = require('merge-recursive'),
     async           = require('async'),
 
     Container       = require('./wrappers/container'),
-    standardize     = require('./util/standardize')
+    standardize     = require('./util/standardize'),
+
+    // just temporary
+    Browser         = require('./util/browser'),
+    Resource        = require('./resource'),
+
+    browser         = new Browser()
 
 // todo: consider using a web component instead!
 
@@ -119,6 +125,26 @@ function factory() {
                     cb(null, results.controller, results.videomail)
                 }
             })
+        },
+
+        // just temporary
+        canRecord: function() {
+            return browser.canRecord()
+        },
+
+        // just temporary
+        get: function(key, localOptions, cb) {
+
+            if (!cb) {
+                cb = localOptions
+                localOptions = {}
+            }
+
+            localOptions = this.getOptions(localOptions)
+
+            var resource = new Resource(localOptions)
+
+            resource.get(key, cb)
         }
     }
 }
@@ -130,7 +156,7 @@ function factory() {
 
     this.Videomail = factory()
 
-    if (typeof exports === 'object')
+    if (module && typeof exports === 'object')
         module.exports = this.Videomail
 
 }(navigator, factory))

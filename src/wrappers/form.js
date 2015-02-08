@@ -8,7 +8,8 @@ var Form = function(container, formElement, options) {
             data  = {}
 
         for (var i = 0; i < limit; i++) {
-            data[formElement.elements[i].name] = formElement.elements[i].value
+            if (formElement.elements[i].name)
+                data[formElement.elements[i].name] = formElement.elements[i].value
         }
 
         return data
