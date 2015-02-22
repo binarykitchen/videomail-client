@@ -22,7 +22,7 @@ That site runs on AngularJS where I only have these two code lines ...
 // loads Videomail into global scope
 require('videomail-client')
 
-// initialises with defaults into the HTML container with id='videomail'
+// initialises the client with defaults inside the HTML container with the ID 'videomail'
 Videomail.init()
 ```
 
@@ -134,13 +134,12 @@ If you look into the `/examples` folder, you'll spot great examples on how to al
 
 ## API
 
-* <a href="#init">`client.init()`</a>
+* <a href="#init">`Videomail.init()`</a>
 * <a href="#onEvent">`controller.on()`</a>
-* <a href="#isReady">`controller.isReady()`</a>
-* <a href="#isValid">`controller.isValid()`</a>
+* <a href="#unload">`controller.unload()`</a>
 
 <a name="init"></a>
-### client.init([options,] [callback])
+### Videomail.init([options,] [callback])
 
 The init function accepts a JSON with options and its optional callback returns either an error or an instance of the videomail controller.
 
