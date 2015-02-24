@@ -25,7 +25,9 @@ var Replay = function(visuals, options) {
     }
 
     function initEvents() {
-        replayElement.addEventListener('click', function() {
+        replayElement.addEventListener('click', function(e) {
+            e.preventDefault()
+
             if (this.paused)
                 this.play()
             else
