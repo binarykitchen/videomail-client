@@ -171,7 +171,7 @@ module.exports = function(options) {
                 valid = form.validate()
 
                 if (valid) {
-                    if (!visualsValid && this.isReady()) {
+                    if (!visualsValid && this.isReady() && !this.isRecording()) {
                         valid      = false
                         whyInvalid = 'requiresRecord'
                     }
