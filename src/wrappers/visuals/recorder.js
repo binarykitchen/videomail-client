@@ -365,7 +365,7 @@ var Recorder = function(visuals, replay, options) {
         replay.reset()
 
         // important to free memory
-        userMedia.stop()
+        userMedia && userMedia.stop()
 
         key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
     }
