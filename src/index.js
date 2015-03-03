@@ -119,7 +119,7 @@ function factory() {
 
             }, function(err, results) {
                 if (err) {
-                    results.controller.unload(err)
+                    results.controller && results.controller.unload(err)
                     cb(err)
                 } else {
                     cb(null, results.controller, results.videomail)
