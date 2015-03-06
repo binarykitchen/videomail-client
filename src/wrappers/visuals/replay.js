@@ -1,14 +1,13 @@
 var util            = require('util'),
     Browser         = require('./../../util/browser'),
-    EventEmitter    = require('./../../util/eventEmitter'),
-
-    browser = new Browser()
+    EventEmitter    = require('./../../util/eventEmitter')
 
 var Replay = function(visuals, options) {
 
     EventEmitter.call(this, options, 'Replay')
 
-    var self = this,
+    var self    = this,
+        browser = new Browser(options.fakeUaString),
 
         replayElement
 

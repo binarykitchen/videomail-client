@@ -8,7 +8,7 @@ var merge           = require('merge-recursive'),
     Browser         = require('./util/browser'),
     Resource        = require('./resource'),
 
-    browser         = new Browser()
+    browser
 
 // todo: consider using a web component instead!
 
@@ -73,7 +73,9 @@ function factory() {
                 entertainClass:    'bg',
                 entertainLimit:    7,
                 entertainInterval: 15000
-            }
+            },
+            displayErrors:    true,                    // Show errors inside the container?
+            fakeUaString:     null                     // Just for testing purposes to simulare VM on diff browsers
         },
 
         setGlobalOptions: function(newGlobalOptions) {
@@ -99,11 +101,6 @@ function factory() {
             } else
                 localOptions = this.getOptions(localOptions)
 
-            if (!cb)
-                 cb = function(err) {
-                    err && localOptions.logger.error(err)
-                 }
-
             async.series({
                 controller: function(cb) {
                     var container = new Container(localOptions)
@@ -120,16 +117,25 @@ function factory() {
             }, function(err, results) {
                 if (err) {
                     results.controller && results.controller.unload(err)
-                    cb(err)
+                    cb && cb(err)
                 } else {
-                    cb(null, results.controller, results.videomail)
+                    cb && cb(null, results.controller, results.videomail)
                 }
             })
         },
 
         // just temporary
+        getBrowser: function() {
+            var localOptions = this.getOptions()
+
+            if (!browser)
+                browser = new Browser(localOptions.fakeUaString)
+
+            return browser
+        },
+
         canRecord: function() {
-            return browser.canRecord()
+            return this.getBrowser().canRecord()
         },
 
         // just temporary

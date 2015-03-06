@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+    </head>
+    <body>
+        <h1>How it looks on a bad browser</h1>
+        <div id="videomail"></div>
+        <script async src="/videomail-client.js"></script>
+        <script>
+            window.addEventListener('load', function() {
+                Videomail.init({
+                    debug:         true,
+                    fakeUaString:  'Internet Explorer 8.0'
+                })
+            })
+        </script>
+    </body>
+</html>

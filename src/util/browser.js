@@ -17,7 +17,9 @@ module.exports = function(uaString) {
         firefox       = uaParser.browser.name === 'Firefox',
         isIE          = /IE/.test(uaParser.browser.name),
         isSafari      = /Safari/.test(uaParser.browser.name),
+        isAndroid     = /Android/.test(uaParser.os.name),
         chromeBased   = isChrome || isChromium,
+        okBrowser     = chromeBased || firefox || isAndroid,
 
         videoType
 
@@ -101,7 +103,7 @@ module.exports = function(uaString) {
     this.checkRecordingCapabilities = function() {
         var err
 
-        if (!this.canRecord())
+        if (!okBrowser || !this.canRecord())
             err = new VideomailError('No webcam support', {
                 explanation: getUserMediaWarning()
             })

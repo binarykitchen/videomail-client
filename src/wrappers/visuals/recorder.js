@@ -18,7 +18,7 @@ var Recorder = function(visuals, replay, options) {
     if (!options.video.height)  throw new Error('Video height is too small')
 
     var self            = this,
-        browser         = new Browser(),
+        browser         = new Browser(options.fakeUaString),
 
         wantedInterval  = 1e3 / options.video.fps,
         debug           = options.debug,
@@ -530,7 +530,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.hide = function() {
-        recorderElement.classList.add('hide')
+        recorderElement && recorderElement.classList.add('hide')
     }
 }
 

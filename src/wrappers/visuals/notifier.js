@@ -13,15 +13,6 @@ var Notifier = function(visuals, options) {
         explanationElement,
         entertainTimeoutId
 
-    function block(err) {
-        var message     = err.message ? err.message.toString() : err.toString(),
-            explanation = err.explanation ? err.explanation.toString() : null
-
-        self.notify(message, explanation, {
-            blocking: true
-        })
-    }
-
     function onStopping(limitReached) {
         var lead = ''
 
@@ -63,7 +54,7 @@ var Notifier = function(visuals, options) {
                 self.hide()
             })
             .on('error', function(err) {
-                block(VideomailError.create(err))
+                self.block(VideomailError.create(err, options))
             })
             .on('stopping', function(limitReached) {
                 onStopping(limitReached)
@@ -98,6 +89,15 @@ var Notifier = function(visuals, options) {
         var blocking = options.blocking ? options.blocking : false
 
         messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
+    }
+
+    this.block = function(err) {
+        var message     = err.message ? err.message.toString() : err.toString(),
+            explanation = err.explanation ? err.explanation.toString() : null
+
+        self.notify(message, explanation, {
+            blocking: true
+        })
     }
 
     this.setExplanation = function(explanation) {

@@ -51,6 +51,10 @@ var Visuals = function(container, options) {
 
     function processError(err) {
         options.logger.error(err)
+
+        if (options.displayErrors)
+            notifier.block(err)
+
         self.reset()
     }
 

@@ -124,7 +124,9 @@ These are the default options:
         entertainClass:    'bg',
         entertainLimit:    7,
         entertainInterval: 15000
-    }
+    },
+    displayErrors:    true,                         // Show errors inside the container?
+    fakeUaString:     null                          // Just for testing purposes to simulare VM on diff browsers
 }
 ```
 

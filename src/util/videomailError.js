@@ -13,15 +13,20 @@ VideomailError.NOT_CONNECTED     = 'Not connected'
 
 // static function to convert an error into a videomail error
 
-VideomailError.create = function(err) {
+VideomailError.create = function(err, options) {
 
     if (err && err.name === VIDEOMAIL_ERR_NAME)
         return err
 
+    var fakeUaString
+
+    if (options && options.fakeUaString)
+        fakeUaString = options.fakeUaString
+
     // Require Browser here, not at the top of the file to avoid
     // recursion. Because the Browser class is requiring this file as well.
     var Browser = require('./browser'),
-        browser = new Browser(),
+        browser = new Browser(fakeUaString),
 
         errType,
         message,
