@@ -78,8 +78,25 @@ module.exports = function(rawVisualUserMedia, options) {
 
         // making sure we're calling it just once
         rawVisualUserMedia.onplaying = function() {
+            // just temporary
+            options.debug('UserMedia: onplaying')
             rawVisualUserMedia.onplaying = null
             onplaying()
+        }
+
+        rawVisualUserMedia.onplay = function() {
+            // just temporary
+            options.debug('UserMedia: onplay')
+        }
+
+        rawVisualUserMedia.oncanplay = function() {
+            // just temporary
+            options.debug('UserMedia: oncanplay')
+        }
+
+        rawVisualUserMedia.onreadystatechange = function() {
+            // just temporary
+            options.debug('UserMedia: onreadystatechange', arguments)
         }
 
         setVisualStream(localMediaStream)
