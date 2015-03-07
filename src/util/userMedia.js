@@ -74,6 +74,10 @@ module.exports = function(rawVisualUserMedia, options) {
 
     this.init = function(localMediaStream, onplaying, onAudioSample) {
 
+        var videoTracks = localMediaStream.getVideoTracks()
+
+        console.log(videoTracks)
+
         rawVisualUserMedia.onloadedmetadata = function() {
             // just temporary
             options.debug('UserMedia: onloadedmetadata')
