@@ -74,17 +74,31 @@ module.exports = function(rawVisualUserMedia, options) {
 
     this.init = function(localMediaStream, onplaying, onAudioSample) {
 
-        rawVisualUserMedia.onloadedmetadata = rawVisualUserMedia.play
+        rawVisualUserMedia.onloadedmetadata = function() {
+            // just temporary
+            options.debug('UserMedia: onloadedmetadata')
 
-        // move this before the other lines because google chrome for mac
-        // won't have onplaying() until it is associated
-        setVisualStream(localMediaStream)
+            rawVisualUserMedia.play()
+        }
+
+        window.addEventListener('loadedmetadata', function() {
+            // just temporary
+            options.debug('UserMedia: loadedmetadata 2')
+        }, true)
 
         // making sure we're calling it just once
         rawVisualUserMedia.onplaying = function() {
+            // just temporary
+            options.debug('UserMedia: onplaying')
+
             rawVisualUserMedia.onplaying = null
             onplaying()
         }
+
+        rawVisualUserMedia.addEventListener('playing', function() {
+            // just temporary
+            options.debug('UserMedia: onplaying 2')
+        }, false)
 
         rawVisualUserMedia.onplay = function() {
             // just temporary
@@ -100,6 +114,10 @@ module.exports = function(rawVisualUserMedia, options) {
             // just temporary
             options.debug('UserMedia: onreadystatechange', arguments)
         }
+
+        setVisualStream(localMediaStream)
+
+        rawVisualUserMedia.autoplay = 'autoplay'
 
         options.audio.enabled &&
         onAudioSample &&
