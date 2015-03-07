@@ -66,8 +66,8 @@ module.exports = function(options) {
         forward(visuals,               buttons)
 
         async.series([
-            visuals.build,
-            buttons.build
+            buttons.build,
+            visuals.build
         ], cb)
     }
 

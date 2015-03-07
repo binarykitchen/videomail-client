@@ -77,7 +77,7 @@ var Recorder = function(visuals, replay, options) {
             userMediaTimeout = setTimeout(function() {
                 if (!self.isReady())
                     self.emit('error', browser.getNoAccessIssue())
-            }, 5e3)
+            }, options.timeouts.userMedia)
 
             navigator.getUserMedia({
                 video: true,
@@ -98,7 +98,7 @@ var Recorder = function(visuals, replay, options) {
 
                 setTimeout(function() {
                     loadUserMedia() // try again
-                }, 5e3)
+                }, options.timeouts.userMedia)
             })
 
         } catch (exc) {

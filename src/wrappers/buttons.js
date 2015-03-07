@@ -105,6 +105,8 @@ var Buttons = function(container, options) {
     function onResetting() {
         if (submitButton)
             submitButton.disabled = true
+
+        self.reset()
     }
 
     function onPreview() {
@@ -239,6 +241,8 @@ var Buttons = function(container, options) {
     }
 
     this.reset = function() {
+        options.debug('Buttons: reset()')
+
         if (pauseButton)
             pauseButton.disabled = true
 

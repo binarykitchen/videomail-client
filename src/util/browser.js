@@ -17,9 +17,10 @@ module.exports = function(uaString) {
         firefox       = uaParser.browser.name === 'Firefox',
         isIE          = /IE/.test(uaParser.browser.name),
         isSafari      = /Safari/.test(uaParser.browser.name),
+        isOpera       = /Opera/.test(uaParser.browser.name),
         isAndroid     = /Android/.test(uaParser.os.name),
         chromeBased   = isChrome || isChromium,
-        okBrowser     = chromeBased || firefox || isAndroid,
+        okBrowser     = chromeBased || firefox || isAndroid || isOpera,
 
         videoType
 

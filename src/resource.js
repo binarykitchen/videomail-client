@@ -26,7 +26,7 @@ module.exports = function(options) {
             .get('/videomail/' + identifier + '/snapshot')
             .set('Accept', 'application/json')
             .set(SITE_NAME_LABEL, options.siteName)
-            .timeout(options.timeout)
+            .timeout(options.timeouts.connection)
             .end(function(err, res) {
 
                 err = packError(err, res)

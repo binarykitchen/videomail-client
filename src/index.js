@@ -18,7 +18,6 @@ function factory() {
         globalOptions: {
             logger:                 console,                // define logging instance
             debug:                  false,                  // set true to log more info
-            timeout:                5000,                   // increase if connection is slow
             baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos
             socketUrl:              'wss://videomail.io',   // leave as it, permanent url to send frames
             siteName:               'videomail-client-demo',// Required for the API. If you change it, contact me
@@ -74,8 +73,12 @@ function factory() {
                 entertainLimit:    7,
                 entertainInterval: 15000
             },
-            displayErrors:    true,                    // Show errors inside the container?
-            fakeUaString:     null                     // Just for testing purposes to simulare VM on diff browsers
+            timeouts: {
+                userMedia:  5e3,                            // increase if you want user give more time to enable webcam
+                connection: 1e4                             // increase if connection is slow
+            },
+            displayErrors:    true,                         // show errors inside the container?
+            fakeUaString:     null                          // just for testing purposes to simulare VM on diff browsers
         },
 
         setGlobalOptions: function(newGlobalOptions) {

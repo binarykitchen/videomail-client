@@ -46,8 +46,8 @@ To run the examples in the repo in your local browser, just do this:
         <script>
             window.addEventListener('load', function() {
                 Videomail.init({
-                    debug:          true,
-                    disableSubmit:  true
+                    debug:          true, // outputs interesting stuff into the console
+                    disableSubmit:  true  // submissions disabled to keep that example simple
                 })
             })
         </script>
@@ -59,7 +59,7 @@ This will load your webcam, fill that placeholder containing the `id="videomail"
 
 The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
 
-With the `debug` option you see additional information in the console. This to enhance DX. If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent.
+With the `debug` option you see additional information in the console. This to enhance DX. If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent. This requires a little more code, see examples directory.
 
 ## Options
 
@@ -69,7 +69,6 @@ These are the default options:
 {
     logger:                 console,                // define logging instance
     debug:                  false,                  // set true to log more info
-    timeout:                5000,                   // increase if connection is slow
     baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos
     socketUrl:              'wss://videomail.io',   // leave as it, permanent url to send frames
     siteName:               'videomail-client-demo',// Required for the API. If you change it, contact me
@@ -125,8 +124,12 @@ These are the default options:
         entertainLimit:    7,
         entertainInterval: 15000
     },
-    displayErrors:    true,                         // Show errors inside the container?
-    fakeUaString:     null                          // Just for testing purposes to simulare VM on diff browsers
+    timeouts: {
+        userMedia:  5e3,                            // increase if you want user give more time to enable webcam
+        connection: 1e4                             // increase if connection is slow
+    },
+    displayErrors:    true,                         // show errors inside the container?
+    fakeUaString:     null                          // just for testing purposes to simulare VM on diff browsers
 }
 ```
 
