@@ -15,11 +15,15 @@ var Form = function(container, formElement, options) {
         return data
     }
 
+    function isNotButton(element) {
+        return element.tagName !== 'BUTTON' && element.type !== 'submit'
+    }
+
     function setDisabled(disabled, buttonsToo) {
         var limit = formElement.elements.length
 
         for (var i = 0; i < limit; i++) {
-            if (buttonsToo || (!buttonsToo && formElement.elements[i].tagName !== 'BUTTON'))
+            if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i])))
                 formElement.elements[i].disabled = disabled
         }
     }
