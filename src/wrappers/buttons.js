@@ -116,7 +116,7 @@ var Buttons = function(container, options) {
         show(backButton)
         backButton.disabled = false
 
-        if (submitButton && container.validate())
+        if (submitButton && container.validate(true))
             submitButton.disabled = false
     }
 

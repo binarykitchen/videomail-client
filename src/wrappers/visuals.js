@@ -63,7 +63,7 @@ var Visuals = function(container, options) {
             .on('error', processError)
             .on('ready', function() {
                 self.endWaiting()
-                container.enableForm()
+                container.enableForm(false)
             })
             .on('preview', function() {
                 self.endWaiting()
@@ -71,7 +71,7 @@ var Visuals = function(container, options) {
 
         notifier
             .on('blocking', function() {
-                container.disableForm()
+                container.disableForm(true)
             })
     }
 

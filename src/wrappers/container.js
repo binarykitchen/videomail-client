@@ -158,10 +158,10 @@ module.exports = function(options) {
         visuals.pause()
     }
 
-    this.validate = function() {
+    this.validate = function(force) {
         var valid
 
-        if (!this.isNotifying()) {
+        if (force || !this.isNotifying()) {
             this.emit('validating')
 
             var visualsValid = visuals.validate() && buttons.isBackButtonEnabled(),
@@ -189,12 +189,12 @@ module.exports = function(options) {
         return valid
     }
 
-    this.disableForm = function() {
-        form && form.disable()
+    this.disableForm = function(buttonsToo) {
+        form && form.disable(buttonsToo)
     }
 
-    this.enableForm = function() {
-        form && form.enable()
+    this.enableForm = function(buttonsToo) {
+        form && form.enable(buttonsToo)
     }
 
     this.hasForm = function() {
@@ -215,7 +215,7 @@ module.exports = function(options) {
         if (options.audio.enabled)
             videomail.sampleRate = visuals.getAudioSampleRate()
 
-        this.disableForm()
+        this.disableForm(true)
         this.emit('submitting')
 
         resource.post(videomail, function(err, response) {

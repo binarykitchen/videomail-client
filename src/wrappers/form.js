@@ -15,20 +15,21 @@ var Form = function(container, formElement, options) {
         return data
     }
 
-    function setDisabled(disabled) {
+    function setDisabled(disabled, buttonsToo) {
         var limit = formElement.elements.length
 
         for (var i = 0; i < limit; i++) {
-            formElement.elements[i].disabled = disabled
+            if (buttonsToo || (!buttonsToo && formElement.elements[i].tagName !== 'BUTTON'))
+                formElement.elements[i].disabled = disabled
         }
     }
 
-    this.disable = function() {
-        setDisabled(true)
+    this.disable = function(buttonsToo) {
+        setDisabled(true, buttonsToo)
     }
 
-    this.enable = function() {
-        setDisabled(false)
+    this.enable = function(buttonsToo) {
+        setDisabled(false, buttonsToo)
     }
 
     this.build = function(cb) {
