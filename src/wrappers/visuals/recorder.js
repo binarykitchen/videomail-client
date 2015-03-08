@@ -109,8 +109,11 @@ var Recorder = function(visuals, replay, options) {
     function preview(args) {
         key = args.key
 
-        replay.setMp4Source(args.mp4)
-        replay.setWebMSource(args.webm)
+        if (args.mp4)
+            replay.setMp4Source(args.mp4 + options.SITE_NAME_LABEL + '/' + options.siteName)
+
+        if (args.webm)
+            replay.setWebMSource(args.webm + options.SITE_NAME_LABEL + '/' + options.siteName)
 
         self.hide()
         self.emit('preview', args.key)

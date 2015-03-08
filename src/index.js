@@ -78,7 +78,10 @@ function factory() {
                 connection: 1e4                             // increase if connection is slow
             },
             displayErrors:    true,                         // show errors inside the container?
-            fakeUaString:     null                          // just for testing purposes to simulare VM on diff browsers
+            fakeUaString:     null,                         // just for testing purposes to simulare VM on diff browsers
+
+            // hidden config
+            SITE_NAME_LABEL: 'X-Videomail-Site-Name'
         },
 
         setGlobalOptions: function(newGlobalOptions) {
