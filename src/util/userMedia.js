@@ -8,7 +8,7 @@ module.exports = function(rawVisualUserMedia, options) {
         paused             = false,
         recorder
 
-    function initAudio(localMediaStream, onAudioSample) {
+    function initAudio(localMediaStream, audioCallback) {
 
         // instantiate only once
         if (!audioContext)
@@ -39,7 +39,7 @@ module.exports = function(rawVisualUserMedia, options) {
             // Returns a Float32Array containing the PCM data associated with the channel,
             // defined by the channel parameter (with 0 representing the first channel)
             var float32Array = e.inputBuffer.getChannelData(0)
-            onAudioSample(new AudioSample(float32Array))
+            audioCallback(new AudioSample(float32Array))
         }
 
         // connect stream to our recorder
@@ -80,32 +80,21 @@ module.exports = function(rawVisualUserMedia, options) {
         function onLoadedMetaData() {
             options.debug('UserMedia emits: loadedmetadata')
 
-            window.removeEventListener('loadedmetadata', onLoadedMetaData, true)
-
+            rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
             rawVisualUserMedia.play()
         }
 
         function onPlaying() {
             options.debug('UserMedia emits: playing')
 
-            rawVisualUserMedia.removeEventListener('playing', onPlaying, false)
-
+            rawVisualUserMedia.removeEventListener('playing', onPlaying)
             videoCallback()
         }
 
-        // we listen on the window instead of rawVisualUserMedia
-        // because of a Google Chrome bug on Mac OS X
-        window.addEventListener('loadedmetadata', onLoadedMetaData, true)
-
-        rawVisualUserMedia.addEventListener('loadedmetadata', function() {
-            console.log('loadedmetadata on rawVisualUserMedia')
-        }, false)
-
-        rawVisualUserMedia.addEventListener('playing', onPlaying, false)
+        rawVisualUserMedia.addEventListener('loadedmetadata',   onLoadedMetaData)
+        rawVisualUserMedia.addEventListener('playing',          onPlaying)
 
         setVisualStream(localMediaStream)
-
-        //rawVisualUserMedia.autoplay = 'autoplay'
 
         options.audio.enabled &&
         audioCallback &&
