@@ -72,60 +72,44 @@ module.exports = function(rawVisualUserMedia, options) {
                 rawVisualUserMedia.srcObject
     }
 
-    this.init = function(localMediaStream, onplaying, onAudioSample) {
+    this.init = function(localMediaStream, videoCallback, audioCallback) {
 
         var videoTracks = localMediaStream.getVideoTracks()
+        options.debug('UserMedia: detected', videoTracks[0].label)
 
-        console.log(videoTracks)
+        function onLoadedMetaData() {
+            options.debug('UserMedia emits: loadedmetadata')
 
-        rawVisualUserMedia.onloadedmetadata = function() {
-            // just temporary
-            options.debug('UserMedia: onloadedmetadata')
+            window.removeEventListener('loadedmetadata', onLoadedMetaData, true)
 
             rawVisualUserMedia.play()
         }
 
-        window.addEventListener('loadedmetadata', function() {
-            // just temporary
-            options.debug('UserMedia: loadedmetadata 2')
-        }, true)
+        function onPlaying() {
+            options.debug('UserMedia emits: playing')
 
-        // making sure we're calling it just once
-        rawVisualUserMedia.onplaying = function() {
-            // just temporary
-            options.debug('UserMedia: onplaying')
+            rawVisualUserMedia.removeEventListener('playing', onPlaying, false)
 
-            rawVisualUserMedia.onplaying = null
-            onplaying()
+            videoCallback()
         }
 
-        rawVisualUserMedia.addEventListener('playing', function() {
-            // just temporary
-            options.debug('UserMedia: onplaying 2')
+        // we listen on the window instead of rawVisualUserMedia
+        // because of a Google Chrome bug on Mac OS X
+        window.addEventListener('loadedmetadata', onLoadedMetaData, true)
+
+        rawVisualUserMedia.addEventListener('loadedmetadata', function() {
+            console.log('loadedmetadata on rawVisualUserMedia')
         }, false)
 
-        rawVisualUserMedia.onplay = function() {
-            // just temporary
-            options.debug('UserMedia: onplay')
-        }
-
-        rawVisualUserMedia.oncanplay = function() {
-            // just temporary
-            options.debug('UserMedia: oncanplay')
-        }
-
-        rawVisualUserMedia.onreadystatechange = function() {
-            // just temporary
-            options.debug('UserMedia: onreadystatechange', arguments)
-        }
+        rawVisualUserMedia.addEventListener('playing', onPlaying, false)
 
         setVisualStream(localMediaStream)
 
-        rawVisualUserMedia.autoplay = 'autoplay'
+        //rawVisualUserMedia.autoplay = 'autoplay'
 
         options.audio.enabled &&
-        onAudioSample &&
-        initAudio(localMediaStream, onAudioSample)
+        audioCallback &&
+        initAudio(localMediaStream, audioCallback)
     }
 
     this.isReady = function() {
