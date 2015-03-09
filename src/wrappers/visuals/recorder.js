@@ -224,7 +224,7 @@ var Recorder = function(visuals, replay, options) {
             headers[options.SITE_NAME_LABEL] = options.siteName
 
             // https://github.com/maxogden/websocket-stream#binary-sockets
-            stream = websocket(options.socketUrl, {headers: headers})
+            stream = websocket(options.socketUrl, null, {headers: headers})
 
             /*
             // useful for debugging streams
