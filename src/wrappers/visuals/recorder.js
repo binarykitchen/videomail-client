@@ -219,8 +219,12 @@ var Recorder = function(visuals, replay, options) {
 
             debug('Recorder: initialising web socket to %s', options.socketUrl)
 
+            var headers = {}
+
+            headers[options.SITE_NAME_LABEL] = options.siteName
+
             // https://github.com/maxogden/websocket-stream#binary-sockets
-            stream = websocket(options.socketUrl)
+            stream = websocket(options.socketUrl, {headers: headers})
 
             /*
             // useful for debugging streams

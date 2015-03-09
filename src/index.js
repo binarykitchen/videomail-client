@@ -80,8 +80,8 @@ function factory() {
             displayErrors:    true,                         // show errors inside the container?
             fakeUaString:     null,                         // just for testing purposes to simulare VM on diff browsers
 
-            // hidden config
-            SITE_NAME_LABEL: 'X-Videomail-Site-Name'
+            // hidden constants (changing these only break down functionality, so be careful)
+            SITE_NAME_LABEL: 'x-videomail-site-name'
         },
 
         setGlobalOptions: function(newGlobalOptions) {
