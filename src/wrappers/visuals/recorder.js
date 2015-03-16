@@ -393,7 +393,6 @@ var Recorder = function(visuals, replay, options) {
     this.pause = function(e) {
         debug('pause()', e)
 
-        // recordTimer.pause()
         userMedia.pause()
 
         this.emit('paused')

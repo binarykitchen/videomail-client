@@ -117,7 +117,7 @@ var Replay = function(visuals, options) {
     }
 
     this.pause = function() {
-        replayElement && replayElement.pause()
+        replayElement && replayElement.pause && replayElement.pause()
     }
 
     this.reset = function() {
