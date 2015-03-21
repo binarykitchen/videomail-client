@@ -245,4 +245,4 @@ They all deserve lots of love.
 
 ## Final philosophy
 
-This planet is completely sold. Talk is overrated. My primary goal is not to turn this into a commercial product but to promote a cool language: Sign Language.
+This planet is completely sold. Talk is overrated. My primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.
