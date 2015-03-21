@@ -53,7 +53,7 @@ module.exports = function(options) {
     this.post = function(videomail, cb) {
         superagent
             .post(options.baseUrl + '/videomail/')
-            .set(options.SITE_NAME_LABEL, options.siteName)
+            .query({options.SITE_NAME_LABEL: options.siteName})
             .send(videomail)
             .timeout(options.timeout)
             .end(function(err, res) {
