@@ -56,7 +56,7 @@ gulp.task('browserify', ['clean:js'], function(cb) {
         .pipe(buffer()) // required because the next steps do not support streams
         .pipe(plugins.concat('videomail-client.js'))
         .pipe(gulp.dest('dist'))
-        /* add this back when we are stable. commented out now for speed.
+        /* TODO: add this back when we are stable. commented out now for speed.
         .pipe(plugins.rename({suffix: '.min'}))
         .pipe(plugins.uglify())
         .pipe(gulp.dest('dist'))
