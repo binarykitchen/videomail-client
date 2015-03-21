@@ -51,9 +51,12 @@ module.exports = function(options) {
     }
 
     this.post = function(videomail, cb) {
+        var queryParams = {}
+        queryParams[options.SITE_NAME_LABEL] = options.siteName
+
         superagent
             .post(options.baseUrl + '/videomail/')
-            .query({options.SITE_NAME_LABEL: options.siteName})
+            .query(queryParams)
             .send(videomail)
             .timeout(options.timeout)
             .end(function(err, res) {
