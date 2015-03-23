@@ -6,7 +6,8 @@ var Notifier = function(visuals, options) {
 
     EventEmitter.call(this, options, 'Notifier')
 
-    var self = this,
+    var self    = this,
+        debug   = options.debug,
 
         notifyElement,
         messageElement,
@@ -46,6 +47,8 @@ var Notifier = function(visuals, options) {
     }
 
     function initEvents() {
+        debug('Notifier: initEvents()')
+
         self
             .on('ready', function() {
                 self.hide()

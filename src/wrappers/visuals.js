@@ -21,6 +21,8 @@ var Visuals = function(container, options) {
 
         notifier        = new Notifier(this, options),
 
+        debug           = options.debug,
+
         visualsElement
 
     function buildNoScriptTag() {
@@ -35,6 +37,8 @@ var Visuals = function(container, options) {
     }
 
     function buildChildren(cb) {
+        debug('Visuals: buildChildren()')
+
         forward(self.getRecorder(), recorderInsides)
         forward(self.getRecorder(), notifier)
         forward(self.getRecorder(), replay)

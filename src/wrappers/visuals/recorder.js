@@ -86,11 +86,16 @@ var Recorder = function(visuals, replay, options) {
 
                 clearUserMediaTimeout()
 
-                userMedia.init(
-                    localStream,
-                    onUserMediaReady.bind(self),
-                    onAudioSample.bind(self)
-                )
+                if (localStream.ended)
+                    self.emit('error', new VideomailError('Already busy', {
+                        explanation: 'Probably another browser window is using your webcam?'
+                    }))
+                else
+                    userMedia.init(
+                        localStream,
+                        onUserMediaReady.bind(self),
+                        onAudioSample.bind(self)
+                    )
 
             }, function(err) {
                 clearUserMediaTimeout()
@@ -248,11 +253,15 @@ var Recorder = function(visuals, replay, options) {
                 // workaround for bug https://github.com/maxogden/websocket-stream/issues/50
 
                 if (stream && stream.destroyed) {
-                    self.unload(err)
 
+                    // Emit error first before unloading, because
+                    // unloading will remov event listeners.
                     self.emit('error', new VideomailError('Unable to connect', {
                         explanation: 'A websocket connection has been refused. Probably you are already connected in another instance?'
                     }))
+
+
+                    self.unload(err)
                 } else {
 
                     // ignore error if there is no stream, see race condition at
