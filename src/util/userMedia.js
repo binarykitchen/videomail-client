@@ -72,7 +72,7 @@ module.exports = function(rawVisualUserMedia, options) {
                 rawVisualUserMedia.srcObject
     }
 
-    this.init = function(localMediaStream, videoCallback, audioCallback) {
+    this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
         var videoTracks = localMediaStream.getVideoTracks()
         options.debug('UserMedia: detected', videoTracks[0].label)
@@ -81,6 +81,7 @@ module.exports = function(rawVisualUserMedia, options) {
             options.debug('UserMedia emits: loadedmetadata')
 
             rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
+            localMediaStream.removeEventListener('ended',            onPlaying)
             rawVisualUserMedia.play()
         }
 
@@ -88,11 +89,23 @@ module.exports = function(rawVisualUserMedia, options) {
             options.debug('UserMedia emits: playing')
 
             rawVisualUserMedia.removeEventListener('playing', onPlaying)
+            localMediaStream.removeEventListener('ended',     onPlaying)
             videoCallback()
+        }
+
+        function onEnded() {
+            options.debug('UserMedia emits: ended too early')
+
+            rawVisualUserMedia.removeEventListener('loadedmetadata',    onPlaying)
+            rawVisualUserMedia.removeEventListener('playing',           onPlaying)
+            localMediaStream.removeEventListener('ended',               onPlaying)
+
+            endedEarlyCallback()
         }
 
         rawVisualUserMedia.addEventListener('loadedmetadata',   onLoadedMetaData)
         rawVisualUserMedia.addEventListener('playing',          onPlaying)
+        localMediaStream.addEventListener('ended',              onEnded)
 
         setVisualStream(localMediaStream)
 

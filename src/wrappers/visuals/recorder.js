@@ -86,16 +86,16 @@ var Recorder = function(visuals, replay, options) {
 
                 clearUserMediaTimeout()
 
-                if (localStream.ended)
-                    self.emit('error', new VideomailError('Already busy', {
-                        explanation: 'Probably another browser window is using your webcam?'
-                    }))
-                else
-                    userMedia.init(
-                        localStream,
-                        onUserMediaReady.bind(self),
-                        onAudioSample.bind(self)
-                    )
+                userMedia.init(
+                    localStream,
+                    onUserMediaReady.bind(self),
+                    onAudioSample.bind(self),
+                    function() {
+                        self.emit('error', new VideomailError('Already busy', {
+                            explanation: 'Probably another browser window is using your webcam?'
+                        }))
+                    }
+                )
 
             }, function(err) {
                 clearUserMediaTimeout()
@@ -255,7 +255,7 @@ var Recorder = function(visuals, replay, options) {
                 if (stream && stream.destroyed) {
 
                     // Emit error first before unloading, because
-                    // unloading will remov event listeners.
+                    // unloading will remove event listeners.
                     self.emit('error', new VideomailError('Unable to connect', {
                         explanation: 'A websocket connection has been refused. Probably you are already connected in another instance?'
                     }))
