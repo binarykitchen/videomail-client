@@ -58,17 +58,21 @@ module.exports = function(options) {
     }
 
     function buildChildren(cb) {
-        containerElement.classList.add('videomail')
+        if (!containerElement.classList)
+            cb(new Error('Sorry, your browser is too old!'))
+        else {
+            containerElement.classList.add('videomail')
 
-        // https://github.com/STRML/forward-emitter
-        forward(visuals.getRecorder(), controller) // todo: double check if this is really needed
-        forward(visuals.getRecorder(), buttons)
-        forward(visuals,               buttons)
+            // https://github.com/STRML/forward-emitter
+            forward(visuals.getRecorder(), controller) // todo: double check if this is really needed
+            forward(visuals.getRecorder(), buttons)
+            forward(visuals,               buttons)
 
-        async.series([
-            buttons.build,
-            visuals.build
-        ], cb)
+            async.series([
+                buttons.build,
+                visuals.build
+            ], cb)
+        }
     }
 
     function initEvents() {
