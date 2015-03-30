@@ -1,4 +1,5 @@
-var AudioSample = require('./items/sample'),
+var AudioSample     = require('./items/sample'),
+    VideomailError  = require('./videomailError'),
 
     audioContext
 
@@ -71,7 +72,6 @@ module.exports = function(rawVisualUserMedia, options) {
                 rawVisualUserMedia.mozSrcObject :
                 rawVisualUserMedia.srcObject
     }
-
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
         var videoTracks = localMediaStream.getVideoTracks()
@@ -86,26 +86,21 @@ module.exports = function(rawVisualUserMedia, options) {
         }
 
         function onPlaying() {
-            options.debug('UserMedia emits: playing')
-
             rawVisualUserMedia.removeEventListener('playing', onPlaying)
             localMediaStream.removeEventListener('ended',     onPlaying)
-            videoCallback()
-        }
 
-        function onEnded() {
-            options.debug('UserMedia emits: ended too early')
-
-            rawVisualUserMedia.removeEventListener('loadedmetadata',    onPlaying)
-            rawVisualUserMedia.removeEventListener('playing',           onPlaying)
-            localMediaStream.removeEventListener('ended',               onPlaying)
-
-            endedEarlyCallback()
+            if (rawVisualUserMedia.srcObject.ended)
+                endedEarlyCallback(new VideomailError('Already busy', {
+                    explanation: 'Probably another browser window is using your webcam?'
+                }))
+            else {
+                options.debug('UserMedia emits: playing')
+                videoCallback()
+            }
         }
 
         rawVisualUserMedia.addEventListener('loadedmetadata',   onLoadedMetaData)
         rawVisualUserMedia.addEventListener('playing',          onPlaying)
-        localMediaStream.addEventListener('ended',              onEnded)
 
         setVisualStream(localMediaStream)
 
@@ -143,11 +138,6 @@ module.exports = function(rawVisualUserMedia, options) {
 
     this.resume = function() {
         paused = false
-    }
-
-    this.hasNoDimensions = function() {
-        // Chrome has a height of 2px for videos without streams
-        return rawVisualUserMedia.videoWidth < 3 || rawVisualUserMedia.videoHeight < 3
     }
 
     this.getRawVisuals = function() {

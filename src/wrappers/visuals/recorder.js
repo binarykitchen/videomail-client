@@ -90,10 +90,8 @@ var Recorder = function(visuals, replay, options) {
                     localStream,
                     onUserMediaReady.bind(self),
                     onAudioSample.bind(self),
-                    function() {
-                        self.emit('error', new VideomailError('Already busy', {
-                            explanation: 'Probably another browser window is using your webcam?'
-                        }))
+                    function(err) {
+                        self.emit('error', err)
                     }
                 )
 
@@ -203,7 +201,7 @@ var Recorder = function(visuals, replay, options) {
                 debug('Reconnected')
                 writeCommand(command, args)
             })
-        } else {
+        } else if (stream) {
             debug('$ %s', command, args)
 
             var command = {
