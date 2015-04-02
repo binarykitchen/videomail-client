@@ -72,10 +72,14 @@ module.exports = function(rawVisualUserMedia, options) {
                 rawVisualUserMedia.mozSrcObject :
                 rawVisualUserMedia.srcObject
     }
+
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
-        var videoTracks = localMediaStream.getVideoTracks()
-        options.debug('UserMedia: detected', videoTracks[0].label)
+        if (localMediaStream.getVideoTracks) {
+            var videoTracks = localMediaStream.getVideoTracks()
+            options.debug('UserMedia: detected', videoTracks[0].label)
+        } else
+            options.debug('UserMedia: detected (but no video tracks exist')
 
         function onLoadedMetaData() {
             options.debug('UserMedia emits: loadedmetadata')
