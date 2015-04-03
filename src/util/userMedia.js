@@ -55,15 +55,13 @@ module.exports = function(rawVisualUserMedia, options) {
     }
 
     function setVisualStream(localMediaStream) {
-        if (rawVisualUserMedia) {
-
-            if (localMediaStream) {
-                rawVisualUserMedia.srcObject = localMediaStream
-                rawVisualUserMedia.src = (window.URL && window.URL.createObjectURL(localMediaStream)) || localMediaStream
-            } else {
-                rawVisualUserMedia.srcObject = null
-                rawVisualUserMedia.removeAttribute('src')
-            }
+        if (localMediaStream) {
+            rawVisualUserMedia.srcObject = localMediaStream
+            rawVisualUserMedia.src =    (window.URL && window.URL.createObjectURL(localMediaStream)) ||
+                                        localMediaStream
+        } else {
+            rawVisualUserMedia.srcObject = null
+            rawVisualUserMedia.removeAttribute('src')
         }
     }
 
@@ -76,8 +74,16 @@ module.exports = function(rawVisualUserMedia, options) {
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
         if (localMediaStream.getVideoTracks) {
-            var videoTracks = localMediaStream.getVideoTracks()
-            options.debug('UserMedia: detected', videoTracks[0].label)
+            var videoTracks = localMediaStream.getVideoTracks(),
+                videoTrack  = videoTracks[0],
+                description
+
+            if (videoTrack.label && videoTrack.label.length > 0)
+                description = videoTracks.label
+            else
+                description = videoTrack.kind
+
+            options.debug('UserMedia: detected', description)
         } else
             options.debug('UserMedia: detected (but no video tracks exist')
 
@@ -90,6 +96,8 @@ module.exports = function(rawVisualUserMedia, options) {
         }
 
         function onPlaying() {
+            options.debug('UserMedia emits: playing')
+
             rawVisualUserMedia.removeEventListener('playing', onPlaying)
             localMediaStream.removeEventListener('ended',     onPlaying)
 
@@ -98,7 +106,6 @@ module.exports = function(rawVisualUserMedia, options) {
                     explanation: 'Probably another browser window is using your webcam?'
                 }))
             else {
-                options.debug('UserMedia emits: playing')
                 videoCallback()
             }
         }

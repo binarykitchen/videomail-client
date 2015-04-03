@@ -97,11 +97,21 @@ var Recorder = function(visuals, replay, options) {
 
             }, function(err) {
                 clearUserMediaTimeout()
-                self.emit('error', err)
 
-                setTimeout(function() {
-                    loadUserMedia() // try again
-                }, options.timeouts.userMedia)
+                var errorListeners = self.listeners('error')
+
+                if (errorListeners) {
+                    self.emit('error', err)
+
+                    setTimeout(function() {
+                        loadUserMedia() // try again
+                    }, options.timeouts.userMedia)
+                } else {
+                    debug('Recorder: no error listeners attached but throwing', err)
+
+                    // weird situation, throw it since there are no error listeners yet
+                    throw err
+                }
             })
 
         } catch (exc) {
