@@ -87,17 +87,6 @@ module.exports = function(rawVisualUserMedia, options) {
         } else
             options.debug('UserMedia: detected (but no video tracks exist')
 
-        function onLoadedMetaData() {
-            options.debug('UserMedia emits: loadedmetadata')
-
-            rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
-
-            if (localMediaStream.removeEventListener)
-                localMediaStream.removeEventListener('ended', onPlaying)
-
-            rawVisualUserMedia.play()
-        }
-
         function onPlaying() {
             options.debug('UserMedia emits: playing')
 
@@ -113,14 +102,14 @@ module.exports = function(rawVisualUserMedia, options) {
             }
         }
 
-        rawVisualUserMedia.addEventListener('loadedmetadata',   onLoadedMetaData)
-        rawVisualUserMedia.addEventListener('playing',          onPlaying)
-
         setVisualStream(localMediaStream)
 
         options.audio.enabled &&
         audioCallback &&
         initAudio(localMediaStream, audioCallback)
+
+        rawVisualUserMedia.addEventListener('playing', onPlaying)
+        rawVisualUserMedia.play()
     }
 
     this.isReady = function() {

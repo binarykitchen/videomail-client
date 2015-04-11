@@ -56,7 +56,7 @@ var RecorderInsides = function(visuals, options) {
             .on('paused', function() {
                 pauseRecording()
             })
-            .on('reset', function() {
+            .on('resetting', function() {
                 self.hidePause()
                 self.hideCountdown()
             })
