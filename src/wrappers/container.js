@@ -168,7 +168,7 @@ var Container = function(options) {
         if (force || !this.isNotifying()) {
             this.emit('validating')
 
-            var visualsValid = visuals.validate() && buttons.isBackButtonEnabled() && !this.isPaused(),
+            var visualsValid = visuals.validate() && buttons.isBackButtonEnabled(),
                 whyInvalid
 
             if (form) {
@@ -177,7 +177,7 @@ var Container = function(options) {
                 if (valid) {
                     if (!visualsValid) {
 
-                        if (this.isReady() || this.isRecording())
+                        if (this.isReady() || this.isRecording() || this.isPaused())
                             valid = false
 
                         if (!valid)

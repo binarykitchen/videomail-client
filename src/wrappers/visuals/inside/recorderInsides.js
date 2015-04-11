@@ -56,8 +56,9 @@ var RecorderInsides = function(visuals, options) {
             .on('paused', function() {
                 pauseRecording()
             })
-            .on('blocking', function() {
+            .on('reset', function() {
                 self.hidePause()
+                self.hideCountdown()
             })
     }
 
@@ -77,6 +78,10 @@ var RecorderInsides = function(visuals, options) {
 
     this.hidePause = function() {
         pausedNote && pausedNote.hide()
+    }
+
+    this.hideCountdown = function() {
+        countdown && countdown.hide()
     }
 
     this.startCountdown = function(cb) {
