@@ -173,9 +173,7 @@ var Container = function(options) {
                 if (valid) {
                     if (!visualsValid) {
 
-                        if (this.isReady())
-                            valid = this.isRecording()
-                        else
+                        if (this.isReady() || this.isRecording())
                             valid = false
 
                         if (!valid)
@@ -211,27 +209,27 @@ var Container = function(options) {
         return buttons.isRecordButtonEnabled()
     }
 
-    this.submit = function(videomail) {
+    this.submit = function(videomailFormData) {
 
         this.beginWaiting()
 
-        videomail.avgFps = visuals.getAvgFps()
-        videomail.key    = visuals.getVideomailKey()
+        videomailFormData.avgFps = visuals.getAvgFps()
+        videomailFormData.key    = visuals.getVideomailKey()
 
         if (options.audio.enabled)
-            videomail.sampleRate = visuals.getAudioSampleRate()
+            videomailFormData.sampleRate = visuals.getAudioSampleRate()
 
         this.disableForm(true)
         this.emit('submitting')
 
-        resource.post(videomail, function(err, response) {
+        resource.post(videomailFormData, function(err, videomail, response) {
 
             self.endWaiting()
 
             if (err)
                 self.emit('error', err)
             else
-                self.emit('submitted', response)
+                self.emit('submitted', videomail, response)
         })
     }
 
