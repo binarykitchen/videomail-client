@@ -56,6 +56,9 @@ var RecorderInsides = function(visuals, options) {
             .on('paused', function() {
                 pauseRecording()
             })
+            .on('blocking', function() {
+                self.hidePause()
+            })
     }
 
     this.build = function() {

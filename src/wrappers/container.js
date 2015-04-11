@@ -154,6 +154,10 @@ var Container = function(options) {
         return visuals.isNotifying()
     }
 
+    this.isPaused = function() {
+        return visuals.isPaused()
+    }
+
     this.pause = function() {
         visuals.pause()
     }
@@ -164,7 +168,7 @@ var Container = function(options) {
         if (force || !this.isNotifying()) {
             this.emit('validating')
 
-            var visualsValid = visuals.validate() && buttons.isBackButtonEnabled(),
+            var visualsValid = visuals.validate() && buttons.isBackButtonEnabled() && !this.isPaused(),
                 whyInvalid
 
             if (form) {

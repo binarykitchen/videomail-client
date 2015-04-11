@@ -142,6 +142,7 @@ If you look into the `/examples` folder, you'll spot great examples on how to al
 * <a href="#init">`Videomail.init()`</a>
 * <a href="#onEvent">`controller.on()`</a>
 * <a href="#unload">`controller.unload()`</a>
+* <a href="#addReplay">`controller.addReplay()`</a>
 
 <a name="init"></a>
 ### Videomail.init([options,] [callback])
@@ -175,13 +176,13 @@ Videomail.init({
         // enable a button somewhere
     })
 
-    controller.on('submitted', function(response) {
+    controller.on('submitted', function(videomail, response) {
         // continue with your own app logic
     })
 })
 ```
 
-Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused`, `resuming`, `submitting` and `submitted`.
+Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused`, `resuming`, `submitting`, `submitted` and `previewShown`.
 
 Some of these events have parameters.
 
@@ -193,6 +194,21 @@ Manually unloads the webcam and all other internal event listeners. Can be used 
 ```js
 $scope.$on('$destroy', controller.unload.bind(controller))
 ```
+
+<a name="addReplay"></a>
+### `controller.addReplay(parentElement, videomail)`
+
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission.
+
+If the parent element already contains a video container like this
+
+```html
+<video class="replay"></video>
+```
+
+then this will be used instead of adding a new dom element.
+
+For a full example how to use addReplay() properly, check out the `submit.html` inside the examples directory.
 
 ## Whitelist
 

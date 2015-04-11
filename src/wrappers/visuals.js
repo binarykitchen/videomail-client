@@ -222,6 +222,10 @@ var Visuals = function(container, options) {
         return recorder.getAudioSampleRate()
     }
 
+    this.isPaused = function() {
+        return recorder.isPaused()
+    }
+
     this.hideReplay   = replay.hide.bind(replay)
     this.hideRecorder = recorder.hide.bind(recorder)
     this.isRecording  = recorder.isRecording.bind(recorder)
