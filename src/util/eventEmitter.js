@@ -1,17 +1,12 @@
-var util         = require('util'),
-    EventEmitter = require('events').EventEmitter
+var singletonEvent = require('node-singleton-event')
 
-var VideomailEventEmitter = function(options, name) {
+module.exports = function(options, name) {
 
-    if (options.debug) {
+    this.emit = function(event) {
 
-        if (!this.originalEmit)
-            this.originalEmit = this.emit
+        var args = [].splice.call(arguments, 0)
 
-        this.emit = function(event) {
-
-            var args = [].splice.call(arguments, 0)
-
+        if (options.debug)
             if (event != 'removeListener' && event != 'newListener') {
                 var moreArguments = args.slice(1)
 
@@ -21,11 +16,18 @@ var VideomailEventEmitter = function(options, name) {
                     options.debug('%s emits: %s', name, event)
             }
 
-            return this.originalEmit.apply(this, args)
-        }
+        return singletonEvent.emit.apply(singletonEvent, args)
+    }
+
+    this.on = function(eventName, cb) {
+        return singletonEvent.on(eventName, cb)
+    }
+
+    this.listeners = function(eventName) {
+        return singletonEvent.listeners(eventName)
+    }
+
+    this.removeAllListeners = function() {
+        return singletonEvent.removeAllListeners()
     }
 }
-
-util.inherits(VideomailEventEmitter, EventEmitter)
-
-module.exports = VideomailEventEmitter

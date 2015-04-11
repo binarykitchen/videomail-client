@@ -7,10 +7,19 @@
             input[type="text"] {
                 margin: 1em 0;
             }
+
+            .hide {
+                display: none;
+            }
+
+            #startOver {
+                display: block;
+            }
         </style>
     </head>
     <body>
-        <h1>Wrap into a form, custom validation, have a submit button and display the record</h1>
+        <h1>BETA! Wrap into a form, custom validation, have a submit button and display the record</h1>
+
         <form id="videomail">
             <input name='title' type='text' placeholder='Enter a title' required/>
             <div class="all_my_buttons">
@@ -22,8 +31,41 @@
                 <input type='submit' value='✉ Submit'/>
             </div>
         </form>
+
+        <div id="viewVideo" class="hide">
+            <h2></h2>
+            <video class="replay"></video>
+            <button id='startOver'>&#x25c0; Start over</button>
+        </div>
+
         <script async src="/videomail-client.js"></script>
         <script>
+
+            var viewVideo       = document.getElementById('viewVideo'),
+                videomailForm   = document.getElementById('videomail'),
+                startOverButton = document.getElementById('startOver')
+
+            var onInitialized = function(err, controller) {
+                controller.on('submitted', onSubmitted.bind(controller))
+            }
+
+            // TODO: continue from here, it's not finished yet
+            var startOver = function() {
+                viewVideo.classList.add('hide')
+                videomailForm.classList.remove('hide')
+            }
+
+            var onSubmitted = function(videomail) {
+                viewVideo.querySelector('h2').innerHTML = videomail.title
+
+                this.addReplay(viewVideo, videomail)
+
+                startOverButton.onclick = startOver
+
+                videomailForm.classList.add('hide')
+                viewVideo.classList.remove('hide')
+            }
+
             window.addEventListener('load', function() {
                 Videomail.init({
                     debug: true,
@@ -33,7 +75,7 @@
                     video: {
                         countdown: false
                     }
-                })
+                }, onInitialized)
             })
         </script>
     </body>

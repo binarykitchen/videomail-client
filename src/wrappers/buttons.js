@@ -3,6 +3,8 @@ var util         = require('util'),
 
 var Buttons = function(container, options) {
 
+    EventEmitter.call(this, options, 'Buttons')
+
     var self = this,
 
         buttonsElement,
@@ -115,8 +117,10 @@ var Buttons = function(container, options) {
 
         show(backButton)
         backButton.disabled = false
+    }
 
-        if (submitButton && container.validate(true))
+    this.enableSubmit = function() {
+        if (submitButton)
             submitButton.disabled = false
     }
 

@@ -1,6 +1,6 @@
 var insertCss      = require('insert-css'),
-    forward        = require('forward-emitter'),
     async          = require('async'),
+    util           = require('util'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
@@ -10,13 +10,16 @@ var insertCss      = require('insert-css'),
     Resource       = require('./../resource'),
 
     VideomailError = require('./../util/videomailError'),
+    EventEmitter   = require('./../util/eventEmitter'),
     css            = require('./../assets/css/main.min.css.js')
 
-module.exports = function(options) {
+var Container = function(options) {
+
+    EventEmitter.call(this, options, 'Container')
 
     var self = this,
 
-        controller  = new Controller(this),
+        controller  = new Controller(this, options),
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         resource    = new Resource(options),
@@ -50,8 +53,6 @@ module.exports = function(options) {
             var submitButton = form.getSubmitButton()
             submitButton && buttons.setSubmitButton(submitButton)
 
-            forward(form, controller)
-
             form.build(cb)
         } else
             cb()
@@ -62,11 +63,6 @@ module.exports = function(options) {
             cb(new Error('Sorry, your browser is too old!'))
         else {
             containerElement.classList.add('videomail')
-
-            // https://github.com/STRML/forward-emitter
-            forward(visuals.getRecorder(), controller) // todo: double check if this is really needed
-            forward(visuals.getRecorder(), buttons)
-            forward(visuals,               buttons)
 
             async.series([
                 buttons.build,
@@ -175,9 +171,15 @@ module.exports = function(options) {
                 valid = form.validate()
 
                 if (valid) {
-                    if (!visualsValid && this.isReady() && !this.isRecording()) {
-                        valid      = false
-                        whyInvalid = 'requiresRecord'
+                    if (!visualsValid) {
+
+                        if (this.isReady())
+                            valid = this.isRecording()
+                        else
+                            valid = false
+
+                        if (!valid)
+                            whyInvalid = 'requiresRecord'
                     }
                 } else
                     whyInvalid = 'badFormData'
@@ -233,18 +235,13 @@ module.exports = function(options) {
         })
     }
 
-    // remove when this is fixed
-    // https://github.com/STRML/forward-emitter/issues/1
-    this.emit = function(event, anything) {
-        if (anything)
-            visuals.emit(event, anything)
-        else
-            visuals.emit(event)
-    }
-
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)
     this.resume         = visuals.resume.bind(visuals)
     this.stop           = visuals.stop.bind(visuals)
     this.back           = visuals.back.bind(visuals)
 }
+
+util.inherits(Container, EventEmitter)
+
+module.exports = Container

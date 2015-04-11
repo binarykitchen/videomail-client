@@ -140,10 +140,6 @@ var Recorder = function(visuals, replay, options) {
                 Humanize.toTime(waitingTime)
             )
         }
-
-        setTimeout(function() {
-            replay.load()
-        }, 50)
     }
 
     function updateFrameProgress(args) {

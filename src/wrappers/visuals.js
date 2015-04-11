@@ -1,6 +1,5 @@
 var async        = require('async'),
     util         = require('util'),
-    forward      = require('forward-emitter'),
 
     Replay          = require('./visuals/replay'),
     Recorder        = require('./visuals/recorder'),
@@ -39,18 +38,12 @@ var Visuals = function(container, options) {
     function buildChildren(cb) {
         debug('Visuals: buildChildren()')
 
-        forward(self.getRecorder(), recorderInsides)
-        forward(self.getRecorder(), notifier)
-        forward(self.getRecorder(), replay)
-
         buildNoScriptTag()
         notifier.build()
         recorderInsides.build()
+        replay.build()
 
-        async.parallel([
-            replay.build.bind(replay),
-            recorder.build
-        ], cb)
+        recorder.build(cb)
     }
 
     function processError(err) {
@@ -63,7 +56,7 @@ var Visuals = function(container, options) {
     }
 
     function initEvents() {
-        recorder
+        self
             .on('error', processError)
             .on('ready', function() {
                 self.endWaiting()
@@ -72,10 +65,11 @@ var Visuals = function(container, options) {
             .on('preview', function() {
                 self.endWaiting()
             })
-
-        notifier
             .on('blocking', function() {
                 container.disableForm(true)
+            })
+            .on('previewShown', function() {
+                container.validate(true)
             })
     }
 
@@ -206,6 +200,10 @@ var Visuals = function(container, options) {
 
     this.getRecorder = function() {
         return recorder
+    }
+
+    this.getReplay = function() {
+        return replay
     }
 
     this.validate = function() {

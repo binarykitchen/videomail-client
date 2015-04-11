@@ -91,7 +91,10 @@ module.exports = function(rawVisualUserMedia, options) {
             options.debug('UserMedia emits: loadedmetadata')
 
             rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
-            localMediaStream.removeEventListener('ended',            onPlaying)
+
+            if (localMediaStream.removeEventListener)
+                localMediaStream.removeEventListener('ended', onPlaying)
+
             rawVisualUserMedia.play()
         }
 

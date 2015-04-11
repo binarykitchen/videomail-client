@@ -2,14 +2,15 @@ var util            = require('util'),
     Browser         = require('./../../util/browser'),
     EventEmitter    = require('./../../util/eventEmitter')
 
-var Replay = function(visuals, options) {
+var Replay = function(parentElement, options) {
 
     EventEmitter.call(this, options, 'Replay')
 
     var self    = this,
         browser = new Browser(options.fakeUaString),
 
-        replayElement
+        replayElement,
+        videomail
 
     function buildElement() {
         replayElement = document.createElement('VIDEO')
@@ -20,7 +21,7 @@ var Replay = function(visuals, options) {
         replayElement.autoplay = false
         replayElement.controls = 'controls'
 
-        visuals.appendChild(replayElement)
+        parentElement.appendChild(replayElement)
     }
 
     function initEvents() {
@@ -35,16 +36,36 @@ var Replay = function(visuals, options) {
 
         self
             .on('preview', function() {
-                show()
+                self.show()
             })
     }
 
-    function show() {
-        replayElement.classList.remove('hide')
+    this.setVideomail = function(newVideomail) {
+        videomail = newVideomail
+
+        if (videomail.webm)
+            this.setWebMSource(videomail.webm)
+
+        if (videomail.mp4)
+            this.setMp4Source(videomail.mp4)
     }
 
-    this.build = function(cb) {
-        replayElement = visuals.querySelector('video.' + options.selectors.replayClass)
+    this.show = function() {
+        replayElement.classList.remove('hide')
+
+        // add a little delay to make sure the source is set
+        setTimeout(function() {
+            replayElement.load()
+        }, 50)
+
+        if (!videomail)
+            this.emit('previewShown')
+        else
+            this.emit('replayShown')
+    }
+
+    this.build = function() {
+        replayElement = parentElement.querySelector('video.' + options.selectors.replayClass)
 
         if (!replayElement)
             buildElement()
@@ -57,9 +78,12 @@ var Replay = function(visuals, options) {
         if (!replayElement.height && options.video.height)
             replayElement.height = options.video.height
 
+        if (!replayElement.controls)
+            replayElement.controls = true
+
         initEvents()
 
-        cb(browser.checkPlaybackCapabilities(replayElement))
+        browser.checkPlaybackCapabilities(replayElement)
     }
 
     this.getVideoSource = function(type) {
@@ -110,10 +134,6 @@ var Replay = function(visuals, options) {
 
     this.getVideoType = function() {
         return browser.getVideoType(replayElement)
-    }
-
-    this.load = function() {
-        replayElement && replayElement.load()
     }
 
     this.pause = function() {

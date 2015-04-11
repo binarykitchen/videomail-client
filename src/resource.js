@@ -69,7 +69,7 @@ module.exports = function(options) {
                     if (options.cache)
                         cache[videomail.alias] = res.body.videomail
 
-                    cb(null, res.body)
+                    cb(null, res.body.videomail)
                 }
             })
     }
