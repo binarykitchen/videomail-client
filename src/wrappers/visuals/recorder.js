@@ -201,7 +201,7 @@ var Recorder = function(visuals, replay, options) {
 
     function writeCommand(command, args) {
         if (!connected) {
-            debug('Trying to reconnect …')
+            debug('Trying to reconnect for the command', commmand, '…')
 
             initSocket(function() {
                 debug('Reconnected')
@@ -305,7 +305,8 @@ var Recorder = function(visuals, replay, options) {
             stream.on('data', function(data) {
                 executeCommand.call(self, data)
             })
-        }
+        } else
+            debug('Not going to initialize socket.')
     }
 
     this.getAvgFps = function() {
