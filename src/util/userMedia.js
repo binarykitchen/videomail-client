@@ -71,6 +71,11 @@ module.exports = function(rawVisualUserMedia, options) {
                 rawVisualUserMedia.srcObject
     }
 
+    function hasEnded() {
+        var visualStream = getVisualStream()
+        return visualStream && visualStream.ended
+    }
+
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
         if (localMediaStream.getVideoTracks) {
@@ -93,13 +98,12 @@ module.exports = function(rawVisualUserMedia, options) {
             rawVisualUserMedia.removeEventListener('playing', onPlaying)
             localMediaStream.removeEventListener('ended',     onPlaying)
 
-            if (rawVisualUserMedia.srcObject.ended)
+            if (hasEnded())
                 endedEarlyCallback(new VideomailError('Already busy', {
                     explanation: 'Probably another browser window is using your webcam?'
                 }))
-            else {
+            else
                 videoCallback()
-            }
         }
 
         setVisualStream(localMediaStream)

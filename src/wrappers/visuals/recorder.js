@@ -261,9 +261,8 @@ var Recorder = function(visuals, replay, options) {
                     // Emit error first before unloading, because
                     // unloading will remove event listeners.
                     self.emit('error', new VideomailError('Unable to connect', {
-                        explanation: 'A websocket connection has been refused. Probably you are already connected in another instance?'
+                        explanation: 'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?'
                     }))
-
 
                     self.unload(err)
                 } else {
@@ -281,12 +280,13 @@ var Recorder = function(visuals, replay, options) {
 
                 self.emit('ended')
 
-                // try to reconnect
-                options.reconnect && setTimeout(function() {
-                    initSocket(function() {
-                        self.emit('reconnected')
-                    })
-                }, 2e3)
+                // do not attempt to reconnect when replay is shown
+                if (!visuals.isReplayShown())
+                    options.reconnect && setTimeout(function() {
+                        initSocket(function() {
+                            self.emit('reconnected')
+                        })
+                    }, 2e3)
             })
 
             var checkConnection = function() {

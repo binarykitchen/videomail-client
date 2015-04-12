@@ -14,7 +14,7 @@ Finally you can encode any webcam recordings from your browser into MP4 and WebM
 
 ## Demo / Fully working version
 
-Check out the full version with all its features on [Videomail](https://videomail.io) itself.
+Check out the full version with all its features on [videomail.io](https://videomail.io) itself.
 
 That site runs on AngularJS where I only have these two code lines ...
 
@@ -22,15 +22,16 @@ That site runs on AngularJS where I only have these two code lines ...
 // loads Videomail into global scope
 require('videomail-client')
 
-// initialises the client with defaults inside the HTML container with the ID 'videomail'
+// initialises the client with defaults
+// inside the HTML container with the ID 'videomail'
 Videomail.init()
 ```
 
-... and bundle all that through Browserify. Awesome stuff!
+... and bundle all that through Browserify. Enough said.
 
 ## Examples
 
-To run the examples in the repo in your local browser, just do this:
+To run the examples in your browser, just do this:
 
 1. `npm install`
 2. Ignite static server with `gulp examples` and
@@ -46,8 +47,8 @@ To run the examples in the repo in your local browser, just do this:
         <script>
             window.addEventListener('load', function() {
                 Videomail.init({
-                    debug:          true, // outputs interesting stuff into the console
-                    disableSubmit:  true  // submissions disabled to keep that example simple
+                    debug:         true, // outputs interesting stuff into the console
+                    disableSubmit: true  // submissions disabled to keep example simple
                 })
             })
         </script>
@@ -135,7 +136,7 @@ These are the default options:
 
 You can change any of these through the `Videomail.init({ ... })` call.
 
-If you look into the `/examples` folder, you'll spot great examples on how to alter these options the correct way.
+If you look into the `/examples` folder, you'll spot great examples on how to use these options the correct way.
 
 ## API
 
@@ -161,7 +162,7 @@ Videomail.init({
 })
 ```
 
-The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors.
+The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further.
 
 <a name="onEvent"></a>
 ### controller.on([event,] [callback])
@@ -182,7 +183,7 @@ Videomail.init({
 })
 ```
 
-Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `preview`, `paused`, `resuming`, `submitting`, `submitted` and `previewShown`.
+Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
 
 Some of these events have parameters.
 
@@ -240,9 +241,9 @@ Bear with me, there are lots of problems to crack, especially with the audio par
 
 ## Coming soon / Planned
 
-1. `post()`, `delete()`, `get()` and `list()` operations
-2. E2E tests
-3. Fix audio recording
+1. `delete()`, `get()` and `list()` operations
+2. Audio recording
+3. E2E tests
 
 ## Credits
 
