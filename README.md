@@ -5,9 +5,9 @@ videomail-client ✉
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
 
-[npm-image]: https://img.shields.io/npm/v/standard.svg?style=flat
+[npm-image]: https://img.shields.io/npm/v/videomail-client.svg?style=flat
 [npm-url]: https://npmjs.org/package/videomail-client
-[downloads-image]: https://img.shields.io/npm/dm/standard.svg?style=flat
+[downloads-image]: https://img.shields.io/npm/dm/videomail-client.svg?style=flat
 [downloads-url]: https://npmjs.org/package/videomail-client
 
 Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
