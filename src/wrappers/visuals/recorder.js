@@ -305,8 +305,7 @@ var Recorder = function(visuals, replay, options) {
             stream.on('data', function(data) {
                 executeCommand.call(self, data)
             })
-        } else
-            debug('Not going to initialize socket.')
+        }
     }
 
     this.getAvgFps = function() {

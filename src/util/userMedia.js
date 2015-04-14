@@ -95,7 +95,10 @@ module.exports = function(rawVisualUserMedia, options) {
         function onPlaying() {
             options.debug('UserMedia emits: playing')
 
+            rawVisualUserMedia.removeEventListener &&
             rawVisualUserMedia.removeEventListener('playing', onPlaying)
+
+            localMediaStream.removeEventListener &&
             localMediaStream.removeEventListener('ended',     onPlaying)
 
             if (hasEnded())
