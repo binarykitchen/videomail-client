@@ -4,11 +4,16 @@ videomail-client ✉
 [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
+[![gratipay][gratipay-image]][gratipay-url]
 
 [npm-image]: https://img.shields.io/npm/v/videomail-client.svg?style=flat
 [npm-url]: https://npmjs.org/package/videomail-client
+
 [downloads-image]: https://img.shields.io/npm/dm/videomail-client.svg?style=flat
 [downloads-url]: https://npmjs.org/package/videomail-client
+
+[gratipay-url]: https://gratipay.com/binarykichen/
+[gratipay-image]: https://img.shields.io/gratipay/binarykitchen.svg
 
 Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
 

@@ -201,7 +201,7 @@ var Recorder = function(visuals, replay, options) {
 
     function writeCommand(command, args) {
         if (!connected) {
-            debug('Trying to reconnect for the command', commmand, '…')
+            debug('Trying to reconnect for the command', command, '…')
 
             initSocket(function() {
                 debug('Reconnected')
