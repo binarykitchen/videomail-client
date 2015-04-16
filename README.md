@@ -167,12 +167,12 @@ Videomail.init({
 })
 ```
 
-The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further.
+The Videomail-Client already comes with internal error handling mechanism however depending on your app logic you might want to process errors further.
 
 <a name="onEvent"></a>
 ### controller.on([event,] [callback])
 
-The videomail controller emits lots of useful events for your app. Here an example:
+The videomail controller emits lots of useful events for your app. Here's a quick example:
 
 ```js
 Videomail.init({
@@ -188,7 +188,8 @@ Videomail.init({
 })
 ```
 
-Supported events: `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
+#### Supported events: 
+`connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
 
 Some of these events have parameters.
 
@@ -218,15 +219,13 @@ For a full example how to use addReplay() properly, check out the `submit.html` 
 
 ## Whitelist
 
-Examples will work right away on [http://localhost:8080](http://localhost:8080). This because localhost is whitelisted on the remote Videomail server.
+Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server.
 
-In other words, if you deploy your piece on your own remote server, it won't work because that URL is not on the Videomail whitelist. To fix that, just reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
-
-Like that I can make sure that my hard work won't be misused for bad stuff.
+In other words, if your web server is connected through a domain besides localhost, the web client is restricted from sending the media packets to binarykitchen server which is responsible for storing video mails. To fix that, please reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
 ## Backward compatibility
 
-Forget IE, Safari and iPhones because they still don't support `getUserMedia()`, *chuckle* - whereas these browsers do work fine like a charm:
+Forget IE, Safari and iPhones because they still don't support `getUserMedia()`, *chuckle* - whereas these browsers work like a charm:
 
 * Firefox >= 33
 * Chrome >= 31
@@ -239,8 +238,6 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 ## Unfinished Metamorphosis (aka Development)
 
 This is just the beginning. I will add a lot more over time.
-
-It makes heavy use of other npm modules. I try to plug together as many well-known, robust but tiny modules as possible.
 
 Bear with me, there are lots of problems to crack, especially with the audio part and some unit tests are missing. Working on it ...
 
