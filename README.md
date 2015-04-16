@@ -221,7 +221,7 @@ For a full example how to use addReplay() properly, check out the `submit.html` 
 
 Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server.
 
-In other words, if your web server is connected through a domain besides localhost, the web client is restricted from sending the media packets to binarykitchen server which is responsible for storing video mails. To fix that, please reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
+In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending video mails. To fix that, please reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
 ## Backward compatibility
 
@@ -239,13 +239,14 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 
 This is just the beginning. I will add a lot more over time.
 
-Bear with me, there are lots of problems to crack, especially with the audio part and some unit tests are missing. Working on it ...
+Bear with me, there are lots of problems to crack, especially with the audio part and some unit tests are missing. Nothing is perfect for the first iteration. Working on it ...
 
 ## Coming soon / Planned
 
-1. `delete()`, `get()` and `list()` operations
-2. Audio recording
-3. E2E tests
+1. Avoid global scope pollution
+2. `delete()`, `get()` and `list()` operations
+3. Audio recording
+4. E2E tests
 
 ## Credits
 
@@ -264,4 +265,4 @@ They all deserve lots of love.
 
 ## Final philosophy
 
-This planet is completely sold. Talk is overrated. My primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.
+This planet is completely sold. And talk is overrated. that's why my primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.
