@@ -12,7 +12,7 @@ videomail-client ✉
 [downloads-image]: https://img.shields.io/npm/dm/videomail-client.svg?style=flat
 [downloads-url]: https://npmjs.org/package/videomail-client
 
-[gratipay-url]: https://gratipay.com/binarykichen/
+[gratipay-url]: https://gratipay.com/binarykitchen/
 [gratipay-image]: https://img.shields.io/gratipay/binarykitchen.svg
 
 Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
