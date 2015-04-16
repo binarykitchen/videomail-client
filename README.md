@@ -239,7 +239,7 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 
 This is just the beginning. I will add a lot more over time.
 
-Bear with me, there are lots of problems to crack, especially with the audio part and some unit tests are missing. Nothing is perfect for the first iteration. Working on it ...
+Bear with me, there are lots of problems to crack, especially with the performance, audio part and some unit tests are missing. I do not want to waste too much time on perfection unless it's proven to work then I rewrite piece by piece.
 
 ## Coming soon / Planned
 
