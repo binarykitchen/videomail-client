@@ -39,21 +39,21 @@ To run the examples in your browser, just do this:
 
 ```html
 <html>
-    <body>
-        <div id="videomail"></div>
-        <script src="/dist/videomail-client.js"></script>
-        <script>
-            var VideomailClient = require('videomail-client'), // load the videomail client package
-                videomailClient = new VideomailClient({        // instantiate with some options
-                    debug:         true,                       // debug prints additional info to console
-                    disableSubmit: true                        // disable submissions to keep example simple
-                })
+  <body>
+    <div id="videomail"></div>
+    <script src="/dist/videomail-client.js"></script>
+    <script>
+      var VideomailClient = require('videomail-client'), // load the videomail client package
+          videomailClient = new VideomailClient({        // instantiate with some options
+            debug:         true,                         // debug prints additional info to console
+            disableSubmit: true                          // disable submissions to keep example simple
+      })
 
-            // This will load your webcam, fill the default placeholder containing
-            // the `id="videomail"` with HTML and CSS code, place buttons and much more.
-            videomailClient.form()
-        </script>
-    </body>
+      // this will load your webcam, fill the placeholder containing
+      // the `id="videomail"` with HTML and CSS code, place buttons and much more.
+      videomailClient.form()
+    </script>
+  </body>
 </html>
 ```
 
