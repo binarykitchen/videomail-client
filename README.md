@@ -32,8 +32,8 @@ Finally you can encode any webcam recordings from your browser into MP4 and WebM
 To run the examples in your browser, just do this:
 
 1. `npm install`
-2. Ignite static server with `gulp examples` and
-3. Open `http://localhost:8080` in your browser
+2. `gulp examples` which will ignite a static server and
+3. open `http://localhost:8080` in your browser
 
 ## Dead simple example (just record and replay)
 
@@ -43,30 +43,30 @@ To run the examples in your browser, just do this:
         <div id="videomail"></div>
         <script src="/dist/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({
-                    debug:         true,
-                    disableSubmit: true
+            var VideomailClient = require('videomail-client'), // load the videomail client package
+                videomailClient = new VideomailClient({        // instantiate with some options
+                    debug:         true,                       // debug prints additional info to console
+                    disableSubmit: true                        // disable submissions to keep example simple
                 })
 
+            // This will load your webcam, fill the default placeholder containing
+            // the `id="videomail"` with HTML and CSS code, place buttons and much more.
             videomailClient.form()
         </script>
     </body>
 </html>
 ```
 
-This will load your webcam, fill the default placeholder containing the `id="videomail"` with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy. It does all the hard work for you.
-
 The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
 
-With the `debug` option you see additional information in the console. This to enhance DX. If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent. This requires a little more code, see examples directory.
+If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent. This requires a little more code, see examples directory.
 
 <a name="demo"></a>
 ## Demo / Fully working version
 
-Check out the full version with all its features on [videomail.io](https://videomail.io) itself.
+Check out the full version with all its features on [videomail.io](https://videomail.io) itself. My aim is to turn this into a stable product in the near future with some external assistance.
 
-That site runs on AngularJS where I just include `require('videomail-client')` in the app logic and bundle all that through Browserify. Enough said.
+That site runs on AngularJS where I just include `require('videomail-client')` in the app logic and bundle all that through Browserify.
 
 <a name="options"></a>
 ## Options
@@ -147,7 +147,7 @@ You can change any of these with your own and pass these onto the VideomailClien
 var videomailClient = new VideomailClient({siteName: 'my site name'})
 ```
 
-If you look into the `/examples` folder, you'll spot great examples on how to use these options the correct way.
+Looking at the examples in the `/examples` folder should give you some ideas how to use these.
 
 <a name="api"></a>
 ## API
@@ -163,12 +163,12 @@ If you look into the `/examples` folder, you'll spot great examples on how to us
 <a name="constructor"></a>
 ### new VideomailClient([options])
 
-The constructor accepts a JSON with optional options, see above.
+The constructor accepts a JSON with optional <a href="#options">options</a>.
 
 <a name="on"></a>
 ### videomailClient.on([event,] [callback])
 
-The videomail client is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
+The VideomailClient class is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
 ```js
 videomailClient.on('formReady', function() {
@@ -183,7 +183,7 @@ videomailClient.on('submitted', function(videomail, response) {
 #### Supported events:
 `formReady`, `connected`, `userMediaReady`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
 
-Some of these events have parameters.
+They should be self-explanatory. If not, ask for better documentation. Then, some of these events have parameters.
 
 The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
 
@@ -197,7 +197,7 @@ By default `{ selectors.containerId }` is set to `videomail`.
 <a name="unload"></a>
 ### videomailClient.unload()
 
-Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with AngularJS' destroy event, for example:
+Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with single page apps, for example with AngularJS' destroy event:
 
 ```js
 $scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
