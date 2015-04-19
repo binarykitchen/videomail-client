@@ -15,7 +15,8 @@ var Container = function(options) {
 
     EventEmitter.call(this, options, 'Container')
 
-    var self = this,
+    var self  = this,
+        built = false,
 
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
@@ -100,18 +101,22 @@ var Container = function(options) {
     }
 
     this.build = function() {
-        containerElement = document.getElementById(options.selectors.containerId)
+        if (!built) {
+            containerElement = document.getElementById(options.selectors.containerId)
 
-        if (!containerElement)
-            this.emit('error', new VideomailError('The container ID is invalid!', {
-                explanation: 'No tag with the ID ' + options.selectors.containerId + ' could be found.'
-            }))
-        else {
-            options.insertCss && prependDefaultCss()
+            if (!containerElement)
+                this.emit('error', new VideomailError('The container ID is invalid!', {
+                    explanation: 'No tag with the ID ' + options.selectors.containerId + ' could be found.'
+                }))
+            else {
+                options.insertCss && prependDefaultCss()
 
-            initEvents()
-            buildForm()
-            buildChildren()
+                initEvents()
+                buildForm()
+                buildChildren()
+
+                built = true
+            }
         }
     }
 

@@ -11,7 +11,8 @@ var Visuals = function(container, options) {
 
     EventEmitter.call(this, options, 'Visuals')
 
-    var self = this,
+    var self  = this,
+        built = false,
 
         replay          = new Replay(this, options),
         recorder        = new Recorder(this, replay, options),
@@ -77,32 +78,35 @@ var Visuals = function(container, options) {
     }
 
     this.build = function() {
+        if (!built) {
+            visualsElement = container.querySelector('.' + options.selectors.visualsClass)
 
-        visualsElement = container.querySelector('.' + options.selectors.visualsClass)
+            if (!visualsElement) {
+                visualsElement = document.createElement('DIV')
+                visualsElement.classList.add(options.selectors.visualsClass)
 
-        if (!visualsElement) {
-            visualsElement = document.createElement('DIV')
-            visualsElement.classList.add(options.selectors.visualsClass)
+                var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
-            var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+                // make sure it's placed before the buttons
+                if (buttonsElement)
+                    container.insertBefore(visualsElement, buttonsElement)
+                else
+                    container.appendChild(visualsElement)
+            }
 
-            // make sure it's placed before the buttons
-            if (buttonsElement)
-                container.insertBefore(visualsElement, buttonsElement)
-            else
-                container.appendChild(visualsElement)
+            visualsElement.classList.add('visuals')
+
+            if (!visualsElement.style.width && options.video.width)
+                visualsElement.style.width = options.video.width + 'px'
+
+            if (!visualsElement.style.height && options.video.height)
+                visualsElement.style.height = options.video.height + 'px'
+
+            initEvents()
+            buildChildren()
+
+            built = true
         }
-
-        visualsElement.classList.add('visuals')
-
-        if (!visualsElement.style.width && options.video.width)
-            visualsElement.style.width = options.video.width + 'px'
-
-        if (!visualsElement.style.height && options.video.height)
-            visualsElement.style.height = options.video.height + 'px'
-
-        initEvents()
-        buildChildren()
     }
 
     this.querySelector = function(selector) {
