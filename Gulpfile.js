@@ -49,7 +49,7 @@ gulp.task('browserify', ['clean:js'], function(cb) {
         })
 
     bundler
-        .require('./src/index.js', {expose: 'VideomailClient'})
+        .require('./src/index.js', {expose: 'videomail-client'})
         .bundle()
         .on('error',    cb)
         .on('log',      plugins.util.log)

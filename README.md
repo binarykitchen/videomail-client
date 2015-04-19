@@ -43,7 +43,7 @@ To run the examples in your browser, just do this:
         <div id="videomail"></div>
         <script src="/dist/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('VideomailClient')
+            var VideomailClient = require('videomail-client')
 
             new VideomailClient({
                 debug:         true,
@@ -165,7 +165,7 @@ The constructor accepts a JSON with optional options, see above.
 <a name="on"></a>
 ### videomailClient.on([event,] [callback])
 
-The videomail controller emits lots of useful events for your app. Here an example:
+The videomail client is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
 ```js
 videomailClient.on('ready', function() {
@@ -182,7 +182,7 @@ videomailClient.on('submitted', function(videomail, response) {
 
 Some of these events have parameters.
 
-The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
+The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
 
 <a name="unload"></a>
 ### videomailClient.unload()
@@ -194,9 +194,9 @@ $scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
 ```
 
 <a name="replay"></a>
-### videomailClient.addReplay(parentElement, videomail)
+### videomailClient.replay(parentElement, videomail)
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission.
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/submit.html` for some inspiration.
 
 If the parent element already contains a video container like this
 
@@ -205,8 +205,6 @@ If the parent element already contains a video container like this
 ```
 
 then this will be used instead of adding a new dom element.
-
-For a full example how to use addReplay() properly, check out the `submit.html` inside the examples directory.
 
 <a name="startOver"></a>
 ### videomailClient.startOver()
@@ -238,7 +236,7 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 
 ### v1.1.0 (2015-04-18)
 
-- **VideomailClient:** Do not initialize the client in the global scope but return an object
+- **VideomailClient:** Do not initialize the client in the global scope but return an object. Replace `VideomailClient.init()` with `new VideomailClient()`
   ([#3](https://github.com/binarykitchen/videomail-client/issues/3))
 
 <a name="notes"></a>
