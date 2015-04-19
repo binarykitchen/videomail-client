@@ -43,6 +43,7 @@
     "merge-recursive": "0.0.3",
     "node-singleton-event": "0.0.3",
     "pauseable": "0.1.6",
+    "readystate": "^0.1.0",
     "superagent": "1.2.0",
     "typedarray-to-buffer": "3.0.1",
     "ua-parser-js": "0.7.6",

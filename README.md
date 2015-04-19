@@ -156,6 +156,7 @@ If you look into the `/examples` folder, you'll spot great examples on how to us
 * <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
+* <a href="#get">`videomailClient.get()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -210,6 +211,11 @@ then this will be used instead of adding a new dom element.
 ### videomailClient.startOver()
 
 Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
+
+<a name="get"></a>
+### videomailClient.get(key, cb)
+
+Queries a videomail (JSON) by a given key. When submitted, you get the key from the `submitted` event and can use that for storage and future queries of videomails.
 
 <a name="whitelist"></a>
 ## Whitelist
