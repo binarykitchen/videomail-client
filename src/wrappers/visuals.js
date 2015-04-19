@@ -57,7 +57,7 @@ var Visuals = function(container, options) {
     function initEvents() {
         self
             .on('error', processError)
-            .on('ready', function() {
+            .on('userMediaReady', function() {
                 self.endWaiting()
                 container.enableForm(false)
             })

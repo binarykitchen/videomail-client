@@ -26,21 +26,22 @@
         </div>
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client')
+            var VideomailClient = require('videomail-client'),
+                videomailClient = new VideomailClient({
+                    debug:          true,
+                    disableSubmit:  true,
+                    selectors: {
+                        containerId:    'videomail2',
+                        userMediaClass: 'webcam',
+                        visualsClass:   'da_window',
+                        buttonsClass:   'all_my_buttons',
+                    },
+                    video: {
+                        countdown: false
+                    }
+                })
 
-            new VideomailClient({
-                debug:          true,
-                disableSubmit:  true,
-                selectors: {
-                    containerId:    'videomail2',
-                    userMediaClass: 'webcam',
-                    visualsClass:   'da_window',
-                    buttonsClass:   'all_my_buttons',
-                },
-                video: {
-                    countdown: false
-                }
-            })
+            videomailClient.form()
         </script>
     </body>
 </html>

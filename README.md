@@ -43,12 +43,13 @@ To run the examples in your browser, just do this:
         <div id="videomail"></div>
         <script src="/dist/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client')
+            var VideomailClient = require('videomail-client'),
+                videomailClient = new VideomailClient({
+                    debug:         true,
+                    disableSubmit: true
+                })
 
-            new VideomailClient({
-                debug:         true,
-                disableSubmit: true
-            })
+            videomailClient.form()
         </script>
     </body>
 </html>
@@ -153,6 +154,7 @@ If you look into the `/examples` folder, you'll spot great examples on how to us
 
 * <a href="#constructor">`new VideomailClient()`</a>
 * <a href="#on">`videomailClient.on()`</a>
+* <a href="#record">`videomailClient.record()`</a>
 * <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
@@ -169,8 +171,8 @@ The constructor accepts a JSON with optional options, see above.
 The videomail client is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
 ```js
-videomailClient.on('ready', function() {
-    // enable a button somewhere
+videomailClient.on('formReady', function() {
+    // form is ready for recording
 })
 
 videomailClient.on('submitted', function(videomail, response) {
@@ -179,11 +181,18 @@ videomailClient.on('submitted', function(videomail, response) {
 ```
 
 #### Supported events:
-`connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
+`formReady`, `connected`, `userMediaReady`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
 
 Some of these events have parameters.
 
 The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
+
+<a name="form"></a>
+### videomailClient.form()
+
+Automatically fills the DOM with a form for video recording. If a HTML element exist with the ID defined under options `{ selectors.containerId }`, that placeholder will be filled.
+
+By default `{ selectors.containerId }` is set to `videomail`.
 
 <a name="unload"></a>
 ### videomailClient.unload()

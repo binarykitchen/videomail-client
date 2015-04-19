@@ -62,7 +62,7 @@ var Recorder = function(visuals, replay, options) {
         unloaded = submitting = false
 
         show()
-        self.emit('ready')
+        self.emit('userMediaReady')
     }
 
     function clearUserMediaTimeout() {

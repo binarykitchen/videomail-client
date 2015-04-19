@@ -49,7 +49,7 @@ var Notifier = function(visuals, options) {
         debug('Notifier: initEvents()')
 
         self
-            .on('ready', function() {
+            .on('userMediaReady', function() {
                 self.hide()
             })
             .on('preview', function() {

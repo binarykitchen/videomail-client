@@ -8,23 +8,24 @@
         <div id="videomail"></div>
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client')
+            var VideomailClient = require('videomail-client'),
+                videomailClient = new VideomailClient({
+                    debug:              true,
+                    enableAutoPause:    false,
+                    disableSubmit:      true,
+                    video: {
+                        countdown:    false,
+                        fps:          30,
+                        limitSeconds: 3,
+                        width:        640,
+                        height:       480
+                    },
+                    image: {
+                        quality: .9,
+                    }
+                })
 
-            new VideomailClient({
-                debug:              true,
-                enableAutoPause:    false,
-                disableSubmit:      true,
-                video: {
-                    countdown:    false,
-                    fps:          30,
-                    limitSeconds: 3,
-                    width:        640,
-                    height:       480
-                },
-                image: {
-                    quality: .9,
-                }
-            })
+            videomailClient.form()
         </script>
     </body>
 </html>

@@ -32,9 +32,14 @@ var VideomailClient = function(options) {
 
     EventEmitter.call(this, localOptions, 'VideomailClient')
 
-    function onLoad() {
-        container.build()
-        self.emit('initialized')
+    this.form = function() {
+
+        function buildForm() {
+            container.build()
+            self.emit('formReady')
+        }
+
+        readystate.interactive(buildForm)
     }
 
     // automatically adds a <video> element inside the given parentElement and loads
@@ -74,8 +79,6 @@ var VideomailClient = function(options) {
     this.canRecord = function() {
         return this.getBrowser().canRecord()
     }
-
-    readystate.interactive(onLoad)
 }
 
 util.inherits(VideomailClient, EventEmitter)
