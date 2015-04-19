@@ -85,5 +85,5 @@ gulp.task('watch', ['connect'], function() {
 })
 
 gulp.task('examples',  ['connect', 'watch'])
-gulp.task('build',     ['stylus', 'browserify'])
-gulp.task('default',   ['stylus', 'browserify', 'todo'])
+gulp.task('build',     ['stylus', 'browserify', 'todo'])
+gulp.task('default',   ['build'])
