@@ -111,6 +111,9 @@ var Container = function(options) {
             else {
                 options.insertCss && prependDefaultCss()
 
+                // trick to avoid warning: possible EventEmitter memory leak detected.
+                this.removeAllListeners()
+
                 initEvents()
                 buildForm()
                 buildChildren()
@@ -143,6 +146,7 @@ var Container = function(options) {
     this.unload = function(e) {
         visuals.unload(e)
         this.endWaiting()
+        this.removeAllListeners()
     }
 
     this.isNotifying = function() {
