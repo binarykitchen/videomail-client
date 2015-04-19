@@ -263,13 +263,6 @@ This is just the beginning. I will add a lot more over time.
 
 Bear with me, there are lots of problems to crack, especially with the performance, audio part and some unit tests are missing. I do not want to waste too much time on perfection unless it's proven to work then I rewrite piece by piece.
 
-### Coming soon / Planned
-
-1. Avoid global scope pollution
-2. `delete()`, `get()` and `list()` operations
-3. Audio recording
-4. E2E tests
-
 ### Credits
 
 These guys helped and/or inspired me for this mad project:
