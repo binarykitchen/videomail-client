@@ -154,7 +154,7 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 
 * <a href="#constructor">`new VideomailClient()`</a>
 * <a href="#on">`videomailClient.on()`</a>
-* <a href="#record">`videomailClient.record()`</a>
+* <a href="#form">`videomailClient.form()`</a>
 * <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
