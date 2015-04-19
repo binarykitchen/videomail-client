@@ -38,27 +38,26 @@
             <button id='startOver'>&#x25c0; Start over</button>
         </div>
 
-        <script async src="/videomail-client.js"></script>
+        <script src="/videomail-client.js"></script>
         <script>
+            var VideomailClient = require('VideomailClient'),
 
-            var viewVideo       = document.getElementById('viewVideo'),
+                viewVideo       = document.getElementById('viewVideo'),
                 videomailForm   = document.getElementById('videomail'),
-                startOverButton = document.getElementById('startOver')
+                startOverButton = document.getElementById('startOver'),
 
-            var onInitialized = function(err, controller) {
-                controller.on('submitted', onSubmitted.bind(controller))
-            }
+                videomailClient
 
-            // TODO: continue from here, it's not finished yet
             var startOver = function() {
                 viewVideo.classList.add('hide')
                 videomailForm.classList.remove('hide')
+                videomailClient.startOver()
             }
 
             var onSubmitted = function(videomail) {
                 viewVideo.querySelector('h2').innerHTML = videomail.title
 
-                this.addReplay(viewVideo, videomail)
+                this.replay(viewVideo, videomail)
 
                 startOverButton.onclick = startOver
 
@@ -66,17 +65,17 @@
                 viewVideo.classList.remove('hide')
             }
 
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug: true,
-                    selectors: {
-                        buttonsClass: 'all_my_buttons'
-                    },
-                    video: {
-                        countdown: false
-                    }
-                }, onInitialized)
+            var videomailClient = new VideomailClient({
+                debug: true,
+                selectors: {
+                    buttonsClass: 'all_my_buttons'
+                },
+                video: {
+                    countdown: false
+                }
             })
+
+            videomailClient.on('submitted', onSubmitted.bind(videomailClient))
         </script>
     </body>
 </html>

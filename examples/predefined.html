@@ -24,22 +24,22 @@
                 <button class="back">&#x25c0; Back</button>
             </div>
         </div>
-        <script async src="/videomail-client.js"></script>
+        <script src="/videomail-client.js"></script>
         <script>
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug:          true,
-                    disableSubmit:  true,
-                    selectors: {
-                        containerId:    'videomail2',
-                        userMediaClass: 'webcam',
-                        visualsClass:   'da_window',
-                        buttonsClass:   'all_my_buttons',
-                    },
-                    video: {
-                        countdown: false
-                    }
-                })
+            var VideomailClient = require('VideomailClient')
+
+            new VideomailClient({
+                debug:          true,
+                disableSubmit:  true,
+                selectors: {
+                    containerId:    'videomail2',
+                    userMediaClass: 'webcam',
+                    visualsClass:   'da_window',
+                    buttonsClass:   'all_my_buttons',
+                },
+                video: {
+                    countdown: false
+                }
             })
         </script>
     </body>

@@ -6,24 +6,24 @@
     <body>
         <h1>High quality: High FPS, near HD quality, short duration and without auto-pause</h1>
         <div id="videomail"></div>
-        <script async src="/videomail-client.js"></script>
+        <script src="/videomail-client.js"></script>
         <script>
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug:              true,
-                    enableAutoPause:    false,
-                    disableSubmit:      true,
-                    video: {
-                        countdown:    false,
-                        fps:          30,
-                        limitSeconds: 3,
-                        width:        640,
-                        height:       480
-                    },
-                    image: {
-                        quality: .9,
-                    }
-                })
+            var VideomailClient = require('VideomailClient')
+
+            new VideomailClient({
+                debug:              true,
+                enableAutoPause:    false,
+                disableSubmit:      true,
+                video: {
+                    countdown:    false,
+                    fps:          30,
+                    limitSeconds: 3,
+                    width:        640,
+                    height:       480
+                },
+                image: {
+                    quality: .9,
+                }
             })
         </script>
     </body>

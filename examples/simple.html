@@ -6,13 +6,13 @@
     <body>
         <h1>Dead simple with default options</h1>
         <div id="videomail"></div>
-        <script async src="/videomail-client.js"></script>
+        <script src="/videomail-client.js"></script>
         <script>
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug:          true,
-                    disableSubmit:  true
-                })
+            var VideomailClient = require('VideomailClient')
+
+            new VideomailClient({
+                debug:         true,
+                disableSubmit: true
             })
         </script>
     </body>

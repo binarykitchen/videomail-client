@@ -8,24 +8,24 @@
         <div id="videomail"></div>
         <p>Due to massive loads on the server side, audio is disabled until there are more servers.</p>
         <p>Furthermore, beware that audio is not working properly. There are many problems to solve.</p>
-        <script async src="/videomail-client.js"></script>
+        <script src="/videomail-client.js"></script>
         <script>
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug:              true,
-                    enableAutoPause:    false,
-                    disableSubmit:      true,
-                    audio: {
-                        enabled: true
-                    },
-                    image: {
-                        quality: .4
-                    },
-                    video: {
-                        limitSeconds:   15,
-                        countdown:      0
-                    }
-                })
+            var VideomailClient = require('VideomailClient')
+
+            new VideomailClient({
+                debug:              true,
+                enableAutoPause:    false,
+                disableSubmit:      true,
+                audio: {
+                    enabled: true
+                },
+                image: {
+                    quality: .4
+                },
+                video: {
+                    limitSeconds:   15,
+                    countdown:      0
+                }
             })
         </script>
     </body>

@@ -1,12 +1,10 @@
 var insertCss      = require('insert-css'),
-    async          = require('async'),
     util           = require('util'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
     Form           = require('./form'),
 
-    Controller     = require('./../controller'),
     Resource       = require('./../resource'),
 
     VideomailError = require('./../util/videomailError'),
@@ -19,7 +17,6 @@ var Container = function(options) {
 
     var self = this,
 
-        controller  = new Controller(this, options),
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         resource    = new Resource(options),
@@ -44,7 +41,7 @@ var Container = function(options) {
         return formElement
     }
 
-    function buildForm(cb) {
+    function buildForm() {
         var formElement = getFormElement()
 
         if (formElement) {
@@ -53,21 +50,18 @@ var Container = function(options) {
             var submitButton = form.getSubmitButton()
             submitButton && buttons.setSubmitButton(submitButton)
 
-            form.build(cb)
-        } else
-            cb()
+            form.build()
+        }
     }
 
-    function buildChildren(cb) {
+    function buildChildren() {
         if (!containerElement.classList)
-            cb(new Error('Sorry, your browser is too old!'))
+            self.emit('error', new Error('Sorry, your browser is too old!'))
         else {
             containerElement.classList.add('videomail')
 
-            async.series([
-                buttons.build,
-                visuals.build
-            ], cb)
+            buttons.build()
+            visuals.build()
         }
     }
 
@@ -99,29 +93,25 @@ var Container = function(options) {
                     }
                 }
             })
+
+        self.on('error', function(err) {
+            self.unload(err)
+        })
     }
 
-    this.build = function(cb) {
+    this.build = function() {
         containerElement = document.getElementById(options.selectors.containerId)
 
         if (!containerElement)
-            cb(new VideomailError('The container ID is invalid!', {
+            this.emit('error', new VideomailError('The container ID is invalid!', {
                 explanation: 'No tag with the ID ' + options.selectors.containerId + ' could be found.'
             }))
         else {
             options.insertCss && prependDefaultCss()
 
-            async.series([
-                buildForm,
-                buildChildren
-            ], function(err) {
-                if (err)
-                    cb(err)
-                else {
-                    initEvents()
-                    cb(null, controller)
-                }
-            })
+            initEvents()
+            buildForm()
+            buildChildren()
         }
     }
 
@@ -160,6 +150,10 @@ var Container = function(options) {
 
     this.pause = function() {
         visuals.pause()
+    }
+
+    this.startOver = function() {
+        visuals.back()
     }
 
     this.validate = function(force) {

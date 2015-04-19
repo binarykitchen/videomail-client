@@ -100,10 +100,6 @@ var Buttons = function(container, options) {
             submitButton.disabled = true
     }
 
-    function onError() {
-        self.reset()
-    }
-
     function onResetting() {
         if (submitButton)
             submitButton.disabled = true
@@ -167,6 +163,20 @@ var Buttons = function(container, options) {
         backButton.disabled   = true
     }
 
+    function onSubmitted() {
+        stopButton.disabled = true
+
+        if (options.enablePause)
+            show(stopButton)
+
+        hide(backButton)
+
+        recordButton.disabled = true
+        show(recordButton)
+
+        submitButton.disabled = true
+    }
+
     function onInvalid() {
         if (submitButton)
             submitButton.disabled = true
@@ -194,8 +204,6 @@ var Buttons = function(container, options) {
             onReady()
         }).on('preview', function() {
             onPreview()
-        }).on('error', function() {
-            onError()
         }).on('paused', function() {
             onPaused()
         }).on('recording', function() {
@@ -214,6 +222,8 @@ var Buttons = function(container, options) {
             onInvalid()
         }).on('valid', function() {
             onValid()
+        }).on('submitted', function() {
+            onSubmitted()
         })
 
         // User actions
@@ -268,7 +278,7 @@ var Buttons = function(container, options) {
         submitButton = newSubmitButton
     }
 
-    this.build = function(cb) {
+    this.build = function() {
 
         buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
@@ -281,8 +291,6 @@ var Buttons = function(container, options) {
 
         buildButtons()
         initEvents()
-
-        cb()
     }
 }
 

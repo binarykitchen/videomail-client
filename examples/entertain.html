@@ -37,28 +37,28 @@
     <body>
         <h1>Entertain user while waiting and disable pause/resume buttons</h1>
         <div id="videomail"></div>
-        <script async src="/videomail-client.js"></script>
+        <script src="/videomail-client.js"></script>
         <script>
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug:          true,
-                    enablePause:    false,
-                    disableSubmit:  true,
-                    video: {
-                        fps:            30,
-                        limitSeconds:   60,
-                        countdown:      false
-                    },
-                    image: {
-                        quality: .9
-                    },
-                    notifier: {
-                        entertain:         true,
-                        entertainClass:    'bg',
-                        entertainLimit:    4,
-                        entertainInterval: 2000
-                    }
-                })
+            var VideomailClient = require('VideomailClient')
+
+            new VideomailClient({
+                debug:          true,
+                enablePause:    false,
+                disableSubmit:  true,
+                video: {
+                    fps:            30,
+                    limitSeconds:   60,
+                    countdown:      false
+                },
+                image: {
+                    quality: .9
+                },
+                notifier: {
+                    entertain:         true,
+                    entertainClass:    'bg',
+                    entertainLimit:    4,
+                    entertainInterval: 2000
+                }
             })
         </script>
     </body>

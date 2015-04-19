@@ -59,7 +59,7 @@ var Recorder = function(visuals, replay, options) {
         debug('Recorder: onUserMediaReady()')
 
         samplesCount = framesCount = 0
-        submitting   = false
+        unloaded = submitting = false
 
         show()
         self.emit('ready')
@@ -100,12 +100,10 @@ var Recorder = function(visuals, replay, options) {
 
                 var errorListeners = self.listeners('error')
 
-                if (errorListeners) {
+                if (errorListeners.length) {
                     self.emit('error', err)
 
-                    setTimeout(function() {
-                        loadUserMedia() // try again
-                    }, options.timeouts.userMedia)
+                    setTimeout(initSocket, options.timeouts.userMedia) // retry after a while
                 } else {
                     debug('Recorder: no error listeners attached but throwing', err)
 
@@ -201,10 +199,9 @@ var Recorder = function(visuals, replay, options) {
 
     function writeCommand(command, args) {
         if (!connected) {
-            debug('Trying to reconnect for the command', command, '…')
+            debug('Reconnecting for the command', command, '…')
 
             initSocket(function() {
-                debug('Reconnected')
                 writeCommand(command, args)
             })
         } else if (stream) {
@@ -224,7 +221,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function initSocket(cb) {
-        if (!connected && !unloaded) {
+        if (!connected) {
 
             debug('Recorder: initialising web socket to %s', options.socketUrl)
 
@@ -263,8 +260,6 @@ var Recorder = function(visuals, replay, options) {
                     self.emit('error', new VideomailError('Unable to connect', {
                         explanation: 'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?'
                     }))
-
-                    self.unload(err)
                 } else {
 
                     // ignore error if there is no stream, see race condition at
@@ -278,14 +273,10 @@ var Recorder = function(visuals, replay, options) {
             stream.on('end', function() {
                 connected = false
 
-                self.emit('ended')
-
-                // do not attempt to reconnect when replay is shown
-                if (!visuals.isReplayShown())
+                // only attempt to reconnect when recording
+                if (visuals.isRecording())
                     options.reconnect && setTimeout(function() {
-                        initSocket(function() {
-                            self.emit('reconnected')
-                        })
+                        initSocket()
                     }, 2e3)
             })
 
@@ -305,6 +296,22 @@ var Recorder = function(visuals, replay, options) {
             stream.on('data', function(data) {
                 executeCommand.call(self, data)
             })
+        }
+    }
+
+    function disconnect() {
+        if (connected) {
+            debug('Recorder: disconnect()')
+
+            if (submitting)
+                // server will disconnect socket automatically after submitting
+                connected = false
+
+            else if (stream) {
+                // force to disconnect socket right now to clean temp files on server
+                stream.end()
+                stream = undefined
+            }
         }
     }
 
@@ -353,46 +360,42 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.unload = function(e) {
-        var cause
+        if (!unloaded) {
+            var cause
 
-        if (e)
-            cause = e.name || e.statusText || e.toString()
+            if (e)
+                cause = e.name || e.statusText || e.toString()
 
-        debug('Recorder: unload()', cause)
+            debug('Recorder: unload(), cause:', cause)
 
-        this.removeAllListeners()
-        this.reset()
+            this.reset()
 
-        clearUserMediaTimeout()
-
-        if (submitting)
-            // server will disconnect socket automatically after submitting
-            connected = false
-
-        else if (stream) {
-            // force to disconnect socket right now to clean temp files on server
-            stream.end()
-            stream = undefined
+            clearUserMediaTimeout()
         }
+
+        disconnect()
 
         unloaded = true
     }
 
     this.reset = function() {
-        debug('Recorder: reset()')
+        // no need to reset when already unloaded
+        if (!unloaded) {
+            debug('Recorder: reset()')
 
-        this.emit('resetting')
+            this.emit('resetting')
 
-        rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
+            rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
-        rafId = null
+            rafId = null
 
-        replay.reset()
+            replay.reset()
 
-        // important to free memory
-        userMedia && userMedia.stop()
+            // important to free memory
+            userMedia && userMedia.stop()
 
-        key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
+            key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
+        }
     }
 
     this.validate = function() {
@@ -512,17 +515,18 @@ var Recorder = function(visuals, replay, options) {
 
         self.on('submitted', function() {
             submitting = false
+            self.unload()
         })
     }
 
-    this.build = function(cb) {
+    this.build = function() {
         var err = browser.checkRecordingCapabilities()
 
         if (!err)
             err = browser.checkBufferTypes()
 
         if (err)
-            cb(err)
+            this.emit('error', err)
 
         else {
             recorderElement = visuals.querySelector('video.' + options.selectors.userMediaClass)
@@ -540,8 +544,6 @@ var Recorder = function(visuals, replay, options) {
 
             initEvents()
             initSocket()
-
-            cb()
         }
     }
 

@@ -17,23 +17,16 @@ videomail-client ✉
 
 Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
 
-## Demo / Fully working version
+* <a href="#examples">Examples</a>
+* <a href="#demo">Demo / Fully working version</a>
+* <a href="#options">Options</a>
+* <a href="#api">API</a>
+* <a href="#whitelist">Whitelist</a>
+* <a href="#compatibility">Backward compatibility</a>
+* <a href="#changes">Breaking changes (Changelog)</a>
+* <a href="#notes">Notes</a>
 
-Check out the full version with all its features on [videomail.io](https://videomail.io) itself.
-
-That site runs on AngularJS where I only have these two code lines ...
-
-```js
-// loads Videomail into global scope
-require('videomail-client')
-
-// initialises the client with defaults
-// inside the HTML container with the ID 'videomail'
-Videomail.init()
-```
-
-... and bundle all that through Browserify. Enough said.
-
+<a name="examples"></a>
 ## Examples
 
 To run the examples in your browser, just do this:
@@ -48,28 +41,36 @@ To run the examples in your browser, just do this:
 <html>
     <body>
         <div id="videomail"></div>
-        <script async src="/dist/videomail-client.js"></script>
+        <script src="/dist/videomail-client.js"></script>
         <script>
-            window.addEventListener('load', function() {
-                Videomail.init({
-                    debug:         true, // outputs interesting stuff into the console
-                    disableSubmit: true  // submissions disabled to keep example simple
-                })
+            var VideomailClient = require('VideomailClient')
+
+            new VideomailClient({
+                debug:         true,
+                disableSubmit: true
             })
         </script>
     </body>
 </html>
 ```
 
-This will load your webcam, fill that placeholder containing the `id="videomail"` with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy. It does all the hard work for you.
+This will load your webcam, fill the default placeholder containing the `id="videomail"` with HTML and CSS code, place buttons such as `record`, `pause`, `stop` and much more. Easy. It does all the hard work for you.
 
 The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
 
 With the `debug` option you see additional information in the console. This to enhance DX. If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent. This requires a little more code, see examples directory.
 
+<a name="demo"></a>
+## Demo / Fully working version
+
+Check out the full version with all its features on [videomail.io](https://videomail.io) itself.
+
+That site runs on AngularJS where I just include `require('videomail-client')` in the app logic and bundle all that through Browserify. Enough said.
+
+<a name="options"></a>
 ## Options
 
-These are the default options:
+These are the default options, located under `/src/options.js`:
 
 ```js
 {
@@ -139,71 +140,61 @@ These are the default options:
 }
 ```
 
-You can change any of these through the `Videomail.init({ ... })` call.
+You can change any of these with your own and pass these onto the VideomailClient constructor:
+
+```js
+var videomailClient = new VideomailClient({siteName: 'my site name'})
+```
 
 If you look into the `/examples` folder, you'll spot great examples on how to use these options the correct way.
 
+<a name="api"></a>
 ## API
 
-* <a href="#init">`Videomail.init()`</a>
-* <a href="#onEvent">`controller.on()`</a>
-* <a href="#unload">`controller.unload()`</a>
-* <a href="#addReplay">`controller.addReplay()`</a>
+* <a href="#constructor">`new VideomailClient()`</a>
+* <a href="#on">`videomailClient.on()`</a>
+* <a href="#unload">`videomailClient.unload()`</a>
+* <a href="#replay">`videomailClient.replay()`</a>
+* <a href="#startOver">`videomailClient.startOver()`</a>
 
-<a name="init"></a>
-### Videomail.init([options,] [callback])
+<a name="constructor"></a>
+### new VideomailClient([options])
 
-The init function accepts a JSON with options and its optional callback returns either an error or an instance of the videomail controller.
+The constructor accepts a JSON with optional options, see above.
 
-Both arguments are optional.
+<a name="on"></a>
+### videomailClient.on([event,] [callback])
 
-Example:
+The videomail controller emits lots of useful events for your app. Here an example:
 
 ```js
-Videomail.init({
-    debug: true
-}, function(err, controller) {
-    ...
+videomailClient.on('ready', function() {
+    // enable a button somewhere
+})
+
+videomailClient.on('submitted', function(videomail, response) {
+    // continue with your own app logic
 })
 ```
 
-The Videomail-Client already comes with internal error handling mechanism however depending on your app logic you might want to process errors further.
-
-<a name="onEvent"></a>
-### controller.on([event,] [callback])
-
-The videomail controller emits lots of useful events for your app. Here's a quick example:
-
-```js
-Videomail.init({
-    debug: true
-}, function(err, controller) {
-    controller.on('ready', function() {
-        // enable a button somewhere
-    })
-
-    controller.on('submitted', function(videomail, response) {
-        // continue with your own app logic
-    })
-})
-```
-
-#### Supported events: 
+#### Supported events:
 `connected`, `ready`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
 
 Some of these events have parameters.
 
+The Videomail-Client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
+
 <a name="unload"></a>
-### `controller.unload()`
+### videomailClient.unload()
 
 Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with AngularJS' destroy event, for example:
 
 ```js
-$scope.$on('$destroy', controller.unload.bind(controller))
+$scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
 ```
 
-<a name="addReplay"></a>
-### `controller.addReplay(parentElement, videomail)`
+<a name="replay"></a>
+### videomailClient.addReplay(parentElement, videomail)
 
 Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission.
 
@@ -217,12 +208,19 @@ then this will be used instead of adding a new dom element.
 
 For a full example how to use addReplay() properly, check out the `submit.html` inside the examples directory.
 
+<a name="startOver"></a>
+### videomailClient.startOver()
+
+Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
+
+<a name="whitelist"></a>
 ## Whitelist
 
 Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server.
 
 In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending video mails. To fix that, please reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
+<a name="compatibility"></a>
 ## Backward compatibility
 
 Forget IE, Safari and iPhones because they still don't support `getUserMedia()`, *chuckle* - whereas these browsers work like a charm:
@@ -235,20 +233,31 @@ Forget IE, Safari and iPhones because they still don't support `getUserMedia()`,
 
 Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
 
-## Unfinished Metamorphosis (aka Development)
+<a name="changes"></a>
+## Breaking changes (Changelog)
+
+### v1.1.0 (2015-04-18)
+
+- **VideomailClient:** Do not initialize the client in the global scope but return an object
+  ([#3](https://github.com/binarykitchen/videomail-client/issues/3))
+
+<a name="notes"></a>
+## Notes
+
+### Unfinished Metamorphosis (aka Development)
 
 This is just the beginning. I will add a lot more over time.
 
 Bear with me, there are lots of problems to crack, especially with the performance, audio part and some unit tests are missing. I do not want to waste too much time on perfection unless it's proven to work then I rewrite piece by piece.
 
-## Coming soon / Planned
+### Coming soon / Planned
 
 1. Avoid global scope pollution
 2. `delete()`, `get()` and `list()` operations
 3. Audio recording
 4. E2E tests
 
-## Credits
+### Credits
 
 These guys helped and/or inspired me for this mad project:
 
@@ -263,6 +272,6 @@ These guys helped and/or inspired me for this mad project:
 
 They all deserve lots of love.
 
-## Final philosophy
+### Final philosophy
 
 This planet is completely sold. And talk is overrated. that's why my primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.

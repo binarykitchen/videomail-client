@@ -36,7 +36,7 @@ var Form = function(container, formElement, options) {
         setDisabled(false, buttonsToo)
     }
 
-    this.build = function(cb) {
+    this.build = function() {
 
         if (options.enableAutoValidation) {
             var textElements = formElement.querySelectorAll('input, textarea')
@@ -60,8 +60,6 @@ var Form = function(container, formElement, options) {
             e.preventDefault()
             container.submit(getData())
         })
-
-        cb()
     }
 
     this.validate = function() {

@@ -1,5 +1,4 @@
-var async        = require('async'),
-    util         = require('util'),
+var util = require('util'),
 
     Replay          = require('./visuals/replay'),
     Recorder        = require('./visuals/recorder'),
@@ -35,7 +34,7 @@ var Visuals = function(container, options) {
         }
     }
 
-    function buildChildren(cb) {
+    function buildChildren() {
         debug('Visuals: buildChildren()')
 
         buildNoScriptTag()
@@ -43,7 +42,7 @@ var Visuals = function(container, options) {
         recorderInsides.build()
         replay.build()
 
-        recorder.build(cb)
+        recorder.build()
     }
 
     function processError(err) {
@@ -77,7 +76,7 @@ var Visuals = function(container, options) {
         return !self.isNotifying() && !replay.isShown() && !recorderInsides.isCountingDown()
     }
 
-    this.build = function(cb) {
+    this.build = function() {
 
         visualsElement = container.querySelector('.' + options.selectors.visualsClass)
 
@@ -103,14 +102,7 @@ var Visuals = function(container, options) {
             visualsElement.style.height = options.video.height + 'px'
 
         initEvents()
-
-        buildChildren(function(err) {
-            if (err) {
-                processError(err)
-                cb(err)
-            } else
-                cb()
-        })
+        buildChildren()
     }
 
     this.querySelector = function(selector) {

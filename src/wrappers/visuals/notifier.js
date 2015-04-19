@@ -1,6 +1,5 @@
 var util           = require('util'),
-    EventEmitter   = require('./../../util/eventEmitter'),
-    VideomailError = require('./../../util/videomailError')
+    EventEmitter   = require('./../../util/eventEmitter')
 
 var Notifier = function(visuals, options) {
 
@@ -55,9 +54,6 @@ var Notifier = function(visuals, options) {
             })
             .on('preview', function() {
                 self.hide()
-            })
-            .on('error', function(err) {
-                self.block(VideomailError.create(err, options))
             })
             .on('stopping', function(limitReached) {
                 onStopping(limitReached)
