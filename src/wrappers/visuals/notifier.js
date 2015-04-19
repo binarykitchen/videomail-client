@@ -7,6 +7,7 @@ var Notifier = function(visuals, options) {
 
     var self    = this,
         debug   = options.debug,
+        built   = false,
 
         notifyElement,
         messageElement,
@@ -110,25 +111,29 @@ var Notifier = function(visuals, options) {
     }
 
     this.build = function() {
-        notifyElement = visuals.querySelector('.notifier')
+        if (!built) {
+            notifyElement = visuals.querySelector('.notifier')
 
-        if (!notifyElement) {
-            notifyElement = document.createElement('DIV')
-            notifyElement.classList.add('notifier')
+            if (!notifyElement) {
+                notifyElement = document.createElement('DIV')
+                notifyElement.classList.add('notifier')
 
-            this.hide()
+                this.hide()
 
-            visuals.appendChild(notifyElement)
-        } else
-            this.hide()
+                visuals.appendChild(notifyElement)
+            } else
+                this.hide()
 
-        if (!notifyElement.width && options.video.width)
-            notifyElement.width = options.video.width
+            if (!notifyElement.width && options.video.width)
+                notifyElement.width = options.video.width
 
-        if (!notifyElement.height && options.video.height)
-            notifyElement.height = options.video.height
+            if (!notifyElement.height && options.video.height)
+                notifyElement.height = options.video.height
 
-        initEvents()
+            initEvents()
+
+            built = true
+        }
     }
 
     this.hide = function() {
