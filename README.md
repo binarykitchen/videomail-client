@@ -71,83 +71,12 @@ That site runs on AngularJS where I just include `require('videomail-client')` i
 <a name="options"></a>
 ## Options
 
-These are the default options, located under `/src/options.js`:
+There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at:
+https://github.com/binarykitchen/videomail-client/blob/master/src/options.js
 
-```js
-{
-    logger:                 console,                // define logging instance
-    debug:                  false,                  // set true to log more info
-    baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos
-    socketUrl:              'wss://videomail.io',   // leave as it, permanent url to send frames
-    siteName:               'videomail-client-demo',// Required for the API. If you change it, contact me
-    reconnect:              true,                   // automatically reconnects
-    cache:                  true,                   // reduces GET queries when loading videos
-    insertCss:              true,                   // inserts predefined CSS, see examples
-    enablePause:            true,                   // enable pause/resume button
-    enableAutoPause:        true,                   // automatically pauses when window becomes inactive
-    enableSpace:            true,                   // hitting space can pause recording
-    disableSubmit:          false,                  // set this to true if you do not want to submit videos,
-                                                    // but just want to record and replay these temporarily
-    enableAutoValidation:   true,                   // automatically validates all form inputs if any exist
+In most cases, these defaults are good enough. But `siteName` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
-    selectors: {                                    // default CSS selectors you can alter, see examples
-        containerId:    'videomail',
-        replayClass:    'replay',
-        userMediaClass: 'userMedia',
-        visualsClass:   'visuals',
-        buttonsClass:   'buttons',
-
-        recordButtonClass: 'record',
-        pauseButtonClass:  'pause',
-        resumeButtonClass: 'resume',
-        stopButtonClass:   'stop',
-        backButtonClass:   'back',
-        submitButtonClass: 'submit',
-
-        submitButtonId:    'submitBtn',
-        formId:            null
-    },
-    audio: {
-        enabled: false                              // experimental, not working properly yet
-    },
-    video: {
-        fps:            15,                         // depends on your connection
-        limitSeconds:   30,                         // recording automatically stops after that limit
-        countdown:      3,                          // set it to 0 or false to disable it
-        width:          320,
-        height:         240
-    },
-    image: {
-        quality:    .5,
-        types:      ['webp', 'jpeg']                // recommended settings to make most of all browsers
-    },
-    text: {
-        paused:         'Paused',                   // alter these text if you have internationalisation
-        processing:     'Processing',
-        limitReached:   'Limit reached'
-    },
-    notifier: {
-        entertain:         false,                   // when true, user is entertained while waiting, see examples
-        entertainClass:    'bg',
-        entertainLimit:    7,
-        entertainInterval: 15000
-    },
-    timeouts: {
-        userMedia:  7e3,                            // increase if you want user give more time to enable webcam
-        connection: 1e4                             // increase if connection is slow
-    },
-    displayErrors:    true,                         // show errors inside the container?
-    fakeUaString:     null                          // just for testing purposes to simulare VM on diff browsers
-}
-```
-
-You can change any of these with your own and pass these onto the VideomailClient constructor:
-
-```js
-var videomailClient = new VideomailClient({siteName: 'my site name'})
-```
-
-Looking at the examples in the `/examples` folder should give you some ideas how to use these.
+Looking at the examples in the `/examples` folder should give you some ideas how to use these options.
 
 <a name="api"></a>
 ## API
@@ -163,7 +92,11 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 <a name="constructor"></a>
 ### new VideomailClient([options])
 
-The constructor accepts a JSON with optional <a href="#options">options</a>.
+The constructor accepts a JSON with optional <a href="#options">options</a>. Example:
+
+```js
+var videomailClient = new VideomailClient({siteName: 'my site name'})
+```
 
 <a name="on"></a>
 ### videomailClient.on([event,] [callback])
