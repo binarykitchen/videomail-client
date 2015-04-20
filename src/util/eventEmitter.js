@@ -38,5 +38,7 @@ module.exports = function(options, name) {
         return singletonEvent.listeners(eventName)
     }
 
-    this.removeAllListeners = singletonEvent.removeAllListeners
+    this.removeAllListeners = function() {
+        singletonEvent.removeAllListeners()
+    }
 }

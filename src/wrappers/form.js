@@ -3,8 +3,6 @@ var util         = require('util'),
 
 var Form = function(container, formElement, options) {
 
-    var built = false
-
     function getData() {
         var limit = formElement.elements.length,
             data  = {}
@@ -39,33 +37,28 @@ var Form = function(container, formElement, options) {
     }
 
     this.build = function() {
+        if (options.enableAutoValidation) {
+            var textElements = formElement.querySelectorAll('input, textarea')
 
-        if (!built) {
-            if (options.enableAutoValidation) {
-                var textElements = formElement.querySelectorAll('input, textarea')
-
-                for (var i = 0, len = textElements.length; i < len; i++) {
-                    textElements[i].addEventListener('input', function() {
-                        container.validate()
-                    })
-                }
-
-                var selectElements = formElement.querySelectorAll('select')
-
-                for (var i = 0, len = selectElements.length; i < len; i++) {
-                    selectElements[i].addEventListener('change', function() {
-                        container.validate()
-                    })
-                }
+            for (var i = 0, len = textElements.length; i < len; i++) {
+                textElements[i].addEventListener('input', function() {
+                    container.validate()
+                })
             }
 
-            formElement.addEventListener('submit', function(e) {
-                e.preventDefault()
-                container.submit(getData())
-            })
+            var selectElements = formElement.querySelectorAll('select')
 
-            built = true
+            for (var i = 0, len = selectElements.length; i < len; i++) {
+                selectElements[i].addEventListener('change', function() {
+                    container.validate()
+                })
+            }
         }
+
+        formElement.addEventListener('submit', function(e) {
+            e.preventDefault()
+            container.submit(getData())
+        })
     }
 
     this.validate = function() {

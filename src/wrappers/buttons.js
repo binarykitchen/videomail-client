@@ -6,7 +6,6 @@ var Buttons = function(container, options) {
     EventEmitter.call(this, options, 'Buttons')
 
     var self  = this,
-        built = false,
 
         buttonsElement,
 
@@ -280,21 +279,17 @@ var Buttons = function(container, options) {
     }
 
     this.build = function() {
-        if (!built) {
-            buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+        buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
-            if (!buttonsElement) {
-                buttonsElement = document.createElement('DIV')
-                buttonsElement.classList.add(options.selectors.buttonsClass)
+        if (!buttonsElement) {
+            buttonsElement = document.createElement('DIV')
+            buttonsElement.classList.add(options.selectors.buttonsClass)
 
-                container.appendChild(buttonsElement)
-            }
-
-            buildButtons()
-            initEvents()
-
-            built = true
+            container.appendChild(buttonsElement)
         }
+
+        buildButtons()
+        initEvents()
     }
 }
 

@@ -17,7 +17,6 @@ var Container = function(options) {
     EventEmitter.call(this, options, 'Container')
 
     var self  = this,
-        built = false,
 
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
@@ -102,26 +101,19 @@ var Container = function(options) {
     }
 
     this.build = function(containerId) {
-        if (!built) {
-            containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
-            containerElement = document.getElementById(containerId)
+        containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
+        containerElement = document.getElementById(containerId)
 
-            if (!containerElement)
-                this.emit('error', new VideomailError('The container ID is invalid!', {
-                    explanation: 'No tag with the ID ' + containerId + ' could be found.'
-                }))
-            else {
-                options.insertCss && prependDefaultCss()
+        if (!containerElement)
+            this.emit('error', new VideomailError('The container ID is invalid!', {
+                explanation: 'No tag with the ID ' + containerId + ' could be found.'
+            }))
+        else {
+            options.insertCss && prependDefaultCss()
 
-                // trick to avoid warning: possible EventEmitter memory leak detected.
-                this.removeAllListeners()
-
-                initEvents()
-                buildForm()
-                buildChildren()
-
-                built = true
-            }
+            initEvents()
+            buildForm()
+            buildChildren()
         }
     }
 
