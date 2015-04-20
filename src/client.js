@@ -32,10 +32,10 @@ var VideomailClient = function(options) {
 
     EventEmitter.call(this, localOptions, 'VideomailClient')
 
-    this.form = function() {
+    this.form = function(containerId) {
 
         function buildForm() {
-            container.build()
+            container.build(containerId)
             self.emit('formReady')
         }
 

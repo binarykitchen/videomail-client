@@ -2,6 +2,7 @@ var websocket    = require('websocket-stream'),
     Frame        = require('canvas-to-buffer'),
     util         = require('util'),
 
+    Constants       = require('./../../constants'),
     EventEmitter    = require('./../../util/eventEmitter'),
     Browser         = require('./../../util/browser'),
     Humanize        = require('./../../util/humanize'),
@@ -121,10 +122,10 @@ var Recorder = function(visuals, replay, options) {
         key = args.key
 
         if (args.mp4)
-            replay.setMp4Source(args.mp4 + options.SITE_NAME_LABEL + '/' + options.siteName)
+            replay.setMp4Source(args.mp4 + Constants.SITE_NAME_LABEL + '/' + options.siteName)
 
         if (args.webm)
-            replay.setWebMSource(args.webm + options.SITE_NAME_LABEL + '/' + options.siteName)
+            replay.setWebMSource(args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName)
 
         self.hide()
         self.emit('preview', args.key)
@@ -232,7 +233,7 @@ var Recorder = function(visuals, replay, options) {
             stream = websocket(
                 options.socketUrl +
                 '?' +
-                encodeURIComponent(options.SITE_NAME_LABEL) +
+                encodeURIComponent(Constants.SITE_NAME_LABEL) +
                 '=' +
                 encodeURIComponent(options.siteName)
             )

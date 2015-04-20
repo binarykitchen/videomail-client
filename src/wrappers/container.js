@@ -6,6 +6,7 @@ var insertCss      = require('insert-css'),
     Form           = require('./form'),
 
     Resource       = require('./../resource'),
+    Constants      = require('./../constants'),
 
     VideomailError = require('./../util/videomailError'),
     EventEmitter   = require('./../util/eventEmitter'),
@@ -100,13 +101,14 @@ var Container = function(options) {
         })
     }
 
-    this.build = function() {
+    this.build = function(containerId) {
         if (!built) {
-            containerElement = document.getElementById(options.selectors.containerId)
+            containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
+            containerElement = document.getElementById(containerId)
 
             if (!containerElement)
                 this.emit('error', new VideomailError('The container ID is invalid!', {
-                    explanation: 'No tag with the ID ' + options.selectors.containerId + ' could be found.'
+                    explanation: 'No tag with the ID ' + containerId + ' could be found.'
                 }))
             else {
                 options.insertCss && prependDefaultCss()

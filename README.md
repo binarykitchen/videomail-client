@@ -121,11 +121,11 @@ They should be self-explanatory. If not, ask for better documentation. Then, som
 The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
 
 <a name="form"></a>
-### videomailClient.form()
+### videomailClient.form([containerId])
 
-Automatically fills the DOM with a form for video recording. If a HTML element exist with the ID defined under options `{ selectors.containerId }`, that placeholder will be filled.
+Automatically fills the DOM with a form for video recording. If a HTML element who ID equals `containerId`, that placeholder will be filled. Otherwise an error occurs.
 
-By default `{ selectors.containerId }` is set to `videomail`.
+By default the optional parameter `containerId` is set to `videomail`.
 
 <a name="unload"></a>
 ### videomailClient.unload()

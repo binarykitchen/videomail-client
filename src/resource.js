@@ -1,4 +1,6 @@
-var superagent = require('superagent')
+var superagent = require('superagent'),
+
+    Constants  = require('./constants')
 
 module.exports = function(options) {
 
@@ -24,7 +26,7 @@ module.exports = function(options) {
         superagent
             .get('/videomail/' + identifier + '/snapshot')
             .set('Accept', 'application/json')
-            .set(options.SITE_NAME_LABEL, options.siteName)
+            .set(Constants.SITE_NAME_LABEL, options.siteName)
             .timeout(options.timeouts.connection)
             .end(function(err, res) {
 
@@ -52,7 +54,7 @@ module.exports = function(options) {
 
     this.post = function(videomail, cb) {
         var queryParams = {}
-        queryParams[options.SITE_NAME_LABEL] = options.siteName
+        queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
         superagent
             .post(options.baseUrl + '/videomail/')

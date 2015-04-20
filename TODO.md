@@ -1,7 +1,8 @@
 ### TODOs
 | Filename | line # | TODO
 |:------|:------:|:------
-| src/index.js | 13 | consider using a web component instead!
+| src/client.js | 70 | remove later
+| src/client.js | 78 | remove later
 | src/util/browser.js | 95 | consider copying the changes to videomail before publishing to see if it works
 | src/util/standardize.js | 3 | add https://github.com/eligrey/classList.js when package.json is avail
 | src/util/items/sample.js | 3 | turn this into an npm module, but only when it's working

@@ -61,8 +61,5 @@ module.exports = {
         connection: 1e4                             // increase if connection is slow
     },
     displayErrors:    true,                         // show errors inside the container?
-    fakeUaString:     null,                         // just for testing purposes to simulare VM on diff browsers
-
-    // hidden constants (changing these only break down functionality, so be careful)
-    SITE_NAME_LABEL: 'x-videomail-site-name'
+    fakeUaString:     null                          // just for testing purposes to simulare VM on diff browsers
 }
