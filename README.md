@@ -104,19 +104,21 @@ var videomailClient = new VideomailClient({siteName: 'my site name'})
 The VideomailClient class is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
 ```js
-videomailClient.on('formReady', function() {
+videomailClient.on('FORM_READY', function() {
     // form is ready for recording
 })
 
-videomailClient.on('submitted', function(videomail, response) {
+videomailClient.on('SUBMITTED', function(videomail, response) {
     // continue with your own app logic
 })
 ```
 
 #### Supported events:
-`formReady`, `connected`, `userMediaReady`, `resetting`, `countdown`, `recording`, `progress`, `stopping`, `notifying`, `blocking`, `beginVideoEncoding`, `beginAudioEncoding`, `validating`, `preview`, `paused`, `resuming`, `submitting`, `submitted`, `previewShown` and `replayShown`.
 
-They should be self-explanatory. If not, ask for better documentation. Then, some of these events have parameters.
+Check them out at the annotated source code:
+https://github.com/binarykitchen/videomail-client/blob/master/src/events.js
+
+They should be self-explanatory. If not, ask for better documentation. Then, some of these events may come with parameters.
 
 The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
 

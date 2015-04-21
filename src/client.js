@@ -3,6 +3,7 @@ var merge           = require('merge-recursive'),
     util            = require('util'),
 
     defaultOptions = require('./options'),
+    Events         = require('./events'),
     EventEmitter   = require('./util/eventEmitter'),
     Container      = require('./wrappers/container'),
     Replay         = require('./wrappers/visuals/replay'),
@@ -32,11 +33,14 @@ var VideomailClient = function(options) {
 
     EventEmitter.call(this, localOptions, 'VideomailClient')
 
+    // expose all possible events
+    this.events = Events
+
     this.form = function(containerId) {
 
         function buildForm() {
             container.build(containerId)
-            self.emit('formReady')
+            self.emit(Events.FORM_READY)
         }
 
         readystate.interactive(buildForm)

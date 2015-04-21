@@ -1,4 +1,6 @@
 var util         = require('util'),
+
+    Events       = require('./../../../events'),
     EventEmitter = require('./../../../util/eventEmitter'),
 
     Countdown   = require('./recorder/countdown'),
@@ -42,21 +44,21 @@ var RecorderInsides = function(visuals, options) {
 
     function initEvents() {
         self
-            .on('recording', function() {
+            .on(Events.RECORDING, function() {
                 startRecording(function(limitReached) {
                     visuals.stop(limitReached)
                 })
             })
-            .on('resuming', function() {
+            .on(Events.RESUMING, function() {
                 resumeRecording()
             })
-            .on('stopping', function() {
+            .on(Events.STOPPING, function() {
                 stopRecording()
             })
-            .on('paused', function() {
+            .on(Events.PAUSED, function() {
                 pauseRecording()
             })
-            .on('resetting', function() {
+            .on(Events.RESETTING, function() {
                 self.hidePause()
                 self.hideCountdown()
             })

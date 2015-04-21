@@ -1,4 +1,6 @@
 var util         = require('util'),
+
+    Events       = require('./../events'),
     EventEmitter = require('./../util/eventEmitter')
 
 var Buttons = function(container, options) {
@@ -200,29 +202,29 @@ var Buttons = function(container, options) {
 
     function initEvents() {
 
-        self.on('userMediaReady', function() {
+        self.on(Events.USER_MEDIA_READY, function() {
             onReady()
-        }).on('preview', function() {
+        }).on(Events.PREVIEW, function() {
             onPreview()
-        }).on('paused', function() {
+        }).on(Events.PAUSED, function() {
             onPaused()
-        }).on('recording', function() {
+        }).on(Events.RECORDING, function() {
             onRecording()
-        }).on('resuming', function() {
+        }).on(Events.RESUMING, function() {
             onResuming()
-        }).on('stopping', function() {
+        }).on(Events.STOPPING, function() {
             onStopping()
-        }).on('countdown', function() {
+        }).on(Events.COUNTDOWN, function() {
             onCountdown()
-        }).on('submitting', function() {
+        }).on(Events.SUBMITTING, function() {
             onSubmitting()
-        }).on('resetting', function() {
+        }).on(Events.RESETTING, function() {
             onResetting()
-        }).on('invalid', function() {
+        }).on(Events.INVALID, function() {
             onInvalid()
-        }).on('valid', function() {
+        }).on(Events.VALID, function() {
             onValid()
-        }).on('submitted', function() {
+        }).on(Events.SUBMITTED, function() {
             onSubmitted()
         })
 

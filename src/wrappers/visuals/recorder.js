@@ -2,6 +2,7 @@ var websocket    = require('websocket-stream'),
     Frame        = require('canvas-to-buffer'),
     util         = require('util'),
 
+    Events          = require('./../../events'),
     Constants       = require('./../../constants'),
     EventEmitter    = require('./../../util/eventEmitter'),
     Browser         = require('./../../util/browser'),
@@ -63,7 +64,7 @@ var Recorder = function(visuals, replay, options) {
         unloaded = submitting = false
 
         show()
-        self.emit('userMediaReady')
+        self.emit(Events.USER_MEDIA_READY)
     }
 
     function clearUserMediaTimeout() {
@@ -77,7 +78,7 @@ var Recorder = function(visuals, replay, options) {
         try {
             userMediaTimeout = setTimeout(function() {
                 if (!self.isReady())
-                    self.emit('error', browser.getNoAccessIssue())
+                    self.emit(Events.ERROR, browser.getNoAccessIssue())
             }, options.timeouts.userMedia)
 
             navigator.getUserMedia({
@@ -92,21 +93,21 @@ var Recorder = function(visuals, replay, options) {
                     onUserMediaReady.bind(self),
                     onAudioSample.bind(self),
                     function(err) {
-                        self.emit('error', err)
+                        self.emit(Events.ERROR, err)
                     }
                 )
 
             }, function(err) {
                 clearUserMediaTimeout()
 
-                var errorListeners = self.listeners('error')
+                var errorListeners = self.listeners(Events.ERROR)
 
                 if (errorListeners.length) {
-                    self.emit('error', err)
+                    self.emit(Events.ERROR, err)
 
                     setTimeout(initSocket, options.timeouts.userMedia) // retry after a while
                 } else {
-                    debug('Recorder: no error listeners attached but throwing', err)
+                    debug('Recorder: no error listeners attached but throwing error', err)
 
                     // weird situation, throw it since there are no error listeners yet
                     throw err
@@ -114,7 +115,12 @@ var Recorder = function(visuals, replay, options) {
             })
 
         } catch (exc) {
-            this.emit('error', exc)
+            var errorListeners = self.listeners(Events.ERROR)
+
+            if (errorListeners.length)
+                self.emit(Events.ERROR, exc)
+            else
+                debug('Recorder: no error listeners attached but throwing exception', exc)
         }
     }
 
@@ -128,7 +134,7 @@ var Recorder = function(visuals, replay, options) {
             replay.setWebMSource(args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName)
 
         self.hide()
-        self.emit('preview', args.key)
+        self.emit(Events.PREVIEW, args.key)
 
         if (options.debug) {
             var waitingTime = Date.now() - stopTime
@@ -152,7 +158,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function updateOverallProgress() {
-        self.emit('progress', frameProgress, sampleProgress)
+        self.emit(Events.PROGRESS, frameProgress, sampleProgress)
     }
 
     function executeCommand(data) {
@@ -176,7 +182,7 @@ var Recorder = function(visuals, replay, options) {
                 preview(command.args)
                 break
             case 'error':
-                this.emit('error', new VideomailError('Oh f**k, server error!', {
+                this.emit(Events.ERROR, new VideomailError('Oh f**k, server error!', {
                     explanation: command.args.err || '(No explanation given)'
                 }))
                 break
@@ -187,13 +193,13 @@ var Recorder = function(visuals, replay, options) {
                 result = updateSampleProgress(command.args)
                 break
             case 'beginAudioEncoding':
-                this.emit('beginAudioEncoding')
+                this.emit(Events.BEGIN_AUDIO_ENCODING)
                 break
             case 'beginVideoEncoding':
-                this.emit('beginVideoEncoding')
+                this.emit(Events.BEGIN_VIDEO_ENCODING)
                 break
             default:
-                this.emit('error', 'Unknown server command: ' + command.command)
+                this.emit(Events.ERROR, 'Unknown server command: ' + command.command)
                 break
         }
     }
@@ -258,7 +264,7 @@ var Recorder = function(visuals, replay, options) {
 
                     // Emit error first before unloading, because
                     // unloading will remove event listeners.
-                    self.emit('error', new VideomailError('Unable to connect', {
+                    self.emit(Events.ERROR, new VideomailError('Unable to connect', {
                         explanation: 'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?'
                     }))
                 } else {
@@ -267,7 +273,7 @@ var Recorder = function(visuals, replay, options) {
                     // https://github.com/maxogden/websocket-stream/issues/58#issuecomment-69711544
 
                     if (stream)
-                        self.emit('error', err ? err : 'Unhandled websocket error')
+                        self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
                 }
             })
 
@@ -285,7 +291,7 @@ var Recorder = function(visuals, replay, options) {
                 if (!connected) {
                     connected = true
 
-                    self.emit('connected')
+                    self.emit(Events.CONNECTED)
 
                     cb && cb()
                 }
@@ -331,7 +337,7 @@ var Recorder = function(visuals, replay, options) {
     this.stop = function(limitReached) {
         debug('stop()')
 
-        this.emit('stopping', limitReached)
+        this.emit(Events.STOPPING, limitReached)
 
         this.reset()
 
@@ -372,11 +378,11 @@ var Recorder = function(visuals, replay, options) {
             this.reset()
 
             clearUserMediaTimeout()
+
+            disconnect()
+
+            unloaded = true
         }
-
-        disconnect()
-
-        unloaded = true
     }
 
     this.reset = function() {
@@ -384,7 +390,7 @@ var Recorder = function(visuals, replay, options) {
         if (!unloaded) {
             debug('Recorder: reset()')
 
-            this.emit('resetting')
+            this.emit(Events.RESETTING)
 
             rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
 
@@ -412,7 +418,7 @@ var Recorder = function(visuals, replay, options) {
 
         userMedia.pause()
 
-        this.emit('paused')
+        this.emit(Events.PAUSED)
     }
 
     this.isPaused = function() {
@@ -422,7 +428,7 @@ var Recorder = function(visuals, replay, options) {
     this.resume = function() {
         debug('Recorder: resume()')
 
-        this.emit('resuming')
+        this.emit(Events.RESUMING)
 
         lastAnimationTimestamp = Date.now()
         userMedia.resume()
@@ -435,7 +441,7 @@ var Recorder = function(visuals, replay, options) {
 
         debug('Recorder: record()')
 
-        this.emit('recording')
+        this.emit(Events.RECORDING)
 
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')
@@ -510,11 +516,11 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function initEvents() {
-        self.on('submitting', function() {
+        self.on(Events.SUBMITTING, function() {
             submitting = true
         })
 
-        self.on('submitted', function() {
+        self.on(Events.SUBMITTED, function() {
             submitting = false
             self.unload()
         })
@@ -527,7 +533,7 @@ var Recorder = function(visuals, replay, options) {
             err = browser.checkBufferTypes()
 
         if (err)
-            this.emit('error', err)
+            this.emit(Events.ERROR, err)
 
         else {
             recorderElement = visuals.querySelector('video.' + options.selectors.userMediaClass)

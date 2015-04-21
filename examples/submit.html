@@ -77,7 +77,10 @@
 
             videomailClient.form()
 
-            videomailClient.on('submitted', onSubmitted.bind(videomailClient))
+            videomailClient.on(
+                videomailClient.events.SUBMITTED,
+                onSubmitted.bind(videomailClient
+            ))
         </script>
     </body>
 </html>

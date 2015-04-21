@@ -5,7 +5,8 @@ var util = require('util'),
     Notifier        = require('./visuals/notifier'),
     RecorderInsides = require('./visuals/inside/recorderInsides'),
 
-    EventEmitter    = require('./../util/eventEmitter')
+    EventEmitter    = require('./../util/eventEmitter'),
+    Events          = require('./../events')
 
 var Visuals = function(container, options) {
 
@@ -45,29 +46,19 @@ var Visuals = function(container, options) {
         recorder.build()
     }
 
-    function processError(err) {
-        options.logger.error(err)
-
-        if (options.displayErrors)
-            notifier.block(err)
-
-        self.reset()
-    }
-
     function initEvents() {
         self
-            .on('error', processError)
-            .on('userMediaReady', function() {
+            .on(Events.USER_MEDIA_READY, function() {
                 self.endWaiting()
                 container.enableForm(false)
             })
-            .on('preview', function() {
+            .on(Events.PREVIEW, function() {
                 self.endWaiting()
             })
-            .on('blocking', function() {
+            .on(Events.BLOCKING, function() {
                 container.disableForm(true)
             })
-            .on('previewShown', function() {
+            .on(Events.PREVIEW_SHOWN, function() {
                 container.validate(true)
             })
     }
@@ -183,7 +174,7 @@ var Visuals = function(container, options) {
 
     this.record = function() {
         if (options.video.countdown) {
-            this.emit('countdown')
+            this.emit(Events.COUNTDOWN)
             recorderInsides.startCountdown(recorder.record.bind(recorder))
         } else
             recorder.record()
@@ -215,6 +206,10 @@ var Visuals = function(container, options) {
 
     this.isPaused = function() {
         return recorder.isPaused()
+    }
+
+    this.block = function(err) {
+        notifier.block(err)
     }
 
     this.hideReplay   = replay.hide.bind(replay)

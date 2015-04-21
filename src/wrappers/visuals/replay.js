@@ -1,4 +1,6 @@
 var util            = require('util'),
+
+    Events          = require('./../../events'),
     Browser         = require('./../../util/browser'),
     EventEmitter    = require('./../../util/eventEmitter')
 
@@ -35,7 +37,7 @@ var Replay = function(parentElement, options) {
         })
 
         self
-            .on('preview', function() {
+            .on(Events.PREVIEW, function() {
                 self.show()
             })
     }
@@ -59,9 +61,9 @@ var Replay = function(parentElement, options) {
         }, 50)
 
         if (!videomail)
-            this.emit('previewShown')
+            this.emit(Events.PREVIEW_SHOWN)
         else
-            this.emit('replayShown')
+            this.emit(Events.REPLAY_SHOWN)
     }
 
     this.build = function() {

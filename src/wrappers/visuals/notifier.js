@@ -1,5 +1,6 @@
 var util           = require('util'),
-    EventEmitter   = require('./../../util/eventEmitter')
+    EventEmitter   = require('./../../util/eventEmitter'),
+    Events         = require('./../../events')
 
 var Notifier = function(visuals, options) {
 
@@ -49,16 +50,16 @@ var Notifier = function(visuals, options) {
         debug('Notifier: initEvents()')
 
         self
-            .on('userMediaReady', function() {
+            .on(Events.USER_MEDIA_READY, function() {
                 self.hide()
             })
-            .on('preview', function() {
+            .on(Events.PREVIEW, function() {
                 self.hide()
             })
-            .on('stopping', function(limitReached) {
+            .on(Events.STOPPING, function(limitReached) {
                 onStopping(limitReached)
             })
-            .on('progress', function(frameProgress, sampleProgress) {
+            .on(Events.PROGRESS, function(frameProgress, sampleProgress) {
                 onProgress(frameProgress, sampleProgress)
             })
     }
@@ -165,9 +166,9 @@ var Notifier = function(visuals, options) {
 
         if (blocking) {
             notifyElement.classList.add('blocking')
-            this.emit('blocking', options)
+            this.emit(Events.BLOCKING, options)
         } else {
-            this.emit('notifying', options)
+            this.emit(Events.NOTIFYING, options)
         }
 
         visuals.hideReplay()

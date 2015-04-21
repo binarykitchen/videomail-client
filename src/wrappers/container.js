@@ -7,6 +7,7 @@ var insertCss      = require('insert-css'),
 
     Resource       = require('./../resource'),
     Constants      = require('./../constants'),
+    Events         = require('./../events'),
 
     VideomailError = require('./../util/videomailError'),
     EventEmitter   = require('./../util/eventEmitter'),
@@ -57,13 +58,22 @@ var Container = function(options) {
 
     function buildChildren() {
         if (!containerElement.classList)
-            self.emit('error', new Error('Sorry, your browser is too old!'))
+            self.emit(Events.ERROR, new Error('Sorry, your browser is too old!'))
         else {
             containerElement.classList.add('videomail')
 
             buttons.build()
             visuals.build()
         }
+    }
+
+    function processError(err) {
+        options.logger.error(err)
+
+        if (options.displayErrors)
+            visuals.block(err)
+        else
+            visuals.reset()
     }
 
     function initEvents() {
@@ -95,7 +105,10 @@ var Container = function(options) {
                 }
             })
 
-        self.on('error', function(err) {
+        // better to keep the one and only error listeners
+        // at one spot, here, because unload() will do a removeAllListeners()
+        self.on(Events.ERROR, function(err) {
+            processError(err)
             self.unload(err)
         })
     }
@@ -105,7 +118,7 @@ var Container = function(options) {
         containerElement = document.getElementById(containerId)
 
         if (!containerElement)
-            this.emit('error', new VideomailError('The container ID is invalid!', {
+            this.emit(Events.ERROR, new VideomailError('The container ID is invalid!', {
                 explanation: 'No tag with the ID ' + containerId + ' could be found.'
             }))
         else {
@@ -163,7 +176,7 @@ var Container = function(options) {
         var valid
 
         if (force || !this.isNotifying()) {
-            this.emit('validating')
+            this.emit(Events.VALIDATING)
 
             var visualsValid = visuals.validate() && buttons.isBackButtonEnabled(),
                 whyInvalid
@@ -186,9 +199,9 @@ var Container = function(options) {
                 valid = visualsValid
 
             if (valid)
-                this.emit('valid')
+                this.emit(Events.VALID)
             else
-                this.emit('invalid', whyInvalid)
+                this.emit(Events.INVALID, whyInvalid)
         }
 
         return valid
@@ -221,16 +234,16 @@ var Container = function(options) {
             videomailFormData.sampleRate = visuals.getAudioSampleRate()
 
         this.disableForm(true)
-        this.emit('submitting')
+        this.emit(Events.SUBMITTING)
 
         resource.post(videomailFormData, function(err, videomail, response) {
 
             self.endWaiting()
 
             if (err)
-                self.emit('error', err)
+                self.emit(Events.ERROR, err)
             else
-                self.emit('submitted', videomail, response)
+                self.emit(Events.SUBMITTED, videomail, response)
         })
     }
 
