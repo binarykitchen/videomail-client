@@ -176,7 +176,8 @@ var Recorder = function(visuals, replay, options) {
 
         switch (command.command) {
             case 'ready':
-                loadUserMedia()
+                if (!userMediaTimeout)
+                    loadUserMedia()
                 break
             case 'preview':
                 preview(command.args)
