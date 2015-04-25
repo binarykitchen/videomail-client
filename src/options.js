@@ -1,5 +1,6 @@
 module.exports = {
-    logger:                 console,                // define logging instance
+    logger:                 null,                   // define logging instance. leave null for default
+    logStackSize:           20,                     // limits the stack size of log outputs to collect
     debug:                  false,                  // set true to log more info
     baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos
     socketUrl:              'wss://videomail.io',   // leave as it, permanent url to send frames

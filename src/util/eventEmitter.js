@@ -1,5 +1,6 @@
 var singletonEvent = require('node-singleton-event'),
-    VideomailError = require('./videomailError')
+    VideomailError = require('./videomailError'),
+    Events         = require('./../events')
 
 module.exports = function(options, name) {
 
@@ -8,7 +9,7 @@ module.exports = function(options, name) {
         var args = [].splice.call(arguments, 0)
 
         // Automatically convert errors to videomail errors
-        if (event === 'error') {
+        if (event === Events.ERROR) {
             var err = args[1]
 
             err = VideomailError.create(err, options)

@@ -44,21 +44,6 @@ module.exports = function(window, navigator) {
         try { return new ActiveXObject("Microsoft.XMLHTTP") } catch (e4) {}
     })
 
-    var method,
-        noop = function() {},
-        methods = [
-            'debug', 'dir', 'error', 'exception', 'info', 'log', 'trace', 'warn'
-        ],
-        length  = methods.length,
-        console = (window.console = window.console || {})
-
-    while (length--) {
-        method = methods[length]
-
-        if (!console[method])
-            console[method] = noop
-    }
-
     if (typeof Object.create != 'function') {
         Object.create = (function() {
             var Object = function() {}

@@ -15,12 +15,12 @@ var Recorder = function(visuals, replay, options) {
     EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
-    if (!options.video.fps)     throw new Error('FPS must be defined')
-    if (!options.video.width)   throw new Error('Video width is too small')
-    if (!options.video.height)  throw new Error('Video height is too small')
+    if (!options.video.fps)     throw VideomailError.create('FPS must be defined', options)
+    if (!options.video.width)   throw VideomailError.create('Video width is too small', options)
+    if (!options.video.height)  throw VideomailError.create('Video height is too small', options)
 
     var self            = this,
-        browser         = new Browser(options.fakeUaString),
+        browser         = new Browser(options),
 
         wantedInterval  = 1e3 / options.video.fps,
         debug           = options.debug,
@@ -183,9 +183,11 @@ var Recorder = function(visuals, replay, options) {
                 preview(command.args)
                 break
             case 'error':
-                this.emit(Events.ERROR, new VideomailError('Oh f**k, server error!', {
-                    explanation: command.args.err || '(No explanation given)'
-                }))
+                this.emit(Events.ERROR, VideomailError.create(
+                    'Oh f**k, server error!',
+                    command.args.err || '(No explanation given)',
+                    options
+                ))
                 break
             case 'confirmFrame':
                 result = updateFrameProgress(command.args)
@@ -259,19 +261,21 @@ var Recorder = function(visuals, replay, options) {
             */
 
             stream.on('error', function(err) {
-                // workaround for bug https://github.com/maxogden/websocket-stream/issues/50
+                // todo: workaround for bug https://github.com/maxogden/websocket-stream/issues/50
 
                 if (stream && stream.destroyed) {
 
                     // Emit error first before unloading, because
                     // unloading will remove event listeners.
-                    self.emit(Events.ERROR, new VideomailError('Unable to connect', {
-                        explanation: 'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?'
-                    }))
+                    self.emit(Events.ERROR, VideomailError.create(
+                        'Unable to connect',
+                        'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?',
+                        options
+                    ))
                 } else {
 
                     // ignore error if there is no stream, see race condition at
-                    // https://github.com/maxogden/websocket-stream/issues/58#issuecomment-69711544
+                    // todo: https://github.com/maxogden/websocket-stream/issues/58#issuecomment-69711544
 
                     if (stream)
                         self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')

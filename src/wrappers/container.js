@@ -23,6 +23,7 @@ var Container = function(options) {
         buttons     = new Buttons(this, options),
         resource    = new Resource(options),
         htmlElement = document.querySelector('html'),
+        hasError    = false,
 
         containerElement,
         form
@@ -68,6 +69,8 @@ var Container = function(options) {
     }
 
     function processError(err) {
+        hasError = true
+
         options.logger.error(err)
 
         if (options.displayErrors)
@@ -118,9 +121,13 @@ var Container = function(options) {
         containerElement = document.getElementById(containerId)
 
         if (!containerElement)
-            this.emit(Events.ERROR, new VideomailError('The container ID is invalid!', {
-                explanation: 'No tag with the ID ' + containerId + ' could be found.'
-            }))
+            this.emit(
+                Events.ERROR,
+                VideomailError.create(
+                    'The container ID is invalid!',
+                    'No tag with the ID ' + containerId + ' could be found.',
+                    options
+                ))
         else {
             options.insertCss && prependDefaultCss()
 
@@ -128,6 +135,8 @@ var Container = function(options) {
             buildForm()
             buildChildren()
         }
+
+        return !hasError
     }
 
     this.querySelector = function(selector) {

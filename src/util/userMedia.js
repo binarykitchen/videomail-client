@@ -102,9 +102,13 @@ module.exports = function(rawVisualUserMedia, options) {
             localMediaStream.removeEventListener('ended',     onPlaying)
 
             if (hasEnded())
-                endedEarlyCallback(new VideomailError('Already busy', {
-                    explanation: 'Probably another browser window is using your webcam?'
-                }))
+                endedEarlyCallback(
+                    VideomailError.create(
+                        'Already busy',
+                        'Probably another browser window is using your webcam?',
+                        options
+                    )
+                )
             else
                 videoCallback()
         }

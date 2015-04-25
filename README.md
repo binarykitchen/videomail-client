@@ -88,6 +88,7 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
 * <a href="#get">`videomailClient.get()`</a>
+* <a href="#canRecord">`videomailClient.canRecord()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -121,6 +122,8 @@ https://github.com/binarykitchen/videomail-client/blob/master/src/events.js
 They should be self-explanatory. If not, ask for better documentation. Then, some of these events may come with parameters.
 
 The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
+
+By the way, all videomail errors are inherited from the class `VideomailError` which comes with additional attributes, useful for debugging weird errors.
 
 <a name="form"></a>
 ### videomailClient.form([containerId])
@@ -160,6 +163,11 @@ Start all over again, resets everything and go back to the ready state. Useful i
 ### videomailClient.get(key, cb)
 
 Queries a videomail (JSON) by a given key. When submitted, you get the key from the `submitted` event and can use that for storage and future queries of videomails.
+
+<a name="canRecord"></a>
+### videomailClient.canRecord()
+
+An utility function which returns true if the current browser is capable of webcam recording. It returns false for <a href="#compatibility">incompatible</a> browsers.
 
 <a name="whitelist"></a>
 ## Whitelist

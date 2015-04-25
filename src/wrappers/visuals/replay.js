@@ -9,7 +9,7 @@ var Replay = function(parentElement, options) {
     EventEmitter.call(this, options, 'Replay')
 
     var self    = this,
-        browser = new Browser(options.fakeUaString),
+        browser = new Browser(options),
 
         replayElement,
         videomail

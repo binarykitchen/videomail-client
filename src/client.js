@@ -4,25 +4,29 @@ var merge           = require('merge-recursive'),
 
     defaultOptions = require('./options'),
     Events         = require('./events'),
+    CollectLogger  = require('./util/collectLogger'),
     EventEmitter   = require('./util/eventEmitter'),
     Container      = require('./wrappers/container'),
     Replay         = require('./wrappers/visuals/replay'),
 
-    // just temporary
     Browser         = require('./util/browser'),
     Resource        = require('./resource'),
 
     browser
 
 function adjustOptions(options) {
-    var localOptions = merge.recursive(defaultOptions, options || {})
-
-    if (localOptions.debug)
-        localOptions.debug = localOptions.logger.debug.bind(localOptions.logger)
-    else
-        localOptions.debug = function() {}
+    var localOptions    = merge.recursive(defaultOptions, options || {})
+    localOptions.logger = new CollectLogger(localOptions)
+    localOptions.debug  = localOptions.logger.debug
 
     return localOptions
+}
+
+function getBrowser(localOptions) {
+    if (!browser)
+        browser = new Browser(localOptions)
+
+    return browser
 }
 
 var VideomailClient = function(options) {
@@ -39,8 +43,7 @@ var VideomailClient = function(options) {
     this.form = function(containerId) {
 
         function buildForm() {
-            container.build(containerId)
-            self.emit(Events.FORM_READY)
+            container.build(containerId) && self.emit(Events.FORM_READY)
         }
 
         readystate.interactive(buildForm)
@@ -71,26 +74,11 @@ var VideomailClient = function(options) {
         resource.get(key, cb)
     }
 
-    // TODO: remove later
-    this.getBrowser = function() {
-        if (!browser)
-            browser = new Browser(localOptions.fakeUaString)
-
-        return browser
-    }
-
-    // TODO: remove later
     this.canRecord = function() {
-        return this.getBrowser().canRecord()
+        return getBrowser(localOptions).canRecord()
     }
 }
 
 util.inherits(VideomailClient, EventEmitter)
-
-// --------------- STATIC FUNCTIONS --------------- //
-
-VideomailClient.setDefaultOptions = function(newDefaultOptions) {
-    defaultOptions = merge.recursive(defaultOptions, newDefaultOptions)
-}
 
 module.exports = VideomailClient

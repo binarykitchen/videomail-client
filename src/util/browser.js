@@ -1,13 +1,14 @@
 var UAParser        = require('ua-parser-js'),
     VideomailError  = require('./videomailError')
 
-module.exports = function(uaString) {
+module.exports = function(options) {
 
     var firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
         chromeDownload   = 'http://www.google.com/chrome/',
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
         browseHappyLink  = 'http://browsehappy.com',
-        ua               = uaString || (typeof window !== 'undefined' && window.navigator.userAgent),
+        ua               = options.fakeUaString ||
+                           (typeof window !== 'undefined' && window.navigator.userAgent),
 
         uaParser = new UAParser(ua).getResult(),
 
@@ -105,9 +106,7 @@ module.exports = function(uaString) {
         var err
 
         if (!okBrowser || !this.canRecord())
-            err = new VideomailError('No webcam support', {
-                explanation: getUserMediaWarning()
-            })
+            err = VideomailError.create('No webcam support', getUserMediaWarning(), options)
 
         return err
     }
@@ -122,9 +121,7 @@ module.exports = function(uaString) {
             message = 'No H264 nor webm support found.'
 
         if (message)
-            err = new VideomailError(message, {
-                explanation: getPlaybackWarning()
-            })
+            err = VideomailError.create(message, getPlaybackWarning(), options)
 
         return err
     }
@@ -133,13 +130,13 @@ module.exports = function(uaString) {
         var err
 
         if (typeof window === 'undefined' || typeof window.atob === 'undefined')
-            err = new VideomailError('atob is not supported')
+            err = VideomailError.create('atob is not supported', options)
 
         else if (typeof window.ArrayBuffer === 'undefined')
-            err = new VideomailError('ArrayBuffers are not supported')
+            err = VideomailError.create('ArrayBuffers are not supported', options)
 
         else if (typeof window.Uint8Array === 'undefined')
-            err = new VideomailError('Uint8Arrays are not supported')
+            err = VideomailError.create('Uint8Arrays are not supported', options)
 
         return err
     }
@@ -171,9 +168,7 @@ module.exports = function(uaString) {
         else
             explanation = 'Your operating system does not let your browser access your webcam.'
 
-        return new VideomailError(message, {
-            explanation: explanation
-        })
+        return VideomailError.create(message, explanation, options)
     }
 
     this.isChromeBased = function() {
