@@ -36,7 +36,11 @@ test('Browser:', function(t) {
     t.test('fake old Firefox', function(tt) {
         tt.plan(11)
 
-        var browser = new Browser('Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:23.0) Gecko/20131011 Firefox/23.0'),
+        var options = {
+            fakeUaString: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:23.0) Gecko/20131011 Firefox/23.0'
+        }
+
+        var browser = new Browser(options),
             err
 
         err = browser.checkRecordingCapabilities()
@@ -65,7 +69,11 @@ test('Browser:', function(t) {
     t.test('fake old Chrome', function(tt) {
         tt.plan(11)
 
-        var browser = new Browser('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.8 (KHTML, like Gecko) Chrome/17.0.940.0 Safari/535.8'),
+        var options = {
+            fakeUaString: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.8 (KHTML, like Gecko) Chrome/17.0.940.0 Safari/535.8'
+        }
+
+        var browser = new Browser(options),
             err
 
         err = browser.checkRecordingCapabilities()
@@ -94,7 +102,11 @@ test('Browser:', function(t) {
     t.test('fake old IE', function(tt) {
         tt.plan(11)
 
-        var browser = new Browser('Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; Media Center PC 4.0; SLCC1; .NET CLR 3.0.04320)'),
+        var options = {
+            fakeUaString: 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; Media Center PC 4.0; SLCC1; .NET CLR 3.0.04320)'
+        }
+
+        var browser = new Browser(options),
             err
 
         err = browser.checkRecordingCapabilities()
@@ -123,7 +135,11 @@ test('Browser:', function(t) {
     t.test('fake old Safari', function(tt) {
         tt.plan(11)
 
-        var browser = new Browser('Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_8; en-us) AppleWebKit/532.0+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9'),
+        var options = {
+            fakeUaString: 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_8; en-us) AppleWebKit/532.0+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
+        }
+
+        var browser = new Browser(options),
             err
 
         err = browser.checkRecordingCapabilities()

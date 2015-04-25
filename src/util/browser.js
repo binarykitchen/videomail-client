@@ -3,6 +3,8 @@ var UAParser        = require('ua-parser-js'),
 
 module.exports = function(options) {
 
+    options = options || {}
+
     var firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
         chromeDownload   = 'http://www.google.com/chrome/',
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',

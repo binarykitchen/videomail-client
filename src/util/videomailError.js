@@ -21,8 +21,10 @@ VideomailError.create = function(err, explanation, options) {
 
     if (!options && explanation) {
         options     = explanation
-        explanation = null
+        explanation = undefined
     }
+
+    options = options || {}
 
     // Require Browser here, not at the top of the file to avoid
     // recursion. Because the Browser class is requiring this file as well.
@@ -105,9 +107,14 @@ VideomailError.create = function(err, explanation, options) {
             break
     }
 
+    var logLines = null
+
+    if (options.logger && options.logger.getLines)
+        logLines = options.logger.getLines()
+
     return new VideomailError(message, {
         explanation: explanation,
-        logLines:    options.logger.getLines()
+        logLines:    logLines
     })
 }
 
