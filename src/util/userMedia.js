@@ -80,49 +80,57 @@ module.exports = function(rawVisualUserMedia, options) {
 
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
-        if (localMediaStream.getVideoTracks) {
-            var videoTracks = localMediaStream.getVideoTracks(),
-                videoTrack  = videoTracks[0],
-                description
-
-            if (videoTrack.label && videoTrack.label.length > 0)
-                description = videoTracks.label
-            else
-                description = videoTrack.kind
-
-            options.debug('UserMedia: detected', description)
-        } else
-            options.debug('UserMedia: detected (but no video tracks exist')
-
         function onPlaying() {
-            options.debug('UserMedia emits: playing')
+            try {
+                options.debug('UserMedia emits: playing')
 
-            rawVisualUserMedia.removeEventListener &&
-            rawVisualUserMedia.removeEventListener('playing', onPlaying)
+                rawVisualUserMedia.removeEventListener &&
+                rawVisualUserMedia.removeEventListener('playing', onPlaying)
 
-            localMediaStream.removeEventListener &&
-            localMediaStream.removeEventListener('ended',     onPlaying)
+                localMediaStream.removeEventListener &&
+                localMediaStream.removeEventListener('ended', onPlaying)
 
-            if (hasEnded())
-                endedEarlyCallback(
-                    VideomailError.create(
-                        'Already busy',
-                        'Probably another browser window is using your webcam?',
-                        options
+                if (hasEnded())
+                    endedEarlyCallback(
+                        VideomailError.create(
+                            'Already busy',
+                            'Probably another browser window is using your webcam?',
+                            options
+                        )
                     )
-                )
-            else
-                videoCallback()
+                else
+                    videoCallback()
+            } catch (exc) {
+                throw VideomailError.create(exc, options)
+            }
         }
 
-        setVisualStream(localMediaStream)
+        try {
+            if (localMediaStream.getVideoTracks) {
+                var videoTracks = localMediaStream.getVideoTracks(),
+                    videoTrack  = videoTracks[0],
+                    description
 
-        options.audio.enabled &&
-        audioCallback &&
-        initAudio(localMediaStream, audioCallback)
+                if (videoTrack.label && videoTrack.label.length > 0)
+                    description = videoTracks.label
+                else
+                    description = videoTrack.kind
 
-        rawVisualUserMedia.addEventListener('playing', onPlaying)
-        rawVisualUserMedia.play()
+                options.debug('UserMedia: detected', description)
+            } else
+                options.debug('UserMedia: detected (but no video tracks exist')
+
+            setVisualStream(localMediaStream)
+
+            options.audio.enabled &&
+            audioCallback &&
+            initAudio(localMediaStream, audioCallback)
+
+            rawVisualUserMedia.addEventListener('playing', onPlaying)
+            rawVisualUserMedia.play()
+        } catch (exc) {
+            throw VideomailError.create(exc, options)
+        }
     }
 
     this.isReady = function() {
@@ -130,18 +138,22 @@ module.exports = function(rawVisualUserMedia, options) {
     }
 
     this.stop = function() {
-        var visualStream = getVisualStream()
+        try {
+            var visualStream = getVisualStream()
 
-        if (visualStream) {
-            visualStream.stop && visualStream.stop()
+            if (visualStream) {
+                visualStream.stop && visualStream.stop()
 
-            setVisualStream(null)
+                setVisualStream(null)
+            }
+
+            paused = recordAudio  = false
+
+            if (recorder)
+                recorder.onaudioprocess = undefined
+        } catch (exc) {
+            throw VideomailError.create(exc, options)
         }
-
-        paused = recordAudio  = false
-
-        if (recorder)
-            recorder.onaudioprocess = undefined
     }
 
     this.pause = function() {

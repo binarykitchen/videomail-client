@@ -122,23 +122,28 @@ var Container = function(options) {
     }
 
     this.build = function(containerId) {
-        containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
-        containerElement = document.getElementById(containerId)
+        try {
+            containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
+            containerElement = document.getElementById(containerId)
 
-        if (!containerElement)
-            this.emit(
-                Events.ERROR,
-                VideomailError.create(
-                    'The container ID is invalid!',
-                    'No tag with the ID ' + containerId + ' could be found.',
-                    options
-                ))
-        else {
-            options.insertCss && prependDefaultCss()
+            if (!containerElement)
+                this.emit(
+                    Events.ERROR,
+                    VideomailError.create(
+                        'The container ID is invalid!',
+                        'No tag with the ID ' + containerId + ' could be found.',
+                        options
+                    ))
+            else {
+                options.insertCss && prependDefaultCss()
 
-            initEvents()
-            buildForm()
-            buildChildren()
+                initEvents()
+                buildForm()
+                buildChildren()
+            }
+        } catch (exc) {
+            // convert into videomail error class
+            throw VideomailError.create(exc, options)
         }
 
         return !hasError
@@ -165,8 +170,12 @@ var Container = function(options) {
     }
 
     this.unload = function(e) {
-        unloadButKeepEventListeners(e)
-        this.removeAllListeners()
+        try {
+            unloadButKeepEventListeners(e)
+            this.removeAllListeners()
+        } catch (exc) {
+            throw VideomailError.create(e)
+        }
     }
 
     this.isNotifying = function() {
@@ -182,7 +191,11 @@ var Container = function(options) {
     }
 
     this.startOver = function() {
-        visuals.back()
+        try {
+            visuals.back()
+        } catch (exc) {
+            throw VideomailError.create(exc, options)
+        }
     }
 
     this.validate = function(force) {

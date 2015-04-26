@@ -1,8 +1,11 @@
-var h = require('hyperscript')
+var h = require('hyperscript'),
+
+    VideomailError  = require('./../../../../util/videomailError')
 
 module.exports = function(visuals, options) {
 
-    if (!options.text.paused) throw new Error('Paused text cannot be empty')
+    if (!options.text.paused)
+        throw VideomailError.create('Paused text cannot be empty', options)
 
     var pausedElement
 

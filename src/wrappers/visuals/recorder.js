@@ -59,13 +59,17 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function onUserMediaReady() {
-        debug('Recorder: onUserMediaReady()')
+        try {
+            debug('Recorder: onUserMediaReady()')
 
-        samplesCount = framesCount = 0
-        unloaded = submitting = false
+            samplesCount = framesCount = 0
+            unloaded = submitting = false
 
-        show()
-        self.emit(Events.USER_MEDIA_READY)
+            show()
+            self.emit(Events.USER_MEDIA_READY)
+        } catch (exc) {
+            throw VideomailError.create(exc, options)
+        }
     }
 
     function clearUserMediaTimeout() {
@@ -87,16 +91,20 @@ var Recorder = function(visuals, replay, options) {
                 audio: options.audio.enabled
             }, function(localStream) {
 
-                clearUserMediaTimeout()
+                try {
+                    clearUserMediaTimeout()
 
-                userMedia.init(
-                    localStream,
-                    onUserMediaReady.bind(self),
-                    onAudioSample.bind(self),
-                    function(err) {
-                        self.emit(Events.ERROR, err)
-                    }
-                )
+                    userMedia.init(
+                        localStream,
+                        onUserMediaReady.bind(self),
+                        onAudioSample.bind(self),
+                        function(err) {
+                            self.emit(Events.ERROR, err)
+                        }
+                    )
+                } catch (exc) {
+                    throw VideomailError.create(exc, options)
+                }
 
             }, function(err) {
                 clearUserMediaTimeout()
@@ -120,8 +128,10 @@ var Recorder = function(visuals, replay, options) {
 
             if (errorListeners.length)
                 self.emit(Events.ERROR, exc)
-            else
+            else {
                 debug('Recorder: no error listeners attached but throwing exception', exc)
+                throw exc // throw it further
+            }
         }
     }
 
@@ -163,48 +173,47 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function executeCommand(data) {
-
-        var command,
-            result
-
         try {
+            var command,
+                result
+
             command = JSON.parse(data.toString())
-        } catch(ex) {
-            throw ex
-        }
 
-        debug('Server says: %s', command.command, command.args, result ? '= ' + result : result)
+            debug('Server says: %s', command.command, command.args, result ? '= ' + result : result)
 
-        switch (command.command) {
-            case 'ready':
-                if (!userMediaTimeout)
-                    loadUserMedia()
-                break
-            case 'preview':
-                preview(command.args)
-                break
-            case 'error':
-                this.emit(Events.ERROR, VideomailError.create(
-                    'Oh f**k, server error!',
-                    command.args.err || '(No explanation given)',
-                    options
-                ))
-                break
-            case 'confirmFrame':
-                result = updateFrameProgress(command.args)
-                break
-            case 'confirmSample':
-                result = updateSampleProgress(command.args)
-                break
-            case 'beginAudioEncoding':
-                this.emit(Events.BEGIN_AUDIO_ENCODING)
-                break
-            case 'beginVideoEncoding':
-                this.emit(Events.BEGIN_VIDEO_ENCODING)
-                break
-            default:
-                this.emit(Events.ERROR, 'Unknown server command: ' + command.command)
-                break
+            switch (command.command) {
+                case 'ready':
+                    if (!userMediaTimeout)
+                        loadUserMedia()
+                    break
+                case 'preview':
+                    preview(command.args)
+                    break
+                case 'error':
+                    this.emit(Events.ERROR, VideomailError.create(
+                        'Oh f**k, server error!',
+                        command.args.err || '(No explanation given)',
+                        options
+                    ))
+                    break
+                case 'confirmFrame':
+                    result = updateFrameProgress(command.args)
+                    break
+                case 'confirmSample':
+                    result = updateSampleProgress(command.args)
+                    break
+                case 'beginAudioEncoding':
+                    this.emit(Events.BEGIN_AUDIO_ENCODING)
+                    break
+                case 'beginVideoEncoding':
+                    this.emit(Events.BEGIN_VIDEO_ENCODING)
+                    break
+                default:
+                    this.emit(Events.ERROR, 'Unknown server command: ' + command.command)
+                    break
+            }
+        } catch (exc) {
+            throw VideomailError.create(exc, options)
         }
     }
 
@@ -468,41 +477,45 @@ var Recorder = function(visuals, replay, options) {
         }
 
         function draw() {
-            rafId = window.requestAnimationFrame(draw)
+            try {
+                rafId = window.requestAnimationFrame(draw)
 
-            if (!self.isPaused()) {
+                if (!self.isPaused()) {
 
-                now      = Date.now()
-                interval = calcInterval(now)
+                    now      = Date.now()
+                    interval = calcInterval(now)
 
-                if (interval > intervalThreshold) {
+                    if (interval > intervalThreshold) {
 
-                    // see: http://codetheory.in/controlling-the-frame-rate-with-requestanimationframe/
-                    lastAnimationTimestamp = now - (interval % intervalThreshold)
+                        // see: http://codetheory.in/controlling-the-frame-rate-with-requestanimationframe/
+                        lastAnimationTimestamp = now - (interval % intervalThreshold)
 
-                    intervalSum += interval
+                        intervalSum += interval
 
-                    // ctx might become null when unloading
-                    ctx && ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
+                        // ctx might become null when unloading
+                        ctx && ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
 
-                    framesCount++
+                        framesCount++
 
-                    buffer = frame.toBuffer()
+                        buffer = frame.toBuffer()
 
-                    // stream might become null while unloading
-                    stream && stream.write(buffer)
+                        // stream might become null while unloading
+                        stream && stream.write(buffer)
 
-                    bytesSum += buffer.length
+                        bytesSum += buffer.length
 
-                    /*
-                    if (options.debug) {
-                        debug(
-                            'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
-                            interval + '/' + intervalThreshold + '/' + wantedInterval
-                        )
+                        /*
+                        if (options.debug) {
+                            debug(
+                                'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
+                                interval + '/' + intervalThreshold + '/' + wantedInterval
+                            )
+                        }
+                        */
                     }
-                    */
                 }
+            } catch (exc) {
+                throw VideomailError.create(exc, options)
             }
         }
 
