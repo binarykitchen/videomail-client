@@ -1,4 +1,5 @@
-var pauseable = require('pauseable')
+var pauseable   = require('pauseable'),
+    h           = require('hyperscript')
 
 module.exports = function(visuals, recordNote, options) {
 
@@ -121,8 +122,7 @@ module.exports = function(visuals, recordNote, options) {
         recordTimerElement = visuals.querySelector('.recordTimer')
 
         if (!recordTimerElement) {
-            recordTimerElement = document.createElement('p')
-            recordTimerElement.classList.add('recordTimer')
+            recordTimerElement = h('p.recordTimer')
 
             hide()
 

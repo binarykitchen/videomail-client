@@ -1,4 +1,6 @@
-var AudioSample     = require('./items/sample'),
+var h = require('hyperscript'),
+
+    AudioSample     = require('./items/sample'),
     VideomailError  = require('./videomailError'),
 
     audioContext
@@ -159,12 +161,10 @@ module.exports = function(rawVisualUserMedia, options) {
     }
 
     this.createCanvas = function() {
-        var canvas = document.createElement('canvas')
-
-        canvas.width  = rawVisualUserMedia.width  || rawVisualUserMedia.clientWidth
-        canvas.height = rawVisualUserMedia.height || rawVisualUserMedia.clientHeight
-
-        return canvas
+        return h('canvas', {
+            width:  rawVisualUserMedia.width  || rawVisualUserMedia.clientWidth,
+            height: rawVisualUserMedia.height || rawVisualUserMedia.clientHeight
+        })
     }
 
     this.recordAudio = function() {

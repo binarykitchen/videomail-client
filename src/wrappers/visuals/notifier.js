@@ -1,4 +1,6 @@
 var util           = require('util'),
+    h              = require('hyperscript'),
+
     EventEmitter   = require('./../../util/eventEmitter'),
     Events         = require('./../../events')
 
@@ -73,7 +75,9 @@ var Notifier = function(visuals, options) {
 
             var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
 
-            notifyElement.className = 'notifier entertain ' + options.notifier.entertainClass + randomBackgroundClass
+            notifyElement.className =   'notifier entertain ' +
+                                        options.notifier.entertainClass +
+                                        randomBackgroundClass
 
             entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
         } else
@@ -103,7 +107,7 @@ var Notifier = function(visuals, options) {
     this.setExplanation = function(explanation) {
 
         if (!explanationElement) {
-            explanationElement = document.createElement('P')
+            explanationElement = h('p')
             notifyElement.appendChild(explanationElement)
         }
 
@@ -114,8 +118,7 @@ var Notifier = function(visuals, options) {
         notifyElement = visuals.querySelector('.notifier')
 
         if (!notifyElement) {
-            notifyElement = document.createElement('DIV')
-            notifyElement.classList.add('notifier')
+            notifyElement = h('.notifier') // defaults to div
 
             this.hide()
 
@@ -156,7 +159,7 @@ var Notifier = function(visuals, options) {
             blocking   = options.blocking   ? options.blocking  : false
 
         if (!messageElement) {
-            messageElement = document.createElement('H2')
+            messageElement = h('h2')
 
             if (explanationElement)
                 notifyElement.insertBefore(messageElement, explanationElement)

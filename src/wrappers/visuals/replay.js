@@ -1,4 +1,5 @@
 var util            = require('util'),
+    h               = require('hyperscript'),
 
     Events          = require('./../../events'),
     Browser         = require('./../../util/browser'),
@@ -15,13 +16,12 @@ var Replay = function(parentElement, options) {
         videomail
 
     function buildElement() {
-        replayElement = document.createElement('VIDEO')
-        replayElement.classList.add(options.selectors.replayClass)
+        replayElement = h('video.' + options.selectors.replayClass, {
+            autoplay: false,
+            controls: 'controls'
+        })
 
         self.hide()
-
-        replayElement.autoplay = false
-        replayElement.controls = 'controls'
 
         parentElement.appendChild(replayElement)
     }
@@ -111,10 +111,10 @@ var Replay = function(parentElement, options) {
 
         if (!source) {
             if (src) {
-                var source = document.createElement('source')
-
-                source.setAttribute('src', src)
-                source.setAttribute('type', 'video/' + type)
+                var source = h('source', {
+                    src:  src,
+                    type: 'video/' + type
+                })
 
                 replayElement.appendChild(source)
             }

@@ -1,3 +1,5 @@
+var h = require('hyperscript')
+
 module.exports = function(visuals, options) {
 
     var self = this,
@@ -37,8 +39,7 @@ module.exports = function(visuals, options) {
         countdownElement = visuals.querySelector('.countdown')
 
         if (!countdownElement) {
-            countdownElement = document.createElement('p')
-            countdownElement.classList.add('countdown')
+            countdownElement = h('p.countdown')
 
             this.hide()
 

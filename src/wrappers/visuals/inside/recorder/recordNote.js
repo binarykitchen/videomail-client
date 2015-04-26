@@ -1,3 +1,5 @@
+var h = require('hyperscript')
+
 module.exports = function(visuals) {
 
     var recordNoteElement
@@ -6,8 +8,7 @@ module.exports = function(visuals) {
         recordNoteElement = visuals.querySelector('.recordNote')
 
         if (!recordNoteElement) {
-            recordNoteElement = document.createElement('p')
-            recordNoteElement.classList.add('recordNote')
+            recordNoteElement = h('p.recordNote')
 
             this.hide()
 

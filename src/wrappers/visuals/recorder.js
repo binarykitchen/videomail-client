@@ -1,6 +1,7 @@
 var websocket    = require('websocket-stream'),
     Frame        = require('canvas-to-buffer'),
     util         = require('util'),
+    h            = require('hyperscript'),
 
     Events          = require('./../../events'),
     Constants       = require('./../../constants'),
@@ -295,6 +296,7 @@ var Recorder = function(visuals, replay, options) {
             var checkConnection = function() {
                 if (!connected) {
                     connected = true
+                    unloaded  = false
 
                     self.emit(Events.CONNECTED)
 
@@ -510,9 +512,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function buildElement() {
-        recorderElement =  document.createElement('VIDEO')
-        recorderElement.classList.add(options.selectors.userMediaClass)
-
+        recorderElement =  h('video.' + options.selectors.userMediaClass)
         visuals.appendChild(recorderElement)
     }
 

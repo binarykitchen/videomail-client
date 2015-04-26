@@ -1,3 +1,5 @@
+var h = require('hyperscript')
+
 module.exports = function(visuals, options) {
 
     if (!options.text.paused) throw new Error('Paused text cannot be empty')
@@ -8,8 +10,7 @@ module.exports = function(visuals, options) {
         pausedElement = visuals.querySelector('.paused')
 
         if (!pausedElement) {
-            pausedElement = document.createElement('p')
-            pausedElement.classList.add('paused')
+            pausedElement = h('p.paused')
 
             this.hide()
 

@@ -1,4 +1,5 @@
 var util         = require('util'),
+    h            = require('hyperscript'),
 
     Events       = require('./../events'),
     EventEmitter = require('./../util/eventEmitter')
@@ -44,9 +45,7 @@ var Buttons = function(container, options) {
             buttonElement = buttonsElement.querySelector('.' + buttonClass)
 
         if (!buttonElement) {
-            buttonElement = document.createElement('BUTTON')
-
-            buttonElement.classList.add(buttonClass)
+            buttonElement = h('button.' + buttonClass)
             buttonElement = adjustButton(buttonElement, show, type)
 
             buttonElement.innerHTML = text
@@ -284,8 +283,7 @@ var Buttons = function(container, options) {
         buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
         if (!buttonsElement) {
-            buttonsElement = document.createElement('DIV')
-            buttonsElement.classList.add(options.selectors.buttonsClass)
+            buttonsElement = h('div.' + options.selectors.buttonsClass)
 
             container.appendChild(buttonsElement)
         }

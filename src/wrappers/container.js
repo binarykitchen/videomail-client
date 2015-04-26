@@ -112,8 +112,13 @@ var Container = function(options) {
         // at one spot, here, because unload() will do a removeAllListeners()
         self.on(Events.ERROR, function(err) {
             processError(err)
-            self.unload(err)
+            unloadButKeepEventListeners(err)
         })
+    }
+
+    function unloadButKeepEventListeners(e) {
+        visuals.unload(e)
+        self.endWaiting()
     }
 
     this.build = function(containerId) {
@@ -160,8 +165,7 @@ var Container = function(options) {
     }
 
     this.unload = function(e) {
-        visuals.unload(e)
-        this.endWaiting()
+        unloadButKeepEventListeners(e)
         this.removeAllListeners()
     }
 

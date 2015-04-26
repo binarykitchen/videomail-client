@@ -1,4 +1,5 @@
 var util = require('util'),
+    h    = require('hyperscript'),
 
     Replay          = require('./visuals/replay'),
     Recorder        = require('./visuals/recorder'),
@@ -28,7 +29,7 @@ var Visuals = function(container, options) {
         var noScriptElement = container.querySelector('noscript')
 
         if (!noScriptElement) {
-            noScriptElement = document.createElement('NOSCRIPT')
+            noScriptElement = h('noscript')
             noScriptElement.innerHTML = 'Please enable Javascript'
 
             visualsElement.appendChild(noScriptElement)
@@ -71,8 +72,7 @@ var Visuals = function(container, options) {
         visualsElement = container.querySelector('.' + options.selectors.visualsClass)
 
         if (!visualsElement) {
-            visualsElement = document.createElement('DIV')
-            visualsElement.classList.add(options.selectors.visualsClass)
+            visualsElement = h('div.' + options.selectors.visualsClass)
 
             var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
