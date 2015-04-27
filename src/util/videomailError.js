@@ -11,6 +11,7 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
 // static and public attribute of this class
 VideomailError.PERMISSION_DENIED = 'PERMISSION_DENIED'
 VideomailError.NOT_CONNECTED     = 'Not connected'
+VideomailError.STARTING_FAILED   = 'Starting video failed'
 
 // static function to convert an error into a videomail error
 
@@ -39,6 +40,9 @@ VideomailError.create = function(err, explanation, options) {
     if (typeof(err) == 'object') {
         if (err.code == 1 && err.PERMISSION_DENIED == 1)
             errType = VideomailError.PERMISSION_DENIED
+
+        else if (err.message === VideomailError.STARTING_FAILED)
+            errType = err.message
 
         else if (err.name)
             errType = err.name
@@ -88,7 +92,7 @@ VideomailError.create = function(err, explanation, options) {
             explanation = 'Your webcam is already used in another browser.'
             break
 
-        case 'Starting video failed':
+        case VideomailError.STARTING_FAILED:
             message     = 'Starting video failed'
             explanation = 'Most likely this happens when the webam is already active in another browser.'
             break
