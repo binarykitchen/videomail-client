@@ -1,9 +1,9 @@
 var test            = require('tape'),
 
-    VideomailError  = require('./../src/util/videomailError')
+    VideomailError  = require('./../../src/util/videomailError')
 
 test('Videomail Error:', function(t) {
-/*
+
     t.test('arguments', function(tt) {
 
         tt.test('no arguments', function(tt) {
@@ -52,7 +52,7 @@ test('Videomail Error:', function(t) {
             tt.equal(err.message,       'one message')
             tt.equal(err.explanation,   'and an explanation')
         })
-    })*/
+    })
 
     t.test('static create(err)', function(tt) {
 

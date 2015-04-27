@@ -1,4 +1,5 @@
 var singletonEvent = require('node-singleton-event'),
+
     VideomailError = require('./videomailError'),
     Events         = require('./../events')
 

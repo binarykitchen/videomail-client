@@ -1,6 +1,6 @@
 var test    = require('tape'),
 
-    Browser = require('./../src/util/browser')
+    Browser = require('./../../src/util/browser')
 
 test('Browser:', function(t) {
 

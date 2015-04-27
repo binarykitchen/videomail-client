@@ -1,6 +1,6 @@
 var test    = require('tape'),
 
-    Sample  = require('./../src/util/items/sample')
+    Sample  = require('./../../src/util/items/sample')
 
 test('Audio Sample:', function(t) {
 

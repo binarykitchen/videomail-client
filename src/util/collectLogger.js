@@ -2,6 +2,8 @@ var util = require('util')
 
 module.exports = function(localOptions) {
 
+    localOptions = localOptions || {}
+
     var logger = localOptions.logger || console,
         stack  = []
 
