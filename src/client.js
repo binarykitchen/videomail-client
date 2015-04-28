@@ -12,11 +12,15 @@ var merge           = require('merge-recursive'),
     Browser         = require('./util/browser'),
     Resource        = require('./resource'),
 
+    collectLogger,
     browser
 
 function adjustOptions(options) {
-    var localOptions    = merge.recursive(defaultOptions, options || {})
-    localOptions.logger = new CollectLogger(localOptions)
+    var localOptions = merge.recursive(defaultOptions, options || {})
+
+    collectLogger = collectLogger || new CollectLogger(localOptions)
+
+    localOptions.logger = collectLogger
     localOptions.debug  = localOptions.logger.debug
 
     return localOptions
