@@ -43,6 +43,7 @@ var Recorder = function(visuals, replay, options) {
         ctx,
         rafId,
 
+        userMediaLoaded,
         samplesCount,
         framesCount,
         avgFps,
@@ -64,6 +65,7 @@ var Recorder = function(visuals, replay, options) {
 
             samplesCount = framesCount = 0
             unloaded = submitting = false
+            userMediaLoaded = true
 
             show()
             self.emit(Events.USER_MEDIA_READY)
@@ -80,6 +82,13 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function loadUserMedia() {
+
+        if (userMediaLoaded) {
+            debug('Recorder: skipping loadUserMedia() because it is already loaded')
+            onUserMediaReady()
+            return false
+        }
+
         debug('Recorder: loadUserMedia()')
 
         try {
@@ -299,15 +308,8 @@ var Recorder = function(visuals, replay, options) {
             })
 
             stream.on('end', function() {
-                debug('Stream has ended', arguments)
-
+                debug('x Stream has ended')
                 connected = false
-
-                // only attempt to reconnect when recording
-                if (visuals.isRecording())
-                    options.reconnect && setTimeout(function() {
-                        initSocket()
-                    }, 2e3)
             })
 
             var checkConnection = function() {
@@ -426,7 +428,7 @@ var Recorder = function(visuals, replay, options) {
             // important to free memory
             userMedia && userMedia.stop()
 
-            key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
+            userMediaLoaded = key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
         }
     }
 
@@ -468,8 +470,8 @@ var Recorder = function(visuals, replay, options) {
         if (!connected) {
             debug('Recorder: reconnecting before recording ...')
 
-            setTimeout(function() {
-                initSocket(self.record)
+            initSocket(function() {
+                self.once(Events.USER_MEDIA_READY, self.record)
             })
 
             return false
@@ -477,7 +479,7 @@ var Recorder = function(visuals, replay, options) {
 
         debug('Recorder: record()')
 
-        this.emit(Events.RECORDING)
+        self.emit(Events.RECORDING)
 
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')

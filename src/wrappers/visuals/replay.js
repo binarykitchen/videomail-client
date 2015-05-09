@@ -58,7 +58,7 @@ var Replay = function(parentElement, options) {
         // add a little delay to make sure the source is set
         setTimeout(function() {
             replayElement.load()
-        }, 50)
+        }, 40)
 
         if (!videomail)
             this.emit(Events.PREVIEW_SHOWN)

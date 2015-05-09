@@ -56,7 +56,7 @@ VideomailError.create = function(err, explanation, options) {
         else
             errType = err
 
-    options.debug && options.debug('Got error of type', errType)
+    options.debug && options.debug('Got error of type:', errType)
 
     switch (errType) {
         case 'NO_DEVICES_FOUND':

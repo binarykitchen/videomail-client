@@ -36,6 +36,10 @@ module.exports = function(options, name) {
         return singletonEvent.on(eventName, cb)
     }
 
+    this.once = function(eventName, cb) {
+        return singletonEvent.once(eventName, cb)
+    }
+
     this.listeners = function(eventName) {
         return singletonEvent.listeners(eventName)
     }
