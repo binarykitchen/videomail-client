@@ -192,7 +192,7 @@ var Recorder = function(visuals, replay, options) {
                 case 'error':
                     this.emit(Events.ERROR, VideomailError.create(
                         'Oh f**k, server error!',
-                        command.args.err || '(No explanation given)',
+                        command.args.err.toString() || '(No explanation given)',
                         options
                     ))
                     break
@@ -282,6 +282,10 @@ var Recorder = function(visuals, replay, options) {
                         'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?',
                         options
                     ))
+
+                    // just temporary
+                    options.logger.error('Original error was:', err)
+
                 } else {
 
                     // ignore error if there is no stream, see race condition at

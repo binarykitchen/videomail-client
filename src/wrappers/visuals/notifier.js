@@ -99,6 +99,9 @@ var Notifier = function(visuals, options) {
         var message     = err.message ? err.message.toString() : err.toString(),
             explanation = err.explanation ? err.explanation.toString() : null
 
+        if (!message)
+            options.debug('Weird empty message generated for error', err)
+
         self.notify(message, explanation, {
             blocking: true
         })

@@ -113,6 +113,8 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.stop = function() {
+        options.debug('Stopping record timer ...')
+
         hide()
         timer && timer.clear()
         recordNote.stop()
