@@ -127,7 +127,7 @@ var Buttons = function(container, options) {
         resumeButton.disabled = false
     }
 
-    function onRecording() {
+    function onFirstFrameSent() {
         hide(recordButton)
 
         if (pauseButton) {
@@ -207,8 +207,8 @@ var Buttons = function(container, options) {
             onPreview()
         }).on(Events.PAUSED, function() {
             onPaused()
-        }).on(Events.RECORDING, function() {
-            onRecording()
+        }).on(Events.FIRST_FRAME_SENT, function() {
+            onFirstFrameSent()
         }).on(Events.RESUMING, function() {
             onResuming()
         }).on(Events.STOPPING, function() {

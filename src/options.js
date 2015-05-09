@@ -43,7 +43,7 @@ module.exports = {
         height:         240
     },
     image: {
-        quality:    .5,
+        quality:    .4,
         types:      ['webp', 'jpeg']                // recommended settings to make most of all browsers
     },
     text: {

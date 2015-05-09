@@ -293,6 +293,8 @@ var Recorder = function(visuals, replay, options) {
             })
 
             stream.on('end', function() {
+                debug('Stream has ended', arguments)
+
                 connected = false
 
                 // only attempt to reconnect when recording
@@ -364,7 +366,8 @@ var Recorder = function(visuals, replay, options) {
         var args = {
             framesCount:  framesCount,
             videoType:    replay.getVideoType(),
-            avgFps:       avgFps
+            avgFps:       avgFps,
+            limitReached: limitReached
         }
 
         if (options.audio.enabled) {
@@ -503,6 +506,9 @@ var Recorder = function(visuals, replay, options) {
                         stream && stream.write(buffer)
 
                         bytesSum += buffer.length
+
+                        if (framesCount === 1)
+                            self.emit(Events.FIRST_FRAME_SENT)
 
                         /*
                         if (options.debug) {

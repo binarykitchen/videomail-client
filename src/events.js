@@ -22,5 +22,6 @@ module.exports = keymirror({
   SUBMITTING:           null, // form is being submitted
   SUBMITTED:            null, // form has been successfully submitted
   ERROR:                null, // an error occured
-  BLOCKING:             null  // something serious, most likely an error, is shown and blocks
+  BLOCKING:             null, // something serious, most likely an error, is shown and blocks
+  FIRST_FRAME_SENT:     null  // emitted once when fist frame has been sent to server
 })
