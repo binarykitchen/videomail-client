@@ -73,6 +73,8 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function clearUserMediaTimeout() {
+        debug('Recorder: clearUserMediaTimeout()')
+
         userMediaTimeout && clearTimeout(userMediaTimeout)
         userMediaTimeout = null
     }
@@ -462,6 +464,17 @@ var Recorder = function(visuals, replay, options) {
         if (unloaded)
             return false
 
+        // reconnect when needed
+        if (!connected) {
+            debug('Recorder: reconnecting before recording ...')
+
+            setTimeout(function() {
+                initSocket(self.record)
+            })
+
+            return false
+        }
+
         debug('Recorder: record()')
 
         this.emit(Events.RECORDING)
@@ -502,17 +515,19 @@ var Recorder = function(visuals, replay, options) {
                         // ctx might become null when unloading
                         ctx && ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
 
-                        framesCount++
-
                         buffer = frame.toBuffer()
 
                         // stream might become null while unloading
-                        stream && stream.write(buffer)
+                        if (stream) {
+                            framesCount++
 
-                        bytesSum += buffer.length
+                            stream.write(buffer)
 
-                        if (framesCount === 1)
-                            self.emit(Events.FIRST_FRAME_SENT)
+                            bytesSum += buffer.length
+
+                            if (framesCount === 1)
+                                self.emit(Events.FIRST_FRAME_SENT)
+                        }
 
                         /*
                         if (options.debug) {
@@ -551,6 +566,10 @@ var Recorder = function(visuals, replay, options) {
         self.on(Events.SUBMITTED, function() {
             submitting = false
             self.unload()
+        })
+
+        self.on(Events.BLOCKING, function() {
+            clearUserMediaTimeout()
         })
     }
 
