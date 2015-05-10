@@ -18,7 +18,8 @@ var RecorderInsides = function(visuals, options) {
         recordTimer = new RecordTimer(visuals, recordNote, options),
 
         countdown,
-        pausedNote
+        pausedNote,
+        built
 
     if (options.video.countdown)
         countdown = new Countdown(visuals, options)
@@ -72,7 +73,9 @@ var RecorderInsides = function(visuals, options) {
         recordNote.build()
         recordTimer.build()
 
-        initEvents()
+        !built && initEvents()
+
+        built = true
     }
 
     this.showPause = function() {

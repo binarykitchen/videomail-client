@@ -23,7 +23,8 @@ var Visuals = function(container, options) {
 
         debug           = options.debug,
 
-        visualsElement
+        visualsElement,
+        built
 
     function buildNoScriptTag() {
         var noScriptElement = container.querySelector('noscript')
@@ -84,6 +85,7 @@ var Visuals = function(container, options) {
         }
 
         visualsElement.classList.add('visuals')
+        visualsElement.classList.remove('hide')
 
         if (!visualsElement.style.width && options.video.width)
             visualsElement.style.width = options.video.width + 'px'
@@ -91,8 +93,10 @@ var Visuals = function(container, options) {
         if (!visualsElement.style.height && options.video.height)
             visualsElement.style.height = options.video.height + 'px'
 
-        initEvents()
+        !built && initEvents()
         buildChildren()
+
+        built = true
     }
 
     this.querySelector = function(selector) {
@@ -210,6 +214,10 @@ var Visuals = function(container, options) {
 
     this.block = function(err) {
         notifier.block(err)
+    }
+
+    this.hide = function() {
+        visualsElement.classList.add('hide')
     }
 
     this.hideReplay   = replay.hide.bind(replay)

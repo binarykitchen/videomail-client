@@ -36,8 +36,7 @@ function getBrowser(localOptions) {
 var VideomailClient = function(options) {
 
     var localOptions = adjustOptions(options),
-        container    = new Container(localOptions),
-        self         = this
+        container    = new Container(localOptions)
 
     EventEmitter.call(this, localOptions, 'VideomailClient')
 
@@ -47,7 +46,7 @@ var VideomailClient = function(options) {
     this.form = function(containerId) {
 
         function buildForm() {
-            container.build(containerId) && self.emit(Events.FORM_READY)
+            container.build(containerId)
         }
 
         readystate.interactive(buildForm)
@@ -69,8 +68,12 @@ var VideomailClient = function(options) {
         container.startOver()
     }
 
-    this.unload = function() {
-        container.unload()
+    this.unload = function(e) {
+        container.unload(e)
+    }
+
+    this.hide = function() {
+        container.hide()
     }
 
     this.get = function(key, cb) {

@@ -4,9 +4,13 @@
         <title>videomail-client examples</title>
 
         <style type="text/css">
+            input[type="email"],
             input[type="text"],
+            fieldset,
+            textarea,
             .buttons {
-                margin: 1em 0;
+                margin:  1em 0;
+                display: block;
             }
 
             .hide {
@@ -19,10 +23,24 @@
         </style>
     </head>
     <body>
-        <h1>Wrap into a form, custom validation, have a submit button and display the record</h1>
+        <h1>BETA! A contact form embracing Sign Language!</h1>
 
         <form id="videomail">
-            <input name='title' type='text' placeholder='Enter a title' required/>
+            <input name='email' type='email' placeholder='Enter your email address' required/>
+            <input name='subject' type='text' placeholder='Enter a subject' required/>
+            <fieldset>
+                <legend>How do you want to contact us?</legend>
+                <p>
+                    <input type="radio" name="how" id="writingOption" value="writing" checked/>
+                    <label for="writingOption">In Writing</label>
+                </p>
+                <p>
+                    <input type="radio" name="how" id="signLanguageOption" value="sign_language"/>
+                    <label for="signLanguageOption">In Sign Language</label>
+                </p>
+            </fieldset>
+            <textarea id='message' name='message' placeholder='Enter your message' cols='40' rows='5' required></textarea>
+            <div class='visuals' class='hide'></div>
             <div class="buttons">
                 <button class='record'>&#9673; Record</button>
                 <button class='pause'>&#9553; Pause</button>
@@ -43,9 +61,12 @@
         <script>
             var VideomailClient = require('videomail-client'),
 
-                viewVideo       = document.getElementById('viewVideo'),
-                videomailForm   = document.getElementById('videomail'),
-                startOverButton = document.getElementById('startOver'),
+                viewVideo          = document.getElementById('viewVideo'),
+                videomailForm      = document.getElementById('videomail'),
+                startOverButton    = document.getElementById('startOver'),
+                writingOption      = document.getElementById('writingOption'),
+                signLanguageOption = document.getElementById('signLanguageOption'),
+                message            = document.getElementById('message'),
 
                 videomailClient
 
@@ -73,7 +94,15 @@
                 }
             })
 
-            videomailClient.form()
+            writingOption.addEventListener('click', function() {
+                videomailClient.hide()
+                message.classList.remove('hide')
+            })
+
+            signLanguageOption.addEventListener('click', function() {
+                videomailClient.form()
+                message.classList.add('hide')
+            })
 
             videomailClient.on(
                 videomailClient.events.SUBMITTED,

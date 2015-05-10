@@ -26,6 +26,7 @@ var Container = function(options) {
         hasError    = false,
 
         containerElement,
+        built,
         form
 
     function prependDefaultCss() {
@@ -137,16 +138,20 @@ var Container = function(options) {
             else {
                 options.insertCss && prependDefaultCss()
 
-                initEvents()
+                !built && initEvents()
                 buildForm()
                 buildChildren()
+
+                if (!hasError) {
+                    built = true
+                    self.emit(Events.FORM_READY)
+                }
             }
+
         } catch (exc) {
             // convert into videomail error class
             throw VideomailError.create(exc, options)
         }
-
-        return !hasError
     }
 
     this.querySelector = function(selector) {
@@ -173,9 +178,15 @@ var Container = function(options) {
         try {
             unloadButKeepEventListeners(e)
             this.removeAllListeners()
+
+            built = false
         } catch (exc) {
             throw VideomailError.create(e)
         }
+    }
+
+    this.hide = function() {
+        visuals.hide()
     }
 
     this.isNotifying = function() {

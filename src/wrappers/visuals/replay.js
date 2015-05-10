@@ -12,6 +12,7 @@ var Replay = function(parentElement, options) {
     var self    = this,
         browser = new Browser(options),
 
+        built,
         replayElement,
         videomail
 
@@ -83,9 +84,11 @@ var Replay = function(parentElement, options) {
         if (!replayElement.controls)
             replayElement.controls = true
 
-        initEvents()
+        !built && initEvents()
 
         browser.checkPlaybackCapabilities(replayElement)
+
+        built = true
     }
 
     this.getVideoSource = function(type) {

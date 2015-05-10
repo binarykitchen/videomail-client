@@ -8,7 +8,7 @@ var Buttons = function(container, options) {
 
     EventEmitter.call(this, options, 'Buttons')
 
-    var self  = this,
+    var self = this,
 
         buttonsElement,
 
@@ -17,7 +17,8 @@ var Buttons = function(container, options) {
         resumeButton,
         stopButton,
         backButton,
-        submitButton
+        submitButton,
+        built
 
     function hide(buttonElement) {
         buttonElement.classList.add('hide')
@@ -289,7 +290,9 @@ var Buttons = function(container, options) {
         }
 
         buildButtons()
-        initEvents()
+        !built && initEvents()
+
+        built = true
     }
 }
 

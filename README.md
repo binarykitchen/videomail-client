@@ -84,11 +84,12 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#constructor">`new VideomailClient()`</a>
 * <a href="#on">`videomailClient.on()`</a>
 * <a href="#form">`videomailClient.form()`</a>
-* <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
 * <a href="#get">`videomailClient.get()`</a>
 * <a href="#canRecord">`videomailClient.canRecord()`</a>
+* <a href="#unload">`videomailClient.unload()`</a>
+* <a href="#hide">`videomailClient.hide()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -132,15 +133,6 @@ Automatically fills the DOM with a form for video recording. If a HTML element w
 
 By default the optional parameter `containerId` is set to `videomail`.
 
-<a name="unload"></a>
-### videomailClient.unload()
-
-Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with single page apps, for example with AngularJS' destroy event:
-
-```js
-$scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
-```
-
 <a name="replay"></a>
 ### videomailClient.replay(parentElement, videomail)
 
@@ -168,6 +160,20 @@ Queries a videomail (JSON) by a given key. When submitted, you get the key from 
 ### videomailClient.canRecord()
 
 An utility function which returns true if the current browser is capable of webcam recording. It returns false for <a href="#compatibility">incompatible</a> browsers.
+
+<a name="unload"></a>
+### videomailClient.unload()
+
+Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with single page apps, for example with AngularJS' destroy event:
+
+```js
+$scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
+```
+
+<a name="hide"></a>
+### videomailClient.hide()
+
+Hides all the visuals (but does not unload anything).
 
 <a name="whitelist"></a>
 ## Whitelist

@@ -44,6 +44,7 @@ var Recorder = function(visuals, replay, options) {
         rafId,
 
         userMediaLoaded,
+        userMediaLoading,
         samplesCount,
         framesCount,
         avgFps,
@@ -52,6 +53,7 @@ var Recorder = function(visuals, replay, options) {
         stopTime,
         stream,
         connected,
+        built,
         key
 
     function onAudioSample(audioSample) {
@@ -87,6 +89,9 @@ var Recorder = function(visuals, replay, options) {
             debug('Recorder: skipping loadUserMedia() because it is already loaded')
             onUserMediaReady()
             return false
+        } else if (userMediaLoading) {
+            debug('Recorder: skipping loadUserMedia() because it is already asking for permission')
+            return false
         }
 
         debug('Recorder: loadUserMedia()')
@@ -97,27 +102,34 @@ var Recorder = function(visuals, replay, options) {
                     self.emit(Events.ERROR, browser.getNoAccessIssue())
             }, options.timeouts.userMedia)
 
+            userMediaLoading = true
+
             navigator.getUserMedia({
                 video: true,
                 audio: options.audio.enabled
             }, function(localStream) {
 
+                userMediaLoading = false
+
                 try {
                     clearUserMediaTimeout()
 
-                    userMedia.init(
-                        localStream,
-                        onUserMediaReady.bind(self),
-                        onAudioSample.bind(self),
-                        function(err) {
-                            self.emit(Events.ERROR, err)
-                        }
-                    )
+                    if (!unloaded)
+                        userMedia.init(
+                            localStream,
+                            onUserMediaReady.bind(self),
+                            onAudioSample.bind(self),
+                            function(err) {
+                                self.emit(Events.ERROR, err)
+                            }
+                        )
                 } catch (exc) {
                     throw VideomailError.create(exc, options)
                 }
 
             }, function(err) {
+                userMediaLoading = false
+
                 clearUserMediaTimeout()
 
                 var errorListeners = self.listeners(Events.ERROR)
@@ -135,6 +147,8 @@ var Recorder = function(visuals, replay, options) {
             })
 
         } catch (exc) {
+            userMediaLoading = false
+
             var errorListeners = self.listeners(Events.ERROR)
 
             if (errorListeners.length)
@@ -428,7 +442,13 @@ var Recorder = function(visuals, replay, options) {
             // important to free memory
             userMedia && userMedia.stop()
 
-            userMediaLoaded = key = avgFps = canvas = ctx = sampleProgress = frameProgress = null
+            userMediaLoaded =
+            key =
+            avgFps =
+            canvas =
+            ctx =
+            sampleProgress =
+            frameProgress = null
         }
     }
 
@@ -598,8 +618,10 @@ var Recorder = function(visuals, replay, options) {
 
             userMedia = new UserMedia(recorderElement, options)
 
-            initEvents()
+            !built && initEvents()
             initSocket()
+
+            built = true
         }
     }
 

@@ -14,7 +14,8 @@ var Notifier = function(visuals, options) {
         notifyElement,
         messageElement,
         explanationElement,
-        entertainTimeoutId
+        entertainTimeoutId,
+        built
 
     function onStopping(limitReached) {
         var lead = ''
@@ -135,7 +136,9 @@ var Notifier = function(visuals, options) {
         if (!notifyElement.height && options.video.height)
             notifyElement.height = options.video.height
 
-        initEvents()
+        !built && initEvents()
+
+        built = true
     }
 
     this.hide = function() {

@@ -106,10 +106,17 @@ module.exports = function(rawVisualUserMedia, options) {
         }
 
         try {
+            var videoTrack, videoTracks
+
             if (localMediaStream.getVideoTracks) {
-                var videoTracks = localMediaStream.getVideoTracks(),
-                    videoTrack  = videoTracks[0],
-                    description
+                videoTracks = localMediaStream.getVideoTracks()
+                videoTrack  = videoTracks[0]
+            }
+
+            if (!videoTrack)
+                options.debug('UserMedia: detected (but no video tracks exist')
+            else {
+                var description
 
                 if (videoTrack.label && videoTrack.label.length > 0)
                     description = videoTracks.label
@@ -117,8 +124,7 @@ module.exports = function(rawVisualUserMedia, options) {
                     description = videoTrack.kind
 
                 options.debug('UserMedia: detected', description)
-            } else
-                options.debug('UserMedia: detected (but no video tracks exist')
+            }
 
             setVisualStream(localMediaStream)
 
