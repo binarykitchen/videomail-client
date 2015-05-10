@@ -189,6 +189,16 @@ var Buttons = function(container, options) {
             submitButton.disabled = false
     }
 
+    function onHidden() {
+        recordButton && hide(recordButton)
+        stopButton && hide(stopButton)
+    }
+
+    function onFormReady() {
+        recordButton && show(recordButton)
+        stopButton && show(stopButton)
+    }
+
     function back() {
         backButton.disabled = true
 
@@ -226,6 +236,10 @@ var Buttons = function(container, options) {
             onValid()
         }).on(Events.SUBMITTED, function() {
             onSubmitted()
+        }).on(Events.HIDE, function() {
+            onHidden()
+        }).on(Events.FORM_READY, function() {
+            onFormReady()
         })
 
         // User actions

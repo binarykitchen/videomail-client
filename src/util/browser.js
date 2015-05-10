@@ -95,8 +95,6 @@ module.exports = function(options) {
         return canPlayType
     }
 
-    // todo: consider copying the changes to videomail before publishing to see if it works
-
     // just temporary
     this.canRecord = function() {
         var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia

@@ -618,8 +618,11 @@ var Recorder = function(visuals, replay, options) {
 
             userMedia = new UserMedia(recorderElement, options)
 
-            !built && initEvents()
-            initSocket()
+            if (!built) {
+                initEvents()
+                initSocket()
+            } else
+                loadUserMedia()
 
             built = true
         }

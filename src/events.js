@@ -23,5 +23,6 @@ module.exports = keymirror({
   SUBMITTED:            null, // form has been successfully submitted
   ERROR:                null, // an error occured
   BLOCKING:             null, // something serious, most likely an error, is shown and blocks
-  FIRST_FRAME_SENT:     null  // emitted once when fist frame has been sent to server
+  FIRST_FRAME_SENT:     null, // emitted once when fist frame has been sent to server
+  HIDE:                 null  // emitted when hidden
 })

@@ -218,6 +218,7 @@ var Visuals = function(container, options) {
 
     this.hide = function() {
         visualsElement.classList.add('hide')
+        this.emit(Events.HIDE)
     }
 
     this.hideReplay   = replay.hide.bind(replay)
