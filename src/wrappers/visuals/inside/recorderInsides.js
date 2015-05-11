@@ -78,6 +78,10 @@ var RecorderInsides = function(visuals, options) {
         built = true
     }
 
+    this.unload = function() {
+        built = false
+    }
+
     this.showPause = function() {
         pausedNote && pausedNote.show()
     }

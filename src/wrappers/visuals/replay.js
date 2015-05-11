@@ -91,6 +91,10 @@ var Replay = function(parentElement, options) {
         built = true
     }
 
+    this.unload = function() {
+        built = false
+    }
+
     this.getVideoSource = function(type) {
         var sources = replayElement.getElementsByTagName('source'),
             l       = sources.length,

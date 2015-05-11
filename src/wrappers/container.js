@@ -119,6 +119,7 @@ var Container = function(options) {
 
     function unloadButKeepEventListeners(e) {
         visuals.unload(e)
+        buttons.unload()
         self.endWaiting()
     }
 
@@ -186,6 +187,8 @@ var Container = function(options) {
     }
 
     this.hide = function() {
+        hasError = false
+        this.pause()
         visuals.hide()
     }
 

@@ -57,7 +57,7 @@ module.exports = {
         entertainInterval: 15000
     },
     timeouts: {
-        userMedia:  7e3,                            // increase if you want user give more time to enable webcam
+        userMedia:  5e3,                            // increase if you want user give more time to enable webcam
         connection: 1e4                             // increase if connection is slow
     },
     displayErrors:    true,                         // show errors inside the container?

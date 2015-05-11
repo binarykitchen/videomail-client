@@ -26,6 +26,9 @@ var Recorder = function(visuals, replay, options) {
         wantedInterval  = 1e3 / options.video.fps,
         debug           = options.debug,
 
+        samplesCount = 0,
+        framesCount  = 0,
+
         recorderElement,
         userMedia,
 
@@ -45,8 +48,6 @@ var Recorder = function(visuals, replay, options) {
 
         userMediaLoaded,
         userMediaLoading,
-        samplesCount,
-        framesCount,
         avgFps,
         submitting,
         unloaded,
@@ -65,7 +66,6 @@ var Recorder = function(visuals, replay, options) {
         try {
             debug('Recorder: onUserMediaReady()')
 
-            samplesCount = framesCount = 0
             unloaded = submitting = false
             userMediaLoaded = true
 
@@ -199,12 +199,15 @@ var Recorder = function(visuals, replay, options) {
 
     function executeCommand(data) {
         try {
-            var command,
+            var command = JSON.parse(data.toString()),
                 result
 
-            command = JSON.parse(data.toString())
-
-            debug('Server says: %s', command.command, command.args, result ? '= ' + result : result)
+            debug(
+                'Server commanded: %s with args %s',
+                command.command,
+                command.args,
+                result ? '= ' + result : 'without result'
+            )
 
             switch (command.command) {
                 case 'ready':
@@ -362,6 +365,12 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
+    function cancelAnimationFrame() {
+        rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
+
+        rafId = null
+    }
+
     this.getAvgFps = function() {
         return avgFps
     }
@@ -378,8 +387,6 @@ var Recorder = function(visuals, replay, options) {
         debug('stop()')
 
         this.emit(Events.STOPPING, limitReached)
-
-        this.reset()
 
         stopTime = Date.now()
 
@@ -398,6 +405,9 @@ var Recorder = function(visuals, replay, options) {
         }
 
         writeCommand('stop', args)
+
+        // beware, resetting will set framesCount to zero, so leave this here
+        this.reset()
     }
 
     this.back = function() {
@@ -423,6 +433,8 @@ var Recorder = function(visuals, replay, options) {
             disconnect()
 
             unloaded = true
+
+            built = false
         }
     }
 
@@ -433,14 +445,14 @@ var Recorder = function(visuals, replay, options) {
 
             this.emit(Events.RESETTING)
 
-            rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
-
-            rafId = null
+            cancelAnimationFrame()
 
             replay.reset()
 
             // important to free memory
             userMedia && userMedia.stop()
+
+            samplesCount = framesCount = 0
 
             userMediaLoaded =
             key =
@@ -499,7 +511,7 @@ var Recorder = function(visuals, replay, options) {
 
         debug('Recorder: record()')
 
-        self.emit(Events.RECORDING)
+        self.emit(Events.RECORDING, framesCount)
 
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')
@@ -593,6 +605,10 @@ var Recorder = function(visuals, replay, options) {
         self.on(Events.BLOCKING, function() {
             clearUserMediaTimeout()
         })
+
+        self.on(Events.HIDE, function() {
+            self.hide()
+        })
     }
 
     this.build = function() {
@@ -618,9 +634,15 @@ var Recorder = function(visuals, replay, options) {
 
             userMedia = new UserMedia(recorderElement, options)
 
+            show()
+
             if (!built) {
                 initEvents()
-                initSocket()
+
+                if (!connected)
+                    initSocket()
+                else
+                    loadUserMedia()
             } else
                 loadUserMedia()
 
@@ -637,6 +659,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.hide = function() {
+        cancelAnimationFrame()
         recorderElement && recorderElement.classList.add('hide')
     }
 }

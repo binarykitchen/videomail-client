@@ -94,6 +94,9 @@
                 }
             })
 
+            // continue from here, it behaves a bit weird:
+            // while recording, switching to writing and back, should go into resume state, but it doesn't
+
             writingOption.addEventListener('click', function() {
                 videomailClient.hide()
                 message.classList.remove('hide')

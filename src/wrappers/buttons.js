@@ -37,7 +37,17 @@ var Buttons = function(container, options) {
         return buttonElement
     }
 
-    function makeButton(buttonClass, text, show, id, type) {
+    function replaceClickHandler(buttonElement, clickHandler) {
+
+        var wrappedClickHandler = function(e) {
+            e && e.preventDefault()
+            clickHandler()
+        }
+
+        buttonElement.onclick = wrappedClickHandler
+    }
+
+    function makeButton(buttonClass, text, clickHandler, show, id, type) {
         var buttonElement
 
         if (id)
@@ -55,35 +65,66 @@ var Buttons = function(container, options) {
         } else
             buttonElement = adjustButton(buttonElement, show, type)
 
+        if (clickHandler)
+            replaceClickHandler(buttonElement, clickHandler)
+
         return buttonElement
     }
 
     function buildButtons() {
-        recordButton = makeButton(options.selectors.recordButtonClass, 'Record', true)
+        recordButton = makeButton(
+            options.selectors.recordButtonClass,
+            'Record',
+            container.record,
+            true
+        )
 
         if (options.enablePause)
-            pauseButton = makeButton(options.selectors.pauseButtonClass, 'Pause')
+            pauseButton = makeButton(
+                options.selectors.pauseButtonClass,
+                'Pause',
+                container.pause
+            )
 
         if (options.enablePause)
-            resumeButton = makeButton(options.selectors.resumeButtonClass, 'Resume')
+            resumeButton = makeButton(
+                options.selectors.resumeButtonClass,
+                'Resume',
+                container.resume
+            )
 
         // show stop only when pause is enabled - looks better that way otherwise button
         // move left and right between record and stop
-        stopButton = makeButton(options.selectors.stopButtonClass, 'Stop', options.enablePause)
+        stopButton = makeButton(
+            options.selectors.stopButtonClass,
+            'Stop',
+            container.stop,
+            options.enablePause
+        )
 
-        backButton = makeButton(options.selectors.backButtonClass, 'Back')
+        backButton = makeButton(
+            options.selectors.backButtonClass,
+            'Back',
+            back
+        )
 
         if (!options.disableSubmit) {
             if (!submitButton)
                 submitButton = makeButton(
                     options.selectors.submitButtonClass,
                     'Submit',
+                    null,
                     true,
                     options.selectors.submitButtonId,
                     'submit'
                 )
             else
                 submitButton.disabled = true
+
+            // no need to listen to the submit event when it's already listened
+            // within the form element class
+            if (!container.hasForm() && submitButton)
+                replaceClickHandler(submitButton, submit)
         }
     }
 
@@ -126,6 +167,8 @@ var Buttons = function(container, options) {
         pauseButton && hide(pauseButton)
         show(resumeButton)
         resumeButton.disabled = false
+        hide(recordButton)
+        show(stopButton)
     }
 
     function onFirstFrameSent() {
@@ -140,8 +183,18 @@ var Buttons = function(container, options) {
         show(stopButton)
     }
 
+    function onRecording(framesCount) {
+        // it is possible to hide while recording, hence
+        // check framesCount first (coming from recorder)
+        if (framesCount > 1)
+            onFirstFrameSent()
+        else
+            recordButton.disabled = true
+    }
+
     function onResuming() {
         hide(resumeButton)
+        hide(recordButton)
 
         if (pauseButton) {
             pauseButton.disabled = false
@@ -190,13 +243,15 @@ var Buttons = function(container, options) {
     }
 
     function onHidden() {
-        recordButton && hide(recordButton)
-        stopButton && hide(stopButton)
+        hide(recordButton)
+        hide(stopButton)
+        hide(backButton)
+        hide(resumeButton)
     }
 
     function onFormReady() {
-        recordButton && show(recordButton)
-        stopButton && show(stopButton)
+        show(recordButton)
+        show(stopButton)
     }
 
     function back() {
@@ -218,6 +273,8 @@ var Buttons = function(container, options) {
             onPreview()
         }).on(Events.PAUSED, function() {
             onPaused()
+        }).on(Events.RECORDING, function(framesCount) {
+            onRecording(framesCount)
         }).on(Events.FIRST_FRAME_SENT, function() {
             onFirstFrameSent()
         }).on(Events.RESUMING, function() {
@@ -240,33 +297,6 @@ var Buttons = function(container, options) {
             onHidden()
         }).on(Events.FORM_READY, function() {
             onFormReady()
-        })
-
-        // User actions
-        recordButton.addEventListener('click', function() {
-            container.record()
-        })
-
-        pauseButton && pauseButton.addEventListener('click', function() {
-            container.pause()
-        })
-
-        resumeButton && resumeButton.addEventListener('click', function() {
-            container.resume()
-        })
-
-        stopButton.addEventListener('click', function() {
-            container.stop()
-        })
-
-        backButton.addEventListener('click', function() {
-            back()
-        })
-
-        // no need to listen to the submit event when it's already listened
-        // within the form element class
-        !container.hasForm() && submitButton && submitButton.addEventListener('click', function() {
-            submit()
         })
     }
 
@@ -304,9 +334,14 @@ var Buttons = function(container, options) {
         }
 
         buildButtons()
+
         !built && initEvents()
 
         built = true
+    }
+
+    this.unload = function() {
+        built = false
     }
 }
 

@@ -44,7 +44,6 @@ var Visuals = function(container, options) {
         notifier.build()
         recorderInsides.build()
         replay.build()
-
         recorder.build()
     }
 
@@ -133,6 +132,10 @@ var Visuals = function(container, options) {
 
     this.unload = function(e) {
         recorder.unload(e)
+        recorderInsides.unload(e)
+        replay.unload(e)
+
+        built = false
     }
 
     this.isNotifying = function() {

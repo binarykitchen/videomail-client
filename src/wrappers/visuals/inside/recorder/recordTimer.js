@@ -103,7 +103,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.pause = function() {
-        timer.pause()
+        timer && timer.pause()
         recordNote.hide()
     }
 
