@@ -93,8 +93,6 @@ var VideomailClient = function(options) {
     this.canRecord = function() {
         return getBrowser(localOptions).canRecord()
     }
-
-    build()
 }
 
 util.inherits(VideomailClient, EventEmitter)
