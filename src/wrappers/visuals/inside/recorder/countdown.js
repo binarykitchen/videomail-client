@@ -9,10 +9,7 @@ module.exports = function(visuals, options) {
         countdown
 
     function fire(cb) {
-        clearInterval(intervalId)
-
-        intervalId = null
-
+        self.unload()
         self.hide()
 
         cb()
@@ -58,5 +55,10 @@ module.exports = function(visuals, options) {
 
     this.isCountingDown = function() {
         return !!intervalId
+    }
+
+    this.unload = function() {
+        clearInterval(intervalId)
+        intervalId = null
     }
 }

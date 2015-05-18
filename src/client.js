@@ -44,7 +44,7 @@ var VideomailClient = function(options) {
     // expose all possible events
     this.events = Events
 
-    function build(containerId, cb) {
+    this.build = function(containerId, cb) {
         function buildForm() {
             localOptions.debug('VideomailClient: buildForm()')
 
@@ -58,7 +58,7 @@ var VideomailClient = function(options) {
     this.show = function(containerId) {
         localOptions.debug('VideomailClient: show()')
 
-        build(containerId, container.show)
+        this.build(containerId, container.show)
     }
 
     // automatically adds a <video> element inside the given parentElement and loads

@@ -84,6 +84,7 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#constructor">`new VideomailClient()`</a>
 * <a href="#on">`videomailClient.on()`</a>
 * <a href="#show">`videomailClient.show()`</a>
+* <a href="#build">`videomailClient.build()`</a>
 * <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
@@ -132,6 +133,11 @@ By the way, all videomail errors are inherited from the class `VideomailError` w
 Automatically fills the DOM with a form for video recording. If a HTML element who ID equals `containerId`, that placeholder will be filled. Otherwise an error occurs.
 
 By default the optional parameter `containerId` is set to `videomail`.
+
+<a name="build"></a>
+### videomailClient.build([containerId])
+
+Very similar to `show()`, except that it's not going to show anything. Only the DOM is adjusted internally. You might need this if you have a switch somewhere to enable or disable the Videomail client, see example `contact_form.html`.
 
 <a name="replay"></a>
 ### videomailClient.replay(parentElement, videomail)

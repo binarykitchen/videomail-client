@@ -79,6 +79,8 @@ var RecorderInsides = function(visuals, options) {
     }
 
     this.unload = function() {
+        countdown.unload()
+
         built = false
     }
 
