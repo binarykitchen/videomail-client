@@ -83,13 +83,13 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 
 * <a href="#constructor">`new VideomailClient()`</a>
 * <a href="#on">`videomailClient.on()`</a>
-* <a href="#form">`videomailClient.form()`</a>
+* <a href="#show">`videomailClient.show()`</a>
+* <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
 * <a href="#get">`videomailClient.get()`</a>
 * <a href="#canRecord">`videomailClient.canRecord()`</a>
 * <a href="#unload">`videomailClient.unload()`</a>
-* <a href="#hide">`videomailClient.hide()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -126,8 +126,8 @@ The videomail client already comes with internal error handling mechanism so the
 
 By the way, all videomail errors are inherited from the class `VideomailError` which comes with additional attributes, useful for debugging weird errors.
 
-<a name="form"></a>
-### videomailClient.form([containerId])
+<a name="show"></a>
+### videomailClient.show([containerId])
 
 Automatically fills the DOM with a form for video recording. If a HTML element who ID equals `containerId`, that placeholder will be filled. Otherwise an error occurs.
 
@@ -197,6 +197,10 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 
 <a name="changes"></a>
 ## Breaking changes (Changelog)
+
+### v1.2.0 (2015-05-17)
+
+- **VideomailClient:** Renamed `VideomailClient.form()` to `VideomailClient.show()`
 
 ### v1.1.0 (2015-04-18)
 

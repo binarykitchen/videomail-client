@@ -33,7 +33,8 @@ VideomailError.create = function(err, explanation, options) {
         browser = new Browser(options),
 
         errType,
-        message
+        message,
+        stack
 
     // whole code is ugly because all browsers behave so differently :(
 
@@ -49,6 +50,9 @@ VideomailError.create = function(err, explanation, options) {
 
         else if (err.type === 'error' && err.target.bufferedAmount === 0)
             errType = VideomailError.NOT_CONNECTED
+
+        if (err.stack)
+            stack = err.stack
 
     } else
         if (err === VideomailError.NOT_CONNECTED)
@@ -117,6 +121,11 @@ VideomailError.create = function(err, explanation, options) {
 
     if (options.logger && options.logger.getLines)
         logLines = options.logger.getLines()
+
+    if (stack) {
+        message = new Error(message)
+        message.stack = stack
+    }
 
     return new VideomailError(message, {
         explanation: explanation,

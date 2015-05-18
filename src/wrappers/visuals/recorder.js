@@ -72,7 +72,7 @@ var Recorder = function(visuals, replay, options) {
             show()
             self.emit(Events.USER_MEDIA_READY)
         } catch (exc) {
-            throw VideomailError.create(exc, options)
+            self.emit(Events.ERROR, exc)
         }
     }
 
@@ -124,7 +124,7 @@ var Recorder = function(visuals, replay, options) {
                             }
                         )
                 } catch (exc) {
-                    throw VideomailError.create(exc, options)
+                    self.emit(Events.ERROR, exc)
                 }
 
             }, function(err) {
@@ -241,7 +241,7 @@ var Recorder = function(visuals, replay, options) {
                     break
             }
         } catch (exc) {
-            throw VideomailError.create(exc, options)
+            self.emit(Events.ERROR, exc)
         }
     }
 
@@ -456,7 +456,6 @@ var Recorder = function(visuals, replay, options) {
 
             userMediaLoaded =
             key =
-            avgFps =
             canvas =
             ctx =
             sampleProgress =
@@ -516,6 +515,7 @@ var Recorder = function(visuals, replay, options) {
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')
 
+        avgFps   = null
         bytesSum = intervalSum = 0
         lastAnimationTimestamp = Date.now()
 
@@ -574,7 +574,7 @@ var Recorder = function(visuals, replay, options) {
                     }
                 }
             } catch (exc) {
-                throw VideomailError.create(exc, options)
+                self.emit(Events.ERROR, exc)
             }
         }
 

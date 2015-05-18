@@ -155,7 +155,10 @@ var Notifier = function(visuals, options) {
     }
 
     this.isVisible = function() {
-        return !notifyElement.classList.contains('hide')
+        if (!built)
+            return false
+        else
+            return !notifyElement.classList.contains('hide')
     }
 
     this.notify = function(message, explanation, options) {

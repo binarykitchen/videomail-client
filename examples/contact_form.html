@@ -4,30 +4,20 @@
         <title>videomail-client examples</title>
 
         <style type="text/css">
-            input[type="email"],
-            input[type="text"],
-            fieldset,
-            textarea,
-            .buttons {
+            input[type="email"], input[type="text"], fieldset, textarea, .buttons, #startOver {
                 margin:  1em 0;
                 display: block;
             }
 
-            .hide {
-                display: none;
-            }
-
-            #startOver {
-                display: block;
-            }
+            .hide { display: none; }
         </style>
     </head>
     <body>
         <h1>BETA! A contact form embracing Sign Language!</h1>
 
         <form id="videomail">
-            <input name='email' type='email' placeholder='Enter your email address' required/>
-            <input name='subject' type='text' placeholder='Enter a subject' required/>
+            <input name='from'    type='email' placeholder='Enter your email address' required/>
+            <input name='subject' type='text'  placeholder='Enter a subject' required/>
             <fieldset>
                 <legend>How do you want to contact us?</legend>
                 <p>
@@ -40,77 +30,60 @@
                 </p>
             </fieldset>
             <textarea id='message' name='message' placeholder='Enter your message' cols='40' rows='5' required></textarea>
-            <div class='visuals' class='hide'></div>
+
             <div class="buttons">
-                <button class='record hide'>&#9673; Record</button>
-                <button class='pause hide'>&#9553; Pause</button>
-                <button class='resume hide'>&#9673; Resume</button>
-                <button class='stop hide'>&#10006; Stop</button>
-                <button class='back hide'>&#x25c0; Back</button>
-                <input type='submit' value='✉ Submit'/>
+                <button type='submit' disabled>Submit</button>
             </div>
         </form>
 
         <div id="viewVideo" class="hide">
-            <h2></h2>
+            <h2></h2> <!-- Title placeholder -->
             <video class="replay"></video>
-            <button id='startOver'>&#x25c0; Start over</button>
+            <button id='startOver'>Start over</button>
         </div>
 
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client'),
+                videomailClient = new VideomailClient(),
 
                 viewVideo          = document.getElementById('viewVideo'),
-                videomailForm      = document.getElementById('videomail'),
                 startOverButton    = document.getElementById('startOver'),
                 writingOption      = document.getElementById('writingOption'),
                 signLanguageOption = document.getElementById('signLanguageOption'),
-                message            = document.getElementById('message'),
-
-                videomailClient
-
-            var startOver = function() {
-                viewVideo.classList.add('hide')
-                videomailForm.classList.remove('hide')
-                videomailClient.startOver()
-            }
+                message            = document.getElementById('message')
 
             var onSubmitted = function(videomail) {
                 viewVideo.querySelector('h2').innerHTML = videomail.title
 
                 this.replay(viewVideo, videomail)
 
-                startOverButton.onclick = startOver
-
-                videomailForm.classList.add('hide')
-                viewVideo.classList.remove('hide')
-            }
-
-            var videomailClient = new VideomailClient({
-                debug: true,
-                video: {
-                    countdown: false
+                startOverButton.onclick = function() {
+                    videomailClient.startOver()
                 }
-            })
+            }
 
             // continue from here, it behaves a bit weird:
             // while recording, switching to writing and back, should go into resume state, but it doesn't
 
-            writingOption.addEventListener('click', function() {
+            writingOption.onclick = function() {
                 videomailClient.hide()
-                message.classList.remove('hide')
-            })
 
-            signLanguageOption.addEventListener('click', function() {
-                videomailClient.form()
+                message.classList.remove('hide')
+                message.required = true
+            }
+
+            signLanguageOption.onclick = function() {
+                videomailClient.show()
+
                 message.classList.add('hide')
-            })
+                message.required = false
+            }
 
             videomailClient.on(
                 videomailClient.events.SUBMITTED,
-                onSubmitted.bind(videomailClient
-            ))
+                onSubmitted.bind(videomailClient)
+            )
         </script>
     </body>
 </html>

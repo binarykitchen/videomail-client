@@ -43,6 +43,10 @@ var Replay = function(parentElement, options) {
             })
     }
 
+    function isStandalone() {
+        return parentElement.constructor.name === 'HTMLDivElement'
+    }
+
     this.setVideomail = function(newVideomail) {
         videomail = newVideomail
 
@@ -51,20 +55,26 @@ var Replay = function(parentElement, options) {
 
         if (videomail.mp4)
             this.setMp4Source(videomail.mp4)
+
+        this.show()
     }
 
     this.show = function() {
         replayElement.classList.remove('hide')
+
+        if (parentElement.classList)
+            parentElement.classList.remove('hide')
 
         // add a little delay to make sure the source is set
         setTimeout(function() {
             replayElement.load()
         }, 40)
 
-        if (!videomail)
-            this.emit(Events.PREVIEW_SHOWN)
-        else
-            this.emit(Events.REPLAY_SHOWN)
+        if (!isStandalone())
+            if (!videomail)
+                this.emit(Events.PREVIEW_SHOWN)
+            else
+                this.emit(Events.REPLAY_SHOWN)
     }
 
     this.build = function() {
@@ -84,7 +94,7 @@ var Replay = function(parentElement, options) {
         if (!replayElement.controls)
             replayElement.controls = true
 
-        !built && initEvents()
+        !built && !isStandalone() && initEvents()
 
         browser.checkPlaybackCapabilities(replayElement)
 
@@ -158,7 +168,10 @@ var Replay = function(parentElement, options) {
     }
 
     this.hide = function() {
-        replayElement.classList.add('hide')
+        if (isStandalone())
+            parentElement.classList.add('hide')
+        else
+            replayElement.classList.add('hide')
     }
 
     this.isShown = function() {

@@ -2,13 +2,15 @@ var h = require('hyperscript'),
 
     AudioSample     = require('./items/sample'),
     VideomailError  = require('./videomailError'),
+    Events          = require('./../events'),
 
     audioContext
 
 module.exports = function(rawVisualUserMedia, options) {
 
-    var recordAudio        = false,
-        paused             = false,
+    var self            = this,
+        recordAudio     = false,
+        paused          = false,
         recorder
 
     function initAudio(localMediaStream, audioCallback) {
@@ -101,7 +103,7 @@ module.exports = function(rawVisualUserMedia, options) {
                 else
                     videoCallback()
             } catch (exc) {
-                throw VideomailError.create(exc, options)
+                self.emit(Events.ERROR, exc)
             }
         }
 
@@ -135,7 +137,7 @@ module.exports = function(rawVisualUserMedia, options) {
             rawVisualUserMedia.addEventListener('playing', onPlaying)
             rawVisualUserMedia.play()
         } catch (exc) {
-            throw VideomailError.create(exc, options)
+            self.emit(Events.ERROR, exc)
         }
     }
 
@@ -158,7 +160,7 @@ module.exports = function(rawVisualUserMedia, options) {
             if (recorder)
                 recorder.onaudioprocess = undefined
         } catch (exc) {
-            throw VideomailError.create(exc, options)
+            self.emit(Events.ERROR, exc)
         }
     }
 

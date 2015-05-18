@@ -5,28 +5,20 @@
 
         <style type="text/css">
             input[type="text"],
-            .buttons {
-                margin: 1em 0;
-            }
-
-            .hide {
-                display: none;
-            }
-
-            #startOver {
-                display: block;
-            }
+            .buttons    { margin: 1em 0;}
+            .hide       { display: none; }
+            #startOver  { display: block; }
         </style>
     </head>
     <body>
         <h1>Wrap into a form, custom validation, have a submit button and display the record</h1>
 
         <form id="videomail">
-            <input name='title' type='text' placeholder='Enter a title' required/>
+            <input name='subject' type='text' placeholder='Enter a subject' required/>
         </form>
 
         <div id="viewVideo" class="hide">
-            <h2></h2>
+            <h2></h2> <!-- Title placeholder -->
             <video class="replay"></video>
             <button id='startOver'>&#x25c0; Start over</button>
         </div>
@@ -36,26 +28,18 @@
             var VideomailClient = require('videomail-client'),
 
                 viewVideo       = document.getElementById('viewVideo'),
-                videomailForm   = document.getElementById('videomail'),
                 startOverButton = document.getElementById('startOver'),
 
                 videomailClient
 
-            var startOver = function() {
-                viewVideo.classList.add('hide')
-                videomailForm.classList.remove('hide')
-                videomailClient.startOver()
-            }
-
             var onSubmitted = function(videomail) {
-                viewVideo.querySelector('h2').innerHTML = videomail.title
+                viewVideo.querySelector('h2').innerHTML = videomail.subject
 
                 this.replay(viewVideo, videomail)
 
-                startOverButton.onclick = startOver
-
-                videomailForm.classList.add('hide')
-                viewVideo.classList.remove('hide')
+                startOverButton.onclick = function() {
+                    videomailClient.startOver()
+                }
             }
 
             var videomailClient = new VideomailClient({
@@ -65,12 +49,12 @@
                 }
             })
 
-            videomailClient.form()
+            videomailClient.show()
 
             videomailClient.on(
                 videomailClient.events.SUBMITTED,
-                onSubmitted.bind(videomailClient
-            ))
+                onSubmitted.bind(videomailClient)
+            )
         </script>
     </body>
 </html>

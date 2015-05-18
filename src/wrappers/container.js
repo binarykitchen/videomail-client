@@ -24,6 +24,7 @@ var Container = function(options) {
         resource    = new Resource(options),
         htmlElement = document.querySelector('html'),
         hasError    = false,
+        submitted   = false,
 
         containerElement,
         built,
@@ -72,7 +73,10 @@ var Container = function(options) {
     function processError(err) {
         hasError = true
 
-        options.logger.error(err)
+        if (err.stack)
+            options.logger.error(err.stack)
+        else
+            options.logger.error(err)
 
         if (options.displayErrors)
             visuals.block(err)
@@ -123,6 +127,10 @@ var Container = function(options) {
         self.endWaiting()
     }
 
+    function hideMySelf() {
+        containerElement.classList.add('hide')
+    }
+
     this.build = function(containerId) {
         try {
             containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
@@ -143,15 +151,12 @@ var Container = function(options) {
                 buildForm()
                 buildChildren()
 
-                if (!hasError) {
+                if (!hasError)
                     built = true
-                    self.emit(Events.FORM_READY)
-                }
             }
 
         } catch (exc) {
-            // convert into videomail error class
-            throw VideomailError.create(exc, options)
+            self.emit(Events.ERROR, exc)
         }
     }
 
@@ -180,16 +185,32 @@ var Container = function(options) {
             unloadButKeepEventListeners(e)
             this.removeAllListeners()
 
-            built = false
+            built = submitted = false
         } catch (exc) {
-            throw VideomailError.create(e)
+            self.emit(Events.ERROR, exc)
         }
+    }
+
+    this.show = function() {
+        containerElement.classList.remove('hide')
+
+        visuals.show()
+        buttons.show()
+
+        if (!hasError)
+            self.emit(Events.FORM_READY)
     }
 
     this.hide = function() {
         hasError = false
         this.pause()
+
         visuals.hide()
+
+        if (submitted) {
+            buttons.hide()
+            hideMySelf()
+        }
     }
 
     this.isNotifying = function() {
@@ -206,9 +227,10 @@ var Container = function(options) {
 
     this.startOver = function() {
         try {
+            this.show()
             visuals.back()
         } catch (exc) {
-            throw VideomailError.create(exc, options)
+            self.emit(Events.ERROR, exc)
         }
     }
 
@@ -225,7 +247,7 @@ var Container = function(options) {
                 valid = form.validate()
 
                 if (valid) {
-                    if (!visualsValid) {
+                    if (!visuals.isHidden() && !visualsValid) {
 
                         if (this.isReady() || this.isRecording() || this.isPaused())
                             valid = false
@@ -282,8 +304,10 @@ var Container = function(options) {
 
             if (err)
                 self.emit(Events.ERROR, err)
-            else
+            else {
+                submitted = true
                 self.emit(Events.SUBMITTED, videomail, response)
+            }
         })
     }
 

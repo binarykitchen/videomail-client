@@ -36,35 +36,45 @@ function getBrowser(localOptions) {
 var VideomailClient = function(options) {
 
     var localOptions = adjustOptions(options),
-        container    = new Container(localOptions)
+        container    = new Container(localOptions),
+        replay
 
     EventEmitter.call(this, localOptions, 'VideomailClient')
 
     // expose all possible events
     this.events = Events
 
-    this.form = function(containerId) {
-
+    function build(containerId, cb) {
         function buildForm() {
+            localOptions.debug('VideomailClient: buildForm()')
+
             container.build(containerId)
+            cb && cb()
         }
 
         readystate.interactive(buildForm)
     }
 
+    this.show = function(containerId) {
+        localOptions.debug('VideomailClient: show()')
+
+        build(containerId, container.show)
+    }
+
     // automatically adds a <video> element inside the given parentElement and loads
     // it with the videomail
     this.replay = function(parentElement, videomail) {
-        var replayElement = new Replay(parentElement, localOptions)
+        container.hide()
 
-        replayElement.build()
+        replay = new Replay(parentElement, localOptions)
 
-        replayElement.setVideomail(videomail)
+        replay.build()
 
-        replayElement.show()
+        replay.setVideomail(videomail)
     }
 
     this.startOver = function() {
+        replay && replay.hide()
         container.startOver()
     }
 
@@ -77,13 +87,14 @@ var VideomailClient = function(options) {
     }
 
     this.get = function(key, cb) {
-        var resource = new Resource(localOptions)
-        resource.get(key, cb)
+        new Resource(localOptions).get(key, cb)
     }
 
     this.canRecord = function() {
         return getBrowser(localOptions).canRecord()
     }
+
+    build()
 }
 
 util.inherits(VideomailClient, EventEmitter)

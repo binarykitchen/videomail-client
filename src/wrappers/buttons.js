@@ -20,12 +20,12 @@ var Buttons = function(container, options) {
         submitButton,
         built
 
-    function hide(buttonElement) {
-        buttonElement.classList.add('hide')
+    function hide(element) {
+        element.classList.add('hide')
     }
 
-    function show(buttonElement) {
-        buttonElement.classList.remove('hide')
+    function show(element) {
+        element.classList.remove('hide')
     }
 
     function adjustButton(buttonElement, show, type) {
@@ -61,7 +61,10 @@ var Buttons = function(container, options) {
 
             buttonElement.innerHTML = text
 
-            buttonsElement.appendChild(buttonElement)
+            if (submitButton)
+                buttonsElement.insertBefore(buttonElement, submitButton)
+            else
+                buttonsElement.appendChild(buttonElement)
         } else
             buttonElement = adjustButton(buttonElement, show, type)
 
@@ -72,42 +75,6 @@ var Buttons = function(container, options) {
     }
 
     function buildButtons() {
-        recordButton = makeButton(
-            options.selectors.recordButtonClass,
-            'Record',
-            container.record,
-            true
-        )
-
-        if (options.enablePause)
-            pauseButton = makeButton(
-                options.selectors.pauseButtonClass,
-                'Pause',
-                container.pause
-            )
-
-        if (options.enablePause)
-            resumeButton = makeButton(
-                options.selectors.resumeButtonClass,
-                'Resume',
-                container.resume
-            )
-
-        // show stop only when pause is enabled - looks better that way otherwise button
-        // move left and right between record and stop
-        stopButton = makeButton(
-            options.selectors.stopButtonClass,
-            'Stop',
-            container.stop,
-            options.enablePause
-        )
-
-        backButton = makeButton(
-            options.selectors.backButtonClass,
-            'Back',
-            back
-        )
-
         if (!options.disableSubmit) {
             if (!submitButton)
                 submitButton = makeButton(
@@ -126,6 +93,45 @@ var Buttons = function(container, options) {
             if (!container.hasForm() && submitButton)
                 replaceClickHandler(submitButton, submit)
         }
+
+        recordButton = makeButton(
+            options.selectors.recordButtonClass,
+            'Record',
+            container.record,
+            false
+        )
+
+        if (options.enablePause)
+            pauseButton = makeButton(
+                options.selectors.pauseButtonClass,
+                'Pause',
+                container.pause,
+                false
+            )
+
+        if (options.enablePause)
+            resumeButton = makeButton(
+                options.selectors.resumeButtonClass,
+                'Resume',
+                container.resume,
+                false
+            )
+
+        // show stop only when pause is enabled - looks better that way otherwise button
+        // move left and right between record and stop
+        stopButton = makeButton(
+            options.selectors.stopButtonClass,
+            'Stop',
+            container.stop,
+            false
+        )
+
+        backButton = makeButton(
+            options.selectors.backButtonClass,
+            'Back',
+            back,
+            false
+        )
     }
 
     function onReady() {
@@ -266,7 +272,6 @@ var Buttons = function(container, options) {
     }
 
     function initEvents() {
-
         self.on(Events.USER_MEDIA_READY, function() {
             onReady()
         }).on(Events.PREVIEW, function() {
@@ -342,6 +347,14 @@ var Buttons = function(container, options) {
 
     this.unload = function() {
         built = false
+    }
+
+    this.hide = function() {
+        hide(buttonsElement)
+    }
+
+    this.show = function() {
+        show(buttonsElement)
     }
 }
 

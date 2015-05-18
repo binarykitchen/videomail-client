@@ -44,7 +44,6 @@ var Visuals = function(container, options) {
         notifier.build()
         recorderInsides.build()
         replay.build()
-        recorder.build()
     }
 
     function initEvents() {
@@ -84,7 +83,7 @@ var Visuals = function(container, options) {
         }
 
         visualsElement.classList.add('visuals')
-        visualsElement.classList.remove('hide')
+        visualsElement.classList.add('hide')
 
         if (!visualsElement.style.width && options.video.width)
             visualsElement.style.width = options.video.width + 'px'
@@ -222,6 +221,18 @@ var Visuals = function(container, options) {
     this.hide = function() {
         visualsElement.classList.add('hide')
         this.emit(Events.HIDE)
+    }
+
+    this.isHidden = function() {
+        if (!built)
+            return true
+        else
+            return visualsElement.classList.contains('hide')
+    }
+
+    this.show = function() {
+        recorder.build()
+        visualsElement.classList.remove('hide')
     }
 
     this.hideReplay   = replay.hide.bind(replay)
