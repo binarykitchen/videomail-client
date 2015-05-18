@@ -43,6 +43,12 @@ var RecorderInsides = function(visuals, options) {
         recordTimer.pause()
     }
 
+    function onResetting() {
+        self.hidePause()
+        self.hideCountdown()
+        recordTimer.stop()
+    }
+
     function initEvents() {
         self
             .on(Events.RECORDING, function() {
@@ -59,10 +65,9 @@ var RecorderInsides = function(visuals, options) {
             .on(Events.PAUSED, function() {
                 pauseRecording()
             })
-            .on(Events.RESETTING, function() {
-                self.hidePause()
+            .on(Events.RESETTING, onResetting)
+            .on(Events.HIDE, function() {
                 self.hideCountdown()
-                recordTimer.stop()
             })
     }
 

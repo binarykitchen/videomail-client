@@ -41,6 +41,7 @@ gulp.task('todo', function() {
         .pipe(gulp.dest('./'))
 })
 
+// todo: change when https://github.com/substack/node-browserify/issues/1271 is fixed
 gulp.task('browserify', ['clean:js'], function(cb) {
     var bundler = browserify({
             entries:    ['./src/index.js'],

@@ -45,10 +45,6 @@ module.exports = function(visuals, options) {
             this.hide()
     }
 
-    this.hide = function() {
-        countdownElement.classList.add('hide')
-    }
-
     this.show = function() {
         countdownElement.classList.remove('hide')
     }
@@ -60,5 +56,10 @@ module.exports = function(visuals, options) {
     this.unload = function() {
         clearInterval(intervalId)
         intervalId = null
+    }
+
+    this.hide = function() {
+       countdownElement.classList.add('hide')
+       this.unload()
     }
 }

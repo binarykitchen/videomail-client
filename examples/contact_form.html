@@ -16,6 +16,7 @@
         <h1>BETA! A contact form embracing Sign Language!</h1>
 
         <form id="videomail">
+            <input name='videomail_key' type='hidden' id='videomailKey'/>
             <input name='from'    type='email' placeholder='Enter your email address' required/>
             <input name='subject' type='text'  placeholder='Enter a subject' required/>
             <fieldset>
@@ -48,13 +49,20 @@
                 videomailClient = new VideomailClient(),
 
                 viewVideo          = document.getElementById('viewVideo'),
+                videomailKeyInput  = document.getElementById('videomailKey'),
                 startOverButton    = document.getElementById('startOver'),
                 writingOption      = document.getElementById('writingOption'),
                 signLanguageOption = document.getElementById('signLanguageOption'),
                 message            = document.getElementById('message')
 
+            // todo: try to reduce number of code lines to keep it as simple as possible!!
+
+            var onPreview = function(videomailKey) {
+                videomailKeyInput.value = videomailKey
+            }
+
             var onSubmitted = function(videomail) {
-                viewVideo.querySelector('h2').innerHTML = videomail.title
+                viewVideo.querySelector('h2').innerHTML = videomail.subject
 
                 this.replay(viewVideo, videomail)
 
@@ -62,9 +70,6 @@
                     videomailClient.startOver()
                 }
             }
-
-            // continue from here, it behaves a bit weird:
-            // while recording, switching to writing and back, should go into resume state, but it doesn't
 
             writingOption.onclick = function() {
                 videomailClient.hide()
@@ -80,6 +85,12 @@
                 message.required = false
             }
 
+            videomailClient.on(
+                videomailClient.events.PREVIEW,
+                onPreview.bind(videomailClient)
+            )
+
+            // todo: if the form already has an URL, do not the real submit
             videomailClient.on(
                 videomailClient.events.SUBMITTED,
                 onSubmitted.bind(videomailClient)
