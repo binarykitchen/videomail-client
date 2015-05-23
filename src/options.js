@@ -28,6 +28,8 @@ module.exports = {
         backButtonClass:   'back',
         submitButtonClass: 'submit',
 
+        keyInputName:      'videomail_key',
+
         formId:            null,                    // automatically detects form if any
         submitButtonId:    null                     // automatically detects submit button in the form
     },

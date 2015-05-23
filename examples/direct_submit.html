@@ -5,22 +5,23 @@
 
         <style type="text/css">
             input[type="text"],
-            .buttons    { margin: 1em 0;}
-            .hide       { display: none; }
+            .buttons    { margin: 1em 0;  }
+            .hide       { display: none;  }
             #startOver  { display: block; }
         </style>
     </head>
     <body>
-        <h1>Wrap into a form, validation, have a direct submit button and display the record</h1>
+        <h1>Wrap into a form, validation, have a direct submit form and display the record</h1>
 
+        <!-- By default the videomail-client hooks into the form with the id='videomail' -->
         <form id="videomail">
             <input name='subject' type='text' placeholder='Enter a subject' required/>
         </form>
 
         <div id="viewVideo" class="hide">
-            <h2></h2> <!-- Title placeholder -->
+            <h2 class='subject'></h2>
             <video class="replay"></video>
-            <button id='startOver'>&#x25c0; Start over</button>
+            <button id='startOver'>Start over</button>
         </div>
 
         <script src="/videomail-client.js"></script>
@@ -30,31 +31,24 @@
                 viewVideo       = document.getElementById('viewVideo'),
                 startOverButton = document.getElementById('startOver'),
 
-                videomailClient
+                videomailClient = new VideomailClient({debug: true})
 
             var onSubmitted = function(videomail) {
-                viewVideo.querySelector('h2').innerHTML = videomail.subject
-
                 this.replay(viewVideo, videomail)
 
-                startOverButton.onclick = function() {
-                    videomailClient.startOver()
-                }
+                startOverButton.onclick = this.startOver
             }
 
-            var videomailClient = new VideomailClient({
-                debug: true,
-                video: {
-                    countdown: false
-                }
-            })
-
-            videomailClient.show()
-
+            // allow direct submits, means:
+            // any form data here is submitted directly into the videomail server
+            // if you do not want that, look at the other example contact_form.html where
+            // you grab the key from the videomail server and use it in your own form (preferred solution).
             videomailClient.on(
                 videomailClient.events.SUBMITTED,
                 onSubmitted.bind(videomailClient)
             )
+
+            videomailClient.show()
         </script>
     </body>
 </html>

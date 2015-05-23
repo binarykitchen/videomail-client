@@ -1,7 +1,14 @@
-var util         = require('util'),
+var h            = require('hyperscript'),
+    util         = require('util'),
+
+    Events       = require('./../events'),
     EventEmitter = require('./../util/eventEmitter')
 
 var Form = function(container, formElement, options) {
+
+    EventEmitter.call(this, options, 'Form')
+
+    var keyInput
 
     function getData() {
         var limit = formElement.elements.length,
@@ -54,6 +61,21 @@ var Form = function(container, formElement, options) {
                 })
             }
         }
+
+        keyInput = formElement.querySelector('input[name="' + options.selectors.keyInputName + '"]')
+
+        if (!keyInput) {
+            keyInput = h('input', {
+                name: options.selectors.keyInputName,
+                type: 'hidden'
+            })
+
+            formElement.appendChild(keyInput)
+        }
+
+        this.on(Events.PREVIEW, function(videomailKey) {
+            keyInput.value = videomailKey
+        })
 
         formElement.addEventListener('submit', function(e) {
             e.preventDefault()

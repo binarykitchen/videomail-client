@@ -47,6 +47,17 @@ var Replay = function(parentElement, options) {
         return parentElement.constructor.name === 'HTMLDivElement'
     }
 
+    function copyAttributes(newVideomail) {
+        var attributeContainer
+
+        Object.keys(newVideomail).forEach(function(attribute) {
+            attributeContainer = parentElement.querySelector('.' + attribute)
+
+            if (attributeContainer)
+                attributeContainer.innerHTML = newVideomail[attribute]
+        })
+    }
+
     this.setVideomail = function(newVideomail) {
         videomail = newVideomail
 
@@ -55,6 +66,8 @@ var Replay = function(parentElement, options) {
 
         if (videomail.mp4)
             this.setMp4Source(videomail.mp4)
+
+        copyAttributes(newVideomail)
 
         this.show()
     }
