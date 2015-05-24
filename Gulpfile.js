@@ -1,4 +1,5 @@
-var gulp            = require('gulp'),
+var path            = require('path'),
+    gulp            = require('gulp'),
     plugins         = require('gulp-load-plugins')(),
     nib             = require('nib'),
     browserify      = require('browserify'),
@@ -41,16 +42,17 @@ gulp.task('todo', function() {
         .pipe(gulp.dest('./'))
 })
 
-// todo: change when https://github.com/substack/node-browserify/issues/1271 is fixed
 gulp.task('browserify', ['clean:js'], function(cb) {
-    var bundler = browserify({
-            entries:    ['./src/index.js'],
+    var entry   = path.join(__dirname, '/src/index.js'),
+        bundler = browserify({
+            entries:    [entry],
+            basedir:    __dirname,
             globals:    false,
             debug:      true // enables source maps
         })
 
     bundler
-        .require('./src/index.js', {expose: 'videomail-client'})
+        .require(entry, {expose: 'videomail-client'})
         .bundle()
         .on('error',    cb)
         .on('log',      plugins.util.log)

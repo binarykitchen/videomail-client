@@ -27,11 +27,10 @@
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client'),
+                videomailClient = new VideomailClient({debug: true}),
 
                 viewVideo       = document.getElementById('viewVideo'),
-                startOverButton = document.getElementById('startOver'),
-
-                videomailClient = new VideomailClient({debug: true})
+                startOverButton = document.getElementById('startOver')
 
             var onSubmitted = function(videomail) {
                 this.replay(viewVideo, videomail)

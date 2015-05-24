@@ -197,13 +197,19 @@ var Container = function(options) {
         visuals.show()
         buttons.show()
 
-        if (!hasError)
-            self.emit(Events.FORM_READY)
+        if (!hasError) {
+            if (visuals.isReplayShown())
+                self.emit(Events.PREVIEW)
+            else
+                self.emit(Events.FORM_READY)
+        }
     }
 
     this.hide = function() {
         hasError = false
-        this.pause()
+
+        if (this.isRecording())
+            this.pause()
 
         visuals.hide()
 
@@ -227,8 +233,7 @@ var Container = function(options) {
 
     this.startOver = function() {
         try {
-            this.show()
-            visuals.back()
+            visuals.back(this.show)
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
@@ -249,7 +254,7 @@ var Container = function(options) {
                 if (valid) {
                     if (!visuals.isHidden() && !visualsValid) {
 
-                        if (this.isReady() || this.isRecording() || this.isPaused())
+                        if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown())
                             valid = false
 
                         if (!valid)
@@ -311,6 +316,11 @@ var Container = function(options) {
         })
     }
 
+    this.isBuilt = function() {
+        return built
+    }
+
+    this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)
     this.resume         = visuals.resume.bind(visuals)

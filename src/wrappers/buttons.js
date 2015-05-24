@@ -134,14 +134,27 @@ var Buttons = function(container, options) {
         )
     }
 
-    function onReady() {
+    function onFormReady() {
         stopButton.disabled = true
 
         if (options.enablePause)
             show(stopButton)
 
+        if (options.enablePause) {
+            if (pauseButton.disabled)
+                show(recordButton)
+            else {
+                stopButton.disabled = false
+                show(resumeButton)
+            }
+        } else
+            show(recordButton)
+    }
+
+    function onReady() {
+        onFormReady()
+
         hide(backButton)
-        show(recordButton)
 
         recordButton.disabled = false
 
@@ -253,11 +266,6 @@ var Buttons = function(container, options) {
         hide(stopButton)
         hide(backButton)
         hide(resumeButton)
-    }
-
-    function onFormReady() {
-        show(recordButton)
-        show(stopButton)
     }
 
     function back() {

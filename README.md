@@ -134,15 +134,10 @@ Automatically fills the DOM with a form for video recording. If a HTML element w
 
 By default the optional parameter `containerId` is set to `videomail`.
 
-<a name="build"></a>
-### videomailClient.build([containerId])
-
-Very similar to `show()`, except that it's not going to show anything. Only the DOM is adjusted internally. You might need this if you have a switch somewhere to enable or disable the Videomail client, see example `contact_form.html`.
-
 <a name="replay"></a>
 ### videomailClient.replay(parentElement, videomail)
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/submit.html` for some inspiration.
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` for some inspiration.
 
 If the parent element already contains a video container like this
 
@@ -151,6 +146,8 @@ If the parent element already contains a video container like this
 ```
 
 then this will be used instead of adding a new dom element.
+
+Furthermore the `replay()` method also detects whether the parent element has placeholders to fill with form data. To understand this better, check out how the subject in the `/examples/direct_submit.html` example is being displayed upon replay.
 
 <a name="startOver"></a>
 ### videomailClient.startOver()

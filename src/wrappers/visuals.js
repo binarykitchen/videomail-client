@@ -64,7 +64,11 @@ var Visuals = function(container, options) {
     }
 
     function isRecordable() {
-        return !self.isNotifying() && !replay.isShown() && !recorderInsides.isCountingDown()
+        return !self.isNotifying() && !replay.isShown() && !this.isCountingDown()
+    }
+
+    this.isCountingDown = function() {
+        return recorderInsides.isCountingDown()
     }
 
     this.build = function() {
@@ -123,10 +127,10 @@ var Visuals = function(container, options) {
         recorderInsides.hidePause()
     }
 
-    this.back = function() {
+    this.back = function(cb) {
         replay.hide()
         notifier.hide()
-        recorder.back()
+        recorder.back(cb)
     }
 
     this.unload = function(e) {
@@ -156,7 +160,7 @@ var Visuals = function(container, options) {
     }
 
     this.pauseOrResume = function() {
-        if (isRecordable()) {
+        if (isRecordable.call(this)) {
             if (this.isRecording())
                 this.pause()
 
@@ -231,13 +235,16 @@ var Visuals = function(container, options) {
     }
 
     this.show = function() {
-        recorder.build()
+        if (!this.isReplayShown())
+            recorder.build()
+
         visualsElement.classList.remove('hide')
     }
 
-    this.hideReplay   = replay.hide.bind(replay)
-    this.hideRecorder = recorder.hide.bind(recorder)
-    this.isRecording  = recorder.isRecording.bind(recorder)
+    this.isReplayShown = replay.isShown.bind(replay)
+    this.hideReplay    = replay.hide.bind(replay)
+    this.hideRecorder  = recorder.hide.bind(recorder)
+    this.isRecording   = recorder.isRecording.bind(recorder)
 }
 
 util.inherits(Visuals, EventEmitter)

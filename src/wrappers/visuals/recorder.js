@@ -114,15 +114,14 @@ var Recorder = function(visuals, replay, options) {
                 try {
                     clearUserMediaTimeout()
 
-                    if (!unloaded)
-                        userMedia.init(
-                            localStream,
-                            onUserMediaReady.bind(self),
-                            onAudioSample.bind(self),
-                            function(err) {
-                                self.emit(Events.ERROR, err)
-                            }
-                        )
+                    userMedia.init(
+                        localStream,
+                        onUserMediaReady.bind(self),
+                        onAudioSample.bind(self),
+                        function(err) {
+                            self.emit(Events.ERROR, err)
+                        }
+                    )
                 } catch (exc) {
                     self.emit(Events.ERROR, exc)
                 }
@@ -245,12 +244,13 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
-    function writeCommand(command, args) {
+    function writeCommand(command, args, cb) {
         if (!connected) {
             debug('Reconnecting for the command', command, '…')
 
             initSocket(function() {
                 writeCommand(command, args)
+                cb && cb()
             })
         } else if (stream) {
             debug('$ %s', command, args)
@@ -261,6 +261,8 @@ var Recorder = function(visuals, replay, options) {
             }
 
             stream.write(new Buffer(JSON.stringify(command)))
+
+            cb && cb()
         }
     }
 
@@ -410,11 +412,11 @@ var Recorder = function(visuals, replay, options) {
         this.reset()
     }
 
-    this.back = function() {
+    this.back = function(cb) {
         show()
         this.reset()
 
-        writeCommand('back')
+        writeCommand('back', null, cb)
     }
 
     this.unload = function(e) {
@@ -659,7 +661,6 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.hide = function() {
-        cancelAnimationFrame()
         recorderElement && recorderElement.classList.add('hide')
     }
 }

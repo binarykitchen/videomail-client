@@ -44,11 +44,13 @@ var VideomailClient = function(options) {
     // expose all possible events
     this.events = Events
 
-    this.build = function(containerId, cb) {
+    function build(containerId, cb) {
         function buildForm() {
-            localOptions.debug('VideomailClient: buildForm()')
+            if (!container.isBuilt()) {
+                localOptions.debug('VideomailClient: buildForm()')
+                container.build(containerId)
+            }
 
-            container.build(containerId)
             cb && cb()
         }
 
@@ -58,7 +60,7 @@ var VideomailClient = function(options) {
     this.show = function(containerId) {
         localOptions.debug('VideomailClient: show()')
 
-        this.build(containerId, container.show)
+        build.call(this, containerId, container.show)
     }
 
     // automatically adds a <video> element inside the given parentElement and loads
@@ -93,6 +95,8 @@ var VideomailClient = function(options) {
     this.canRecord = function() {
         return getBrowser(localOptions).canRecord()
     }
+
+    build()
 }
 
 util.inherits(VideomailClient, EventEmitter)
