@@ -202,10 +202,10 @@ var Recorder = function(visuals, replay, options) {
                 result
 
             debug(
-                'Server commanded: %s with args %s',
+                'Server commanded: %s with %j',
                 command.command,
                 command.args,
-                result ? '= ' + result : 'without result'
+                result ? '= ' + result : ''
             )
 
             switch (command.command) {
@@ -253,7 +253,7 @@ var Recorder = function(visuals, replay, options) {
                 cb && cb()
             })
         } else if (stream) {
-            debug('$ %s', command, args)
+            debug('$ %s', command, args ? JSON.stringify(args) : '')
 
             var command = {
                 command:    command,
@@ -300,35 +300,12 @@ var Recorder = function(visuals, replay, options) {
             }
             */
 
-            stream.on('error', function(err) {
-                // todo: workaround for bug https://github.com/maxogden/websocket-stream/issues/50
-
-                if (stream && stream.destroyed) {
-
-                    // Emit error first before unloading, because
-                    // unloading will remove event listeners.
-                    self.emit(Events.ERROR, VideomailError.create(
-                        'Unable to connect',
-                        'A websocket connection has been refused. Either the server is in trouble or you are already connected in another instance?',
-                        options
-                    ))
-
-                    // just temporary
-                    options.logger.error('Original error was:', err)
-
-                } else {
-
-                    // ignore error if there is no stream, see race condition at
-                    // todo: https://github.com/maxogden/websocket-stream/issues/58#issuecomment-69711544
-
-                    if (stream)
-                        self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
-                }
-            })
-
-            stream.on('end', function() {
-                debug('x Stream has ended')
+            stream.on('close', function(err) {
+                debug('x Stream has closed')
                 connected = false
+
+                if (err)
+                    self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
             })
 
             var checkConnection = function() {
@@ -369,7 +346,6 @@ var Recorder = function(visuals, replay, options) {
 
     function cancelAnimationFrame() {
         rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
-
         rafId = null
     }
 
@@ -426,7 +402,7 @@ var Recorder = function(visuals, replay, options) {
             if (e)
                 cause = e.name || e.statusText || e.toString()
 
-            debug('Recorder: unload(), cause:', cause)
+            debug('Recorder: unload()', cause ? ', cause: ' + cause : '')
 
             this.reset()
 
@@ -474,7 +450,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.pause = function(e) {
-        debug('pause()', e)
+        debug('pause()', e ? e : '<button press>')
 
         userMedia.pause()
 

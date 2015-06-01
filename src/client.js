@@ -66,6 +66,9 @@ var VideomailClient = function(options) {
     // automatically adds a <video> element inside the given parentElement and loads
     // it with the videomail
     this.replay = function(parentElement, videomail) {
+        if (typeof parentElement === 'string')
+            parentElement = document.getElementById(parentElement)
+
         container.hide()
 
         replay = new Replay(parentElement, localOptions)

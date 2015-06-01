@@ -24,5 +24,6 @@ module.exports = keymirror({
   ERROR:                null, // an error occured
   BLOCKING:             null, // something serious, most likely an error, is shown and blocks
   FIRST_FRAME_SENT:     null, // emitted once when fist frame has been sent to server
-  HIDE:                 null  // emitted when hidden
+  HIDE:                 null, // emitted when hidden
+  NOTIFYING:            null  // notifies user about something (not blocking)
 })

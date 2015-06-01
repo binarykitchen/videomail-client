@@ -73,7 +73,12 @@ gulp.task('connect', ['build'], function() {
     plugins.connect.server({
         root:       ['examples', 'dist'],
         port:       8080,
-        livereload: true
+        livereload: true,
+        middleware: function(connect, opt) {
+          return [
+            // todo: add routing logic to process POST requests from contact_form.html
+          ]
+        }
     })
 })
 

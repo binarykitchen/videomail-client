@@ -125,7 +125,7 @@ module.exports = function(rawVisualUserMedia, options) {
                 else
                     description = videoTrack.kind
 
-                options.debug('UserMedia: detected', description)
+                options.debug('UserMedia: detected', description ? description : '')
             }
 
             setVisualStream(localMediaStream)

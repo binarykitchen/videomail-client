@@ -9,6 +9,9 @@ module.exports = function(options, name) {
 
         var args = [].splice.call(arguments, 0)
 
+        if (!event)
+            throw VideomailError.create('You cannot emit without an event.')
+
         // Automatically convert errors to videomail errors
         if (event === Events.ERROR) {
             var err = args[1]
@@ -18,11 +21,15 @@ module.exports = function(options, name) {
             args[1] = err
         }
 
+
         if (options.debug)
             if (event != 'removeListener' && event != 'newListener') {
-                var moreArguments = args.slice(1)
+                var moreArguments
 
-                if (moreArguments.length > 0)
+                if (args[1])
+                    moreArguments = args.slice(1)
+
+                if (moreArguments)
                     options.debug('%s emits: %s', name, event, moreArguments)
                 else
                     options.debug('%s emits: %s', name, event)

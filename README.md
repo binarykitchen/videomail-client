@@ -137,9 +137,11 @@ By default the optional parameter `containerId` is set to `videomail`.
 <a name="replay"></a>
 ### videomailClient.replay(parentElement, videomail)
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` for some inspiration.
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` or `/examples/contact_form.html` for some inspiration.
 
-If the parent element already contains a video container like this
+If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally.
+
+Also note that, when the parent element already contains a video container like this
 
 ```html
 <video class="replay"></video>

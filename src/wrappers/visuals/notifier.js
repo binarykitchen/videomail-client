@@ -179,9 +179,8 @@ var Notifier = function(visuals, options) {
         if (blocking) {
             notifyElement.classList.add('blocking')
             this.emit(Events.BLOCKING, options)
-        } else {
+        } else
             this.emit(Events.NOTIFYING, options)
-        }
 
         visuals.hideReplay()
         visuals.hideRecorder()
