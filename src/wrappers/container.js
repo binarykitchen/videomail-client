@@ -136,15 +136,9 @@ var Container = function(options) {
             containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
             containerElement = document.getElementById(containerId)
 
-            if (!containerElement)
-                this.emit(
-                    Events.ERROR,
-                    VideomailError.create(
-                        'The container ID is invalid!',
-                        'No tag with the ID ' + containerId + ' could be found.',
-                        options
-                    ))
-            else {
+            // only build when a container element hast been found, otherwise
+            // be silent and do nothing
+            if (containerElement) {
                 options.insertCss && prependDefaultCss()
 
                 !built && initEvents()
