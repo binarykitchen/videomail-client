@@ -402,7 +402,7 @@ var Recorder = function(visuals, replay, options) {
             if (e)
                 cause = e.name || e.statusText || e.toString()
 
-            debug('Recorder: unload()', cause ? ', cause: ' + cause : '')
+            debug('Recorder: unload()' + (cause ? ', cause: ' + cause : ''))
 
             this.reset()
 

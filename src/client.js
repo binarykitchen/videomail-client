@@ -46,10 +46,8 @@ var VideomailClient = function(options) {
 
     function build(containerId, cb) {
         function buildForm() {
-            if (!container.isBuilt()) {
-                localOptions.debug('VideomailClient: buildForm()')
+            if (!container.isBuilt())
                 container.build(containerId)
-            }
 
             cb && cb()
         }
