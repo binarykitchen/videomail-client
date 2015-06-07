@@ -202,10 +202,10 @@ var Recorder = function(visuals, replay, options) {
                 result
 
             debug(
-                'Server commanded: %s with %j',
+                'Server commanded: %s',
                 command.command,
-                command.args,
-                result ? '= ' + result : ''
+                command.args ? ', ' + command.args : '',
+                result       ? '= ' + result : ''
             )
 
             switch (command.command) {

@@ -35,7 +35,11 @@ gulp.task('stylus', function() {
 })
 
 gulp.task('todo', function() {
-    gulp.src('src/**/*.{js, styl}', {base: './'})
+    gulp.src(
+            //todo: put back in examples after https://github.com/pgilad/gulp-todo/issues/38
+            ['src/**/*.{js, styl}', 'Gulpfile.js'/*, 'examples/*.html'*/],
+            {base: './'}
+        )
         .pipe(plugins.todo({
             fileName: 'TODO.md'
         }))
