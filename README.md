@@ -35,6 +35,8 @@ To run the examples in your browser, just do this:
 2. `gulp examples` which will ignite a static server and
 3. open `http://localhost:8080` in your browser
 
+Best is to study `/examples/contact_form.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
+
 ## Dead simple example (just record and replay)
 
 ```html
@@ -113,6 +115,7 @@ videomailClient.on('FORM_READY', function() {
 
 videomailClient.on('SUBMITTED', function(videomail, response) {
     // continue with your own app logic
+    // check out /examples/contact_form.html on how to integrate into your contact form
 })
 ```
 

@@ -79,7 +79,11 @@ var Form = function(container, formElement, options) {
 
         formElement.addEventListener('submit', function(e) {
             e.preventDefault()
-            container.submit(getData())
+            container.submitAll(
+                getData(),
+                formElement.method,
+                formElement.action || '/' // use '/' as default URL is none is specified
+            )
         })
     }
 

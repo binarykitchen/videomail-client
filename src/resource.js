@@ -75,4 +75,24 @@ module.exports = function(options) {
                 }
             })
     }
+
+    this.form = function(formData, url, cb) {
+        // avgFps is only for the videomail server
+        delete formData.avgFps
+
+        superagent
+            .post(url)
+            .send(formData)
+            .timeout(options.timeout)
+            .end(function(err, res) {
+
+                err = packError(err, res)
+
+                if (err)
+                    cb(err)
+                else {
+                    cb(null, res.body)
+                }
+            })
+    }
 }

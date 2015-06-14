@@ -15,7 +15,9 @@
     <body>
         <h1>BETA! A contact form embracing Sign Language!</h1>
 
-        <form id="videomail">
+        <!-- Once you set the method to POST, then two request will be made internally. -->
+        <!-- The first one to the videomail server and the second one to the specified action -->
+        <form id="videomail" action="/contact" method="post">
             <input name='from'    type='email' placeholder='Enter your email address' required/>
             <input name='subject' type='text'  placeholder='Enter a subject' required/>
             <fieldset>
@@ -38,6 +40,7 @@
 
         <div id="viewVideo" class="hide">
             <h2 class="subject"></h2>
+            <h3 class="status"></h3>
             <video class="replay"></video>
             <button id='startOver'>Start over</button>
         </div>
@@ -52,7 +55,12 @@
                 signLanguageOption = document.getElementById('signLanguageOption'),
                 message            = document.getElementById('message')
 
-            var onSubmitted = function(videomail) {
+            var onSubmitted = function(videomail, response) {
+                var statusHeader = document.querySelector('h3.status')
+
+                // status has been generated on server side, see gulp task 'connect'
+                statusHeader.innerHTML = response.status
+
                 this.replay('viewVideo', videomail)
 
                 startOverButton.onclick = this.startOver
@@ -72,7 +80,6 @@
                 message.required = false
             }
 
-            // todo: if the form already has an URL, do not the real submit
             videomailClient.on(
                 videomailClient.events.SUBMITTED,
                 onSubmitted.bind(videomailClient)

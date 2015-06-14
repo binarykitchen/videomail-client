@@ -5,6 +5,9 @@ var path            = require('path'),
     browserify      = require('browserify'),
     source          = require('vinyl-source-stream'),
     buffer          = require('vinyl-buffer'),
+    Router          = require('router'),
+    bodyParser      = require('body-parser'),
+    send            = require('connect-send-json'),
     del             = require('del')
 
 gulp.task('clean:js', function(cb) {
@@ -78,10 +81,25 @@ gulp.task('connect', ['build'], function() {
         root:       ['examples', 'dist'],
         port:       8080,
         livereload: true,
-        middleware: function(connect, opt) {
-          return [
-            // todo: add routing logic to process POST requests from contact_form.html
-          ]
+        middleware: function() {
+            var router = new Router()
+
+            router.use(bodyParser.json())
+            router.use(send.json())
+
+            router.post('/contact', function(req, res) {
+                console.log('Videomail data received:', req.body)
+
+                // At this stage, a backend could store the videomail_key in req.body
+                // into a database for replay functionality
+
+                // Just an example to see that the backend can do anything with the data
+                res.json({
+                    status: 'Inserted on ' + new Date().toISOString()
+                })
+            })
+
+            return [router]
         }
     })
 })

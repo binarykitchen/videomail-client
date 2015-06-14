@@ -1,5 +1,6 @@
 var insertCss      = require('insert-css'),
     util           = require('util'),
+    merge          = require('merge-recursive'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
@@ -9,7 +10,6 @@ var insertCss      = require('insert-css'),
     Constants      = require('./../constants'),
     Events         = require('./../events'),
 
-    VideomailError = require('./../util/videomailError'),
     EventEmitter   = require('./../util/eventEmitter'),
     css            = require('./../assets/css/main.min.css.js')
 
@@ -129,6 +129,48 @@ var Container = function(options) {
 
     function hideMySelf() {
         containerElement.classList.add('hide')
+    }
+
+    function submitVideomail(formData, cb) {
+        var videomailFormData = {}
+
+        Object.keys(formData).forEach(function(key) {
+            videomailFormData[key] = formData[key]
+        })
+
+        videomailFormData.avgFps = visuals.getAvgFps()
+        videomailFormData.key    = visuals.getVideomailKey()
+
+        if (options.audio.enabled)
+            videomailFormData.sampleRate = visuals.getAudioSampleRate()
+
+        resource.post(videomailFormData, cb)
+    }
+
+    function submitForm(formData, url, cb) {
+        resource.form(formData, url, cb)
+    }
+
+    function finalizeSubmissions(err, videomail, response, formResponse) {
+        self.endWaiting()
+
+        if (err)
+            self.emit(Events.ERROR, err)
+        else {
+            submitted = true
+
+            // merge two json responses to fake as if it were only one request
+            if (formResponse)
+                Object.keys(formResponse).forEach(function(key) {
+                    response[key] = formResponse[key]
+                })
+
+            self.emit(
+                Events.SUBMITTED,
+                videomail,
+                response
+            )
+        }
     }
 
     this.build = function(containerId) {
@@ -284,29 +326,21 @@ var Container = function(options) {
         return buttons.isRecordButtonEnabled()
     }
 
-    this.submit = function(videomailFormData) {
-
+    this.submitAll = function(formData, method, url) {
         this.beginWaiting()
-
-        videomailFormData.avgFps = visuals.getAvgFps()
-        videomailFormData.key    = visuals.getVideomailKey()
-
-        if (options.audio.enabled)
-            videomailFormData.sampleRate = visuals.getAudioSampleRate()
-
         this.disableForm(true)
         this.emit(Events.SUBMITTING)
 
-        resource.post(videomailFormData, function(err, videomail, response) {
+        submitVideomail(formData, function(err, videomail, videomailResponse) {
+            // for now, accept POSTs only and treat all other submissions
+            // as direct submissions
+            if (!err && method.toUpperCase() == 'POST')
 
-            self.endWaiting()
-
-            if (err)
-                self.emit(Events.ERROR, err)
-            else {
-                submitted = true
-                self.emit(Events.SUBMITTED, videomail, response)
-            }
+                submitForm(formData, url, function(err, formResponse) {
+                    finalizeSubmissions(err, videomail, videomailResponse, formResponse)
+                })
+            else
+                finalizeSubmissions(err, videomail, videomailResponse)
         })
     }
 
