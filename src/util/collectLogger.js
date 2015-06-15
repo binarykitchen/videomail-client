@@ -30,6 +30,10 @@ module.exports = function(localOptions) {
         logger.error(lifo('error', arguments))
     }
 
+    this.warn = function() {
+        logger.warn(lifo('warn', arguments))
+    }
+
     this.getLines = function() {
         return stack
     }

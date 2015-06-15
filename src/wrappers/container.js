@@ -1,6 +1,5 @@
 var insertCss      = require('insert-css'),
     util           = require('util'),
-    merge          = require('merge-recursive'),
 
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
@@ -173,6 +172,10 @@ var Container = function(options) {
         }
     }
 
+    this.hasElement = function() {
+        return !!containerElement
+    }
+
     this.build = function(containerId) {
         try {
             containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
@@ -189,6 +192,8 @@ var Container = function(options) {
 
                 if (!hasError)
                     built = true
+            } else {
+                options.logger.warn('Could not find a container with the ID', containerId)
             }
 
         } catch (exc) {
@@ -228,16 +233,18 @@ var Container = function(options) {
     }
 
     this.show = function() {
-        containerElement.classList.remove('hide')
+        if (containerElement) {
+            containerElement.classList.remove('hide')
 
-        visuals.show()
-        buttons.show()
+            visuals.show()
+            buttons.show()
 
-        if (!hasError) {
-            if (visuals.isReplayShown())
-                self.emit(Events.PREVIEW)
-            else
-                self.emit(Events.FORM_READY)
+            if (!hasError) {
+                if (visuals.isReplayShown())
+                    self.emit(Events.PREVIEW)
+                else
+                    self.emit(Events.FORM_READY)
+            }
         }
     }
 
@@ -269,6 +276,7 @@ var Container = function(options) {
 
     this.startOver = function() {
         try {
+            submitted = false
             visuals.back(this.show)
         } catch (exc) {
             self.emit(Events.ERROR, exc)

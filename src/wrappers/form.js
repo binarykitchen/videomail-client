@@ -78,12 +78,16 @@ var Form = function(container, formElement, options) {
         })
 
         formElement.addEventListener('submit', function(e) {
-            e.preventDefault()
-            container.submitAll(
-                getData(),
-                formElement.method,
-                formElement.action || '/' // use '/' as default URL is none is specified
-            )
+            // only adjust submission when there is a container, otherwise
+            // do nothing and leave as it for robustness
+            if (container.hasElement()) {
+                e.preventDefault()
+                container.submitAll(
+                    getData(),
+                    formElement.method,
+                    formElement.action || '/' // use '/' as default URL is none is specified
+                )
+            }
         })
     }
 

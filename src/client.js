@@ -56,8 +56,6 @@ var VideomailClient = function(options) {
     }
 
     this.show = function(containerId) {
-        localOptions.debug('VideomailClient: show()')
-
         build.call(this, containerId, container.show)
     }
 
