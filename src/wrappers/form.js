@@ -85,7 +85,7 @@ var Form = function(container, formElement, options) {
                 container.submitAll(
                     getData(),
                     formElement.method,
-                    formElement.action || '/' // use '/' as default URL is none is specified
+                    formElement.action
                 )
             }
         })
