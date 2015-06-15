@@ -192,8 +192,6 @@ var Container = function(options) {
 
                 if (!hasError)
                     built = true
-            } else {
-                options.logger.warn('Could not find a container with the ID', containerId)
             }
 
         } catch (exc) {
