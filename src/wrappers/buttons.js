@@ -56,6 +56,9 @@ var Buttons = function(container, options) {
             buttonElement = buttonsElement.querySelector('.' + buttonClass)
 
         if (!buttonElement) {
+            if (options.selectors.buttonClass)
+                buttonClass += '.' + options.selectors.buttonClass
+
             buttonElement = h('button.' + buttonClass)
             buttonElement = adjustButton(buttonElement, show, type)
 

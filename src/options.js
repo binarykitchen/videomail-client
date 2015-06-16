@@ -19,6 +19,7 @@ module.exports = {
         replayClass:    'replay',
         userMediaClass: 'userMedia',
         visualsClass:   'visuals',
+        buttonClass:    null,                       // can also be used as a default class for all buttons
         buttonsClass:   'buttons',
 
         recordButtonClass: 'record',

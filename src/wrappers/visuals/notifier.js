@@ -68,7 +68,8 @@ var Notifier = function(visuals, options) {
     }
 
     function show() {
-        notifyElement.classList.remove('hide')
+        if (notifyElement)
+            notifyElement.classList.remove('hide')
     }
 
     function runEntertainment() {
@@ -86,14 +87,22 @@ var Notifier = function(visuals, options) {
     }
 
     function cancelEntertainment() {
-        notifyElement.className = 'notifier'
+        if (notifyElement)
+            notifyElement.className = 'notifier'
+
         clearInterval(entertainTimeoutId)
     }
 
-    function setMessage(message, options) {
-        var blocking = options.blocking ? options.blocking : false
+    function setMessage(message, messageOptions) {
+        var blocking = messageOptions.blocking ? messageOptions.blocking : false
 
-        messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
+        if (messageElement)
+            messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
+        else
+            options.logger.warn(
+                'Unable to show following because messageElement is empty:',
+                message
+            )
     }
 
     this.block = function(err) {
@@ -112,7 +121,14 @@ var Notifier = function(visuals, options) {
 
         if (!explanationElement) {
             explanationElement = h('p')
-            notifyElement.appendChild(explanationElement)
+
+            if (notifyElement)
+                notifyElement.appendChild(explanationElement)
+            else
+                options.logger.warn(
+                    'Unable to show explanation because notifyElement is empty:',
+                    explanation
+                )
         }
 
         explanationElement.innerHTML = explanation
@@ -144,8 +160,10 @@ var Notifier = function(visuals, options) {
     this.hide = function() {
         cancelEntertainment()
 
-        notifyElement.classList.add('hide')
-        notifyElement.classList.remove('blocking')
+        if (notifyElement) {
+            notifyElement.classList.add('hide')
+            notifyElement.classList.remove('blocking')
+        }
 
         if (messageElement)
             messageElement.innerHTML = null
@@ -158,16 +176,16 @@ var Notifier = function(visuals, options) {
         if (!built)
             return false
         else
-            return !notifyElement.classList.contains('hide')
+            return notifyElement && !notifyElement.classList.contains('hide')
     }
 
-    this.notify = function(message, explanation, options) {
+    this.notify = function(message, explanation, notifyOptions) {
 
-        var processing = options.processing ? options.processing : false,
-            entertain  = options.entertain  ? options.entertain  : false,
-            blocking   = options.blocking   ? options.blocking  : false
+        var processing = notifyOptions.processing ? notifyOptions.processing : false,
+            entertain  = notifyOptions.entertain  ? notifyOptions.entertain  : false,
+            blocking   = notifyOptions.blocking   ? notifyOptions.blocking  : false
 
-        if (!messageElement) {
+        if (!messageElement && notifyElement) {
             messageElement = h('h2')
 
             if (explanationElement)
@@ -177,15 +195,15 @@ var Notifier = function(visuals, options) {
         }
 
         if (blocking) {
-            notifyElement.classList.add('blocking')
-            this.emit(Events.BLOCKING, options)
+            notifyElement && notifyElement.classList.add('blocking')
+            this.emit(Events.BLOCKING, notifyOptions)
         } else
-            this.emit(Events.NOTIFYING, options)
+            this.emit(Events.NOTIFYING, notifyOptions)
 
         visuals.hideReplay()
         visuals.hideRecorder()
 
-        setMessage(message, options)
+        setMessage(message, notifyOptions)
 
         explanation && this.setExplanation(explanation)
 

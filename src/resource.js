@@ -12,8 +12,10 @@ module.exports = function(options) {
 
             // use the server generated text instead of the superagent's default text
 
-            if (res.body && res.body.message)
-                err.message = res.body.message
+            if (res.body) {
+                if (res.body.message)
+                    err.message = res.body.message
+            }
 
             else if (res.text)
                 err.message = res.text
