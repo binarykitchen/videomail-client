@@ -7,7 +7,7 @@ module.exports = function(options) {
     var cache = {}
 
     function packError(err, res) {
-        if (!err && res.error) {
+        if (res.error) {
             err = res.error
 
             // use the server generated text instead of the superagent's default text
@@ -15,9 +15,11 @@ module.exports = function(options) {
             if (res.body) {
                 if (res.body.message)
                     err.message = res.body.message
-            }
 
-            else if (res.text)
+                if (res.body.details)
+                    err.details = res.body.details
+
+            } else if (res.text)
                 err.message = res.text
         }
 

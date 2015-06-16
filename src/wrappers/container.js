@@ -338,14 +338,18 @@ var Container = function(options) {
         this.emit(Events.SUBMITTING)
 
         submitVideomail(formData, function(err, videomail, videomailResponse) {
-            // for now, accept POSTs only which have an URL defined and
+            // for now, accept POSTs only which have an URL unlike null and
             // treat all other submissions as direct submissions
-            if (!err && url && method.toUpperCase() == 'POST')
+
+            if (!err && url !== null && method.toUpperCase() == 'POST') {
+
+                if (url === '')
+                    url = document.baseURI
 
                 submitForm(formData, url, function(err, formResponse) {
                     finalizeSubmissions(err, videomail, videomailResponse, formResponse)
                 })
-            else
+            } else
                 finalizeSubmissions(err, videomail, videomailResponse)
         })
     }
