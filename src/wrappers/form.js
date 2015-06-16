@@ -84,8 +84,8 @@ var Form = function(container, formElement, options) {
                 e.preventDefault()
                 container.submitAll(
                     getData(),
-                    formElement.method,
-                    formElement.action
+                    formElement.getAttribute('method'),
+                    formElement.getAttribute('action')
                 )
             }
         })
