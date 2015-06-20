@@ -170,7 +170,7 @@ var Container = function(options) {
                 response
             )
 
-            if (formResponse.type === "text/html" && formResponse.text) {
+            if (formResponse && formResponse.type === "text/html" && formResponse.text) {
                 // server replied with HTML contents - display these
                 document.body.innerHTML = formResponse.text
 
