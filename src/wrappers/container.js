@@ -174,18 +174,14 @@ var Container = function(options) {
                 // server replied with HTML contents - display these
                 document.body.innerHTML = formResponse.text
 
-                if (document.createEventObject) {
-                    // dispatch for IE
-                    var evt = document.createEventObject()
-                    return document.fireEvent('onload', evt)
-                } else {
-                    // dispatch for firefox + others
-                    var evt = document.createEvent("HTMLEvents")
-                    evt.initEvent('load', true, true)
-                    return !document.dispatchEvent(evt)
-                }
+                // todo: figure out how to fire dom's onload event again
+                // todo: or how to run all the scripts over again
             }
         }
+    }
+
+    this.areVisualsHidden = function() {
+        return visuals.isHidden()
     }
 
     this.hasElement = function() {
@@ -310,7 +306,7 @@ var Container = function(options) {
                 valid = form.validate()
 
                 if (valid) {
-                    if (!visuals.isHidden() && !visualsValid) {
+                    if (!this.areVisualsHidden() && !visualsValid) {
 
                         if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown())
                             valid = false

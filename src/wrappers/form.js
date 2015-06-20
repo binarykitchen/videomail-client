@@ -78,16 +78,21 @@ var Form = function(container, formElement, options) {
         })
 
         formElement.addEventListener('submit', function(e) {
-            e.preventDefault()
 
-            // only adjust submission when there is a container, otherwise
-            // do nothing and leave as it for robustness
-            if (container.hasElement()) {
-                container.submitAll(
-                    getData(),
-                    formElement.getAttribute('method'),
-                    formElement.getAttribute('action')
-                )
+            // when videomail-client is hidden, leave the form handling as it and
+            // do not mess with it at all
+            if (!container.areVisualsHidden()) {
+                e.preventDefault()
+
+                // only adjust submission when there is a container, otherwise
+                // do nothing and leave as it for robustness
+                if (container.hasElement()) {
+                    container.submitAll(
+                        getData(),
+                        formElement.getAttribute('method'),
+                        formElement.getAttribute('action')
+                    )
+                }
             }
         })
     }
