@@ -1,7 +1,7 @@
 module.exports = {
     logger:                 null,                   // define logging instance. leave null for default
     logStackSize:           20,                     // limits the stack size of log outputs to collect
-    debug:                  false,                  // set true to log more info
+    verbose:                false,                  // set true to log more info
     baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos
     socketUrl:              'wss://videomail.io',   // leave as it, permanent url to send frames
     siteName:               'videomail-client-demo',// Required for the API. If you change it, contact me
@@ -13,6 +13,9 @@ module.exports = {
     disableSubmit:          false,                  // set this to true if you do not want to submit videos,
                                                     // but just want to record and replay these temporarily
     enableAutoValidation:   true,                   // automatically validates all form inputs if any exist
+
+    enctype:                'application/json',     // enctype for the form submission. currently implemented are:
+                                                    // 'application/json' and 'application/x-www-form-urlencoded'
 
     selectors: {                                    // default CSS selectors you can alter, see examples
         containerId:    'videomail',

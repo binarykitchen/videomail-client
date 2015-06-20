@@ -353,10 +353,6 @@ var Recorder = function(visuals, replay, options) {
         return avgFps
     }
 
-    this.getKey = function() {
-        return key
-    }
-
     this.getAudioSampleRate = function() {
         return userMedia.getAudioSampleRate()
     }

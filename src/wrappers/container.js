@@ -138,7 +138,7 @@ var Container = function(options) {
         })
 
         videomailFormData.avgFps = visuals.getAvgFps()
-        videomailFormData.key    = visuals.getVideomailKey()
+        videomailFormData.key    = formData[options.selectors.keyInputName]
 
         if (options.audio.enabled)
             videomailFormData.sampleRate = visuals.getAudioSampleRate()
@@ -341,16 +341,18 @@ var Container = function(options) {
             // for now, accept POSTs only which have an URL unlike null and
             // treat all other submissions as direct submissions
 
-            if (!err && url !== null && method.toUpperCase() == 'POST') {
+            if (!err && method.toUpperCase() == 'POST') {
 
-                if (url === '')
-                    url = document.baseURI
+                if (!url || url === '')
+                    url = document.baseURI // figure out URL automatically then
 
                 submitForm(formData, url, function(err, formResponse) {
                     finalizeSubmissions(err, videomail, videomailResponse, formResponse)
                 })
-            } else
+            } else {
+                e.preventDefault()
                 finalizeSubmissions(err, videomail, videomailResponse)
+            }
         })
     }
 

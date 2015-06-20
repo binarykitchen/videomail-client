@@ -7,19 +7,11 @@ module.exports = function(options) {
     var cache = {}
 
     function packError(err, res) {
-        if (res.error) {
-            err = res.error
-
+        if (res.body.error) {
             // use the server generated text instead of the superagent's default text
+            err = res.body.error
 
-            if (res.body) {
-                if (res.body.message)
-                    err.message = res.body.message
-
-                if (res.body.details)
-                    err.details = res.body.details
-
-            } else if (res.text)
+            if (!err.message)
                 err.message = res.text
         }
 
@@ -81,22 +73,39 @@ module.exports = function(options) {
     }
 
     this.form = function(formData, url, cb) {
-        // avgFps is only for the videomail server
-        delete formData.avgFps
 
-        superagent
-            .post(url)
-            .send(formData)
-            .timeout(options.timeout)
-            .end(function(err, res) {
+        var formType
 
-                err = packError(err, res)
+        switch (options.enctype) {
+            case 'application/json':
+                formType = 'json'
+                break
+            case 'application/x-www-form-urlencoded':
+                formType = 'form'
+                break
+            default:
+                cb(new Error('Invalid enctype given: ' + options.enctype))
+        }
 
-                if (err)
-                    cb(err)
-                else {
-                    cb(null, res.body)
-                }
-            })
+        if (formType) {
+            // avgFps is only for the videomail server
+            delete formData.avgFps
+
+            superagent
+                .post(url)
+                .type(formType)
+                .send(formData)
+                .timeout(options.timeout)
+                .end(function(err, res) {
+
+                    err = packError(err, res)
+
+                    if (err)
+                        cb(err)
+                    else {
+                        cb(null, res.body)
+                    }
+                })
+        }
     }
 }

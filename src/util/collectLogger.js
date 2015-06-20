@@ -21,9 +21,11 @@ module.exports = function(localOptions) {
     // workaround: since we cannot overwrite console.log without having the correct file and line number
     // we'll use groupCollapsed() and trace() instead to get these.
     this.debug = function() {
-        logger.groupCollapsed(lifo('debug', arguments))
-        logger.trace('Trace')
-        logger.groupEnd()
+        if (localOptions.verbose) {
+            logger.groupCollapsed(lifo('debug', arguments))
+            logger.trace('Trace')
+            logger.groupEnd()
+        }
     }
 
     this.error = function() {

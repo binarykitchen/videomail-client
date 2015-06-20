@@ -109,6 +109,11 @@ var Notifier = function(visuals, options) {
         var message     = err.message ? err.message.toString() : err.toString(),
             explanation = err.explanation ? err.explanation.toString() : null
 
+        // some errors have details in them, i.E. the videomail server,
+        // so include these if there are any
+        if (!explanation && err.details)
+            explanation = err.details.toString()
+
         if (!message)
             options.debug('Weird empty message generated for error', err)
 
