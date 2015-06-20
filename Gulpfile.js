@@ -85,7 +85,7 @@ gulp.task('connect', ['build'], function() {
             var router = new Router()
 
             router.use(bodyParser.json())
-            router.use(bodyParser.urlencoded())
+            // router.use(bodyParser.urlencoded())
             router.use(send.json())
 
             router.post('/contact', function(req, res) {

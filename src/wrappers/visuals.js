@@ -49,6 +49,7 @@ var Visuals = function(container, options) {
     function initEvents() {
         self
             .on(Events.USER_MEDIA_READY, function() {
+                built = true
                 self.endWaiting()
                 container.enableForm(false)
             })

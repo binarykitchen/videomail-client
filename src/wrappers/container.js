@@ -353,7 +353,7 @@ var Container = function(options) {
             // for now, accept POSTs only which have an URL unlike null and
             // treat all other submissions as direct submissions
 
-            if (!err && method.toUpperCase() == 'POST') {
+            if (!err && method && method.toUpperCase() == 'POST') {
 
                 if (!url || url === '')
                     url = document.baseURI // figure out URL automatically then
