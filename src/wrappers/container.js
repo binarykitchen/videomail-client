@@ -173,6 +173,17 @@ var Container = function(options) {
             if (formResponse.type === "text/html" && formResponse.text) {
                 // server replied with HTML contents - display these
                 document.body.innerHTML = formResponse.text
+
+                if (document.createEventObject) {
+                    // dispatch for IE
+                    var evt = document.createEventObject()
+                    return document.fireEvent('onload', evt)
+                } else {
+                    // dispatch for firefox + others
+                    var evt = document.createEvent("HTMLEvents")
+                    evt.initEvent('load', true, true)
+                    return !document.dispatchEvent(evt)
+                }
             }
         }
     }

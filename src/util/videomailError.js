@@ -116,7 +116,7 @@ VideomailError.create = function(err, explanation, options) {
                 if (err && err.explanation)
                     explanation = err.explanation.toString()
 
-                if (!explanation && err.details)
+                if (!explanation && err && err.details)
                     explanation = err.details.toString()
             }
 
