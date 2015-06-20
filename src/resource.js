@@ -103,7 +103,7 @@ module.exports = function(options) {
                     if (err)
                         cb(err)
                     else {
-                        cb(null, res.body)
+                        cb(null, res)
                     }
                 })
         }

@@ -158,10 +158,10 @@ var Container = function(options) {
         else {
             submitted = true
 
-            // merge two json responses to fake as if it were only one request
-            if (formResponse)
-                Object.keys(formResponse).forEach(function(key) {
-                    response[key] = formResponse[key]
+            // merge two json response bodies to fake as if it were only one request
+            if (formResponse && formResponse.body)
+                Object.keys(formResponse.body).forEach(function(key) {
+                    response[key] = formResponse.body[key]
                 })
 
             self.emit(
@@ -169,6 +169,11 @@ var Container = function(options) {
                 videomail,
                 response
             )
+
+            if (formResponse.type === "text/html" && formResponse.text) {
+                // server replied with HTML contents - display these
+                document.body.innerHTML = formResponse.text
+            }
         }
     }
 
