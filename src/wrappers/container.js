@@ -349,10 +349,8 @@ var Container = function(options) {
                 submitForm(formData, url, function(err, formResponse) {
                     finalizeSubmissions(err, videomail, videomailResponse, formResponse)
                 })
-            } else {
-                e.preventDefault()
+            } else
                 finalizeSubmissions(err, videomail, videomailResponse)
-            }
         })
     }
 
