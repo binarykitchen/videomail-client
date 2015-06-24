@@ -58,12 +58,25 @@ module.exports = function(rawVisualUserMedia, options) {
         volume.connect(recorder)
     }
 
+    function attachMediaStream(stream) {
+        if (typeof rawVisualUserMedia.srcObject !== 'undefined')
+            rawVisualUserMedia.srcObject = stream
+
+        else if (typeof rawVisualUserMedia.mozSrcObject !== 'undefined')
+            rawVisualUserMedia.mozSrcObject = stream
+
+        else if (typeof rawVisualUserMedia.src !== 'undefined') {
+            var URL = window.URL || window.webkitURL
+            rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
+
+        } else
+            console.error('Error attaching stream to element.')
+    }
+
     function setVisualStream(localMediaStream) {
-        if (localMediaStream) {
-            rawVisualUserMedia.srcObject = localMediaStream
-            rawVisualUserMedia.src =    (window.URL && window.URL.createObjectURL(localMediaStream)) ||
-                                        localMediaStream
-        } else {
+        if (localMediaStream)
+            attachMediaStream(localMediaStream)
+        else {
             rawVisualUserMedia.srcObject = null
             rawVisualUserMedia.removeAttribute('src')
         }
