@@ -1,4 +1,4 @@
-var singletonEvent = require('node-singleton-event'),
+var despot = require('despot'),
 
     VideomailError = require('./videomailError'),
     Events         = require('./../events')
@@ -35,23 +35,22 @@ module.exports = function(options, name) {
                     options.debug('%s emits: %s', name, event)
             }
 
-        return singletonEvent.emit.apply(singletonEvent, args)
+        return despot.emit.apply(despot, args)
     }
 
-    // Not working well with IE10, see https://github.com/teawithfruit/node-singleton-event/issues/5
     this.on = function(eventName, cb) {
-        return singletonEvent.on(eventName, cb)
+        return despot.on(eventName, cb)
     }
 
     this.once = function(eventName, cb) {
-        return singletonEvent.once(eventName, cb)
+        return despot.once(eventName, cb)
     }
 
     this.listeners = function(eventName) {
-        return singletonEvent.listeners(eventName)
+        return despot.listeners(eventName)
     }
 
     this.removeAllListeners = function() {
-        singletonEvent.removeAllListeners()
+        despot.removeAllListeners()
     }
 }

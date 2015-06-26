@@ -1,5 +1,5 @@
 module.exports = {
-    logger:                 null,                   // define logging instance. leave null for default
+    logger:                 null,                   // define logging instance. leave null for default, console.
     logStackSize:           20,                     // limits the stack size of log outputs to collect
     verbose:                false,                  // set true to log more info
     baseUrl:                'https://videomail.io', // leave as it, permanent url to post videos

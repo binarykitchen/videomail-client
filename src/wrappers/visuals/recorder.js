@@ -218,7 +218,7 @@ var Recorder = function(visuals, replay, options) {
                     break
                 case 'error':
                     this.emit(Events.ERROR, VideomailError.create(
-                        'Oh f**k, server error!',
+                        'Oh no, server error!',
                         command.args.err.toString() || '(No explanation given)',
                         options
                     ))
@@ -605,6 +605,12 @@ var Recorder = function(visuals, replay, options) {
 
             if (!recorderElement.height && options.video.height)
                 recorderElement.height = options.video.height
+
+            if (options.audio.enabled) {
+                // prevent audio feedback, see
+                // https://github.com/binarykitchen/videomail-client/issues/35
+                recorderElement.muted = true
+            }
 
             userMedia = new UserMedia(recorderElement, options)
 
