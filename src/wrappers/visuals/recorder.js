@@ -59,7 +59,7 @@ var Recorder = function(visuals, replay, options) {
 
     function onAudioSample(audioSample) {
         samplesCount++
-        stream.write(audioSample.toBuffer())
+        stream && stream.write(audioSample.toBuffer())
     }
 
     function onUserMediaReady() {
@@ -204,7 +204,7 @@ var Recorder = function(visuals, replay, options) {
             debug(
                 'Server commanded: %s',
                 command.command,
-                command.args ? ', ' + command.args : '',
+                command.args ? ', ' + JSON.stringify(command.args) : '',
                 result       ? '= ' + result : ''
             )
 
@@ -287,18 +287,18 @@ var Recorder = function(visuals, replay, options) {
                 encodeURIComponent(options.siteName)
             )
 
-            /*
             // useful for debugging streams
 
-            if (!stream.originalEmit)
-                stream.originalEmit = stream.emit
+            // if (!stream.originalEmit)
+            //     stream.originalEmit = stream.emit
 
-            stream.emit = function(type) {
-                debug(type)
-                var args = [].splice.call(arguments, 0)
-                return stream.originalEmit.apply(stream, args)
-            }
-            */
+            // stream.emit = function(type) {
+            //     if (stream) {
+            //         debug(type)
+            //         var args = [].splice.call(arguments, 0)
+            //         return stream.originalEmit.apply(stream, args)
+            //     }
+            // }
 
             stream.on('close', function(err) {
                 debug('x Stream has closed')
@@ -308,7 +308,7 @@ var Recorder = function(visuals, replay, options) {
                     self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
             })
 
-            var checkConnection = function() {
+            stream.on('connect', function() {
                 if (!connected) {
                     connected = true
                     unloaded  = false
@@ -317,13 +317,15 @@ var Recorder = function(visuals, replay, options) {
 
                     cb && cb()
                 }
-            }
-
-            stream.on('readable', checkConnection)
-            stream.on('resume',   checkConnection)
+            })
 
             stream.on('data', function(data) {
                 executeCommand.call(self, data)
+            })
+
+            stream.on('error', function(err) {
+                connected = false
+                self.emit(Events.ERROR, err)
             })
         }
     }

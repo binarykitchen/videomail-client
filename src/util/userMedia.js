@@ -93,19 +93,28 @@ module.exports = function(rawVisualUserMedia, options) {
         return visualStream && visualStream.ended
     }
 
+    function hasInvalidDimensions() {
+        if (rawVisualUserMedia.videoWidth && rawVisualUserMedia.height) {
+            if (rawVisualUserMedia.videoWidth < 3 ||
+                rawVisualUserMedia.height < 3) {
+                return true
+            }
+        }
+    }
+
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
-        function onPlaying() {
+        function onPlay() {
             try {
-                options.debug('UserMedia emits: playing')
+                options.debug('UserMedia emits: play')
 
                 rawVisualUserMedia.removeEventListener &&
-                rawVisualUserMedia.removeEventListener('playing', onPlaying)
+                rawVisualUserMedia.removeEventListener('play', onPlay)
 
                 localMediaStream.removeEventListener &&
-                localMediaStream.removeEventListener('ended', onPlaying)
+                localMediaStream.removeEventListener('ended', onPlay)
 
-                if (hasEnded())
+                if (hasEnded() || hasInvalidDimensions())
                     endedEarlyCallback(
                         VideomailError.create(
                             'Already busy',
@@ -147,7 +156,7 @@ module.exports = function(rawVisualUserMedia, options) {
             audioCallback &&
             initAudio(localMediaStream, audioCallback)
 
-            rawVisualUserMedia.addEventListener('playing', onPlaying)
+            rawVisualUserMedia.addEventListener('play', onPlay)
             rawVisualUserMedia.play()
         } catch (exc) {
             self.emit(Events.ERROR, exc)
