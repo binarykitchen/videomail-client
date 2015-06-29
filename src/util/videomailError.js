@@ -117,6 +117,7 @@ VideomailError.create = function(err, explanation, options) {
                     explanation = err.explanation.toString()
 
                 if (!explanation && err && err.details)
+                    // todo: iterate through all string attributes
                     explanation = err.details.toString()
             }
 

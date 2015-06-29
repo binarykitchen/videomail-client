@@ -169,7 +169,7 @@ var Recorder = function(visuals, replay, options) {
             replay.setWebMSource(args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName)
 
         self.hide()
-        self.emit(Events.PREVIEW, args.key)
+        self.emit(Events.PREVIEW, key)
 
         if (options.debug) {
             var waitingTime = Date.now() - stopTime

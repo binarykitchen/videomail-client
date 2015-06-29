@@ -1,14 +1,16 @@
 var h            = require('hyperscript'),
     util         = require('util'),
 
-    Events       = require('./../events'),
-    EventEmitter = require('./../util/eventEmitter')
+    Events         = require('./../events'),
+    EventEmitter   = require('./../util/eventEmitter'),
+    VideomailError = require('./../util/videomailError')
 
 var Form = function(container, formElement, options) {
 
     EventEmitter.call(this, options, 'Form')
 
-    var keyInput
+    var self = this,
+        keyInput
 
     function getData() {
         var limit = formElement.elements.length,
@@ -74,7 +76,19 @@ var Form = function(container, formElement, options) {
         }
 
         this.on(Events.PREVIEW, function(videomailKey) {
-            keyInput.value = videomailKey
+            // beware that preview doesn't always come with a key, i.E.
+            // container.show() can emit PREVIEW without a key when a replay already exists
+            // (can happen when showing - hiding - showing videomail over again)
+
+            // only emit error if key is missing AND the input has no key (value) yet
+            if (!videomailKey && !keyInput.value)
+                self.emit(Events.ERROR, VideomailError.create(
+                    'Videomail key for preview is missing!'
+                ))
+            else if (videomailKey)
+                keyInput.value = videomailKey
+            // else
+            // leave as it and use existing keyInput.value
         })
 
         formElement.addEventListener('submit', function(e) {
