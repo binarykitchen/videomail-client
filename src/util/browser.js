@@ -74,7 +74,7 @@ module.exports = function(options) {
     }
 
     function getBrowseHappyLink() {
-        return '<a href="' + browseHappyLink + '" target="_blank">Upgrade browser</a>.'
+        return '<a href="' + browseHappyLink + '" target="_blank">Upgrade browser</a>'
     }
 
     function getPlaybackWarning() {
@@ -106,7 +106,9 @@ module.exports = function(options) {
         var err
 
         if (!okBrowser || !this.canRecord())
-            err = VideomailError.create('No webcam support', getUserMediaWarning(), options)
+            err = VideomailError.create({
+                message: 'No webcam support',
+            }, getUserMediaWarning(), options)
 
         return err
     }

@@ -1,5 +1,6 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error'),
+    pretty = require('./pretty'),
 
     VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
@@ -116,9 +117,14 @@ VideomailError.create = function(err, explanation, options) {
                 if (err && err.explanation)
                     explanation = err.explanation.toString()
 
-                if (!explanation && err && err.details)
-                    // todo: iterate through all string attributes
-                    explanation = err.details.toString()
+                if (err && err.details) {
+                    var details = pretty(err.details)
+
+                    if (!explanation)
+                        explanation = details
+                    else
+                        explanation += ';<br/>' + details
+                }
             }
 
             break
