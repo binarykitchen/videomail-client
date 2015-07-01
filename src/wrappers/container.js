@@ -146,7 +146,15 @@ var Container = function(options) {
         resource.post(videomailFormData, cb)
     }
 
-    function submitForm(formData, url, cb) {
+    function submitForm(formData, videomailResponse, url, cb) {
+        formData.videomail = videomailResponse.videomail
+
+        // avgFps is only for the videomail server
+        delete formData.avgFps
+
+        // not needed, it's already in the videomail object
+        delete formData[options.selectors.keyInputName]
+
         resource.form(formData, url, cb)
     }
 
@@ -358,7 +366,7 @@ var Container = function(options) {
                 if (!url || url === '')
                     url = document.baseURI // figure out URL automatically then
 
-                submitForm(formData, url, function(err, formResponse) {
+                submitForm(formData, videomailResponse, url, function(err, formResponse) {
                     finalizeSubmissions(err, videomail, videomailResponse, formResponse)
                 })
             } else

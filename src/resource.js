@@ -88,9 +88,6 @@ module.exports = function(options) {
         }
 
         if (formType) {
-            // avgFps is only for the videomail server
-            delete formData.avgFps
-
             superagent
                 .post(url)
                 .type(formType)
