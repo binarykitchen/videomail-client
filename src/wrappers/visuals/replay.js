@@ -98,11 +98,6 @@ var Replay = function(parentElement, options) {
                 })
             }
 
-// THEN
-// - ALLOW MISSING TO IN VIDEOMAIL
-// - when subject is missing, do not generate an alias like -81559658 but someting better SEE GITHUB
-// - make JS functions to compile video view container
-// - tweet and show the world
             replayElement.onclick = function(e) {
                 e.preventDefault()
 

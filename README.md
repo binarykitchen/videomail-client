@@ -35,7 +35,10 @@ To run the examples in your browser, just do this:
 2. `gulp examples` which will ignite a static server and
 3. open `http://localhost:8080` in your browser
 
-Best is to study `/examples/contact_form.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
+Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
+
+A live contact form example embracing contact inquiries in direct sign language can be seen at:
+<a href="https://binarykitchen.com/contact">https://binarykitchen.com/contact</a>
 
 ## Dead simple example (just record and replay)
 
@@ -73,8 +76,7 @@ That site runs on AngularJS where I just include `require('videomail-client')` i
 <a name="options"></a>
 ## Options
 
-There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at:
-https://github.com/binarykitchen/videomail-client/blob/master/src/options.js
+There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code of [src/options.js](https://github.com/binarykitchen/videomail-client/blob/master/src/options.js)
 
 In most cases, these defaults are good enough. But `siteName` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
