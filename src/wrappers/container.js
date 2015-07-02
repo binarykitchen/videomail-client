@@ -134,7 +134,7 @@ var Container = function(options) {
                 'subject':      options.selectors.subjectInputName,
                 'from':         options.selectors.fromInputName,
                 'to':           options.selectors.toInputName,
-                'message':      options.selectors.messageInputName,
+                'body':         options.selectors.bodyInputName,
                 'key':          options.selectors.keyInputName,
                 'parentKey':    options.selectors.parentKeyInputName
             },
