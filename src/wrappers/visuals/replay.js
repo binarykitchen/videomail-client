@@ -27,22 +27,6 @@ var Replay = function(parentElement, options) {
         parentElement.appendChild(replayElement)
     }
 
-    function initEvents() {
-        replayElement.addEventListener('click', function(e) {
-            e.preventDefault()
-
-            if (this.paused)
-                this.play()
-            else
-                self.pause()
-        })
-
-        self
-            .on(Events.PREVIEW, function() {
-                self.show()
-            })
-    }
-
     function isStandalone() {
         return parentElement.constructor.name === 'HTMLDivElement'
     }
@@ -107,7 +91,27 @@ var Replay = function(parentElement, options) {
         if (!replayElement.controls)
             replayElement.controls = true
 
-        !built && !isStandalone() && initEvents()
+        if (!built) {
+            if (!isStandalone()) {
+                this.on(Events.PREVIEW, function() {
+                    self.show()
+                })
+            }
+
+// THEN
+// - ALLOW MISSING TO IN VIDEOMAIL
+// - when subject is missing, do not generate an alias like -81559658 but someting better SEE GITHUB
+// - make JS functions to compile video view container
+// - tweet and show the world
+            replayElement.onclick = function(e) {
+                e.preventDefault()
+
+                if (this.paused)
+                    this.play()
+                else
+                    self.pause()
+            }
+        }
 
         browser.checkPlaybackCapabilities(replayElement)
 

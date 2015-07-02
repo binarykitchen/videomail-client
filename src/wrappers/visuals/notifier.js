@@ -23,7 +23,7 @@ var Notifier = function(visuals, options) {
         visuals.beginWaiting()
 
         if (limitReached) {
-            options.debug('Limit reached')
+            debug('Limit reached')
             lead += options.text.limitReached + '.<br/>'
         }
 
