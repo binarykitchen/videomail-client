@@ -6,7 +6,6 @@ var insertCss      = require('insert-css'),
     Form           = require('./form'),
 
     Resource       = require('./../resource'),
-    Constants      = require('./../constants'),
     Events         = require('./../events'),
 
     EventEmitter   = require('./../util/eventEmitter'),
@@ -131,14 +130,22 @@ var Container = function(options) {
     }
 
     function submitVideomail(formData, cb) {
-        var videomailFormData = {}
+        var FORM_FIELDS = {
+                'subject':      options.selectors.subjectInputName,
+                'from':         options.selectors.fromInputName,
+                'to':           options.selectors.toInputName,
+                'message':      options.selectors.messageInputName,
+                'key':          options.selectors.keyInputName,
+                'parentKey':    options.selectors.parentKeyInputName
+            },
+            videomailFormData = {}
 
-        Object.keys(formData).forEach(function(key) {
-            videomailFormData[key] = formData[key]
+        Object.keys(FORM_FIELDS).forEach(function(key) {
+            if (formData.hasOwnProperty(FORM_FIELDS[key]))
+                videomailFormData[key] = formData[FORM_FIELDS[key]]
         })
 
         videomailFormData.avgFps = visuals.getAvgFps()
-        videomailFormData.key    = formData[options.selectors.keyInputName]
 
         if (options.audio.enabled)
             videomailFormData.sampleRate = visuals.getAudioSampleRate()
@@ -147,13 +154,10 @@ var Container = function(options) {
     }
 
     function submitForm(formData, videomailResponse, url, cb) {
-        formData.videomail = videomailResponse.videomail
-
         // avgFps is only for the videomail server
         delete formData.avgFps
 
-        // not needed, it's already in the videomail object
-        delete formData[options.selectors.keyInputName]
+        formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias
 
         resource.form(formData, url, cb)
     }
@@ -198,7 +202,7 @@ var Container = function(options) {
 
     this.build = function(containerId) {
         try {
-            containerId      = containerId || Constants.DEFAULT_CONTAINER_ID
+            containerId      = containerId || options.selectors.containerId
             containerElement = document.getElementById(containerId)
 
             // only build when a container element hast been found, otherwise

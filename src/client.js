@@ -3,6 +3,7 @@ var merge           = require('merge-recursive'),
     util            = require('util'),
 
     defaultOptions = require('./options'),
+    Constants      = require('./constants'),
     Events         = require('./events'),
     CollectLogger  = require('./util/collectLogger'),
     EventEmitter   = require('./util/eventEmitter'),
@@ -99,5 +100,9 @@ var VideomailClient = function(options) {
 }
 
 util.inherits(VideomailClient, EventEmitter)
+
+Object.keys(Constants.public).forEach(function(name) {
+    VideomailClient[name] = Constants.public[name]
+})
 
 module.exports = VideomailClient

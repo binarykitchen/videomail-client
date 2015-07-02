@@ -32,7 +32,14 @@ module.exports = {
         backButtonClass:   'back',
         submitButtonClass: 'submit',
 
-        keyInputName:      'videomail_key',
+        subjectInputName:  'subject',               // the form input name for subject
+        fromInputName:     'from',                  // the form input name for the from email
+        toInputName:       'to',                    // the form input name for the to email
+        bodyInputName:     'body',                  // the form input name for the message (body)
+
+        keyInputName:       'videomail_key',
+        parentKeyInputName: 'videomail_parent_key',
+        aliasInputName:     'videomail_alias',
 
         formId:            null,                    // automatically detects form if any
         submitButtonId:    null                     // automatically detects submit button in the form

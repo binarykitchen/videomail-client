@@ -31,7 +31,7 @@
                     <label for="signLanguageOption">In Sign Language</label>
                 </p>
             </fieldset>
-            <textarea id='message' name='message' placeholder='Enter your message' cols='40' rows='5' required></textarea>
+            <textarea id='body' name='body' placeholder='Enter your message' cols='40' rows='5' required></textarea>
 
             <div class="buttons">
                 <button type='submit' disabled>Submit</button>
@@ -53,7 +53,7 @@
                 startOverButton    = document.getElementById('startOver'),
                 writingOption      = document.getElementById('writingOption'),
                 signLanguageOption = document.getElementById('signLanguageOption'),
-                message            = document.getElementById('message')
+                body               = document.getElementById('body')
 
             var onSubmitted = function(videomail, response) {
                 var statusHeader = document.querySelector('h3.status')
@@ -69,15 +69,15 @@
             writingOption.onclick = function() {
                 videomailClient.hide()
 
-                message.classList.remove('hide')
-                message.required = true
+                body.classList.remove('hide')
+                body.required = true
             }
 
             signLanguageOption.onclick = function() {
                 videomailClient.show()
 
-                message.classList.add('hide')
-                message.required = false
+                body.classList.add('hide')
+                body.required = false
             }
 
             videomailClient.on(

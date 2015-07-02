@@ -77,10 +77,10 @@ module.exports = function(options) {
         var formType
 
         switch (options.enctype) {
-            case 'application/json':
+            case Constants.public.ENC_TYPE_APP_JSON:
                 formType = 'json'
                 break
-            case 'application/x-www-form-urlencoded':
+            case Constants.public.ENC_TYPE_FORM:
                 formType = 'form'
                 break
             default:
