@@ -15,7 +15,9 @@ videomail-client ✉
 [gratipay-url]: https://gratipay.com/binarykitchen/
 [gratipay-image]: https://img.shields.io/gratipay/binarykitchen.svg
 
-Finally you can encode any webcam recordings from your browser into MP4 and WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
+Record videos in contact forms!
+
+Finally you can encode any webcam recordings from modern browsers into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
 
 * <a href="#examples">Examples</a>
 * <a href="#demo">Demo / Fully working version</a>
@@ -29,10 +31,10 @@ Finally you can encode any webcam recordings from your browser into MP4 and WebM
 <a name="examples"></a>
 ## Examples
 
-To run the examples in your browser, just do this:
+To run the examples in your browser, just do:
 
 1. `npm install`
-2. `gulp examples` which will ignite a static server and
+2. `gulp examples` to ignite a static server and
 3. open `http://localhost:8080` in your browser
 
 Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
@@ -48,9 +50,9 @@ A live contact form example embracing contact inquiries in direct sign language 
     <div id="videomail"></div>
     <script src="/dist/videomail-client.js"></script>
     <script>
-      var VideomailClient = require('videomail-client'), // load the videomail client package
+      var VideomailClient = require('videomail-client'), // load videomail client package
           videomailClient = new VideomailClient({        // instantiate with some options
-            debug:         true,                         // debug prints additional info to console
+            verbose:       true,                         // prints additional info to console
             disableSubmit: true                          // disable submissions to keep example simple
       })
 
@@ -64,19 +66,21 @@ A live contact form example embracing contact inquiries in direct sign language 
 
 The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
 
-If you remove `disableSubmit` then you will see a submit button to post the video and make it persistent. This requires a little more code, see examples directory.
+If you remove `disableSubmit`, then you will see a submit button to post the video and make it persistent. This requires a bit more code, see examples directory.
 
 <a name="demo"></a>
 ## Demo / Fully working version
 
-Check out the full version with all its features on [videomail.io](https://videomail.io) itself. My aim is to turn this into a stable product in the near future with some external assistance.
+Check out the full version with all its features on [videomail.io](https://videomail.io) itself. Aim is to turn this into a stable product in the near future with some external assistance.
 
 That site runs on AngularJS where I just include `require('videomail-client')` in the app logic and bundle all that through Browserify.
+
+More live examples are coming.
 
 <a name="options"></a>
 ## Options
 
-There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code of [src/options.js](https://github.com/binarykitchen/videomail-client/blob/master/src/options.js)
+There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at [src/options.js](https://github.com/binarykitchen/videomail-client/blob/master/src/options.js)
 
 In most cases, these defaults are good enough. But `siteName` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
@@ -123,26 +127,25 @@ videomailClient.on('SUBMITTED', function(videomail, response) {
 
 #### Supported events:
 
-Check them out at the annotated source code:
-https://github.com/binarykitchen/videomail-client/blob/master/src/events.js
+Check them out at [src/events.js](https://github.com/binarykitchen/videomail-client/blob/master/src/events.js)
 
 They should be self-explanatory. If not, ask for better documentation. Then, some of these events may come with parameters.
 
 The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
 
-By the way, all videomail errors are inherited from the class `VideomailError` which comes with additional attributes, useful for debugging weird errors.
+By the way, all videomail errors are instances of `VideomailError`, inherited from the native Error class and come with additional attributes, useful for debugging weird errors.
 
 <a name="show"></a>
 ### videomailClient.show([containerId])
 
-Automatically fills the DOM with a form for video recording. If a HTML element who ID equals `containerId`, that placeholder will be filled. Otherwise an error occurs.
+Automatically fills the DOM with a form for video recording. If a HTML element whose ID equals `containerId`, that placeholder will be filled. Otherwise an error occurs.
 
 By default the optional parameter `containerId` is set to `videomail`.
 
 <a name="replay"></a>
 ### videomailClient.replay(parentElement, videomail)
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` or `/examples/contact_form.html` for some inspiration.
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` or `/examples/contact_form_json.html` for some inspiration.
 
 If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally.
 
@@ -207,6 +210,11 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 
 <a name="changes"></a>
 ## Breaking changes (Changelog)
+
+### v1.3.0 (2015-07-03)
+
+Minor change:
+- **VideomailClient:** Renamed `options.debug` to `options.verbose`
 
 ### v1.2.0 (2015-05-17)
 
