@@ -31,12 +31,12 @@ module.exports = function(options) {
         var warning
 
         if (firefox)
-            warning = '<a href="' + firefoxDownload + '" target="_blank">' +
-                      'Upgrade Firefox</a> to fix this.'
+            warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
+                      'upgrade Firefox</a> to fix this.'
 
         else if (isChrome)
-            warning = '<a href="' + chromeDownload + '" target="_blank">' +
-                      'Upgrade Chrome</a> to fix this.'
+            warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
+                      'upgrade Chrome</a> to fix this.'
 
         else if (isChromium)
             warning = '<a href="' + chromiumDownload + '" target="_blank">' +
@@ -105,10 +105,20 @@ module.exports = function(options) {
     this.checkRecordingCapabilities = function() {
         var err
 
-        if (!okBrowser || !this.canRecord())
+        if (!okBrowser || !this.canRecord()) {
+
+            var message
+
+            if (!okBrowser)
+                message = 'Browser has no webcam support'
+
+            else
+                message = 'Browser has no getUserMedia support'
+
             err = VideomailError.create({
-                message: 'No webcam support',
+                message: message,
             }, getUserMediaWarning(), options)
+        }
 
         return err
     }
@@ -119,6 +129,7 @@ module.exports = function(options) {
 
         if (!video)
             message = 'No HTML5 support for video tag!'
+
         else if (!this.getVideoType(video))
             message = 'No H264 nor webm support found.'
 

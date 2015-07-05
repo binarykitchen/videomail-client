@@ -48,7 +48,10 @@
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({verbose: true}),
+                videomailClient = new VideomailClient({
+                    verbose: true,
+                    video: {limitSeconds: 120}
+                }),
 
                 startOverButton    = document.getElementById('startOver'),
                 writingOption      = document.getElementById('writingOption'),

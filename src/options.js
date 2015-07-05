@@ -66,7 +66,7 @@ module.exports = {
     notifier: {
         entertain:         false,                   // when true, user is entertained while waiting, see examples
         entertainClass:    'bg',
-        entertainLimit:    7,
+        entertainLimit:    6,
         entertainInterval: 15000
     },
     timeouts: {
