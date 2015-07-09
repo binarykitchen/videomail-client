@@ -34,6 +34,7 @@ var Recorder = function(visuals, replay, options) {
 
         lastAnimationTimestamp,
         userMediaTimeout,
+        retryTimeout,
 
         intervalSum,
         bytesSum,
@@ -76,6 +77,13 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
+    function clearRetryTimeout() {
+        debug('Recorder: clearRetryTimeout()')
+
+        retryTimeout && clearTimeout(retryTimeout)
+        retryTimeout = null
+    }
+
     function clearUserMediaTimeout() {
         debug('Recorder: clearUserMediaTimeout()')
 
@@ -111,19 +119,21 @@ var Recorder = function(visuals, replay, options) {
 
                 userMediaLoading = false
 
-                try {
-                    clearUserMediaTimeout()
+                if (!isHidden()) {
+                    try {
+                        clearUserMediaTimeout()
 
-                    userMedia.init(
-                        localStream,
-                        onUserMediaReady.bind(self),
-                        onAudioSample.bind(self),
-                        function(err) {
-                            self.emit(Events.ERROR, err)
-                        }
-                    )
-                } catch (exc) {
-                    self.emit(Events.ERROR, exc)
+                        userMedia.init(
+                            localStream,
+                            onUserMediaReady.bind(self),
+                            onAudioSample.bind(self),
+                            function(err) {
+                                self.emit(Events.ERROR, err)
+                            }
+                        )
+                    } catch (exc) {
+                        self.emit(Events.ERROR, exc)
+                    }
                 }
 
             }, function(err) {
@@ -136,7 +146,8 @@ var Recorder = function(visuals, replay, options) {
                 if (errorListeners.length) {
                     self.emit(Events.ERROR, err)
 
-                    setTimeout(initSocket, options.timeouts.userMedia) // retry after a while
+                    // retry after a while
+                    retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
                 } else {
                     debug('Recorder: no error listeners attached but throwing error', err)
 
@@ -157,6 +168,10 @@ var Recorder = function(visuals, replay, options) {
                 throw exc // throw it further
             }
         }
+    }
+
+    function isHidden() {
+        return recorderElement.classList.contains('hide')
     }
 
     function preview(args) {
@@ -641,7 +656,13 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.hide = function() {
-        recorderElement && recorderElement.classList.add('hide')
+        if (!isHidden()) {
+
+            recorderElement && recorderElement.classList.add('hide')
+
+            clearUserMediaTimeout()
+            clearRetryTimeout()
+        }
     }
 }
 
