@@ -62,9 +62,6 @@ module.exports = function(rawVisualUserMedia, options) {
         if (typeof rawVisualUserMedia.srcObject !== 'undefined')
             rawVisualUserMedia.srcObject = stream
 
-        else if (typeof rawVisualUserMedia.mozSrcObject !== 'undefined')
-            rawVisualUserMedia.mozSrcObject = stream
-
         else if (typeof rawVisualUserMedia.src !== 'undefined') {
             var URL = window.URL || window.webkitURL
             rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
@@ -214,6 +211,10 @@ module.exports = function(rawVisualUserMedia, options) {
     }
 
     this.getAudioSampleRate = function() {
-        return audioContext.sampleRate
+        if (audioContext) {
+            return audioContext.sampleRate
+        } else {
+            return -1
+        }
     }
 }

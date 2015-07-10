@@ -55,6 +55,7 @@ var Recorder = function(visuals, replay, options) {
         stopTime,
         stream,
         connected,
+        blocking,
         built,
         key
 
@@ -67,7 +68,7 @@ var Recorder = function(visuals, replay, options) {
         try {
             debug('Recorder: onUserMediaReady()')
 
-            unloaded = submitting = false
+            blocking = unloaded = submitting = false
             userMediaLoaded = true
 
             show()
@@ -119,7 +120,7 @@ var Recorder = function(visuals, replay, options) {
 
                 userMediaLoading = false
 
-                if (!isHidden()) {
+                if (!isHidden() || blocking) {
                     try {
                         clearUserMediaTimeout()
 
@@ -171,7 +172,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function isHidden() {
-        return recorderElement.classList.contains('hide')
+        return !recorderElement || recorderElement.classList.contains('hide')
     }
 
     function preview(args) {
@@ -594,6 +595,7 @@ var Recorder = function(visuals, replay, options) {
         })
 
         self.on(Events.BLOCKING, function() {
+            blocking = true
             clearUserMediaTimeout()
         })
 
