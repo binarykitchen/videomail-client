@@ -93,12 +93,13 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#on">`videomailClient.on()`</a>
 * <a href="#show">`videomailClient.show()`</a>
 * <a href="#build">`videomailClient.build()`</a>
-* <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#replay">`videomailClient.replay()`</a>
 * <a href="#startOver">`videomailClient.startOver()`</a>
 * <a href="#get">`videomailClient.get()`</a>
 * <a href="#canRecord">`videomailClient.canRecord()`</a>
 * <a href="#unload">`videomailClient.unload()`</a>
+* <a href="#hide">`videomailClient.hide()`</a>
+* <a href="#isDirty">`videomailClient.isDirty()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -187,6 +188,11 @@ $scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
 ### videomailClient.hide()
 
 Hides all the visuals (but does not unload anything).
+
+<a name="isDirty"></a>
+### videomailClient.isDirty()
+
+Returns true when a video has been recorded and a form exists. Useful when checking something before closing the window, i.E. this use case: show a window confirmation dialog to make sure the user didn't forget to submit the recorded video.
 
 <a name="whitelist"></a>
 ## Whitelist

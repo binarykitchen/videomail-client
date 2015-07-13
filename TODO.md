@@ -1,8 +1,8 @@
 ### TODOs
 | Filename | line # | TODO
 |:------|:------:|:------
-| src/wrappers/container.js | 189 | figure out how to fire dom's onload event again
-| src/wrappers/container.js | 190 | or how to run all the scripts over again
+| src/wrappers/container.js | 190 | figure out how to fire dom's onload event again
+| src/wrappers/container.js | 191 | or how to run all the scripts over again
 | src/util/items/sample.js | 3 | turn this into an npm module, but only when it's working
 | src/util/items/sample.js | 7 | change to MP3 to save lots of bytes but that's for the future
 | src/util/items/sample.js | 31 | audio samples seem to be a bit too fast compared to the video

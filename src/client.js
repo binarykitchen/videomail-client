@@ -96,6 +96,11 @@ var VideomailClient = function(options) {
         return getBrowser(localOptions).canRecord()
     }
 
+    // return true when a video has been recorded but is not sent yet
+    this.isDirty = function() {
+        return container.isDirty()
+    }
+
     build()
 }
 

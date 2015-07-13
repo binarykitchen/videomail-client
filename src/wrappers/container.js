@@ -84,7 +84,8 @@ var Container = function(options) {
 
     function initEvents() {
         window.addEventListener('beforeunload', function(e) {
-            self.unload(e)
+            if (!e.defaultPrevented)
+                self.unload(e)
         })
 
         if (options.enablePause && options.enableAutoPause)
@@ -262,7 +263,7 @@ var Container = function(options) {
             buttons.show()
 
             if (!hasError) {
-                if (visuals.isReplayShown())
+                if (self.isReplayShown())
                     self.emit(Events.PREVIEW)
                 else
                     self.emit(Events.FORM_READY)
@@ -380,6 +381,14 @@ var Container = function(options) {
 
     this.isBuilt = function() {
         return built
+    }
+
+    this.isReplayShown = function() {
+        return visuals.isReplayShown()
+    }
+
+    this.isDirty = function() {
+        return form && this.isReplayShown()
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
