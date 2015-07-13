@@ -92,6 +92,112 @@ var Recorder = function(visuals, replay, options) {
         userMediaTimeout = null
     }
 
+    function userMediaErrorCallback(err) {
+        userMediaLoading = false
+
+        clearUserMediaTimeout()
+
+        var errorListeners = self.listeners(Events.ERROR)
+
+        if (errorListeners.length) {
+            self.emit(Events.ERROR, err)
+
+            // retry after a while
+            retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
+        } else {
+            debug('Recorder: no error listeners attached but throwing error', err)
+
+            // weird situation, throw it since there are no error listeners yet
+            throw err
+        }
+    }
+
+    function showUserMedia() {
+        return !isHidden() || blocking
+    }
+
+    function loadGenuineUserMedia() {
+        navigator.getUserMedia_({
+            video: true,
+            audio: options.audio.enabled
+        }, function(localStream) {
+
+            userMediaLoading = false
+
+            if (showUserMedia()) {
+                try {
+                    clearUserMediaTimeout()
+
+                    userMedia.init(
+                        localStream,
+                        onUserMediaReady.bind(self),
+                        onAudioSample.bind(self),
+                        function(err) {
+                            self.emit(Events.ERROR, err)
+                        }
+                    )
+                } catch (exc) {
+                    self.emit(Events.ERROR, exc)
+                }
+            }
+
+        }, userMediaErrorCallback)
+    }
+
+    function loadFlashWebcam() {
+        debug('Recorder: loadFlashWebcam()')
+
+        visuals.removeChild(recorderElement)
+
+        recorderElement = h('object.' + options.selectors.userMediaClass, {
+            classid:   'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
+            type:      'application/x-shockwave-flash',
+            data:      'jscam_canvas_only.swf',
+            width:     recorderElement.width,
+            height:    recorderElement.height,
+            classList: recorderElement.classList
+        }, h('param', {
+            name:  'movie',
+            value: 'scam_canvas_only.swf'
+        }), h('param', {
+            name:  'FlashVars',
+            value: "mode='callback'&amp;quality='" + options.image.quality + "'"
+        }), h('param', {
+            name:  'allowScriptAccess',
+            value: 'always'
+        }))
+
+        visuals.appendChild(recorderElement)
+
+        function register(run) {
+
+            if (recorderElement.capture !== undefined) {
+
+                userMediaLoading = false
+
+                if (showUserMedia()) {
+                    clearUserMediaTimeout()
+
+                    // CONTINUE ISSUE #38 FROM HERE; more see:
+                    // https://github.com/addyosmani/getUserMedia.js/blob/gh-pages/lib/getUserMedia.js#L86
+                    // onUserMediaReady()
+                }
+
+            } else if (run < 1)
+                // Flash movie not yet registered
+                userMediaErrorCallback(new Error('Flash movie not yet registered'))
+            else
+                // Flash interface not ready yet
+                setTimeout(register, 1e3 * (4 - run), --run)
+        }
+
+        register(3)
+    }
+
+    function useFlash() {
+        return options.forceFlash || !navigator.getUserMedia_
+    }
+
     function loadUserMedia() {
 
         if (userMediaLoaded) {
@@ -113,49 +219,10 @@ var Recorder = function(visuals, replay, options) {
 
             userMediaLoading = true
 
-            navigator.getUserMedia({
-                video: true,
-                audio: options.audio.enabled
-            }, function(localStream) {
-
-                userMediaLoading = false
-
-                if (!isHidden() || blocking) {
-                    try {
-                        clearUserMediaTimeout()
-
-                        userMedia.init(
-                            localStream,
-                            onUserMediaReady.bind(self),
-                            onAudioSample.bind(self),
-                            function(err) {
-                                self.emit(Events.ERROR, err)
-                            }
-                        )
-                    } catch (exc) {
-                        self.emit(Events.ERROR, exc)
-                    }
-                }
-
-            }, function(err) {
-                userMediaLoading = false
-
-                clearUserMediaTimeout()
-
-                var errorListeners = self.listeners(Events.ERROR)
-
-                if (errorListeners.length) {
-                    self.emit(Events.ERROR, err)
-
-                    // retry after a while
-                    retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
-                } else {
-                    debug('Recorder: no error listeners attached but throwing error', err)
-
-                    // weird situation, throw it since there are no error listeners yet
-                    throw err
-                }
-            })
+            if (useFlash())
+                loadFlashWebcam()
+            else
+                loadGenuineUserMedia()
 
         } catch (exc) {
             userMediaLoading = false

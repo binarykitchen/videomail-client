@@ -3,7 +3,7 @@ module.exports = function(window, navigator) {
     require('es5-shim')
     require('cross-class-list')
 
-    navigator.getUserMedia =
+    navigator.getUserMedia_ =
         navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
         navigator.mozGetUserMedia ||

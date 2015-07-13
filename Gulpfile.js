@@ -52,10 +52,10 @@ gulp.task('todo', function() {
 gulp.task('browserify', ['clean:js'], function(cb) {
     var entry   = path.join(__dirname, '/src/index.js'),
         bundler = browserify({
-            entries:    [entry],
-            basedir:    __dirname,
-            globals:    false,
-            debug:      true // enables source maps
+            entries: [entry],
+            basedir: __dirname,
+            globals: false,
+            debug:   true // enables source maps
         })
 
     bundler

@@ -97,7 +97,7 @@ module.exports = function(options) {
 
     // just temporary
     this.canRecord = function() {
-        var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia
+        var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia_
 
         return getUserMediaType !== 'undefined' && getUserMediaType == 'function'
     }
@@ -173,7 +173,7 @@ module.exports = function(options) {
             explanation
 
         if (this.isChromeBased())
-            explanation = 'Click on the allow button above to grant access to your webcam.'
+            explanation = 'Click on the allow button to grant access to your webcam.'
 
         else if (this.isFirefox())
             explanation = 'Please share your webcam under Firefox.'

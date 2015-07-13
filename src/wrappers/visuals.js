@@ -110,6 +110,10 @@ var Visuals = function(container, options) {
         visualsElement.appendChild(child)
     }
 
+    this.removeChild = function(child) {
+        visualsElement.removeChild(child)
+    }
+
     this.reset = function() {
         this.endWaiting()
         recorder.reset()
