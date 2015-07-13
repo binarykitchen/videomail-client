@@ -93,7 +93,7 @@ test('Browser:', function(t) {
 
         err = browser.getNoAccessIssue()
         tt.equal(err.message, 'Cannot access webcam!')
-        tt.equal(err.explanation, 'Click on the allow button above to grant access to your webcam.')
+        tt.equal(err.explanation, 'Click on the allow button to grant access to your webcam.')
 
         tt.equal(browser.isChromeBased(), true)
         tt.equal(browser.isFirefox(), false)
