@@ -733,6 +733,10 @@ var Recorder = function(visuals, replay, options) {
             clearRetryTimeout()
         }
     }
+
+    this.isUnloaded = function() {
+        return unloaded
+    }
 }
 
 util.inherits(Recorder, EventEmitter)

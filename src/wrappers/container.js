@@ -84,8 +84,7 @@ var Container = function(options) {
 
     function initEvents() {
         window.addEventListener('beforeunload', function(e) {
-            if (!e.defaultPrevented)
-                self.unload(e)
+            self.unload(e)
         })
 
         if (options.enablePause && options.enableAutoPause)
@@ -388,7 +387,16 @@ var Container = function(options) {
     }
 
     this.isDirty = function() {
-        return form && this.isReplayShown()
+        var isDirty = !!form
+
+        if (isDirty) {
+            if (visuals.isRecorderUnloaded())
+                isDirty = false
+            else (this.isReplayShown() || this.isPaused())
+                isDirty = true
+        }
+
+        return isDirty
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)

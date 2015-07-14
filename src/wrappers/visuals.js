@@ -244,6 +244,10 @@ var Visuals = function(container, options) {
         visualsElement.classList.remove('hide')
     }
 
+    this.isRecorderUnloaded = function() {
+        return recorder.isUnloaded()
+    }
+
     this.isReplayShown = replay.isShown.bind(replay)
     this.hideReplay    = replay.hide.bind(replay)
     this.hideRecorder  = recorder.hide.bind(recorder)
