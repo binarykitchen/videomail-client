@@ -387,12 +387,12 @@ var Container = function(options) {
     }
 
     this.isDirty = function() {
-        var isDirty = !!form
+        var isDirty = false
 
-        if (isDirty) {
+        if (!!form) {
             if (visuals.isRecorderUnloaded())
                 isDirty = false
-            else (this.isReplayShown() || this.isPaused())
+            else if (this.isReplayShown() || this.isPaused())
                 isDirty = true
         }
 

@@ -20,12 +20,13 @@ module.exports = function(float32Array) {
     */
     this.toBuffer = function() {
 
-        var l   = float32Array.length,
-            arr = new Int16Array(l)
+        var l       = float32Array.length,
+            arr     = new Int16Array(l),
+            amplify = 10 // see http://ffmpeg.gusari.org/viewtopic.php?f=26&t=2208&p=6404#p6404
 
         // this uses lots of CPU and should be optimized
         for (var i = 0; i < l; i++) {
-            arr[i] = Math.min(1, float32Array[i]) * 0x7FFF
+            arr[i] = Math.max(-1, Math.min(1, amplify * float32Array[i])) * 0x7FFF
         }
 
         // TODO: audio samples seem to be a bit too fast compared to the video
