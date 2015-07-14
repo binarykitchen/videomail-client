@@ -92,9 +92,9 @@ test('Audio Sample:', function(t) {
 
             tt.ok(Buffer.isBuffer(buffer))
             tt.equal(buffer.length, 6)
-            tt.equal(buffer.readInt16LE(0), 3276)
-            tt.equal(buffer.readInt16LE(2), 6553)
-            tt.equal(buffer.readInt16LE(4), 9830)
+            tt.equal(buffer.readInt16LE(0), 6553)
+            tt.equal(buffer.readInt16LE(2), 13106)
+            tt.equal(buffer.readInt16LE(4), 19660)
         })
     })
 })

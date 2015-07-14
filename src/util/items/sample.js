@@ -22,7 +22,7 @@ module.exports = function(float32Array) {
 
         var l       = float32Array.length,
             arr     = new Int16Array(l),
-            amplify = 10 // see http://ffmpeg.gusari.org/viewtopic.php?f=26&t=2208&p=6404#p6404
+            amplify = 2 // see http://ffmpeg.gusari.org/viewtopic.php?f=26&t=2208&p=6404#p6404
 
         // this uses lots of CPU and should be optimized
         for (var i = 0; i < l; i++) {
