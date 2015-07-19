@@ -1,62 +1,19 @@
 var h = require('hyperscript'),
 
-    AudioSample     = require('./items/sample'),
+    AudioRecorder   = require('./audioRecorder'),
     VideomailError  = require('./videomailError'),
-    Events          = require('./../events'),
-
-    audioContext
+    Events          = require('./../events')
 
 module.exports = function(rawVisualUserMedia, options) {
 
-    var self            = this,
-        recordAudio     = false,
-        paused          = false,
-        recorder
+    var self   = this,
+        paused = false,
+        record = false,
 
-    function initAudio(localMediaStream, audioCallback) {
+        audioRecorder
 
-        // instantiate only once
-        if (!audioContext)
-            audioContext = new AudioContext()
-
-        // creates an audio node from the microphone incoming stream
-        var audioInput = audioContext.createMediaStreamSource(localMediaStream),
-            volume     = audioContext.createGain()
-
-        // set recording volume to max (0 .. 1)
-        volume.gain.value = .9
-
-        /*
-        From the spec: This value controls how frequently the audioprocess event is
-        dispatched and how many sample-frames need to be processed each call.
-        Lower values for buffer size will result in a lower (better) latency.
-        Higher values will be necessary to avoid audio breakup and glitches
-        */
-        var bufferSize = 2048 // remember it needs to be a power of two
-
-        // Create a ScriptProcessorNode with the given bufferSize and a single input and output channel
-        recorder = audioContext.createScriptProcessor(bufferSize, 1, 1)
-
-        recorder.onaudioprocess = function(e) {
-            if (!recordAudio|| paused)
-                return
-
-            // Returns a Float32Array containing the PCM data associated with the channel,
-            // defined by the channel parameter (with 0 representing the first channel)
-            var float32Array = e.inputBuffer.getChannelData(0)
-            audioCallback(new AudioSample(float32Array))
-        }
-
-        // connect stream to our recorder
-        audioInput.connect(recorder)
-
-        // connect our recorder to the previous destination
-        recorder.connect(audioContext.destination)
-
-        // connect volume
-        audioInput.connect(volume)
-        volume.connect(recorder)
-    }
+    if (options.audio.enabled)
+        audioRecorder = new AudioRecorder(this)
 
     function attachMediaStream(stream) {
         if (typeof rawVisualUserMedia.srcObject !== 'undefined')
@@ -149,9 +106,8 @@ module.exports = function(rawVisualUserMedia, options) {
 
             setVisualStream(localMediaStream)
 
-            options.audio.enabled &&
-            audioCallback &&
-            initAudio(localMediaStream, audioCallback)
+            if (audioRecorder && audioCallback)
+                audioRecorder.attach(localMediaStream, audioCallback)
 
             rawVisualUserMedia.addEventListener('play', onPlay)
             rawVisualUserMedia.play()
@@ -174,13 +130,24 @@ module.exports = function(rawVisualUserMedia, options) {
                 setVisualStream(null)
             }
 
-            paused = recordAudio  = false
+            paused = record  = false
 
-            if (recorder)
-                recorder.onaudioprocess = undefined
+            audioRecorder && audioRecorder.stop()
+
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
+    }
+
+    this.createCanvas = function() {
+        return h('canvas', {
+            width:  rawVisualUserMedia.width  || rawVisualUserMedia.clientWidth,
+            height: rawVisualUserMedia.height || rawVisualUserMedia.clientHeight
+        })
+    }
+
+    this.getRawVisuals = function() {
+        return rawVisualUserMedia
     }
 
     this.pause = function() {
@@ -195,26 +162,18 @@ module.exports = function(rawVisualUserMedia, options) {
         paused = false
     }
 
-    this.getRawVisuals = function() {
-        return rawVisualUserMedia
+    this.record = function() {
+        record = true
     }
 
-    this.createCanvas = function() {
-        return h('canvas', {
-            width:  rawVisualUserMedia.width  || rawVisualUserMedia.clientWidth,
-            height: rawVisualUserMedia.height || rawVisualUserMedia.clientHeight
-        })
-    }
-
-    this.recordAudio = function() {
-        recordAudio = true
+    this.isRecording = function() {
+        return record
     }
 
     this.getAudioSampleRate = function() {
-        if (audioContext) {
-            return audioContext.sampleRate
-        } else {
+        if (audioRecorder)
+            return audioRecorder.getSampleRate()
+        else
             return -1
-        }
     }
 }

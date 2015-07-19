@@ -637,7 +637,7 @@ var Recorder = function(visuals, replay, options) {
             }
         }
 
-        userMedia.recordAudio()
+        userMedia.record()
 
         rafId = window.requestAnimationFrame(draw)
     }
