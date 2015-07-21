@@ -61,7 +61,7 @@ var Recorder = function(visuals, replay, options) {
 
     function onAudioSample(audioSample) {
         samplesCount++
-        stream && stream.write(audioSample.toBuffer())
+        writeStream(audioSample.toBuffer())
     }
 
     function onUserMediaReady() {
@@ -86,10 +86,12 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function clearUserMediaTimeout() {
-        debug('Recorder: clearUserMediaTimeout()')
+        if (userMediaTimeout) {
+            debug('Recorder: clearUserMediaTimeout()')
 
-        userMediaTimeout && clearTimeout(userMediaTimeout)
-        userMediaTimeout = null
+            userMediaTimeout && clearTimeout(userMediaTimeout)
+            userMediaTimeout = null
+        }
     }
 
     function userMediaErrorCallback(err) {
@@ -327,6 +329,19 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
+    function writeStream(buffer) {
+        if (stream) {
+            if (stream.destroyed)
+                self.emit(Events.ERROR, VideomailError.create(
+                    'Already disconnected.',
+                    'Sorry, the connection to the server has been destroyed. Please reload.',
+                    options
+                ))
+            else
+                stream.write(buffer)
+        }
+    }
+
     function writeCommand(command, args, cb) {
         if (!connected) {
             debug('Reconnecting for the command', command, '…')
@@ -343,7 +358,7 @@ var Recorder = function(visuals, replay, options) {
                 args:       args
             }
 
-            stream.write(new Buffer(JSON.stringify(command)))
+            writeStream(new Buffer(JSON.stringify(command)))
 
             cb && cb()
         }
@@ -385,7 +400,16 @@ var Recorder = function(visuals, replay, options) {
 
             stream.on('close', function(err) {
                 debug('x Stream has closed')
+
                 connected = false
+
+                if (!err && self.isPaused())
+                    // todo: fix within https://github.com/binarykitchen/videomail-client/issues/46
+                    err = VideomailError.create(
+                        'Pause is too long.',
+                        'Sorry, please try again and keep the pause under 60 seconds.',
+                        options
+                    )
 
                 if (err)
                     self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
@@ -552,7 +576,6 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.record = function() {
-
         if (unloaded)
             return false
 
@@ -614,7 +637,7 @@ var Recorder = function(visuals, replay, options) {
                         if (stream) {
                             framesCount++
 
-                            stream.write(buffer)
+                            writeStream(buffer)
 
                             bytesSum += buffer.length
 
@@ -622,14 +645,12 @@ var Recorder = function(visuals, replay, options) {
                                 self.emit(Events.FIRST_FRAME_SENT)
                         }
 
-                        /*
-                        if (options.debug) {
-                            debug(
-                                'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
-                                interval + '/' + intervalThreshold + '/' + wantedInterval
-                            )
-                        }
-                        */
+                        // if (options.verbose) {
+                        //     debug(
+                        //         'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
+                        //         interval + '/' + intervalThreshold + '/' + wantedInterval
+                        //     )
+                        // }
                     }
                 }
             } catch (exc) {

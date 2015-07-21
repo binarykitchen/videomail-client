@@ -3,6 +3,7 @@
 |:------|:------:|:------
 | src/wrappers/container.js | 189 | figure out how to fire dom's onload event again
 | src/wrappers/container.js | 190 | or how to run all the scripts over again
+| src/wrappers/visuals/recorder.js | 407 | fix within https://github.com/binarykitchen/videomail-client/issues/46
 | src/util/items/audioSample.js | 3 | turn this into an npm module, but only when it's working
 | src/util/items/audioSample.js | 7 | change to MP3 to save lots of bytes but that's for the future
 | src/util/items/audioSample.js | 32 | audio samples seem to be a bit too fast compared to the video
