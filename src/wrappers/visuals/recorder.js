@@ -563,7 +563,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.isPaused = function() {
-        return userMedia.isPaused()
+        return userMedia && userMedia.isPaused()
     }
 
     this.resume = function() {
