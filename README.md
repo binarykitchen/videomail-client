@@ -25,6 +25,7 @@ Finally you can encode any webcam recordings from modern browsers into MP4 + Web
 * <a href="#api">API</a>
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
+* <a href="#super-fast-cdn">Super fast global CDN</a>
 * <a href="#changes">Breaking changes (Changelog)</a>
 * <a href="#notes">Notes</a>
 
@@ -213,6 +214,17 @@ Forget IE, Safari and iPhones because they still don't support `getUserMedia()`,
 * Android Browser >= 37
 
 Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
+
+<a name="super-fast-cdn"></a>
+## Super fast global CDN
+
+You can grab the already browserified videomail-client JS file through GitHub's rawgit server which is proxied by [MaxCDN's](http://www.maxcdn.com/) super fast global CDN:
+```
+https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/dist/videomail-client.js
+```
+
+For example for version 1.3.19, use this in your production site:
+https://cdn.rawgit.com/binarykitchen/videomail-client/1.3.19/dist/videomail-client.js
 
 <a name="changes"></a>
 ## Breaking changes (Changelog)
