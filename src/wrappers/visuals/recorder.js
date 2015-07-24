@@ -393,7 +393,7 @@ var Recorder = function(visuals, replay, options) {
             // stream.emit = function(type) {
             //     if (stream) {
             //         debug(type)
-            //         var args = [].splice.call(arguments, 0)
+            //         var args = Array.prototype.slice.call(arguments, 0)
             //         return stream.originalEmit.apply(stream, args)
             //     }
             // }

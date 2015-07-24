@@ -6,8 +6,10 @@ module.exports = function(userMedia) {
 
     function getAudioContext() {
         // instantiate only once
-        if (!window.audioContext)
+        if (!window.audioContext) {
+            var AudioContext = window.AudioContext || window.webkitAudioContext
             window.audioContext = new AudioContext()
+        }
 
         return window.audioContext
     }
@@ -37,11 +39,12 @@ module.exports = function(userMedia) {
         Lower values for buffer size will result in a lower (better) latency.
         Higher values will be necessary to avoid audio breakup and glitches
         */
-        var bufferSize = 2048 // remember it needs to be a power of two
+        var bufferSize = 2048, // remember it needs to be a power of two
+            channels   = 1
 
         // Create a ScriptProcessorNode with the given bufferSize and
         // a single input and output channel
-        scriptProcessor = getAudioContext().createScriptProcessor(bufferSize, 1, 1)
+        scriptProcessor = getAudioContext().createScriptProcessor(bufferSize, channels, channels)
 
         scriptProcessor.onaudioprocess = function(e) {
             onAudioProcess(e, cb)

@@ -7,7 +7,7 @@ module.exports = function(options, name) {
 
     this.emit = function(event) {
 
-        var args = [].splice.call(arguments, 0)
+        var args = Array.prototype.slice.call(arguments, 0)
 
         if (!event)
             throw VideomailError.create('You cannot emit without an event.')
