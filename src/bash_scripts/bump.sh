@@ -44,7 +44,7 @@ git push
 git flow release start $VERSION
 
 # This will increment version in package.json
-gulp bump --write --version=$VERSION
+gulp bumpVersion --write --version=$VERSION
 
 # Ensure dependencies are okay
 npm prune
