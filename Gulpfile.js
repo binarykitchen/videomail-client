@@ -8,7 +8,19 @@ var path            = require('path'),
     Router          = require('router'),
     bodyParser      = require('body-parser'),
     send            = require('connect-send-json'),
-    del             = require('del')
+    del             = require('del'),
+    minimist        = require('minimist'),
+
+    defaultOptions = {
+        minify:     false,
+        importance: null,
+        write:      false,
+        version:    null
+    },
+
+    options = minimist(process.argv.slice(2), {default: defaultOptions})
+
+// plugins.util.log('Options:', options)
 
 gulp.task('clean:js', function(cb) {
     del(['dist/*.js'], cb)
@@ -30,6 +42,10 @@ gulp.task('stylus', function() {
             'Firefox ESR',
             'iOS >= 6', 'android >= 4'
         ))
+        // always minify otherwise it gets broken with line-breaks
+        // when surrounded with `'s when injected
+        // todo: fix this, so that it also works when not minified, this
+        // for faster builds during development
         .pipe(plugins.minifyCss())
         .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
         .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
@@ -67,11 +83,8 @@ gulp.task('browserify', ['clean:js'], function(cb) {
         .pipe(buffer()) // required because the next steps do not support streams
         .pipe(plugins.concat('videomail-client.js'))
         .pipe(gulp.dest('dist'))
-        /* TODO: add this back when we are stable. commented out now for speed.
-        .pipe(plugins.rename({suffix: '.min'}))
-        .pipe(plugins.uglify())
-        .pipe(gulp.dest('dist'))
-        */
+        .pipe(plugins.if(options.minify, plugins.rename({suffix: '.min'}), plugins.uglify()))
+        .pipe(plugins.if(options.minify, gulp.dest('dist')))
         .pipe(plugins.connect.reload())
         .on('end', cb)
 })
@@ -113,6 +126,24 @@ gulp.task('watch', ['connect'], function() {
     gulp.watch(['src/assets/styl/**/*.styl'],   ['stylus'])
     gulp.watch(['src/**/*.js'],                 ['browserify'])
     gulp.watch(['examples/*.html'],             ['reload'])
+})
+
+// get inspired by
+// https://www.npmjs.com/package/gulp-tag-version and
+// https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
+gulp.task('bumpVersion', function() {
+    var bumpOptions = {}
+
+    if (options.version)
+        bumpOptions.version = options.version
+
+    else if (options.importance)
+        bumpOptions.importance = options.importance
+
+    return gulp.src(['./package.json'])
+        .pipe(plugins.bump(bumpOptions))
+        .pipe(plugins.if(options.write, gulp.dest('./')))
+        .on('error', plugins.util.log)
 })
 
 gulp.task('examples',  ['connect', 'watch'])

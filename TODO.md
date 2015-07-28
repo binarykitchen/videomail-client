@@ -8,5 +8,5 @@
 | src/util/items/audioSample.js | 32 | audio samples seem to be a bit too fast compared to the video
 | src/util/items/audioSample.js | 35 | Also study PCM specs if these really have to be converted to 16 bit signed integers???
 | src/wrappers/visuals/recorder.js | 407 | fix within https://github.com/binarykitchen/videomail-client/issues/46
-| Gulpfile.js | 42 | put back in examples after https://github.com/pgilad/gulp-todo/issues/38
-| Gulpfile.js | 70 | add this back when we are stable. commented out now for speed.
+| Gulpfile.js | 47 | fix this, so that it also works when not minified, this
+| Gulpfile.js | 58 | put back in examples after https://github.com/pgilad/gulp-todo/issues/38
