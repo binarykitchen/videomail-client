@@ -42,6 +42,14 @@ var Replay = function(parentElement, options) {
         })
     }
 
+    function correctDimensions() {
+        var width  = (videomail && videomail.width) || options.width,
+            height = (videomail && videomail.height) || options.height
+
+        replayElement.style.width  = width + 'px'
+        replayElement.style.height = height + 'px'
+    }
+
     this.setVideomail = function(newVideomail) {
         videomail = newVideomail
 
@@ -52,6 +60,7 @@ var Replay = function(parentElement, options) {
             this.setMp4Source(videomail.mp4)
 
         copyAttributes(newVideomail)
+        correctDimensions()
 
         this.show()
     }
@@ -82,11 +91,7 @@ var Replay = function(parentElement, options) {
         else
             this.hide()
 
-        if (!replayElement.width && options.video.width)
-            replayElement.width = options.video.width
-
-        if (!replayElement.height && options.video.height)
-            replayElement.height = options.video.height
+        correctDimensions()
 
         if (!replayElement.controls)
             replayElement.controls = true
@@ -175,19 +180,21 @@ var Replay = function(parentElement, options) {
         // pause video to make sure it won't consume any memory
         this.pause()
 
-        this.setMp4Source(null)
-        this.setWebMSource(null)
+        if (replayElement) {
+            this.setMp4Source(null)
+            this.setWebMSource(null)
+        }
     }
 
     this.hide = function() {
         if (isStandalone())
             parentElement.classList.add('hide')
         else
-            replayElement.classList.add('hide')
+            replayElement && replayElement.classList.add('hide')
     }
 
     this.isShown = function() {
-        return !replayElement.classList.contains('hide')
+        return replayElement && !replayElement.classList.contains('hide')
     }
 }
 

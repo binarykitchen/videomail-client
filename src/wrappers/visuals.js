@@ -62,6 +62,14 @@ var Visuals = function(container, options) {
             .on(Events.PREVIEW_SHOWN, function() {
                 container.validate(true)
             })
+            .on(Events.CAN_PLAY, function() {
+                correctDimensions()
+            })
+    }
+
+    function correctDimensions() {
+        visualsElement.style.width  = self.getRecorderWidth(true) + 'px'
+        visualsElement.style.height = self.getRecorderHeight(true) + 'px'
     }
 
     function isRecordable() {
@@ -90,11 +98,7 @@ var Visuals = function(container, options) {
         visualsElement.classList.add('visuals')
         visualsElement.classList.add('hide')
 
-        if (!visualsElement.style.width && options.video.width)
-            visualsElement.style.width = options.video.width + 'px'
-
-        if (!visualsElement.style.height && options.video.height)
-            visualsElement.style.height = options.video.height + 'px'
+        correctDimensions()
 
         !built && initEvents()
         buildChildren()
@@ -103,11 +107,11 @@ var Visuals = function(container, options) {
     }
 
     this.querySelector = function(selector) {
-        return visualsElement.querySelector(selector)
+        return visualsElement && visualsElement.querySelector(selector)
     }
 
     this.appendChild = function(child) {
-        visualsElement.appendChild(child)
+        visualsElement && visualsElement.appendChild(child)
     }
 
     this.removeChild = function(child) {
@@ -219,8 +223,8 @@ var Visuals = function(container, options) {
         return recorder.isPaused()
     }
 
-    this.block = function(err) {
-        notifier.block(err)
+    this.error = function(err) {
+        notifier.error(err)
     }
 
     this.hide = function() {
@@ -246,6 +250,22 @@ var Visuals = function(container, options) {
 
     this.isRecorderUnloaded = function() {
         return recorder.isUnloaded()
+    }
+
+    this.getRecorderWidth = function(responsive) {
+        return recorder.getRecorderWidth(responsive)
+    }
+
+    this.getRecorderHeight = function(responsive) {
+        return recorder.getRecorderHeight(responsive)
+    }
+
+    this.getOuterWidth = function() {
+        return container.getOuterWidth()
+    }
+
+    this.isConnected = function() {
+        return recorder.isConnected()
     }
 
     this.isReplayShown = replay.isShown.bind(replay)

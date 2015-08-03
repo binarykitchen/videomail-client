@@ -3,12 +3,13 @@ var websocket    = require('websocket-stream'),
     util         = require('util'),
     h            = require('hyperscript'),
 
+    UserMedia = require('./userMedia'),
+
     Events          = require('./../../events'),
     Constants       = require('./../../constants'),
     EventEmitter    = require('./../../util/eventEmitter'),
     Browser         = require('./../../util/browser'),
     Humanize        = require('./../../util/humanize'),
-    UserMedia       = require('./../../util/userMedia'),
     VideomailError  = require('./../../util/videomailError')
 
 var Recorder = function(visuals, replay, options) {
@@ -16,9 +17,7 @@ var Recorder = function(visuals, replay, options) {
     EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
-    if (!options.video.fps)     throw VideomailError.create('FPS must be defined', options)
-    if (!options.video.width)   throw VideomailError.create('Video width is too small', options)
-    if (!options.video.height)  throw VideomailError.create('Video height is too small', options)
+    if (!options.video.fps) throw VideomailError.create('FPS must be defined', options)
 
     var self            = this,
         browser         = new Browser(options),
@@ -160,10 +159,10 @@ var Recorder = function(visuals, replay, options) {
             classList: recorderElement.classList
         }, h('param', {
             name:  'movie',
-            value: 'scam_canvas_only.swf'
+            value: 'jscam_canvas_only.swf'
         }), h('param', {
             name:  'FlashVars',
-            value: "mode='callback'&amp;quality='" + options.image.quality + "'"
+            value: "mode=callback&amp;quality=" + options.image.quality
         }), h('param', {
             name:  'allowScriptAccess',
             value: 'always'
@@ -177,12 +176,17 @@ var Recorder = function(visuals, replay, options) {
 
                 userMediaLoading = false
 
+                console.trace(recorderElement)
+
                 if (showUserMedia()) {
                     clearUserMediaTimeout()
 
-                    // CONTINUE ISSUE #38 FROM HERE; more see:
+                    // CONTINUE ISSUE #47 FROM HERE; more see:
                     // https://github.com/addyosmani/getUserMedia.js/blob/gh-pages/lib/getUserMedia.js#L86
                     // onUserMediaReady()
+
+                    // OR CONSIDER USING:
+                    // https://github.com/unshiftio/swfobject
                 }
 
             } else if (run < 1)
@@ -392,7 +396,7 @@ var Recorder = function(visuals, replay, options) {
 
             // stream.emit = function(type) {
             //     if (stream) {
-            //         debug(type)
+            //         debug('Websocket stream emitted:', type)
             //         var args = Array.prototype.slice.call(arguments, 0)
             //         return stream.originalEmit.apply(stream, args)
             //     }
@@ -672,24 +676,33 @@ var Recorder = function(visuals, replay, options) {
         recorderElement.classList.remove('hide')
     }
 
+    function correctDimensions() {
+        if (self.hasDefinedWidth())
+            recorderElement.width = self.getRecorderWidth(true)
+
+        if (self.hasDefinedHeight())
+            recorderElement.height = self.getRecorderHeight(true)
+    }
+
     function initEvents() {
-        self.on(Events.SUBMITTING, function() {
-            submitting = true
-        })
-
-        self.on(Events.SUBMITTED, function() {
-            submitting = false
-            self.unload()
-        })
-
-        self.on(Events.BLOCKING, function() {
-            blocking = true
-            clearUserMediaTimeout()
-        })
-
-        self.on(Events.HIDE, function() {
-            self.hide()
-        })
+        self
+            .on(Events.SUBMITTING, function() {
+                submitting = true
+            })
+            .on(Events.SUBMITTED, function() {
+                submitting = false
+                self.unload()
+            })
+            .on(Events.BLOCKING, function() {
+                blocking = true
+                clearUserMediaTimeout()
+            })
+            .on(Events.HIDE, function() {
+                self.hide()
+            })
+            .on(Events.CAN_PLAY, function() {
+                correctDimensions()
+            })
     }
 
     this.build = function() {
@@ -707,19 +720,14 @@ var Recorder = function(visuals, replay, options) {
             if (!recorderElement)
                 buildElement()
 
-            if (!recorderElement.width && options.video.width)
-                recorderElement.width = options.video.width
+            correctDimensions()
 
-            if (!recorderElement.height && options.video.height)
-                recorderElement.height = options.video.height
-
-            if (options.audio.enabled) {
+            if (options.audio.enabled)
                 // prevent audio feedback, see
                 // https://github.com/binarykitchen/videomail-client/issues/35
                 recorderElement.muted = true
-            }
 
-            userMedia = new UserMedia(recorderElement, options)
+            userMedia = new UserMedia(this, options)
 
             show()
 
@@ -757,6 +765,110 @@ var Recorder = function(visuals, replay, options) {
 
     this.isUnloaded = function() {
         return unloaded
+    }
+
+    // these two return the true dimensions of the webcam area.
+    // needed because on mobiles they might be different.
+
+    this.getRecorderWidth = function(responsive) {
+        if (userMedia)
+            return userMedia.getRawWidth(responsive)
+
+        else if (responsive && this.hasDefinedWidth())
+            return this.limitWidth(options.video.width)
+    }
+
+    this.getRecorderHeight = function(responsive) {
+        if (userMedia)
+            return userMedia.getRawHeight(responsive)
+
+        else if (responsive && this.hasDefinedHeight())
+            return this.calculateHeight(responsive)
+    }
+
+    function figureMinHeight(height) {
+        if (self.hasDefinedHeight()) {
+            if (!height)
+                height = options.video.height
+            else
+                height = Math.min(options.video.height, height)
+        }
+
+        return height
+    }
+
+    this.calculateWidth = function(responsive) {
+        var height = userMedia && userMedia.getVideoHeight()
+
+        height = figureMinHeight(height)
+
+        if (responsive)
+            height = this.limitHeight(height)
+
+        return parseInt(height / this.getRatio())
+    }
+
+    this.calculateHeight = function(responsive) {
+        var width = userMedia && userMedia.getVideoWidth(),
+            height
+
+        if (this.hasDefinedWidth())
+            width = options.video.width
+
+        if (responsive)
+            width = this.limitWidth(width)
+
+        if (width)
+            height = parseInt(width * this.getRatio())
+
+        return figureMinHeight(height)
+    }
+
+    this.getRatio = function() {
+        var ratio = 1 // just a default one when no computations are possible
+
+        if (userMedia)
+            ratio = userMedia.getVideoHeight() / userMedia.getVideoWidth()
+
+        else if (this.hasDefinedDimensions())
+            ratio = options.video.height / options.video.width
+
+        return ratio
+    }
+
+    this.hasDefinedWidth = function() {
+        return options.video.width != 'auto'
+    }
+
+    this.hasDefinedHeight = function() {
+        return options.video.height != 'auto'
+    }
+
+    this.hasDefinedDimension = function() {
+        return this.hasDefinedWidth() || this.hasDefinedHeight()
+    }
+
+    this.hasDefinedDimensions = function() {
+        return this.hasDefinedWidth() && this.hasDefinedHeight()
+    }
+
+    this.getRawVisualUserMedia = function() {
+        return recorderElement
+    }
+
+    this.limitWidth = function(width) {
+        var outerWidth = visuals.getOuterWidth()
+        return outerWidth < width ? outerWidth : width
+    }
+
+    // this is difficult to compute and is not entirely correct.
+    // but good enough for now to ensure some stability.
+    this.limitHeight = function(height) {
+        return window.outerHeight < height ? window.outerHeight : height
+    }
+
+    this.isConnected = function() {
+        return connected
     }
 }
 

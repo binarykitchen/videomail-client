@@ -77,7 +77,7 @@ var Container = function(options) {
             options.logger.error(err)
 
         if (options.displayErrors)
-            visuals.block(err)
+            visuals.error(err)
         else
             visuals.reset()
     }
@@ -113,10 +113,20 @@ var Container = function(options) {
 
         // better to keep the one and only error listeners
         // at one spot, here, because unload() will do a removeAllListeners()
-        self.on(Events.ERROR, function(err) {
-            processError(err)
-            unloadButKeepEventListeners(err)
-        })
+        self
+            .on(Events.ERROR, function(err) {
+                processError(err)
+                unloadButKeepEventListeners(err)
+            })
+            .on(Events.CAN_PLAY, function() {
+                correctDimensions()
+            })
+    }
+
+    // this will just set the width but not the height because
+    // it can be a form with more inputs elements
+    function correctDimensions() {
+        containerElement.style.width = visuals.getRecorderWidth(true) + 'px'
     }
 
     function unloadButKeepEventListeners(e) {
@@ -146,6 +156,8 @@ var Container = function(options) {
         })
 
         videomailFormData.avgFps = visuals.getAvgFps()
+        videomailFormData.width  = visuals.getRecorderWidth()
+        videomailFormData.height = visuals.getRecorderHeight()
 
         if (options.audio.enabled)
             videomailFormData.sampleRate = visuals.getAudioSampleRate()
@@ -211,6 +223,7 @@ var Container = function(options) {
                 options.insertCss && prependDefaultCss()
 
                 !built && initEvents()
+                correctDimensions()
                 buildForm()
                 buildChildren()
 
@@ -397,6 +410,11 @@ var Container = function(options) {
         }
 
         return isDirty
+    }
+
+    this.getOuterWidth = function() {
+        var rect = containerElement.getBoundingClientRect()
+        return rect.right - rect.left
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)

@@ -57,15 +57,21 @@ gulp build --minify
 npm test
 
 git add -A
-git commit -am "Version $VERSION"
+git commit -am "Final commit of version $VERSION"
 
+echo "Publishing to npm ..."
 npm publish
 
 # Complete the previous release
-git flow release finish $VERSION -m "Version $VERSION" # This will also tag it
+git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
+
+git push
+
 git checkout master
 git push
 git push --tags
 
 # Prepare the develop branch for the new cycle
 git checkout develop
+
+echo "All good. Ready for the next cycle!"

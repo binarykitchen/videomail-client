@@ -38,7 +38,7 @@ gulp.task('stylus', function() {
             'last 3 versions',
             '> 1%',
             'Explorer >= 9',
-            'Chrome >= 30',
+            'Chrome >= 34',
             'Firefox ESR',
             'iOS >= 6', 'android >= 4'
         ))

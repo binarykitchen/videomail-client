@@ -1,12 +1,17 @@
 var h = require('hyperscript'),
 
-    AudioRecorder   = require('./audioRecorder'),
-    VideomailError  = require('./videomailError'),
-    Events          = require('./../events')
+    AudioRecorder   = require('./../../util/audioRecorder'),
+    VideomailError  = require('./../../util/videomailError'),
+    EventEmitter    = require('./../../util/eventEmitter'),
+    Events          = require('./../../events')
 
-module.exports = function(rawVisualUserMedia, options) {
+module.exports = function(recorder, options) {
 
-    var self   = this,
+    EventEmitter.call(this, options, 'UserMedia')
+
+    var rawVisualUserMedia = recorder.getRawVisualUserMedia(),
+
+        self   = this,
         paused = false,
         record = false,
 
@@ -60,7 +65,7 @@ module.exports = function(rawVisualUserMedia, options) {
 
         function onPlay() {
             try {
-                options.debug('UserMedia emits: play')
+                options.debug('UserMedia: onPlay()')
 
                 rawVisualUserMedia.removeEventListener &&
                 rawVisualUserMedia.removeEventListener('play', onPlay)
@@ -81,6 +86,13 @@ module.exports = function(rawVisualUserMedia, options) {
             } catch (exc) {
                 self.emit(Events.ERROR, exc)
             }
+        }
+
+        function onCanPlay() {
+            self.emit(Events.CAN_PLAY)
+
+            rawVisualUserMedia.removeEventListener &&
+            rawVisualUserMedia.removeEventListener('canplay', onCanPlay)
         }
 
         try {
@@ -109,7 +121,8 @@ module.exports = function(rawVisualUserMedia, options) {
             if (audioRecorder && audioCallback)
                 audioRecorder.attach(localMediaStream, audioCallback)
 
-            rawVisualUserMedia.addEventListener('play', onPlay)
+            rawVisualUserMedia.addEventListener('play',     onPlay)
+            rawVisualUserMedia.addEventListener('canplay',  onCanPlay)
             rawVisualUserMedia.play()
         } catch (exc) {
             self.emit(Events.ERROR, exc)
@@ -140,10 +153,49 @@ module.exports = function(rawVisualUserMedia, options) {
     }
 
     this.createCanvas = function() {
+        // it's important not to use the responsive flag here so that
+        // the true pixels are being used for the image generation
         return h('canvas', {
-            width:  rawVisualUserMedia.width  || rawVisualUserMedia.clientWidth,
-            height: rawVisualUserMedia.height || rawVisualUserMedia.clientHeight
+            width:  this.getRawWidth(),
+            height: this.getRawHeight()
         })
+    }
+
+    this.getVideoHeight = function() {
+        return rawVisualUserMedia.videoHeight
+    }
+
+    this.getVideoWidth = function() {
+        return rawVisualUserMedia.videoWidth
+    }
+
+    this.getRawWidth = function(responsive) {
+        var rawWidth     = this.getVideoWidth(),
+            widthDefined = recorder.hasDefinedWidth()
+
+        if (widthDefined || recorder.hasDefinedHeight()) {
+            if (!responsive && widthDefined)
+                rawWidth = options.video.width
+            else
+                rawWidth = recorder.calculateWidth(responsive)
+        }
+
+        if (responsive)
+            rawWidth = recorder.limitWidth(rawWidth)
+
+        return rawWidth
+    }
+
+    this.getRawHeight = function(responsive) {
+        var rawHeight = this.getVideoHeight()
+
+        if (recorder.hasDefinedDimension())
+            rawHeight = recorder.calculateHeight(responsive)
+
+        if (responsive)
+            rawHeight = recorder.limitHeight(rawHeight)
+
+        return rawHeight
     }
 
     this.getRawVisuals = function() {
