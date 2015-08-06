@@ -53,8 +53,28 @@ var Notifier = function(visuals, options) {
         debug('Notifier: initEvents()')
 
         self
+            .on(Events.FORM_READY, function() {
+                if (!visuals.isConnected())
+                    self.notify(
+                        'Building stream ...',
+                        'Please wait until a connection to the Videomail server is built.', {
+                            blocking: true
+                        }
+                    )
+            })
+            .on(Events.CONNECTED, function() {
+                self.notify(
+                    'Accessing webcam ...',
+                    'Please grant browser access to your webcam.', {
+                        blocking: true
+                    }
+                )
+            })
             .on(Events.USER_MEDIA_READY, function() {
                 self.hide()
+            })
+            .on(Events.CAN_PLAY, function() {
+                correctDimensions()
             })
             .on(Events.PREVIEW, function() {
                 self.hide()
@@ -67,9 +87,13 @@ var Notifier = function(visuals, options) {
             })
     }
 
+    function correctDimensions() {
+        notifyElement.style.width  = visuals.getRecorderWidth(true) + 'px'
+        notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
+    }
+
     function show() {
-        if (notifyElement)
-            notifyElement.classList.remove('hide')
+        notifyElement && notifyElement.classList.remove('hide')
     }
 
     function runEntertainment() {
@@ -94,10 +118,10 @@ var Notifier = function(visuals, options) {
     }
 
     function setMessage(message, messageOptions) {
-        var blocking = messageOptions.blocking ? messageOptions.blocking : false
+        var problem = messageOptions.problem ? messageOptions.problem : false
 
         if (messageElement)
-            messageElement.innerHTML = (blocking ? '&#x2639; ' : '') + message
+            messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message
         else
             options.logger.warn(
                 'Unable to show following because messageElement is empty:',
@@ -105,7 +129,7 @@ var Notifier = function(visuals, options) {
             )
     }
 
-    this.block = function(err) {
+    this.error = function(err) {
         var message     = err.message ? err.message.toString() : err.toString(),
             explanation = err.explanation ? err.explanation.toString() : null
 
@@ -113,7 +137,8 @@ var Notifier = function(visuals, options) {
             options.debug('Weird empty message generated for error', err)
 
         self.notify(message, explanation, {
-            blocking: true
+            blocking: true,
+            problem:  true
         })
     }
 
@@ -146,12 +171,6 @@ var Notifier = function(visuals, options) {
         } else
             this.hide()
 
-        if (!notifyElement.width && options.video.width)
-            notifyElement.width = options.video.width
-
-        if (!notifyElement.height && options.video.height)
-            notifyElement.height = options.video.height
-
         !built && initEvents()
 
         built = true
@@ -181,9 +200,12 @@ var Notifier = function(visuals, options) {
 
     this.notify = function(message, explanation, notifyOptions) {
 
+        if (!notifyOptions)
+            notifyOptions = {}
+
         var processing = notifyOptions.processing ? notifyOptions.processing : false,
             entertain  = notifyOptions.entertain  ? notifyOptions.entertain  : false,
-            blocking   = notifyOptions.blocking   ? notifyOptions.blocking  : false
+            blocking   = notifyOptions.blocking   ? notifyOptions.blocking   : false
 
         if (!messageElement && notifyElement) {
             messageElement = h('h2')

@@ -67,6 +67,13 @@ VideomailError.create = function(err, explanation, options) {
             explanation = 'Your browser cannot find a webcam attached to your machine.'
             break
 
+        case 'PermissionDismissedError':
+            message     = 'Unknown permission!'
+            explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
+                          'Please grant access next time the dialogue appears.'
+
+            break
+
         case VideomailError.PERMISSION_DENIED:
         case 'PermissionDeniedError':
             message = 'Permission denied!'
@@ -126,6 +133,10 @@ VideomailError.create = function(err, explanation, options) {
                         explanation += ';<br/>' + details
                 }
             }
+
+            // for weird, undefined cases
+            if (!message && !explanation)
+                message = errType
 
             break
     }

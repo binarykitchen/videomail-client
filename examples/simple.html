@@ -2,16 +2,20 @@
 <html>
     <head>
         <title>videomail-client examples</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
     </head>
     <body>
-        <h1>Dead simple with default options</h1>
+        <h1>Dead simple with most defaults and small</h1>
         <div id="videomail"></div>
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client'),
                 videomailClient = new VideomailClient({
                     verbose:       true,
-                    disableSubmit: true
+                    disableSubmit: true,
+                    video: {
+                        width: 280
+                    }
                 })
 
             videomailClient.show()

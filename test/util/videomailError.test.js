@@ -71,8 +71,8 @@ test('Videomail Error:', function(t) {
 
             var err = VideomailError.create(new Error())
 
-            tt.equal(err.toString(),    'Videomail Error')
-            tt.equal(err.message,       '')
+            tt.equal(err.toString(),    'Videomail Error: Error')
+            tt.equal(err.message,       'Error')
             tt.equal(err.explanation,   undefined)
         })
 
@@ -81,8 +81,8 @@ test('Videomail Error:', function(t) {
 
             var err = VideomailError.create(new Error(undefined))
 
-            tt.equal(err.toString(),    'Videomail Error')
-            tt.equal(err.message,       '')
+            tt.equal(err.toString(),    'Videomail Error: Error')
+            tt.equal(err.message,       'Error')
             tt.equal(err.explanation,   undefined)
         })
 
@@ -91,8 +91,8 @@ test('Videomail Error:', function(t) {
 
             var err = VideomailError.create(123)
 
-            tt.equal(err.toString(),    'Videomail Error')
-            tt.equal(err.message,       '')
+            tt.equal(err.toString(),    'Videomail Error: 123')
+            tt.equal(err.message,       123)
             tt.equal(err.explanation,   undefined)
         })
 
@@ -145,8 +145,8 @@ test('Videomail Error:', function(t) {
                 name: 1
             })
 
-            tt.equal(err.toString(),    'Videomail Error')
-            tt.equal(err.message,       '')
+            tt.equal(err.toString(),    'Videomail Error: 1')
+            tt.equal(err.message,       1)
             tt.equal(err.explanation,   undefined)
         })
 

@@ -68,6 +68,9 @@ var VideomailClient = function(options) {
 
         container.hide()
 
+        localOptions.width  = videomail.width
+        localOptions.height = videomail.height
+
         replay = new Replay(parentElement, localOptions)
 
         replay.build()

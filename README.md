@@ -226,6 +226,9 @@ https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/dist/vide
 For example for version 1.3.19, use this in your production site:
 https://cdn.rawgit.com/binarykitchen/videomail-client/1.3.19/dist/videomail-client.js
 
+If for whatever reason that GitHub CDN doesn't meet your standard, here's another CDN to try:
+https://cdnjs.com/libraries/videomail-client
+
 <a name="changes"></a>
 ## Breaking changes (Changelog)
 

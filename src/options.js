@@ -51,8 +51,8 @@ module.exports = {
         fps:            15,                         // depends on your connection
         limitSeconds:   30,                         // recording automatically stops after that limit
         countdown:      3,                          // set it to 0 or false to disable it
-        width:          320,
-        height:         240
+        width:          'auto',                     // or use an integer for exact pixels
+        height:         'auto'                      // or use an integer for exact pixels
     },
     image: {
         quality:    .35,

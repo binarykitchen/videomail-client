@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>videomail-client examples</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
 
         <style type="text/css">
             input[type="text"],
@@ -28,7 +29,7 @@
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({verbose: true}),
+                videomailClient = new VideomailClient({verbose: true, video: {width: 320}}),
                 startOverButton = document.getElementById('startOver')
 
             var onSubmitted = function(videomail) {
