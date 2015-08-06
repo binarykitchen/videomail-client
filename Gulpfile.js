@@ -138,7 +138,7 @@ gulp.task('bumpVersion', function() {
         bumpOptions.version = options.version
 
     else if (options.importance)
-        bumpOptions.importance = options.importance
+        bumpOptions.type = options.importance
 
     return gulp.src(['./package.json'])
         .pipe(plugins.bump(bumpOptions))

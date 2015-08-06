@@ -20,8 +20,8 @@
   "scripts": {
     "test": "tape test/**/*.test.js",
     "patch": "./src/bash_scripts/bump.sh --importance=patch",
-    "feature": "./src/bash_scripts/bump.sh --importance=feature",
-    "release": "./src/bash_scripts/bump.sh --importance=release"
+    "minor": "./src/bash_scripts/bump.sh --importance=minor",
+    "major": "./src/bash_scripts/bump.sh --importance=major"
   },
   "engines": {
     "node": ">=0.11.1",
