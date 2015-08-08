@@ -837,11 +837,11 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.hasDefinedWidth = function() {
-        return options.video.width != 'auto'
+        return options.video.width && options.video.width != 'auto'
     }
 
     this.hasDefinedHeight = function() {
-        return options.video.height != 'auto'
+        return options.video.height && options.video.height != 'auto'
     }
 
     this.hasDefinedDimension = function() {
