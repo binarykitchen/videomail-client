@@ -21,6 +21,7 @@ var Container = function(options) {
         buttons     = new Buttons(this, options),
         resource    = new Resource(options),
         htmlElement = document.querySelector('html'),
+        debug       = options.debug,
         hasError    = false,
         submitted   = false,
 
@@ -277,8 +278,10 @@ var Container = function(options) {
             if (!hasError) {
                 if (self.isReplayShown())
                     self.emit(Events.PREVIEW)
-                else
+                else {
                     self.emit(Events.FORM_READY)
+                    debug('Building stream connection to server ...')
+                }
             }
         }
     }
