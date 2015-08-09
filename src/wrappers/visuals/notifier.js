@@ -53,23 +53,6 @@ var Notifier = function(visuals, options) {
         debug('Notifier: initEvents()')
 
         self
-            .on(Events.FORM_READY, function() {
-                if (!visuals.isConnected())
-                    self.notify(
-                        'Building stream ...',
-                        'Please wait until a connection to the Videomail server is built.', {
-                            blocking: true
-                        }
-                    )
-            })
-            .on(Events.CONNECTED, function() {
-                self.notify(
-                    'Accessing webcam ...',
-                    'Please grant browser access to your webcam.', {
-                        blocking: true
-                    }
-                )
-            })
             .on(Events.USER_MEDIA_READY, function() {
                 self.hide()
             })
