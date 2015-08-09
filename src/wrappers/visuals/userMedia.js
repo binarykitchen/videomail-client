@@ -88,11 +88,13 @@ module.exports = function(recorder, options) {
             }
         }
 
-        function onCanPlay() {
-            self.emit(Events.CAN_PLAY)
+        function onLoadedMetaData() {
+            options.debug('UserMedia: onLoadedMetaData()')
+
+            self.emit(Events.LOADED_META_DATA)
 
             rawVisualUserMedia.removeEventListener &&
-            rawVisualUserMedia.removeEventListener('canplay', onCanPlay)
+            rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
         }
 
         try {
@@ -121,8 +123,39 @@ module.exports = function(recorder, options) {
             if (audioRecorder && audioCallback)
                 audioRecorder.attach(localMediaStream, audioCallback)
 
-            rawVisualUserMedia.addEventListener('play',     onPlay)
-            rawVisualUserMedia.addEventListener('canplay',  onCanPlay)
+            // useful list of all available user media related events
+            // var EVENTS = [
+            //     'audioprocess',
+            //     'canplay',
+            //     'canplaythrough',
+            //     'durationchange',
+            //     'emptied',
+            //     'ended',
+            //     'loadeddata',
+            //     'loadedmetadata',
+            //     'MozAudioAvailable',
+            //     'pause',
+            //     'play',
+            //     'playing',
+            //     'ratechange',
+            //     'seeked',
+            //     'seeking',
+            //     'stalled',
+            //     'suspend',
+            //     'timeupdate',
+            //     'volumechange',
+            //     'waiting',
+            //     'complete'
+            // ]
+
+            // EVENTS.forEach(function(eventName) {
+            //     rawVisualUserMedia.addEventListener(eventName, function() {
+            //         console.log('userMedia event:', eventName)
+            //     }, false)
+            // });
+
+            rawVisualUserMedia.addEventListener('play',            onPlay)
+            rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
             rawVisualUserMedia.play()
         } catch (exc) {
             self.emit(Events.ERROR, exc)
@@ -143,7 +176,7 @@ module.exports = function(recorder, options) {
                 setVisualStream(null)
             }
 
-            paused = record  = false
+            paused = record = false
 
             audioRecorder && audioRecorder.stop()
 
