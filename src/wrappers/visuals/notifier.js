@@ -73,7 +73,7 @@ var Notifier = function(visuals, options) {
             .on(Events.USER_MEDIA_READY, function() {
                 self.hide()
             })
-            .on(Events.CAN_PLAY, function() {
+            .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
             })
             .on(Events.PREVIEW, function() {

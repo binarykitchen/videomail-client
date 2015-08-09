@@ -118,7 +118,7 @@ var Container = function(options) {
                 processError(err)
                 unloadButKeepEventListeners(err)
             })
-            .on(Events.CAN_PLAY, function() {
+            .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
             })
     }

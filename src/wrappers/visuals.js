@@ -62,7 +62,7 @@ var Visuals = function(container, options) {
             .on(Events.PREVIEW_SHOWN, function() {
                 container.validate(true)
             })
-            .on(Events.CAN_PLAY, function() {
+            .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
             })
     }

@@ -153,13 +153,13 @@ var Recorder = function(visuals, replay, options) {
         recorderElement = h('object.' + options.selectors.userMediaClass, {
             classid:   'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
             type:      'application/x-shockwave-flash',
-            data:      'jscam_canvas_only.swf',
+            data:      'flash/jscam_canvas_only.swf',
             width:     recorderElement.width,
             height:    recorderElement.height,
             classList: recorderElement.classList
         }, h('param', {
             name:  'movie',
-            value: 'jscam_canvas_only.swf'
+            value: 'flash/jscam_canvas_only.swf'
         }), h('param', {
             name:  'FlashVars',
             value: "mode=callback&amp;quality=" + options.image.quality
@@ -700,7 +700,7 @@ var Recorder = function(visuals, replay, options) {
             .on(Events.HIDE, function() {
                 self.hide()
             })
-            .on(Events.CAN_PLAY, function() {
+            .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
             })
     }
