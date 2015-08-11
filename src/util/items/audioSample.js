@@ -20,17 +20,14 @@ module.exports = function(float32Array) {
     */
     this.toBuffer = function() {
 
-        var l       = float32Array.length,
-            arr     = new Int16Array(l),
-            amplify = 1 // see http://ffmpeg.gusari.org/viewtopic.php?f=26&t=2208&p=6404#p6404
+        var l   = float32Array.length,
+            arr = new Int16Array(l),
+            i
 
         // this uses lots of CPU and should be optimized
-        for (var i = 0; i < l; i++) {
-            arr[i] = Math.max(-1, Math.min(1, amplify * float32Array[i])) * 0x7FFF
+        for (i = 0; i < l; i++) {
+            arr[i] = Math.min(1, float32Array[i]) * 0x7FFF
         }
-
-        // TODO: audio samples seem to be a bit too fast compared to the video
-        // Try signing and talking at the same time. You will see that sound preceeds audio
 
         // TODO: Also study PCM specs if these really have to be converted to 16 bit signed integers???
 

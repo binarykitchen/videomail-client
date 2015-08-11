@@ -1,6 +1,9 @@
-var AudioSample = require('./items/audioSample')
+var isPOT = require('is-power-of-two'),
 
-module.exports = function(userMedia) {
+    AudioSample     = require('./items/audioSample'),
+    VideomailError  = require('./videomailError')
+
+module.exports = function(userMedia, options) {
 
     var scriptProcessor
 
@@ -24,31 +27,29 @@ module.exports = function(userMedia) {
         cb(new AudioSample(float32Array))
     }
 
-    this.attach = function(localMediaStream, cb) {
+    this.init = function(localMediaStream) {
 
         // creates an audio node from the microphone incoming stream
         var audioInput = getAudioContext().createMediaStreamSource(localMediaStream),
-            volume     = getAudioContext().createGain()
-
-        // set recording volume to max (0 .. 1)
-        volume.gain.value = .9
-
-        /*
-        From the spec: This value controls how frequently the audioprocess event is
-        dispatched and how many sample-frames need to be processed each call.
-        Lower values for buffer size will result in a lower (better) latency.
-        Higher values will be necessary to avoid audio breakup and glitches
-        */
-        var bufferSize = 2048, // remember it needs to be a power of two
+            volume     = getAudioContext().createGain(),
             channels   = 1
+
+        if (!isPOT(options.audio.bufferSize))
+            throw VideomailError.create('Audio buffer size must be a power of two.', options)
+
+        else if (!options.audio.volume || options.audio.volume > 1)
+            throw VideomailError.create('Audio volume must be between zero and one.', options)
+
+        volume.gain.value = options.audio.volume
 
         // Create a ScriptProcessorNode with the given bufferSize and
         // a single input and output channel
-        scriptProcessor = getAudioContext().createScriptProcessor(bufferSize, channels, channels)
-
-        scriptProcessor.onaudioprocess = function(e) {
-            onAudioProcess(e, cb)
-        }
+        scriptProcessor =
+            getAudioContext().createScriptProcessor(
+                options.audio.bufferSize,
+                channels,
+                channels
+            )
 
         // connect stream to our scriptProcessor
         audioInput.connect(scriptProcessor)
@@ -61,7 +62,17 @@ module.exports = function(userMedia) {
         volume.connect(scriptProcessor)
     }
 
+    this.record = function(cb) {
+        options.debug('AudioRecorder: record()')
+
+        scriptProcessor.onaudioprocess = function(e) {
+            onAudioProcess(e, cb)
+        }
+    }
+
     this.stop = function() {
+        options.debug('AudioRecorder: stop()')
+
         if (scriptProcessor)
             scriptProcessor.onaudioprocess = undefined
     }

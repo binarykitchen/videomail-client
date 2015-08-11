@@ -18,7 +18,7 @@ module.exports = function(recorder, options) {
         audioRecorder
 
     if (options.audio.enabled)
-        audioRecorder = new AudioRecorder(this)
+        audioRecorder = new AudioRecorder(this, options)
 
     function attachMediaStream(stream) {
         if (typeof rawVisualUserMedia.srcObject !== 'undefined')
@@ -73,6 +73,14 @@ module.exports = function(recorder, options) {
                 localMediaStream.removeEventListener &&
                 localMediaStream.removeEventListener('ended', onPlay)
 
+                if (audioRecorder && audioCallback) {
+                    audioRecorder.init(localMediaStream)
+
+                    self.on(Events.SENDING_FIRST_FRAME, function() {
+                        audioRecorder.record(audioCallback)
+                    })
+                }
+
                 if (hasEnded() || hasInvalidDimensions())
                     endedEarlyCallback(
                         VideomailError.create(
@@ -120,9 +128,6 @@ module.exports = function(recorder, options) {
 
             setVisualStream(localMediaStream)
 
-            if (audioRecorder && audioCallback)
-                audioRecorder.attach(localMediaStream, audioCallback)
-
             // useful list of all available user media related events
             // var EVENTS = [
             //     'audioprocess',
@@ -152,7 +157,7 @@ module.exports = function(recorder, options) {
             //     rawVisualUserMedia.addEventListener(eventName, function() {
             //         console.log('userMedia event:', eventName)
             //     }, false)
-            // });
+            // })
 
             rawVisualUserMedia.addEventListener('play',            onPlay)
             rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)

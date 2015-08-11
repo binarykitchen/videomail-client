@@ -60,7 +60,16 @@ var Recorder = function(visuals, replay, options) {
 
     function onAudioSample(audioSample) {
         samplesCount++
-        writeStream(audioSample.toBuffer())
+
+        var audioBuffer = audioSample.toBuffer()
+
+        // if (options.verbose) {
+        //     debug(
+        //         'Sample #' + samplesCount + ' (' + audioBuffer.length + ' bytes):'
+        //     )
+        // }
+
+        writeStream(audioBuffer)
     }
 
     function onUserMediaReady() {
@@ -596,10 +605,6 @@ var Recorder = function(visuals, replay, options) {
             return false
         }
 
-        debug('Recorder: record()')
-
-        self.emit(Events.RECORDING, framesCount)
-
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')
 
@@ -632,10 +637,17 @@ var Recorder = function(visuals, replay, options) {
                         // see: http://codetheory.in/controlling-the-frame-rate-with-requestanimationframe/
                         lastAnimationTimestamp = now - (interval % intervalThreshold)
 
-                        intervalSum += interval
+                        if (framesCount === 0 && stream)
+                            self.emit(Events.SENDING_FIRST_FRAME)
 
                         // ctx might become null when unloading
-                        ctx && ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
+                        ctx && ctx.drawImage(
+                            userMedia.getRawVisuals(),
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        )
 
                         buffer = frame.toBuffer()
 
@@ -645,10 +657,10 @@ var Recorder = function(visuals, replay, options) {
 
                             writeStream(buffer)
 
-                            bytesSum += buffer.length
-
                             if (framesCount === 1)
                                 self.emit(Events.FIRST_FRAME_SENT)
+
+                            bytesSum += buffer.length
                         }
 
                         // if (options.verbose) {
@@ -657,6 +669,8 @@ var Recorder = function(visuals, replay, options) {
                         //         interval + '/' + intervalThreshold + '/' + wantedInterval
                         //     )
                         // }
+
+                        intervalSum += interval
                     }
                 }
             } catch (exc) {
@@ -664,9 +678,12 @@ var Recorder = function(visuals, replay, options) {
             }
         }
 
-        userMedia.record()
+        debug('Recorder: record()')
 
-        rafId = window.requestAnimationFrame(draw)
+        userMedia.record()
+        self.emit(Events.RECORDING, framesCount)
+
+        draw()
     }
 
     function buildElement() {
