@@ -28,6 +28,9 @@ var Recorder = function(visuals, replay, options) {
         samplesCount = 0,
         framesCount  = 0,
 
+        confirmedFrameNumber = 0,
+        confirmedSampleNumber = 0,
+
         recorderElement,
         userMedia,
 
@@ -37,7 +40,6 @@ var Recorder = function(visuals, replay, options) {
 
         intervalSum,
         bytesSum,
-        framesCount,
 
         frameProgress,
         sampleProgress,
@@ -258,6 +260,14 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function preview(args) {
+        confirmedFrameNumber =
+        confirmedSampleNumber =
+        samplesCount =
+        framesCount = 0
+
+        sampleProgress =
+        frameProgress = null
+
         key = args.key
 
         if (args.mp4)
@@ -280,18 +290,45 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
+    function calculateFrameProgress() {
+        return (confirmedFrameNumber / (framesCount || 1) * 100).toFixed(2) + '%'
+    }
+
+    function calculateSampleProgress() {
+        return (confirmedSampleNumber / (samplesCount || 1) * 100).toFixed(2) + '%'
+    }
+
     function updateFrameProgress(args) {
-        frameProgress = ((args.frame / framesCount) * 100).toFixed(2) + '%'
+        confirmedFrameNumber = args.frame ? args.frame : confirmedFrameNumber
+
+        frameProgress = calculateFrameProgress()
+
         updateOverallProgress()
     }
 
     function updateSampleProgress(args) {
-        sampleProgress = ((args.sample / samplesCount) * 100).toFixed(2) + '%'
+        confirmedSampleNumber = args.sample ? args.sample : confirmedSampleNumber
+
+        sampleProgress = calculateSampleProgress()
+
         updateOverallProgress()
     }
 
     function updateOverallProgress() {
-        self.emit(Events.PROGRESS, frameProgress, sampleProgress)
+        // when progresses aren't initialized,
+        // then do a first calculation to avoid `infinite` or `null` displays
+
+        if (!frameProgress)
+            frameProgress = calculateFrameProgress()
+
+        if (!sampleProgress)
+            sampleProgress = calculateSampleProgress()
+
+        self.emit(
+            Events.PROGRESS,
+            frameProgress,
+            sampleProgress
+        )
     }
 
     function executeCommand(data) {
@@ -550,14 +587,10 @@ var Recorder = function(visuals, replay, options) {
             // important to free memory
             userMedia && userMedia.stop()
 
-            samplesCount = framesCount = 0
-
             userMediaLoaded =
             key =
             canvas =
-            ctx =
-            sampleProgress =
-            frameProgress = null
+            ctx = null
         }
     }
 
