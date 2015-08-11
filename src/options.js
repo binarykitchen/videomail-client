@@ -45,7 +45,9 @@ module.exports = {
         submitButtonId:    null                     // automatically detects submit button in the form
     },
     audio: {
-        enabled: false                              // experimental, not working properly yet
+        enabled:    false,                          // set to true for experimential audio recording
+        volume:     .85,                            // must be between 0 .. 1
+        bufferSize: 2048                            // decides how often the audio is being sampled, must be a power of two
     },
     video: {
         fps:            15,                         // depends on your connection
@@ -67,7 +69,7 @@ module.exports = {
         entertain:         false,                   // when true, user is entertained while waiting, see examples
         entertainClass:    'bg',
         entertainLimit:    6,
-        entertainInterval: 15000
+        entertainInterval: 10000
     },
     timeouts: {
         userMedia:  5e3,                            // increase if you want user give more time to enable webcam
