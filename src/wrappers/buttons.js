@@ -16,7 +16,7 @@ var Buttons = function(container, options) {
         pauseButton,
         resumeButton,
         stopButton,
-        backButton,
+        recordAgainButton,
         submitButton,
         built
 
@@ -26,6 +26,10 @@ var Buttons = function(container, options) {
 
     function show(element) {
         element.classList.remove('hide')
+    }
+
+    function isShown(element) {
+        return !element.classList.contains('hide')
     }
 
     function adjustButton(buttonElement, show, type) {
@@ -84,12 +88,14 @@ var Buttons = function(container, options) {
                     options.selectors.submitButtonClass,
                     'Submit',
                     null,
-                    true,
+                    false,
                     options.selectors.submitButtonId,
                     'submit'
                 )
-            else
+            else {
+                hide(submitButton)
                 submitButton.disabled = true
+            }
 
             // no need to listen to the submit event when it's already listened
             // within the form element class
@@ -99,8 +105,8 @@ var Buttons = function(container, options) {
 
         recordButton = makeButton(
             options.selectors.recordButtonClass,
-            'Record',
-            container.record,
+            'Record video',
+            record,
             false
         )
 
@@ -129,45 +135,38 @@ var Buttons = function(container, options) {
             false
         )
 
-        backButton = makeButton(
-            options.selectors.backButtonClass,
-            'Back',
-            back,
+        recordAgainButton = makeButton(
+            options.selectors.recordAgainButtonClass,
+            'Record again',
+            recordAgain,
             false
         )
     }
 
     function onFormReady() {
-        stopButton.disabled = true
-
-        if (options.enablePause)
-            show(stopButton)
-
-        if (options.enablePause) {
-            if (pauseButton.disabled)
-                show(recordButton)
-            else {
-                stopButton.disabled = false
-                show(resumeButton)
-            }
-        } else
+        // no need to show record button when doing a record again
+        if (!isShown(recordAgainButton))
             show(recordButton)
+
+        stopButton.disabled = true
+        hide(stopButton)
     }
 
-    function onReady() {
+    function onUserMediaReady() {
         onFormReady()
 
-        hide(backButton)
-
-        recordButton.disabled = false
+        if (isShown(recordButton))
+            recordButton.disabled = false
 
         if (submitButton)
             submitButton.disabled = true
     }
 
     function onResetting() {
-        if (submitButton)
+        if (submitButton) {
             submitButton.disabled = true
+            hide(submitButton)
+        }
 
         self.reset()
     }
@@ -176,8 +175,10 @@ var Buttons = function(container, options) {
         hide(recordButton)
         hide(stopButton)
 
-        show(backButton)
-        backButton.disabled = false
+        show(recordAgainButton)
+        recordAgainButton.disabled = false
+
+        submitButton && show(submitButton)
     }
 
     this.enableSubmit = function() {
@@ -195,6 +196,7 @@ var Buttons = function(container, options) {
 
     function onFirstFrameSent() {
         hide(recordButton)
+        hide(recordAgainButton)
 
         if (pauseButton) {
             show(pauseButton)
@@ -211,7 +213,7 @@ var Buttons = function(container, options) {
         if (framesCount > 1)
             onFirstFrameSent()
         else
-            recordButton.disabled = true
+            recordAgainButton.disabled = recordButton.disabled = true
     }
 
     function onResuming() {
@@ -237,7 +239,7 @@ var Buttons = function(container, options) {
 
     function onSubmitting() {
         submitButton.disabled = true
-        backButton.disabled   = true
+        recordAgainButton.disabled = true
     }
 
     function onSubmitted() {
@@ -246,7 +248,7 @@ var Buttons = function(container, options) {
         if (options.enablePause)
             show(stopButton)
 
-        hide(backButton)
+        hide(recordAgainButton)
 
         recordButton.disabled = true
         show(recordButton)
@@ -267,24 +269,29 @@ var Buttons = function(container, options) {
     function onHidden() {
         hide(recordButton)
         hide(stopButton)
-        hide(backButton)
+        hide(recordAgainButton)
         hide(resumeButton)
     }
 
-    function back() {
-        backButton.disabled = true
+    function recordAgain() {
+        recordAgainButton.disabled = true
 
         container.beginWaiting()
-        container.back()
+        container.recordAgain()
     }
 
     function submit() {
         container.submit()
     }
 
+    function record() {
+        recordButton.disabled = true
+        container.record()
+    }
+
     function initEvents() {
         self.on(Events.USER_MEDIA_READY, function() {
-            onReady()
+            onUserMediaReady()
         }).on(Events.PREVIEW, function() {
             onPreview()
         }).on(Events.PAUSED, function() {
@@ -313,6 +320,11 @@ var Buttons = function(container, options) {
             onHidden()
         }).on(Events.FORM_READY, function() {
             onFormReady()
+        }).on(Events.ERROR, function(err) {
+            // since https://github.com/binarykitchen/videomail-client/issues/60
+            // we hide areas to make it easier for the user
+            if (err.isBrowserProblem && err.isBrowserProblem())
+                self.hide()
         })
     }
 
@@ -325,11 +337,11 @@ var Buttons = function(container, options) {
         if (resumeButton)
             resumeButton.disabled = true
 
-        recordButton.disabled = stopButton.disabled = backButton.disabled = true
+        recordButton.disabled = stopButton.disabled = recordAgainButton.disabled = true
     }
 
-    this.isBackButtonEnabled = function() {
-        return !backButton.disabled
+    this.isRecordAgainButtonEnabled = function() {
+        return !recordAgainButton.disabled
     }
 
     this.isRecordButtonEnabled = function() {

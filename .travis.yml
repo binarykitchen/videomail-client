@@ -1,6 +1,8 @@
 language: node_js
 node_js:
   - "iojs"
+before_install:
+  npm install -g npm@'>=2.13.5'
 deploy:
   provider: npm
   email: michael.heuberger@binarykitchen.com

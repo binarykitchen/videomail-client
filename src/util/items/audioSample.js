@@ -1,4 +1,5 @@
-var toBuffer = require('typedarray-to-buffer')
+var toBuffer       = require('typedarray-to-buffer'),
+    isFloat32Array = require( 'validate.io-float32array' )
 
 // todo: turn this into an npm module, but only when it's working
 
@@ -10,7 +11,7 @@ module.exports = function(float32Array) {
     // inspired by:
     // http://blog.groupbuddies.com/posts/39-tutorial-html-audio-capture-streaming-to-node-js-no-browser-extensions
 
-    if (float32Array.constructor !== Float32Array)
+    if (!isFloat32Array(float32Array))
         throw new Error('The parameter is not a Float32Array')
 
     /*

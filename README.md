@@ -161,8 +161,8 @@ then this will be used instead of adding a new dom element.
 
 Furthermore the `replay()` method also detects whether the parent element has placeholders to fill with form data. To understand this better, check out how the subject in the `/examples/direct_submit.html` example is being displayed upon replay.
 
-<a name="startOver"></a>
-### videomailClient.startOver()
+<a name="reset"></a>
+### videomailClient.reset()
 
 Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
 
@@ -231,6 +231,12 @@ https://cdnjs.com/libraries/videomail-client
 
 <a name="changes"></a>
 ## Breaking changes (Changelog)
+
+### v1.4.0 (2015-07-03)
+
+Minor change:
+- **VideomailClient:** Renamed `options.buttons.backButtonClass` to `options.buttons.recordAgainButtonClass`
+- **VideomailClient:** Merged `back` and `record` button actions to `recordAgain`
 
 ### v1.3.0 (2015-07-03)
 

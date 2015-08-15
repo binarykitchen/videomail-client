@@ -25,6 +25,8 @@ module.exports = function(options) {
         chromeBased   = isChrome || isChromium,
         okBrowser     = chromeBased || firefox || isAndroid || isOpera,
 
+        self = this,
+
         videoType
 
     function getRecommendation() {
@@ -44,13 +46,13 @@ module.exports = function(options) {
 
         else if (isIE)
             warning = 'Forget Internet Explorer!<br/>Better pick' +
-                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>' +
-                      ' or <a href="' + chromeDownload + '" target="_blank">Chrome</a>.'
+                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>' +
+                      ' or <a href="' + firefoxDownload + '" target="_blank">Firefox</a>.'
 
         else if (isSafari)
             warning = 'Safari has no webcam support yet.<br/>Better pick' +
-                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>' +
-                      ' or <a href="' + chromeDownload + '" target="_blank">Chrome</a>.'
+                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>' +
+                      ' or <a href="' + firefoxDownload + '" target="_blank">Firefox</a>.'
 
         return warning
     }
@@ -59,29 +61,37 @@ module.exports = function(options) {
         var warning
 
         if (isIOS)
-            warning = '<a href="http://caniuse.com/stream" target="_blank">' +
-                      'iOS devices are unable to access video streams.' +
-                      '</a> One day they will hopefully. Depends on Apple &hellip;'
+            warning = 'On iPads/iPhones this feature is missing. ' +
+                      'Hopefully Apple will add it one day. Here is ' +
+                      '<a href="http://caniuse.com/stream" target="_blank">' +
+                      'evidence</a> why.<br/>For now, we recommend you to use a desktop computer or ' +
+                      'an Android device.'
 
         else
             warning = getRecommendation()
 
-        if (!warning)
-            warning = '<a href="http://caniuse.com/stream" target="_blank">Switch</a> ' +
-                      'or ' + getBrowseHappyLink()
+        if (!warning) {
+            if (self.isChromeBased() || self.isFirefox())
+                warning = 'For that, your browser needs an <a href="' + browseHappyLink + '" target="_blank">upgrade</a>.'
+            else
+                warning = 'Hence we recommend you to use either ' +
+                          '<a href="' + chromeDownload + '" target="_blank">Chrome</a> ' +
+                          'or <a href="' + firefoxDownload + '" target="_blank">Firefox</a> instead. ' +
+                          '<a href="http://caniuse.com/stream" target="_blank">Here is evidence</a>.'
+        }
+
+        warning = 'To access external webcams, your browser must support the getUserMedia/Stream feature.<br/>' +
+                  warning
 
         return warning
-    }
-
-    function getBrowseHappyLink() {
-        return '<a href="' + browseHappyLink + '" target="_blank">Upgrade browser</a>'
     }
 
     function getPlaybackWarning() {
         var warning = getRecommendation()
 
         if (!warning)
-            warning = getBrowseHappyLink()
+            warning =   '<a href="' + browseHappyLink + '" target="_blank">Upgrading your old browser</a> ' +
+                        'might help.'
 
         return warning
     }
@@ -107,17 +117,17 @@ module.exports = function(options) {
 
         if (!okBrowser || !this.canRecord()) {
 
-            var message
+            var message = 'Sorry, your old browser has no '
 
             if (!okBrowser)
-                message = 'Browser has no webcam support'
+                message += 'webcam support'
 
             else
-                message = 'Browser has no getUserMedia support'
+                message += 'getUserMedia support'
 
             err = VideomailError.create({
                 message: message,
-            }, getUserMediaWarning(), options)
+            }, getUserMediaWarning(), options, true)
         }
 
         return err

@@ -53,15 +53,30 @@ module.exports = function(recorder, options) {
     }
 
     function hasInvalidDimensions() {
-        if (rawVisualUserMedia.videoWidth && rawVisualUserMedia.height) {
-            if (rawVisualUserMedia.videoWidth < 3 ||
-                rawVisualUserMedia.height < 3) {
-                return true
-            }
+        if ((rawVisualUserMedia.videoWidth && rawVisualUserMedia.videoWidth < 3) ||
+            (rawVisualUserMedia.height && rawVisualUserMedia.height < 3)) {
+            return true
         }
     }
 
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
+
+        var onPlayReached           = false,
+            onLoadedMetaDataReached = false
+
+        function fireCallbacks() {
+            if (onPlayReached && onLoadedMetaDataReached) {
+                videoCallback()
+
+                if (audioRecorder && audioCallback) {
+                    audioRecorder.init(localMediaStream)
+
+                    self.on(Events.SENDING_FIRST_FRAME, function() {
+                        audioRecorder.record(audioCallback)
+                    })
+                }
+            }
+        }
 
         function onPlay() {
             try {
@@ -73,14 +88,6 @@ module.exports = function(recorder, options) {
                 localMediaStream.removeEventListener &&
                 localMediaStream.removeEventListener('ended', onPlay)
 
-                if (audioRecorder && audioCallback) {
-                    audioRecorder.init(localMediaStream)
-
-                    self.on(Events.SENDING_FIRST_FRAME, function() {
-                        audioRecorder.record(audioCallback)
-                    })
-                }
-
                 if (hasEnded() || hasInvalidDimensions())
                     endedEarlyCallback(
                         VideomailError.create(
@@ -89,20 +96,27 @@ module.exports = function(recorder, options) {
                             options
                         )
                     )
-                else
-                    videoCallback()
+                else {
+                    onPlayReached = true
+                    fireCallbacks()
+                }
             } catch (exc) {
                 self.emit(Events.ERROR, exc)
             }
         }
 
         function onLoadedMetaData() {
-            options.debug('UserMedia: onLoadedMetaData()')
-
-            self.emit(Events.LOADED_META_DATA)
-
             rawVisualUserMedia.removeEventListener &&
             rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
+
+            if (!hasEnded() && !hasInvalidDimensions()) {
+                options.debug('UserMedia: onLoadedMetaData()')
+
+                self.emit(Events.LOADED_META_DATA)
+
+                onLoadedMetaDataReached = true
+                fireCallbacks()
+            }
         }
 
         try {

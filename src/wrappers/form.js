@@ -37,6 +37,14 @@ var Form = function(container, formElement, options) {
         }
     }
 
+    function hideAllInputs() {
+        var limit = formElement.elements.length
+
+        for (var i = 0; i < limit; i++) {
+            formElement.elements[i].classList.add('hide')
+        }
+    }
+
     this.disable = function(buttonsToo) {
         setDisabled(true, buttonsToo)
     }
@@ -89,6 +97,13 @@ var Form = function(container, formElement, options) {
                 keyInput.value = videomailKey
             // else
             // leave as it and use existing keyInput.value
+        })
+
+        this.on(Events.ERROR, function(err) {
+            // since https://github.com/binarykitchen/videomail-client/issues/60
+            // we hide areas to make it easier for the user
+            if (err.isBrowserProblem && err.isBrowserProblem())
+                hideAllInputs()
         })
 
         formElement.addEventListener('submit', function(e) {
