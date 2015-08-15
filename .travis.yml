@@ -3,10 +3,12 @@ node_js:
   - "iojs"
 before_install:
   npm install -g npm@'>=2.13.5'
-deploy:
-  provider: npm
-  email: michael.heuberger@binarykitchen.com
-  api_key:
-    secure: a6gY9fTQh+nIIB4oc5O4ToBRoRfLtyaQNKDmVHgumi5VerVwOxQx37N+wQnx9o8zuXZ/gkL+WnALJ1BPHfO6yE/pTLRSK1CliH90+DDT0sqfg3auBUPWYwLjgVkpNjf8Te/24zwKErI4zZ0U2WISPf0PIS80UgofpbDaAnHKJbw=
-  on:
-    repo: binarykitchen/videomail-client
+
+# moved npm publishing to bump.sh
+# deploy:
+#   provider: npm
+#   email: michael.heuberger@binarykitchen.com
+#   api_key:
+#     secure: a6gY9fTQh+nIIB4oc5O4ToBRoRfLtyaQNKDmVHgumi5VerVwOxQx37N+wQnx9o8zuXZ/gkL+WnALJ1BPHfO6yE/pTLRSK1CliH90+DDT0sqfg3auBUPWYwLjgVkpNjf8Te/24zwKErI4zZ0U2WISPf0PIS80UgofpbDaAnHKJbw=
+#   on:
+#     repo: binarykitchen/videomail-client
