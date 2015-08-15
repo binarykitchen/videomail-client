@@ -1,6 +1,6 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error'),
-    pretty = require('./pretty'),
+    pretty      = require('./pretty'),
 
     VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
@@ -16,7 +16,7 @@ VideomailError.STARTING_FAILED   = 'Starting video failed'
 
 // static function to convert an error into a videomail error
 
-VideomailError.create = function(err, explanation, options) {
+VideomailError.create = function(err, explanation, options, isBrowserProblem) {
 
     if (err && err.name === VIDEOMAIL_ERR_NAME)
         return err
@@ -118,10 +118,10 @@ VideomailError.create = function(err, explanation, options) {
             if (typeof err === 'string')
                 message = err
             else {
-                if (err && err.message)
+                if (err && err.message && err.message.toString)
                     message = err.message.toString()
 
-                if (err && err.explanation)
+                if (err && err.explanation && err.explanation.toString)
                     explanation = err.explanation.toString()
 
                 if (err && err.details) {
@@ -151,10 +151,17 @@ VideomailError.create = function(err, explanation, options) {
         message.stack = stack
     }
 
-    return new VideomailError(message, {
+    var videomailError = new VideomailError(message, {
         explanation: explanation,
         logLines:    logLines
     })
+
+    // add some public functions
+    videomailError.isBrowserProblem = function() {
+        return isBrowserProblem
+    }
+
+    return videomailError
 }
 
 module.exports = VideomailError

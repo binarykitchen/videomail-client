@@ -11,12 +11,12 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Browser has no webcam support')
-        tt.ok(err.explanation.indexOf('Upgrade browser') >= 0)
+        tt.equal(err.message, 'Sorry, your old browser has no webcam support')
+        tt.ok(err.explanation.indexOf('to use either') >= 0)
 
         err = browser.checkPlaybackCapabilities()
         tt.equal(err.message, 'No HTML5 support for video tag!')
-        tt.ok(err.explanation.indexOf('Upgrade browser') >= 0)
+        tt.ok(err.explanation.indexOf('Upgrading your old browser') >= 0)
 
         err = browser.checkBufferTypes()
 
@@ -44,7 +44,7 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Browser has no getUserMedia support')
+        tt.equal(err.message, 'Sorry, your old browser has no getUserMedia support')
         tt.ok(err.explanation.indexOf('upgrade Firefox') >= 0)
 
         err = browser.checkPlaybackCapabilities()
@@ -77,7 +77,7 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Browser has no getUserMedia support')
+        tt.equal(err.message, 'Sorry, your old browser has no getUserMedia support')
         tt.ok(err.explanation.indexOf('upgrade Chrome') >= 0)
 
         err = browser.checkPlaybackCapabilities()
@@ -110,7 +110,7 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Browser has no webcam support')
+        tt.equal(err.message, 'Sorry, your old browser has no webcam support')
         tt.ok(err.explanation.indexOf('Forget Internet Explorer!') >= 0)
 
         err = browser.checkPlaybackCapabilities()
@@ -143,7 +143,7 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Browser has no webcam support')
+        tt.equal(err.message, 'Sorry, your old browser has no webcam support')
         tt.ok(err.explanation.indexOf('Safari has no webcam support yet.') >= 0)
 
         err = browser.checkPlaybackCapabilities()

@@ -118,6 +118,9 @@ var Container = function(options) {
             .on(Events.ERROR, function(err) {
                 processError(err)
                 unloadButKeepEventListeners(err)
+
+                if (err.isBrowserProblem && err.isBrowserProblem())
+                    removeDimensions()
             })
             .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
@@ -128,6 +131,10 @@ var Container = function(options) {
     // it can be a form with more inputs elements
     function correctDimensions() {
         containerElement.style.width = visuals.getRecorderWidth(true) + 'px'
+    }
+
+    function removeDimensions() {
+        containerElement.style.width  = 'auto'
     }
 
     function unloadButKeepEventListeners(e) {
@@ -273,9 +280,12 @@ var Container = function(options) {
             containerElement.classList.remove('hide')
 
             visuals.show()
-            buttons.show()
 
             if (!hasError) {
+                // since https://github.com/binarykitchen/videomail-client/issues/60
+                // we hide areas to make it easier for the user
+                buttons.show()
+
                 if (self.isReplayShown())
                     self.emit(Events.PREVIEW)
                 else {
@@ -327,7 +337,7 @@ var Container = function(options) {
         if (force || !this.isNotifying()) {
             this.emit(Events.VALIDATING)
 
-            var visualsValid = visuals.validate() && buttons.isBackButtonEnabled(),
+            var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled(),
                 whyInvalid
 
             if (form) {
@@ -425,7 +435,7 @@ var Container = function(options) {
     this.record         = visuals.record.bind(visuals)
     this.resume         = visuals.resume.bind(visuals)
     this.stop           = visuals.stop.bind(visuals)
-    this.back           = visuals.back.bind(visuals)
+    this.recordAgain    = visuals.recordAgain.bind(visuals)
 }
 
 util.inherits(Container, EventEmitter)

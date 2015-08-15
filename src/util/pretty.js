@@ -5,7 +5,8 @@ function arrayToString(array) {
         var lines = []
 
         array.forEach(function(element) {
-            lines.push(element.toString())
+            if (element.toString)
+                lines.push(element.toString())
         })
 
         return SEPARATOR + lines.join(SEPARATOR)
@@ -19,7 +20,8 @@ function objectToString(object) {
         var lines = []
 
         propertyNames.forEach(function(name) {
-            lines.push(object[name].toString())
+            if (object[name].toString)
+                lines.push(object[name].toString())
         })
 
         return SEPARATOR + lines.join(SEPARATOR)

@@ -59,13 +59,10 @@ npm test
 git add -A
 git commit -am "Final commit of version $VERSION"
 
-echo "Publishing to npm ..."
-npm publish
-
 # Complete the previous release
 git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
 
-git push
+git push # this should trigger a post hook on travis, doing the tests and npm publish
 
 git checkout master
 git push

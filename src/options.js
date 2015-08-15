@@ -25,12 +25,12 @@ module.exports = {
         buttonClass:    null,                       // can also be used as a default class for all buttons
         buttonsClass:   'buttons',
 
-        recordButtonClass: 'record',
-        pauseButtonClass:  'pause',
-        resumeButtonClass: 'resume',
-        stopButtonClass:   'stop',
-        backButtonClass:   'back',
-        submitButtonClass: 'submit',
+        recordButtonClass:      'record',
+        pauseButtonClass:       'pause',
+        resumeButtonClass:      'resume',
+        stopButtonClass:        'stop',
+        recordAgainButtonClass: 'recordAgain',
+        submitButtonClass:      'submit',
 
         subjectInputName:  'subject',               // the form input name for subject
         fromInputName:     'from',                  // the form input name for the from email

@@ -187,8 +187,6 @@ var Recorder = function(visuals, replay, options) {
 
                 userMediaLoading = false
 
-                console.trace(recorderElement)
-
                 if (showUserMedia()) {
                     clearUserMediaTimeout()
 
@@ -393,6 +391,11 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function writeCommand(command, args, cb) {
+        if (!cb && args && args.constructor === Function) {
+            cb   = args
+            args = null
+        }
+
         if (!connected) {
             debug('Reconnecting for the command', command, '…')
 
@@ -549,7 +552,7 @@ var Recorder = function(visuals, replay, options) {
         show()
         this.reset()
 
-        writeCommand('back', null, cb)
+        writeCommand('back', cb)
     }
 
     this.unload = function(e) {
@@ -641,6 +644,12 @@ var Recorder = function(visuals, replay, options) {
         canvas = userMedia.createCanvas()
         ctx    = canvas.getContext('2d')
 
+        if (!canvas.width)
+            throw VideomailError.create('Canvas has an invalid width.')
+
+        if (!canvas.height)
+            throw VideomailError.create('Canvas has an invalid height.')
+
         avgFps   = null
         bytesSum = intervalSum = 0
         lastAnimationTimestamp = Date.now()
@@ -650,6 +659,7 @@ var Recorder = function(visuals, replay, options) {
 
             interval,
             now,
+            bufferLength,
             buffer
 
         function calcInterval(now) {
@@ -682,7 +692,11 @@ var Recorder = function(visuals, replay, options) {
                             canvas.height
                         )
 
-                        buffer = frame.toBuffer()
+                        buffer       = frame.toBuffer()
+                        bufferLength = buffer.length
+
+                        if (bufferLength < 1)
+                            throw VideomailError.create('Failed to extract webcam data.')
 
                         // stream might become null while unloading
                         if (stream) {
@@ -693,12 +707,12 @@ var Recorder = function(visuals, replay, options) {
                             if (framesCount === 1)
                                 self.emit(Events.FIRST_FRAME_SENT)
 
-                            bytesSum += buffer.length
+                            bytesSum += bufferLength
                         }
 
                         // if (options.verbose) {
                         //     debug(
-                        //         'Frame #' + framesCount + ' (' + buffer.length + ' bytes):',
+                        //         'Frame #' + framesCount + ' (' + bufferLength + ' bytes):',
                         //         interval + '/' + intervalThreshold + '/' + wantedInterval
                         //     )
                         // }

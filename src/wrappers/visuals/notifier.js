@@ -75,6 +75,11 @@ var Notifier = function(visuals, options) {
         notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
     }
 
+    function removeDimensions() {
+        notifyElement.style.width  = 'auto'
+        notifyElement.style.height = 'auto'
+    }
+
     function show() {
         notifyElement && notifyElement.classList.remove('hide')
     }
@@ -120,8 +125,9 @@ var Notifier = function(visuals, options) {
             options.debug('Weird empty message generated for error', err)
 
         self.notify(message, explanation, {
-            blocking: true,
-            problem:  true
+            blocking:         true,
+            problem:          true,
+            isBrowserProblem: err.isBrowserProblem && err.isBrowserProblem()
         })
     }
 
@@ -186,9 +192,13 @@ var Notifier = function(visuals, options) {
         if (!notifyOptions)
             notifyOptions = {}
 
-        var processing = notifyOptions.processing ? notifyOptions.processing : false,
-            entertain  = notifyOptions.entertain  ? notifyOptions.entertain  : false,
-            blocking   = notifyOptions.blocking   ? notifyOptions.blocking   : false
+        var processing       = notifyOptions.processing ? notifyOptions.processing : false,
+            entertain        = notifyOptions.entertain  ? notifyOptions.entertain  : false,
+            blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
+            isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
+
+        if (!entertain)
+            cancelEntertainment()
 
         if (!messageElement && notifyElement) {
             messageElement = h('h2')
@@ -198,6 +208,13 @@ var Notifier = function(visuals, options) {
             else
                 notifyElement.appendChild(messageElement)
         }
+
+        if (notifyElement)
+            if (isBrowserProblem) {
+                notifyElement.classList.add('browserProblem')
+                removeDimensions()
+            } else
+                notifyElement.classList.remove('browserProblem')
 
         if (blocking) {
             notifyElement && notifyElement.classList.add('blocking')
@@ -214,8 +231,6 @@ var Notifier = function(visuals, options) {
 
         if (entertain)
             runEntertainment()
-        else
-            cancelEntertainment()
 
         show()
 

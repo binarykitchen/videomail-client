@@ -65,11 +65,20 @@ var Visuals = function(container, options) {
             .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
             })
+            .on(Events.ERROR, function(err) {
+                if (err.isBrowserProblem && err.isBrowserProblem())
+                    removeDimensions()
+            })
     }
 
     function correctDimensions() {
         visualsElement.style.width  = self.getRecorderWidth(true) + 'px'
         visualsElement.style.height = self.getRecorderHeight(true) + 'px'
+    }
+
+    function removeDimensions() {
+        visualsElement.style.width  = 'auto'
+        visualsElement.style.height = 'auto'
     }
 
     function isRecordable() {
@@ -140,6 +149,14 @@ var Visuals = function(container, options) {
         replay.hide()
         notifier.hide()
         recorder.back(cb)
+    }
+
+    this.recordAgain = function() {
+        this.back(function() {
+            self.once(Events.USER_MEDIA_READY, function() {
+                self.record()
+            })
+        })
     }
 
     this.unload = function(e) {
