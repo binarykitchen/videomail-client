@@ -88,14 +88,12 @@ var Buttons = function(container, options) {
                     options.selectors.submitButtonClass,
                     'Submit',
                     null,
-                    false,
+                    true,
                     options.selectors.submitButtonId,
                     'submit'
                 )
-            else {
-                hide(submitButton)
+            else
                 submitButton.disabled = true
-            }
 
             // no need to listen to the submit event when it's already listened
             // within the form element class
@@ -163,10 +161,8 @@ var Buttons = function(container, options) {
     }
 
     function onResetting() {
-        if (submitButton) {
+        if (submitButton)
             submitButton.disabled = true
-            hide(submitButton)
-        }
 
         self.reset()
     }
@@ -177,8 +173,6 @@ var Buttons = function(container, options) {
 
         show(recordAgainButton)
         recordAgainButton.disabled = false
-
-        submitButton && show(submitButton)
     }
 
     this.enableSubmit = function() {
@@ -238,8 +232,7 @@ var Buttons = function(container, options) {
     }
 
     function onSubmitting() {
-        submitButton.disabled = true
-        recordAgainButton.disabled = true
+        submitButton.disabled = recordAgainButton.disabled = true
     }
 
     function onSubmitted() {
