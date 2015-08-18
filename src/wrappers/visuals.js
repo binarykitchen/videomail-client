@@ -269,6 +269,10 @@ var Visuals = function(container, options) {
         return recorder.isUnloaded()
     }
 
+    this.isConnected = function() {
+        return recorder.isConnected()
+    }
+
     this.getRecorderWidth = function(responsive) {
         return recorder.getRecorderWidth(responsive)
     }
@@ -277,12 +281,20 @@ var Visuals = function(container, options) {
         return recorder.getRecorderHeight(responsive)
     }
 
-    this.getOuterWidth = function() {
-        return container.getOuterWidth()
+    this.limitWidth  = function(width) {
+        return container.limitWidth(width)
     }
 
-    this.isConnected = function() {
-        return recorder.isConnected()
+    this.limitHeight  = function(height) {
+        return container.limitHeight(height)
+    }
+
+    this.calculateWidth  = function(options) {
+        return container.calculateWidth(options)
+    }
+
+    this.calculateHeight  = function(options) {
+        return container.calculateHeight(options)
     }
 
     this.isReplayShown = replay.isShown.bind(replay)

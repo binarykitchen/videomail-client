@@ -223,9 +223,9 @@ module.exports = function(recorder, options) {
 
     this.getRawWidth = function(responsive) {
         var rawWidth     = this.getVideoWidth(),
-            widthDefined = recorder.hasDefinedWidth()
+            widthDefined = options.hasDefinedWidth()
 
-        if (widthDefined || recorder.hasDefinedHeight()) {
+        if (widthDefined || options.hasDefinedHeight()) {
             if (!responsive && widthDefined)
                 rawWidth = options.video.width
             else
@@ -241,7 +241,7 @@ module.exports = function(recorder, options) {
     this.getRawHeight = function(responsive) {
         var rawHeight = this.getVideoHeight()
 
-        if (recorder.hasDefinedDimension())
+        if (options.hasDefinedDimension())
             rawHeight = recorder.calculateHeight(responsive)
 
         if (responsive)

@@ -1,6 +1,7 @@
 var insertCss      = require('insert-css'),
     util           = require('util'),
 
+    Dimension      = require('./dimension'),
     Visuals        = require('./visuals'),
     Buttons        = require('./buttons'),
     Form           = require('./form'),
@@ -20,6 +21,7 @@ var Container = function(options) {
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         resource    = new Resource(options),
+        dimension   = new Dimension(this, options),
         htmlElement = document.querySelector('html'),
         debug       = options.debug,
         hasError    = false,
@@ -210,6 +212,22 @@ var Container = function(options) {
                 // todo: or how to run all the scripts over again
             }
         }
+    }
+
+    this.addPlayerDimensions = function(videomail) {
+        videomail.playerHeight = dimension.calculateHeight({
+            responsive: true,
+            videoWidth: videomail.width,
+            ratio:      videomail.height / videomail.width
+        })
+
+        videomail.playerWidth = dimension.calculateWidth({
+            responsive:  true,
+            videoHeight: videomail.playerHeight,
+            ratio:       videomail.height / videomail.width
+        })
+
+        return videomail
     }
 
     this.areVisualsHidden = function() {
@@ -425,10 +443,14 @@ var Container = function(options) {
         return isDirty
     }
 
-    this.getOuterWidth = function() {
-        var rect = containerElement.getBoundingClientRect()
-        return rect.right - rect.left
+    this.getBoundingClientRect = function() {
+        return containerElement.getBoundingClientRect()
     }
+
+    this.limitWidth      = dimension.limitWidth.bind(dimension)
+    this.limitHeight     = dimension.limitHeight.bind(dimension)
+    this.calculateWidth  = dimension.calculateWidth.bind(dimension)
+    this.calculateHeight = dimension.calculateHeight.bind(dimension)
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)

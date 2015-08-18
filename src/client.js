@@ -8,6 +8,7 @@ var merge           = require('merge-recursive'),
     CollectLogger  = require('./util/collectLogger'),
     EventEmitter   = require('./util/eventEmitter'),
     Container      = require('./wrappers/container'),
+    OptionsWrapper = require('./wrappers/optionsWrapper'),
     Replay         = require('./wrappers/visuals/replay'),
 
     Browser         = require('./util/browser'),
@@ -23,6 +24,8 @@ function adjustOptions(options) {
 
     localOptions.logger = collectLogger
     localOptions.debug  = localOptions.logger.debug
+
+    OptionsWrapper.addFunctions(localOptions)
 
     return localOptions
 }
@@ -66,10 +69,11 @@ var VideomailClient = function(options) {
         if (typeof parentElement === 'string')
             parentElement = document.getElementById(parentElement)
 
-        container.hide()
+        // CONTINUE FROM HERE, TEST AND FIX THIS
+        videomail = container.addPlayerDimensions(videomail)
 
-        localOptions.width  = videomail.width
-        localOptions.height = videomail.height
+        // only hide after dimensions have been computed!
+        container.hide()
 
         replay = new Replay(parentElement, localOptions)
 
@@ -92,7 +96,12 @@ var VideomailClient = function(options) {
     }
 
     this.get = function(key, cb) {
-        new Resource(localOptions).get(key, cb)
+        new Resource(localOptions).get(key, function(err, videomail) {
+            if (err)
+                cb(err)
+            else
+                cb(null, container.addPlayerDimensions(videomail))
+        })
     }
 
     this.canRecord = function() {

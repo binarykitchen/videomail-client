@@ -62,9 +62,8 @@ module.exports = function(options) {
 
         if (isIOS)
             warning = 'On iPads/iPhones this feature is missing. ' +
-                      'Hopefully Apple will add it one day. Here is ' +
-                      '<a href="http://caniuse.com/stream" target="_blank">' +
-                      'evidence</a> why.<br/>For now, we recommend you to use a desktop computer or ' +
+                      'Here is <a href="http://caniuse.com/stream" target="_blank">' +
+                      'evidence</a>.<br/><br/>For now, we recommend you to use a desktop computer or ' +
                       'an Android device.'
 
         else
@@ -76,12 +75,12 @@ module.exports = function(options) {
             else
                 warning = 'Hence we recommend you to use either ' +
                           '<a href="' + chromeDownload + '" target="_blank">Chrome</a> ' +
-                          'or <a href="' + firefoxDownload + '" target="_blank">Firefox</a> instead. ' +
+                          'or <a href="' + firefoxDownload + '" target="_blank">Firefox</a> instead.<br/>' +
                           '<a href="http://caniuse.com/stream" target="_blank">Here is evidence</a>.'
         }
 
-        warning = 'To access external webcams, your browser must support the getUserMedia/Stream feature.<br/>' +
-                  warning
+        warning = 'To access external webcams, your browser must support the getUserMedia/Stream feature.' +
+                  '<br/><br/>' + warning
 
         return warning
     }
