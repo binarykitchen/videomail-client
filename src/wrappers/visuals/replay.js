@@ -43,8 +43,8 @@ var Replay = function(parentElement, options) {
     }
 
     function correctDimensions() {
-        var width  = (videomail && videomail.width) || options.width,
-            height = (videomail && videomail.height) || options.height
+        var width  = (videomail && videomail.playerWidth)  || options.video.width,
+            height = (videomail && videomail.playerHeight) || options.video.height
 
         replayElement.style.width  = width + 'px'
         replayElement.style.height = height + 'px'

@@ -222,7 +222,6 @@ You can grab the already browserified videomail-client JS file through GitHub's 
 ```
 https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/dist/videomail-client.js
 ```
-
 For example for version 1.3.19, use this in your production site:
 https://cdn.rawgit.com/binarykitchen/videomail-client/1.3.19/dist/videomail-client.js
 
@@ -232,7 +231,12 @@ https://cdnjs.com/libraries/videomail-client
 <a name="changes"></a>
 ## Breaking changes (Changelog)
 
-### v1.4.0 (2015-07-03)
+### v1.5.0 (2015-08-18)
+
+Minor change:
+- **VideomailClient:** Renamed `options.buttons.stopButtonClass` to `options.buttons.previewButtonClass`
+
+### v1.4.0 (2015-08-11)
 
 Minor change:
 - **VideomailClient:** Renamed `options.buttons.backButtonClass` to `options.buttons.recordAgainButtonClass`
@@ -278,4 +282,4 @@ They all deserve lots of love.
 
 ### Final philosophy
 
-This planet is completely sold. And talk is overrated. that's why my primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.
+This planet is completely sold. And talk is overrated. That's why my primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.

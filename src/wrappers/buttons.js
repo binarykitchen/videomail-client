@@ -15,7 +15,7 @@ var Buttons = function(container, options) {
         recordButton,
         pauseButton,
         resumeButton,
-        stopButton,
+        previewButton,
         recordAgainButton,
         submitButton,
         built
@@ -125,10 +125,10 @@ var Buttons = function(container, options) {
             )
 
         // show stop only when pause is enabled - looks better that way otherwise button
-        // move left and right between record and stop
-        stopButton = makeButton(
-            options.selectors.stopButtonClass,
-            'Stop',
+        // move left and right between record and stop (preview)
+        previewButton = makeButton(
+            options.selectors.previewButtonClass,
+            'Preview',
             container.stop,
             false
         )
@@ -146,8 +146,8 @@ var Buttons = function(container, options) {
         if (!isShown(recordAgainButton))
             show(recordButton)
 
-        stopButton.disabled = true
-        hide(stopButton)
+        previewButton.disabled = true
+        hide(previewButton)
     }
 
     function onUserMediaReady() {
@@ -169,7 +169,7 @@ var Buttons = function(container, options) {
 
     function onPreview() {
         hide(recordButton)
-        hide(stopButton)
+        hide(previewButton)
 
         show(recordAgainButton)
         recordAgainButton.disabled = false
@@ -185,7 +185,7 @@ var Buttons = function(container, options) {
         show(resumeButton)
         resumeButton.disabled = false
         hide(recordButton)
-        show(stopButton)
+        show(previewButton)
     }
 
     function onFirstFrameSent() {
@@ -197,8 +197,8 @@ var Buttons = function(container, options) {
             pauseButton.disabled = false
         }
 
-        stopButton.disabled = false
-        show(stopButton)
+        previewButton.disabled = false
+        show(previewButton)
     }
 
     function onRecording(framesCount) {
@@ -221,7 +221,7 @@ var Buttons = function(container, options) {
     }
 
     function onStopping() {
-        stopButton.disabled = true
+        previewButton.disabled = true
 
         pauseButton && hide(pauseButton)
         resumeButton && hide(resumeButton)
@@ -236,10 +236,10 @@ var Buttons = function(container, options) {
     }
 
     function onSubmitted() {
-        stopButton.disabled = true
+        previewButton.disabled = true
 
         if (options.enablePause)
-            show(stopButton)
+            show(previewButton)
 
         hide(recordAgainButton)
 
@@ -261,7 +261,7 @@ var Buttons = function(container, options) {
 
     function onHidden() {
         hide(recordButton)
-        hide(stopButton)
+        hide(previewButton)
         hide(recordAgainButton)
         hide(resumeButton)
     }
@@ -330,7 +330,7 @@ var Buttons = function(container, options) {
         if (resumeButton)
             resumeButton.disabled = true
 
-        recordButton.disabled = stopButton.disabled = recordAgainButton.disabled = true
+        recordButton.disabled = previewButton.disabled = recordAgainButton.disabled = true
     }
 
     this.isRecordAgainButtonEnabled = function() {

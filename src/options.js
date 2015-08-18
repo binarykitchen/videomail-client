@@ -28,7 +28,7 @@ module.exports = {
         recordButtonClass:      'record',
         pauseButtonClass:       'pause',
         resumeButtonClass:      'resume',
-        stopButtonClass:        'stop',
+        previewButtonClass:     'preview',
         recordAgainButtonClass: 'recordAgain',
         submitButtonClass:      'submit',
 

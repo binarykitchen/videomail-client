@@ -6,7 +6,7 @@ module.exports = keymirror({
   CONNECTED:            null, // socket is connected to server
   COUNTDOWN:            null, // countdown for recording has started
   RECORDING:            null, // webcam is recording
-  STOPPING:             null, // recording is being stopped
+  STOPPING:             null, // recording is being stopped (= preview)
   PROGRESS:             null, // start processing
   BEGIN_AUDIO_ENCODING: null, // encoding video
   BEGIN_VIDEO_ENCODING: null, // encoding video

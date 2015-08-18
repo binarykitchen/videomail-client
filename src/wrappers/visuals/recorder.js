@@ -743,10 +743,10 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function correctDimensions() {
-        if (self.hasDefinedWidth())
+        if (options.hasDefinedWidth())
             recorderElement.width = self.getRecorderWidth(true)
 
-        if (self.hasDefinedHeight())
+        if (options.hasDefinedHeight())
             recorderElement.height = self.getRecorderHeight(true)
     }
 
@@ -840,7 +840,7 @@ var Recorder = function(visuals, replay, options) {
         if (userMedia)
             return userMedia.getRawWidth(responsive)
 
-        else if (responsive && this.hasDefinedWidth())
+        else if (responsive && options.hasDefinedWidth())
             return this.limitWidth(options.video.width)
     }
 
@@ -848,93 +848,51 @@ var Recorder = function(visuals, replay, options) {
         if (userMedia)
             return userMedia.getRawHeight(responsive)
 
-        else if (responsive && this.hasDefinedHeight())
+        else if (responsive && options.hasDefinedHeight())
             return this.calculateHeight(responsive)
     }
 
-    function figureMinHeight(height) {
-        if (self.hasDefinedHeight()) {
-            if (!height)
-                height = options.video.height
-            else
-                height = Math.min(options.video.height, height)
-        }
-
-        return height
-    }
-
-    this.calculateWidth = function(responsive) {
-        var height = userMedia && userMedia.getVideoHeight()
-
-        height = figureMinHeight(height)
-
-        if (responsive)
-            height = this.limitHeight(height)
-
-        return parseInt(height / this.getRatio())
-    }
-
-    this.calculateHeight = function(responsive) {
-        var width = userMedia && userMedia.getVideoWidth(),
-            height
-
-        if (this.hasDefinedWidth())
-            width = options.video.width
-
-        if (responsive)
-            width = this.limitWidth(width)
-
-        if (width)
-            height = parseInt(width * this.getRatio())
-
-        return figureMinHeight(height)
-    }
-
-    this.getRatio = function() {
-        var ratio = 1 // just a default one when no computations are possible
+    function getRatio() {
+        var ratio
 
         if (userMedia)
             ratio = userMedia.getVideoHeight() / userMedia.getVideoWidth()
-
-        else if (this.hasDefinedDimensions())
-            ratio = options.video.height / options.video.width
+        else
+            ratio = options.getRatio()
 
         return ratio
     }
 
-    this.hasDefinedWidth = function() {
-        return options.video.width && options.video.width != 'auto'
+    this.calculateWidth = function(responsive) {
+        return visuals.calculateWidth({
+            responsive:  responsive,
+            ratio:       getRatio(),
+            videoHeight: userMedia && userMedia.getVideoHeight()
+        })
     }
 
-    this.hasDefinedHeight = function() {
-        return options.video.height && options.video.height != 'auto'
-    }
-
-    this.hasDefinedDimension = function() {
-        return this.hasDefinedWidth() || this.hasDefinedHeight()
-    }
-
-    this.hasDefinedDimensions = function() {
-        return this.hasDefinedWidth() && this.hasDefinedHeight()
+    this.calculateHeight = function(responsive) {
+        return visuals.calculateHeight({
+            responsive: responsive,
+            ratio:      getRatio(),
+            videoWidth: userMedia && userMedia.getVideoWidth()
+        })
     }
 
     this.getRawVisualUserMedia = function() {
         return recorderElement
     }
 
-    this.limitWidth = function(width) {
-        var outerWidth = visuals.getOuterWidth()
-        return outerWidth < width ? outerWidth : width
-    }
-
-    // this is difficult to compute and is not entirely correct.
-    // but good enough for now to ensure some stability.
-    this.limitHeight = function(height) {
-        return window.outerHeight < height ? window.outerHeight : height
-    }
-
     this.isConnected = function() {
         return connected
+    }
+
+    this.limitWidth  = function(width) {
+        return visuals.limitWidth(width)
+    }
+
+    this.limitHeight  = function(height) {
+        return visuals.limitHeight(height)
     }
 }
 
