@@ -215,17 +215,19 @@ var Container = function(options) {
     }
 
     this.addPlayerDimensions = function(videomail) {
-        videomail.playerHeight = dimension.calculateHeight({
-            responsive: true,
-            videoWidth: videomail.width,
-            ratio:      videomail.height / videomail.width
-        })
+        if (containerElement) {
+            videomail.playerHeight = dimension.calculateHeight({
+                responsive: true,
+                videoWidth: videomail.width,
+                ratio:      videomail.height / videomail.width
+            })
 
-        videomail.playerWidth = dimension.calculateWidth({
-            responsive:  true,
-            videoHeight: videomail.playerHeight,
-            ratio:       videomail.height / videomail.width
-        })
+            videomail.playerWidth = dimension.calculateWidth({
+                responsive:  true,
+                videoHeight: videomail.playerHeight,
+                ratio:       videomail.height / videomail.width
+            })
+        }
 
         return videomail
     }

@@ -254,7 +254,7 @@ var Visuals = function(container, options) {
     this.isHidden = function() {
         if (!built)
             return true
-        else
+        else if (visualsElement)
             return visualsElement.classList.contains('hide')
     }
 
@@ -262,7 +262,7 @@ var Visuals = function(container, options) {
         if (!this.isReplayShown())
             recorder.build()
 
-        visualsElement.classList.remove('hide')
+        visualsElement && visualsElement.classList.remove('hide')
     }
 
     this.isRecorderUnloaded = function() {
