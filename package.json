@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "A revolutionary node.js module which enables you to record videos directly in the browser.",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -56,7 +56,7 @@
     "typedarray-to-buffer": "3.0.4",
     "ua-parser-js": "0.7.9",
     "validate.io-float32array": "1.0.0",
-    "websocket-stream": "1.5.1"
+    "websocket-stream": "2.0.0"
   },
   "devDependencies": {
     "body-parser": "1.13.3",
