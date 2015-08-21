@@ -69,8 +69,7 @@ var VideomailClient = function(options) {
         if (typeof parentElement === 'string')
             parentElement = document.getElementById(parentElement)
 
-        // CONTINUE FROM HERE, TEST AND FIX THIS
-        videomail = container.addPlayerDimensions(videomail)
+        videomail = container.addPlayerDimensions(videomail, parentElement)
 
         // only hide after dimensions have been computed!
         container.hide()
