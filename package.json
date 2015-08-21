@@ -38,6 +38,7 @@
     "recorder"
   ],
   "dependencies": {
+    "audio-sample": "^1.0.0",
     "canvas-to-buffer": "1.0.5",
     "create-error": "0.3.1",
     "cross-class-list": "1.0.3",

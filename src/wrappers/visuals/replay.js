@@ -42,12 +42,21 @@ var Replay = function(parentElement, options) {
         })
     }
 
-    function correctDimensions() {
-        var width  = (videomail && videomail.playerWidth)  || options.video.width,
-            height = (videomail && videomail.playerHeight) || options.video.height
+    function correctDimensions(options) {
+        var width, height
 
-        replayElement.style.width  = width + 'px'
-        replayElement.style.height = height + 'px'
+        if (videomail && videomail.playerWidth)
+            width = videomail.playerWidth
+        else if (parentElement.calculateWidth)
+            width = parentElement.calculateWidth(options)
+
+        if (videomail && videomail.playerHeight)
+            height = videomail.playerHeight
+        else if (parentElement.calculateHeight)
+            height = parentElement.calculateHeight(options)
+
+        replayElement.style.width  = width  ? width + 'px' : 'auto'
+        replayElement.style.height = height ? height + 'px' : 'auto'
     }
 
     this.setVideomail = function(newVideomail) {
@@ -60,12 +69,19 @@ var Replay = function(parentElement, options) {
             this.setMp4Source(videomail.mp4)
 
         copyAttributes(newVideomail)
+
         correctDimensions()
 
         this.show()
     }
 
-    this.show = function() {
+    this.show = function(recorderWidth, recorderHeight) {
+        correctDimensions({
+            responsive:  true,
+            videoWidth:  recorderWidth,
+            videoHeight: recorderHeight
+        })
+
         replayElement.classList.remove('hide')
 
         if (parentElement.classList)
@@ -74,7 +90,7 @@ var Replay = function(parentElement, options) {
         // add a little delay to make sure the source is set
         setTimeout(function() {
             replayElement.load()
-        }, 40)
+        }, 30)
 
         if (!isStandalone())
             if (!videomail)
@@ -91,15 +107,13 @@ var Replay = function(parentElement, options) {
         else
             this.hide()
 
-        correctDimensions()
-
         if (!replayElement.controls)
             replayElement.controls = true
 
         if (!built) {
             if (!isStandalone()) {
-                this.on(Events.PREVIEW, function() {
-                    self.show()
+                this.on(Events.PREVIEW, function(key, recorderWidth, recorderHeight) {
+                    self.show(recorderWidth, recorderHeight)
                 })
             }
 

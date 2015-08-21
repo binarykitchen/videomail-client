@@ -1,6 +1,6 @@
-var isPOT = require('is-power-of-two'),
+var isPOT           = require('is-power-of-two'),
+    AudioSample     = require('audio-sample'),
 
-    AudioSample     = require('./items/audioSample'),
     VideomailError  = require('./videomailError')
 
 module.exports = function(userMedia, options) {

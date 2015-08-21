@@ -1,4 +1,5 @@
 var insertCss      = require('insert-css'),
+    merge          = require('merge-recursive'),
     util           = require('util'),
 
     Dimension      = require('./dimension'),
@@ -21,7 +22,6 @@ var Container = function(options) {
         visuals     = new Visuals(this, options),
         buttons     = new Buttons(this, options),
         resource    = new Resource(options),
-        dimension   = new Dimension(this, options),
         htmlElement = document.querySelector('html'),
         debug       = options.debug,
         hasError    = false,
@@ -214,22 +214,44 @@ var Container = function(options) {
         }
     }
 
-    this.addPlayerDimensions = function(videomail) {
-        if (containerElement) {
-            videomail.playerHeight = dimension.calculateHeight({
-                responsive: true,
-                videoWidth: videomail.width,
-                ratio:      videomail.height / videomail.width
-            })
+    this.addPlayerDimensions = function(videomail, element) {
+        videomail.playerHeight = this.calculateHeight({
+            responsive: true,
+            videoWidth: videomail.width,
+            ratio:      videomail.height / videomail.width
+        }, element)
 
-            videomail.playerWidth = dimension.calculateWidth({
-                responsive:  true,
-                videoHeight: videomail.playerHeight,
-                ratio:       videomail.height / videomail.width
-            })
-        }
+        videomail.playerWidth  = this.calculateWidth({
+            responsive:  true,
+            videoHeight: videomail.playerHeight,
+            ratio:       videomail.height / videomail.width
+        })
 
         return videomail
+    }
+
+    this.limitWidth = function(width) {
+        return Dimension.limitWidth(containerElement, width)
+    }
+
+    this.limitHeight = function(height) {
+        return Dimension.limitHeight(height)
+    }
+
+    this.calculateWidth = function(fnOptions) {
+        return Dimension.calculateWidth(merge.recursive(options, fnOptions))
+    }
+
+    this.calculateHeight = function(fnOptions, element) {
+        if (!element) {
+            if (containerElement)
+                element = containerElement
+            else
+                // better than nothing
+                element = document.body
+        }
+
+        return Dimension.calculateHeight(element, merge.recursive(options, fnOptions))
     }
 
     this.areVisualsHidden = function() {
@@ -444,15 +466,6 @@ var Container = function(options) {
 
         return isDirty
     }
-
-    this.getBoundingClientRect = function() {
-        return containerElement.getBoundingClientRect()
-    }
-
-    this.limitWidth      = dimension.limitWidth.bind(dimension)
-    this.limitHeight     = dimension.limitHeight.bind(dimension)
-    this.calculateWidth  = dimension.calculateWidth.bind(dimension)
-    this.calculateHeight = dimension.calculateHeight.bind(dimension)
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)
