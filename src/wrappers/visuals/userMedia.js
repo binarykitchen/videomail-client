@@ -9,7 +9,7 @@ module.exports = function(recorder, options) {
 
     EventEmitter.call(this, options, 'UserMedia')
 
-    var rawVisualUserMedia = recorder.getRawVisualUserMedia(),
+    var rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia(),
 
         self   = this,
         paused = false,
@@ -17,7 +17,7 @@ module.exports = function(recorder, options) {
 
         audioRecorder
 
-    if (options.audio.enabled)
+    if (options && options.audio && options.audio.enabled)
         audioRecorder = new AudioRecorder(this, options)
 
     function attachMediaStream(stream) {

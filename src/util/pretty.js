@@ -5,7 +5,7 @@ function arrayToString(array) {
         var lines = []
 
         array.forEach(function(element) {
-            if (element.toString)
+            if (element && element.toString)
                 lines.push(element.toString())
         })
 
@@ -20,7 +20,7 @@ function objectToString(object) {
         var lines = []
 
         propertyNames.forEach(function(name) {
-            if (object[name].toString)
+            if (object[name] && object[name].toString)
                 lines.push(object[name].toString())
         })
 
@@ -29,12 +29,21 @@ function objectToString(object) {
 }
 
 module.exports = function(anything) {
-    if (typeof anything === 'string')
+    if (anything === null)
+        return 'null'
+
+    else if (typeof anything === 'undefined')
+        return 'undefined'
+
+    else if (typeof anything === 'string')
         return anything
 
-    else if (Array.isArray(anything)) {
+    else if (Array.isArray(anything))
         return arrayToString(anything)
 
-    } else if (typeof anything === 'object')
+    else if (typeof anything === 'object')
         return objectToString(anything)
+
+    else
+        return anything.toString()
 }

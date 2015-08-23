@@ -17,7 +17,8 @@ var Recorder = function(visuals, replay, options) {
     EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
-    if (!options.video.fps) throw VideomailError.create('FPS must be defined', options)
+    if (!options || !options.video || !options.video.fps)
+        throw VideomailError.create('FPS must be defined', options)
 
     var self            = this,
         browser         = new Browser(options),

@@ -16,7 +16,6 @@ function figureMinHeight(height, options) {
 
 module.exports = {
 
-
     limitWidth: function(element, width) {
         var outerWidth = getOuterWidth(element)
         return outerWidth < width ? outerWidth : width
