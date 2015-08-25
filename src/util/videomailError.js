@@ -78,7 +78,7 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
         case 'PermissionDeniedError':
             message = 'Permission denied!'
 
-            if (browser.isChromeBased() || browser.isFirefox())
+            if (browser.isChromeBased() || browser.isFirefox() || browser.isEdge())
                 explanation = 'Permission to access your webcam has been denied. ' +
                               'This can have two reasons:<br/>' +
                               'a) you blocked access to webcam; or<br/>' +
