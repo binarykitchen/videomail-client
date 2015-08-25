@@ -1,14 +1,14 @@
 var test = require('tape'),
 
-    UserMedia = require('./../../src/util/userMedia')
+    Form = require('./../../src/wrappers/form')
 
-test('UserMedia:', function(t) {
+test('Form:', function(t) {
 
     t.test('can be instantiated', function(tt) {
         tt.plan(1)
 
         tt.doesNotThrow(function() {
-            new UserMedia()
+            new Form()
         })
     })
 })

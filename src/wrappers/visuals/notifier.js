@@ -9,7 +9,7 @@ var Notifier = function(visuals, options) {
     EventEmitter.call(this, options, 'Notifier')
 
     var self    = this,
-        debug   = options.debug,
+        debug   = options && options.debug,
 
         notifyElement,
         messageElement,

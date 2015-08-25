@@ -11,7 +11,7 @@ module.exports = function(userMedia, options) {
         // instantiate only once
         if (!window.audioContext) {
             var AudioContext = window.AudioContext || window.webkitAudioContext
-            window.audioContext = new AudioContext()
+            window.audioContext = new AudioContext
         }
 
         return window.audioContext

@@ -18,12 +18,13 @@ module.exports = function(options) {
         isChrome      = uaParser.browser.name === 'Chrome',
         isChromium    = uaParser.browser.name === 'Chromium',
         firefox       = uaParser.browser.name === 'Firefox',
+        isEdge        = uaParser.browser.name === 'Edge',
         isIE          = /IE/.test(uaParser.browser.name),
         isSafari      = /Safari/.test(uaParser.browser.name),
         isOpera       = /Opera/.test(uaParser.browser.name),
         isAndroid     = /Android/.test(uaParser.os.name),
         chromeBased   = isChrome || isChromium,
-        okBrowser     = chromeBased || firefox || isAndroid || isOpera,
+        okBrowser     = chromeBased || firefox || isAndroid || isOpera || isEdge,
 
         self = this,
 
@@ -199,5 +200,9 @@ module.exports = function(options) {
 
     this.isFirefox = function() {
         return firefox
+    }
+
+    this.isEdge = function() {
+        return isEdge
     }
 }
