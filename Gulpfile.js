@@ -93,6 +93,7 @@ gulp.task('connect', ['build'], function() {
         root:       ['examples', 'dist'],
         port:       8080,
         livereload: true,
+        // https:      true,
         middleware: function() {
             var router = new Router()
 
