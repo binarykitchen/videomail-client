@@ -23,7 +23,9 @@ var path            = require('path'),
 // plugins.util.log('Options:', options)
 
 gulp.task('clean:js', function(cb) {
-    del(['dist/*.js'], cb)
+    del(['dist/*.js']).then(function() {
+        cb()
+    })
 })
 
 gulp.task('stylus', function() {

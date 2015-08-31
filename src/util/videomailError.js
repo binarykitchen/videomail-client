@@ -17,7 +17,6 @@ VideomailError.STARTING_FAILED   = 'Starting video failed'
 // static function to convert an error into a videomail error
 
 VideomailError.create = function(err, explanation, options, isBrowserProblem) {
-
     if (err && err.name === VIDEOMAIL_ERR_NAME)
         return err
 
@@ -62,6 +61,7 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
             errType = err
 
     switch (errType) {
+        case 'NotFoundError':
         case 'NO_DEVICES_FOUND':
             message     = 'No webcam found'
             explanation = 'Your browser cannot find a webcam attached to your machine.'
