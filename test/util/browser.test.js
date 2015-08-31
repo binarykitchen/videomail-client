@@ -45,7 +45,7 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your old browser has no getUserMedia support')
+        tt.equal(err.message, 'Sorry, your old browser has no webcam support')
         tt.ok(err.explanation.indexOf('upgrade Firefox') >= 0)
 
         err = browser.checkPlaybackCapabilities()
@@ -79,7 +79,7 @@ test('Browser:', function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your old browser has no getUserMedia support')
+        tt.equal(err.message, 'Sorry, your old browser has no webcam support')
         tt.ok(err.explanation.indexOf('upgrade Chrome') >= 0)
 
         err = browser.checkPlaybackCapabilities()

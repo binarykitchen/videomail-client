@@ -40,6 +40,9 @@ git push
 git checkout develop
 git push
 
+# Ensures nothing is broken
+npm test
+
 # Start a new release
 git flow release start $VERSION
 
@@ -53,7 +56,7 @@ npm install
 # Rebuild all assets
 gulp build --minify
 
-# Ensures nothing is broken
+# Ensures again that nothing is broken with the build
 npm test
 
 git add -A
