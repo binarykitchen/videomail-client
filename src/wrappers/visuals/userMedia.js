@@ -36,7 +36,7 @@ module.exports = function(recorder, options) {
         if (localMediaStream)
             attachMediaStream(localMediaStream)
         else {
-            rawVisualUserMedia.srcObject = null
+            rawVisualUserMedia.removeAttribute('srcObject')
             rawVisualUserMedia.removeAttribute('src')
         }
     }
@@ -48,8 +48,12 @@ module.exports = function(recorder, options) {
     }
 
     function hasEnded() {
-        var visualStream = getVisualStream()
-        return visualStream && visualStream.ended
+        if (rawVisualUserMedia.ended)
+            return rawVisualUserMedia.ended
+        else {
+            var visualStream = getVisualStream()
+            return visualStream && visualStream.ended
+        }
     }
 
     function hasInvalidDimensions() {
@@ -189,11 +193,9 @@ module.exports = function(recorder, options) {
         try {
             var visualStream = getVisualStream()
 
-            if (visualStream) {
-                visualStream.stop && visualStream.stop()
+            visualStream && visualStream.stop && visualStream.stop()
 
-                setVisualStream(null)
-            }
+            setVisualStream(null)
 
             paused = record = false
 

@@ -205,10 +205,11 @@ In other words, if your web server is connected through a domain besides localho
 <a name="compatibility"></a>
 ## Backward compatibility
 
-Forget IE, Safari and iPhones because they still don't support `getUserMedia()`, *chuckle* - whereas these browsers work like a charm:
+Forget the old IE, Safari and iPhones because they still don't support `getUserMedia()`, *chuckle* - whereas these browsers work like a charm:
 
-* Firefox >= 33
-* Chrome >= 31
+* Firefox >= 34
+* Google Chrome >= 32
+* Microsoft Edge >= 12
 * Opera >= 26
 * Chrome for Android >= 39
 * Android Browser >= 37

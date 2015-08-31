@@ -82,7 +82,7 @@ var Visuals = function(container, options) {
     }
 
     function isRecordable() {
-        return !self.isNotifying() && !replay.isShown() && !this.isCountingDown()
+        return !self.isNotifying() && !replay.isShown() && !self.isCountingDown()
     }
 
     this.isCountingDown = function() {
