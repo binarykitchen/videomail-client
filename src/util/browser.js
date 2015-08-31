@@ -18,7 +18,9 @@ module.exports = function(options) {
         isChrome      = uaParser.browser.name === 'Chrome',
         isChromium    = uaParser.browser.name === 'Chromium',
         firefox       = uaParser.browser.name === 'Firefox',
-        isEdge        = uaParser.browser.name === 'Edge',
+        osVersion     = parseFloat(uaParser.os.version),
+        isWindows     = uaParser.os.name === 'Windows',
+        isEdge        = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10),
         isIE          = /IE/.test(uaParser.browser.name),
         isSafari      = /Safari/.test(uaParser.browser.name),
         isOpera       = /Opera/.test(uaParser.browser.name),
@@ -80,7 +82,7 @@ module.exports = function(options) {
                           '<a href="http://caniuse.com/stream" target="_blank">Here is evidence</a>.'
         }
 
-        warning = 'To access external webcams, your browser must support the getUserMedia/Stream feature.' +
+        warning = 'To access external webcams, your browser must support the getUserMedia feature.' +
                   '<br/><br/>' + warning
 
         return warning
@@ -117,16 +119,8 @@ module.exports = function(options) {
 
         if (!okBrowser || !this.canRecord()) {
 
-            var message = 'Sorry, your old browser has no '
-
-            if (!okBrowser)
-                message += 'webcam support'
-
-            else
-                message += 'getUserMedia support'
-
             err = VideomailError.create({
-                message: message,
+                message: 'Sorry, your old browser has no webcam support',
             }, getUserMediaWarning(), options, true)
         }
 
