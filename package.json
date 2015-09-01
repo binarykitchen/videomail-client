@@ -57,7 +57,7 @@
     "typedarray-to-buffer": "3.0.4",
     "ua-parser-js": "0.7.9",
     "validate.io-float32array": "1.0.0",
-    "websocket-stream": "2.0.0"
+    "websocket-stream": "2.0.2"
   },
   "devDependencies": {
     "body-parser": "1.13.3",
