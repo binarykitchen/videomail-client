@@ -90,6 +90,7 @@ var Replay = function(parentElement, options) {
         // add a little delay to make sure the source is set
         setTimeout(function() {
             replayElement.load()
+            self.play()
         }, 30)
 
         if (!isStandalone())
@@ -188,6 +189,10 @@ var Replay = function(parentElement, options) {
 
     this.pause = function() {
         replayElement && replayElement.pause && replayElement.pause()
+    }
+
+    this.play = function() {
+        replayElement && replayElement.play && replayElement.play()
     }
 
     this.reset = function() {
