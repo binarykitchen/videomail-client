@@ -160,11 +160,15 @@ var Visuals = function(container, options) {
     }
 
     this.unload = function(e) {
-        recorder.unload(e)
-        recorderInsides.unload(e)
-        replay.unload(e)
+        try {
+            recorder.unload(e)
+            recorderInsides.unload(e)
+            replay.unload(e)
 
-        built = false
+            built = false
+        } catch (exc) {
+            this.emit(Events.ERROR, exc)
+        }
     }
 
     this.isNotifying = function() {
