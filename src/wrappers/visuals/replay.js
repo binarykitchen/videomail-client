@@ -18,8 +18,9 @@ var Replay = function(parentElement, options) {
 
     function buildElement() {
         replayElement = h('video.' + options.selectors.replayClass, {
-            autoplay: false,
-            controls: 'controls'
+            autoplay:   true,
+            autobuffer: true,
+            controls:   'controls'
         })
 
         self.hide()
@@ -90,7 +91,6 @@ var Replay = function(parentElement, options) {
         // add a little delay to make sure the source is set
         setTimeout(function() {
             replayElement.load()
-            self.play()
         }, 30)
 
         if (!isStandalone())
@@ -122,7 +122,7 @@ var Replay = function(parentElement, options) {
                 e.preventDefault()
 
                 if (this.paused)
-                    this.play()
+                    self.play()
                 else
                     self.pause()
             }

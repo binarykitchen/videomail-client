@@ -118,6 +118,8 @@ module.exports = function(recorder, options) {
 
                 self.emit(Events.LOADED_META_DATA)
 
+                rawVisualUserMedia.play()
+
                 onLoadedMetaDataReached = true
                 fireCallbacks()
             }
@@ -179,7 +181,6 @@ module.exports = function(recorder, options) {
 
             rawVisualUserMedia.addEventListener('play',            onPlay)
             rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
-            rawVisualUserMedia.play()
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
