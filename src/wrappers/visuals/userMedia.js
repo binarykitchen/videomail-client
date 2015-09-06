@@ -118,6 +118,7 @@ module.exports = function(recorder, options) {
 
                 self.emit(Events.LOADED_META_DATA)
 
+                // for android devices, we cannot call play() unless meta data has been loaded!
                 rawVisualUserMedia.play()
 
                 onLoadedMetaDataReached = true
