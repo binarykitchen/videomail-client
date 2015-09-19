@@ -66,19 +66,23 @@ var VideomailClient = function(options) {
     // automatically adds a <video> element inside the given parentElement and loads
     // it with the videomail
     this.replay = function(parentElement, videomail) {
-        if (typeof parentElement === 'string')
-            parentElement = document.getElementById(parentElement)
+        function buildReplay() {
+            if (typeof parentElement === 'string')
+                parentElement = document.getElementById(parentElement)
 
-        videomail = container.addPlayerDimensions(videomail, parentElement)
+            videomail = container.addPlayerDimensions(videomail, parentElement)
 
-        // only hide after dimensions have been computed!
-        container.hide()
+            // only hide after dimensions have been computed!
+            container.hide()
 
-        replay = new Replay(parentElement, localOptions)
+            replay = new Replay(parentElement, localOptions)
 
-        replay.build()
+            replay.build()
 
-        replay.setVideomail(videomail)
+            replay.setVideomail(videomail)
+        }
+
+        readystate.interactive(buildReplay)
     }
 
     this.startOver = function() {
