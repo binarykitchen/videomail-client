@@ -72,10 +72,15 @@ var VideomailClient = function(options) {
 
             // if there is none, use the automatically generated one
             if (!parentElement) {
-                parentElement = container.getReplayParentElement()
+                replay        = container.getReplay()
+                parentElement = replay.getParentElement()
+            } else {
+                replay = new Replay(parentElement, localOptions)
+                replay.build()
             }
 
             videomail = container.addPlayerDimensions(videomail, parentElement)
+            replay.setVideomail(videomail)
 
             if (container.isParentElementOf(parentElement)) {
                 container.showReplayOnly()
@@ -85,12 +90,6 @@ var VideomailClient = function(options) {
                 // only hide after dimensions have been computed!
                 container.hide()
             }
-
-            replay = new Replay(parentElement, localOptions)
-
-            replay.build()
-
-            replay.setVideomail(videomail)
         }
 
         readystate.interactive(buildReplay)

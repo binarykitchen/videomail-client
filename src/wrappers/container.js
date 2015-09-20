@@ -476,8 +476,8 @@ var Container = function(options) {
         return isDirty
     }
 
-    this.getReplayParentElement = function() {
-        return visuals.getReplayParentElement()
+    this.getReplay = function() {
+        return visuals.getReplay()
     }
 
     this.isParentElementOf = function(element) {
