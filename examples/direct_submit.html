@@ -33,7 +33,7 @@
                 startOverButton = document.getElementById('startOver')
 
             var onSubmitted = function(videomail) {
-                this.replay('viewVideo', videomail)
+                this.replay(videomail, 'viewVideo')
 
                 startOverButton.onclick = this.startOver
             }
