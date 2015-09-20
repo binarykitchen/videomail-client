@@ -71,9 +71,7 @@ var Replay = function(parentElement, options) {
 
         copyAttributes(newVideomail)
 
-        correctDimensions()
-
-        this.show()
+        this.show(videomail.width, videomail.height)
     }
 
     this.show = function(recorderWidth, recorderHeight) {
