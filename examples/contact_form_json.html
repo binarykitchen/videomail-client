@@ -65,7 +65,7 @@
                 // status has been generated on server side, see gulp task 'connect'
                 statusHeader.innerHTML = response.status
 
-                this.replay('viewVideo', videomail)
+                this.replay(videomail, 'viewVideo')
 
                 startOverButton.onclick = this.startOver
             }

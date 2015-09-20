@@ -215,6 +215,10 @@ var Replay = function(parentElement, options) {
     this.isShown = function() {
         return replayElement && !replayElement.classList.contains('hide')
     }
+
+    this.getParentElement = function() {
+        return parentElement
+    }
 }
 
 util.inherits(Replay, EventEmitter)

@@ -341,8 +341,7 @@ var Container = function(options) {
     this.hide = function() {
         hasError = false
 
-        if (this.isRecording())
-            this.pause()
+        this.isRecording() && this.pause()
 
         visuals.hide()
 
@@ -350,6 +349,16 @@ var Container = function(options) {
             buttons.hide()
             hideMySelf()
         }
+    }
+
+    this.showReplayOnly = function() {
+        hasError = false
+
+        this.isRecording() && this.pause()
+
+        visuals.showReplayOnly()
+
+        submitted && buttons.hide()
     }
 
     this.isNotifying = function() {
@@ -465,6 +474,14 @@ var Container = function(options) {
         }
 
         return isDirty
+    }
+
+    this.getReplayParentElement = function() {
+        return visuals.getReplayParentElement()
+    }
+
+    this.isParentElementOf = function(element) {
+        return element.parentNode == containerElement
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)

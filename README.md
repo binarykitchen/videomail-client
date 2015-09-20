@@ -145,11 +145,11 @@ Automatically fills the DOM with a form for video recording. If a HTML element w
 By default the optional parameter `containerId` is set to `videomail`.
 
 <a name="replay"></a>
-### videomailClient.replay(parentElement, videomail)
+### videomailClient.replay(videomail[, parentElement])
 
 Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` or `/examples/contact_form_json.html` for some inspiration.
 
-If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally.
+If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally. If no parent element is given, then a replay container within the containerId is automatically generated.
 
 Also note that, when the parent element already contains a video container like this
 
@@ -198,7 +198,7 @@ Returns true when a video has been recorded and a form exists. Useful when check
 <a name="whitelist"></a>
 ## Whitelist
 
-Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server.
+Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server. `127.0.0.1:8080` is whitelisted too for local development. Other IP addresses won't work.
 
 In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending video mails. To fix that, please reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
@@ -231,6 +231,10 @@ https://cdnjs.com/libraries/videomail-client
 
 <a name="changes"></a>
 ## Breaking changes (Changelog)
+
+### v1.6.0 (2015-09-20)
+
+- **VideomailClient:** Changed order of arguments `VideomailClient.replay(parentElement, videomail)` to `VideomailClient.replay(videomail[, parentElement])`
 
 ### v1.5.0 (2015-08-18)
 
