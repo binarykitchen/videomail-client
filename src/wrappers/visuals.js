@@ -266,16 +266,17 @@ var Visuals = function(container, options) {
     }
 
     this.show = function() {
-        if (!this.isReplayShown())
-            recorder.build()
+        !this.isReplayShown() && recorder.build()
 
         visualsElement && visualsElement.classList.remove('hide')
     }
 
     this.showReplayOnly = function() {
+        !this.isReplayShown() && replay.show()
+
+        self.show()
         recorder.hide()
         notifier.hide()
-        replay.show()
     }
 
     this.isRecorderUnloaded = function() {
@@ -310,8 +311,8 @@ var Visuals = function(container, options) {
         return container.calculateHeight(options)
     }
 
-    this.getReplayParentElement = function() {
-        return replay.getParentElement()
+    this.getReplay = function() {
+        return replay
     }
 
     this.getBoundingClientRect = function() {
