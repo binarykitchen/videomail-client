@@ -133,6 +133,14 @@ var Form = function(container, formElement, options) {
     this.getSubmitButton = function() {
         return formElement.querySelector("[type='submit']")
     }
+
+    this.hide = function() {
+        formElement && formElement.classList.add('hide')
+    }
+
+    this.show = function() {
+        formElement && formElement.classList.remove('hide')
+    }
 }
 
 util.inherits(Form, EventEmitter)

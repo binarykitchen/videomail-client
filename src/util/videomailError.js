@@ -12,6 +12,7 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
 // static and public attribute of this class
 VideomailError.PERMISSION_DENIED = 'PERMISSION_DENIED'
 VideomailError.NOT_CONNECTED     = 'Not connected'
+VideomailError.DOM_EXCEPTION     = 'DOMException'
 VideomailError.STARTING_FAILED   = 'Starting video failed'
 
 // static function to convert an error into a videomail error
@@ -39,8 +40,12 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
     // whole code is ugly because all browsers behave so differently :(
 
     if (typeof(err) == 'object') {
+
         if (err.code == 1 && err.PERMISSION_DENIED == 1)
             errType = VideomailError.PERMISSION_DENIED
+
+        else if (err.constructor && err.constructor.name == VideomailError.DOM_EXCEPTION)
+            errType = VideomailError.DOM_EXCEPTION
 
         else if (err.message === VideomailError.STARTING_FAILED)
             errType = err.message
@@ -112,6 +117,11 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
         case 'DevicesNotFoundError':
             message     = 'Webcam is unavailable'
             explanation = 'Looks like another program has control over your webcam? Close it and come back.'
+            break
+
+        case VideomailError.DOM_EXCEPTION:
+            message     = VideomailError.DOM_EXCEPTION
+            explanation = err.toString()
             break
 
         default:

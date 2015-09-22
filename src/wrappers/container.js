@@ -484,6 +484,10 @@ var Container = function(options) {
         return element.parentNode == containerElement
     }
 
+    this.hideForm = function() {
+        form.hide()
+    }
+
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)
