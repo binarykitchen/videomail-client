@@ -31,10 +31,10 @@
             <fieldset>
                 <input name="key" value="" type="hidden">
                 <input name="from" type="email" required="required">
-                <textarea id="toEmailList" name="to" required="required"></textarea>
+                <input name="to" type="email" required="required" multiple/>
                 <input name="subject"type="text" required="required">
                 <textarea name="body" rows="4"></textarea>
-                <input id="send" disabled="" type="submit" value="✉ ">
+                <input id="send" disabled="" type="submit" value="✉ Send">
             </fieldset>
         </form>
 
@@ -53,26 +53,17 @@
                 })
 
             // CONTINUE FROM HERE:
-            // - WHERE IS THE REPLAY SHOWN EVENT?
-            // - MAKE THE ATTRIBUTES BELOW APPEAR IN THE FORM
-            // - WHAT IS WRONG WITH THE SUBMIT BUTTON?
             // - USE A SOURCE FROM YOUTUBE OR SOMEWHERE ELSE
             // - REMOVE ANY UNNECESSARY ATTRIBUTES
             videomailClient.replay({
-                "subject":          "sdf",
-                "from":             "michael.heuberger@binarykitchen.com",
-                "to":               "michael.heuberger@binarykitchen.com",
-                "body":             "sdfsdf",
-                "avgFps":           14.855543757125952,
+                "subject":          "i am a subject",
+                "from":             "from@binarykitchen.com",
+                "to":               "to1@binarykitchen.com, to2@binarykitchen.com",
+                "body":             "i am a body\nand a have a second line",
                 "width":            400,
                 "height":           300,
-                "siteName":         "videomail.io",
-                "alias":            "sdf-917649590070",
-                "dateCreated":      1442912652739,
                 "url":              "https://videomail.io/videomail/sdf-917649590070",
                 "key":              "11e5-6108-de7bdc00-ae04-33a7034f05d2",
-                "expiresAfter":     1445504652739,
-                "expirationPretty": "30 days",
                 "webm":             "https://videomail.io/videomail/sdf-917649590070/type/webm/",
                 "poster":           "https://videomail.io/videomail/sdf-917649590070/poster/",
             }, 'videomail')

@@ -20,6 +20,7 @@ var Replay = function(parentElement, options) {
         replayElement = h('video.' + options.selectors.replayClass, {
             autoplay:   true,
             autobuffer: true,
+            preload:    'auto',
             controls:   'controls'
         })
 
@@ -69,6 +70,9 @@ var Replay = function(parentElement, options) {
         if (videomail.mp4)
             this.setMp4Source(videomail.mp4)
 
+        if (videomail.poster)
+            replayElement.setAttribute('poster', videomail.poster)
+
         copyAttributes(newVideomail)
 
         this.show(videomail.width, videomail.height)
@@ -89,13 +93,12 @@ var Replay = function(parentElement, options) {
         // add a little delay to make sure the source is set
         setTimeout(function() {
             replayElement.load()
-        }, 30)
 
-        if (!isStandalone())
             if (!videomail)
-                this.emit(Events.PREVIEW_SHOWN)
+                self.emit(Events.PREVIEW_SHOWN)
             else
-                this.emit(Events.REPLAY_SHOWN)
+                self.emit(Events.REPLAY_SHOWN)
+        }, 30)
     }
 
     this.build = function() {

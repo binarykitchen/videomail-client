@@ -18,7 +18,7 @@ module.exports = {
 
     limitWidth: function(element, width) {
         var outerWidth = getOuterWidth(element)
-        return outerWidth < width ? outerWidth : width
+        return outerWidth > 0 && outerWidth < width ? outerWidth : width
     },
 
     // this is difficult to compute and is not entirely correct.

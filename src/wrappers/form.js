@@ -24,6 +24,19 @@ var Form = function(container, formElement, options) {
         return data
     }
 
+    this.loadVideomail = function(videomail) {
+        var limit = formElement.elements.length,
+            name
+
+        for (var i = 0; i < limit; i++) {
+            name = formElement.elements[i].name
+            if (videomail[name])
+                formElement.elements[i].value = videomail[name]
+        }
+
+        formElement.setAttribute('method', 'put')
+    }
+
     function isNotButton(element) {
         return element.tagName !== 'BUTTON' && element.type !== 'submit'
     }

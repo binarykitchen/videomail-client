@@ -149,7 +149,7 @@ var Container = function(options) {
         containerElement.classList.add('hide')
     }
 
-    function submitVideomail(formData, cb) {
+    function submitVideomail(formData, method, cb) {
         var FORM_FIELDS = {
                 'subject':      options.selectors.subjectInputName,
                 'from':         options.selectors.fromInputName,
@@ -165,14 +165,18 @@ var Container = function(options) {
                 videomailFormData[key] = formData[FORM_FIELDS[key]]
         })
 
-        videomailFormData.avgFps = visuals.getAvgFps()
-        videomailFormData.width  = visuals.getRecorderWidth()
-        videomailFormData.height = visuals.getRecorderHeight()
+        // when method is undefined, treat it as a post
+        if (isPost(method) || !method) {
+            videomailFormData.avgFps = visuals.getAvgFps()
+            videomailFormData.width  = visuals.getRecorderWidth()
+            videomailFormData.height = visuals.getRecorderHeight()
 
-        if (options.audio.enabled)
-            videomailFormData.sampleRate = visuals.getAudioSampleRate()
+            if (options.audio.enabled)
+                videomailFormData.sampleRate = visuals.getAudioSampleRate()
 
-        resource.post(videomailFormData, cb)
+            resource.post(videomailFormData, cb)
+        } else if (isPut(method))
+            resource.put(videomailFormData, cb)
     }
 
     function submitForm(formData, videomailResponse, url, cb) {
@@ -184,7 +188,7 @@ var Container = function(options) {
         resource.form(formData, url, cb)
     }
 
-    function finalizeSubmissions(err, videomail, response, formResponse) {
+    function finalizeSubmissions(err, method, videomail, response, formResponse) {
         self.endWaiting()
 
         if (err)
@@ -433,25 +437,33 @@ var Container = function(options) {
         return buttons.isRecordButtonEnabled()
     }
 
+    function isPost(method) {
+        return method && method.toUpperCase() == 'POST'
+    }
+
+    function isPut(method) {
+        return method && method.toUpperCase() == 'PUT'
+    }
+
     this.submitAll = function(formData, method, url) {
         this.beginWaiting()
         this.disableForm(true)
         this.emit(Events.SUBMITTING)
 
-        submitVideomail(formData, function(err, videomail, videomailResponse) {
+        submitVideomail(formData, method, function(err, videomail, videomailResponse) {
             // for now, accept POSTs only which have an URL unlike null and
             // treat all other submissions as direct submissions
 
-            if (!err && method && method.toUpperCase() == 'POST') {
+            if (!err && isPost(method)) {
 
                 if (!url || url === '')
                     url = document.baseURI // figure out URL automatically then
 
                 submitForm(formData, videomailResponse, url, function(err, formResponse) {
-                    finalizeSubmissions(err, videomail, videomailResponse, formResponse)
+                    finalizeSubmissions(err, method, videomail, videomailResponse, formResponse)
                 })
             } else
-                finalizeSubmissions(err, videomail, videomailResponse)
+                finalizeSubmissions(err, method, videomail, videomailResponse)
         })
     }
 
@@ -480,12 +492,17 @@ var Container = function(options) {
         return visuals.getReplay()
     }
 
-    this.isParentElementOf = function(element) {
-        return element.parentNode == containerElement
+    this.isOutsideElementOf = function(element) {
+        return element.parentNode != containerElement && element != containerElement
     }
 
     this.hideForm = function() {
         form.hide()
+    }
+
+    this.loadForm = function(videomail) {
+        form.loadVideomail(videomail)
+        this.validate()
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
