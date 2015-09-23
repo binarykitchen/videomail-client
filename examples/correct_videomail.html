@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+
+        <style type="text/css">
+            input[type="email"], input[type="text"], textarea, .buttons {
+                margin:  1em 0;
+                display: block;
+            }
+
+            .hide { display: none; }
+            #videomail, #email { float: left; }
+            #videomail { width: 400px; }
+
+            #email {
+                width:       400px;
+                margin-left: 1em;
+            }
+
+            #email input, #email textarea { width: 100%; }
+        </style>
+    </head>
+    <body>
+        <h1>A form to correct an existing videomail</h1>
+
+        <div id="videomail"></div>
+
+        <form id="email">
+            <fieldset>
+                <input name="key" value="" type="hidden">
+                <input name="from" type="email" required="required">
+                <input name="to" type="email" required="required" multiple/>
+                <input name="subject"type="text" required="required">
+                <textarea name="body" rows="4"></textarea>
+                <input id="send" disabled="" type="submit" value="✉ Send">
+            </fieldset>
+        </form>
+
+        <script src="/videomail-client.js"></script>
+        <script>
+            var VideomailClient = require('videomail-client'),
+                videomailClient = new VideomailClient({
+                    verbose: true,
+                    video: {
+                        width: 400
+                    },
+                    selectors: {
+                        formId:       'email',
+                        keyInputName: 'key'
+                    }
+                })
+
+            // CONTINUE FROM HERE:
+            // - USE A SOURCE FROM YOUTUBE OR SOMEWHERE ELSE
+            // - REMOVE ANY UNNECESSARY ATTRIBUTES
+            videomailClient.replay({
+                "subject":          "i am a subject",
+                "from":             "from@binarykitchen.com",
+                "to":               "to1@binarykitchen.com, to2@binarykitchen.com",
+                "body":             "i am a body\nand a have a second line",
+                "width":            400,
+                "height":           300,
+                "url":              "https://videomail.io/videomail/sdf-917649590070",
+                "key":              "11e5-6108-de7bdc00-ae04-33a7034f05d2",
+                "webm":             "https://videomail.io/videomail/sdf-917649590070/type/webm/",
+                "poster":           "https://videomail.io/videomail/sdf-917649590070/poster/",
+            }, 'videomail')
+        </script>
+    </body>
+</html>

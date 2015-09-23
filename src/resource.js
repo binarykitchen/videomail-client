@@ -41,19 +41,13 @@ module.exports = function(options) {
             })
     }
 
-    this.get = function(identifier, cb) {
-        if (options.cache && cache[identifier])
-            cb(null, cache[identifier])
-        else
-            fetch(identifier, cb)
-    }
-
-    this.post = function(videomail, cb) {
+    function write(method, videomail, cb) {
         var queryParams = {}
         queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
-        superagent
-            .post(options.baseUrl + '/videomail/')
+        var request = superagent(method, options.baseUrl + '/videomail/')
+
+        request
             .query(queryParams)
             .send(videomail)
             .timeout(options.timeout)
@@ -70,6 +64,21 @@ module.exports = function(options) {
                     cb(null, res.body.videomail, res.body)
                 }
             })
+    }
+
+    this.get = function(identifier, cb) {
+        if (options.cache && cache[identifier])
+            cb(null, cache[identifier])
+        else
+            fetch(identifier, cb)
+    }
+
+    this.post = function(videomail, cb) {
+        write('post', videomail, cb)
+    }
+
+    this.put = function(videomail, cb) {
+        write('put', videomail, cb)
     }
 
     this.form = function(formData, url, cb) {

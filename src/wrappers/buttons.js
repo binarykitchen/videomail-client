@@ -68,7 +68,8 @@ var Buttons = function(container, options) {
 
             buttonElement.innerHTML = text
 
-            if (submitButton)
+            // double check that submit button is already in the buttonsElement container
+            if (submitButton && buttonsElement.contains(submitButton))
                 buttonsElement.insertBefore(buttonElement, submitButton)
             else
                 buttonsElement.appendChild(buttonElement)
