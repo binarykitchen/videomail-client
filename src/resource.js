@@ -1,6 +1,6 @@
 var superagent = require('superagent'),
-
-    Constants  = require('./constants')
+    Constants  = require('./constants'),
+    CACHE_KEY  = 'alias'
 
 module.exports = function(options) {
 
@@ -18,9 +18,9 @@ module.exports = function(options) {
         return err
     }
 
-    function fetch(identifier, cb) {
+    function fetch(alias, cb) {
         superagent
-            .get('/videomail/' + identifier + '/snapshot')
+            .get('/videomail/' + alias + '/snapshot')
             .set('Accept', 'application/json')
             .set(Constants.SITE_NAME_LABEL, options.siteName)
             .timeout(options.timeouts.connection)
@@ -34,18 +34,31 @@ module.exports = function(options) {
                     var videomail = res.body
 
                     if (options.cache)
-                        cache[identifier] = videomail
+                        cache[CACHE_KEY] = videomail
 
                     cb(null, videomail)
                 }
             })
     }
 
-    function write(method, videomail, cb) {
-        var queryParams = {}
-        queryParams[Constants.SITE_NAME_LABEL] = options.siteName
+    function write(method, videomail, identifier, cb) {
 
-        var request = superagent(method, options.baseUrl + '/videomail/')
+        if (!cb) {
+            cb = identifier
+            identifier = null
+        }
+
+        var url         = options.baseUrl + '/videomail/',
+            queryParams = {},
+
+            request
+
+        if (identifier)
+            url += identifier
+
+        request = superagent(method, url)
+
+        queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
         request
             .query(queryParams)
@@ -58,19 +71,19 @@ module.exports = function(options) {
                 if (err)
                     cb(err)
                 else {
-                    if (options.cache)
-                        cache[videomail.alias] = res.body.videomail
+                    if (options.cache && videomail[CACHE_KEY])
+                        cache[videomail[CACHE_KEY]] = res.body.videomail
 
                     cb(null, res.body.videomail, res.body)
                 }
             })
     }
 
-    this.get = function(identifier, cb) {
-        if (options.cache && cache[identifier])
-            cb(null, cache[identifier])
+    this.get = function(alias, cb) {
+        if (options.cache && cache[alias])
+            cb(null, cache[alias])
         else
-            fetch(identifier, cb)
+            fetch(alias, cb)
     }
 
     this.post = function(videomail, cb) {
@@ -78,7 +91,7 @@ module.exports = function(options) {
     }
 
     this.put = function(videomail, cb) {
-        write('put', videomail, cb)
+        write('put', videomail, videomail.key, cb)
     }
 
     this.form = function(formData, url, cb) {
