@@ -26,12 +26,20 @@ var Form = function(container, formElement, options) {
 
     this.loadVideomail = function(videomail) {
         var limit = formElement.elements.length,
+            input,
             name
 
         for (var i = 0; i < limit; i++) {
-            name = formElement.elements[i].name
+            input = formElement.elements[i]
+            name  = input.name
+
             if (videomail[name])
-                formElement.elements[i].value = videomail[name]
+                input.value = videomail[name]
+
+            if (name == options.selectors.subjectInputName ||
+                name == options.selectors.fromInputName ||
+                name == options.selectors.bodyInputName)
+                input.disabled = true
         }
 
         formElement.setAttribute('method', 'put')

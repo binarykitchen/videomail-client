@@ -9,7 +9,7 @@ function arrayToString(array) {
                 lines.push(element.toString())
         })
 
-        return SEPARATOR + lines.join(SEPARATOR)
+        return lines.join(SEPARATOR)
     }
 }
 
@@ -24,7 +24,7 @@ function objectToString(object) {
                 lines.push(object[name].toString())
         })
 
-        return SEPARATOR + lines.join(SEPARATOR)
+        return lines.join(SEPARATOR)
     }
 }
 
