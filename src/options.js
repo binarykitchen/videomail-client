@@ -69,7 +69,7 @@ module.exports = {
         entertain:         false,                   // when true, user is entertained while waiting, see examples
         entertainClass:    'bg',
         entertainLimit:    6,
-        entertainInterval: 10000
+        entertainInterval: 9000
     },
     timeouts: {
         userMedia:  5e3,                            // increase if you want user give more time to enable webcam

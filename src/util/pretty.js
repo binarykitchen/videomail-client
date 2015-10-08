@@ -1,4 +1,5 @@
-var SEPARATOR = '<br/>- '
+var DASH      = '- ',
+    SEPARATOR = '<br/>' + DASH
 
 function arrayToString(array) {
     if (array.length > 0) {
@@ -9,7 +10,7 @@ function arrayToString(array) {
                 lines.push(element.toString())
         })
 
-        return SEPARATOR + lines.join(SEPARATOR)
+        return DASH + lines.join(SEPARATOR)
     }
 }
 
@@ -24,7 +25,7 @@ function objectToString(object) {
                 lines.push(object[name].toString())
         })
 
-        return SEPARATOR + lines.join(SEPARATOR)
+        return DASH + lines.join(SEPARATOR)
     }
 }
 
