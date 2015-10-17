@@ -458,10 +458,9 @@ var Recorder = function(visuals, replay, options) {
                 connected = false
 
                 if (!err && self.isPaused())
-                    // todo: fix within https://github.com/binarykitchen/videomail-client/issues/46
                     err = VideomailError.create(
-                        'Pause is too long.',
-                        'Sorry, please try again and keep the pause under 60 seconds.',
+                        'Pause was too long.',
+                        'Sorry, please try again and do not pause too long otherwise connection closes.',
                         options
                     )
 
