@@ -56,14 +56,14 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
         else if (err.type === 'error' && err.target.bufferedAmount === 0)
             errType = VideomailError.NOT_CONNECTED
 
-        if (err.stack)
-            stack = err.stack
-
     } else
         if (err === VideomailError.NOT_CONNECTED)
             errType = VideomailError.NOT_CONNECTED
         else
             errType = err
+
+    if (err.stack)
+        stack = err.stack
 
     switch (errType) {
         case 'NotFoundError':
@@ -145,8 +145,10 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
             }
 
             // for weird, undefined cases
-            if (!message && !explanation)
-                message = errType
+            if (!message && !explanation) {
+                message     = errType
+                explanation = err.toString()
+            }
 
             break
     }
