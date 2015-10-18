@@ -6,6 +6,7 @@ module.exports = function(options) {
     options = options || {}
 
     var firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
+        edgeDownload     = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126',
         chromeDownload   = 'http://www.google.com/chrome/',
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
         browseHappyLink  = 'http://browsehappy.com',
@@ -49,8 +50,9 @@ module.exports = function(options) {
 
         else if (isIE)
             warning = 'Forget Internet Explorer!<br/>Better pick' +
-                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>' +
-                      ' or <a href="' + firefoxDownload + '" target="_blank">Firefox</a>.'
+                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
+                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>' +
+                      ' or <a href="' + edgeDownload + '" target="_blank">Edge</a>.'
 
         else if (isSafari)
             warning = 'Safari has no webcam support yet.<br/>Better pick' +
@@ -77,8 +79,9 @@ module.exports = function(options) {
                 warning = 'For that, your browser needs an <a href="' + browseHappyLink + '" target="_blank">upgrade</a>.'
             else
                 warning = 'Hence we recommend you to use either ' +
-                          '<a href="' + chromeDownload + '" target="_blank">Chrome</a> ' +
-                          'or <a href="' + firefoxDownload + '" target="_blank">Firefox</a> instead.<br/>' +
+                          '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
+                          '<a href="' + firefoxDownload + '" target="_blank">Firefox</a> or ' +
+                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> instead.<br/>' +
                           '<a href="http://caniuse.com/stream" target="_blank">Here is evidence</a>.'
         }
 
@@ -92,7 +95,7 @@ module.exports = function(options) {
         var warning = getRecommendation()
 
         if (!warning)
-            warning =   '<a href="' + browseHappyLink + '" target="_blank">Upgrading your old browser</a> ' +
+            warning =   '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> ' +
                         'might help.'
 
         return warning
@@ -120,7 +123,7 @@ module.exports = function(options) {
         if (!okBrowser || !this.canRecord()) {
 
             err = VideomailError.create({
-                message: 'Sorry, your old browser has no webcam support',
+                message: 'Sorry, your browser has no webcam support',
             }, getUserMediaWarning(), options, true)
         }
 
