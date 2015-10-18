@@ -15,6 +15,13 @@ VideomailError.NOT_CONNECTED     = 'Not connected'
 VideomailError.DOM_EXCEPTION     = 'DOMException'
 VideomailError.STARTING_FAILED   = 'Starting video failed'
 
+function stringify(anything) {
+    if (anything && Object.keys(anything).length > 0)
+        return JSON.stringify(anything)
+    else
+        return undefined
+}
+
 // static function to convert an error into a videomail error
 
 VideomailError.create = function(err, explanation, options, isBrowserProblem) {
@@ -62,7 +69,7 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
         else
             errType = err
 
-    if (err.stack)
+    if (err && err.stack)
         stack = err.stack
 
     switch (errType) {
@@ -121,18 +128,26 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
 
         case VideomailError.DOM_EXCEPTION:
             message     = VideomailError.DOM_EXCEPTION
-            explanation = err.toString()
+            explanation = stringify(err)
             break
 
         default:
             if (typeof err === 'string')
                 message = err
             else {
-                if (err && err.message && err.message.toString)
-                    message = err.message.toString()
+                if (err && err.message) {
+                    if (err.message.toString)
+                        message = err.message.toString()
+                    else
+                        message = stringify(err.message)
+                }
 
-                if (err && err.explanation && err.explanation.toString)
-                    explanation = err.explanation.toString()
+                if (err && err.explanation) {
+                    if (err.explanation.toString)
+                        explanation = err.explanation.toString()
+                    else
+                        explanation = stringify(err.explanation)
+                }
 
                 if (err && err.details) {
                     var details = pretty(err.details)
@@ -145,9 +160,11 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
             }
 
             // for weird, undefined cases
-            if (!message && !explanation) {
-                message     = errType
-                explanation = err.toString()
+            if (!message) {
+                message = errType
+
+                if (!explanation)
+                    explanation = stringify(err)
             }
 
             break
