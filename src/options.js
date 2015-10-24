@@ -76,6 +76,5 @@ module.exports = {
         connection: 1e4                             // increase if connection is slow
     },
     displayErrors:    true,                         // show errors inside the container?
-    forceFlash:       false,                        // just for testing to see if the flash fallback is working fine
     fakeUaString:     null                          // just for testing purposes to simulare VM on diff browsers
 }

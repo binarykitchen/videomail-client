@@ -92,11 +92,14 @@ gulp.task('browserify', ['clean:js'], function(cb) {
 })
 
 gulp.task('connect', ['build'], function() {
+    //suppress invalid self-signed ssl certificate error
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
     plugins.connect.server({
         root:       ['examples', 'dist'],
         port:       8080,
         livereload: true,
-        // https:      true,
+        https:      true, // todo: fix expired certificate, see https://github.com/AveVlad/gulp-connect/issues/140
         middleware: function() {
             var router = new Router()
 
