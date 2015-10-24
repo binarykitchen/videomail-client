@@ -157,63 +157,6 @@ var Recorder = function(visuals, replay, options) {
         }, userMediaErrorCallback)
     }
 
-    function loadFlashWebcam() {
-        debug('Recorder: loadFlashWebcam()')
-
-        visuals.removeChild(recorderElement)
-
-        recorderElement = h('object.' + options.selectors.userMediaClass, {
-            classid:   'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-            type:      'application/x-shockwave-flash',
-            data:      'flash/jscam_canvas_only.swf',
-            width:     recorderElement.width,
-            height:    recorderElement.height,
-            classList: recorderElement.classList
-        }, h('param', {
-            name:  'movie',
-            value: 'flash/jscam_canvas_only.swf'
-        }), h('param', {
-            name:  'FlashVars',
-            value: "mode=callback&amp;quality=" + options.image.quality
-        }), h('param', {
-            name:  'allowScriptAccess',
-            value: 'always'
-        }))
-
-        visuals.appendChild(recorderElement)
-
-        function register(run) {
-
-            if (recorderElement.capture !== undefined) {
-
-                userMediaLoading = false
-
-                if (showUserMedia()) {
-                    clearUserMediaTimeout()
-
-                    // CONTINUE ISSUE #47 FROM HERE; more see:
-                    // https://github.com/addyosmani/getUserMedia.js/blob/gh-pages/lib/getUserMedia.js#L86
-                    // onUserMediaReady()
-
-                    // OR CONSIDER USING:
-                    // https://github.com/unshiftio/swfobject
-                }
-
-            } else if (run < 1)
-                // Flash movie not yet registered
-                userMediaErrorCallback(new Error('Flash movie not yet registered'))
-            else
-                // Flash interface not ready yet
-                setTimeout(register, 1e3 * (4 - run), --run)
-        }
-
-        register(3)
-    }
-
-    function useFlash() {
-        return options.forceFlash || !navigator.getUserMedia_
-    }
-
     function loadUserMedia() {
 
         if (userMediaLoaded) {
@@ -235,10 +178,7 @@ var Recorder = function(visuals, replay, options) {
 
             userMediaLoading = true
 
-            if (useFlash())
-                loadFlashWebcam()
-            else
-                loadGenuineUserMedia()
+            loadGenuineUserMedia()
 
         } catch (exc) {
             userMediaLoading = false

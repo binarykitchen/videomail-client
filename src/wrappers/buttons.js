@@ -151,6 +151,10 @@ var Buttons = function(container, options) {
         hide(previewButton)
     }
 
+    function onReplayShown() {
+        self.hide()
+    }
+
     function onUserMediaReady() {
         onFormReady()
 
@@ -314,6 +318,8 @@ var Buttons = function(container, options) {
             onHidden()
         }).on(Events.FORM_READY, function() {
             onFormReady()
+        }).on(Events.REPLAY_SHOWN, function() {
+            onReplayShown()
         }).on(Events.ERROR, function(err) {
             // since https://github.com/binarykitchen/videomail-client/issues/60
             // we hide areas to make it easier for the user
