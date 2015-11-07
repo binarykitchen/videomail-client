@@ -65,6 +65,8 @@ module.exports = function(recorder, options) {
 
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
+        this.stop()
+
         var onPlayReached           = false,
             onLoadedMetaDataReached = false
 
@@ -126,6 +128,17 @@ module.exports = function(recorder, options) {
             }
         }
 
+        function onCanPlayThrough() {
+            rawVisualUserMedia.removeEventListener &&
+            rawVisualUserMedia.removeEventListener('canplaythrough', onCanPlayThrough)
+
+            options.debug('UserMedia: onCanPlayThrough()')
+
+            if (hasInvalidDimensions()) {
+                options.debug('UserMedia: still invalid')
+            }
+        }
+
         try {
             var videoTrack, videoTracks
 
@@ -149,39 +162,44 @@ module.exports = function(recorder, options) {
 
             setVisualStream(localMediaStream)
 
-            // useful list of all available user media related events
-            // var EVENTS = [
-            //     'audioprocess',
-            //     'canplay',
-            //     'canplaythrough',
-            //     'durationchange',
-            //     'emptied',
-            //     'ended',
-            //     'loadeddata',
-            //     'loadedmetadata',
-            //     'MozAudioAvailable',
-            //     'pause',
-            //     'play',
-            //     'playing',
-            //     'ratechange',
-            //     'seeked',
-            //     'seeking',
-            //     'stalled',
-            //     'suspend',
-            //     'timeupdate',
-            //     'volumechange',
-            //     'waiting',
-            //     'complete'
-            // ]
+            var heavyDebugging = false
 
-            // EVENTS.forEach(function(eventName) {
-            //     rawVisualUserMedia.addEventListener(eventName, function() {
-            //         console.log('userMedia event:', eventName)
-            //     }, false)
-            // })
+            if (heavyDebugging) {
+                // useful list of all available user media related events
+                var EVENTS = [
+                    'audioprocess',
+                    'canplay',
+                    'canplaythrough',
+                    'durationchange',
+                    'emptied',
+                    'ended',
+                    'loadeddata',
+                    'loadedmetadata',
+                    'MozAudioAvailable',
+                    'pause',
+                    'play',
+                    'playing',
+                    'ratechange',
+                    'seeked',
+                    'seeking',
+                    'stalled',
+                    'suspend',
+                    'timeupdate',
+                    'volumechange',
+                    'waiting',
+                    'complete'
+                ]
 
-            rawVisualUserMedia.addEventListener('play',            onPlay)
+                EVENTS.forEach(function(eventName) {
+                    rawVisualUserMedia.addEventListener(eventName, function() {
+                        console.log('userMedia event:', eventName)
+                    }, false)
+                })
+            }
+
+            rawVisualUserMedia.addEventListener('canplaythrough',  onCanPlayThrough)
             rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
+            rawVisualUserMedia.addEventListener('play',            onPlay)
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
