@@ -10,6 +10,8 @@ var Form = function(container, formElement, options) {
     EventEmitter.call(this, options, 'Form')
 
     var self = this,
+
+        disableContainerValidation,
         keyInput
 
     function getData() {
@@ -82,6 +84,12 @@ var Form = function(container, formElement, options) {
                 textElements[i].addEventListener('input', function() {
                     container.validate()
                 })
+
+                // because of angular's digest cycle, validate again when it became invalid
+                textElements[i].addEventListener('invalid', function() {
+                    if (!disableContainerValidation)
+                        container.validate()
+                })
             }
 
             var selectElements = formElement.querySelectorAll('select')
@@ -148,7 +156,14 @@ var Form = function(container, formElement, options) {
     }
 
     this.validate = function() {
-        return formElement.checkValidity()
+        // prevents endless validation loop
+        disableContainerValidation = true
+
+        var formIsValid = formElement.checkValidity()
+
+        disableContainerValidation = false
+
+        return formIsValid
     }
 
     this.getSubmitButton = function() {
