@@ -24,8 +24,8 @@
     "major": "./src/bash_scripts/bump.sh --importance=major"
   },
   "engines": {
-    "node": "~4.2.0",
-    "npm": "~2.10.0"
+    "node": ">=4.1.0",
+    "npm": ">=2.9.0"
   },
   "keywords": [
     "webcam",
