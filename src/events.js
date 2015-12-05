@@ -27,5 +27,7 @@ module.exports = keymirror({
   FIRST_FRAME_SENT:     null, // emitted once when fist frame has been sent to server
   HIDE:                 null, // emitted when hidden
   NOTIFYING:            null, // notifies user about something (not blocking)
+  ENABLING_AUDIO:       null, // about to enable audio
+  DISABLING_AUDIO:      null, // about to disable audio
   LOADED_META_DATA:     null  // raised when webcam knows its dimensions
 })

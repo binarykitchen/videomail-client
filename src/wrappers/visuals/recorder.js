@@ -132,7 +132,7 @@ var Recorder = function(visuals, replay, options) {
     function loadGenuineUserMedia() {
         navigator.getUserMedia_({
             video: true,
-            audio: options.audio.enabled
+            audio: options.isAudioEnabled()
         }, function(localStream) {
 
             userMediaLoading = false
@@ -477,7 +477,7 @@ var Recorder = function(visuals, replay, options) {
             limitReached: limitReached
         }
 
-        if (options.audio.enabled) {
+        if (options.isAudioEnabled()) {
             args.samplesCount = samplesCount
             args.sampleRate   = userMedia.getAudioSampleRate()
         }
@@ -495,6 +495,17 @@ var Recorder = function(visuals, replay, options) {
         writeCommand('back', cb)
     }
 
+    function reInitialiseAudio() {
+        clearUserMediaTimeout()
+
+        // important to free memory
+        userMedia && userMedia.stop()
+
+        userMediaLoaded = key = canvas = ctx = null
+
+        loadUserMedia()
+    }
+
     this.unload = function(e) {
         if (!unloaded) {
             var cause
@@ -503,6 +514,8 @@ var Recorder = function(visuals, replay, options) {
                 cause = e.name || e.statusText || e.toString()
 
             debug('Recorder: unload()' + (cause ? ', cause: ' + cause : ''))
+
+            userMedia && userMedia.unload()
 
             this.reset()
 
@@ -530,10 +543,7 @@ var Recorder = function(visuals, replay, options) {
             // important to free memory
             userMedia && userMedia.stop()
 
-            userMediaLoaded =
-            key =
-            canvas =
-            ctx = null
+            userMediaLoaded = key = canvas = ctx = null
         }
     }
 
@@ -709,6 +719,12 @@ var Recorder = function(visuals, replay, options) {
             .on(Events.LOADED_META_DATA, function() {
                 correctDimensions()
             })
+            .on(Events.DISABLING_AUDIO, function() {
+                reInitialiseAudio()
+            })
+            .on(Events.ENABLING_AUDIO, function() {
+                reInitialiseAudio()
+            })
     }
 
     this.build = function() {
@@ -728,10 +744,9 @@ var Recorder = function(visuals, replay, options) {
 
             correctDimensions()
 
-            if (options.audio.enabled)
-                // prevent audio feedback, see
-                // https://github.com/binarykitchen/videomail-client/issues/35
-                recorderElement.muted = true
+            // prevent audio feedback, see
+            // https://github.com/binarykitchen/videomail-client/issues/35
+            recorderElement.muted = true
 
             userMedia = new UserMedia(this, options)
 

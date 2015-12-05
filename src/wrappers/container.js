@@ -171,7 +171,7 @@ var Container = function(options) {
             videomailFormData.width  = visuals.getRecorderWidth()
             videomailFormData.height = visuals.getRecorderHeight()
 
-            if (options.audio.enabled)
+            if (options.isAudioEnabled())
                 videomailFormData.sampleRate = visuals.getAudioSampleRate()
 
             resource.post(videomailFormData, cb)
@@ -503,6 +503,16 @@ var Container = function(options) {
     this.loadForm = function(videomail) {
         form.loadVideomail(videomail)
         this.validate()
+    }
+
+    this.enableAudio = function() {
+        options.setAudioEnabled(true)
+        this.emit(Events.ENABLING_AUDIO)
+    }
+
+    this.disableAudio = function() {
+        options.setAudioEnabled(false)
+        this.emit(Events.DISABLING_AUDIO)
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)

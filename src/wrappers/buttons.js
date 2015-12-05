@@ -18,37 +18,88 @@ var Buttons = function(container, options) {
         previewButton,
         recordAgainButton,
         submitButton,
+
+        audioOnRadioButton,
+        audioOffRadioButton,
+
         built
 
     function hide(element) {
-        element.classList.add('hide')
+        if (element)
+            element.classList.add('hide')
     }
 
     function show(element) {
-        element.classList.remove('hide')
+        if (element)
+            element.classList.remove('hide')
     }
 
     function isShown(element) {
-        return !element.classList.contains('hide')
+        return element && !element.classList.contains('hide')
+    }
+
+    function disable(element) {
+        if (element)
+            element.disabled = true
+    }
+
+    function enable(element) {
+        if (element)
+            element.disabled = false
     }
 
     function adjustButton(buttonElement, show, type) {
-        buttonElement.disabled = true
-        buttonElement.type     = type || 'button'
+        disable(buttonElement)
+
+        buttonElement.type = type || 'button'
 
         !show && hide(buttonElement)
 
         return buttonElement
     }
 
-    function replaceClickHandler(buttonElement, clickHandler) {
+    function replaceClickHandler(element, clickHandler) {
 
         var wrappedClickHandler = function(e) {
             e && e.preventDefault()
             clickHandler()
         }
 
-        buttonElement.onclick = wrappedClickHandler
+        element.onclick = wrappedClickHandler
+    }
+
+    function makeRadioButton(options) {
+        var radioButtonElement
+
+        if (options.id)
+            radioButtonElement = document.getElementById(options.id)
+
+        if (!radioButtonElement) {
+
+            radioButtonElement = h('input#' + options.id, {
+                type:    'radio',
+                name:    options.name,
+                value:   options.value,
+                checked: options.checked
+            })
+
+            var radioButtonGroup = h('p.radioGroup', radioButtonElement, h('label', {
+                'htmlFor': options.id
+            }, options.label))
+
+            // double check that submit button is already in the buttonsElement container
+            if (submitButton && buttonsElement.contains(submitButton))
+                buttonsElement.insertBefore(radioButtonGroup, submitButton)
+            else
+                buttonsElement.appendChild(radioButtonGroup)
+        }
+
+        if (options.changeHandler)
+            radioButtonElement.onchange = options.changeHandler
+
+        disable(radioButtonElement)
+
+        return radioButtonElement
     }
 
     function makeButton(buttonClass, text, clickHandler, show, id, type) {
@@ -94,7 +145,7 @@ var Buttons = function(container, options) {
                     'submit'
                 )
             else
-                submitButton.disabled = true
+                disable(submitButton)
 
             // no need to listen to the submit event when it's already listened
             // within the form element class
@@ -140,6 +191,30 @@ var Buttons = function(container, options) {
             recordAgain,
             false
         )
+
+        if (options.audio && options.audio.switch) {
+            audioOnRadioButton = makeRadioButton({
+                id:            'audioOnOption',
+                name:          'audio',
+                value:         'on',
+                label:         'Audio On',
+                checked:       options.isAudioEnabled(),
+                changeHandler: function() {
+                    container.enableAudio()
+                }
+            })
+
+            audioOffRadioButton = makeRadioButton({
+                id:            'audioOffOption',
+                name:          'audio',
+                value:         'off',
+                label:         'Audio Off',
+                checked:       !options.isAudioEnabled(),
+                changeHandler: function() {
+                    container.disableAudio()
+                }
+            })
+        }
     }
 
     function onFormReady() {
@@ -147,7 +222,7 @@ var Buttons = function(container, options) {
         if (!isShown(recordAgainButton))
             show(recordButton)
 
-        previewButton.disabled = true
+        disable(previewButton)
         hide(previewButton)
     }
 
@@ -159,15 +234,19 @@ var Buttons = function(container, options) {
         onFormReady()
 
         if (isShown(recordButton))
-            recordButton.disabled = false
+            enable(recordButton)
 
-        if (submitButton)
-            submitButton.disabled = true
+        if (isShown(audioOnRadioButton))
+            enable(audioOnRadioButton)
+
+        if (isShown(audioOffRadioButton))
+            enable(audioOffRadioButton)
+
+        disable(submitButton)
     }
 
     function onResetting() {
-        if (submitButton)
-            submitButton.disabled = true
+        disable(submitButton)
 
         self.reset()
     }
@@ -175,20 +254,21 @@ var Buttons = function(container, options) {
     function onPreview() {
         hide(recordButton)
         hide(previewButton)
+        disable(audioOnRadioButton)
+        disable(audioOffRadioButton)
 
         show(recordAgainButton)
-        recordAgainButton.disabled = false
+        enable(recordAgainButton)
     }
 
     this.enableSubmit = function() {
-        if (submitButton)
-            submitButton.disabled = false
+        enable(submitButton)
     }
 
     function onPaused() {
         pauseButton && hide(pauseButton)
         show(resumeButton)
-        resumeButton.disabled = false
+        enable(resumeButton)
         hide(recordButton)
         show(previewButton)
     }
@@ -199,10 +279,10 @@ var Buttons = function(container, options) {
 
         if (pauseButton) {
             show(pauseButton)
-            pauseButton.disabled = false
+            enable(pauseButton)
         }
 
-        previewButton.disabled = false
+        enable(previewButton)
         show(previewButton)
     }
 
@@ -211,8 +291,12 @@ var Buttons = function(container, options) {
         // check framesCount first (coming from recorder)
         if (framesCount > 1)
             onFirstFrameSent()
-        else
-            recordAgainButton.disabled = recordButton.disabled = true
+        else {
+            disable(audioOffRadioButton)
+            disable(audioOnRadioButton)
+            disable(recordAgainButton)
+            disable(recordButton)
+        }
     }
 
     function onResuming() {
@@ -220,48 +304,45 @@ var Buttons = function(container, options) {
         hide(recordButton)
 
         if (pauseButton) {
-            pauseButton.disabled = false
+            enable(pauseButton)
             show(pauseButton)
         }
     }
 
     function onStopping() {
-        previewButton.disabled = true
-
-        pauseButton && hide(pauseButton)
-        resumeButton && hide(resumeButton)
+        disable(previewButton)
+        hide(pauseButton)
+        hide(resumeButton)
     }
 
     function onCountdown() {
-        recordButton.disabled = true
+        disable(recordButton)
     }
 
     function onSubmitting() {
-        submitButton.disabled = recordAgainButton.disabled = true
+        disable(submitButton)
+        disable(recordAgainButton)
     }
 
     function onSubmitted() {
-        previewButton.disabled = true
+        disable(previewButton)
 
         if (options.enablePause)
             show(previewButton)
 
         hide(recordAgainButton)
 
-        recordButton.disabled = true
+        disable(recordButton)
         show(recordButton)
-
-        submitButton.disabled = true
+        disable(submitButton)
     }
 
     function onInvalid() {
-        if (submitButton)
-            submitButton.disabled = true
+        disable(submitButton)
     }
 
     function onValid() {
-        if (submitButton)
-            submitButton.disabled = false
+        enable(submitButton)
     }
 
     function onHidden() {
@@ -272,8 +353,7 @@ var Buttons = function(container, options) {
     }
 
     function recordAgain() {
-        recordAgainButton.disabled = true
-
+        disable(recordAgainButton)
         container.beginWaiting()
         container.recordAgain()
     }
@@ -283,7 +363,7 @@ var Buttons = function(container, options) {
     }
 
     function record() {
-        recordButton.disabled = true
+        disable(recordButton)
         container.record()
     }
 
@@ -331,13 +411,11 @@ var Buttons = function(container, options) {
     this.reset = function() {
         options.debug('Buttons: reset()')
 
-        if (pauseButton)
-            pauseButton.disabled = true
-
-        if (resumeButton)
-            resumeButton.disabled = true
-
-        recordButton.disabled = previewButton.disabled = recordAgainButton.disabled = true
+        disable(pauseButton)
+        disable(resumeButton)
+        disable(recordButton)
+        disable(previewButton)
+        disable(recordAgainButton)
     }
 
     this.isRecordAgainButtonEnabled = function() {
