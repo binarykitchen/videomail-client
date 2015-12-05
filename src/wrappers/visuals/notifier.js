@@ -38,7 +38,7 @@ var Notifier = function(visuals, options) {
     function onProgress(frameProgress, sampleProgress) {
         var overallProgress
 
-        if (options.audio.enabled) {
+        if (options.isAudioEnabled()) {
             overallProgress = 'Video: ' + frameProgress
 
             if (sampleProgress)

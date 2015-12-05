@@ -17,9 +17,6 @@ module.exports = function(recorder, options) {
 
         audioRecorder
 
-    if (options && options.audio && options.audio.enabled)
-        audioRecorder = new AudioRecorder(this, options)
-
     function attachMediaStream(stream) {
         if (typeof rawVisualUserMedia.srcObject !== 'undefined')
             rawVisualUserMedia.srcObject = stream
@@ -70,6 +67,9 @@ module.exports = function(recorder, options) {
         var onPlayReached           = false,
             onLoadedMetaDataReached = false
 
+        if (options && options.isAudioEnabled())
+            audioRecorder = new AudioRecorder(this, options)
+
         function fireCallbacks() {
             if (onPlayReached && onLoadedMetaDataReached) {
                 videoCallback()
@@ -78,7 +78,7 @@ module.exports = function(recorder, options) {
                     audioRecorder.init(localMediaStream)
 
                     self.on(Events.SENDING_FIRST_FRAME, function() {
-                        audioRecorder.record(audioCallback)
+                        audioRecorder && audioRecorder.record(audioCallback)
                     })
                 }
             }
@@ -86,7 +86,7 @@ module.exports = function(recorder, options) {
 
         function onPlay() {
             try {
-                options.debug('UserMedia: onPlay()')
+                options.debug('UserMedia: onPlay()', 'audio =', options.isAudioEnabled())
 
                 rawVisualUserMedia.removeEventListener &&
                 rawVisualUserMedia.removeEventListener('play', onPlay)
@@ -221,6 +221,7 @@ module.exports = function(recorder, options) {
 
             audioRecorder && audioRecorder.stop()
 
+            audioRecorder = null
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
@@ -301,5 +302,9 @@ module.exports = function(recorder, options) {
             return audioRecorder.getSampleRate()
         else
             return -1
+    }
+
+    this.unload = function() {
+        audioRecorder && audioRecorder.unload()
     }
 }

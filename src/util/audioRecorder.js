@@ -77,6 +77,13 @@ module.exports = function(userMedia, options) {
             scriptProcessor.onaudioprocess = undefined
     }
 
+    this.unload = function() {
+        options.debug('AudioRecorder: unload()')
+
+        if (getAudioContext())
+            getAudioContext().close()
+    }
+
     this.getSampleRate = function() {
         if (getAudioContext())
             return getAudioContext().sampleRate

@@ -11,11 +11,12 @@
         <script>
             var VideomailClient = require('videomail-client'),
                 videomailClient = new VideomailClient({
-                    verbose:            true,
-                    enableAutoPause:    false,
-                    disableSubmit:      true,
+                    verbose:         true,
+                    enableAutoPause: false,
+                    disableSubmit:   true,
                     audio: {
-                        enabled: true
+                        enabled: true,
+                        switch:  true
                     },
                     image: {
                         quality: .4

@@ -2,6 +2,9 @@
 
 module.exports = {
     addFunctions: function(options) {
+
+        var audioEnabled = options.audio && options.audio.enabled
+
         options.hasDefinedHeight = function() {
             return options.video.height && options.video.height != 'auto'
         }
@@ -25,6 +28,14 @@ module.exports = {
                 ratio = options.video.height / options.video.width
 
             return ratio
+        }
+
+        options.isAudioEnabled = function() {
+            return audioEnabled
+        }
+
+        options.setAudioEnabled = function(enabled) {
+            audioEnabled = enabled
         }
     }
 }
