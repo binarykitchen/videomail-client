@@ -515,8 +515,6 @@ var Recorder = function(visuals, replay, options) {
 
             debug('Recorder: unload()' + (cause ? ', cause: ' + cause : ''))
 
-            userMedia && userMedia.unload()
-
             this.reset()
 
             clearUserMediaTimeout()

@@ -128,6 +128,7 @@ module.exports = function(recorder, options) {
             }
         }
 
+        // not really needed, just an useful listener for debugging
         function onCanPlayThrough() {
             rawVisualUserMedia.removeEventListener &&
             rawVisualUserMedia.removeEventListener('canplaythrough', onCanPlayThrough)
@@ -153,14 +154,12 @@ module.exports = function(recorder, options) {
                 var description
 
                 if (videoTrack.label && videoTrack.label.length > 0)
-                    description = videoTracks.label
+                    description = videoTrack.label
                 else
                     description = videoTrack.kind
 
                 options.debug('UserMedia: detected', description ? description : '')
             }
-
-            setVisualStream(localMediaStream)
 
             var heavyDebugging = false
 
@@ -200,6 +199,8 @@ module.exports = function(recorder, options) {
             rawVisualUserMedia.addEventListener('canplaythrough',  onCanPlayThrough)
             rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
             rawVisualUserMedia.addEventListener('play',            onPlay)
+
+            setVisualStream(localMediaStream)
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
@@ -302,9 +303,5 @@ module.exports = function(recorder, options) {
             return audioRecorder.getSampleRate()
         else
             return -1
-    }
-
-    this.unload = function() {
-        audioRecorder && audioRecorder.unload()
     }
 }
