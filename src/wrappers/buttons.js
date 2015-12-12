@@ -197,7 +197,7 @@ var Buttons = function(container, options) {
                 id:            'audioOnOption',
                 name:          'audio',
                 value:         'on',
-                label:         'Audio On',
+                label:         'Audio On (Beta)',
                 checked:       options.isAudioEnabled(),
                 changeHandler: function() {
                     container.enableAudio()
@@ -317,6 +317,8 @@ var Buttons = function(container, options) {
 
     function onCountdown() {
         disable(recordButton)
+        disable(audioOffRadioButton)
+        disable(audioOnRadioButton)
     }
 
     function onSubmitting() {
