@@ -19,33 +19,69 @@ var Buttons = function(container, options) {
         recordAgainButton,
         submitButton,
 
-        audioOnRadioButton,
-        audioOffRadioButton,
+        audioOnRadioPair,
+        audioOffRadioPair,
 
         built
 
-    function hide(element) {
-        if (element)
+    function hide(elements) {
+        if (elements && !Array.isArray(elements)) {
+            elements = [elements]
+        }
+
+        elements && elements.forEach(function(element) {
             element.classList.add('hide')
+        })
     }
 
-    function show(element) {
-        if (element)
+    function show(elements) {
+        if (elements && !Array.isArray(elements)) {
+            elements = [elements]
+        }
+
+        elements && elements.forEach(function(element) {
             element.classList.remove('hide')
+        })
     }
 
-    function isShown(element) {
-        return element && !element.classList.contains('hide')
+    function isShown(elements) {
+        var isShown = elements && true
+
+        if (elements && !Array.isArray(elements)) {
+            elements = [elements]
+        }
+
+        elements && elements.forEach(function(element) {
+            isShown = isShown && !element.classList.contains('hide')
+        })
+
+        return isShown
     }
 
-    function disable(element) {
-        if (element)
-            element.disabled = true
+    function disable(elements) {
+        if (elements && !Array.isArray(elements)) {
+            elements = [elements]
+        }
+
+        elements && elements.forEach(function(element) {
+            if (element.tagName == 'INPUT' || element.tagName == 'BUTTON')
+                element.disabled = true
+            else
+                element.classList.add('disabled')
+        })
     }
 
-    function enable(element) {
-        if (element)
-            element.disabled = false
+    function enable(elements) {
+        if (elements && !Array.isArray(elements)) {
+            elements = [elements]
+        }
+
+        elements && elements.forEach(function(element) {
+            if (element.tagName == 'INPUT' || element.tagName == 'BUTTON')
+                element.disabled = false
+            else
+                element.classList.remove('disabled')
+        })
     }
 
     function adjustButton(buttonElement, show, type) {
@@ -68,8 +104,9 @@ var Buttons = function(container, options) {
         element.onclick = wrappedClickHandler
     }
 
-    function makeRadioButton(options) {
-        var radioButtonElement
+    function makeRadioButtonPair(options) {
+        var radioButtonElement,
+            radioButtonGroup
 
         if (options.id)
             radioButtonElement = document.getElementById(options.id)
@@ -83,7 +120,7 @@ var Buttons = function(container, options) {
                 checked: options.checked
             })
 
-            var radioButtonGroup = h('p.radioGroup', radioButtonElement, h('label', {
+            radioButtonGroup = h('p.radioGroup', radioButtonElement, h('label', {
                 'htmlFor': options.id
             }, options.label))
 
@@ -99,7 +136,7 @@ var Buttons = function(container, options) {
 
         disable(radioButtonElement)
 
-        return radioButtonElement
+        return [radioButtonElement, radioButtonGroup]
     }
 
     function makeButton(buttonClass, text, clickHandler, show, id, type) {
@@ -193,18 +230,7 @@ var Buttons = function(container, options) {
         )
 
         if (options.audio && options.audio.switch) {
-            audioOnRadioButton = makeRadioButton({
-                id:            'audioOnOption',
-                name:          'audio',
-                value:         'on',
-                label:         'Audio On (Beta)',
-                checked:       options.isAudioEnabled(),
-                changeHandler: function() {
-                    container.enableAudio()
-                }
-            })
-
-            audioOffRadioButton = makeRadioButton({
+            audioOffRadioPair = makeRadioButtonPair({
                 id:            'audioOffOption',
                 name:          'audio',
                 value:         'off',
@@ -212,6 +238,17 @@ var Buttons = function(container, options) {
                 checked:       !options.isAudioEnabled(),
                 changeHandler: function() {
                     container.disableAudio()
+                }
+            })
+
+            audioOnRadioPair = makeRadioButtonPair({
+                id:            'audioOnOption',
+                name:          'audio',
+                value:         'on',
+                label:         'Audio On (Beta)',
+                checked:       options.isAudioEnabled(),
+                changeHandler: function() {
+                    container.enableAudio()
                 }
             })
         }
@@ -236,11 +273,11 @@ var Buttons = function(container, options) {
         if (isShown(recordButton))
             enable(recordButton)
 
-        if (isShown(audioOnRadioButton))
-            enable(audioOnRadioButton)
+        if (isShown(audioOnRadioPair))
+            enable(audioOnRadioPair)
 
-        if (isShown(audioOffRadioButton))
-            enable(audioOffRadioButton)
+        if (isShown(audioOffRadioPair))
+            enable(audioOffRadioPair)
 
         disable(submitButton)
     }
@@ -254,8 +291,8 @@ var Buttons = function(container, options) {
     function onPreview() {
         hide(recordButton)
         hide(previewButton)
-        disable(audioOnRadioButton)
-        disable(audioOffRadioButton)
+        disable(audioOnRadioPair)
+        disable(audioOffRadioPair)
 
         show(recordAgainButton)
         enable(recordAgainButton)
@@ -292,8 +329,8 @@ var Buttons = function(container, options) {
         if (framesCount > 1)
             onFirstFrameSent()
         else {
-            disable(audioOffRadioButton)
-            disable(audioOnRadioButton)
+            disable(audioOffRadioPair)
+            disable(audioOnRadioPair)
             disable(recordAgainButton)
             disable(recordButton)
         }
@@ -317,8 +354,8 @@ var Buttons = function(container, options) {
 
     function onCountdown() {
         disable(recordButton)
-        disable(audioOffRadioButton)
-        disable(audioOnRadioButton)
+        disable(audioOffRadioPair)
+        disable(audioOnRadioPair)
     }
 
     function onSubmitting() {
