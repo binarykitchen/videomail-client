@@ -120,7 +120,7 @@ var Buttons = function(container, options) {
                 checked: options.checked
             })
 
-            radioButtonGroup = h('p.radioGroup', radioButtonElement, h('label', {
+            radioButtonGroup = h('span.radioGroup', radioButtonElement, h('label', {
                 'htmlFor': options.id
             }, options.label))
 
