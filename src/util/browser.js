@@ -10,8 +10,7 @@ module.exports = function(options) {
         chromeDownload   = 'http://www.google.com/chrome/',
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
         browseHappyLink  = 'http://browsehappy.com',
-        ua               = options.fakeUaString ||
-                           (
+        ua               = options.fakeUaString || (
                             typeof window !== 'undefined' &&
                             window.navigator &&
                             window.navigator.userAgent
