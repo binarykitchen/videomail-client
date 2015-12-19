@@ -46,6 +46,7 @@ module.exports = {
     },
     audio: {
         enabled:    false,                          // set to true for experimential audio recording
+        switch:     false,                          // enables a switcher for audio recording (on/off)
         volume:     .85,                            // must be between 0 .. 1
         bufferSize: 2048                            // decides how often the audio is being sampled, must be a power of two
     },

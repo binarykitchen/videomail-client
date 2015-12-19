@@ -36,7 +36,7 @@ To run the examples in your browser, just do:
 
 1. `npm install`
 2. `gulp examples` to ignite a static server and
-3. open `http://localhost:8080` in your browser
+3. open `https://localhost:8080` in your browser
 
 Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
@@ -55,7 +55,7 @@ A live contact form example embracing contact inquiries in direct sign language 
           videomailClient = new VideomailClient({        // instantiate with some options
             verbose:       true,                         // prints additional info to console
             disableSubmit: true                          // disable submissions to keep example simple
-      })
+          })
 
       // this will load your webcam, fill the placeholder containing
       // the `id="videomail"` with HTML and CSS code, place buttons and much more.
@@ -230,7 +230,12 @@ If for whatever reason that GitHub CDN doesn't meet your standard, here's anothe
 https://cdnjs.com/libraries/videomail-client
 
 <a name="changes"></a>
-## Breaking changes (Changelog)
+## Breaking/Hot Changes (Changelog)
+
+### v1.7.0 (2015-12-5)
+
+- **VideomailClient:** New option to switch audio recording on or off `options.audio.switch`
+- **VideomailClient:** Removed Flash solution for good
 
 ### v1.6.0 (2015-09-20)
 

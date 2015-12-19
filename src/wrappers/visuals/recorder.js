@@ -130,6 +130,9 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function loadGenuineUserMedia() {
+        if (!navigator)
+            throw new Error('Navigator is missing!')
+
         navigator.getUserMedia_({
             video: true,
             audio: options.isAudioEnabled()

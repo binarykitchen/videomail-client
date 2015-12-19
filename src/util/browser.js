@@ -11,7 +11,11 @@ module.exports = function(options) {
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
         browseHappyLink  = 'http://browsehappy.com',
         ua               = options.fakeUaString ||
-                           (typeof window !== 'undefined' && window.navigator.userAgent),
+                           (
+                            typeof window !== 'undefined' &&
+                            window.navigator &&
+                            window.navigator.userAgent
+                           ) || '',
 
         uaParser = new UAParser(ua).getResult(),
 
