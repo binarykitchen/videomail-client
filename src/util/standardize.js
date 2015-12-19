@@ -3,6 +3,9 @@ module.exports = function(window, navigator) {
     require('es5-shim')
     require('cross-class-list')
 
+    if (!navigator)
+        throw new Error('Navigator is missing!')
+
     navigator.getUserMedia_ =
         navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
