@@ -161,7 +161,7 @@ module.exports = function(recorder, options) {
                 options.debug('UserMedia: detected', description ? description : '')
             }
 
-            var heavyDebugging = true
+            var heavyDebugging = false
 
             if (heavyDebugging) {
                 // useful list of all available user media related events
