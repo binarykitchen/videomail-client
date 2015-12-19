@@ -161,7 +161,7 @@ module.exports = function(recorder, options) {
                 options.debug('UserMedia: detected', description ? description : '')
             }
 
-            var heavyDebugging = false
+            var heavyDebugging = true
 
             if (heavyDebugging) {
                 // useful list of all available user media related events
@@ -201,6 +201,8 @@ module.exports = function(recorder, options) {
             rawVisualUserMedia.addEventListener('play',            onPlay)
 
             setVisualStream(localMediaStream)
+
+            rawVisualUserMedia.play()
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
