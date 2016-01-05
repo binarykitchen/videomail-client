@@ -48,9 +48,10 @@ gulp.task('stylus', function() {
         // when surrounded with `'s when injected
         // todo: fix this, so that it also works when not minified, this
         // for faster builds during development
-        .pipe(plugins.minifyCss())
+        .pipe(plugins.cssnano())
         .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
         .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
+        // todo: location is bad, should be in a temp folder or so
         .pipe(gulp.dest('src/assets/css'))
         .pipe(plugins.connect.reload())
 })
