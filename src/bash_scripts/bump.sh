@@ -35,13 +35,13 @@ fi
 
 read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk -F 'version to:' '{print $2}')
 
+# Ensures nothing is broken
+npm test
+
 git checkout master
 git push
 git checkout develop
 git push
-
-# Ensures nothing is broken
-npm test
 
 # Start a new release
 git flow release start $VERSION
