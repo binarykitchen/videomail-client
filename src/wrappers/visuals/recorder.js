@@ -381,11 +381,21 @@ var Recorder = function(visuals, replay, options) {
                     '?' +
                     encodeURIComponent(Constants.SITE_NAME_LABEL) +
                     '=' +
-                    encodeURIComponent(options.siteName)
+                    encodeURIComponent(options.siteName),
+                    // see https://html.spec.whatwg.org/multipage/comms.html#network
+                    // and https://github.com/maxogden/websocket-stream/issues/82
+                    []
                 )
             } catch (exc) {
                 connected = false
-                self.emit(Events.ERROR, exc)
+
+                var err = VideomailError.create(
+                    'Failed to create websocket',
+                    exc.toString(),
+                    options
+                )
+
+                self.emit(Events.ERROR, err)
             }
 
             // useful for debugging streams
