@@ -374,13 +374,19 @@ var Recorder = function(visuals, replay, options) {
 
             // we use query parameters here because we cannot set custom headers in web sockets,
             // see https://github.com/websockets/ws/issues/467
-            stream = websocket(
-                options.socketUrl +
-                '?' +
-                encodeURIComponent(Constants.SITE_NAME_LABEL) +
-                '=' +
-                encodeURIComponent(options.siteName)
-            )
+
+            try {
+                stream = websocket(
+                    options.socketUrl +
+                    '?' +
+                    encodeURIComponent(Constants.SITE_NAME_LABEL) +
+                    '=' +
+                    encodeURIComponent(options.siteName)
+                )
+            } catch (exc) {
+                connected = false
+                self.emit(Events.ERROR, exc)
+            }
 
             // useful for debugging streams
 
@@ -395,43 +401,45 @@ var Recorder = function(visuals, replay, options) {
             //     }
             // }
 
-            stream.on('close', function(err) {
-                debug('x Stream has closed')
+            if (stream) {
+                stream.on('close', function(err) {
+                    debug('x Stream has closed')
 
-                connected = false
+                    connected = false
 
-                if (!err && self.isPaused())
-                    err = VideomailError.create(
-                        'Pause was too long.',
-                        'Sorry, please try again and do not pause too long otherwise connection closes.',
-                        options
-                    )
+                    if (!err && self.isPaused())
+                        err = VideomailError.create(
+                            'Pause was too long.',
+                            'Sorry, please try again and do not pause too long otherwise connection closes.',
+                            options
+                        )
 
-                if (err)
-                    self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
-            })
+                    if (err)
+                        self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
+                })
 
-            stream.on('connect', function() {
-                if (!connected) {
-                    connected = true
-                    unloaded  = false
+                stream.on('connect', function() {
+                    if (!connected) {
+                        connected = true
+                        unloaded  = false
 
-                    self.emit(Events.CONNECTED)
+                        self.emit(Events.CONNECTED)
 
-                    debug('Asking for webcam permissons now.')
+                        debug('Asking for webcam permissons now.')
 
-                    cb && cb()
-                }
-            })
+                        cb && cb()
+                    }
+                })
 
-            stream.on('data', function(data) {
-                executeCommand.call(self, data)
-            })
+                stream.on('data', function(data) {
+                    executeCommand.call(self, data)
+                })
 
-            stream.on('error', function(err) {
-                connected = false
-                self.emit(Events.ERROR, err)
-            })
+                stream.on('error', function(err) {
+                    connected = false
+                    self.emit(Events.ERROR, err)
+                })
+            }
         }
     }
 
