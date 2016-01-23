@@ -1,7 +1,9 @@
 var isPOT           = require('is-power-of-two'),
     AudioSample     = require('audio-sample'),
 
-    VideomailError  = require('./videomailError')
+    VideomailError  = require('./videomailError'),
+
+    CHANNELS = 1
 
 module.exports = function(userMedia, options) {
 
@@ -32,7 +34,7 @@ module.exports = function(userMedia, options) {
         // creates an audio node from the microphone incoming stream
         var audioInput = getAudioContext().createMediaStreamSource(localMediaStream),
             volume     = getAudioContext().createGain(),
-            channels   = 1
+            channels   = CHANNELS
 
         if (!isPOT(options.audio.bufferSize))
             throw VideomailError.create('Audio buffer size must be a power of two.', options)
