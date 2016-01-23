@@ -17,7 +17,7 @@ videomail-client ✉
 
 Record videos in contact forms!
 
-Finally you can encode any webcam recordings from modern browsers into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
+Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
 
 * <a href="#examples">Examples</a>
 * <a href="#demo">Demo / Fully working version</a>
