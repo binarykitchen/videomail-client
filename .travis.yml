@@ -7,12 +7,3 @@ notifications:
   email:
     on_success: never
     on_failure: always
-
-# moved npm publishing to bump.sh
-# deploy:
-#   provider: npm
-#   email: michael.heuberger@binarykitchen.com
-#   api_key:
-#     secure: a6gY9fTQh+nIIB4oc5O4ToBRoRfLtyaQNKDmVHgumi5VerVwOxQx37N+wQnx9o8zuXZ/gkL+WnALJ1BPHfO6yE/pTLRSK1CliH90+DDT0sqfg3auBUPWYwLjgVkpNjf8Te/24zwKErI4zZ0U2WISPf0PIS80UgofpbDaAnHKJbw=
-#   on:
-#     repo: binarykitchen/videomail-client
