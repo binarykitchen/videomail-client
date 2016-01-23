@@ -3,6 +3,9 @@ module.exports = function(window, navigator) {
     require('es5-shim')
     require('cross-class-list')
 
+    // https://github.com/julienetie/request-frame/issues/6
+    window.screen = window.screen || {}
+
     // https://github.com/julienetie/request-frame
     require('request-frame')('native')
 
