@@ -381,10 +381,7 @@ var Recorder = function(visuals, replay, options) {
                     '?' +
                     encodeURIComponent(Constants.SITE_NAME_LABEL) +
                     '=' +
-                    encodeURIComponent(options.siteName),
-                    // see https://html.spec.whatwg.org/multipage/comms.html#network
-                    // and https://github.com/maxogden/websocket-stream/issues/82
-                    []
+                    encodeURIComponent(options.siteName)
                 )
             } catch (exc) {
                 connected = false
