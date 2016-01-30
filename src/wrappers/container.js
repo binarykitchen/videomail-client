@@ -149,6 +149,11 @@ var Container = function(options) {
         containerElement.classList.add('hide')
     }
 
+    // fixes https://github.com/binarykitchen/videomail-client/issues/71
+    function trimEmail(email) {
+        return email.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+    }
+
     function submitVideomail(formData, method, cb) {
         var FORM_FIELDS = {
                 'subject':      options.selectors.subjectInputName,
@@ -164,6 +169,12 @@ var Container = function(options) {
             if (formData.hasOwnProperty(FORM_FIELDS[key]))
                 videomailFormData[key] = formData[FORM_FIELDS[key]]
         })
+
+        if (videomailFormData['from'])
+            videomailFormData['from'] = trimEmail(videomailFormData['from'])
+
+        if (videomailFormData['to'])
+            videomailFormData['to'] = trimEmail(videomailFormData['to'])
 
         // when method is undefined, treat it as a post
         if (isPost(method) || !method) {
