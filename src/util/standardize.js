@@ -1,6 +1,7 @@
 module.exports = function(window, navigator) {
 
     require('es5-shim')
+    require('es6-shim')
     require('cross-class-list')
 
     // https://github.com/julienetie/request-frame/issues/6
