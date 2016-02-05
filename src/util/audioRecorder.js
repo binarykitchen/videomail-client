@@ -32,9 +32,15 @@ module.exports = function(userMedia, options) {
     this.init = function(localMediaStream) {
 
         // creates an audio node from the microphone incoming stream
-        var audioInput = getAudioContext().createMediaStreamSource(localMediaStream),
-            volume     = getAudioContext().createGain(),
-            channels   = CHANNELS
+        var volume     = getAudioContext().createGain(),
+            channels   = CHANNELS,
+            audioInput
+
+        try {
+            audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
+        } catch (exc) {
+            throw VideomailError.create('Failed to access media for audio.', exc.toString(), options)
+        }
 
         if (!isPOT(options.audio.bufferSize))
             throw VideomailError.create('Audio buffer size must be a power of two.', options)
