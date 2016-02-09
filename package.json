@@ -65,7 +65,7 @@
     "browserify": "13.0.0",
     "connect-send-json": "1.0.0",
     "del": "2.2.0",
-    "gulp": "3.9.0",
+    "gulp": "3.9.1",
     "gulp-autoprefixer": "3.1.0",
     "gulp-bump": "1.0.0",
     "gulp-concat": "2.6.0",
