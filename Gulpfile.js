@@ -20,7 +20,7 @@ var path            = require('path'),
 
     options = minimist(process.argv.slice(2), {default: defaultOptions})
 
-// plugins.util.log('Options:', options)
+plugins.util.log('Options:', options)
 
 gulp.task('clean:js', function(cb) {
     del(['dist/*.js']).then(function() {
@@ -39,7 +39,7 @@ gulp.task('stylus', function() {
         .pipe(plugins.autoprefixer(
             'last 3 versions',
             '> 1%',
-            'Explorer >= 9',
+            'Explorer >= 10',
             'Chrome >= 34',
             'Firefox ESR',
             'iOS >= 6', 'android >= 4'
