@@ -254,7 +254,7 @@ var Buttons = function(container, options) {
         }
     }
 
-    function onFormReady() {
+    function onFormReady(options) {
         // no need to show record button when doing a record again
         if (!isShown(recordAgainButton))
             show(recordButton)
@@ -267,17 +267,28 @@ var Buttons = function(container, options) {
         self.hide()
     }
 
-    function onUserMediaReady() {
-        onFormReady()
+    function onUserMediaReadyAfterLongPause() {
+        // CONTINUE FROM HERE, FIX BACKEND. DO NOT DELETE FILES ON DISCONNECTS SO THAT THEY CAN BE RESUMED!
+        show(resumeButton)
+        show(previewButton)
+    }
 
-        if (isShown(recordButton))
-            enable(recordButton)
+    function onUserMediaReady(options) {
+        if (options && options.reconnectAfterLongPause) {
+            onUserMediaReadyAfterLongPause()
+        } else {
+            onFormReady()
 
-        if (isShown(audioOnRadioPair))
-            enable(audioOnRadioPair)
+            if (isShown(recordButton))
+                enable(recordButton)
 
-        if (isShown(audioOffRadioPair))
-            enable(audioOffRadioPair)
+            if (isShown(audioOnRadioPair))
+                enable(audioOnRadioPair)
+
+            if (isShown(audioOffRadioPair))
+                enable(audioOffRadioPair)
+        }
+
 
         disable(submitButton)
     }
@@ -407,8 +418,8 @@ var Buttons = function(container, options) {
     }
 
     function initEvents() {
-        self.on(Events.USER_MEDIA_READY, function() {
-            onUserMediaReady()
+        self.on(Events.USER_MEDIA_READY, function(options) {
+            onUserMediaReady(options)
         }).on(Events.PREVIEW, function() {
             onPreview()
         }).on(Events.PAUSED, function() {

@@ -57,6 +57,7 @@ var Recorder = function(visuals, replay, options) {
         stopTime,
         stream,
         connected,
+        reconnectAfterLongPause,
         blocking,
         built,
         key
@@ -83,7 +84,9 @@ var Recorder = function(visuals, replay, options) {
             userMediaLoaded = true
 
             show()
-            self.emit(Events.USER_MEDIA_READY)
+            self.emit(Events.USER_MEDIA_READY, {reconnectAfterLongPause: reconnectAfterLongPause})
+
+            reconnectAfterLongPause = false
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
@@ -365,7 +368,14 @@ var Recorder = function(visuals, replay, options) {
         return visuals.isNotifying()
     }
 
-    function initSocket(cb) {
+    function initSocket(subOptions, cb) {
+
+        if (!cb && typeof subOptions === 'function') {
+            cb = subOptions
+            subOptions = {}
+        } else if (!subOptions)
+            subOptions = {}
+
         if (!connected) {
 
             debug('Recorder: initialising web socket to %s', options.socketUrl)
@@ -409,17 +419,21 @@ var Recorder = function(visuals, replay, options) {
             // }
 
             if (stream) {
+
                 stream.on('close', function(err) {
                     debug('x Stream has closed')
 
                     connected = false
 
-                    if (!err && self.isPaused())
-                        err = VideomailError.create(
-                            'Pause was too long.',
-                            'Sorry, please try again and do not pause too long otherwise connection closes.',
-                            options
-                        )
+                    if (!err && self.isPaused()) {
+                        initSocket({reconnectAfterLongPause: true})
+
+                        // err = VideomailError.create(
+                        //     'Pause was too long.',
+                        //     'Sorry, please try again and do not pause too long otherwise connection closes.',
+                        //     options
+                        // )
+                    }
 
                     if (err)
                         self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
@@ -429,6 +443,9 @@ var Recorder = function(visuals, replay, options) {
                     if (!connected) {
                         connected = true
                         unloaded  = false
+
+                        if (subOptions && subOptions.reconnectAfterLongPause)
+                            reconnectAfterLongPause = true
 
                         self.emit(Events.CONNECTED)
 
