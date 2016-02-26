@@ -267,28 +267,17 @@ var Buttons = function(container, options) {
         self.hide()
     }
 
-    function onUserMediaReadyAfterLongPause() {
-        // CONTINUE FROM HERE, FIX BACKEND. DO NOT DELETE FILES ON DISCONNECTS SO THAT THEY CAN BE RESUMED!
-        show(resumeButton)
-        show(previewButton)
-    }
+    function onUserMediaReady() {
+        onFormReady()
 
-    function onUserMediaReady(options) {
-        if (options && options.reconnectAfterLongPause) {
-            onUserMediaReadyAfterLongPause()
-        } else {
-            onFormReady()
+        if (isShown(recordButton))
+            enable(recordButton)
 
-            if (isShown(recordButton))
-                enable(recordButton)
+        if (isShown(audioOnRadioPair))
+            enable(audioOnRadioPair)
 
-            if (isShown(audioOnRadioPair))
-                enable(audioOnRadioPair)
-
-            if (isShown(audioOffRadioPair))
-                enable(audioOffRadioPair)
-        }
-
+        if (isShown(audioOffRadioPair))
+            enable(audioOffRadioPair)
 
         disable(submitButton)
     }
