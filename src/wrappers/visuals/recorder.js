@@ -428,13 +428,6 @@ var Recorder = function(visuals, replay, options) {
 
                     connected = false
 
-                    if (!err && self.isPaused())
-                        err = VideomailError.create(
-                            'Pause was too long.',
-                            'Sorry, could not keep connection alive. Try again or contact us.',
-                            options
-                        )
-
                     if (err)
                         self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
                 })
