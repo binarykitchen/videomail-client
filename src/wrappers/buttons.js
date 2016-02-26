@@ -254,7 +254,7 @@ var Buttons = function(container, options) {
         }
     }
 
-    function onFormReady() {
+    function onFormReady(options) {
         // no need to show record button when doing a record again
         if (!isShown(recordAgainButton))
             show(recordButton)
@@ -407,8 +407,8 @@ var Buttons = function(container, options) {
     }
 
     function initEvents() {
-        self.on(Events.USER_MEDIA_READY, function() {
-            onUserMediaReady()
+        self.on(Events.USER_MEDIA_READY, function(options) {
+            onUserMediaReady(options)
         }).on(Events.PREVIEW, function() {
             onPreview()
         }).on(Events.PAUSED, function() {

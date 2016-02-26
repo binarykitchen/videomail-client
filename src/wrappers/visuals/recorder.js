@@ -59,7 +59,19 @@ var Recorder = function(visuals, replay, options) {
         connected,
         blocking,
         built,
-        key
+        key,
+
+        pingInterval
+
+    function sendPings() {
+        pingInterval = window.setInterval(function() {
+            writeStream(new Buffer(''))
+        }, options.timeouts.pingInterval)
+    }
+
+    function stopPings() {
+        clearInterval(pingInterval)
+    }
 
     function onAudioSample(audioSample) {
         samplesCount++
@@ -366,6 +378,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function initSocket(cb) {
+
         if (!connected) {
 
             debug('Recorder: initialising web socket to %s', options.socketUrl)
@@ -409,6 +422,7 @@ var Recorder = function(visuals, replay, options) {
             // }
 
             if (stream) {
+
                 stream.on('close', function(err) {
                     debug('x Stream has closed')
 
@@ -417,7 +431,7 @@ var Recorder = function(visuals, replay, options) {
                     if (!err && self.isPaused())
                         err = VideomailError.create(
                             'Pause was too long.',
-                            'Sorry, please try again and do not pause too long otherwise connection closes.',
+                            'Sorry, could not keep connection alive. Try again or contact us.',
                             options
                         )
 
@@ -577,6 +591,8 @@ var Recorder = function(visuals, replay, options) {
         userMedia.pause()
 
         this.emit(Events.PAUSED)
+
+        sendPings()
     }
 
     this.isPaused = function() {
@@ -585,6 +601,8 @@ var Recorder = function(visuals, replay, options) {
 
     this.resume = function() {
         debug('Recorder: resume()')
+
+        stopPings()
 
         this.emit(Events.RESUMING)
 
