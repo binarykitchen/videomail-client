@@ -4,33 +4,45 @@ var h = require('hyperscript'),
 
 module.exports = function(visuals, options) {
 
-    if (!options.text.paused)
-        throw VideomailError.create('Paused text cannot be empty', options)
+    if (!options.text.pausedHeader)
+        throw VideomailError.create('Paused header cannot be empty', options)
 
-    var pausedElement
+    var pausedBlockElement,
+        pausedHeaderElement,
+        pausedHintElement
 
     this.build = function() {
-        pausedElement = visuals.querySelector('.paused')
+        pausedBlockElement  = visuals.querySelector('.paused')
+        pausedHeaderElement = visuals.querySelector('.pausedHeader')
+        pausedHintElement   = visuals.querySelector('.pausedHint')
 
-        if (!pausedElement) {
-            pausedElement = h('p.paused')
+        if (!pausedHeaderElement) {
+            pausedBlockElement  = h('div.paused')
+            pausedHeaderElement = h('p.pausedHeader')
+            pausedHintElement   = h('p.pausedHint')
 
             this.hide()
 
-            pausedElement.innerHTML = options.text.paused
+            pausedHeaderElement.innerHTML = options.text.pausedHeader
+            pausedHintElement.innerHTML   = options.text.pausedHint
 
-            visuals.appendChild(pausedElement)
+            pausedBlockElement.appendChild(pausedHeaderElement)
+            pausedBlockElement.appendChild(pausedHintElement)
+
+            visuals.appendChild(pausedBlockElement)
         } else {
             this.hide()
-            pausedElement.innerHTML = options.text.paused
+
+            pausedHeaderElement.innerHTML = options.text.pausedHeader
+            pausedHintElement.innerHTML   = options.text.pausedHint
         }
     }
 
     this.hide = function() {
-        pausedElement.classList.add('hide')
+        pausedBlockElement.classList.add('hide')
     }
 
     this.show = function() {
-        pausedElement.classList.remove('hide')
+        pausedBlockElement.classList.remove('hide')
     }
 }
