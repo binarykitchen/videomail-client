@@ -29,9 +29,10 @@
         <script>
             var VideomailClient = require('videomail-client'),
                 videomailClient = new VideomailClient({
-                    verbose:        true,
-                    disableSubmit:  true,
-                    selectors: {
+                    verbose:         true,
+                    disableSubmit:   true,
+                    enableAutoPause: false,
+                    selectors:       {
                         userMediaClass: 'webcam',
                         visualsClass:   'da_window',
                         buttonsClass:   'all_my_buttons',

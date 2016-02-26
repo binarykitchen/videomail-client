@@ -76,8 +76,9 @@ module.exports = {
         entertainInterval: 9000
     },
     timeouts: {
-        userMedia:  5e3,            // increase if you want user give more time to enable webcam
-        connection: 1e4             // increase if connection is slow
+        userMedia:    5e3,          // increase if you want user give more time to enable webcam
+        connection:   1e4,          // increase if connection is slow
+        pingInterval: 30e3          // keeps webstream (connection) alive when pausing
     },
     displayErrors: true,            // show errors inside the container?
     fakeUaString:  null             // just for testing purposes to simulare VM on diff browsers
