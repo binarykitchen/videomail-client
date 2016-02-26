@@ -232,6 +232,10 @@ https://cdnjs.com/libraries/videomail-client
 <a name="changes"></a>
 ## Breaking/Hot Changes (Changelog)
 
+### v1.8.0 (2016-02-26)
+
+- **VideomailClient:** Very long pauses are now possible. This thanks to pings to keep connection to server alive.
+
 ### v1.7.0 (2015-12-5)
 
 - **VideomailClient:** New option to switch audio recording on or off `options.audio.switch`
