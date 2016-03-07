@@ -39,11 +39,10 @@
   "dependencies": {
     "audio-sample": "1.0.2",
     "canvas-to-buffer": "1.0.8",
+    "classlist.js": "1.1.20150312",
     "create-error": "0.3.1",
-    "cross-class-list": "1.0.3",
     "despot": "1.0.0",
     "es5-shim": "4.5.7",
-    "es6-shim": "0.35.0",
     "filesize": "3.2.1",
     "humanize-duration": "3.6.1",
     "hyperscript": "1.4.7",
@@ -83,7 +82,7 @@
     "minimist": "1.2.0",
     "nib": "1.1.0",
     "router": "1.1.4",
-    "tape": "4.5.0",
+    "tape": "4.5.1",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
   }
