@@ -1,7 +1,9 @@
 module.exports = function(window, navigator) {
 
     require('es5-shim')
-    require('classlist.js')
+
+    if (typeof self !== "undefined")
+        require('classlist.js')
 
     // https://github.com/julienetie/request-frame/issues/6
     window.screen = window.screen || {}
