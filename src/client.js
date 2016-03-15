@@ -48,19 +48,18 @@ var VideomailClient = function(options) {
     // expose all possible events
     this.events = Events
 
-    function build(containerId, cb) {
-        function buildForm() {
+    function build() {
+        readystate.interactive(function() {
             if (!container.isBuilt())
-                container.build(containerId)
-
-            cb && cb()
-        }
-
-        readystate.interactive(buildForm)
+                container.build()
+        })
     }
 
-    this.show = function(containerId) {
-        build.call(this, containerId, container.show)
+    this.show = function() {
+        if (container.isBuilt())
+            container.show()
+        else
+            this.once(Events.BUILT, container.show)
     }
 
     // automatically adds a <video> element inside the given parentElement and loads

@@ -277,10 +277,9 @@ var Container = function(options) {
         return !!containerElement
     }
 
-    this.build = function(containerId) {
+    this.build = function() {
         try {
-            containerId      = containerId || options.selectors.containerId
-            containerElement = document.getElementById(containerId)
+            containerElement = document.getElementById(options.selectors.containerId)
 
             // only build when a container element hast been found, otherwise
             // be silent and do nothing
@@ -292,8 +291,10 @@ var Container = function(options) {
                 buildForm()
                 buildChildren()
 
-                if (!hasError)
+                if (!hasError) {
                     built = true
+                    self.emit(Events.BUILT)
+                }
             }
 
         } catch (exc) {

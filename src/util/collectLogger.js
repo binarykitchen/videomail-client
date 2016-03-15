@@ -4,8 +4,9 @@ module.exports = function(localOptions) {
 
     localOptions = localOptions || {}
 
-    var logger = localOptions.logger || console,
-        stack  = []
+    var logger      = localOptions.logger || console,
+        containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id'
+        stack       = []
 
     function lifo(level, parameters) {
         var line = util.format.apply(util, parameters)
@@ -18,10 +19,17 @@ module.exports = function(localOptions) {
         return line
     }
 
+    function addContainerId(firstArgument) {
+        return '#' + containerId + ' > ' + firstArgument
+    }
+
     // workaround: since we cannot overwrite console.log without having the correct file and line number
     // we'll use groupCollapsed() and trace() instead to get these.
     this.debug = function() {
         if (localOptions.verbose) {
+
+            arguments[0] = addContainerId(arguments[0])
+
             logger.groupCollapsed(lifo('debug', arguments))
             logger.trace('Trace')
             logger.groupEnd()
@@ -29,10 +37,12 @@ module.exports = function(localOptions) {
     }
 
     this.error = function() {
+        arguments[0] = addContainerId(arguments[0])
         logger.error(lifo('error', arguments))
     }
 
     this.warn = function() {
+        arguments[0] = addContainerId(arguments[0])
         logger.warn(lifo('warn', arguments))
     }
 
