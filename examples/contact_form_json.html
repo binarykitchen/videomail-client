@@ -51,7 +51,7 @@
             var VideomailClient = require('videomail-client'),
                 videomailClient = new VideomailClient({
                     verbose: true,
-                    video: {limitSeconds: 120, width: 320}
+                    video: {limitSeconds: 120, width: 320, countdown: false}
                 }),
 
                 startOverButton    = document.getElementById('startOver'),

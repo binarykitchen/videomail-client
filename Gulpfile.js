@@ -93,21 +93,22 @@ gulp.task('browserify', ['clean:js'], function(cb) {
 })
 
 gulp.task('connect', ['build'], function() {
-    //suppress invalid self-signed ssl certificate error
+    // suppress invalid self-signed ssl certificate error
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     plugins.connect.server({
         root:       ['examples', 'dist'],
         port:       8080,
+        debug:      true,
         livereload: true,
         https:      true, // todo: fix expired certificate, see https://github.com/AveVlad/gulp-connect/issues/140
-        middleware: function() {
+        middleware: function(connect, options) {
             var router = new Router()
 
             router.use(bodyParser.json())
-            // router.use(bodyParser.urlencoded())
             router.use(send.json())
 
+            // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
             router.post('/contact', function(req, res) {
                 console.log('Videomail data received:', req.body)
 

@@ -59,7 +59,7 @@ A live contact form example embracing contact inquiries in direct sign language 
 
       // this will load your webcam, fill the placeholder containing
       // the `id="videomail"` with HTML and CSS code, place buttons and much more.
-      videomailClient.form()
+      videomailClient.show()
     </script>
   </body>
 </html>
@@ -138,11 +138,9 @@ The videomail client already comes with internal error handling mechanism so the
 By the way, all videomail errors are instances of `VideomailError`, inherited from the native Error class and come with additional attributes, useful for debugging weird errors.
 
 <a name="show"></a>
-### videomailClient.show([containerId])
+### videomailClient.show()
 
-Automatically fills the DOM with a form for video recording. If a HTML element whose ID equals `containerId`, that placeholder will be filled. Otherwise an error occurs.
-
-By default the optional parameter `containerId` is set to `videomail`.
+Automatically fills the DOM with a form for video recording. By default the HTML element with the ID `videomail` will be filled, see options.
 
 <a name="replay"></a>
 ### videomailClient.replay(videomail[, parentElement])
@@ -209,7 +207,8 @@ Forget the old IE, Safari and iPhones/iPads because they still don't support `ge
 
 * Firefox >= 34
 * Google Chrome >= 32
-* Microsoft Edge >= 12
+* Microsoft Edge >= 1 (is that IE 12?)
+* Internet Explorer >= 12
 * Opera >= 26
 * Chrome for Android >= 39
 * Android Browser >= 37
@@ -231,6 +230,10 @@ https://cdnjs.com/libraries/videomail-client
 
 <a name="changes"></a>
 ## Breaking/Hot Changes (Changelog)
+
+### v1.9.0 (2016-03-12)
+
+- **VideomailClient:** Removed the `containerId` option in `show()` - define it in the constructor under options instead.
 
 ### v1.8.0 (2016-02-26)
 
