@@ -1,6 +1,7 @@
 var keymirror = require('keymirror')
 
 module.exports = keymirror({
+  BUILT:                null, // all dom elements are ready, are in the DOM
   FORM_READY:           null, // form is ready, available in the DOM
   USER_MEDIA_READY:     null, // user media (= webcam) is ready, loaded
   CONNECTED:            null, // socket is connected to server

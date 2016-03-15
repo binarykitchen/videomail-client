@@ -3,6 +3,8 @@ var despot = require('despot'),
     VideomailError = require('./videomailError'),
     Events         = require('./../events')
 
+// CONTINUE FROM HERE, MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
+
 module.exports = function(options, name) {
 
     this.emit = function(event) {
