@@ -52,7 +52,7 @@ var Buttons = function(container, options) {
         }
 
         elements && elements.forEach(function(element) {
-            isShown = isShown && !element.classList.contains('hide')
+            isShown = isShown && element && !element.classList.contains('hide')
         })
 
         return isShown

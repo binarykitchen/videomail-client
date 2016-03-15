@@ -19,6 +19,7 @@ var Replay = function(parentElement, options) {
     function buildElement() {
         replayElement = h('video.' + options.selectors.replayClass, {
             autoplay:   true,
+            autostart:  true,
             autobuffer: true,
             preload:    'auto',
             controls:   'controls'
