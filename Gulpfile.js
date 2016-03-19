@@ -1,15 +1,16 @@
-var path            = require('path'),
-    gulp            = require('gulp'),
-    plugins         = require('gulp-load-plugins')(),
-    nib             = require('nib'),
-    browserify      = require('browserify'),
-    source          = require('vinyl-source-stream'),
-    buffer          = require('vinyl-buffer'),
-    Router          = require('router'),
-    bodyParser      = require('body-parser'),
-    send            = require('connect-send-json'),
-    del             = require('del'),
-    minimist        = require('minimist'),
+var path       = require('path'),
+    fs         = require('fs'),
+    gulp       = require('gulp'),
+    plugins    = require('gulp-load-plugins')(),
+    nib        = require('nib'),
+    browserify = require('browserify'),
+    source     = require('vinyl-source-stream'),
+    buffer     = require('vinyl-buffer'),
+    Router     = require('router'),
+    bodyParser = require('body-parser'),
+    send       = require('connect-send-json'),
+    del        = require('del'),
+    minimist   = require('minimist'),
 
     defaultOptions = {
         minify:     false,
@@ -96,12 +97,18 @@ gulp.task('connect', ['build'], function() {
     // suppress invalid self-signed ssl certificate error
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+    var SSL_CERTS_PATH = __dirname + '/etc/ssl-certs/'
+
     plugins.connect.server({
         root:       ['examples', 'dist'],
         port:       8080,
         debug:      true,
         livereload: true,
-        https:      true, // todo: fix expired certificate, see https://github.com/AveVlad/gulp-connect/issues/140
+        // todo: fix expired certificate, see https://github.com/AveVlad/gulp-connect/issues/140
+        https:      {
+            key:  fs.readFileSync(SSL_CERTS_PATH + 'fake.key'),
+            cert: fs.readFileSync(SSL_CERTS_PATH + 'fake.crt')
+        },
         middleware: function(connect, options) {
             var router = new Router()
 

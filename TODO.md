@@ -3,5 +3,6 @@
 |:------|:------:|:------
 | src/wrappers/container.js | 226 | figure out how to fire dom's onload event again
 | src/wrappers/container.js | 227 | or how to run all the scripts over again
-| Gulpfile.js | 49 | fix this, so that it also works when not minified, this
-| Gulpfile.js | 54 | location is bad, should be in a temp folder or so
+| Gulpfile.js | 50 | fix this, so that it also works when not minified, this
+| Gulpfile.js | 55 | location is bad, should be in a temp folder or so
+| Gulpfile.js | 107 | fix expired certificate, see https://github.com/AveVlad/gulp-connect/issues/140
