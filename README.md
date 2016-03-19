@@ -38,6 +38,8 @@ To run the examples in your browser, just do:
 2. `gulp examples` to ignite a static server and
 3. open `https://localhost:8080` in your browser
 
+(just ignore the invalid certificate warning, this will be fixed soon)
+
 Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
 A live contact form example embracing contact inquiries in direct sign language can be seen at:
