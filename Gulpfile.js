@@ -15,6 +15,7 @@ var path       = require('path'),
     defaultOptions = {
         minify:     false,
         importance: null,
+        write:      false,
         version:    null
     },
 
@@ -154,11 +155,9 @@ gulp.task('bumpVersion', function() {
     else if (options.importance)
         bumpOptions.type = options.importance
 
-    console.log(bumpOptions)
-
     return gulp.src(['./package.json'])
         .pipe(plugins.bump(bumpOptions))
-        .pipe(gulp.dest('./'))
+        .pipe(plugins.if(options.write, gulp.dest('./')))
         .on('error', plugins.util.log)
 })
 
