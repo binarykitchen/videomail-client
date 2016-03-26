@@ -56,6 +56,7 @@ var Recorder = function(visuals, replay, options) {
         unloaded,
         stopTime,
         stream,
+        connecting,
         connected,
         blocking,
         built,
@@ -378,8 +379,9 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function initSocket(cb) {
-
         if (!connected) {
+
+            connecting = true
 
             debug('Recorder: initialising web socket to %s', options.socketUrl)
 
@@ -397,7 +399,7 @@ var Recorder = function(visuals, replay, options) {
                     encodeURIComponent(options.siteName)
                 )
             } catch (exc) {
-                connected = false
+                connecting = connected = false
 
                 var err = VideomailError.create(
                     'Failed to create websocket',
@@ -426,7 +428,7 @@ var Recorder = function(visuals, replay, options) {
                 stream.on('close', function(err) {
                     debug('x Stream has closed')
 
-                    connected = false
+                    connecting = connected = false
 
                     if (err)
                         self.emit(Events.ERROR, err ? err : 'Unhandled websocket error')
@@ -435,7 +437,7 @@ var Recorder = function(visuals, replay, options) {
                 stream.on('connect', function() {
                     if (!connected) {
                         connected = true
-                        unloaded  = false
+                        connecting = unloaded = false
 
                         self.emit(Events.CONNECTED)
 
@@ -450,7 +452,7 @@ var Recorder = function(visuals, replay, options) {
                 })
 
                 stream.on('error', function(err) {
-                    connected = false
+                    connecting = connected = false
                     self.emit(Events.ERROR, err)
                 })
             }
@@ -463,7 +465,7 @@ var Recorder = function(visuals, replay, options) {
 
             if (submitting)
                 // server will disconnect socket automatically after submitting
-                connected = false
+                connecting = connected = false
 
             else if (stream) {
                 // force to disconnect socket right now to clean temp files on server
@@ -869,12 +871,20 @@ var Recorder = function(visuals, replay, options) {
         return connected
     }
 
+    this.isConnecting = function() {
+        return connecting
+    }
+
     this.limitWidth  = function(width) {
         return visuals.limitWidth(width)
     }
 
     this.limitHeight  = function(height) {
         return visuals.limitHeight(height)
+    }
+
+    this.isUserMediaLoaded = function() {
+        return userMediaLoaded
     }
 }
 
