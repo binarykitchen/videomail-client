@@ -398,10 +398,11 @@ var Container = function(options) {
         }
     }
 
+    // this code needs a good rewrite :(
     this.validate = function(force) {
         var valid
 
-        if (force || !this.isNotifying()) {
+        if (force || (!this.isNotifying() && this.isConnected())) {
             this.emit(Events.VALIDATING)
 
             var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled(),
@@ -527,6 +528,7 @@ var Container = function(options) {
         this.emit(Events.DISABLING_AUDIO)
     }
 
+    this.isConnected    = visuals.isConnected.bind(visuals)
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)
