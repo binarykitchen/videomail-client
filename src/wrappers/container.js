@@ -400,9 +400,20 @@ var Container = function(options) {
 
     // this code needs a good rewrite :(
     this.validate = function(force) {
-        var valid
+        var runValidation = true,
+            valid
 
-        if (force || (!this.isNotifying() && this.isConnected())) {
+        if (force) {
+            runValidation = force
+        } else if (self.isNotifying()) {
+            runValidation = false
+        } else if (visuals.isConnected()) {
+            runValidation = visuals.isUserMediaLoaded() || visuals.isReplayShown()
+        } else if (visuals.isConnecting()) {
+            runValidation = false
+        }
+
+        if (runValidation) {
             this.emit(Events.VALIDATING)
 
             var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled(),
@@ -528,7 +539,6 @@ var Container = function(options) {
         this.emit(Events.DISABLING_AUDIO)
     }
 
-    this.isConnected    = visuals.isConnected.bind(visuals)
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)

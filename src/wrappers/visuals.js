@@ -283,8 +283,8 @@ var Visuals = function(container, options) {
         return recorder.isUnloaded()
     }
 
-    this.isConnected = function() {
-        return recorder.isConnected()
+    this.isConnecting = function() {
+        return recorder.isConnecting()
     }
 
     this.getRecorderWidth = function(responsive) {
@@ -319,10 +319,12 @@ var Visuals = function(container, options) {
         return visualsElement.getBoundingClientRect()
     }
 
-    this.isReplayShown = replay.isShown.bind(replay)
-    this.hideReplay    = replay.hide.bind(replay)
-    this.hideRecorder  = recorder.hide.bind(recorder)
-    this.isRecording   = recorder.isRecording.bind(recorder)
+    this.isReplayShown     = replay.isShown.bind(replay)
+    this.hideReplay        = replay.hide.bind(replay)
+    this.hideRecorder      = recorder.hide.bind(recorder)
+    this.isRecording       = recorder.isRecording.bind(recorder)
+    this.isUserMediaLoaded = recorder.isUserMediaLoaded.bind(recorder)
+    this.isConnected       = recorder.isConnected.bind(recorder)
 }
 
 util.inherits(Visuals, EventEmitter)
