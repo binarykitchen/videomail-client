@@ -66,7 +66,7 @@
     "del": "2.2.0",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "3.1.0",
-    "gulp-bump": "2.0.1",
+    "gulp-bump": "2.1.0",
     "gulp-concat": "2.6.0",
     "gulp-connect": "3.2.1",
     "gulp-if": "2.0.0",
