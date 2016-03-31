@@ -104,7 +104,6 @@ gulp.task('connect', ['build'], function() {
         port:       8080,
         debug:      true,
         livereload: true,
-        // todo: fix expired certificate, see https://github.com/AveVlad/gulp-connect/issues/140
         https:      {
             key:  fs.readFileSync(SSL_CERTS_PATH + 'fake.key'),
             cert: fs.readFileSync(SSL_CERTS_PATH + 'fake.crt')
