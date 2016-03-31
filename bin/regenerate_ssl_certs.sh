@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SSL_DIR="$DIR/../etc/ssl-certs"
 
