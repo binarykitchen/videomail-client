@@ -11,6 +11,7 @@ var path       = require('path'),
     send       = require('connect-send-json'),
     del        = require('del'),
     minimist   = require('minimist'),
+    sslRootCas = require('ssl-root-cas'),
 
     defaultOptions = {
         minify:     false,
@@ -94,19 +95,20 @@ gulp.task('browserify', ['clean:js'], function(cb) {
 })
 
 gulp.task('connect', ['build'], function() {
-    // suppress invalid self-signed ssl certificate error
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
     var SSL_CERTS_PATH = __dirname + '/etc/ssl-certs/'
+
+    sslRootCas
+      .inject()
+      .addFile(path.join(SSL_CERTS_PATH, 'server', 'my-root-ca.crt.pem'))
 
     plugins.connect.server({
         root:       ['examples', 'dist'],
         port:       8080,
         debug:      true,
         livereload: true,
-        https:      {
-            key:  fs.readFileSync(SSL_CERTS_PATH + 'fake.key'),
-            cert: fs.readFileSync(SSL_CERTS_PATH + 'fake.crt')
+        https: {
+            key:  fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
+            cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
         },
         middleware: function(connect, options) {
             var router = new Router()
