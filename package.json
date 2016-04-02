@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "1.9.5",
+  "version": "1.9.6",
   "description": "A revolutionary node.js module which enables you to record videos directly in most browsers and mobiles.",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -67,10 +67,10 @@
     "gulp-bump": "2.1.0",
     "gulp-concat": "2.6.0",
     "gulp-connect": "3.2.2",
+    "gulp-cssnano": "2.1.1",
     "gulp-if": "2.0.0",
     "gulp-inject-string": "1.1.0",
     "gulp-load-plugins": "1.2.0",
-    "gulp-cssnano": "2.1.1",
     "gulp-plumber": "1.1.0",
     "gulp-rename": "1.2.2",
     "gulp-stylus": "2.3.1",
@@ -80,6 +80,7 @@
     "minimist": "1.2.0",
     "nib": "1.1.0",
     "router": "1.1.4",
+    "ssl-root-cas": "^1.1.10",
     "tape": "4.5.1",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
