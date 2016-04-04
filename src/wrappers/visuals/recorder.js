@@ -133,7 +133,7 @@ var Recorder = function(visuals, replay, options) {
         } else {
             debug('Recorder: no error listeners attached but throwing error', err)
 
-            // weird situation, throw it since there are no error listeners yet
+            // weird situation, throw it since there are no error listeners
             throw err
         }
     }
