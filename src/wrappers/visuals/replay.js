@@ -1,9 +1,14 @@
-var util            = require('util'),
-    h               = require('hyperscript'),
+var util = require('util'),
+    h    = require('hyperscript'),
 
     Events          = require('./../../events'),
     Browser         = require('./../../util/browser'),
-    EventEmitter    = require('./../../util/eventEmitter')
+    EventEmitter    = require('./../../util/eventEmitter'),
+
+    makeVideoPlayableInline
+
+if ('undefined' != typeof navigator)
+    makeVideoPlayableInline = require('iphone-inline-video')
 
 var Replay = function(parentElement, options) {
 
@@ -17,16 +22,7 @@ var Replay = function(parentElement, options) {
         videomail
 
     function buildElement() {
-        replayElement = h('video.' + options.selectors.replayClass, {
-            autoplay:   true,
-            autostart:  true,
-            autobuffer: true,
-            preload:    'auto',
-            controls:   'controls'
-        })
-
-        self.hide()
-
+        replayElement = h('video.' + options.selectors.replayClass)
         parentElement.appendChild(replayElement)
     }
 
@@ -58,7 +54,7 @@ var Replay = function(parentElement, options) {
         else if (parentElement.calculateHeight)
             height = parentElement.calculateHeight(options)
 
-        replayElement.style.width  = width  ? width + 'px' : 'auto'
+        replayElement.style.width  = width  ? width  + 'px' : 'auto'
         replayElement.style.height = height ? height + 'px' : 'auto'
     }
 
@@ -99,7 +95,7 @@ var Replay = function(parentElement, options) {
                 self.emit(Events.PREVIEW_SHOWN)
             else
                 self.emit(Events.REPLAY_SHOWN)
-        }, 30)
+        }, 40)
     }
 
     this.build = function() {
@@ -107,11 +103,25 @@ var Replay = function(parentElement, options) {
 
         if (!replayElement)
             buildElement()
-        else
-            this.hide()
+
+        this.hide()
+
+        if (!replayElement.autoplay)
+            replayElement.autoplay = true
+
+        if (!replayElement.autostart)
+            replayElement.autostart = true
+
+        if (!replayElement.autobuffer)
+            replayElement.autobuffer = true
 
         if (!replayElement.controls)
-            replayElement.controls = true
+            replayElement.controls = 'controls'
+
+        if (!replayElement.preload)
+            replayElement.preload = 'auto'
+
+        makeVideoPlayableInline && makeVideoPlayableInline(replayElement, options.isAudioEnabled())
 
         if (!built) {
             if (!isStandalone()) {
@@ -119,6 +129,10 @@ var Replay = function(parentElement, options) {
                     self.show(recorderWidth, recorderHeight)
                 })
             }
+
+            replayElement.addEventListener('touchstart', function() {
+                video.play()
+            })
 
             replayElement.onclick = function(e) {
                 e.preventDefault()
