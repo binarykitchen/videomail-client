@@ -87,15 +87,17 @@ var Replay = function(parentElement, options) {
         if (parentElement.classList)
             parentElement.classList.remove('hide')
 
-        // add a little delay to make sure the source is set
-        setTimeout(function() {
-            replayElement.load()
+        // this must be called after setting the sources and when becoming visible
+        // see https://github.com/bfred-it/iphone-inline-video/issues/16
+        makeVideoPlayableInline && makeVideoPlayableInline(replayElement, options.isAudioEnabled())
 
-            if (!videomail)
-                self.emit(Events.PREVIEW_SHOWN)
-            else
-                self.emit(Events.REPLAY_SHOWN)
-        }, 40)
+        // this forces to actually fetch the videos from the server
+        replayElement.load()
+
+        if (!videomail)
+            self.emit(Events.PREVIEW_SHOWN)
+        else
+            self.emit(Events.REPLAY_SHOWN)
     }
 
     this.build = function() {
@@ -195,10 +197,6 @@ var Replay = function(parentElement, options) {
 
     this.setWebMSource = function(src) {
         setVideoSource('webm', src)
-    }
-
-    this.makeVideoPlayableInline = function() {
-        makeVideoPlayableInline && makeVideoPlayableInline(replayElement, options.isAudioEnabled())
     }
 
     this.getVideoType = function() {

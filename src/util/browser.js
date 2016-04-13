@@ -115,9 +115,15 @@ module.exports = function(options) {
 
     // just temporary
     this.canRecord = function() {
-        var getUserMediaType = typeof navigator !== 'undefined' && typeof navigator.getUserMedia_
+        var hasNavigator = typeof navigator !== 'undefined'
 
-        return getUserMediaType !== 'undefined' && getUserMediaType == 'function'
+        if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            return true
+        } else {
+            var getUserMediaType = hasNavigator && typeof navigator.getUserMedia_
+
+            return getUserMediaType !== 'undefined' && getUserMediaType == 'function'
+        }
     }
 
     this.checkRecordingCapabilities = function() {
