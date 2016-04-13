@@ -11,11 +11,17 @@ module.exports = function(window, navigator) {
     // https://github.com/julienetie/request-frame
     require('request-frame')('native')
 
-    navigator.getUserMedia_ =
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia
+    // avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
+    // see https://github.com/binarykitchen/videomail-client/issues/79
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // do not shim
+    } else {
+        navigator.getUserMedia_ =
+            navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia
+    }
 
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
