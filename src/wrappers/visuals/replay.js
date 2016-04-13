@@ -121,8 +121,6 @@ var Replay = function(parentElement, options) {
         if (!replayElement.preload)
             replayElement.preload = 'auto'
 
-        makeVideoPlayableInline && makeVideoPlayableInline(replayElement, options.isAudioEnabled())
-
         if (!built) {
             if (!isStandalone()) {
                 this.on(Events.PREVIEW, function(key, recorderWidth, recorderHeight) {
@@ -197,6 +195,10 @@ var Replay = function(parentElement, options) {
 
     this.setWebMSource = function(src) {
         setVideoSource('webm', src)
+    }
+
+    this.makeVideoPlayableInline = function() {
+        makeVideoPlayableInline && makeVideoPlayableInline(replayElement, options.isAudioEnabled())
     }
 
     this.getVideoType = function() {
