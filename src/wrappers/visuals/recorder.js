@@ -142,35 +142,46 @@ var Recorder = function(visuals, replay, options) {
         return !isHidden() || blocking
     }
 
+    function getUserMediaCallback(localStream) {
+        userMediaLoading = false
+
+        if (showUserMedia()) {
+            try {
+                clearUserMediaTimeout()
+
+                userMedia.init(
+                    localStream,
+                    onUserMediaReady.bind(self),
+                    onAudioSample.bind(self),
+                    function(err) {
+                        self.emit(Events.ERROR, err)
+                    }
+                )
+            } catch (exc) {
+                self.emit(Events.ERROR, exc)
+            }
+        }
+    }
+
     function loadGenuineUserMedia() {
         if (!navigator)
             throw new Error('Navigator is missing!')
 
-        navigator.getUserMedia_({
-            video: true,
-            audio: options.isAudioEnabled()
-        }, function(localStream) {
-
-            userMediaLoading = false
-
-            if (showUserMedia()) {
-                try {
-                    clearUserMediaTimeout()
-
-                    userMedia.init(
-                        localStream,
-                        onUserMediaReady.bind(self),
-                        onAudioSample.bind(self),
-                        function(err) {
-                            self.emit(Events.ERROR, err)
-                        }
-                    )
-                } catch (exc) {
-                    self.emit(Events.ERROR, exc)
-                }
-            }
-
-        }, userMediaErrorCallback)
+        // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+        if (navigator.mediaDevices.getUserMedia) {
+            // prefer the front camera (if one is available) over the rear one
+            navigator.mediaDevices.getUserMedia({
+                video: {facingMode: "user"},
+                audio: options.isAudioEnabled()
+            })
+            .then(getUserMediaCallback)
+            .catch(userMediaErrorCallback)
+        } else {
+            navigator.getUserMedia_({
+                video: true,
+                audio: options.isAudioEnabled()
+            }, getUserMediaCallback, userMediaErrorCallback)
+        }
     }
 
     function loadUserMedia() {
@@ -230,10 +241,6 @@ var Recorder = function(visuals, replay, options) {
 
         if (args.webm)
             replay.setWebMSource(args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName)
-
-        // this must be called after setting the sources,
-        // see https://github.com/bfred-it/iphone-inline-video/issues/16
-        replay.makeVideoPlayableInline()
 
         self.hide()
         self.emit(Events.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true))

@@ -60,9 +60,20 @@ module.exports = function(recorder, options) {
         }
     }
 
+    function getVideoTrack(localMediaStream) {
+        var videoTrack
+
+        if (localMediaStream && localMediaStream.getVideoTracks) {
+            var videoTracks = localMediaStream.getVideoTracks()
+            videoTrack      = videoTracks[0]
+        }
+
+        return videoTrack
+    }
+
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
-        this.stop()
+        this.stop(localMediaStream)
 
         var onPlayReached           = false,
             onLoadedMetaDataReached = false
@@ -141,12 +152,7 @@ module.exports = function(recorder, options) {
         }
 
         try {
-            var videoTrack, videoTracks
-
-            if (localMediaStream.getVideoTracks) {
-                videoTracks = localMediaStream.getVideoTracks()
-                videoTrack  = videoTracks[0]
-            }
+            var videoTrack = getVideoTrack(localMediaStream)
 
             if (!videoTrack)
                 options.debug('UserMedia: detected (but no video tracks exist')
@@ -212,10 +218,24 @@ module.exports = function(recorder, options) {
         return !!rawVisualUserMedia.src
     }
 
-    this.stop = function() {
+    this.stop = function(visualStream) {
         try {
-            var visualStream = getVisualStream()
+            // TO BE CONTINUED FOR
+            // https://github.com/binarykitchen/videomail-client/issues/78
+            // BUT IS ALSO BREADKING .ENDED
 
+            // if (!visualStream)
+            //     visualStream = getVisualStream()
+
+            // var videoTrack = getVideoTrack(visualStream)
+
+            // if (videoTrack) {
+            //     videoTrack.stop()
+            // } else {
+            //     visualStream && visualStream.stop && visualStream.stop()
+            // }
+
+            var visualStream = getVisualStream()
             visualStream && visualStream.stop && visualStream.stop()
 
             setVisualStream(null)
