@@ -231,6 +231,10 @@ var Recorder = function(visuals, replay, options) {
         if (args.webm)
             replay.setWebMSource(args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName)
 
+        // this must be called after setting the sources,
+        // see https://github.com/bfred-it/iphone-inline-video/issues/16
+        replay.makeVideoPlayableInline()
+
         self.hide()
         self.emit(Events.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true))
 
