@@ -340,6 +340,13 @@ var Container = function(options) {
             visuals.show()
 
             if (!hasError) {
+
+                var paused = self.isPaused()
+
+                if (paused) {
+                    buttons.adjustButtonsForPause()
+                }
+
                 // since https://github.com/binarykitchen/videomail-client/issues/60
                 // we hide areas to make it easier for the user
                 buttons.show()
@@ -347,7 +354,7 @@ var Container = function(options) {
                 if (self.isReplayShown())
                     self.emit(Events.PREVIEW)
                 else {
-                    self.emit(Events.FORM_READY)
+                    self.emit(Events.FORM_READY, {paused: paused})
                     debug('Building stream connection to server ...')
                 }
             }
