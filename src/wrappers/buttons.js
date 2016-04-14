@@ -256,19 +256,21 @@ var Buttons = function(container, options) {
 
     function onFormReady(options) {
         // no need to show record button when doing a record again
-        if (!isShown(recordAgainButton))
+        if (!isShown(recordAgainButton) && !options.paused)
             show(recordButton)
 
-        disable(previewButton)
-        hide(previewButton)
+        if (!options.paused) {
+            disable(previewButton)
+            hide(previewButton)
+        }
     }
 
     function onReplayShown() {
         self.hide()
     }
 
-    function onUserMediaReady() {
-        onFormReady()
+    function onUserMediaReady(options) {
+        onFormReady(options)
 
         if (isShown(recordButton))
             enable(recordButton)
@@ -302,12 +304,13 @@ var Buttons = function(container, options) {
         enable(submitButton)
     }
 
-    function onPaused() {
+    this.adjustButtonsForPause = function() {
         pauseButton && hide(pauseButton)
         show(resumeButton)
         enable(resumeButton)
         hide(recordButton)
         show(previewButton)
+        enable(previewButton)
     }
 
     function onFirstFrameSent() {
@@ -412,7 +415,7 @@ var Buttons = function(container, options) {
         }).on(Events.PREVIEW, function() {
             onPreview()
         }).on(Events.PAUSED, function() {
-            onPaused()
+            self.adjustButtonsForPause()
         }).on(Events.RECORDING, function(framesCount) {
             onRecording(framesCount)
         }).on(Events.FIRST_FRAME_SENT, function() {
@@ -435,8 +438,8 @@ var Buttons = function(container, options) {
             onSubmitted()
         }).on(Events.HIDE, function() {
             onHidden()
-        }).on(Events.FORM_READY, function() {
-            onFormReady()
+        }).on(Events.FORM_READY, function(options) {
+            onFormReady(options)
         }).on(Events.REPLAY_SHOWN, function() {
             onReplayShown()
         }).on(Events.ERROR, function(err) {

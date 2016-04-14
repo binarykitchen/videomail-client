@@ -1,11 +1,13 @@
-var util = require('util')
+var util    = require('util'),
+    Browser = require('./browser')
 
 module.exports = function(localOptions) {
 
     localOptions = localOptions || {}
 
-    var logger      = localOptions.logger || console,
-        containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id'
+    var browser     = new Browser(localOptions),
+        logger      = localOptions.logger || console,
+        containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id',
         stack       = []
 
     function lifo(level, parameters) {
@@ -30,9 +32,15 @@ module.exports = function(localOptions) {
 
             arguments[0] = addContainerId(arguments[0])
 
-            logger.groupCollapsed(lifo('debug', arguments))
-            logger.trace('Trace')
-            logger.groupEnd()
+            var output = lifo('debug', arguments)
+
+            if (browser.isFirefox()) {
+                logger.debug(output)
+            } else {
+                logger.groupCollapsed(output)
+                logger.trace('Trace')
+                logger.groupEnd()
+            }
         }
     }
 

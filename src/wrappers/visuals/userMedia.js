@@ -73,7 +73,7 @@ module.exports = function(recorder, options) {
 
     this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
 
-        this.stop(localMediaStream)
+        this.stop(localMediaStream, true)
 
         var onPlayReached           = false,
             onLoadedMetaDataReached = false
@@ -218,33 +218,30 @@ module.exports = function(recorder, options) {
         return !!rawVisualUserMedia.src
     }
 
-    this.stop = function(visualStream) {
+    this.stop = function(visualStream, aboutToInitialize) {
         try {
-            // TO BE CONTINUED FOR
-            // https://github.com/binarykitchen/videomail-client/issues/78
-            // BUT IS ALSO BREADKING .ENDED
+            // do not stop "too much" when going to initialize anyway
+            if (!aboutToInitialize) {
+                if (!visualStream)
+                    visualStream = getVisualStream()
 
-            // if (!visualStream)
-            //     visualStream = getVisualStream()
+                var videoTrack = getVideoTrack(visualStream)
 
-            // var videoTrack = getVideoTrack(visualStream)
+                if (videoTrack) {
+                    videoTrack.stop()
+                } else {
+                    visualStream && visualStream.stop && visualStream.stop()
+                }
 
-            // if (videoTrack) {
-            //     videoTrack.stop()
-            // } else {
-            //     visualStream && visualStream.stop && visualStream.stop()
-            // }
+                setVisualStream(null)
 
-            var visualStream = getVisualStream()
-            visualStream && visualStream.stop && visualStream.stop()
+                audioRecorder && audioRecorder.stop()
 
-            setVisualStream(null)
+                audioRecorder = null
+            }
 
             paused = record = false
 
-            audioRecorder && audioRecorder.stop()
-
-            audioRecorder = null
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }

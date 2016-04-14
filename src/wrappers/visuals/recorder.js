@@ -96,7 +96,7 @@ var Recorder = function(visuals, replay, options) {
             userMediaLoaded = true
 
             show()
-            self.emit(Events.USER_MEDIA_READY)
+            self.emit(Events.USER_MEDIA_READY, {paused: self.isPaused()})
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
@@ -788,7 +788,8 @@ var Recorder = function(visuals, replay, options) {
             // https://github.com/binarykitchen/videomail-client/issues/35
             recorderElement.muted = true
 
-            userMedia = new UserMedia(this, options)
+            if (!userMedia)
+                userMedia = new UserMedia(this, options)
 
             show()
 
