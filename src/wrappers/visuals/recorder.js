@@ -96,7 +96,7 @@ var Recorder = function(visuals, replay, options) {
             userMediaLoaded = true
 
             show()
-            self.emit(Events.USER_MEDIA_READY)
+            self.emit(Events.USER_MEDIA_READY, {paused: self.isPaused()})
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
@@ -139,10 +139,12 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function showUserMedia() {
-        return !isHidden() || blocking
+        return isNotifying() || !isHidden() || blocking
     }
 
     function getUserMediaCallback(localStream) {
+        debug('Recorder: getUserMediaCallback()')
+
         userMediaLoading = false
 
         if (showUserMedia()) {
@@ -196,6 +198,8 @@ var Recorder = function(visuals, replay, options) {
         }
 
         debug('Recorder: loadUserMedia()')
+
+        self.emit(Events.LOADING_USER_MEDIA)
 
         try {
             userMediaTimeout = setTimeout(function() {
@@ -381,7 +385,11 @@ var Recorder = function(visuals, replay, options) {
 
             writeStream(new Buffer(JSON.stringify(command)))
 
-            cb && cb()
+            if (cb)
+                // keep all callbacks async
+                setTimeout(function() {
+                    cb()
+                }, 0)
         }
     }
 
@@ -788,7 +796,8 @@ var Recorder = function(visuals, replay, options) {
             // https://github.com/binarykitchen/videomail-client/issues/35
             recorderElement.muted = true
 
-            userMedia = new UserMedia(this, options)
+            if (!userMedia)
+                userMedia = new UserMedia(this, options)
 
             show()
 
