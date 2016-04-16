@@ -139,10 +139,12 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function showUserMedia() {
-        return !isHidden() || blocking
+        return isNotifying() || !isHidden() || blocking
     }
 
     function getUserMediaCallback(localStream) {
+        debug('Recorder: getUserMediaCallback()')
+
         userMediaLoading = false
 
         if (showUserMedia()) {
@@ -196,6 +198,8 @@ var Recorder = function(visuals, replay, options) {
         }
 
         debug('Recorder: loadUserMedia()')
+
+        self.emit(Events.LOADING_USER_MEDIA)
 
         try {
             userMediaTimeout = setTimeout(function() {
@@ -381,7 +385,11 @@ var Recorder = function(visuals, replay, options) {
 
             writeStream(new Buffer(JSON.stringify(command)))
 
-            cb && cb()
+            if (cb)
+                // keep all callbacks async
+                setTimeout(function() {
+                    cb()
+                }, 0)
         }
     }
 
