@@ -81,7 +81,10 @@ module.exports = function(options) {
 
     this.get = function(alias, cb) {
         if (options.cache && cache[alias])
-            cb(null, cache[alias])
+            // keep all callbacks async
+            setTimeout(function() {
+                cb(null, cache[alias])
+            }, 0)
         else
             fetch(alias, cb)
     }
@@ -106,7 +109,10 @@ module.exports = function(options) {
                 formType = 'form'
                 break
             default:
-                cb(new Error('Invalid enctype given: ' + options.enctype))
+                // keep all callbacks async
+                setTimeout(function () {
+                    cb(new Error('Invalid enctype given: ' + options.enctype))
+                }, 0)
         }
 
         if (formType) {
