@@ -12,7 +12,10 @@ module.exports = function(visuals, options) {
         self.unload()
         self.hide()
 
-        cb()
+        // keep all callbacks async
+        setTimeout(function() {
+            cb()
+        }, 0)
     }
 
     function countBackward(cb) {

@@ -35,6 +35,10 @@ var Notifier = function(visuals, options) {
         })
     }
 
+    function onLoadingUserMedia() {
+        self.notify('Loading webcam …')
+    }
+
     function onProgress(frameProgress, sampleProgress) {
         var overallProgress
 
@@ -53,6 +57,9 @@ var Notifier = function(visuals, options) {
         debug('Notifier: initEvents()')
 
         self
+            .on(Events.LOADING_USER_MEDIA, function() {
+                onLoadingUserMedia()
+            })
             .on(Events.USER_MEDIA_READY, function() {
                 self.hide()
             })
