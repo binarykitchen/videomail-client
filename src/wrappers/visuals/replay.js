@@ -54,8 +54,15 @@ var Replay = function(parentElement, options) {
         else if (parentElement.calculateHeight)
             height = parentElement.calculateHeight(options)
 
-        replayElement.style.width  = width  ? width  + 'px' : 'auto'
-        replayElement.style.height = height ? height + 'px' : 'auto'
+        if (width > 0)
+            replayElement.style.width = width  + 'px'
+        else
+            replayElement.style.width = 'auto'
+
+        if (height > 0)
+            replayElement.style.height = height + 'px'
+        else
+            replayElement.style.height = 'auto'
     }
 
     this.setVideomail = function(newVideomail) {
