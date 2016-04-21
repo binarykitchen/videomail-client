@@ -29,7 +29,10 @@ module.exports = {
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
     limitHeight : function(height) {
-        var limitedHeight = window.outerHeight < height ? window.outerHeight : height
+
+        // see http://ryanve.com/lab/dimensions/
+        var windowHeight  = document.documentElement.clientHeight,
+            limitedHeight = windowHeight < height ? windowHeight : height
 
         if (limitedHeight < 1)
             throw new Error('Limited height cannot be less than 1!')
