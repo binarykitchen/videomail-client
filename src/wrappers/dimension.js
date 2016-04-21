@@ -18,7 +18,12 @@ module.exports = {
 
     limitWidth: function(element, width) {
         var outerWidth = getOuterWidth(element)
-        return outerWidth > 0 && outerWidth < width ? outerWidth : width
+        var limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
+
+        if (limitedWidth < 1)
+            throw new Error('Limited width cannot be less than 1!')
+        else
+            return limitedWidth
     },
 
     // this is difficult to compute and is not entirely correct.
@@ -36,7 +41,13 @@ module.exports = {
         if (options.responsive)
             height = this.limitHeight(height)
 
-        return parseInt(height / ratio)
+        var calculatedWidth = parseInt(height / ratio)
+
+        if (calculatedWidth < 1) {
+            throw new Error('Calculated width cannot be smaller than 1!')
+        } else {
+            return calculatedWidth
+        }
     },
 
     calculateHeight: function(element, options) {
