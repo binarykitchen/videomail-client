@@ -132,7 +132,12 @@ var Container = function(options) {
     // this will just set the width but not the height because
     // it can be a form with more inputs elements
     function correctDimensions() {
-        containerElement.style.width = visuals.getRecorderWidth(true) + 'px'
+        var width = visuals.getRecorderWidth(true);
+
+        if (width < 1)
+            throw new Eror('Recorder width cannot be less than 1!')
+        else
+            containerElement.style.width = width + 'px'
     }
 
     function removeDimensions() {
