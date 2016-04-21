@@ -17,7 +17,7 @@ function figureMinHeight(height, options) {
 module.exports = {
 
     limitWidth: function(element, width) {
-        var outerWidth = getOuterWidth(element)
+        var outerWidth   = getOuterWidth(element)
         var limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
 
         if (limitedWidth < 1)
@@ -29,7 +29,12 @@ module.exports = {
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
     limitHeight : function(height) {
-        return window.outerHeight < height ? window.outerHeight : height
+        var limitedHeight = window.outerHeight < height ? window.outerHeight : height
+
+        if (limitedHeight < 1)
+            throw new Error('Limited height cannot be less than 1!')
+        else
+            return limitedHeight
     },
 
     calculateWidth: function(options) {
@@ -41,12 +46,16 @@ module.exports = {
         if (options.responsive)
             height = this.limitHeight(height)
 
-        var calculatedWidth = parseInt(height / ratio)
-
-        if (calculatedWidth < 1) {
-            throw new Error('Calculated width cannot be smaller than 1!')
+        if (height < 1) {
+            throw new Error('Height cannot be smaller than 1 when calculating width.')
         } else {
-            return calculatedWidth
+            var calculatedWidth = parseInt(height / ratio)
+
+            if (calculatedWidth < 1) {
+                throw new Error('Calculated width cannot be smaller than 1!')
+            } else {
+                return calculatedWidth
+            }
         }
     },
 
