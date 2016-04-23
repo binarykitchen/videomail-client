@@ -130,6 +130,8 @@ var Replay = function(parentElement, options) {
         if (!replayElement.preload)
             replayElement.preload = 'auto'
 
+        replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
+
         if (!built) {
             if (!isStandalone()) {
                 this.on(Events.PREVIEW, function(key, recorderWidth, recorderHeight) {
@@ -137,12 +139,17 @@ var Replay = function(parentElement, options) {
                 })
             }
 
-            replayElement.addEventListener('touchstart', function() {
-                video.play()
+            replayElement.addEventListener('touchstart', function(e) {
+                e && e.preventDefault()
+
+                if (this.paused)
+                    self.play()
+                else
+                    self.pause()
             })
 
             replayElement.onclick = function(e) {
-                e.preventDefault()
+                e && e.preventDefault()
 
                 if (this.paused)
                     self.play()
