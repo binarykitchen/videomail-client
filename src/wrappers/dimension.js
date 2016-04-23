@@ -28,7 +28,7 @@ module.exports = {
 
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
-    limitHeight : function(height) {
+    limitHeight: function(height) {
 
         // see http://ryanve.com/lab/dimensions/
         var windowHeight  = document.documentElement.clientHeight,
