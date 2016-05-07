@@ -47,7 +47,7 @@
     "humanize-duration": "3.7.1",
     "hyperscript": "1.4.7",
     "insert-css": "0.2.0",
-    "iphone-inline-video": "1.6.4",
+    "iphone-inline-video": "1.7.2",
     "is-power-of-two": "1.0.0",
     "keymirror": "0.1.1",
     "merge-recursive": "0.0.3",
@@ -59,8 +59,8 @@
     "websocket-stream": "3.1.0"
   },
   "devDependencies": {
-    "body-parser": "1.15.0",
-    "browserify": "13.0.0",
+    "body-parser": "1.15.1",
+    "browserify": "13.0.1",
     "connect-send-json": "1.0.0",
     "del": "2.2.0",
     "gulp": "3.9.1",
@@ -69,7 +69,7 @@
     "gulp-concat": "2.6.0",
     "gulp-connect": "4.0.0",
     "gulp-cssnano": "2.1.2",
-    "gulp-if": "2.0.0",
+    "gulp-if": "2.0.1",
     "gulp-inject-string": "1.1.0",
     "gulp-load-plugins": "1.2.2",
     "gulp-plumber": "1.1.0",
