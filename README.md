@@ -32,7 +32,7 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 <a name="examples"></a>
 ## Examples
 
-To run the examples in your browser, just do:
+To run the examples in your browser with Gulp, just do:
 
 1. `npm install`
 2. `gulp examples` to ignite a static server and
