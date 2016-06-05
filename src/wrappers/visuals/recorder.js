@@ -639,14 +639,19 @@ var Recorder = function(visuals, replay, options) {
             return false
         }
 
-        canvas = userMedia.createCanvas()
-        ctx    = canvas.getContext('2d')
+        try {
+            canvas = userMedia.createCanvas()
+        } catch (exc) {
+            throw VideomailError.create('Failed to create canvas.', exc.toString(), options)
+        }
+
+        ctx = canvas.getContext('2d')
 
         if (!canvas.width)
-            throw VideomailError.create('Canvas has an invalid width.')
+            throw VideomailError.create('Canvas has an invalid width.', options)
 
         if (!canvas.height)
-            throw VideomailError.create('Canvas has an invalid height.')
+            throw VideomailError.create('Canvas has an invalid height.', options)
 
         avgFps   = null
         bytesSum = intervalSum = 0
@@ -694,7 +699,7 @@ var Recorder = function(visuals, replay, options) {
                         bufferLength = buffer.length
 
                         if (bufferLength < 1)
-                            throw VideomailError.create('Failed to extract webcam data.')
+                            throw VideomailError.create('Failed to extract webcam data.', options)
 
                         // stream might become null while unloading
                         if (stream) {
