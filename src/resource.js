@@ -127,9 +127,8 @@ module.exports = function(options) {
 
                     if (err)
                         cb(err)
-                    else {
+                    else
                         cb(null, res)
-                    }
                 })
         }
     }
