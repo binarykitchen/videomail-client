@@ -42,7 +42,7 @@ gulp.task('stylus', function() {
             'last 3 versions',
             '> 1%',
             'Explorer >= 10',
-            'Chrome >= 34',
+            'Chrome >= 38',
             'Firefox ESR',
             'iOS >= 6', 'android >= 4'
         ))
