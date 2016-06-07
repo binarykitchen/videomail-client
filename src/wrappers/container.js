@@ -441,10 +441,17 @@ var Container = function(options) {
                             valid = false
 
                         if (!valid)
-                            whyInvalid = 'requiresRecord'
+                            whyInvalid = 'Video is not recorded'
                     }
-                } else
-                    whyInvalid = 'badFormData'
+                } else {
+                    var invalidInput = form.getInvalidElement()
+
+                    if (invalidInput) {
+                        whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid'
+                    } else {
+                        whyInvalid = 'Form input(s() are invalid'
+                    }
+                }
             } else
                 valid = visualsValid
 
