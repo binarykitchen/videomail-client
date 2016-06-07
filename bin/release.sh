@@ -80,6 +80,6 @@ git push --tags
 # Prepare the develop branch for the new cycle
 git checkout develop
 
-use unset GIT_MERGE_AUTOEDIT
+unset GIT_MERGE_AUTOEDIT
 
 echo "All good. Ready for the next cycle!"
