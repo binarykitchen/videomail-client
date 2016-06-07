@@ -200,12 +200,12 @@ Returns true when a video has been recorded and a form exists. Useful when check
 
 Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server. `127.0.0.1:8080` is whitelisted too for local development. Other IP addresses won't work.
 
-In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending video mails. To fix that, please reach me at [https://binarykitchen.com/contact](https://binarykitchen.com/contact) and you will get a new site name and a list of whitelisted URLs for your own usage.
+In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending video mails. To fix that, please reach me at [https://binarykitchen.com](https://binarykitchen.com) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
 <a name="compatibility"></a>
 ## Backward compatibility
 
-Forget the old IE, Safari and iPhones/iPads because they still don't support `getUserMedia()`. Do not blame me but Apple + Microsoft *chuckle* - these browsers work like a charm:
+Forget the old IE, Safari and iPhones/iPads because they still don't support `getUserMedia()`. Do not blame me but Apple + Microsoft *chuckle* - but these browsers work like a charm:
 
 * Firefox >= 34
 * Google Chrome >= 32
@@ -217,6 +217,8 @@ Forget the old IE, Safari and iPhones/iPads because they still don't support `ge
 
 Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
 
+PS: On Safari and iPhones/iPads you can play the videomails fine without any issues. Repeating: there is just no recording functionality for them.
+
 <a name="super-fast-cdn"></a>
 ## Super fast global CDN
 
@@ -225,7 +227,7 @@ You can grab the already browserified videomail-client JS file through GitHub's 
 https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/dist/videomail-client.js
 ```
 For example for version 1.3.19, use this in your production site:
-https://cdn.rawgit.com/binarykitchen/videomail-client/1.3.19/dist/videomail-client.js
+https://cdn.rawgit.com/binarykitchen/videomail-client/1.10.21/dist/videomail-client.min.js
 
 If for whatever reason that GitHub CDN doesn't meet your standard, here's another CDN to try:
 https://cdnjs.com/libraries/videomail-client
@@ -297,7 +299,7 @@ These guys helped and/or inspired me for this mad project:
 * Nicholas Buchanan
 * Kelvin Wong
 
-They all deserve lots of love.
+They all deserve lots of beer and love. That order is irrelevant.
 
 ### Final philosophy
 
