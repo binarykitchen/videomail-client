@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
+export GIT_MERGE_AUTOEDIT=no
+
 die() {
+    use unset GIT_MERGE_AUTOEDIT
     echo >&2 "☠ ☠ ☠ ☠ ☠ ☠ ☠  $@  ☠ ☠ ☠ ☠ ☠ ☠ ☠"
     exit 1
 }
@@ -60,7 +63,7 @@ gulp build --minify
 npm test
 
 git add -A
-git commit -am "Final commit of version $VERSION"
+git commit -am "Final commit of version $VERSION" --no-edit
 
 echo "Publishing to npm ..."
 npm publish
@@ -76,5 +79,7 @@ git push --tags
 
 # Prepare the develop branch for the new cycle
 git checkout develop
+
+use unset GIT_MERGE_AUTOEDIT
 
 echo "All good. Ready for the next cycle!"

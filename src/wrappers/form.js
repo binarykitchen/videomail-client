@@ -68,6 +68,14 @@ var Form = function(container, formElement, options) {
         }
     }
 
+    function getTextElements() {
+        return formElement.querySelectorAll('input, textarea')
+    }
+
+    function getSelectElements() {
+        return formElement.querySelectorAll('select')
+    }
+
     this.disable = function(buttonsToo) {
         setDisabled(true, buttonsToo)
     }
@@ -78,7 +86,7 @@ var Form = function(container, formElement, options) {
 
     this.build = function() {
         if (options.enableAutoValidation) {
-            var textElements = formElement.querySelectorAll('input, textarea')
+            var textElements = getTextElements()
 
             for (var i = 0, len = textElements.length; i < len; i++) {
                 textElements[i].addEventListener('input', function() {
@@ -92,7 +100,7 @@ var Form = function(container, formElement, options) {
                 })
             }
 
-            var selectElements = formElement.querySelectorAll('select')
+            var selectElements = getSelectElements()
 
             for (var i = 0, len = selectElements.length; i < len; i++) {
                 selectElements[i].addEventListener('change', function() {
@@ -153,6 +161,24 @@ var Form = function(container, formElement, options) {
                 }
             }
         })
+    }
+
+    this.getInvalidElement = function() {
+        var textElements = getTextElements()
+
+        for (var i = 0, len = textElements.length; i < len; i++) {
+            if (!textElements[i].validity.valid)
+                return textElements[i]
+        }
+
+        var selectElements = getSelectElements()
+
+        for (var i = 0, len = selectElements.length; i < len; i++) {
+            if (!selectElements[i].validity.valid)
+                return selectElements[i]
+        }
+
+        return null
     }
 
     this.validate = function() {
