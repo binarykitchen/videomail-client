@@ -15,9 +15,12 @@ module.exports = function(recorder, options) {
         paused = false,
         record = false,
 
-        audioRecorder
+        audioRecorder,
+        currentVisualStream
 
     function attachMediaStream(stream) {
+        currentVisualStream = stream
+
         if (typeof rawVisualUserMedia.srcObject !== 'undefined')
             rawVisualUserMedia.srcObject = stream
 
@@ -35,13 +38,20 @@ module.exports = function(recorder, options) {
         else {
             rawVisualUserMedia.removeAttribute('srcObject')
             rawVisualUserMedia.removeAttribute('src')
+
+            currentVisualStream = null
         }
     }
 
     function getVisualStream() {
-        return  rawVisualUserMedia.mozSrcObject ?
-                rawVisualUserMedia.mozSrcObject :
-                rawVisualUserMedia.srcObject
+        if (rawVisualUserMedia.mozSrcObject)
+            return rawVisualUserMedia.mozSrcObject
+
+        else if (rawVisualUserMedia.srcObject)
+            return rawVisualUserMedia.srcObject
+
+        else
+            return currentVisualStream
     }
 
     function hasEnded() {
@@ -60,13 +70,30 @@ module.exports = function(recorder, options) {
         }
     }
 
-    function getVideoTrack(localMediaStream) {
-        var videoTrack
+    function getTracks(localMediaStream) {
+        var tracks
 
-        if (localMediaStream && localMediaStream.getVideoTracks) {
-            var videoTracks = localMediaStream.getVideoTracks()
-            videoTrack      = videoTracks[0]
-        }
+        if (localMediaStream && localMediaStream.getTracks)
+            tracks = localMediaStream.getTracks()
+
+        return tracks
+    }
+
+    function getVideoTracks(localMediaStream) {
+        var videoTracks
+
+        if (localMediaStream && localMediaStream.getVideoTracks)
+            videoTracks = localMediaStream.getVideoTracks()
+
+        return videoTracks
+    }
+
+    function getFirstVideoTrack(localMediaStream) {
+        var videoTracks = getVideoTracks(localMediaStream),
+            videoTrack
+
+        if (videoTracks && videoTracks[0])
+            videoTrack = videoTracks[0]
 
         return videoTrack
     }
@@ -152,7 +179,7 @@ module.exports = function(recorder, options) {
         }
 
         try {
-            var videoTrack = getVideoTrack(localMediaStream)
+            var videoTrack = getFirstVideoTrack(localMediaStream)
 
             if (!videoTrack)
                 options.debug('UserMedia: detected (but no video tracks exist')
@@ -225,13 +252,14 @@ module.exports = function(recorder, options) {
                 if (!visualStream)
                     visualStream = getVisualStream()
 
-                var videoTrack = getVideoTrack(visualStream)
+                var tracks = getTracks(visualStream)
 
-                if (videoTrack) {
-                    videoTrack.stop()
-                } else {
-                    visualStream && visualStream.stop && visualStream.stop()
-                }
+                if (tracks)
+                    tracks.forEach(function(track) {
+                        track.stop()
+                    })
+
+                visualStream && visualStream.stop && visualStream.stop()
 
                 setVisualStream(null)
 

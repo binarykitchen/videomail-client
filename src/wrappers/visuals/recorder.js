@@ -92,7 +92,7 @@ var Recorder = function(visuals, replay, options) {
         try {
             debug('Recorder: onUserMediaReady()')
 
-            blocking = unloaded = submitting = false
+            userMediaLoading = blocking = unloaded = submitting = false
             userMediaLoaded = true
 
             show()
@@ -144,8 +144,6 @@ var Recorder = function(visuals, replay, options) {
 
     function getUserMediaCallback(localStream) {
         debug('Recorder: getUserMediaCallback()')
-
-        userMediaLoading = false
 
         if (showUserMedia()) {
             try {
