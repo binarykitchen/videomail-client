@@ -12,7 +12,11 @@ module.exports = {
     enableSpace:     true,                   // hitting space can pause recording
     disableSubmit:   false,                  // set this to true if you do not want to submit videos,
                                              // but just want to record and replay these temporarily
-    enableAutoValidation: true,              // automatically validates all form inputs if any exist
+    enableAutoValidation: true,              // automatically validates all form inputs if any exist and
+                                             // does not disable submit button after recording when something
+                                             // else seems invalid. useful in conjunction if you want to
+                                             // set the 'disabled' attribute of the submit button yourself, see
+                                             // setSubmitButtonAttribute() in the API
 
     enctype: 'application/json',             // enctype for the form submission. currently implemented are:
                                              // 'application/json' and 'application/x-www-form-urlencoded'
