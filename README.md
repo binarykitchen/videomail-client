@@ -206,7 +206,7 @@ For example
 
 ```js
 setSubmitButtonAttribute('disabled', false)
-` ``
+```
 
 will allow you to control the submit button in case if you want to take over control of form validation. Works best in conjunction when option `enableAutoValidation` is set to false. Only recommended when you integrate this Videomail-Client into a larger framework or CMS such as WordPress.
 
@@ -250,9 +250,7 @@ https://cdnjs.com/libraries/videomail-client
 <a name="changes"></a>
 ## Breaking/Hot Changes (Changelog)
 
-### v1.12.0
-
-setSubmitButtonAttribute
+### v1.13.0 (2016-06-13)
 
 - **VideomailClient:** New API function `setSubmitButtonAttribute(name, value)` - this to directly modify HTML attributes of the submit button.
 
