@@ -380,7 +380,8 @@ var Buttons = function(container, options) {
     }
 
     function onInvalid() {
-        disable(submitButton)
+        if (options.enableAutoValidation)
+            disable(submitButton)
     }
 
     function onValid() {
