@@ -31,5 +31,6 @@ module.exports = keymirror({
   NOTIFYING:            null, // notifies user about something (not blocking)
   ENABLING_AUDIO:       null, // about to enable audio
   DISABLING_AUDIO:      null, // about to disable audio
-  LOADED_META_DATA:     null  // raised when webcam knows its dimensions
+  LOADED_META_DATA:     null, // raised when webcam knows its dimensions
+  EVENT_EMITTED:        null  // for debugging only, is emitted when an event is emitted lol
 })
