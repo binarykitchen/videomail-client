@@ -18,7 +18,7 @@
   "readmeFilename": "README.md",
   "main": "src/index.js",
   "scripts": {
-    "test": "browserify test/**/*.test.js --debug | tape-run",
+    "test": "browserify test/**/*.test.js --debug | tape-run | tap-spec",
     "patch": "./bin/release.sh --importance=patch",
     "minor": "./bin/release.sh --importance=minor",
     "major": "./bin/release.sh --importance=major"
@@ -82,6 +82,7 @@
     "nib": "1.1.0",
     "router": "1.1.4",
     "ssl-root-cas": "1.1.10",
+    "tap-spec": "4.1.1",
     "tape": "4.5.1",
     "tape-run": "2.1.4",
     "vinyl-buffer": "1.0.0",

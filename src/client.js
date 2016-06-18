@@ -79,15 +79,18 @@ var VideomailClient = function(options) {
             }
 
             videomail = container.addPlayerDimensions(videomail, parentElement)
-            replay.setVideomail(videomail)
 
-            if (container.isOutsideElementOf(parentElement))
-                // replay element must be outside of the container
-                container.hideForm()
-            else
-                container.loadForm(videomail)
+            if (videomail) {
+                replay.setVideomail(videomail)
 
-            container.showReplayOnly()
+                if (container.isOutsideElementOf(parentElement))
+                    // replay element must be outside of the container
+                    container.hideForm()
+                else
+                    container.loadForm(videomail)
+
+                container.showReplayOnly()
+            }
         }
 
         readystate.interactive(buildReplay)
