@@ -740,7 +740,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function show() {
-        recorderElement.classList.remove('hide')
+        recorderElement && recorderElement.classList.remove('hide')
     }
 
     function correctDimensions() {
