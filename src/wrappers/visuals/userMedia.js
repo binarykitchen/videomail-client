@@ -259,6 +259,7 @@ module.exports = function(recorder, options) {
                         track.stop()
                     })
 
+                // will probably become obsolete in one year (after june 2017)
                 visualStream && visualStream.stop && visualStream.stop()
 
                 setVisualStream(null)

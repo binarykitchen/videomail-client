@@ -141,7 +141,7 @@ var Container = function(options) {
     }
 
     function removeDimensions() {
-        containerElement.style.width  = 'auto'
+        containerElement.style.width = 'auto'
     }
 
     function unloadButKeepEventListeners(e) {

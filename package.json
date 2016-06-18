@@ -18,14 +18,14 @@
   "readmeFilename": "README.md",
   "main": "src/index.js",
   "scripts": {
-    "test": "tape test/**/*.test.js",
+    "test": "browserify test/**/*.test.js --debug | tape-run",
     "patch": "./bin/release.sh --importance=patch",
     "minor": "./bin/release.sh --importance=minor",
     "major": "./bin/release.sh --importance=major"
   },
   "engines": {
-    "node": ">=4.1.0",
-    "npm": ">=2.9.0"
+    "node": ">=4.2.0",
+    "npm": ">=3.2.0"
   },
   "keywords": [
     "webcam",
@@ -42,7 +42,7 @@
     "classlist.js": "1.1.20150312",
     "create-error": "0.3.1",
     "despot": "1.0.0",
-    "es5-shim": "4.5.8",
+    "es5-shim": "4.5.9",
     "filesize": "3.3.0",
     "humanize-duration": "3.9.0",
     "hyperscript": "1.4.7",
@@ -67,7 +67,7 @@
     "gulp-autoprefixer": "3.1.0",
     "gulp-bump": "2.1.0",
     "gulp-concat": "2.6.0",
-    "gulp-connect": "4.0.0",
+    "gulp-connect": "4.1.0",
     "gulp-cssnano": "2.1.2",
     "gulp-if": "2.0.1",
     "gulp-inject-string": "1.1.0",
@@ -83,6 +83,7 @@
     "router": "1.1.4",
     "ssl-root-cas": "1.1.10",
     "tape": "4.5.1",
+    "tape-run": "2.1.4",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
   }

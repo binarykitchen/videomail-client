@@ -3,7 +3,7 @@ var despot = require('despot'),
     VideomailError = require('./videomailError'),
     Events         = require('./../events')
 
-// CONTINUE FROM HERE, MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
+// TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 
 module.exports = function(options, name) {
 
@@ -23,7 +23,6 @@ module.exports = function(options, name) {
             args[1] = err
         }
 
-
         if (options.debug)
             if (event != 'removeListener' && event != 'newListener') {
                 var moreArguments
@@ -37,7 +36,13 @@ module.exports = function(options, name) {
                     options.debug('%s emits: %s', name, event)
             }
 
-        return despot.emit.apply(despot, args)
+        var result = despot.emit.apply(despot, args)
+
+        // Todo: have this emitted through a configuration because it is pretty noisy
+        // if (event !== Events.EVENT_EMITTED)
+        //     this.emit(Events.EVENT_EMITTED, event)
+
+        return result
     }
 
     this.on = function(eventName, cb) {
