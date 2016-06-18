@@ -135,7 +135,7 @@ var Container = function(options) {
         var width = visuals.getRecorderWidth(true);
 
         if (width < 1)
-            throw new Eror('Recorder width cannot be less than 1!')
+            throw VideomailError.create('Recorder width cannot be less than 1!')
         else
             containerElement.style.width = width + 'px'
     }
@@ -235,19 +235,23 @@ var Container = function(options) {
     }
 
     this.addPlayerDimensions = function(videomail, element) {
-        videomail.playerHeight = this.calculateHeight({
-            responsive: true,
-            videoWidth: videomail.width,
-            ratio:      videomail.height / videomail.width
-        }, element)
+        try {
+            videomail.playerHeight = this.calculateHeight({
+                responsive: true,
+                videoWidth: videomail.width,
+                ratio:      videomail.height / videomail.width
+            }, element)
 
-        videomail.playerWidth  = this.calculateWidth({
-            responsive:  true,
-            videoHeight: videomail.playerHeight,
-            ratio:       videomail.height / videomail.width
-        })
+            videomail.playerWidth  = this.calculateWidth({
+                responsive:  true,
+                videoHeight: videomail.playerHeight,
+                ratio:       videomail.height / videomail.width
+            })
 
-        return videomail
+            return videomail
+        } catch (exc) {
+            self.emit(Events.ERROR, exc)
+        }
     }
 
     this.limitWidth = function(width) {
