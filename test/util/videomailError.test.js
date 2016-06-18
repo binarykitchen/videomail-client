@@ -126,7 +126,7 @@ test('Videomail Error:', function(t) {
 
             tt.equal(err.toString(),    'Videomail Error: Permission denied!')
             tt.equal(err.message,       'Permission denied!')
-            tt.equal(err.explanation,   undefined)
+            tt.equal(err.explanation,   'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
 
             err = VideomailError.create({
                 code:               2,
@@ -171,7 +171,7 @@ test('Videomail Error:', function(t) {
 
             tt.equal(err.toString(),    'Videomail Error: Permission denied!')
             tt.equal(err.message,       'Permission denied!')
-            tt.equal(err.explanation,   undefined)
+            tt.equal(err.explanation,   'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
         })
 
         tt.test('with HARDWARE_UNAVAILABLE as name in object', function(tt) {
@@ -183,7 +183,7 @@ test('Videomail Error:', function(t) {
 
             tt.equal(err.toString(),    'Videomail Error: Webcam is unavailable!')
             tt.equal(err.message,       'Webcam is unavailable!')
-            tt.equal(err.explanation,   'Maybe it is already busy in another window?')
+            tt.equal(err.explanation,   'Maybe it is already busy in another window? Or you have to allow access above?')
         })
 
         tt.test('with "Not connected" as name in object', function(tt) {

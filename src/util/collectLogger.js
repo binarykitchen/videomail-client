@@ -36,10 +36,18 @@ module.exports = function(localOptions) {
 
             if (browser.isFirefox()) {
                 logger.debug(output)
-            } else {
+
+            } else if (logger.groupCollapsed) {
                 logger.groupCollapsed(output)
                 logger.trace('Trace')
                 logger.groupEnd()
+
+            } else if (logger.debug) {
+                logger.debug(output)
+
+            } else {
+                // last resort if everything else fails for any weird reasons
+                console.log(output)
             }
         }
     }
