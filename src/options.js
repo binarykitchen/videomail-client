@@ -71,7 +71,14 @@ module.exports = {
         pausedHeader: 'Paused',
         pausedHint:   null,
         processing:   'Processing',
-        limitReached: 'Limit reached'
+        limitReached: 'Limit reached',
+        buttons: {
+            'record':       'Record video',
+            'recordAgain':  'Record again',
+            'resume':       'Resume',
+            'pause':        'Pause',
+            'preview':      'Preview'
+        }
     },
     notifier: {
         entertain:         false,   // when true, user is entertained while waiting, see examples
