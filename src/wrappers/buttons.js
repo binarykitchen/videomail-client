@@ -192,7 +192,7 @@ var Buttons = function(container, options) {
 
         recordButton = makeButton(
             options.selectors.recordButtonClass,
-            'Record video',
+            options.text.buttons.record,
             record,
             false
         )
@@ -200,7 +200,7 @@ var Buttons = function(container, options) {
         if (options.enablePause)
             pauseButton = makeButton(
                 options.selectors.pauseButtonClass,
-                'Pause',
+                options.text.buttons.pause,
                 container.pause,
                 false
             )
@@ -208,7 +208,7 @@ var Buttons = function(container, options) {
         if (options.enablePause)
             resumeButton = makeButton(
                 options.selectors.resumeButtonClass,
-                'Resume',
+                options.text.buttons.resume,
                 container.resume,
                 false
             )
@@ -217,14 +217,14 @@ var Buttons = function(container, options) {
         // move left and right between record and stop (preview)
         previewButton = makeButton(
             options.selectors.previewButtonClass,
-            'Preview',
+            options.text.buttons.preview,
             container.stop,
             false
         )
 
         recordAgainButton = makeButton(
             options.selectors.recordAgainButtonClass,
-            'Record again',
+            options.text.buttons.recordAgain,
             recordAgain,
             false
         )
