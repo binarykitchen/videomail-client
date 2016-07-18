@@ -1,3 +1,5 @@
+var VideomailError = require('./../util/videomailError')
+
 function getOuterWidth(element) {
     var rect = element.getBoundingClientRect()
     return rect.right - rect.left
@@ -11,7 +13,10 @@ function figureMinHeight(height, options) {
             height = Math.min(options.video.height, height)
     }
 
-    return height
+    if (height < 1)
+        throw VideomailError.create('Got a video height less than 1 while figuring out the minimum!')
+    else
+        return height
 }
 
 module.exports = {
@@ -21,7 +26,7 @@ module.exports = {
         var limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
 
         if (limitedWidth < 1)
-            throw new Error('Limited width cannot be less than 1!')
+            throw VideomailError.create('Limited width cannot be less than 1!')
         else
             return limitedWidth
     },
@@ -30,7 +35,7 @@ module.exports = {
     // but good enough for now to ensure some stability.
     limitHeight: function(height) {
         if (height < 1)
-            throw new Error('Passed limit-height argument cannot be less than 1!')
+            throw VideomailError.create('Passed limit-height argument cannot be less than 1!')
         else {
             var body = document.body,
                 elem = document.documentElement
@@ -43,7 +48,7 @@ module.exports = {
             )
 
             if (limitedHeight < 1)
-                throw new Error('Limited height cannot be less than 1!')
+                throw VideomailError.create('Limited height cannot be less than 1!')
             else
                 return limitedHeight
         }
@@ -78,12 +83,18 @@ module.exports = {
         if (options.hasDefinedWidth())
             width = options.video.width
 
-        if (options.responsive)
-            width = this.limitWidth(element, width)
+        if (width < 1)
+            throw VideomailError.create('Unable to calculate height when width is less than 1.')
+        else
+            if (options.responsive)
+                width = this.limitWidth(element, width)
 
-        if (width)
-            height = parseInt(width * ratio)
+            if (width)
+                height = parseInt(width * ratio)
 
-        return figureMinHeight(height, options)
+            if (height < 1)
+                throw VideomailError.create('Just calculated a height less than 1 which is wrong.')
+            else
+                return figureMinHeight(height, options)
     }
 }

@@ -11,6 +11,7 @@ var insertCss      = require('insert-css'),
     Events         = require('./../events'),
 
     EventEmitter   = require('./../util/eventEmitter'),
+    VideomailError = require('./../util/videomailError'),
     css            = require('./../assets/css/main.min.css.js')
 
 var Container = function(options) {
