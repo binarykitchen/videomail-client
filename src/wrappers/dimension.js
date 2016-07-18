@@ -29,15 +29,24 @@ module.exports = {
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
     limitHeight: function(height) {
+        if (height < 1)
+            throw new Error('Passed limit-height argument cannot be less than 1!')
+        else {
+            var body = document.body,
+                elem = document.documentElement
 
-        // see http://ryanve.com/lab/dimensions/
-        var windowHeight  = document.documentElement.clientHeight,
-            limitedHeight = windowHeight < height ? windowHeight : height
+            var limitedHeight = Math.min(
+                height,
+                body.scrollHeight, elem.scrollHeight,
+                body.offsetHeight, elem.offsetHeight,
+                body.clientHeight, elem.clientHeight
+            )
 
-        if (limitedHeight < 1)
-            throw new Error('Limited height cannot be less than 1!')
-        else
-            return limitedHeight
+            if (limitedHeight < 1)
+                throw new Error('Limited height cannot be less than 1!')
+            else
+                return limitedHeight
+        }
     },
 
     calculateWidth: function(options) {
@@ -49,16 +58,15 @@ module.exports = {
         if (options.responsive)
             height = this.limitHeight(height)
 
-        if (height < 1) {
+        if (height < 1)
             throw new Error('Height cannot be smaller than 1 when calculating width.')
-        } else {
+        else {
             var calculatedWidth = parseInt(height / ratio)
 
-            if (calculatedWidth < 1) {
+            if (calculatedWidth < 1)
                 throw new Error('Calculated width cannot be smaller than 1!')
-            } else {
+            else
                 return calculatedWidth
-            }
         }
     },
 
