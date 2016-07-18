@@ -311,10 +311,19 @@ module.exports = function(recorder, options) {
     }
 
     this.getRawHeight = function(responsive) {
-        var rawHeight = this.getVideoHeight()
+        var rawHeight
 
-        if (options.hasDefinedDimension())
+        if (options.hasDefinedDimension()) {
             rawHeight = recorder.calculateHeight(responsive)
+
+            if (rawHeight < 1)
+                throw VideomailError.create('Calculated raw height cannot be less than 1!')
+        } else {
+            rawHeight =  this.getVideoHeight()
+
+            if (rawHeight < 1)
+                throw VideomailError.create('Raw video height from DOM element cannot be less than 1!')
+        }
 
         if (responsive)
             rawHeight = recorder.limitHeight(rawHeight)
