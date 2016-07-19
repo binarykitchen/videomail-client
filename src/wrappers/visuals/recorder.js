@@ -871,18 +871,32 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.calculateWidth = function(responsive) {
+        var videoHeight
+
+        if (userMedia)
+            videoHeight = userMedia.getVideoHeight()
+        else if (recorderElement)
+            videoHeight = recorderElement.videoHeight
+
         return visuals.calculateWidth({
             responsive:  responsive,
             ratio:       getRatio(),
-            videoHeight: userMedia && userMedia.getVideoHeight()
+            videoHeight: videoHeight
         })
     }
 
     this.calculateHeight = function(responsive) {
+        var videoWidth
+
+        if (userMedia)
+            videoWidth = userMedia.getVideoWidth()
+        else if (recorderElement)
+            videoWidth = recorderElement.videoWidth
+
         return visuals.calculateHeight({
             responsive: responsive,
             ratio:      getRatio(),
-            videoWidth: userMedia && userMedia.getVideoWidth()
+            videoWidth: videoWidth
         })
     }
 
