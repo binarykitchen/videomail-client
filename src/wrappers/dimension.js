@@ -40,14 +40,10 @@ module.exports = {
         if (height < 1)
             throw VideomailError.create('Passed limit-height argument cannot be less than 1!')
         else {
-            var body = document.body,
-                elem = document.documentElement
-
             var limitedHeight = Math.min(
                 height,
-                body.scrollHeight, elem.scrollHeight,
-                body.offsetHeight, elem.offsetHeight,
-                body.clientHeight, elem.clientHeight
+                document.body.scrollHeight,
+                document.documentElement.clientHeight
             )
 
             if (limitedHeight < 1)
