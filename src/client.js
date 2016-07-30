@@ -81,15 +81,18 @@ var VideomailClient = function(options) {
             videomail = container.addPlayerDimensions(videomail, parentElement)
 
             if (videomail) {
-                replay.setVideomail(videomail)
+                // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+                setTimeout(function() {
+                    replay.setVideomail(videomail)
 
-                if (container.isOutsideElementOf(parentElement))
-                    // replay element must be outside of the container
-                    container.hideForm()
-                else
-                    container.loadForm(videomail)
+                    if (container.isOutsideElementOf(parentElement))
+                        // replay element must be outside of the container
+                        container.hideForm()
+                    else
+                        container.loadForm(videomail)
 
-                container.showReplayOnly()
+                    container.showReplayOnly()
+                }, 150)
             }
         }
 
