@@ -143,18 +143,18 @@ var Replay = function(parentElement, options) {
                 e && e.preventDefault()
 
                 if (this.paused)
-                    self.play()
+                    play()
                 else
-                    self.pause()
+                    pause()
             })
 
             replayElement.onclick = function(e) {
                 e && e.preventDefault()
 
                 if (this.paused)
-                    self.play()
+                    play()
                 else
-                    self.pause()
+                    pause()
             }
         }
 
@@ -217,22 +217,44 @@ var Replay = function(parentElement, options) {
         return browser.getVideoType(replayElement)
     }
 
-    this.pause = function() {
-        replayElement && replayElement.pause && replayElement.pause()
+    function pause(cb) {
+        // dispatch to event loop to avoid promise error thrown when playing at same time
+        if (replayElement && replayElement.pause)
+            setTimeout(function() {
+                replayElement.pause()
+
+                if (cb)
+                    cb()
+            })
+        else
+            if (cb)
+                cb()
     }
 
-    this.play = function() {
-        replayElement && replayElement.play && replayElement.play()
+    function play(cb) {
+        // dispatch to event loop to avoid promise error thrown when pausing at same time
+        if (replayElement && replayElement.play)
+            setTimeout(function() {
+                replayElement.play()
+
+                if (cb)
+                    cb()
+            })
+        else
+            if (cb)
+                cb()
     }
 
-    this.reset = function() {
+    this.reset = function(cb) {
         // pause video to make sure it won't consume any memory
-        this.pause()
+        pause(function() {
+            if (replayElement) {
+                self.setMp4Source(null)
+                self.setWebMSource(null)
+            }
 
-        if (replayElement) {
-            this.setMp4Source(null)
-            this.setWebMSource(null)
-        }
+            if (cb) cb()
+        })
     }
 
     this.hide = function() {
