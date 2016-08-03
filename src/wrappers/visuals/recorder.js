@@ -533,6 +533,8 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.back = function(cb) {
+        this.emit(Events.GOING_BACK)
+
         show()
         this.reset()
 
