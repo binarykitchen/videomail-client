@@ -409,6 +409,7 @@ var Container = function(options) {
     this.startOver = function() {
         try {
             submitted = false
+            form.show()
             visuals.back(this.show)
         } catch (exc) {
             self.emit(Events.ERROR, exc)
