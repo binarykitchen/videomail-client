@@ -42,9 +42,6 @@ To run the examples in your browser with Gulp, just do:
 
 Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
-A live contact form example embracing contact inquiries in direct sign language can be seen at:
-<a href="https://binarykitchen.com/contact">https://binarykitchen.com/contact</a>
-
 ## Dead simple example (just record and replay)
 
 ```html
