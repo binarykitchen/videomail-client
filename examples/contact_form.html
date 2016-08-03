@@ -14,11 +14,12 @@
         </style>
     </head>
     <body>
-        <h1>A JSON based contact form embracing Sign Language!</h1>
+        <h1>Contact Form Integration</h1>
+        <p>A JSON based contact form embracing Sign Language!</p>
 
         <!-- Once you set the method to POST, then two request will be made internally. -->
         <!-- The first one to the videomail server and the second one to the specified action -->
-        <form id="videomail" action="/contact" method="post">
+        <form action="/contact" method="post" id="someForm">
             <input name='from'    type='email' placeholder='Enter your email address' required/>
             <input name='subject' type='text'  placeholder='Enter a subject' required/>
             <fieldset>
@@ -34,8 +35,10 @@
             </fieldset>
             <textarea id='body' name='body' placeholder='Enter your message' cols='40' rows='5' required></textarea>
 
+            <div id="videomail"></div>
+
             <div class="buttons">
-                <button type='submit' disabled>Submit</button>
+                <button type='submit' id="submitButton" disabled>Submit</button>
             </div>
         </form>
 
@@ -51,7 +54,11 @@
             var VideomailClient = require('videomail-client'),
                 videomailClient = new VideomailClient({
                     verbose: true,
-                    video: {limitSeconds: 120, width: 320, countdown: false}
+                    video: {limitSeconds: 120, width: 320, countdown: false},
+                    selectors: {
+                        formId:         "someForm",
+                        submitButtonId: "submitButton"
+                    }
                 }),
 
                 startOverButton    = document.getElementById('startOver'),

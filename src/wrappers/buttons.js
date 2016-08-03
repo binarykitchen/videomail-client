@@ -256,13 +256,20 @@ var Buttons = function(container, options) {
 
     function onFormReady(options) {
         // no need to show record button when doing a record again
-        if (!isShown(recordAgainButton) && !options.paused)
-            show(recordButton)
+        if (!isShown(recordAgainButton)) {
+            if (!options.paused)
+                show(recordButton)
+        }
 
         if (!options.paused) {
             disable(previewButton)
             hide(previewButton)
         }
+    }
+
+    function onGoingBack() {
+        hide(recordAgainButton)
+        show(recordButton)
     }
 
     function onReplayShown() {
@@ -368,14 +375,8 @@ var Buttons = function(container, options) {
 
     function onSubmitted() {
         disable(previewButton)
-
-        if (options.enablePause)
-            show(previewButton)
-
-        hide(recordAgainButton)
-
+        disable(recordAgainButton)
         disable(recordButton)
-        show(recordButton)
         disable(submitButton)
     }
 
@@ -443,6 +444,8 @@ var Buttons = function(container, options) {
             onFormReady(options)
         }).on(Events.REPLAY_SHOWN, function() {
             onReplayShown()
+        }).on(Events.GOING_BACK, function() {
+            onGoingBack()
         }).on(Events.ERROR, function(err) {
             // since https://github.com/binarykitchen/videomail-client/issues/60
             // we hide areas to make it easier for the user
