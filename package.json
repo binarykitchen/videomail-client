@@ -79,7 +79,7 @@
     "gulp-uglify": "2.0.0",
     "gulp-util": "3.0.7",
     "minimist": "1.2.0",
-    "nib": "1.1.0",
+    "nib": "1.1.2",
     "router": "1.1.4",
     "ssl-root-cas": "1.2.1",
     "tap-spec": "4.1.1",
