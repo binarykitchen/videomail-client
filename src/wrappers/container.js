@@ -36,6 +36,11 @@ var Container = function(options) {
         insertCss(css, {prepend: true})
     }
 
+    // since https://github.com/binarykitchen/videomail-client/issues/87
+    function findParentFormElement() {
+        return containerElement.closest('form')
+    }
+
     function getFormElement() {
         var formElement
 
@@ -44,6 +49,9 @@ var Container = function(options) {
 
         else if (options.selectors.formId)
             formElement = document.getElementById(options.selectors.formId)
+
+        else
+            formElement = findParentFormElement()
 
         return formElement
     }
