@@ -91,6 +91,9 @@ module.exports = {
         connection:   1e4,          // increase if connection is slow
         pingInterval: 30e3          // keeps webstream (connection) alive when pausing
     },
+    callbacks: {
+      adjustFormDataBeforePosting: null  // a custom callback to tweak form data before posting to server
+    },
     displayErrors: true,            // show errors inside the container?
     fakeUaString:  null             // just for testing purposes to simulare VM on diff browsers
 }

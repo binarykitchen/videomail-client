@@ -57,6 +57,13 @@
                     video: {limitSeconds: 120, width: 320, countdown: false},
                     selectors: {
                         submitButtonId: "submitButton"
+                    },
+                    callbacks: {
+                        adjustFormDataBeforePosting: function(videomail, cb) {
+                            videomail.subject = 'Adjusted: ' + videomail.subject
+
+                            cb(null, videomail)
+                        }
                     }
                 }),
 
