@@ -145,4 +145,7 @@ Object.keys(Constants.public).forEach(function(name) {
     VideomailClient[name] = Constants.public[name]
 })
 
+// just another convenient thing
+VideomailClient.events = Events
+
 module.exports = VideomailClient

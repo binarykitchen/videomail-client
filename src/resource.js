@@ -90,7 +90,18 @@ module.exports = function(options) {
     }
 
     this.post = function(videomail, cb) {
-        write('post', videomail, cb)
+        if (options.callbacks.adjustFormDataBeforePosting) {
+            options.callbacks.adjustFormDataBeforePosting(
+                videomail,
+                function(err, adjustedVideomail) {
+                    if (err)
+                        cb(err)
+                    else
+                        write('post', adjustedVideomail, cb)
+                }
+            )
+        } else
+            write('post', videomail, cb)
     }
 
     this.put = function(videomail, cb) {
