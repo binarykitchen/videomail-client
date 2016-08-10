@@ -221,14 +221,18 @@ var Replay = function(parentElement, options) {
         // dispatch to event loop to avoid promise error thrown when playing at same time
         if (replayElement && replayElement.pause)
             setTimeout(function() {
-                replayElement.pause()
+                try {
+                    replayElement.pause()
+                } catch (exc) {
+                    // ignore because it sometimes can throw this one error while transitioning to a
+                    // different state internally somehow, making pausings not valid anymore:
+                    // "Unexpected call to method or property access."
+                }
 
-                if (cb)
-                    cb()
+                cb && cb()
             })
         else
-            if (cb)
-                cb()
+            cb && cb()
     }
 
     function play(cb) {
@@ -237,12 +241,10 @@ var Replay = function(parentElement, options) {
             setTimeout(function() {
                 replayElement.play()
 
-                if (cb)
-                    cb()
+                cb && cb()
             })
         else
-            if (cb)
-                cb()
+            cb && cb()
     }
 
     this.reset = function(cb) {
@@ -253,7 +255,7 @@ var Replay = function(parentElement, options) {
                 self.setWebMSource(null)
             }
 
-            if (cb) cb()
+            cb && cb()
         })
     }
 
