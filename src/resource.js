@@ -6,6 +6,24 @@ module.exports = function(options) {
 
     var cache = {}
 
+    function applyDefaultValue(videomail, name) {
+        if (options.defaults[name] && !videomail[name])
+            videomail[name] = options.defaults[name]
+
+        return videomail
+    }
+
+    function applyDefaultValues(videomail) {
+        if (options.defaults) {
+            videomail = applyDefaultValue(videomail, 'from')
+            videomail = applyDefaultValue(videomail, 'to')
+            videomail = applyDefaultValue(videomail, 'subject')
+            videomail = applyDefaultValue(videomail, 'body')
+        }
+
+        return videomail
+    }
+
     function packError(err, res) {
         if (res && res.body && res.body.error) {
             // use the server generated text instead of the superagent's default text
@@ -90,6 +108,8 @@ module.exports = function(options) {
     }
 
     this.post = function(videomail, cb) {
+        videomail = applyDefaultValues(videomail)
+
         if (options.callbacks.adjustFormDataBeforePosting) {
             options.callbacks.adjustFormDataBeforePosting(
                 videomail,

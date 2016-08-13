@@ -45,6 +45,7 @@
         <div id="viewVideo" class="hide">
             <h2 class="subject"></h2>
             <h3 class="status"></h3>
+            <p class="body"></p>
             <video class="replay"></video>
             <button id='startOver'>Start over</button>
         </div>
@@ -64,6 +65,9 @@
 
                             cb(null, videomail)
                         }
+                    },
+                    defaults: {
+                        body: "No body content"
                     }
                 }),
 
