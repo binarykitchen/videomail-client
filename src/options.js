@@ -92,7 +92,15 @@ module.exports = {
         pingInterval: 30e3          // keeps webstream (connection) alive when pausing
     },
     callbacks: {
-      adjustFormDataBeforePosting: null  // a custom callback to tweak form data before posting to server
+        // a custom callback to tweak form data before posting to server
+        // this is for advanced use only and shouldn't be used if possible
+        adjustFormDataBeforePosting: null
+    },
+    defaults: {
+        from:       null,   // define default FROM email address
+        to:         null,   // define default TO email address
+        subject:    null,   // define default subject line
+        body:       null    // define default body content
     },
     displayErrors: true,            // show errors inside the container?
     fakeUaString:  null             // just for testing purposes to simulare VM on diff browsers
