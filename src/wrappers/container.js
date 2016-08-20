@@ -572,11 +572,6 @@ var Container = function(options) {
         this.emit(Events.DISABLING_AUDIO)
     }
 
-    this.setSubmitButtonAttribute = function(name, value) {
-        var submitButton = form.getSubmitButton()
-        submitButton && submitButton.setAttribute(name, value)
-    }
-
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
     this.isRecording    = visuals.isRecording.bind(visuals)
     this.record         = visuals.record.bind(visuals)

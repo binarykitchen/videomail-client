@@ -14,9 +14,7 @@ module.exports = {
                                              // but just want to record and replay these temporarily
     enableAutoValidation: true,              // automatically validates all form inputs if any exist and
                                              // does not disable submit button after recording when something
-                                             // else seems invalid. useful in conjunction if you want to
-                                             // set the 'disabled' attribute of the submit button yourself, see
-                                             // setSubmitButtonAttribute() in the API
+                                             // else seems invalid.
 
     enctype: 'application/json',             // enctype for the form submission. currently implemented are:
                                              // 'application/json' and 'application/x-www-form-urlencoded'
