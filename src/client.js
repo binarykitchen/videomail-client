@@ -130,12 +130,6 @@ var VideomailClient = function(options) {
         return container.isDirty()
     }
 
-    // useful in case if you want to override an attribute of the submit button, i.E.
-    // manually disable or enable it for whatever reasons you have such as form integration
-    this.setSubmitButtonAttribute = function(name, value) {
-        container.setSubmitButtonAttribute(name, value)
-    }
-
     build()
 }
 
