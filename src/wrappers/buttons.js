@@ -476,6 +476,10 @@ var Buttons = function(container, options) {
         submitButton = newSubmitButton
     }
 
+    this.getSubmitButton = function() {
+        return submitButton
+    }
+
     this.build = function() {
         buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 

@@ -62,7 +62,7 @@ var Container = function(options) {
         if (formElement) {
             form = new Form(self, formElement, options)
 
-            var submitButton = form.getSubmitButton()
+            var submitButton = form.findSubmitButton()
             submitButton && buttons.setSubmitButton(submitButton)
 
             form.build()
@@ -318,6 +318,10 @@ var Container = function(options) {
         } catch (exc) {
             self.emit(Events.ERROR, exc)
         }
+    }
+
+    this.getSubmitButton = function() {
+        return buttons.getSubmitButton()
     }
 
     this.querySelector = function(selector) {
