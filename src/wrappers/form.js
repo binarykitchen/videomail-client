@@ -143,24 +143,52 @@ var Form = function(container, formElement, options) {
                 hideAllInputs()
         })
 
-        formElement.addEventListener('submit', function(e) {
-
-            // when videomail-client is hidden, leave the form handling as it and
-            // do not mess with it at all
-            if (!container.areVisualsHidden()) {
-                e.preventDefault()
-
-                // only adjust submission when there is a container, otherwise
-                // do nothing and leave as it for robustness
-                if (container.hasElement()) {
-                    container.submitAll(
-                        getData(),
-                        formElement.getAttribute('method'),
-                        formElement.getAttribute('action')
-                    )
-                }
-            }
+        this.on(Events.BUILT, function() {
+            startListeningToSubmitEvents()
         })
+    }
+
+    function startListeningToSubmitEvents() {
+        var submitButton            = container.getSubmitButton(),
+            listenToFormSubmitEvent = true
+
+        // figure out first if submit button is inside form
+
+        if (formElement.id && submitButton.id) {
+            var submitButtonsInForm = document.querySelectorAll(
+                "#" + formElement.id + " " +
+                "#" + submitButton.id
+            )
+
+            listenToFormSubmitEvent = submitButtonsInForm.length > 0
+        }
+
+        if (listenToFormSubmitEvent)
+            formElement.addEventListener('submit', function(e) {
+                doTheSubmit(e)
+            })
+        else
+            submitButton.onclick = function(e) {
+                doTheSubmit(e)
+            }
+    }
+
+    function doTheSubmit(e) {
+        // when videomail-client is hidden, leave the form handling as it and
+        // do not mess with it at all
+        if (!container.areVisualsHidden()) {
+            e.preventDefault()
+
+            // only adjust submission when there is a container, otherwise
+            // do nothing and leave as it for robustness
+            if (container.hasElement()) {
+                container.submitAll(
+                    getData(),
+                    formElement.getAttribute('method'),
+                    formElement.getAttribute('action')
+                )
+            }
+        }
     }
 
     this.getInvalidElement = function() {
@@ -192,7 +220,7 @@ var Form = function(container, formElement, options) {
         return formIsValid
     }
 
-    this.getSubmitButton = function() {
+    this.findSubmitButton = function() {
         return formElement.querySelector("[type='submit']")
     }
 

@@ -36,11 +36,10 @@
             <textarea id='body' name='body' placeholder='Enter your message' cols='40' rows='5' required></textarea>
 
             <div id="videomail"></div>
-
-            <div class="buttons">
-                <button type='submit' id="submitButton" disabled>Submit</button>
-            </div>
         </form>
+
+        <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
+        <button type='submit' id="submitButton" disabled>Submit</button>
 
         <div id="viewVideo" class="hide">
             <h2 class="subject"></h2>
@@ -57,7 +56,8 @@
                     verbose: true,
                     video: {limitSeconds: 120, width: 320, countdown: false},
                     selectors: {
-                        submitButtonId: "submitButton"
+                        submitButtonId: "submitButton",
+                        formId:         "someForm"
                     },
                     callbacks: {
                         adjustFormDataBeforePosting: function(videomail, cb) {
