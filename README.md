@@ -100,7 +100,6 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#isDirty">`videomailClient.isDirty()`</a>
-* <a href="#setSubmitButtonAttribute">`videomailClient.setSubmitButtonAttribute()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -193,20 +192,6 @@ Hides all the visuals (but does not unload anything).
 
 Returns true when a video has been recorded and a form exists. Useful when checking something before closing the window, i.E. this use case: show a window confirmation dialog to make sure the user didn't forget to submit the recorded video.
 
-<a name="setSubmitButtonAttribute"></a>
-### videomailClient.setSubmitButtonAttribute(name, value)
-
-For advanced use only. With that function you can set any HTML attributes of the submit button.
-
-
-For example
-
-```js
-setSubmitButtonAttribute('disabled', false)
-```
-
-will allow you to control the submit button in case if you want to take over control of form validation. Works best in conjunction when option `enableAutoValidation` is set to false. Only recommended when you integrate this Videomail-Client into a larger framework or CMS such as WordPress.
-
 <a name="whitelist"></a>
 ## Whitelist
 
@@ -246,10 +231,6 @@ https://cdnjs.com/libraries/videomail-client
 
 <a name="changes"></a>
 ## Breaking/Hot Changes (Changelog)
-
-### v1.13.0 (2016-06-13)
-
-- **VideomailClient:** New API function `setSubmitButtonAttribute(name, value)` - this to directly modify HTML attributes of the submit button.
 
 ### v1.9.0 (2016-03-12)
 

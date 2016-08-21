@@ -62,7 +62,7 @@ var Container = function(options) {
         if (formElement) {
             form = new Form(self, formElement, options)
 
-            var submitButton = form.getSubmitButton()
+            var submitButton = form.findSubmitButton()
             submitButton && buttons.setSubmitButton(submitButton)
 
             form.build()
@@ -320,6 +320,10 @@ var Container = function(options) {
         }
     }
 
+    this.getSubmitButton = function() {
+        return buttons.getSubmitButton()
+    }
+
     this.querySelector = function(selector) {
         return containerElement.querySelector(selector)
     }
@@ -570,11 +574,6 @@ var Container = function(options) {
     this.disableAudio = function() {
         options.setAudioEnabled(false)
         this.emit(Events.DISABLING_AUDIO)
-    }
-
-    this.setSubmitButtonAttribute = function(name, value) {
-        var submitButton = form.getSubmitButton()
-        submitButton && submitButton.setAttribute(name, value)
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)
