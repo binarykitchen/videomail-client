@@ -164,13 +164,9 @@ var Form = function(container, formElement, options) {
         }
 
         if (listenToFormSubmitEvent)
-            formElement.addEventListener('submit', function(e) {
-                doTheSubmit(e)
-            })
+            formElement.addEventListener('submit', doTheSubmit)
         else
-            submitButton.onclick = function(e) {
-                doTheSubmit(e)
-            }
+            submitButton.addEventListener('click', doTheSubmit, true)
     }
 
     function doTheSubmit(e) {
