@@ -164,16 +164,16 @@ var Form = function(container, formElement, options) {
         }
 
         if (listenToFormSubmitEvent)
-            formElement.addEventListener('submit', doTheSubmit)
+            formElement.addEventListener('submit', self.doTheSubmit.bind(self))
         else
-            submitButton.addEventListener('click', doTheSubmit)
+            submitButton.addEventListener('click', self.doTheSubmit.bind(self))
     }
 
-    function doTheSubmit(e) {
+    this.doTheSubmit = function(e) {
         // when videomail-client is hidden, leave the form handling as it and
         // do not mess with it at all
         if (!container.areVisualsHidden()) {
-            e.preventDefault()
+            e && e.preventDefault()
 
             // only adjust submission when there is a container, otherwise
             // do nothing and leave as it for robustness

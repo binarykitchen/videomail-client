@@ -20,13 +20,14 @@ var Container = function(options) {
 
     var self  = this,
 
-        visuals     = new Visuals(this, options),
-        buttons     = new Buttons(this, options),
-        resource    = new Resource(options),
-        htmlElement = document && document.querySelector && document.querySelector('html'),
-        debug       = options.debug,
-        hasError    = false,
-        submitted   = false,
+        visuals         = new Visuals(this, options),
+        buttons         = new Buttons(this, options),
+        resource        = new Resource(options),
+        htmlElement     = document && document.querySelector && document.querySelector('html'),
+        debug           = options.debug,
+        hasError        = false,
+        submitted       = false,
+        lastValidation  = false,
 
         containerElement,
         built,
@@ -479,6 +480,8 @@ var Container = function(options) {
                 this.emit(Events.INVALID, whyInvalid)
         }
 
+        lastValidation = valid
+
         return valid
     }
 
@@ -574,6 +577,10 @@ var Container = function(options) {
     this.disableAudio = function() {
         options.setAudioEnabled(false)
         this.emit(Events.DISABLING_AUDIO)
+    }
+
+    this.submit = function () {
+        lastValidation && form && form.doTheSubmit()
     }
 
     this.isCountingDown = visuals.isCountingDown.bind(visuals)

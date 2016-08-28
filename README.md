@@ -100,6 +100,7 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#isDirty">`videomailClient.isDirty()`</a>
+* <a href="#submit">`videomailClient.submit()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -192,6 +193,13 @@ Hides all the visuals (but does not unload anything).
 
 Returns true when a video has been recorded and a form exists. Useful when checking something before closing the window, i.E. this use case: show a window confirmation dialog to make sure the user didn't forget to submit the recorded video.
 
+<a name="submit"></a>
+### videomailClient.submit()
+
+For advanced use only: especially when the submit button is covered with other HTML layers and the videomail client fails to process the click event.
+
+Calling this function will manually trigger a submission of the recorded videomail. But only when everything else is valid. Nothing will happen when invalid.
+
 <a name="whitelist"></a>
 ## Whitelist
 
@@ -231,6 +239,10 @@ https://cdnjs.com/libraries/videomail-client
 
 <a name="changes"></a>
 ## Breaking/Hot Changes (Changelog)
+
+### v1.18.0 (2016-08-28)
+
+- **VideomailClient:** New functiion `submit()` to manually submit a videomail
 
 ### v1.9.0 (2016-03-12)
 
