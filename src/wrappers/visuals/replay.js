@@ -218,32 +218,23 @@ var Replay = function(parentElement, options) {
     }
 
     function pause(cb) {
-        // dispatch to event loop to avoid promise error thrown when playing at same time
         if (replayElement && replayElement.pause)
-            setTimeout(function() {
-                try {
-                    replayElement.pause()
-                } catch (exc) {
-                    // ignore because it sometimes can throw this one error while transitioning to a
-                    // different state internally somehow, making pausings not valid anymore:
-                    // "Unexpected call to method or property access."
-                }
+            replayElement.pause()
 
-                cb && cb()
-            })
-        else
-            cb && cb()
+        cb && cb()
     }
 
     function play(cb) {
-        // dispatch to event loop to avoid promise error thrown when pausing at same time
-        if (replayElement && replayElement.play)
-            setTimeout(function() {
-                replayElement.play()
+        if (replayElement && replayElement.play && replayElement.duration) {
+            const p = replayElement.play()
 
+            if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
+                p.then(function() {
+                    cb && cb()
+                })
+            } else
                 cb && cb()
-            })
-        else
+        } else
             cb && cb()
     }
 
