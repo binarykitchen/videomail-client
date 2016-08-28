@@ -130,6 +130,10 @@ var VideomailClient = function(options) {
         return container.isDirty()
     }
 
+    this.submit = function() {
+        container.submit()
+    }
+
     build()
 }
 
