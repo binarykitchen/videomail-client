@@ -13,8 +13,8 @@ module.exports = {
     disableSubmit:   false,                  // set this to true if you do not want to submit videos,
                                              // but just want to record and replay these temporarily
     enableAutoValidation: true,              // automatically validates all form inputs if any exist and
-                                             // does not disable submit button after recording when something
-                                             // else seems invalid.
+                                             // does not /enable disable submit button after recording
+                                             // when something else seems invalid.
 
     enctype: 'application/json',             // enctype for the form submission. currently implemented are:
                                              // 'application/json' and 'application/x-www-form-urlencoded'
