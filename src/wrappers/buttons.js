@@ -386,7 +386,8 @@ var Buttons = function(container, options) {
     }
 
     function onValid() {
-        enable(submitButton)
+        if (options.enableAutoValidation)
+            enable(submitButton)
     }
 
     function onHidden() {
