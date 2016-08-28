@@ -165,15 +165,8 @@ var Form = function(container, formElement, options) {
 
         if (listenToFormSubmitEvent)
             formElement.addEventListener('submit', doTheSubmit)
-        else {
-            // special treatment for parent elements covering submit button
-            // which can happen when using in conjunction with frameworks such as jquery
-            // or backbone, messing up with the html ...
-            document.body.addEventListener('click', function(e) {
-                if (e.target.id == submitButton.id)
-                    doTheSubmit(e)
-            })
-        }
+        else
+            submitButton.addEventListener('click', doTheSubmit)
     }
 
     function doTheSubmit(e) {
