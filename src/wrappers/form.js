@@ -136,6 +136,11 @@ var Form = function(container, formElement, options) {
             // leave as it and use existing keyInput.value
         })
 
+        // fixes https://github.com/binarykitchen/videomail-client/issues/91
+        this.on(Events.GOING_BACK, function() {
+            keyInput.value = null
+        })
+
         this.on(Events.ERROR, function(err) {
             // since https://github.com/binarykitchen/videomail-client/issues/60
             // we hide areas to make it easier for the user
