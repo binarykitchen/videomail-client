@@ -9,8 +9,6 @@
                 margin:  1em 0;
                 display: block;
             }
-
-            .hide { display: none; }
         </style>
     </head>
     <body>
@@ -41,7 +39,7 @@
         <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
         <button type='submit' id="submitButton" disabled>Submit</button>
 
-        <div id="viewVideo" class="hide">
+        <div id="viewVideo" style="display:none">
             <h2 class="subject"></h2>
             <h3 class="status"></h3>
             <p class="body"></p>
@@ -90,14 +88,14 @@
             writingOption.onclick = function() {
                 videomailClient.hide()
 
-                body.classList.remove('hide')
+                body.style.display = 'block'
                 body.required = true
             }
 
             signLanguageOption.onclick = function() {
                 videomailClient.show()
 
-                body.classList.add('hide')
+                body.style.display = 'none'
                 body.required = false
             }
 

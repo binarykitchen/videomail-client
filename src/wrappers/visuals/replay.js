@@ -1,5 +1,6 @@
-var util = require('util'),
-    h    = require('hyperscript'),
+var util   = require('util'),
+    h      = require('hyperscript'),
+    hidden = require('hidden'),
 
     Events          = require('./../../events'),
     Browser         = require('./../../util/browser'),
@@ -89,10 +90,15 @@ var Replay = function(parentElement, options) {
             videoHeight: recorderHeight
         })
 
-        replayElement.classList.remove('hide')
+        hidden(replayElement, false)
 
-        if (parentElement.classList)
-            parentElement.classList.remove('hide')
+        // parent element can be any object, be careful!
+        if (parentElement) {
+            if (parentElement.style)
+                hidden(parentElement, false)
+            else if (parentElement.show)
+                parentElement.show()
+        }
 
         // this must be called after setting the sources and when becoming visible
         // see https://github.com/bfred-it/iphone-inline-video/issues/16
@@ -252,13 +258,13 @@ var Replay = function(parentElement, options) {
 
     this.hide = function() {
         if (isStandalone())
-            parentElement.classList.add('hide')
+            hidden(parentElement, true)
         else
-            replayElement && replayElement.classList.add('hide')
+            replayElement && hidden(replayElement, true)
     }
 
     this.isShown = function() {
-        return replayElement && !replayElement.classList.contains('hide')
+        return replayElement && !hidden(replayElement)
     }
 
     this.getParentElement = function() {

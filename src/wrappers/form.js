@@ -1,5 +1,6 @@
 var h            = require('hyperscript'),
     util         = require('util'),
+    hidden       = require('hidden'),
 
     Events         = require('./../events'),
     EventEmitter   = require('./../util/eventEmitter'),
@@ -64,7 +65,7 @@ var Form = function(container, formElement, options) {
         var limit = formElement.elements.length
 
         for (var i = 0; i < limit; i++) {
-            formElement.elements[i].classList.add('hide')
+            hidden(formElement.elements[i], true)
         }
     }
 
@@ -226,11 +227,11 @@ var Form = function(container, formElement, options) {
     }
 
     this.hide = function() {
-        formElement && formElement.classList.add('hide')
+        formElement && hidden(formElement, true)
     }
 
     this.show = function() {
-        formElement && formElement.classList.remove('hide')
+        formElement && hidden(formElement, false)
     }
 }
 
