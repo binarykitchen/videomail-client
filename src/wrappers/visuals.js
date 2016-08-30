@@ -1,5 +1,6 @@
-var util = require('util'),
-    h    = require('hyperscript'),
+var util   = require('util'),
+    h      = require('hyperscript'),
+    hidden = require('hidden'),
 
     Replay          = require('./visuals/replay'),
     Recorder        = require('./visuals/recorder'),
@@ -105,7 +106,7 @@ var Visuals = function(container, options) {
         }
 
         visualsElement.classList.add('visuals')
-        visualsElement.classList.add('hide')
+        hidden(visualsElement, true)
 
         correctDimensions()
 
@@ -253,7 +254,7 @@ var Visuals = function(container, options) {
 
     this.hide = function() {
         if (visualsElement) {
-            visualsElement.classList.add('hide')
+            hidden(visualsElement, true)
             this.emit(Events.HIDE)
         }
     }
@@ -262,13 +263,13 @@ var Visuals = function(container, options) {
         if (!built)
             return true
         else if (visualsElement)
-            return visualsElement.classList.contains('hide')
+            return hidden(visualsElement)
     }
 
     this.show = function() {
         !this.isReplayShown() && recorder.build()
 
-        visualsElement && visualsElement.classList.remove('hide')
+        visualsElement && hidden(visualsElement, false)
     }
 
     this.showReplayOnly = function() {

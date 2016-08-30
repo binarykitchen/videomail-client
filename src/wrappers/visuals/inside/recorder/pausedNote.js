@@ -1,4 +1,5 @@
-var h = require('hyperscript'),
+var h      = require('hyperscript'),
+    hidden = require('hidden'),
 
     VideomailError  = require('./../../../../util/videomailError')
 
@@ -39,10 +40,10 @@ module.exports = function(visuals, options) {
     }
 
     this.hide = function() {
-        pausedBlockElement.classList.add('hide')
+        hidden(pausedBlockElement, true)
     }
 
     this.show = function() {
-        pausedBlockElement.classList.remove('hide')
+        hidden(pausedBlockElement, false)
     }
 }

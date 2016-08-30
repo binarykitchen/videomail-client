@@ -10,7 +10,6 @@
                 display: block;
             }
 
-            .hide { display: none; }
         </style>
     </head>
     <body>
@@ -27,10 +26,10 @@
             </div>
         </form>
 
-        <div id="viewVideo" class="hide">
-            <h4 class="hide">Permalink to view online <a class="url"></a></h4>
-            <h4 class="hide">Permalink to WebM video <a class="webm"></a></h4>
-            <h4 class="hide">Permalink to MP4 video <a class="mp4"></a></h4>
+        <div id="viewVideo" style="display:none">
+            <h4 style="display:none">Permalink to view online <a class="url"></a></h4>
+            <h4 style="display:none">Permalink to WebM video <a class="webm"></a></h4>
+            <h4 style="display:none">Permalink to MP4 video <a class="mp4"></a></h4>
             <video class="replay"></video>
             <button id='startOver'>Start over</button>
         </div>
@@ -51,7 +50,7 @@
                     var element = document.querySelector('a.' + name)
                     element.innerHTML = videomail[name]
                     element.setAttribute('href', videomail[name])
-                    element.parentElement.classList.remove('hide')
+                    element.parentElement.style.display = 'block'
                 }
             }
 

@@ -7,7 +7,6 @@
         <style type="text/css">
             input[type="text"],
             .buttons    { margin: 1em 0;  }
-            .hide       { display: none;  }
             #startOver  { display: block; }
         </style>
     </head>
@@ -20,7 +19,7 @@
             <input name='subject' type='text' placeholder='Enter a subject' required/>
         </form>
 
-        <div id="viewVideo" class="hide">
+        <div id="viewVideo" style="display:none">
             <h2 class='subject'></h2>
             <video class="replay"></video>
             <button id='startOver'>Start over</button>
