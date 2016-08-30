@@ -1,4 +1,5 @@
-var h = require('hyperscript')
+var h      = require('hyperscript'),
+    hidden = require('hidden')
 
 module.exports = function(visuals, options) {
 
@@ -49,7 +50,7 @@ module.exports = function(visuals, options) {
     }
 
     this.show = function() {
-        countdownElement.classList.remove('hide')
+        hidden(countdownElement, false)
     }
 
     this.isCountingDown = function() {
@@ -62,7 +63,7 @@ module.exports = function(visuals, options) {
     }
 
     this.hide = function() {
-       countdownElement.classList.add('hide')
+       hidden(countdownElement, true)
        this.unload()
     }
 }

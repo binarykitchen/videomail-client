@@ -1,5 +1,6 @@
 var pauseable   = require('pauseable'),
-    h           = require('hyperscript')
+    h           = require('hyperscript'),
+    hidden      = require('hidden')
 
 module.exports = function(visuals, recordNote, options) {
 
@@ -83,13 +84,14 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     function hide() {
-        recordTimerElement.classList.add('hide')
+        hidden(recordTimerElement, true)
     }
 
     function show() {
         recordTimerElement.classList.remove('near')
         recordTimerElement.classList.remove('nigh')
-        recordTimerElement.classList.remove('hide')
+
+        hidden(recordTimerElement, false)
     }
 
     this.start = function(cb) {

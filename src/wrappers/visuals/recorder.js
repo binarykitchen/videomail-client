@@ -2,6 +2,7 @@ var websocket    = require('websocket-stream'),
     Frame        = require('canvas-to-buffer'),
     util         = require('util'),
     h            = require('hyperscript'),
+    hidden       = require('hidden'),
 
     UserMedia = require('./userMedia'),
 
@@ -224,7 +225,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function isHidden() {
-        return !recorderElement || recorderElement.classList.contains('hide')
+        return !recorderElement || hidden(recorderElement)
     }
 
     function preview(args) {
@@ -742,7 +743,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function show() {
-        recorderElement && recorderElement.classList.remove('hide')
+        recorderElement && hidden(recorderElement, false)
     }
 
     function correctDimensions() {
@@ -831,7 +832,7 @@ var Recorder = function(visuals, replay, options) {
     this.hide = function() {
         if (!isHidden()) {
 
-            recorderElement && recorderElement.classList.add('hide')
+            recorderElement && hidden(recorderElement, true)
 
             clearUserMediaTimeout()
             clearRetryTimeout()

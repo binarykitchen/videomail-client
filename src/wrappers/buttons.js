@@ -1,5 +1,6 @@
 var util         = require('util'),
     h            = require('hyperscript'),
+    hidden       = require('hidden'),
 
     Events       = require('./../events'),
     EventEmitter = require('./../util/eventEmitter')
@@ -30,7 +31,7 @@ var Buttons = function(container, options) {
         }
 
         elements && elements.forEach(function(element) {
-            element.classList.add('hide')
+            hidden(element, true)
         })
     }
 
@@ -40,7 +41,7 @@ var Buttons = function(container, options) {
         }
 
         elements && elements.forEach(function(element) {
-            element.classList.remove('hide')
+            hidden(element, false)
         })
     }
 
@@ -52,7 +53,7 @@ var Buttons = function(container, options) {
         }
 
         elements && elements.forEach(function(element) {
-            isShown = isShown && element && !element.classList.contains('hide')
+            isShown = isShown && element && !hidden(element)
         })
 
         return isShown

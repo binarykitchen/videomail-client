@@ -1,4 +1,5 @@
-var h = require('hyperscript')
+var h      = require('hyperscript'),
+    hidden = require('hidden')
 
 module.exports = function(visuals) {
 
@@ -32,10 +33,10 @@ module.exports = function(visuals) {
     }
 
     this.hide = function() {
-        recordNoteElement.classList.add('hide')
+        hidden(recordNoteElement, true)
     }
 
     this.show = function() {
-        recordNoteElement.classList.remove('hide')
+        hidden(recordNoteElement, false)
     }
 }
