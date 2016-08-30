@@ -1,5 +1,6 @@
 var util           = require('util'),
     h              = require('hyperscript'),
+    hidden         = require('hidden'),
 
     EventEmitter   = require('./../../util/eventEmitter'),
     Events         = require('./../../events')
@@ -88,7 +89,7 @@ var Notifier = function(visuals, options) {
     }
 
     function show() {
-        notifyElement && notifyElement.classList.remove('hide')
+        notifyElement && hidden(notifyElement, false)
     }
 
     function runEntertainment() {
@@ -176,7 +177,7 @@ var Notifier = function(visuals, options) {
         cancelEntertainment()
 
         if (notifyElement) {
-            notifyElement.classList.add('hide')
+            hidden(notifyElement, true)
             notifyElement.classList.remove('blocking')
         }
 
@@ -191,7 +192,7 @@ var Notifier = function(visuals, options) {
         if (!built)
             return false
         else
-            return notifyElement && !notifyElement.classList.contains('hide')
+            return notifyElement && !hidden(notifyElement)
     }
 
     this.notify = function(message, explanation, notifyOptions) {

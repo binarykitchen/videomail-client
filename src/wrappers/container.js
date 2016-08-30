@@ -1,5 +1,6 @@
 var insertCss      = require('insert-css'),
     merge          = require('merge-recursive'),
+    hidden         = require('hidden'),
     util           = require('util'),
 
     Dimension      = require('./dimension'),
@@ -161,7 +162,7 @@ var Container = function(options) {
     }
 
     function hideMySelf() {
-        containerElement.classList.add('hide')
+        hidden(containerElement, true)
     }
 
     // fixes https://github.com/binarykitchen/videomail-client/issues/71
@@ -358,7 +359,7 @@ var Container = function(options) {
 
     this.show = function() {
         if (containerElement) {
-            containerElement.classList.remove('hide')
+            hidden(containerElement, false)
 
             visuals.show()
 
