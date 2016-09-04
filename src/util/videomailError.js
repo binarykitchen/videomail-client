@@ -16,9 +16,14 @@ VideomailError.DOM_EXCEPTION     = 'DOMException'
 VideomailError.STARTING_FAILED   = 'Starting video failed'
 
 function stringify(anything) {
-    if (anything && Object.keys(anything).length > 0)
-        return JSON.stringify(anything)
-    else
+    if (anything) {
+        if (typeof anything === 'string')
+            return anything
+        else if (Object.keys(anything).length > 0)
+            return JSON.stringify(anything)
+        else
+            return anything.toString()
+    } else
         return undefined
 }
 
@@ -135,19 +140,11 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
             if (typeof err === 'string')
                 message = err
             else {
-                if (err && err.message) {
-                    if (err.message.toString)
-                        message = err.message.toString()
-                    else
-                        message = stringify(err.message)
-                }
+                if (err && err.message)
+                    message = stringify(err.message)
 
-                if (err && err.explanation) {
-                    if (err.explanation.toString)
-                        explanation = err.explanation.toString()
-                    else
-                        explanation = stringify(err.explanation)
-                }
+                if (err && err.explanation)
+                    explanation = stringify(err.explanation)
 
                 if (err && err.details) {
                     var details = pretty(err.details)
@@ -165,6 +162,9 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
 
                 if (!explanation)
                     explanation = stringify(err)
+
+                if (message == explanation)
+                    explanation = undefined
             }
 
             break

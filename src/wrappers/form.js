@@ -190,6 +190,8 @@ var Form = function(container, formElement, options) {
                     formElement.getAttribute('action')
                 )
             }
+
+            return false // important to stop submission
         }
     }
 
