@@ -16,9 +16,12 @@ VideomailError.DOM_EXCEPTION     = 'DOMException'
 VideomailError.STARTING_FAILED   = 'Starting video failed'
 
 function stringify(anything) {
-    if (anything && Object.keys(anything).length > 0)
-        return JSON.stringify(anything)
-    else
+    if (anything) {
+        if (Object.keys(anything).length > 0)
+            return JSON.stringify(anything)
+        else
+            return anything.toString()
+    } else
         return undefined
 }
 
