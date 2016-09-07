@@ -515,12 +515,14 @@ var Container = function(options) {
         this.disableForm(true)
         this.emit(Events.SUBMITTING)
 
-        submitVideomail(formData, method, function(err1, videomail, videomailResponse) {
+        var post = isPost(method)
 
+        // a closure so that we can access method
+        var submitVideomailCallback = function(err1, videomail, videomailResponse) {
             if (err1) {
                 finalizeSubmissions(err1, method, videomail, videomailResponse)
 
-            } else if (isPost(method)) {
+            } else if (post) {
 
                 // for now, accept POSTs only which have an URL unlike null and
                 // treat all other submissions as direct submissions
@@ -531,9 +533,13 @@ var Container = function(options) {
                 submitForm(formData, videomailResponse, url, function(err2, formResponse) {
                     finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse)
                 })
-            } else
-                finalizeSubmissions(err1, method, videomail, videomailResponse)
-        })
+            } else {
+                // it's a direct submission
+                finalizeSubmissions(null, method, videomail, videomailResponse)
+            }
+        }
+
+        submitVideomail(formData, method, submitVideomailCallback)
     }
 
     this.isBuilt = function() {
