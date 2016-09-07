@@ -515,20 +515,24 @@ var Container = function(options) {
         this.disableForm(true)
         this.emit(Events.SUBMITTING)
 
-        submitVideomail(formData, method, function(err, videomail, videomailResponse) {
-            // for now, accept POSTs only which have an URL unlike null and
-            // treat all other submissions as direct submissions
+        submitVideomail(formData, method, function(err1, videomail, videomailResponse) {
 
-            if (!err && isPost(method)) {
+            if (err1) {
+                finalizeSubmissions(err1, method, videomail, videomailResponse)
+
+            } else if (isPost(method)) {
+
+                // for now, accept POSTs only which have an URL unlike null and
+                // treat all other submissions as direct submissions
 
                 if (!url || url === '')
                     url = document.baseURI // figure out URL automatically then
 
-                submitForm(formData, videomailResponse, url, function(err, formResponse) {
-                    finalizeSubmissions(err, method, videomail, videomailResponse, formResponse)
+                submitForm(formData, videomailResponse, url, function(err2, formResponse) {
+                    finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse)
                 })
             } else
-                finalizeSubmissions(err, method, videomail, videomailResponse)
+                finalizeSubmissions(err1, method, videomail, videomailResponse)
         })
     }
 
