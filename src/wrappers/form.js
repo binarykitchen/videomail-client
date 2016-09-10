@@ -155,24 +155,8 @@ var Form = function(container, formElement, options) {
     }
 
     function startListeningToSubmitEvents() {
-        var submitButton            = container.getSubmitButton(),
-            listenToFormSubmitEvent = true
-
-        // figure out first if submit button is inside form
-
-        if (formElement.id && submitButton.id) {
-            var submitButtonsInForm = document.querySelectorAll(
-                "#" + formElement.id + " " +
-                "#" + submitButton.id
-            )
-
-            listenToFormSubmitEvent = submitButtonsInForm.length > 0
-        }
-
-        if (listenToFormSubmitEvent)
-            formElement.addEventListener('submit', self.doTheSubmit.bind(self))
-        else
-            submitButton.addEventListener('click', self.doTheSubmit.bind(self))
+        var submitButton = container.getSubmitButton()
+        submitButton.addEventListener('click', self.doTheSubmit.bind(self))
     }
 
     this.doTheSubmit = function(e) {
