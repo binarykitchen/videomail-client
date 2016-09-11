@@ -435,10 +435,10 @@ var Container = function(options) {
         var runValidation = true,
             valid
 
-        if (force) {
-            runValidation = force
-        } else if (!options.enableAutoValidation) {
+        if (!options.enableAutoValidation) {
             runValidation = false
+        } else if (force) {
+            runValidation = force
         } else if (self.isNotifying()) {
             runValidation = false
         } else if (visuals.isConnected()) {
