@@ -437,6 +437,8 @@ var Container = function(options) {
 
         if (force) {
             runValidation = force
+        } else if (!options.enableAutoValidation) {
+            runValidation = false
         } else if (self.isNotifying()) {
             runValidation = false
         } else if (visuals.isConnected()) {
