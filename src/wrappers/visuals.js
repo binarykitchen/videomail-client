@@ -57,8 +57,14 @@ var Visuals = function(container, options) {
             .on(Events.PREVIEW, function() {
                 self.endWaiting()
             })
-            .on(Events.BLOCKING, function() {
-                container.disableForm(true)
+            .on(Events.BLOCKING, function(blockingOptions) {
+                if (blockingOptions.isBrowserProblem && !options.adjustFormOnBrowserError) {
+                    // do nothing, user still can enter form inputs
+                    // can be useful when you are on i.E. seeflow's contact page and
+                    // still want to tick off the webcam option
+                } else {
+                    container.disableForm(true)
+                }
             })
             .on(Events.PREVIEW_SHOWN, function() {
                 container.validate(true)
