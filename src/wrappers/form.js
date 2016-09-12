@@ -147,7 +147,7 @@ var Form = function(container, formElement, options) {
             // we hide areas to make it easier for the user to process an error
             // (= less distractions)
             if (err.isBrowserProblem && err.isBrowserProblem() &&
-                options.hideFormOnBrowserError) {
+                options.adjustFormOnBrowserError) {
                 hideAllInputs()
             }
         })
