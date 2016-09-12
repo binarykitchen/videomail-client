@@ -84,11 +84,11 @@ module.exports = function(options) {
                 warning = 'Hence we recommend you to use either ' +
                           '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
                           '<a href="' + firefoxDownload + '" target="_blank">Firefox</a> or ' +
-                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> instead.<br/>' +
-                          '<a href="http://caniuse.com/stream" target="_blank">Here is evidence</a>.'
+                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> instead.'
         }
 
-        warning = 'To access external webcams, your browser must support the getUserMedia feature.' +
+        warning = 'To access external webcams, your browser must support the ' +
+                  '<a href="http://caniuse.com/#feat=stream" target="_blank">getUserMedia</a> feature.' +
                   '<br/><br/>' + warning
 
         return warning

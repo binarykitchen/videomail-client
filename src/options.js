@@ -110,10 +110,13 @@ module.exports = {
         body:       null    // define default body content
     },
 
-    // error stuff
-    displayErrors:          true,  // show errors inside the container?
-    hideFormOnBrowserError: false, // true = all form inputs disappear when browser can't record
 
-    // for devs only
-    fakeUaString:  null             // just for testing purposes to simulare VM on diff browsers
+    // show errors inside the container?
+    displayErrors: true,
+
+    // true = all form inputs get disabled and disappear when browser can't record
+    adjustFormOnBrowserError: false,
+
+    // just for testing purposes to simulate browser agent handling
+    fakeUaString: null
 }
