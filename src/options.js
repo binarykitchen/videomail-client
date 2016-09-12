@@ -19,7 +19,8 @@ module.exports = {
     enctype: 'application/json',             // enctype for the form submission. currently implemented are:
                                              // 'application/json' and 'application/x-www-form-urlencoded'
 
-    selectors: {                             // default CSS selectors you can alter, see examples
+    // default CSS selectors you can alter, see examples
+    selectors: {
         containerId:    'videomail',
         replayClass:    'replay',
         userMediaClass: 'userMedia',
@@ -46,6 +47,7 @@ module.exports = {
         formId:         null,                    // automatically detects form if any
         submitButtonId: null                     // automatically detects submit button in the form
     },
+
     audio: {
         enabled:    false,      // set to true for experimential audio recording
         switch:     false,      // enables a switcher for audio recording (on/off)
@@ -53,6 +55,7 @@ module.exports = {
                                 // distorting at the higher volume peaks
         bufferSize: 4096        // decides how often the audio is being sampled, must be a power of two
     },
+
     video: {
         fps:          15,          // depends on your connection
         limitSeconds: 30,          // recording automatically stops after that limit
@@ -60,10 +63,12 @@ module.exports = {
         width:        'auto',      // or use an integer for exact pixels
         height:       'auto'       // or use an integer for exact pixels
     },
+
     image: {
         quality:    .35,
         types:      ['webp', 'jpeg']                // recommended settings to make most of all browsers
     },
+
     // alter these text for internationalisation
     text: {
         pausedHeader: 'Paused',
@@ -78,28 +83,37 @@ module.exports = {
             'preview':      'Preview'
         }
     },
+
     notifier: {
         entertain:         false,   // when true, user is entertained while waiting, see examples
         entertainClass:    'bg',
         entertainLimit:    6,
         entertainInterval: 9000
     },
+
     timeouts: {
         userMedia:    5e3,          // increase if you want user give more time to enable webcam
         connection:   1e4,          // increase if connection is slow
         pingInterval: 30e3          // keeps webstream (connection) alive when pausing
     },
+
     callbacks: {
         // a custom callback to tweak form data before posting to server
         // this is for advanced use only and shouldn't be used if possible
         adjustFormDataBeforePosting: null
     },
+
     defaults: {
         from:       null,   // define default FROM email address
         to:         null,   // define default TO email address
         subject:    null,   // define default subject line
         body:       null    // define default body content
     },
-    displayErrors: true,            // show errors inside the container?
+
+    // error stuff
+    displayErrors:          true,  // show errors inside the container?
+    hideFormOnBrowserError: false, // true = all form inputs disappear when browser can't record
+
+    // for devs only
     fakeUaString:  null             // just for testing purposes to simulare VM on diff browsers
 }
