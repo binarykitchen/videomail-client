@@ -452,7 +452,7 @@ var Buttons = function(container, options) {
             // since https://github.com/binarykitchen/videomail-client/issues/60
             // we hide areas to make it easier for the user
             if (err.isBrowserProblem && err.isBrowserProblem() &&
-                options.hideFormOnBrowserError) {
+                options.adjustFormOnBrowserError) {
                 self.hide()
             }
         })
