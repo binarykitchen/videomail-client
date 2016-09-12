@@ -12,7 +12,7 @@ test('Browser:', {timeout: 1000}, function(t) {
 
         err = browser.checkRecordingCapabilities()
         tt.equal(err.message, 'Sorry, your browser has no webcam support')
-        tt.ok(err.explanation.indexOf('your browser must support the getUserMedia feature') >= 0)
+        tt.ok(err.explanation.indexOf('your browser must support') >= 0)
 
         err = browser.checkPlaybackCapabilities()
         tt.equal(err.message, 'No HTML5 support for video tag!')
