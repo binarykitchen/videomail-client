@@ -86,8 +86,9 @@ var Replay = function(parentElement, options) {
     this.show = function(recorderWidth, recorderHeight) {
         correctDimensions({
             responsive:  true,
-            videoWidth:  recorderWidth,
-            videoHeight: recorderHeight
+            // beware that recorderWidth and recorderHeight can be null sometimes
+            videoWidth:  recorderWidth  || replayElement.videoWidth,
+            videoHeight: recorderHeight || replayElement.videoHeight
         })
 
         hidden(replayElement, false)
