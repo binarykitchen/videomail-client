@@ -1,6 +1,7 @@
 var h            = require('hyperscript'),
     util         = require('util'),
     hidden       = require('hidden'),
+    getFormData  = require('get-form-data'),
 
     Events         = require('./../events'),
     EventEmitter   = require('./../util/eventEmitter'),
@@ -16,15 +17,7 @@ var Form = function(container, formElement, options) {
         keyInput
 
     function getData() {
-        var limit = formElement.elements.length,
-            data  = {}
-
-        for (var i = 0; i < limit; i++) {
-            if (formElement.elements[i].name)
-                data[formElement.elements[i].name] = formElement.elements[i].value
-        }
-
-        return data
+        return getFormData(formElement)
     }
 
     this.loadVideomail = function(videomail) {
