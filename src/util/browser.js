@@ -115,15 +115,18 @@ module.exports = function(options) {
 
     // just temporary
     this.canRecord = function() {
-        var hasNavigator = typeof navigator !== 'undefined'
+        var hasNavigator = typeof navigator !== 'undefined',
+            canRecord = false
 
         if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            return true
+            canRecord = true
         } else {
             var getUserMediaType = hasNavigator && typeof navigator.getUserMedia_
 
-            return getUserMediaType !== 'undefined' && getUserMediaType == 'function'
+            canRecord = getUserMediaType == 'function'
         }
+
+        return canRecord
     }
 
     this.checkRecordingCapabilities = function() {
