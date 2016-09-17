@@ -1,4 +1,5 @@
-var VideomailError = require('./../util/videomailError')
+var numberIsInteger = require('number-is-integer');
+    VideomailError  = require('./../util/videomailError')
 
 function getOuterWidth(element) {
     var rect = element.getBoundingClientRect()
@@ -13,13 +14,14 @@ function figureMinHeight(height, options) {
             height = Math.min(options.video.height, height)
     }
 
-    if (height < 1)
+    if (numberIsInteger(height) && height < 1)
         throw VideomailError.create(
             'Got a video height less than 1 (' +
             height +
             ') while figuring out the minimum!')
-    else
-        return height
+
+    // just return it, can be "auto"
+    return height
 }
 
 module.exports = {
@@ -28,7 +30,7 @@ module.exports = {
         var outerWidth   = getOuterWidth(element)
         var limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
 
-        if (limitedWidth < 1)
+        if (numberIsInteger(limitedWidth) && limitedWidth < 1)
             throw VideomailError.create('Limited width cannot be less than 1!')
         else
             return limitedWidth
@@ -37,7 +39,7 @@ module.exports = {
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
     limitHeight: function(height) {
-        if (height < 1)
+        if (numberIsInteger(height) && height < 1)
             throw VideomailError.create('Passed limit-height argument cannot be less than 1!')
         else {
             var limitedHeight = Math.min(
@@ -62,7 +64,7 @@ module.exports = {
         if (options.responsive)
             height = this.limitHeight(height)
 
-        if (height < 1)
+        if (numberIsInteger(height) && height < 1)
             throw new Error('Height cannot be smaller than 1 when calculating width.')
         else {
             var calculatedWidth = parseInt(height / ratio)
@@ -82,7 +84,7 @@ module.exports = {
         if (options.hasDefinedWidth())
             width = options.video.width
 
-        if (width < 1)
+        if (numberIsInteger(width) && width < 1)
             throw VideomailError.create('Unable to calculate height when width is less than 1.')
         else
             if (options.responsive)
@@ -91,7 +93,7 @@ module.exports = {
             if (width)
                 height = parseInt(width * ratio)
 
-            if (height < 1)
+            if (numberIsInteger(height) && height < 1)
                 throw VideomailError.create('Just calculated a height less than 1 which is wrong.')
             else
                 return figureMinHeight(height, options)

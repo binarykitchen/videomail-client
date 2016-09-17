@@ -53,6 +53,7 @@
     "is-power-of-two": "1.0.0",
     "keymirror": "0.1.1",
     "merge-recursive": "0.0.3",
+    "number-is-integer": "1.0.0",
     "pauseable": "0.1.6",
     "readystate": "0.1.0",
     "request-frame": "1.4.3",
