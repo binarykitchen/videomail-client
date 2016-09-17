@@ -62,7 +62,7 @@ var Form = function(container, formElement, options) {
         }
     }
 
-    function getTextElements() {
+    function getInputElements() {
         return formElement.querySelectorAll('input, textarea')
     }
 
@@ -80,15 +80,24 @@ var Form = function(container, formElement, options) {
 
     this.build = function() {
         if (options.enableAutoValidation) {
-            var textElements = getTextElements()
+            var inputElements = getInputElements(),
+                inputElement
 
-            for (var i = 0, len = textElements.length; i < len; i++) {
-                textElements[i].addEventListener('input', function() {
-                    container.validate()
-                })
+            for (var i = 0, len = inputElements.length; i < len; i++) {
+                inputElement = inputElements[i]
+
+                if (inputElement.type == "radio") {
+                    inputElement.addEventListener('change', function() {
+                        container.validate()
+                    })
+                } else {
+                    inputElement.addEventListener('input', function() {
+                        container.validate()
+                    })
+                }
 
                 // because of angular's digest cycle, validate again when it became invalid
-                textElements[i].addEventListener('invalid', function() {
+                inputElement.addEventListener('invalid', function() {
                     if (!disableContainerValidation)
                         container.validate()
                 })
@@ -176,11 +185,11 @@ var Form = function(container, formElement, options) {
     }
 
     this.getInvalidElement = function() {
-        var textElements = getTextElements()
+        var inputElements = getInputElements()
 
-        for (var i = 0, len = textElements.length; i < len; i++) {
-            if (!textElements[i].validity.valid)
-                return textElements[i]
+        for (var i = 0, len = inputElements.length; i < len; i++) {
+            if (!inputElements[i].validity.valid)
+                return inputElements[i]
         }
 
         var selectElements = getSelectElements()
