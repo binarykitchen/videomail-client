@@ -436,7 +436,8 @@ var Container = function(options) {
             valid
 
         if (!options.enableAutoValidation) {
-            runValidation = false
+            runValidation  = false
+            lastValidation = true // needed so that it can be submitted anyway, see submit()
         } else if (force) {
             runValidation = force
         } else if (self.isNotifying()) {
@@ -481,9 +482,9 @@ var Container = function(options) {
                 this.emit(Events.VALID)
             else
                 this.emit(Events.INVALID, whyInvalid)
-        }
 
-        lastValidation = valid
+            lastValidation = valid
+        }
 
         return valid
     }
