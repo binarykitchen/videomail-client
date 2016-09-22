@@ -310,6 +310,12 @@ These guys helped and/or inspired me for this mad project:
 
 They all deserve lots of beer and love. That order is irrelevant.
 
+### Code quality
+
+I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bugfixes come first before perfection otherwise you'll loose users. Reality you know.
+
+Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io/react/) or better [re-frame](https://github.com/Day8/re-frame) because the Videomail-Client depends heaviliy on application states.
+
 ### Final philosophy
 
 This planet is completely sold. And talk is overrated. That's why my primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.
