@@ -26,15 +26,6 @@ module.exports = function(window, navigator) {
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
 
-    window.XMLHttpRequest = (
-        window.XMLHttpRequest || function() {
-        try { return new ActiveXObject("Msxml3.XMLHTTP") } catch (e0) {}
-        try { return new ActiveXObject("Msxml2.XMLHTTP.6.0") } catch (e1) {}
-        try { return new ActiveXObject("Msxml2.XMLHTTP.3.0") } catch (e2) {}
-        try { return new ActiveXObject("Msxml2.XMLHTTP") } catch (e3) {}
-        try { return new ActiveXObject("Microsoft.XMLHTTP") } catch (e4) {}
-    })
-
     var method,
         noop = function() {},
         methods = [
