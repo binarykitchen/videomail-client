@@ -1,4 +1,5 @@
 var UAParser        = require('ua-parser-js'),
+    defined         = require('defined'),
     VideomailError  = require('./videomailError')
 
 module.exports = function(options) {
@@ -10,11 +11,11 @@ module.exports = function(options) {
         chromeDownload   = 'http://www.google.com/chrome/',
         chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
         browseHappyLink  = 'http://browsehappy.com',
-        ua               = options.fakeUaString || (
+        ua               = defined(options.fakeUaString, (
                             typeof window !== 'undefined' &&
                             window.navigator &&
                             window.navigator.userAgent
-                           ) || '',
+                           ), '')
 
         uaParser = new UAParser(ua).getResult(),
 
