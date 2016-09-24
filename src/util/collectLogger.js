@@ -1,4 +1,5 @@
 var util    = require('util'),
+    defined = require('defined'),
     Browser = require('./browser')
 
 module.exports = function(localOptions) {
@@ -6,7 +7,7 @@ module.exports = function(localOptions) {
     localOptions = localOptions || {}
 
     var browser     = new Browser(localOptions),
-        logger      = localOptions.logger || console,
+        logger      = defined(localOptions.logger, console),
         containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id',
         stack       = []
 

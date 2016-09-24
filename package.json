@@ -41,6 +41,7 @@
     "canvas-to-buffer": "1.0.9",
     "classlist.js": "1.1.20150312",
     "create-error": "0.3.1",
+    "defined": "1.0.0",
     "despot": "1.0.0",
     "es5-shim": "4.5.9",
     "filesize": "3.3.0",

@@ -1,3 +1,5 @@
+var defined = require('defined')
+
 module.exports = function(window, navigator) {
 
     require('es5-shim')
@@ -16,15 +18,16 @@ module.exports = function(window, navigator) {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         // do not shim
     } else {
-        navigator.getUserMedia_ =
-            navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
+        navigator.getUserMedia_ = defined(
+            navigator.getUserMedia,
+            navigator.webkitGetUserMedia,
+            navigator.mozGetUserMedia,
             navigator.msGetUserMedia
+        )
     }
 
-    window.AudioContext = window.AudioContext || window.webkitAudioContext
-    window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
+    window.AudioContext = defined(window.AudioContext, window.webkitAudioContext)
+    window.URL = defined(window.URL, window.webkitURL, window.mozURL, window.msURL)
 
     var method,
         noop = function() {},
