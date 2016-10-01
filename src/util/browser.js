@@ -15,7 +15,7 @@ module.exports = function(options) {
                             typeof window !== 'undefined' &&
                             window.navigator &&
                             window.navigator.userAgent
-                           ), '')
+                           ), ''),
 
         uaParser = new UAParser(ua).getResult(),
 
