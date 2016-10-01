@@ -113,7 +113,11 @@ module.exports = function(recorder, options) {
                 videoCallback()
 
                 if (audioRecorder && audioCallback) {
-                    audioRecorder.init(localMediaStream)
+                    try {
+                        audioRecorder.init(localMediaStream)
+                    } catch (exc) {
+                        self.emit(Events.ERROR, exc)
+                    }
 
                     self.on(Events.SENDING_FIRST_FRAME, function() {
                         audioRecorder && audioRecorder.record(audioCallback)
