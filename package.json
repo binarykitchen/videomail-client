@@ -54,7 +54,7 @@
     "is-power-of-two": "1.0.0",
     "keymirror": "0.1.1",
     "merge-recursive": "0.0.3",
-    "number-is-integer": "1.0.0",
+    "number-is-integer": "1.0.1",
     "pauseable": "0.1.6",
     "readystate": "0.1.0",
     "request-frame": "1.4.3",
@@ -87,7 +87,7 @@
     "router": "1.1.4",
     "ssl-root-cas": "1.2.2",
     "tap-spec": "4.1.1",
-    "tape": "4.6.0",
+    "tape": "4.6.2",
     "tape-run": "2.1.4",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
