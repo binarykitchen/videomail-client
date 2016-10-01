@@ -18,7 +18,8 @@ function figureMinHeight(height, options) {
         throw VideomailError.create(
             'Got a video height less than 1 (' +
             height +
-            ') while figuring out the minimum!')
+            ') while figuring out the minimum!'
+        )
 
     // just return it, can be "auto"
     return height
