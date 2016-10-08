@@ -27,10 +27,7 @@ module.exports = function(userMedia, options) {
         // defined by the channel parameter (with 0 representing the first channel)
         var float32Array = e.inputBuffer.getChannelData(0)
 
-        // keep all callbacks async
-        setTimeout(function() {
-            cb(new AudioSample(float32Array))
-        }, 0)
+        cb(new AudioSample(float32Array))
     }
 
     this.init = function(localMediaStream) {
