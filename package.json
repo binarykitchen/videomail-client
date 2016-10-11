@@ -57,7 +57,7 @@
     "number-is-integer": "1.0.1",
     "pauseable": "0.1.6",
     "readystate": "0.1.0",
-    "request-frame": "1.4.3",
+    "request-frame": "1.5.1",
     "superagent": "2.3.0",
     "ua-parser-js": "0.7.10",
     "websocket-stream": "3.3.0"
