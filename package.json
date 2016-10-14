@@ -18,7 +18,7 @@
   "readmeFilename": "README.md",
   "main": "src/index.js",
   "scripts": {
-    "test": "browserify test/**/*.test.js --debug | tape-run | tap-spec",
+    "test": "browserify test/**/*.test.js --debug | tape-run",
     "patch": "./bin/release.sh --importance=patch",
     "minor": "./bin/release.sh --importance=minor",
     "major": "./bin/release.sh --importance=major"
