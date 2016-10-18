@@ -194,6 +194,10 @@ var Replay = function(parentElement, options) {
 
     function setVideoSource(type, src) {
         var source = self.getVideoSource(type)
+        var timestamp = Date.now()
+
+        if (src)
+            src += '?' +  timestamp
 
         if (!source) {
             if (src) {
