@@ -80,7 +80,7 @@ module.exports = function(visuals, recordNote, options) {
                 cb(true)
             else
                 update(cb)
-        }, 980)
+        }, 990)
     }
 
     function hide() {
@@ -92,6 +92,10 @@ module.exports = function(visuals, recordNote, options) {
         recordTimerElement.classList.remove('nigh')
 
         hidden(recordTimerElement, false)
+    }
+
+    function getSecondsRecorded() {
+        return options.video.limitSeconds - countdown
     }
 
     this.start = function(cb) {
@@ -115,7 +119,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.stop = function() {
-        options.debug('Stopping record timer ...')
+        options.debug('Stopping record timer. Was recording for ' + getSecondsRecorded() + " seconds.")
 
         hide()
         timer && timer.clear()
