@@ -502,6 +502,20 @@ var Recorder = function(visuals, replay, options) {
         return avgFps
     }
 
+    function getAvgInterval() {
+        return (intervalSum / framesCount)
+    }
+
+    this.getRecordingStats = function() {
+        return {
+            avgInterval:  getAvgInterval(),
+            intervalSum:  intervalSum,
+            framesCount:  framesCount,
+            samplesCount: samplesCount,
+            sampleRate:   sampleRate
+        }
+    }
+
     this.getAudioSampleRate = function() {
         return userMedia.getAudioSampleRate()
     }
@@ -513,17 +527,14 @@ var Recorder = function(visuals, replay, options) {
 
         stopTime = Date.now()
 
-        var avgInterval = (intervalSum / framesCount)
+        var avgInterval = getAvgInterval()
 
         avgFps = 1000 / (intervalSum / framesCount)
 
         var args = {
             framesCount:    framesCount,
             videoType:      replay.getVideoType(),
-            avgFps:         avgFps,
-            limitReached:   limitReached,
-            wantedInterval: wantedInterval,
-            avgInterval:    avgInterval
+            avgFps:         avgFps
         }
 
         if (options.isAudioEnabled()) {
