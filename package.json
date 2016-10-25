@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "body-parser": "1.15.2",
-    "browserify": "13.1.0",
+    "browserify": "13.1.1",
     "connect-send-json": "1.0.0",
     "del": "2.2.2",
     "gulp": "3.9.1",
@@ -85,7 +85,7 @@
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.1.4",
-    "ssl-root-cas": "1.2.2",
+    "ssl-root-cas": "1.2.3",
     "tap-spec": "4.1.1",
     "tape": "4.6.2",
     "tape-run": "2.1.4",
