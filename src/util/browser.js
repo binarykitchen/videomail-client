@@ -134,7 +134,6 @@ module.exports = function(options) {
         var err
 
         if (!okBrowser || !this.canRecord()) {
-
             err = VideomailError.create({
                 message: 'Sorry, your browser has no webcam support',
             }, getUserMediaWarning(), options, true)

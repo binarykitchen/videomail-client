@@ -194,9 +194,10 @@ var Container = function(options) {
 
         // when method is undefined, treat it as a post
         if (isPost(method) || !method) {
-            videomailFormData.avgFps = visuals.getAvgFps()
-            videomailFormData.width  = visuals.getRecorderWidth()
-            videomailFormData.height = visuals.getRecorderHeight()
+            videomailFormData.avgFps         = visuals.getAvgFps()
+            videomailFormData.recordingStats = visuals.getRecordingStats()
+            videomailFormData.width          = visuals.getRecorderWidth()
+            videomailFormData.height         = visuals.getRecorderHeight()
 
             if (options.isAudioEnabled())
                 videomailFormData.sampleRate = visuals.getAudioSampleRate()

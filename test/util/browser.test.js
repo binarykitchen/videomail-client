@@ -2,7 +2,7 @@ var test    = require('tape'),
 
     Browser = require('./../../src/util/browser')
 
-test('Browser:', {timeout: 1000}, function(t) {
+test('Browser:', {timeout: 2000}, function(t) {
 
     t.test('without arguments', function(tt) {
         tt.plan(11)
