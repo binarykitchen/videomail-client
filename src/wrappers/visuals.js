@@ -246,6 +246,10 @@ var Visuals = function(container, options) {
         return recorder.getAvgFps()
     }
 
+    this.getRecordingStats = function() {
+        return recorder.getRecordingStats()
+    }
+
     this.getAudioSampleRate = function() {
         return recorder.getAudioSampleRate()
     }
