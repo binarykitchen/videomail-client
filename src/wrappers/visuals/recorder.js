@@ -30,6 +30,8 @@ var Recorder = function(visuals, replay, options) {
         samplesCount = 0,
         framesCount  = 0,
 
+        recordingStats = {},
+
         confirmedFrameNumber = 0,
         confirmedSampleNumber = 0,
 
@@ -507,13 +509,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.getRecordingStats = function() {
-        return {
-            avgInterval:  getAvgInterval(),
-            intervalSum:  intervalSum,
-            framesCount:  framesCount,
-            samplesCount: samplesCount,
-            sampleRate:   self.getAudioSampleRate()
-        }
+        return recordingStats
     }
 
     this.getAudioSampleRate = function() {
@@ -543,6 +539,15 @@ var Recorder = function(visuals, replay, options) {
         }
 
         writeCommand('stop', args)
+
+        // remember them before resetting
+        recordingStats = {
+            avgInterval:  getAvgInterval(),
+            intervalSum:  intervalSum,
+            framesCount:  framesCount,
+            samplesCount: samplesCount,
+            sampleRate:   self.getAudioSampleRate()
+        }
 
         // beware, resetting will set framesCount to zero, so leave this here
         this.reset()
