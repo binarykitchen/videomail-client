@@ -512,7 +512,7 @@ var Recorder = function(visuals, replay, options) {
             intervalSum:  intervalSum,
             framesCount:  framesCount,
             samplesCount: samplesCount,
-            sampleRate:   sampleRate
+            sampleRate:   self.getAudioSampleRate()
         }
     }
 
