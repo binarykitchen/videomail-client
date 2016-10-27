@@ -79,7 +79,7 @@
     "gulp-plumber": "1.1.0",
     "gulp-rename": "1.2.2",
     "gulp-stylus": "2.5.0",
-    "gulp-todo": "5.0.0",
+    "gulp-todo": "5.1.0",
     "gulp-uglify": "2.0.0",
     "gulp-util": "3.0.7",
     "minimist": "1.2.0",
