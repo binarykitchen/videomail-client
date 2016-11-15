@@ -1,6 +1,6 @@
-module.exports = function(window, navigator) {
+require('es5-shim')
 
-    require('es5-shim')
+module.exports = function(window, navigator) {
 
     if (typeof self !== "undefined")
         require('classlist.js')
