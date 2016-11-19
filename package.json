@@ -60,7 +60,7 @@
     "request-frame": "1.5.3",
     "superagent": "2.3.0",
     "ua-parser-js": "0.7.12",
-    "websocket-stream": "3.3.0"
+    "websocket-stream": "3.3.2"
   },
   "devDependencies": {
     "body-parser": "1.15.2",
