@@ -60,7 +60,7 @@
     "request-frame": "1.5.3",
     "superagent": "2.3.0",
     "ua-parser-js": "0.7.12",
-    "websocket-stream": "3.3.2"
+    "websocket-stream": "3.3.3"
   },
   "devDependencies": {
     "body-parser": "1.15.2",
@@ -69,7 +69,7 @@
     "del": "2.2.2",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "3.1.1",
-    "gulp-bump": "2.5.0",
+    "gulp-bump": "2.5.1",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.0.0",
     "gulp-cssnano": "2.1.2",
@@ -87,7 +87,7 @@
     "router": "1.1.4",
     "ssl-root-cas": "1.2.3",
     "tap-spec": "4.1.1",
-    "tape": "4.6.2",
+    "tape": "4.6.3",
     "tape-run": "2.1.4",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
