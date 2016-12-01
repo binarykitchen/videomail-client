@@ -119,7 +119,7 @@ module.exports = function(recorder, options) {
                         self.emit(Events.ERROR, exc)
                     }
 
-                    self.on(Events.FIRST_FRAME_SENT, function() {
+                    self.on(Events.RECORDING, function() {
                         audioRecorder && audioRecorder.record(audioCallback)
                     })
                 }
