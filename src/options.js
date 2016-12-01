@@ -51,7 +51,7 @@ module.exports = {
     audio: {
         enabled:    false,      // set to true for experimential audio recording
         switch:     false,      // enables a switcher for audio recording (on/off)
-        volume:     .45,        // must be between 0 .. 1 but 0.45 is recommeded to avoid
+        volume:     .30,        // must be between 0 .. 1 but 0.30 is recommeded to avoid
                                 // distorting at the higher volume peaks
         bufferSize: 1024        // decides how often the audio is being sampled, must be a power of two.
                                 // the higher the less traffic, but harder to adjust with rubberband
@@ -94,9 +94,9 @@ module.exports = {
     },
 
     timeouts: {
-        userMedia:    5e3,          // increase if you want user give more time to enable webcam
-        connection:   1e4,          // increase if connection is slow
-        pingInterval: 30e3          // keeps webstream (connection) alive when pausing
+        userMedia:    10e3,         // in milliseconds, increase if you want user give more time to enable webcam
+        connection:   1e4,          // in seconds, increase if api is slow
+        pingInterval: 45e3          // in milliseconds, keeps webstream (connection) alive when pausing
     },
 
     callbacks: {
@@ -111,7 +111,6 @@ module.exports = {
         subject:    null,   // define default subject line
         body:       null    // define default body content
     },
-
 
     // show errors inside the container?
     displayErrors: true,
