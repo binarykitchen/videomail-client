@@ -678,7 +678,7 @@ var Recorder = function(visuals, replay, options) {
         bytesSum = intervalSum = 0
         lastAnimationTimestamp = Date.now()
 
-        var intervalThreshold = wantedInterval * .83, // allow ~ 17% below fps (can't be too strict)
+        var intervalThreshold = wantedInterval * .8, // allow ~ 20% below fps (can't be too strict)
             frame             = new Frame(canvas, options),
 
             interval,
