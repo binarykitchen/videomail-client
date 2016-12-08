@@ -5,14 +5,10 @@ var test    = require('tape'),
 test('Browser:', {timeout: 2000}, function(t) {
 
     t.test('without arguments', function(tt) {
-        tt.plan(11)
+        tt.plan(9)
 
         var browser = new Browser(),
             err
-
-        err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your browser has no webcam support')
-        tt.ok(err.explanation.indexOf('your browser must support') >= 0)
 
         err = browser.checkPlaybackCapabilities()
         tt.equal(err.message, 'No HTML5 support for video tag!')
@@ -34,7 +30,7 @@ test('Browser:', {timeout: 2000}, function(t) {
     })
 
     t.test('fake old Firefox', function(tt) {
-        tt.plan(11)
+        tt.plan(9)
 
         var options = {
             fakeUaString: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:23.0) Gecko/20131011 Firefox/23.0'
@@ -42,10 +38,6 @@ test('Browser:', {timeout: 2000}, function(t) {
 
         var browser = new Browser(options),
             err
-
-        err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your browser has no webcam support')
-        tt.ok(err.explanation.indexOf('upgrade Firefox') >= 0)
 
         err = browser.checkPlaybackCapabilities()
         tt.equal(err.message, 'No HTML5 support for video tag!')
@@ -66,7 +58,7 @@ test('Browser:', {timeout: 2000}, function(t) {
     })
 
     t.test('fake old Chrome', function(tt) {
-        tt.plan(11)
+        tt.plan(9)
 
         var options = {
             fakeUaString: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.8 (KHTML, like Gecko) Chrome/17.0.940.0 Safari/535.8'
@@ -74,10 +66,6 @@ test('Browser:', {timeout: 2000}, function(t) {
 
         var browser = new Browser(options),
             err
-
-        err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your browser has no webcam support')
-        tt.ok(err.explanation.indexOf('upgrade Chrome') >= 0)
 
         err = browser.checkPlaybackCapabilities()
         tt.equal(err.message, 'No HTML5 support for video tag!')
