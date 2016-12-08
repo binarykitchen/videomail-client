@@ -18,7 +18,7 @@
   "readmeFilename": "README.md",
   "main": "src/index.js",
   "scripts": {
-    "test": "browserify test/**/*.test.js --debug | tape-run --render=tap-spec",
+    "test": "browserify test/**/*.test.js --debug | tape-run",
     "patch": "./bin/release.sh --importance=patch",
     "minor": "./bin/release.sh --importance=minor",
     "major": "./bin/release.sh --importance=major"
@@ -55,7 +55,7 @@
     "keymirror": "0.1.1",
     "merge-recursive": "0.0.3",
     "number-is-integer": "1.0.1",
-    "pauseable": "0.1.6",
+    "pauseable": "0.1.7",
     "readystate": "0.1.0",
     "request-frame": "1.5.3",
     "superagent": "3.1.0",
@@ -86,7 +86,6 @@
     "nib": "1.1.2",
     "router": "1.1.4",
     "ssl-root-cas": "1.2.3",
-    "tap-spec": "4.1.1",
     "tape": "4.6.3",
     "tape-run": "2.1.4",
     "vinyl-buffer": "1.0.0",
