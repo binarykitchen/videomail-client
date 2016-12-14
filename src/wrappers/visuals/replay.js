@@ -122,21 +122,11 @@ var Replay = function(parentElement, options) {
 
         this.hide()
 
-        if (!replayElement.autoplay)
-            replayElement.autoplay = true
-
-        if (!replayElement.autostart)
-            replayElement.autostart = true
-
-        if (!replayElement.autobuffer)
-            replayElement.autobuffer = true
-
-        if (!replayElement.controls)
-            replayElement.controls = 'controls'
-
-        if (!replayElement.preload)
-            replayElement.preload = 'auto'
-
+        replayElement.setAttribute('autoplay', true)
+        replayElement.setAttribute('autostart', true)
+        replayElement.setAttribute('autobuffer', true)
+        replayElement.setAttribute('controls', 'controls')
+        replayElement.setAttribute('preload', 'auto')
         replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
 
         if (!built) {
