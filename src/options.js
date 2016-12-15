@@ -75,7 +75,8 @@ module.exports = {
     text: {
         pausedHeader: 'Paused',
         pausedHint:   null,
-        processing:   'Processing',
+        sending:      'Teleporting',
+        encoding:     'Encoding',
         limitReached: 'Limit reached',
         buttons: {
             'record':       'Record video',
