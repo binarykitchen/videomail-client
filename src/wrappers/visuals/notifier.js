@@ -28,11 +28,11 @@ var Notifier = function(visuals, options) {
             lead += options.text.limitReached + '.<br/>'
         }
 
-        lead += options.text.processing + ' …'
+        lead += options.text.sending + ' …'
 
         self.notify(lead, null, {
-            processing: true,
-            entertain:  options.notifier.entertain
+            stillWait: true,
+            entertain: options.notifier.entertain
         })
     }
 
@@ -52,6 +52,17 @@ var Notifier = function(visuals, options) {
             overallProgress = frameProgress
 
         self.setExplanation(overallProgress)
+    }
+
+    function onBeginVideoEncoding() {
+        visuals.beginWaiting()
+
+        var lead = options.text.encoding + ' …'
+
+        self.notify(lead, null, {
+            stillWait: true,
+            entertain: options.notifier.entertain
+        })
     }
 
     function initEvents() {
@@ -75,6 +86,9 @@ var Notifier = function(visuals, options) {
             })
             .on(Events.PROGRESS, function(frameProgress, sampleProgress) {
                 onProgress(frameProgress, sampleProgress)
+            })
+            .on(Events.BEGIN_VIDEO_ENCODING, function() {
+                onBeginVideoEncoding()
             })
     }
 
@@ -200,7 +214,7 @@ var Notifier = function(visuals, options) {
         if (!notifyOptions)
             notifyOptions = {}
 
-        var processing       = notifyOptions.processing ? notifyOptions.processing : false,
+        var stillWait        = notifyOptions.stillWait ? notifyOptions.stillWait : false,
             entertain        = notifyOptions.entertain  ? notifyOptions.entertain  : false,
             blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
             isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
@@ -242,7 +256,7 @@ var Notifier = function(visuals, options) {
 
         show()
 
-        !processing && visuals.endWaiting()
+        !stillWait && visuals.endWaiting()
     }
 }
 
