@@ -9,7 +9,7 @@ module.exports = keymirror({
   COUNTDOWN:            null, // countdown for recording has started
   RECORDING:            null, // webcam is recording
   STOPPING:             null, // recording is being stopped (= preview)
-  PROGRESS:             null, // start processing
+  PROGRESS:             null, // start sending
   BEGIN_AUDIO_ENCODING: null, // encoding video
   BEGIN_VIDEO_ENCODING: null, // encoding video
   RESETTING:            null, // resetting everything to go back to initial state
