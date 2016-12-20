@@ -242,7 +242,7 @@ https://cdnjs.com/libraries/videomail-client
 
 ### v1.18.0 (2016-08-28)
 
-- **VideomailClient:** New functiion `submit()` to manually submit a videomail
+- **VideomailClient:** New function `submit()` to manually submit a videomail
 
 ### v1.9.0 (2016-03-12)
 

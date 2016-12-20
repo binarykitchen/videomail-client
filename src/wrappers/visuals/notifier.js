@@ -63,6 +63,8 @@ var Notifier = function(visuals, options) {
             stillWait: true,
             entertain: options.notifier.entertain
         })
+
+        hideExplanation()
     }
 
     function initEvents() {
@@ -187,6 +189,11 @@ var Notifier = function(visuals, options) {
         built = true
     }
 
+    function hideExplanation() {
+      if (explanationElement)
+          explanationElement.innerHTML = null
+    }
+
     this.hide = function() {
         cancelEntertainment()
 
@@ -198,8 +205,7 @@ var Notifier = function(visuals, options) {
         if (messageElement)
             messageElement.innerHTML = null
 
-        if (explanationElement)
-            explanationElement.innerHTML = null
+        hideExplanation()
     }
 
     this.isVisible = function() {
