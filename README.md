@@ -26,7 +26,8 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
 * <a href="#super-fast-cdn">Super fast global CDN</a>
-* <a href="#changes">Breaking changes (Changelog)</a>
+* <a href="CHANGELOG.md">Breaking changes (Changelog)</a>
+* <a href="#addons">Addons</a>
 * <a href="#notes">Notes</a>
 
 <a name="examples"></a>
@@ -231,60 +232,19 @@ You can grab the already browserified videomail-client JS file through GitHub's 
 ```
 https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/dist/videomail-client.js
 ```
-For example for version 1.10.21, use this in your production site:
-https://cdn.rawgit.com/binarykitchen/videomail-client/1.10.21/dist/videomail-client.min.js
+For example for version x.y.z, use this in your production site:
+https://cdn.rawgit.com/binarykitchen/videomail-client/x.y.z/dist/videomail-client.min.js
 
 If for whatever reason that GitHub CDN doesn't meet your standard, here's another CDN to try:
 https://cdnjs.com/libraries/videomail-client
 
-<a name="changes"></a>
-## Breaking/Hot Changes (Changelog)
+<a name="addons"></a>
+## Addons
 
-### v1.18.0 (2016-08-28)
+There is a Videomail WordPress addon, wicked!
+https://ninjaforms.com/extensions/videomail/
 
-- **VideomailClient:** New function `submit()` to manually submit a videomail
-
-### v1.9.0 (2016-03-12)
-
-- **VideomailClient:** Removed the `containerId` option in `show()` - define it in the constructor under options instead.
-
-### v1.8.0 (2016-02-26)
-
-- **VideomailClient:** Very long pauses are now possible. This thanks to pings to keep connection to server alive.
-
-### v1.7.0 (2015-12-5)
-
-- **VideomailClient:** New option to switch audio recording on or off `options.audio.switch`
-- **VideomailClient:** Removed Flash solution for good
-
-### v1.6.0 (2015-09-20)
-
-- **VideomailClient:** Changed order of arguments `VideomailClient.replay(parentElement, videomail)` to `VideomailClient.replay(videomail[, parentElement])`
-
-### v1.5.0 (2015-08-18)
-
-Minor change:
-- **VideomailClient:** Renamed `options.buttons.stopButtonClass` to `options.buttons.previewButtonClass`
-
-### v1.4.0 (2015-08-11)
-
-Minor change:
-- **VideomailClient:** Renamed `options.buttons.backButtonClass` to `options.buttons.recordAgainButtonClass`
-- **VideomailClient:** Merged `back` and `record` button actions to `recordAgain`
-
-### v1.3.0 (2015-07-03)
-
-Minor change:
-- **VideomailClient:** Renamed `options.debug` to `options.verbose`
-
-### v1.2.0 (2015-05-17)
-
-- **VideomailClient:** Renamed `VideomailClient.form()` to `VideomailClient.show()`
-
-### v1.1.0 (2015-04-18)
-
-- **VideomailClient:** Do not initialize the client in the global scope but return an object. Replace `VideomailClient.init()` with `new VideomailClient()`
-  ([#3](https://github.com/binarykitchen/videomail-client/issues/3))
+It's an extension of the popular form builder called Ninja Forms. When the videomail addon is installed, then you can just drag and drop a live webcam input into the form! And tell what should happen upon submission. So easy.
 
 <a name="notes"></a>
 ## Notes
