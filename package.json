@@ -79,15 +79,15 @@
     "gulp-plumber": "1.1.0",
     "gulp-rename": "1.2.2",
     "gulp-stylus": "2.6.0",
-    "gulp-todo": "5.1.0",
+    "gulp-todo": "5.2.0",
     "gulp-uglify": "2.0.0",
-    "gulp-util": "3.0.7",
+    "gulp-util": "3.0.8",
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.1.4",
     "ssl-root-cas": "1.2.3",
     "tape": "4.6.3",
-    "tape-run": "2.1.4",
+    "tape-run": "2.1.5",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
   }
