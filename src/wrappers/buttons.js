@@ -311,6 +311,9 @@ var Buttons = function(container, options) {
 
         show(recordAgainButton)
         enable(recordAgainButton)
+
+        if (!options.enableAutoValidation)
+          enable(submitButton)
     }
 
     this.enableSubmit = function() {

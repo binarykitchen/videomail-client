@@ -3,6 +3,7 @@ var websocket    = require('websocket-stream'),
     util         = require('util'),
     h            = require('hyperscript'),
     hidden       = require('hidden'),
+    animitter    = require('animitter'),
 
     UserMedia = require('./userMedia'),
 
@@ -24,8 +25,9 @@ var Recorder = function(visuals, replay, options) {
     var self            = this,
         browser         = new Browser(options),
 
-        wantedInterval  = 1e3 / options.video.fps,
-        debug           = options.debug,
+        loop = null, // animatter instance
+
+        debug = options.debug,
 
         samplesCount = 0,
         framesCount  = 0,
@@ -38,7 +40,6 @@ var Recorder = function(visuals, replay, options) {
         recorderElement,
         userMedia,
 
-        lastAnimationTimestamp,
         userMediaTimeout,
         retryTimeout,
 
@@ -50,7 +51,6 @@ var Recorder = function(visuals, replay, options) {
 
         canvas,
         ctx,
-        rafId,
 
         userMediaLoaded,
         userMediaLoading,
@@ -66,6 +66,19 @@ var Recorder = function(visuals, replay, options) {
         key,
 
         pingInterval
+
+      function writeStream(buffer) {
+          if (stream) {
+              if (stream.destroyed)
+                  self.emit(Events.ERROR, VideomailError.create(
+                      'Already disconnected.',
+                      'Sorry, the connection to the server has been destroyed. Please reload.',
+                      options
+                  ))
+              else
+                  stream.write(buffer)
+          }
+      }
 
     function sendPings() {
         pingInterval = window.setInterval(function() {
@@ -89,6 +102,10 @@ var Recorder = function(visuals, replay, options) {
         // }
 
         writeStream(audioBuffer)
+    }
+
+    function show() {
+        recorderElement && hidden(recorderElement, false)
     }
 
     function onUserMediaReady() {
@@ -121,113 +138,45 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
-    function userMediaErrorCallback(err) {
-        userMediaLoading = false
-
-        clearUserMediaTimeout()
-
-        var errorListeners = self.listeners(Events.ERROR)
-
-        if (errorListeners.length) {
-            self.emit(Events.ERROR, err)
-
-            // retry after a while
-            retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
-        } else {
-            debug('Recorder: no error listeners attached but throwing error', err)
-
-            // weird situation, throw it since there are no error listeners
-            throw err
-        }
+    function calculateFrameProgress() {
+        return (confirmedFrameNumber / (framesCount || 1) * 100).toFixed(2) + '%'
     }
 
-    function showUserMedia() {
-        return isNotifying() || !isHidden() || blocking
+    function calculateSampleProgress() {
+        return (confirmedSampleNumber / (samplesCount || 1) * 100).toFixed(2) + '%'
     }
 
-    function getUserMediaCallback(localStream) {
-        debug('Recorder: getUserMediaCallback()')
+    function updateOverallProgress() {
+        // when progresses aren't initialized,
+        // then do a first calculation to avoid `infinite` or `null` displays
 
-        if (showUserMedia()) {
-            try {
-                clearUserMediaTimeout()
+        if (!frameProgress)
+            frameProgress = calculateFrameProgress()
 
-                userMedia.init(
-                    localStream,
-                    onUserMediaReady.bind(self),
-                    onAudioSample.bind(self),
-                    function(err) {
-                        self.emit(Events.ERROR, err)
-                    }
-                )
-            } catch (exc) {
-                self.emit(Events.ERROR, exc)
-            }
-        }
+        if (!sampleProgress)
+            sampleProgress = calculateSampleProgress()
+
+        self.emit(
+            Events.PROGRESS,
+            frameProgress,
+            sampleProgress
+        )
     }
 
-    function loadGenuineUserMedia() {
-        if (!navigator)
-            throw new Error('Navigator is missing!')
+    function updateFrameProgress(args) {
+        confirmedFrameNumber = args.frame ? args.frame : confirmedFrameNumber
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // prefer the front camera (if one is available) over the rear one
-            navigator.mediaDevices.getUserMedia({
-                video: {facingMode: "user"},
-                audio: options.isAudioEnabled()
-            })
-            .then(getUserMediaCallback)
-            .catch(userMediaErrorCallback)
-        } else {
-            navigator.getUserMedia_({
-                video: true,
-                audio: options.isAudioEnabled()
-            }, getUserMediaCallback, userMediaErrorCallback)
-        }
+        frameProgress = calculateFrameProgress()
+
+        updateOverallProgress()
     }
 
-    function loadUserMedia() {
+    function updateSampleProgress(args) {
+        confirmedSampleNumber = args.sample ? args.sample : confirmedSampleNumber
 
-        if (userMediaLoaded) {
-            debug('Recorder: skipping loadUserMedia() because it is already loaded')
-            onUserMediaReady()
-            return false
-        } else if (userMediaLoading) {
-            debug('Recorder: skipping loadUserMedia() because it is already asking for permission')
-            return false
-        }
+        sampleProgress = calculateSampleProgress()
 
-        debug('Recorder: loadUserMedia()')
-
-        self.emit(Events.LOADING_USER_MEDIA)
-
-        try {
-            userMediaTimeout = setTimeout(function() {
-                if (!self.isReady())
-                    self.emit(Events.ERROR, browser.getNoAccessIssue())
-            }, options.timeouts.userMedia)
-
-            userMediaLoading = true
-
-            loadGenuineUserMedia()
-
-        } catch (exc) {
-            userMediaLoading = false
-
-            var errorListeners = self.listeners(Events.ERROR)
-
-            if (errorListeners.length)
-                self.emit(Events.ERROR, exc)
-            else {
-                debug('Recorder: no error listeners attached but throwing exception', exc)
-                throw exc // throw it further
-            }
-        }
-    }
-
-    function isHidden() {
-        return !recorderElement || hidden(recorderElement)
+        updateOverallProgress()
     }
 
     function preview(args) {
@@ -259,143 +208,6 @@ var Recorder = function(visuals, replay, options) {
                 Humanize.toTime(waitingTime)
             )
         }
-    }
-
-    function calculateFrameProgress() {
-        return (confirmedFrameNumber / (framesCount || 1) * 100).toFixed(2) + '%'
-    }
-
-    function calculateSampleProgress() {
-        return (confirmedSampleNumber / (samplesCount || 1) * 100).toFixed(2) + '%'
-    }
-
-    function updateFrameProgress(args) {
-        confirmedFrameNumber = args.frame ? args.frame : confirmedFrameNumber
-
-        frameProgress = calculateFrameProgress()
-
-        updateOverallProgress()
-    }
-
-    function updateSampleProgress(args) {
-        confirmedSampleNumber = args.sample ? args.sample : confirmedSampleNumber
-
-        sampleProgress = calculateSampleProgress()
-
-        updateOverallProgress()
-    }
-
-    function updateOverallProgress() {
-        // when progresses aren't initialized,
-        // then do a first calculation to avoid `infinite` or `null` displays
-
-        if (!frameProgress)
-            frameProgress = calculateFrameProgress()
-
-        if (!sampleProgress)
-            sampleProgress = calculateSampleProgress()
-
-        self.emit(
-            Events.PROGRESS,
-            frameProgress,
-            sampleProgress
-        )
-    }
-
-    function executeCommand(data) {
-        try {
-            var command = JSON.parse(data.toString()),
-                result
-
-            debug(
-                'Server commanded: %s',
-                command.command,
-                command.args ? ', ' + JSON.stringify(command.args) : '',
-                result       ? '= ' + result : ''
-            )
-
-            switch (command.command) {
-                case 'ready':
-                    if (!userMediaTimeout)
-                        loadUserMedia()
-                    break
-                case 'preview':
-                    preview(command.args)
-                    break
-                case 'error':
-                    this.emit(Events.ERROR, VideomailError.create(
-                        'Oh no, server error!',
-                        command.args.err.toString() || '(No explanation given)',
-                        options
-                    ))
-                    break
-                case 'confirmFrame':
-                    result = updateFrameProgress(command.args)
-                    break
-                case 'confirmSample':
-                    result = updateSampleProgress(command.args)
-                    break
-                case 'beginAudioEncoding':
-                    this.emit(Events.BEGIN_AUDIO_ENCODING)
-                    break
-                case 'beginVideoEncoding':
-                    this.emit(Events.BEGIN_VIDEO_ENCODING)
-                    break
-                default:
-                    this.emit(Events.ERROR, 'Unknown server command: ' + command.command)
-                    break
-            }
-        } catch (exc) {
-            self.emit(Events.ERROR, exc)
-        }
-    }
-
-    function writeStream(buffer) {
-        if (stream) {
-            if (stream.destroyed)
-                self.emit(Events.ERROR, VideomailError.create(
-                    'Already disconnected.',
-                    'Sorry, the connection to the server has been destroyed. Please reload.',
-                    options
-                ))
-            else
-                stream.write(buffer)
-        }
-    }
-
-    function writeCommand(command, args, cb) {
-        if (!cb && args && args.constructor === Function) {
-            cb   = args
-            args = null
-        }
-
-        if (!connected) {
-            debug('Reconnecting for the command', command, '…')
-
-            initSocket(function() {
-                writeCommand(command, args)
-                cb && cb()
-            })
-        } else if (stream) {
-            debug('$ %s', command, args ? JSON.stringify(args) : '')
-
-            var command = {
-                command:    command,
-                args:       args
-            }
-
-            writeStream(new Buffer(JSON.stringify(command)))
-
-            if (cb)
-                // keep all callbacks async
-                setTimeout(function() {
-                    cb()
-                }, 0)
-        }
-    }
-
-    function isNotifying() {
-        return visuals.isNotifying()
     }
 
     function initSocket(cb) {
@@ -479,6 +291,198 @@ var Recorder = function(visuals, replay, options) {
         }
     }
 
+    function showUserMedia() {
+        return isNotifying() || !isHidden() || blocking
+    }
+
+    function userMediaErrorCallback(err) {
+        userMediaLoading = false
+
+        clearUserMediaTimeout()
+
+        var errorListeners = self.listeners(Events.ERROR)
+
+        if (errorListeners.length) {
+            self.emit(Events.ERROR, err)
+
+            // retry after a while
+            retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
+        } else {
+            debug('Recorder: no error listeners attached but throwing error', err)
+
+            // weird situation, throw it since there are no error listeners
+            throw err
+        }
+    }
+
+    function getUserMediaCallback(localStream) {
+        debug('Recorder: getUserMediaCallback()')
+
+        if (showUserMedia()) {
+            try {
+                clearUserMediaTimeout()
+
+                userMedia.init(
+                    localStream,
+                    onUserMediaReady.bind(self),
+                    onAudioSample.bind(self),
+                    function(err) {
+                        self.emit(Events.ERROR, err)
+                    }
+                )
+            } catch (exc) {
+                self.emit(Events.ERROR, exc)
+            }
+        }
+    }
+
+    function loadGenuineUserMedia() {
+        if (!navigator)
+            throw new Error('Navigator is missing!')
+
+        // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // prefer the front camera (if one is available) over the rear one
+            navigator.mediaDevices.getUserMedia({
+                video: {facingMode: "user"},
+                audio: options.isAudioEnabled()
+            })
+            .then(getUserMediaCallback)
+            .catch(userMediaErrorCallback)
+        } else {
+            navigator.getUserMedia_({
+                video: true,
+                audio: options.isAudioEnabled()
+            }, getUserMediaCallback, userMediaErrorCallback)
+        }
+    }
+
+    function loadUserMedia() {
+
+        if (userMediaLoaded) {
+            debug('Recorder: skipping loadUserMedia() because it is already loaded')
+            onUserMediaReady()
+            return false
+        } else if (userMediaLoading) {
+            debug('Recorder: skipping loadUserMedia() because it is already asking for permission')
+            return false
+        }
+
+        debug('Recorder: loadUserMedia()')
+
+        self.emit(Events.LOADING_USER_MEDIA)
+
+        try {
+            userMediaTimeout = setTimeout(function() {
+                if (!self.isReady())
+                    self.emit(Events.ERROR, browser.getNoAccessIssue())
+            }, options.timeouts.userMedia)
+
+            userMediaLoading = true
+
+            loadGenuineUserMedia()
+
+        } catch (exc) {
+            userMediaLoading = false
+
+            var errorListeners = self.listeners(Events.ERROR)
+
+            if (errorListeners.length)
+                self.emit(Events.ERROR, exc)
+            else {
+                debug('Recorder: no error listeners attached but throwing exception', exc)
+                throw exc // throw it further
+            }
+        }
+    }
+
+    function executeCommand(data) {
+        try {
+            var command = JSON.parse(data.toString()),
+                result
+
+            debug(
+                'Server commanded: %s',
+                command.command,
+                command.args ? ', ' + JSON.stringify(command.args) : '',
+                result       ? '= ' + result : ''
+            )
+
+            switch (command.command) {
+                case 'ready':
+                    if (!userMediaTimeout)
+                        loadUserMedia()
+                    break
+                case 'preview':
+                    preview(command.args)
+                    break
+                case 'error':
+                    this.emit(Events.ERROR, VideomailError.create(
+                        'Oh no, server error!',
+                        command.args.err.toString() || '(No explanation given)',
+                        options
+                    ))
+                    break
+                case 'confirmFrame':
+                    result = updateFrameProgress(command.args)
+                    break
+                case 'confirmSample':
+                    result = updateSampleProgress(command.args)
+                    break
+                case 'beginAudioEncoding':
+                    this.emit(Events.BEGIN_AUDIO_ENCODING)
+                    break
+                case 'beginVideoEncoding':
+                    this.emit(Events.BEGIN_VIDEO_ENCODING)
+                    break
+                default:
+                    this.emit(Events.ERROR, 'Unknown server command: ' + command.command)
+                    break
+            }
+        } catch (exc) {
+            self.emit(Events.ERROR, exc)
+        }
+    }
+
+    function isNotifying() {
+        return visuals.isNotifying()
+    }
+
+    function isHidden() {
+        return !recorderElement || hidden(recorderElement)
+    }
+
+    function writeCommand(command, args, cb) {
+        if (!cb && args && args.constructor === Function) {
+            cb   = args
+            args = null
+        }
+
+        if (!connected) {
+            debug('Reconnecting for the command', command, '…')
+
+            initSocket(function() {
+                writeCommand(command, args)
+                cb && cb()
+            })
+        } else if (stream) {
+            debug('$ %s', command, args ? JSON.stringify(args) : '')
+
+            var command = {
+                command:    command,
+                args:       args
+            }
+
+            writeStream(new Buffer(JSON.stringify(command)))
+
+            if (cb)
+                // keep all callbacks async
+                setTimeout(function() {
+                    cb()
+                }, 0)
+        }
+    }
+
     function disconnect() {
         if (connected) {
             debug('Recorder: disconnect()')
@@ -496,8 +500,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function cancelAnimationFrame() {
-        rafId && window.cancelAnimationFrame && window.cancelAnimationFrame(rafId)
-        rafId = null
+        loop && loop.dispose()
     }
 
     this.getAvgFps = function() {
@@ -521,14 +524,18 @@ var Recorder = function(visuals, replay, options) {
 
         this.emit(Events.STOPPING, limitReached)
 
+        loop && loop.stop()
+
         stopTime = Date.now()
 
         avgFps = 1000 / (intervalSum / framesCount)
 
         recordingStats = {
             avgFps:             avgFps,
+            wantedFps:          options.video.fps,
             avgInterval:        getAvgInterval(),
-            wantedInterval:     wantedInterval,
+            wantedInterval:     1e3 / options.video.fps,
+
             intervalSum:        intervalSum,
             framesCount:        framesCount,
             videoType:          replay.getVideoType()
@@ -633,12 +640,7 @@ var Recorder = function(visuals, replay, options) {
 
         this.emit(Events.RESUMING)
 
-        lastAnimationTimestamp = Date.now()
         userMedia.resume()
-    }
-
-    function getIntervalThreshold() {
-      return wantedInterval * .8 // allow ~ 20% below fps (can't be too strict)
     }
 
     this.record = function() {
@@ -670,96 +672,72 @@ var Recorder = function(visuals, replay, options) {
         if (!canvas.height)
             throw VideomailError.create('Canvas has an invalid height.', options)
 
-        avgFps   = null
         bytesSum = intervalSum = 0
-        lastAnimationTimestamp = Date.now()
 
-        var intervalThreshold = getIntervalThreshold(),
-            frame             = new Frame(canvas, options),
+        var frame = new Frame(canvas, options),
 
-            interval,
-            now,
             bufferLength,
             buffer
 
-        function calcInterval(now) {
-            return now - lastAnimationTimestamp
-        }
-
-        function draw() {
+        function draw(deltaTime) {
             try {
-                rafId = window.requestAnimationFrame(draw)
+                // ctx and stream might become null while unloading
+                if (!self.isPaused() && stream && ctx) {
 
-                if (!self.isPaused()) {
+                    if (framesCount === 0)
+                        self.emit(Events.SENDING_FIRST_FRAME)
 
-                    now      = Date.now()
-                    interval = calcInterval(now)
+                    ctx.drawImage(
+                        userMedia.getRawVisuals(),
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    )
 
-                    if (interval > intervalThreshold) {
+                    buffer       = frame.toBuffer()
+                    bufferLength = buffer.length
 
-                        // see: http://codetheory.in/controlling-the-frame-rate-with-requestanimationframe/
-                        lastAnimationTimestamp = now - (interval % intervalThreshold)
+                    if (bufferLength < 1)
+                        throw VideomailError.create('Failed to extract webcam data.', options)
 
-                        if (framesCount === 0 && stream)
-                            self.emit(Events.SENDING_FIRST_FRAME)
+                    framesCount++
 
-                        // ctx might become null when unloading
-                        ctx && ctx.drawImage(
-                            userMedia.getRawVisuals(),
-                            0,
-                            0,
-                            canvas.width,
-                            canvas.height
-                        )
+                    writeStream(buffer)
 
-                        buffer       = frame.toBuffer()
-                        bufferLength = buffer.length
+                    if (framesCount === 1)
+                        self.emit(Events.FIRST_FRAME_SENT)
 
-                        if (bufferLength < 1)
-                            throw VideomailError.create('Failed to extract webcam data.', options)
+                    bytesSum += bufferLength
 
-                        // stream might become null while unloading
-                        if (stream) {
-                            framesCount++
+                    // todo use elapsedTime instead when we have pause/resume in animitter
+                    intervalSum += deltaTime
 
-                            writeStream(buffer)
-
-                            if (framesCount === 1)
-                                self.emit(Events.FIRST_FRAME_SENT)
-
-                            bytesSum += bufferLength
-                        }
-
-                        // if (options.verbose) {
-                        //     debug(
-                        //         'Frame #' + framesCount + ' (' + bufferLength + ' bytes):',
-                        //         interval + '/' + intervalThreshold + '/' + wantedInterval
-                        //     )
-                        // }
-
-                        intervalSum += interval
-                    }
+                    // if (options.verbose) {
+                    //     debug(
+                    //         'Frame #' + framesCount + ' (' + bufferLength + ' bytes):',
+                    //         deltaTime + "ms"
+                    //     )
+                    // }
                 }
             } catch (exc) {
                 self.emit(Events.ERROR, exc)
             }
         }
 
-        debug('Recorder: record()')
+        loop = animitter({fps: options.video.fps}, draw)
 
+        debug('Recorder: record()')
         userMedia.record()
+
         self.emit(Events.RECORDING, framesCount)
 
-        draw()
+        loop.start()
     }
 
     function buildElement() {
         recorderElement =  h('video.' + options.selectors.userMediaClass)
         visuals.appendChild(recorderElement)
-    }
-
-    function show() {
-        recorderElement && hidden(recorderElement, false)
     }
 
     function correctDimensions() {
@@ -842,7 +820,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.isRecording = function() {
-        return !!rafId && !this.isPaused() && !isNotifying()
+        return loop && loop.isRunning() && !this.isPaused() && !isNotifying()
     }
 
     this.hide = function() {

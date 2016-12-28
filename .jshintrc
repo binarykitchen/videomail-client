@@ -25,6 +25,7 @@
     "browser"       : true,     // Web Browser (window, document, etc)
     "devel"         : true,     // Development/debugging (alert, confirm, etc)
     "node"          : true,     // Node.js
+    "-W003"         : true,     // 'x' was used before it was defined
     "-W008"         : true,     // A leading decimal point can be confused with a dot
     "-W044"         : true,     // Bad escaping
     "-W079"         : true,     // Allow redefinitions
@@ -44,4 +45,3 @@
         "CalendarEvent"
     ]
 }
-
