@@ -99,7 +99,12 @@ var Buttons = function(container, options) {
 
         var wrappedClickHandler = function(e) {
             e && e.preventDefault()
-            clickHandler()
+
+            try {
+              clickHandler()
+            } catch (exc) {
+              self.emit(Events.ERROR, exc)
+            }
         }
 
         element.onclick = wrappedClickHandler
@@ -306,6 +311,9 @@ var Buttons = function(container, options) {
 
         show(recordAgainButton)
         enable(recordAgainButton)
+
+        if (!options.enableAutoValidation)
+          enable(submitButton)
     }
 
     this.enableSubmit = function() {
