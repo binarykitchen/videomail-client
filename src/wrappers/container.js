@@ -186,21 +186,17 @@ var Container = function(options) {
                 videomailFormData[key] = formData[FORM_FIELDS[key]]
         })
 
-        if (videomailFormData['from'])
-            videomailFormData['from'] = trimEmail(videomailFormData['from'])
+        if (videomailFormData.from)
+            videomailFormData.from = trimEmail(videomailFormData.from)
 
-        if (videomailFormData['to'])
-            videomailFormData['to'] = trimEmail(videomailFormData['to'])
+        if (videomailFormData.to)
+            videomailFormData.to = trimEmail(videomailFormData.to)
 
         // when method is undefined, treat it as a post
         if (isPost(method) || !method) {
-            videomailFormData.avgFps         = visuals.getAvgFps()
             videomailFormData.recordingStats = visuals.getRecordingStats()
             videomailFormData.width          = visuals.getRecorderWidth()
             videomailFormData.height         = visuals.getRecorderHeight()
-
-            if (options.isAudioEnabled())
-                videomailFormData.sampleRate = visuals.getAudioSampleRate()
 
             resource.post(videomailFormData, cb)
         } else if (isPut(method))

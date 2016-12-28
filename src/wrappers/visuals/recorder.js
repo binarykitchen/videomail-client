@@ -503,10 +503,6 @@ var Recorder = function(visuals, replay, options) {
         loop && loop.dispose()
     }
 
-    this.getAvgFps = function() {
-        return avgFps
-    }
-
     function getAvgInterval() {
         return (intervalSum / framesCount)
     }
