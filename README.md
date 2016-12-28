@@ -43,6 +43,8 @@ To run the examples in your browser with Gulp, just do:
 
 Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
+Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won't allow the use of `getUserMedia()` on insecure origins. 
+
 ## Dead simple example (just record and replay)
 
 ```html

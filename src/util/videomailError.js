@@ -132,8 +132,13 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
             break
 
         case VideomailError.DOM_EXCEPTION:
-            message     = VideomailError.DOM_EXCEPTION
-            explanation = stringify(err)
+            if (err.code == 9) {
+              message     = "Insecure origin detected"
+              explanation = "To use the powerful webcam feature, security cannot be neglected. Please use HTTPS instead."
+            } else {
+              message     = VideomailError.DOM_EXCEPTION
+              explanation = stringify(err)
+            }
             break
 
         default:
