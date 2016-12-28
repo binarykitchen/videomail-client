@@ -42,9 +42,9 @@ gulp.task('stylus', function() {
             'last 3 versions',
             '> 1%',
             'Explorer >= 10',
-            'Chrome >= 38',
+            'Chrome >= 40',
             'Firefox ESR',
-            'iOS >= 6', 'android >= 4'
+            'iOS >= 7', 'android >= 4'
         ))
         // always minify otherwise it gets broken with line-breaks
         // when surrounded with `'s when injected
