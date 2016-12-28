@@ -242,10 +242,6 @@ var Visuals = function(container, options) {
         return recorder.validate() && this.isReplayShown()
     }
 
-    this.getAvgFps = function() {
-        return recorder.getAvgFps()
-    }
-
     this.getRecordingStats = function() {
         return recorder.getRecordingStats()
     }
