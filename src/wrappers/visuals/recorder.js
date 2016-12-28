@@ -523,31 +523,23 @@ var Recorder = function(visuals, replay, options) {
 
         stopTime = Date.now()
 
-        var avgInterval = getAvgInterval()
-
         avgFps = 1000 / (intervalSum / framesCount)
 
-        var args = {
-            framesCount:    framesCount,
-            videoType:      replay.getVideoType(),
-            avgFps:         avgFps
+        recordingStats = {
+            avgFps:             avgFps,
+            avgInterval:        getAvgInterval(),
+            wantedInterval:     wantedInterval,
+            intervalSum:        intervalSum,
+            framesCount:        framesCount,
+            videoType:          replay.getVideoType()
         }
 
         if (options.isAudioEnabled()) {
-            args.samplesCount = samplesCount
-            args.sampleRate   = userMedia.getAudioSampleRate()
+            recordingStats.samplesCount = samplesCount,
+            recordingStats.sampleRate =   userMedia.getAudioSampleRate()
         }
 
-        writeCommand('stop', args)
-
-        // remember them before resetting
-        recordingStats = {
-            avgInterval:  getAvgInterval(),
-            intervalSum:  intervalSum,
-            framesCount:  framesCount,
-            samplesCount: samplesCount,
-            sampleRate:   self.getAudioSampleRate()
-        }
+        writeCommand('stop', recordingStats)
 
         // beware, resetting will set framesCount to zero, so leave this here
         this.reset()
@@ -645,6 +637,10 @@ var Recorder = function(visuals, replay, options) {
         userMedia.resume()
     }
 
+    function getIntervalThreshold() {
+      return wantedInterval * .8 // allow ~ 20% below fps (can't be too strict)
+    }
+
     this.record = function() {
         if (unloaded)
             return false
@@ -678,7 +674,7 @@ var Recorder = function(visuals, replay, options) {
         bytesSum = intervalSum = 0
         lastAnimationTimestamp = Date.now()
 
-        var intervalThreshold = wantedInterval * .8, // allow ~ 20% below fps (can't be too strict)
+        var intervalThreshold = getIntervalThreshold(),
             frame             = new Frame(canvas, options),
 
             interval,

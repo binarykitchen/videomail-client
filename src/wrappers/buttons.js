@@ -99,7 +99,12 @@ var Buttons = function(container, options) {
 
         var wrappedClickHandler = function(e) {
             e && e.preventDefault()
-            clickHandler()
+
+            try {
+              clickHandler()
+            } catch (exc) {
+              self.emit(Events.ERROR, exc)
+            }
         }
 
         element.onclick = wrappedClickHandler
