@@ -227,7 +227,7 @@ var Replay = function(parentElement, options) {
 
     function play(cb) {
         if (replayElement && replayElement.play && replayElement.duration) {
-            const p = replayElement.play()
+            var p = replayElement.play()
 
             if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
                 p.then(function() {
