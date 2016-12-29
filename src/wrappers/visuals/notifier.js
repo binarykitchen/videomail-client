@@ -126,7 +126,7 @@ var Notifier = function(visuals, options) {
         if (notifyElement)
             notifyElement.className = 'notifier'
 
-        clearInterval(entertainTimeoutId)
+        clearTimeout(entertainTimeoutId)
     }
 
     function setMessage(message, messageOptions) {
@@ -225,9 +225,6 @@ var Notifier = function(visuals, options) {
             blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
             isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
 
-        if (!entertain)
-            cancelEntertainment()
-
         if (!messageElement && notifyElement) {
             messageElement = h('h2')
 
@@ -259,6 +256,8 @@ var Notifier = function(visuals, options) {
 
         if (entertain)
             runEntertainment()
+        else
+            cancelEntertainment()
 
         show()
 

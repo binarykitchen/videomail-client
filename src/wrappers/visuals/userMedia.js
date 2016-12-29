@@ -106,10 +106,15 @@ module.exports = function(recorder, options) {
             onLoadedMetaDataReached = false
 
         if (options && options.isAudioEnabled())
-            audioRecorder = new AudioRecorder(this, options)
+            audioRecorder = audioRecorder || new AudioRecorder(this, options)
+
+        function audioRecord() {
+            self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord)
+            audioRecorder && audioRecorder.record(audioCallback)
+        }
 
         function fireCallbacks() {
-          options.debug('UserMedia: fireCallbacks()')
+            options.debug('UserMedia: fireCallbacks()')
             if (onPlayReached && onLoadedMetaDataReached) {
                 videoCallback()
 
@@ -120,9 +125,7 @@ module.exports = function(recorder, options) {
                         self.emit(Events.ERROR, exc)
                     }
 
-                    self.once(Events.RECORDING, function() {
-                        audioRecorder && audioRecorder.record(audioCallback)
-                    })
+                    self.on(Events.SENDING_FIRST_FRAME, audioRecord)
                 }
             }
         }
@@ -172,16 +175,16 @@ module.exports = function(recorder, options) {
         }
 
         // not really needed, just an useful listener for debugging
-        function onCanPlayThrough() {
-            rawVisualUserMedia.removeEventListener &&
-            rawVisualUserMedia.removeEventListener('canplaythrough', onCanPlayThrough)
-
-            options.debug('UserMedia: onCanPlayThrough()')
-
-            if (hasInvalidDimensions()) {
-                options.debug('UserMedia: still invalid')
-            }
-        }
+        // function onCanPlayThrough() {
+        //     rawVisualUserMedia.removeEventListener &&
+        //     rawVisualUserMedia.removeEventListener('canplaythrough', onCanPlayThrough)
+        //
+        //     options.debug('UserMedia: onCanPlayThrough()')
+        //
+        //     if (hasInvalidDimensions()) {
+        //         options.debug('UserMedia: still invalid')
+        //     }
+        // }
 
         try {
             var videoTrack = getFirstVideoTrack(localMediaStream)
@@ -234,7 +237,7 @@ module.exports = function(recorder, options) {
                 })
             }
 
-            rawVisualUserMedia.addEventListener('canplaythrough',  onCanPlayThrough)
+            // rawVisualUserMedia.addEventListener('canplaythrough',  onCanPlayThrough)
             rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
             rawVisualUserMedia.addEventListener('play',            onPlay)
 
