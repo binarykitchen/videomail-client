@@ -62,6 +62,10 @@ module.exports = {
         fps:          15,          // depends on your connection
         limitSeconds: 30,          // recording automatically stops after that limit
         countdown:    3,           // set it to 0 or false to disable it
+
+        // it is recommended to set one dimension only and leave the other one to auto
+        // because each webcam has a different aspect ratio
+        
         width:        'auto',      // or use an integer for exact pixels
         height:       'auto'       // or use an integer for exact pixels
     },
