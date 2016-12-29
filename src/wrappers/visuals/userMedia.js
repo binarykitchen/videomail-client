@@ -285,11 +285,9 @@ module.exports = function(recorder, options) {
     }
 
     this.createCanvas = function() {
-        // it's important not to use the responsive flag here so that
-        // the true pixels are being used for the image generation
         return h('canvas', {
-            width:  this.getRawWidth(),
-            height: this.getRawHeight()
+            width:  this.getRawWidth(true),
+            height: this.getRawHeight(true)
         })
     }
 
