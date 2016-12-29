@@ -195,8 +195,8 @@ var Container = function(options) {
         // when method is undefined, treat it as a post
         if (isPost(method) || !method) {
             videomailFormData.recordingStats = visuals.getRecordingStats()
-            videomailFormData.width          = visuals.getRecorderWidth()
-            videomailFormData.height         = visuals.getRecorderHeight()
+            videomailFormData.width          = visuals.getRecorderWidth(true)
+            videomailFormData.height         = visuals.getRecorderHeight(true)
 
             resource.post(videomailFormData, cb)
         } else if (isPut(method))
