@@ -57,6 +57,10 @@ module.exports = function(options, name) {
         return despot.listeners(eventName)
     }
 
+    this.removeListener = function(eventName, cb) {
+        return despot.removeListener(eventName, cb)
+    }
+
     this.removeAllListeners = function() {
         despot.removeAllListeners()
     }

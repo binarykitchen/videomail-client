@@ -123,8 +123,6 @@ var Notifier = function(visuals, options) {
     }
 
     function cancelEntertainment() {
-        options.debug('Notifier: cancelEntertainment()')
-
         if (notifyElement)
             notifyElement.className = 'notifier'
 
