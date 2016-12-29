@@ -31,6 +31,7 @@ module.exports = function(userMedia, options) {
     }
 
     this.init = function(localMediaStream) {
+        options.debug('AudioRecorder: init()')
 
         // creates an audio node from the microphone incoming stream
         var volume     = getAudioContext().createGain(),

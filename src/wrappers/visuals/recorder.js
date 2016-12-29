@@ -558,6 +558,8 @@ var Recorder = function(visuals, replay, options) {
     }
 
     function reInitialiseAudio() {
+        debug('Recorder: reInitialiseAudio()')
+
         clearUserMediaTimeout()
 
         // important to free memory

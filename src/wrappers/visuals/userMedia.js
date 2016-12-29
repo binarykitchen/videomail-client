@@ -109,6 +109,7 @@ module.exports = function(recorder, options) {
             audioRecorder = new AudioRecorder(this, options)
 
         function fireCallbacks() {
+          options.debug('UserMedia: fireCallbacks()')
             if (onPlayReached && onLoadedMetaDataReached) {
                 videoCallback()
 
@@ -119,7 +120,7 @@ module.exports = function(recorder, options) {
                         self.emit(Events.ERROR, exc)
                     }
 
-                    self.on(Events.RECORDING, function() {
+                    self.once(Events.RECORDING, function() {
                         audioRecorder && audioRecorder.record(audioCallback)
                     })
                 }
