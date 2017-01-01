@@ -170,6 +170,8 @@ var Notifier = function(visuals, options) {
         }
 
         explanationElement.innerHTML = explanation
+
+        hidden(explanationElement, false)
     }
 
     this.build = function() {
@@ -190,8 +192,10 @@ var Notifier = function(visuals, options) {
     }
 
     function hideExplanation() {
-      if (explanationElement)
-          explanationElement.innerHTML = null
+      if (explanationElement) {
+        explanationElement.innerHTML = null
+        hidden(explanationElement, true)
+      }
     }
 
     this.hide = function() {
