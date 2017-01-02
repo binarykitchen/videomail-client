@@ -1,5 +1,4 @@
-var pauseable   = require('pauseable'),
-    h           = require('hyperscript'),
+var h           = require('hyperscript'),
     hidden      = require('hidden')
 
 module.exports = function(visuals, recordNote, options) {
@@ -9,7 +8,6 @@ module.exports = function(visuals, recordNote, options) {
         nearComputed    = false,
         endNighComputed = false,
 
-        timer,
         countdown
 
     function pad(n) {
@@ -44,10 +42,19 @@ module.exports = function(visuals, recordNote, options) {
         recordTimerElement.classList.add('nigh')
     }
 
-    function update(cb) {
-        // stop any existing ones first
-        timer && timer.clear()
+    this.check = function(opts) {
+        var intervalSum = opts.intervalSum // it is in ms
 
+        countdown = getStartSeconds() - Math.floor(intervalSum / 1e3)
+
+        update()
+
+        if (countdown < 0) {
+            visuals.stop(true)
+        }
+    }
+
+    function update() {
         var mins = parseInt(countdown / 60, 10),
             secs = countdown - mins * 60
 
@@ -71,16 +78,6 @@ module.exports = function(visuals, recordNote, options) {
         }
 
         recordTimerElement.innerHTML = mins + ':' + pad(secs)
-
-        // do not use 1000 but few milliseconds less due to CPU usage
-        timer = pauseable.setTimeout(function() {
-            countdown--
-
-            if (countdown < 0)
-                cb(true)
-            else
-                update(cb)
-        }, 990)
     }
 
     function hide() {
@@ -95,35 +92,43 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     function getSecondsRecorded() {
-        return options.video.limitSeconds - countdown
+        return getStartSeconds() - countdown
     }
 
-    this.start = function(cb) {
-        countdown    = options.video.limitSeconds - 1
+    function getStartSeconds() {
+        return options.video.limitSeconds - 1
+    }
+
+    this.start = function() {
+        countdown    = getStartSeconds()
         nearComputed = endNighComputed = false
 
-        show()
-        recordNote.show()
+        update()
 
-        update(cb)
+        show()
     }
 
     this.pause = function() {
-        timer && timer.pause()
         recordNote.hide()
     }
 
     this.resume = function() {
-        timer.resume()
         recordNote.show()
     }
 
-    this.stop = function() {
-        options.debug('Stopping record timer. Was recording for ' + getSecondsRecorded() + " seconds.")
+    function isStopped() {
+        return countdown === null
+    }
 
-        hide()
-        timer && timer.clear()
-        recordNote.stop()
+    this.stop = function() {
+        if (!isStopped()) {
+            options.debug('Stopping record timer. Was recording for about ~' + getSecondsRecorded() + " seconds.")
+
+            hide()
+            recordNote.stop()
+
+            countdown = null
+        }
     }
 
     this.build = function() {
