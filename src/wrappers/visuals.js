@@ -326,6 +326,10 @@ var Visuals = function(container, options) {
         return visualsElement.getBoundingClientRect()
     }
 
+    this.checkTimer = function(intervalSum) {
+        recorderInsides.checkTimer(intervalSum)
+    }
+
     this.isReplayShown     = replay.isShown.bind(replay)
     this.hideReplay        = replay.hide.bind(replay)
     this.hideRecorder      = recorder.hide.bind(recorder)
