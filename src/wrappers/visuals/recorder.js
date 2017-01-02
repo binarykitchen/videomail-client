@@ -67,7 +67,7 @@ var Recorder = function(visuals, replay, options) {
 
         pingInterval
 
-      function writeStream(buffer) {
+      function writeStream(buffer, opts) {
           if (stream) {
               if (stream.destroyed)
                   self.emit(Events.ERROR, VideomailError.create(
@@ -75,8 +75,13 @@ var Recorder = function(visuals, replay, options) {
                       'Sorry, the connection to the server has been destroyed. Please reload.',
                       options
                   ))
-              else
-                  stream.write(buffer)
+              else {
+                  var onFlushedCallback = opts && opts.onFlushedCallback
+
+                  stream.write(buffer, function() {
+                    onFlushedCallback && onFlushedCallback(opts)
+                  })
+              }
           }
       }
 
@@ -286,6 +291,10 @@ var Recorder = function(visuals, replay, options) {
                 stream.on('error', function(err) {
                     connecting = connected = false
                     self.emit(Events.ERROR, err)
+                })
+
+                stream.on('drain', function() {
+                    debug('Stream drain eveng emitted (should not happen!)')
                 })
             }
         }
@@ -600,10 +609,10 @@ var Recorder = function(visuals, replay, options) {
 
             cancelAnimationFrame()
 
-            replay.reset()
-
             // important to free memory
             userMedia && userMedia.stop()
+
+            replay.reset()
 
             userMediaLoaded = key = canvas = ctx = null
         }
@@ -677,6 +686,13 @@ var Recorder = function(visuals, replay, options) {
             bufferLength,
             buffer
 
+        function onFlushed(opts) {
+            var frameNumber = opts && opts.frameNumber
+
+            if (frameNumber === 1)
+                self.emit(Events.FIRST_FRAME_SENT)
+        }
+
         function draw(deltaTime) {
             try {
                 // ctx and stream might become null while unloading
@@ -684,6 +700,8 @@ var Recorder = function(visuals, replay, options) {
 
                     if (framesCount === 0)
                         self.emit(Events.SENDING_FIRST_FRAME)
+
+                    framesCount++
 
                     ctx.drawImage(
                         userMedia.getRawVisuals(),
@@ -699,17 +717,17 @@ var Recorder = function(visuals, replay, options) {
                     if (bufferLength < 1)
                         throw VideomailError.create('Failed to extract webcam data.', options)
 
-                    framesCount++
-
-                    writeStream(buffer)
-
-                    if (framesCount === 1)
-                        self.emit(Events.FIRST_FRAME_SENT)
-
                     bytesSum += bufferLength
 
                     // todo use elapsedTime instead when we have pause/resume in animitter
                     intervalSum += deltaTime
+
+                    writeStream(buffer, {
+                        frameNumber: framesCount,
+                        onFlushedCallback: onFlushed
+                    })
+
+                    visuals.checkTimer({intervalSum: intervalSum})
 
                     // if (options.verbose) {
                     //     debug(
