@@ -49,7 +49,7 @@ module.exports = function(visuals, recordNote, options) {
 
         update()
 
-        if (countdown < 0) {
+        if (countdown < 1) {
             visuals.stop(true)
         }
     }
@@ -96,7 +96,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     function getStartSeconds() {
-        return options.video.limitSeconds - 1
+        return options.video.limitSeconds
     }
 
     this.start = function() {
