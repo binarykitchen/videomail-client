@@ -27,8 +27,8 @@ var RecorderInsides = function(visuals, options) {
     if (options.enablePause)
         pausedNote = new PausedNote(visuals, options)
 
-    function startRecording(cb) {
-        recordTimer.start(cb)
+    function startRecording() {
+        recordTimer.start()
     }
 
     function resumeRecording() {
@@ -52,9 +52,7 @@ var RecorderInsides = function(visuals, options) {
     function initEvents() {
         self
             .on(Events.RECORDING, function() {
-                startRecording(function(limitReached) {
-                    visuals.stop(limitReached)
-                })
+                startRecording()
             })
             .on(Events.RESUMING, function() {
                 resumeRecording()
@@ -107,6 +105,10 @@ var RecorderInsides = function(visuals, options) {
 
     this.isCountingDown = function() {
         return countdown && countdown.isCountingDown()
+    }
+
+    this.checkTimer = function(intervalSum) {
+        recordTimer.check(intervalSum)
     }
 }
 
