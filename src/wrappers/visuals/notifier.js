@@ -16,6 +16,7 @@ var Notifier = function(visuals, options) {
         messageElement,
         explanationElement,
         entertainTimeoutId,
+        entertaining,
         built
 
     function onStopping(limitReached) {
@@ -111,13 +112,16 @@ var Notifier = function(visuals, options) {
     function runEntertainment() {
         if (options.notifier.entertain) {
 
-            var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
+            if (!entertaining) {
+                var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
 
-            notifyElement.className =   'notifier entertain ' +
-                                        options.notifier.entertainClass +
-                                        randomBackgroundClass
+                notifyElement.className =   'notifier entertain ' +
+                options.notifier.entertainClass +
+                randomBackgroundClass
 
-            entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
+                entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
+                entertaining = true
+            }
         } else
             cancelEntertainment()
     }
@@ -127,6 +131,8 @@ var Notifier = function(visuals, options) {
             notifyElement.className = 'notifier'
 
         clearTimeout(entertainTimeoutId)
+        entertainTimeoutId = null
+        entertaining = false
     }
 
     function setMessage(message, messageOptions) {
