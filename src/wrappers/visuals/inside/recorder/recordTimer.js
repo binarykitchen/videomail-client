@@ -8,6 +8,7 @@ module.exports = function(visuals, recordNote, options) {
         nearComputed    = false,
         endNighComputed = false,
 
+        started,
         countdown
 
     function pad(n) {
@@ -102,6 +103,7 @@ module.exports = function(visuals, recordNote, options) {
     this.start = function() {
         countdown    = getStartSeconds()
         nearComputed = endNighComputed = false
+        started = true
 
         update()
 
@@ -121,13 +123,14 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.stop = function() {
-        if (!isStopped()) {
+        if (!isStopped() && started) {
             options.debug('Stopping record timer. Was recording for about ~' + getSecondsRecorded() + " seconds.")
 
             hide()
             recordNote.stop()
 
             countdown = null
+            started = false
         }
     }
 
