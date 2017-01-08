@@ -352,10 +352,24 @@ var Recorder = function(visuals, replay, options) {
         // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // prefer the front camera (if one is available) over the rear one
-            navigator.mediaDevices.getUserMedia({
-                video: {facingMode: "user"},
+
+            var constraints = {
+                video: {
+                    facingMode: "user",
+                    frameRate: {ideal: options.video.fps}
+                },
                 audio: options.isAudioEnabled()
-            })
+            }
+
+            if (options.hasDefinedWidth()) {
+                constraints.video.width = {ideal: options.video.width}
+            }
+
+            if (options.hasDefinedHeight()) {
+                constraints.video.height = {ideal: options.video.height}
+            }
+
+            navigator.mediaDevices.getUserMedia(constraints)
             .then(getUserMediaCallback)
             .catch(userMediaErrorCallback)
         } else {
