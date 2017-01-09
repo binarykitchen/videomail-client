@@ -61,7 +61,7 @@ var Form = function(container, formElement, options) {
             hidden(formElement.elements[i], true)
         }
 
-        hidden(self, true)
+        hidden(formElement, true)
     }
 
     function getInputElements() {
