@@ -54,12 +54,14 @@ var Form = function(container, formElement, options) {
         }
     }
 
-    function hideAllInputs() {
+    function hideAll() {
         var limit = formElement.elements.length
 
         for (var i = 0; i < limit; i++) {
             hidden(formElement.elements[i], true)
         }
+
+        hidden(self, true)
     }
 
     function getInputElements() {
@@ -150,7 +152,7 @@ var Form = function(container, formElement, options) {
             // (= less distractions)
             if (err.isBrowserProblem && err.isBrowserProblem() &&
                 options.adjustFormOnBrowserError) {
-                hideAllInputs()
+                hideAll()
             }
         })
 
