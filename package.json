@@ -37,7 +37,7 @@
     "recorder"
   ],
   "dependencies": {
-    "animitter": "2.0.0",
+    "animitter": "3.0.0",
     "audio-sample": "1.0.2",
     "canvas-to-buffer": "1.0.9",
     "classlist.js": "1.1.20150312",
