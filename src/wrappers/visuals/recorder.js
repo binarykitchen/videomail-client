@@ -43,7 +43,6 @@ var Recorder = function(visuals, replay, options) {
         userMediaTimeout,
         retryTimeout,
 
-        intervalSum,
         bytesSum,
 
         frameProgress,
@@ -54,7 +53,6 @@ var Recorder = function(visuals, replay, options) {
 
         userMediaLoaded,
         userMediaLoading,
-        avgFps,
         submitting,
         unloaded,
         stopTime,
@@ -526,8 +524,12 @@ var Recorder = function(visuals, replay, options) {
         loop && loop.dispose()
     }
 
+    function getIntervalSum() {
+        return loop && loop.getElapsedTime()
+    }
+
     function getAvgInterval() {
-        return (intervalSum / framesCount)
+        return (getIntervalSum() / framesCount)
     }
 
     this.getRecordingStats = function() {
@@ -543,19 +545,17 @@ var Recorder = function(visuals, replay, options) {
 
         this.emit(Events.STOPPING, limitReached)
 
-        loop && loop.stop()
+        loop && loop.complete()
 
         stopTime = Date.now()
 
-        avgFps = 1000 / (intervalSum / framesCount)
-
         recordingStats = {
-            avgFps:             avgFps,
+            avgFps:             loop && loop.getFPS(),
             wantedFps:          options.video.fps,
             avgInterval:        getAvgInterval(),
             wantedInterval:     1e3 / options.video.fps,
 
-            intervalSum:        intervalSum,
+            intervalSum:        getIntervalSum(),
             framesCount:        framesCount,
             videoType:          replay.getVideoType()
         }
@@ -644,6 +644,7 @@ var Recorder = function(visuals, replay, options) {
         debug('pause()', e ? e : '<button press>')
 
         userMedia.pause()
+        loop.stop()
 
         this.emit(Events.PAUSED)
 
@@ -662,6 +663,7 @@ var Recorder = function(visuals, replay, options) {
         this.emit(Events.RESUMING)
 
         userMedia.resume()
+        loop.start()
     }
 
     this.record = function() {
@@ -693,7 +695,7 @@ var Recorder = function(visuals, replay, options) {
         if (!canvas.height)
             throw VideomailError.create('Canvas has an invalid height.', options)
 
-        bytesSum = intervalSum = 0
+        bytesSum = 0
 
         var frame = new Frame(canvas, options),
 
@@ -707,7 +709,7 @@ var Recorder = function(visuals, replay, options) {
                 self.emit(Events.FIRST_FRAME_SENT)
         }
 
-        function draw(deltaTime) {
+        function draw(deltaTime, elapsedTime) {
             try {
                 // ctx and stream might become null while unloading
                 if (!self.isPaused() && stream && ctx) {
@@ -733,15 +735,12 @@ var Recorder = function(visuals, replay, options) {
 
                     bytesSum += bufferLength
 
-                    // todo use elapsedTime instead when we have pause/resume in animitter
-                    intervalSum += deltaTime
-
                     writeStream(buffer, {
                         frameNumber: framesCount,
                         onFlushedCallback: onFlushed
                     })
 
-                    visuals.checkTimer({intervalSum: intervalSum})
+                    visuals.checkTimer({intervalSum: elapsedTime})
 
                     // if (options.verbose) {
                     //     debug(
@@ -846,7 +845,7 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.isPaused = function() {
-        return userMedia && userMedia.isPaused()
+        return userMedia && userMedia.isPaused() && !loop.isRunning()
     }
 
     this.isRecording = function() {
