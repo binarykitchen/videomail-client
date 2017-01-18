@@ -51,7 +51,7 @@
     "humanize-duration": "3.10.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
-    "iphone-inline-video": "1.9.5",
+    "iphone-inline-video": "1.9.6",
     "is-power-of-two": "1.0.0",
     "keymirror": "0.1.1",
     "merge-recursive": "0.0.3",
@@ -63,7 +63,7 @@
     "websocket-stream": "3.3.3"
   },
   "devDependencies": {
-    "body-parser": "1.15.2",
+    "body-parser": "1.16.0",
     "browserify": "13.3.0",
     "connect-send-json": "1.0.0",
     "del": "2.2.2",
