@@ -1,4 +1,4 @@
-var numberIsInteger = require('number-is-integer');
+var numberIsInteger = require('number-is-integer'),
     VideomailError  = require('./../util/videomailError')
 
 function getOuterWidth(element) {
