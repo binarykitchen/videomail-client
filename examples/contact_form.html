@@ -37,7 +37,7 @@
         </form>
 
         <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
-        <button type='submit' id="submitButton" disabled>Submit</button>
+        <input type="button" value="Submit" disabled>
 
         <div id="viewVideo" style="display:none">
             <h2 class="subject"></h2>
@@ -54,8 +54,8 @@
                     verbose: true,
                     video: {limitSeconds: 120, width: 320, countdown: false},
                     selectors: {
-                        submitButtonId: "submitButton",
-                        formId:         "someForm"
+                        submitButtonSelector: 'body input[value="Submit"]',
+                        formId:               "someForm"
                     },
                     callbacks: {
                         adjustFormDataBeforePosting: function(videomail, cb) {
