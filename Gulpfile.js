@@ -110,7 +110,7 @@ gulp.task('connect', ['build'], function() {
             key:  fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
             cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
         },
-        middleware: function(connect, options) {
+        middleware: function() {
             var router = new Router()
 
             router.use(bodyParser.json())
