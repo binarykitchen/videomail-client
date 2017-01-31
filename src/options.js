@@ -45,7 +45,9 @@ module.exports = {
         aliasInputName:     'videomail_alias',
 
         formId:         null,                    // automatically detects form if any
-        submitButtonId: null                     // automatically detects submit button in the form
+        submitButtonId: null,                    // semi-automatically detects submit button in the form
+                                                 // but if that does not work, try using the
+        submitButtonSelector: null               // submitButtonSelector
     },
 
     audio: {

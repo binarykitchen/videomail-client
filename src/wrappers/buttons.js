@@ -145,11 +145,13 @@ var Buttons = function(container, options) {
         return [radioButtonElement, radioButtonGroup]
     }
 
-    function makeButton(buttonClass, text, clickHandler, show, id, type) {
+    function makeButton(buttonClass, text, clickHandler, show, id, type, selector) {
         var buttonElement
 
         if (id)
             buttonElement = document.getElementById(id)
+        else if (selector)
+            buttonElement = document.querySelector(selector)
         else
             buttonElement = buttonsElement.querySelector('.' + buttonClass)
 
@@ -185,7 +187,8 @@ var Buttons = function(container, options) {
                     null,
                     true,
                     options.selectors.submitButtonId,
-                    'submit'
+                    'submit',
+                    options.selectors.submitButtonSelector
                 )
             else
                 disable(submitButton)
