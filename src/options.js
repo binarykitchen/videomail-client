@@ -45,13 +45,15 @@ module.exports = {
         aliasInputName:     'videomail_alias',
 
         formId:         null,                    // automatically detects form if any
-        submitButtonId: null                     // automatically detects submit button in the form
+        submitButtonId: null,                    // semi-automatically detects submit button in the form
+                                                 // but if that does not work, try using the
+        submitButtonSelector: null               // submitButtonSelector
     },
 
     audio: {
         enabled:    false,      // set to true for experimential audio recording
         switch:     false,      // enables a switcher for audio recording (on/off)
-        volume:     .20,        // must be between 0 .. 1 but 0.20 is recommeded to avoid
+        volume:     .2,         // must be between 0 .. 1 but 0.20 is recommeded to avoid
                                 // distorting at the higher volume peaks
         bufferSize: 1024        // decides how often the audio is being sampled, must be a power of two.
                                 // the higher the less traffic, but harder to adjust with rubberband
