@@ -62,6 +62,7 @@ var Recorder = function(visuals, replay, options) {
         blocking,
         built,
         key,
+        waitingTime,
 
         pingInterval
 
@@ -202,8 +203,10 @@ var Recorder = function(visuals, replay, options) {
         self.hide()
         self.emit(Events.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true))
 
+        // keep it for recording stats
+        waitingTime = Date.now() - stopTime
+
         if (options.debug) {
-            var waitingTime = Date.now() - stopTime
 
             debug(
                 'While recording, %s have been transferred and waiting time was %s',
@@ -496,11 +499,12 @@ var Recorder = function(visuals, replay, options) {
 
             writeStream(new Buffer(JSON.stringify(command)))
 
-            if (cb)
+            if (cb) {
                 // keep all callbacks async
                 setTimeout(function() {
                     cb()
                 }, 0)
+            }
         }
     }
 
@@ -557,12 +561,13 @@ var Recorder = function(visuals, replay, options) {
 
             intervalSum:        getIntervalSum(),
             framesCount:        framesCount,
-            videoType:          replay.getVideoType()
+            videoType:          replay.getVideoType(),
+            waitingTime:        waitingTime
         }
 
         if (options.isAudioEnabled()) {
             recordingStats.samplesCount = samplesCount,
-            recordingStats.sampleRate =   userMedia.getAudioSampleRate()
+            recordingStats.sampleRate   = userMedia.getAudioSampleRate()
         }
 
         writeCommand('stop', recordingStats)
@@ -628,7 +633,7 @@ var Recorder = function(visuals, replay, options) {
 
             replay.reset()
 
-            userMediaLoaded = key = canvas = ctx = null
+            userMediaLoaded = key = canvas = ctx = waitingTime = null
         }
     }
 
