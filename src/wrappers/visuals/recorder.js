@@ -206,6 +206,8 @@ var Recorder = function(visuals, replay, options) {
         // keep it for recording stats
         waitingTime = Date.now() - stopTime
 
+        recordingStats.waitingTime = waitingTime
+
         if (options.debug) {
 
             debug(
@@ -561,8 +563,7 @@ var Recorder = function(visuals, replay, options) {
 
             intervalSum:        getIntervalSum(),
             framesCount:        framesCount,
-            videoType:          replay.getVideoType(),
-            waitingTime:        waitingTime
+            videoType:          replay.getVideoType()
         }
 
         if (options.isAudioEnabled()) {
