@@ -6,10 +6,10 @@ var util   = require('util'),
     Browser         = require('./../../util/browser'),
     EventEmitter    = require('./../../util/eventEmitter'),
 
-    makeVideoPlayableInline
+    enableInlineVideo
 
 if ('undefined' != typeof navigator)
-    makeVideoPlayableInline = require('iphone-inline-video')
+    enableInlineVideo = require('iphone-inline-video')
 
 var Replay = function(parentElement, options) {
 
@@ -101,9 +101,15 @@ var Replay = function(parentElement, options) {
                 parentElement.show()
         }
 
+        if (!options.isAudioEnabled()) {
+            replayElement.setAttribute('muted', true)
+        }
+
         // this must be called after setting the sources and when becoming visible
         // see https://github.com/bfred-it/iphone-inline-video/issues/16
-        makeVideoPlayableInline && makeVideoPlayableInline(replayElement, options.isAudioEnabled())
+        enableInlineVideo && enableInlineVideo(replayElement, {
+            iPad: true
+        })
 
         // this forces to actually fetch the videos from the server
         replayElement.load()
@@ -125,6 +131,7 @@ var Replay = function(parentElement, options) {
         replayElement.setAttribute('autoplay', true)
         replayElement.setAttribute('autostart', true)
         replayElement.setAttribute('autobuffer', true)
+        replayElement.setAttribute('playsinline', true)
         replayElement.setAttribute('controls', 'controls')
         replayElement.setAttribute('preload', 'auto')
         replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
