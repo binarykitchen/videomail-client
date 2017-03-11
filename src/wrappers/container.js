@@ -204,9 +204,6 @@ var Container = function(options) {
     }
 
     function submitForm(formData, videomailResponse, url, cb) {
-        // avgFps is only for the videomail server
-        delete formData.avgFps
-
         formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias
 
         resource.form(formData, url, cb)

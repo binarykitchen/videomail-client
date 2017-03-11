@@ -1,5 +1,5 @@
 var test = require('tape'),
-    h    = require('hyperscript')
+    h    = require('hyperscript'),
 
     VideomailClient = require('./../../src/client')
 
@@ -21,7 +21,7 @@ test('VideomailClient:', {timeout: 2000}, function(t) {
     t.test('can be instantiated and emits built event', function(tt) {
         tt.plan(2)
 
-        consoleFacade = console
+        var consoleFacade = console
 
         if (SILENT) {
             consoleFacade.error = function() {}
