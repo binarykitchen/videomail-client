@@ -39,8 +39,7 @@ fi
 read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
 # Ensures nothing is broken
-# temporarily disabled because of https://github.com/juliangruber/tape-run/issues/59
-# npm test
+npm test
 
 git checkout master
 git push
@@ -61,8 +60,7 @@ npm install
 gulp build --minify
 
 # Ensures again that nothing is broken with the build
-# temporarily disabled because of https://github.com/juliangruber/tape-run/issues/59
-# npm test
+npm test
 
 git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
