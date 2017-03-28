@@ -101,7 +101,7 @@ var Buttons = function(container, options) {
             e && e.preventDefault()
 
             try {
-              clickHandler()
+              clickHandler(e)
             } catch (exc) {
               self.emit(Events.ERROR, exc)
             }
@@ -324,12 +324,14 @@ var Buttons = function(container, options) {
     }
 
     this.adjustButtonsForPause = function() {
-        pauseButton && hide(pauseButton)
-        show(resumeButton)
-        enable(resumeButton)
-        hide(recordButton)
-        show(previewButton)
-        enable(previewButton)
+        if (!self.isCountingDown()) {
+            pauseButton && hide(pauseButton)
+            show(resumeButton)
+            enable(resumeButton)
+            hide(recordButton)
+            show(previewButton)
+            enable(previewButton)
+        }
     }
 
     function onFirstFrameSent() {
@@ -419,9 +421,9 @@ var Buttons = function(container, options) {
         container.submit()
     }
 
-    function record() {
+    function record(e) {
         disable(recordButton)
-        container.record()
+        container.record(e)
     }
 
     function initEvents() {
@@ -521,6 +523,10 @@ var Buttons = function(container, options) {
 
     this.show = function() {
         show(buttonsElement)
+    }
+
+    this.isCountingDown = function() {
+        return container.isCountingDown()
     }
 }
 

@@ -7,7 +7,8 @@ module.exports = function(visuals, options) {
 
         countdownElement,
         intervalId,
-        countdown
+        countdown,
+        paused
 
     function fire(cb) {
         self.unload()
@@ -20,12 +21,14 @@ module.exports = function(visuals, options) {
     }
 
     function countBackward(cb) {
-        countdown--
+        if (!paused) {
+            countdown--
 
-        if (countdown < 1)
-            fire(cb)
-        else
-            countdownElement.innerHTML = countdown
+            if (countdown < 1)
+                fire(cb)
+            else
+                countdownElement.innerHTML = countdown
+        }
     }
 
     this.start = function(cb) {
@@ -34,6 +37,14 @@ module.exports = function(visuals, options) {
         this.show()
 
         intervalId = setInterval(countBackward.bind(this, cb), 1e3)
+    }
+
+    this.pause = function() {
+        paused = true
+    }
+
+    this.resume = function() {
+        paused = false
     }
 
     this.build = function() {
@@ -59,6 +70,7 @@ module.exports = function(visuals, options) {
 
     this.unload = function() {
         clearInterval(intervalId)
+        paused = false
         intervalId = null
     }
 

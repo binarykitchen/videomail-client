@@ -40,7 +40,11 @@ var RecorderInsides = function(visuals, options) {
     }
 
     function pauseRecording() {
-        recordTimer.pause()
+        if (self.isCountingDown()) {
+            countdown.pause()
+        } else {
+            recordTimer.pause()
+        }
     }
 
     function onResetting() {
@@ -101,6 +105,10 @@ var RecorderInsides = function(visuals, options) {
 
     this.startCountdown = function(cb) {
         countdown && countdown.start(cb)
+    }
+
+    this.resumeCountdown = function() {
+        countdown && countdown.resume()
     }
 
     this.isCountingDown = function() {
