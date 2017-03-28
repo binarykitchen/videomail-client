@@ -2,6 +2,7 @@ var insertCss      = require('insert-css'),
     merge          = require('merge-recursive'),
     hidden         = require('hidden'),
     util           = require('util'),
+    Visibility     = require('document-visibility'),
 
     Dimension      = require('./dimension'),
     Visuals        = require('./visuals'),
@@ -21,6 +22,7 @@ var Container = function(options) {
 
     var self  = this,
 
+        visibility      = Visibility(),
         visuals         = new Visuals(this, options),
         buttons         = new Buttons(this, options),
         resource        = new Resource(options),
@@ -101,10 +103,16 @@ var Container = function(options) {
             self.unload(e)
         })
 
-        if (options.enablePause && options.enableAutoPause)
-            window.addEventListener('blur', function(e) {
-                self.isRecording() && self.pause(e)
+        if (options.enablePause && options.enableAutoPause) {
+            visibility.onChange(function(visible) {
+                if (visible) {
+                    if (self.isCountingDown())
+                        self.resume()
+                } else if (self.isCountingDown() || self.isRecording()) {
+                    self.pause('document invisible')
+                }
             })
+        }
 
         if (options.enableSpace)
             window.addEventListener('keypress', function(e) {
@@ -410,8 +418,8 @@ var Container = function(options) {
         return visuals.isPaused()
     }
 
-    this.pause = function() {
-        visuals.pause()
+    this.pause = function(e) {
+        visuals.pause(e)
     }
 
     this.startOver = function() {

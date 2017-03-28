@@ -189,14 +189,18 @@ var Visuals = function(container, options) {
         return replay.isShown()
     }
 
-    this.pause = function() {
-        recorder.pause()
+    this.pause = function(e) {
+        recorder.pause(e)
         recorderInsides.showPause()
     }
 
     this.resume = function() {
-        recorder.resume()
-        recorderInsides.hidePause()
+        if (recorderInsides.isCountingDown()) {
+            recorderInsides.resumeCountdown()
+        } else {
+            recorder.resume()
+            recorderInsides.hidePause()
+        }
     }
 
     this.pauseOrResume = function() {
