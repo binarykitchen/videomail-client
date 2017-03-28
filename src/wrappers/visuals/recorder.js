@@ -86,6 +86,7 @@ var Recorder = function(visuals, replay, options) {
 
     function sendPings() {
         pingInterval = window.setInterval(function() {
+            debug('Recorder: pinging...')
             writeStream(new Buffer(''))
         }, options.timeouts.pingInterval)
     }
@@ -647,10 +648,18 @@ var Recorder = function(visuals, replay, options) {
     }
 
     this.pause = function(e) {
-        debug('pause()', e ? e : '<button press>')
+        var details
+
+        if (e instanceof Event) {
+            details = e.type
+        } else if (e) {
+            details = e.toString()
+        }
+
+        debug('pause()', details)
 
         userMedia.pause()
-        loop.stop()
+        loop && loop.stop()
 
         this.emit(Events.PAUSED)
 
@@ -690,16 +699,30 @@ var Recorder = function(visuals, replay, options) {
         try {
             canvas = userMedia.createCanvas()
         } catch (exc) {
-            throw VideomailError.create('Failed to create canvas.', exc.toString(), options)
+            self.emit(
+                Events.ERROR,
+                VideomailError.create('Failed to create canvas.', exc.toString(), options)
+            )
+            return false
         }
 
         ctx = canvas.getContext('2d')
 
-        if (!canvas.width)
-            throw VideomailError.create('Canvas has an invalid width.', options)
+        if (!canvas.width) {
+            self.emit(
+                Events.ERROR,
+                VideomailError.create('Canvas has an invalid width.', options)
+            )
+            return false
+        }
 
-        if (!canvas.height)
-            throw VideomailError.create('Canvas has an invalid height.', options)
+        if (!canvas.height) {
+            self.emit(
+                Events.ERROR,
+                VideomailError.create('Canvas has an invalid height.', options)
+            )
+            return false
+        }
 
         bytesSum = 0
 
@@ -746,14 +769,15 @@ var Recorder = function(visuals, replay, options) {
                         onFlushedCallback: onFlushed
                     })
 
-                    visuals.checkTimer({intervalSum: elapsedTime})
-
                     // if (options.verbose) {
                     //     debug(
                     //         'Frame #' + framesCount + ' (' + bufferLength + ' bytes):',
-                    //         deltaTime + "ms"
+                    //         deltaTime + "ms, " +
+                    //         elapsedTime + "ms"
                     //     )
                     // }
+
+                    visuals.checkTimer({intervalSum: elapsedTime})
                 }
             } catch (exc) {
                 self.emit(Events.ERROR, exc)
