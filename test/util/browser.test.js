@@ -17,7 +17,7 @@ test('Browser:', {timeout: 2000}, function(t) {
         err = browser.checkBufferTypes()
         tt.equal(err, undefined)
 
-        videoType = browser.getVideoType()
+        var videoType = browser.getVideoType()
         tt.equal(videoType, undefined)
 
         err = browser.getNoAccessIssue()
@@ -96,12 +96,12 @@ test('Browser:', {timeout: 2000}, function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your browser has no webcam support')
-        tt.ok(err.explanation.indexOf('Forget Internet Explorer!') >= 0)
+        tt.equal(err.message, 'Sorry, your browser won\'t let you access your webcam.')
+        tt.ok(err.explanation.indexOf('Instead of Internet Explorer better pick') >= 0)
 
         err = browser.checkPlaybackCapabilities()
         tt.equal(err.message, 'No HTML5 support for video tag!')
-        tt.ok(err.explanation.indexOf('Forget Internet Explorer!') >= 0)
+        tt.ok(err.explanation.indexOf('Instead of Internet Explorer better pick') >= 0)
 
         err = browser.checkBufferTypes()
         tt.equal(err, undefined)
@@ -128,7 +128,7 @@ test('Browser:', {timeout: 2000}, function(t) {
             err
 
         err = browser.checkRecordingCapabilities()
-        tt.equal(err.message, 'Sorry, your browser has no webcam support')
+        tt.equal(err.message, 'Sorry, your browser won\'t let you access your webcam.')
         tt.ok(err.explanation.indexOf('Safari has no webcam support yet.') >= 0)
 
         err = browser.checkPlaybackCapabilities()

@@ -43,7 +43,7 @@ To run the examples in your browser with Gulp, just do:
 
 Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
-Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won't allow the use of `getUserMedia()` on insecure origins. 
+Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won't allow the use of `getUserMedia()` on insecure origins.
 
 ## Dead simple example (just record and replay)
 
@@ -208,7 +208,7 @@ Calling this function will manually trigger a submission of the recorded videoma
 
 Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server. `127.0.0.1:8080` is whitelisted too for local development. Other IP addresses won't work.
 
-In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending video mails. To fix that, please reach me at [https://binarykitchen.com](https://binarykitchen.com) and you will get a new site name and a list of whitelisted URLs for your own usage.
+In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, please reach me at [https://binarykitchen.com](https://binarykitchen.com) and you will get a new site name and a list of whitelisted URLs for your own usage.
 
 <a name="compatibility"></a>
 ## Backward compatibility
