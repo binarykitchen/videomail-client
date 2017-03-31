@@ -55,13 +55,13 @@ module.exports = function(options) {
         else if (isIE)
             warning = 'Instead of Internet Explorer better pick' +
                       ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
-                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>' +
-                      ' or <a href="' + edgeDownload + '" target="_blank">Edge</a>.'
+                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>,' +
+                      ' <a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
 
         else if (isSafari)
             warning = 'Safari has no webcam support yet.<br/>Better pick' +
-                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>' +
-                      ' or <a href="' + firefoxDownload + '" target="_blank">Firefox</a>.'
+                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
+                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
 
         return warning
     }
@@ -82,8 +82,8 @@ module.exports = function(options) {
             else
                 warning = 'Hence we recommend you to use either ' +
                           '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
-                          '<a href="' + firefoxDownload + '" target="_blank">Firefox</a> or ' +
-                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> instead.'
+                          '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
+                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
         }
 
         warning = 'Your browser does not have the getUserMedia feature to access webcams.' +

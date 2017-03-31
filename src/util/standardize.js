@@ -1,4 +1,5 @@
-require('es5-shim')
+require('core-js')
+require('element-closest') // needed for IE 11
 
 module.exports = function(window, navigator) {
 
