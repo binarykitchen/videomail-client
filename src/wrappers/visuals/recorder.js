@@ -772,8 +772,8 @@ var Recorder = function(visuals, replay, options) {
                     // if (options.verbose) {
                     //     debug(
                     //         'Frame #' + framesCount + ' (' + bufferLength + ' bytes):',
-                    //         deltaTime + "ms, " +
-                    //         elapsedTime + "ms"
+                    //         ' delta=' + deltaTime + "ms, " +
+                    //         ' elapsed=' + elapsedTime + "ms"
                     //     )
                     // }
 
