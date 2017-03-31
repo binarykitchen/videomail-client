@@ -66,6 +66,8 @@ git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
 echo "Publishing to npm ..."
+# todo figure out how to do this with yarn without the version prompt, see
+# https://github.com/yarnpkg/yarn/issues/3011
 npm publish
 
 # Complete the previous release

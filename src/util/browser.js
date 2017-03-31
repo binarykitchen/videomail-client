@@ -53,15 +53,15 @@ module.exports = function(options) {
                       'Upgrade Chromium</a> to fix this.'
 
         else if (isIE)
-            warning = 'Forget Internet Explorer!<br/>Better pick' +
+            warning = 'Instead of Internet Explorer better pick' +
                       ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
-                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>' +
-                      ' or <a href="' + edgeDownload + '" target="_blank">Edge</a>.'
+                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>,' +
+                      ' <a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
 
         else if (isSafari)
             warning = 'Safari has no webcam support yet.<br/>Better pick' +
-                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>' +
-                      ' or <a href="' + firefoxDownload + '" target="_blank">Firefox</a>.'
+                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
+                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
 
         return warning
     }
@@ -70,26 +70,23 @@ module.exports = function(options) {
         var warning
 
         if (isIOS)
-            warning = 'On iPads/iPhones this feature is missing. ' +
-                      'Here is <a href="http://caniuse.com/stream" target="_blank">' +
-                      'evidence</a>.<br/><br/>For now, we recommend you to use a desktop computer or ' +
-                      'an Android device.'
+            warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' +
+                      'For now, we recommend you to use a desktop computer or an Android device.'
 
         else
             warning = getRecommendation()
 
         if (!warning) {
             if (self.isChromeBased() || self.isFirefox())
-                warning = 'For that, your browser needs an <a href="' + browseHappyLink + '" target="_blank">upgrade</a>.'
+                warning = 'For the webcam feature, your browser needs an upgrade.'
             else
                 warning = 'Hence we recommend you to use either ' +
                           '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
-                          '<a href="' + firefoxDownload + '" target="_blank">Firefox</a> or ' +
-                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> instead.'
+                          '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
+                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
         }
 
-        warning = 'To access external webcams, your browser must support the ' +
-                  '<a href="http://caniuse.com/#feat=stream" target="_blank">getUserMedia</a> feature.' +
+        warning = 'Your browser does not have the getUserMedia feature to access webcams.' +
                   '<br/><br/>' + warning
 
         return warning
@@ -135,7 +132,7 @@ module.exports = function(options) {
 
         if (!okBrowser || !this.canRecord()) {
             err = VideomailError.create({
-                message: 'Sorry, your browser has no webcam support',
+                message: 'Sorry, your browser won\'t let you access your webcam.',
             }, getUserMediaWarning(), options, true)
         }
 
