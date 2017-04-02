@@ -1,4 +1,4 @@
-require('core-js')
+require('core-js/shim')
 require('classlist.js')
 require('element-closest') // needed for IE 11
 
