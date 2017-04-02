@@ -238,9 +238,9 @@ test('Videomail Error:', function(t) {
                 name: 'DevicesNotFoundError'
             })
 
-            tt.equal(err.toString(),    'Videomail Error: Webcam is unavailable')
-            tt.equal(err.message,       'Webcam is unavailable')
-            tt.equal(err.explanation,   'Looks like another program has control over your webcam? Close it and come back.')
+            tt.equal(err.toString(),    'Videomail Error: No available webcam could be found')
+            tt.equal(err.message,       'No available webcam could be found')
+            tt.equal(err.explanation,   'Looks like you do not have any webcam attached to your machine; or the one you plugged in is already used.')
         })
     })
 })

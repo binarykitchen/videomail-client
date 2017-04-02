@@ -29,7 +29,7 @@ module.exports = function(recorder, options) {
             rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
 
         } else
-            console.error('Error attaching stream to element.')
+            throw VideomailError.create('Error attaching stream to element.')
     }
 
     function setVisualStream(localMediaStream) {
@@ -114,7 +114,12 @@ module.exports = function(recorder, options) {
         }
 
         function fireCallbacks() {
-            options.debug('UserMedia: fireCallbacks()')
+            options.debug(
+                'UserMedia: fireCallbacks(' +
+                'onPlayReached=' + onPlayReached + ', ' +
+                'onLoadedMetaDataReached=' + onLoadedMetaDataReached + ')'
+            )
+
             if (onPlayReached && onLoadedMetaDataReached) {
                 videoCallback()
 
@@ -132,7 +137,7 @@ module.exports = function(recorder, options) {
 
         function onPlay() {
             try {
-                options.debug('UserMedia: onPlay()', 'audio =', options.isAudioEnabled())
+                options.debug('UserMedia: ... play', 'audio =', options.isAudioEnabled())
 
                 rawVisualUserMedia.removeEventListener &&
                 rawVisualUserMedia.removeEventListener('play', onPlay)
@@ -157,12 +162,13 @@ module.exports = function(recorder, options) {
             }
         }
 
+        // player modifications to perform that must wait until `loadedmetadata` has been triggered
         function onLoadedMetaData() {
             rawVisualUserMedia.removeEventListener &&
             rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
 
             if (!hasEnded() && !hasInvalidDimensions()) {
-                options.debug('UserMedia: onLoadedMetaData()')
+                options.debug('UserMedia: ... loadedmetadata')
 
                 self.emit(Events.LOADED_META_DATA)
 
@@ -202,7 +208,8 @@ module.exports = function(recorder, options) {
                 options.debug('UserMedia: detected', description ? description : '')
             }
 
-            const heavyDebugging = false
+            // very useful i think, so leave this and just use options.debug()
+            const heavyDebugging = true
 
             if (heavyDebugging) {
                 // useful list of all available user media related events
@@ -210,36 +217,49 @@ module.exports = function(recorder, options) {
                     'audioprocess',
                     'canplay',
                     'canplaythrough',
+                    'dispose',
                     'durationchange',
                     'emptied',
                     'ended',
                     'loadeddata',
-                    'loadedmetadata',
-                    'MozAudioAvailable',
                     'pause',
-                    'play',
                     'playing',
                     'ratechange',
                     'seeked',
                     'seeking',
                     'stalled',
                     'suspend',
-                    'timeupdate',
+                    // 'timeupdate', // commented out, happens too often
                     'volumechange',
                     'waiting',
                     'complete'
                 ]
 
+                const outputEvent = function(e) {
+                    options.debug('UserMedia: ... event', e.type)
+
+                    // remove myself
+                    rawVisualUserMedia.removeEventListener &&
+                    rawVisualUserMedia.removeEventListener(e.type, outputEvent)
+                }
+
                 EVENTS.forEach(function(eventName) {
-                    rawVisualUserMedia.addEventListener(eventName, function() {
-                        console.log('userMedia event:', eventName)
-                    }, false)
+                    rawVisualUserMedia.addEventListener(eventName, outputEvent, false)
                 })
             }
 
             // rawVisualUserMedia.addEventListener('canplaythrough',  onCanPlayThrough)
             rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
             rawVisualUserMedia.addEventListener('play',            onPlay)
+
+            // experimental, not sure if this is ever needed/called? since 2 apr 2017
+            rawVisualUserMedia.addEventListener('error', function(err) {
+                self.emit(Events.ERROR, VideomailError.create(
+                    'User Media Error',
+                    err.toString(),
+                    options
+                ))
+            })
 
             setVisualStream(localMediaStream)
 
