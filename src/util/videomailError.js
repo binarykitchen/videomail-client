@@ -127,8 +127,9 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
             break
 
         case 'DevicesNotFoundError':
-            message     = 'Webcam is unavailable'
-            explanation = 'Looks like another program has control over your webcam? Close it and come back.'
+            message     = 'No available webcam could be found'
+            explanation = 'Looks like you do not have any webcam attached to your machine; or ' +
+                          'the one you plugged in is already used.'
             break
 
         case VideomailError.DOM_EXCEPTION:
