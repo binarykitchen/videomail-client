@@ -1,11 +1,8 @@
 require('core-js')
+require('classlist.js')
 require('element-closest') // needed for IE 11
 
 module.exports = function(window, navigator) {
-
-    if (typeof self !== "undefined")
-        require('classlist.js')
-
     // https://github.com/julienetie/request-frame/issues/6
     window.screen = window.screen || {}
 
@@ -27,14 +24,16 @@ module.exports = function(window, navigator) {
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
 
+    const   methods = [
+                'debug', 'groupCollapsed', 'groupEnd', 'error',
+                'exception', 'info', 'log', 'trace', 'warn'
+            ],
+
+            noop = function() {},
+            console = (window.console = window.console || {})
+
     var method,
-        noop = function() {},
-        methods = [
-            'debug', 'groupCollapsed', 'groupEnd', 'error',
-            'exception', 'info', 'log', 'trace', 'warn'
-        ],
-        length  = methods.length,
-        console = (window.console = window.console || {})
+        length  = methods.length
 
     while (length--) {
         method = methods[length]

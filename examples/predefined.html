@@ -27,23 +27,23 @@
         </div>
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({
-                    verbose:         true,
-                    disableSubmit:   true,
-                    enableAutoPause: true,
-                    selectors:       {
-                        containerId:    'videomail2',
-                        userMediaClass: 'webcam',
-                        visualsClass:   'da_window',
-                        buttonsClass:   'all_my_buttons',
-                    },
-                    video: {
-                        countdown:    false,
-                        width:        360,
-                        limitSeconds: 600,
-                    }
-                })
+            const   VideomailClient = require('videomail-client'),
+                    videomailClient = new VideomailClient({
+                        verbose:         true,
+                        disableSubmit:   true,
+                        enableAutoPause: true,
+                        selectors:       {
+                            containerId:    'videomail2',
+                            userMediaClass: 'webcam',
+                            visualsClass:   'da_window',
+                            buttonsClass:   'all_my_buttons',
+                        },
+                        video: {
+                            countdown:    false,
+                            width:        360,
+                            limitSeconds: 600,
+                        }
+                    })
 
             videomailClient.show()
         </script>

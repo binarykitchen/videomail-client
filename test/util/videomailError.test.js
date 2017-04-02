@@ -1,6 +1,5 @@
-var test            = require('tape'),
-
-    VideomailError  = require('./../../src/util/videomailError')
+const test            = require('tape'),
+      VideomailError  = require('./../../src/util/videomailError')
 
 test('Videomail Error:', function(t) {
 
@@ -9,7 +8,7 @@ test('Videomail Error:', function(t) {
         tt.test('no arguments', function(tt) {
             tt.plan(5)
 
-            var err = new VideomailError()
+            const err = new VideomailError()
 
             tt.ok(err instanceof VideomailError)
             tt.ok(err instanceof Error)
@@ -22,7 +21,7 @@ test('Videomail Error:', function(t) {
         tt.test('all undefined', function(tt) {
             tt.plan(3)
 
-            var err = new VideomailError(undefined, {
+            const err = new VideomailError(undefined, {
                 explanation: undefined
             })
 
@@ -34,7 +33,7 @@ test('Videomail Error:', function(t) {
         tt.test('one message', function(tt) {
             tt.plan(3)
 
-            var err = new VideomailError('one message')
+            const err = new VideomailError('one message')
 
             tt.equal(err.toString(),    'Videomail Error: one message')
             tt.equal(err.message,       'one message')
@@ -44,7 +43,7 @@ test('Videomail Error:', function(t) {
         tt.test('and an explanation', function(tt) {
             tt.plan(3)
 
-            var err = new VideomailError('one message', {
+            const err = new VideomailError('one message', {
                 explanation: 'and an explanation'
             })
 
@@ -59,7 +58,7 @@ test('Videomail Error:', function(t) {
         tt.test('null', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create()
+            const err = VideomailError.create()
 
             tt.equal(err.toString(),    'Videomail Error')
             tt.equal(err.message,       '')
@@ -69,7 +68,7 @@ test('Videomail Error:', function(t) {
         tt.test('no arguments', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create(new Error())
+            const err = VideomailError.create(new Error())
 
             tt.equal(err.toString(),    'Videomail Error: Error')
             tt.equal(err.message,       'Error')
@@ -79,7 +78,7 @@ test('Videomail Error:', function(t) {
         tt.test('undefined message', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create(new Error(undefined))
+            const err = VideomailError.create(new Error(undefined))
 
             tt.equal(err.toString(),    'Videomail Error: Error')
             tt.equal(err.message,       'Error')
@@ -89,7 +88,7 @@ test('Videomail Error:', function(t) {
         tt.test('bad integer', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create(123)
+            const err = VideomailError.create(123)
 
             tt.equal(err.toString(),    'Videomail Error: 123')
             tt.equal(err.message,       123)
@@ -99,7 +98,7 @@ test('Videomail Error:', function(t) {
         tt.test('one message', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create('one message')
+            const err = VideomailError.create('one message')
 
             tt.equal(err.toString(),    'Videomail Error: one message')
             tt.equal(err.message,       'one message')
@@ -109,7 +108,7 @@ test('Videomail Error:', function(t) {
         tt.test('deals with VideomailError instance', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create(new VideomailError('i am already instantiated'))
+            const err = VideomailError.create(new VideomailError('i am already instantiated'))
 
             tt.equal(err.toString(),    'Videomail Error: i am already instantiated')
             tt.equal(err.message,       'i am already instantiated')
@@ -119,29 +118,29 @@ test('Videomail Error:', function(t) {
         tt.test('PERMISSION_DENIED', function(tt) {
             tt.plan(6)
 
-            var err = VideomailError.create({
+            const err1 = VideomailError.create({
                 code:               1,
                 PERMISSION_DENIED:  1
             })
 
-            tt.equal(err.toString(),    'Videomail Error: Permission denied!')
-            tt.equal(err.message,       'Permission denied!')
-            tt.equal(err.explanation,   'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
+            tt.equal(err1.toString(),    'Videomail Error: Permission denied!')
+            tt.equal(err1.message,       'Permission denied!')
+            tt.equal(err1.explanation,   'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
 
-            err = VideomailError.create({
+            const err2 = VideomailError.create({
                 code:               2,
                 PERMISSION_DENIED:  2
             })
 
-            tt.equal(err.toString(),    'Videomail Error')
-            tt.equal(err.message,       '')
-            tt.equal(err.explanation,   '{"code":2,"PERMISSION_DENIED":2}')
+            tt.equal(err2.toString(),    'Videomail Error')
+            tt.equal(err2.message,       '')
+            tt.equal(err2.explanation,   '{"code":2,"PERMISSION_DENIED":2}')
         })
 
         tt.test('with bad name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 1
             })
 
@@ -153,7 +152,7 @@ test('Videomail Error:', function(t) {
         tt.test('with NO_DEVICES_FOUND as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'NO_DEVICES_FOUND'
             })
 
@@ -165,7 +164,7 @@ test('Videomail Error:', function(t) {
         tt.test('with PermissionDeniedError as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'PermissionDeniedError'
             })
 
@@ -177,7 +176,7 @@ test('Videomail Error:', function(t) {
         tt.test('with HARDWARE_UNAVAILABLE as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'HARDWARE_UNAVAILABLE'
             })
 
@@ -189,7 +188,7 @@ test('Videomail Error:', function(t) {
         tt.test('with "Not connected" as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'Not connected'
             })
 
@@ -201,7 +200,7 @@ test('Videomail Error:', function(t) {
         tt.test('with "Not connected" as argument', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create('Not connected')
+            const err = VideomailError.create('Not connected')
 
             tt.equal(err.toString(),    'Videomail Error: Unable to transfer data')
             tt.equal(err.message,       'Unable to transfer data')
@@ -211,7 +210,7 @@ test('Videomail Error:', function(t) {
         tt.test('with NO_VIDEO_FEED as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'NO_VIDEO_FEED'
             })
 
@@ -223,7 +222,7 @@ test('Videomail Error:', function(t) {
         tt.test('with "Starting video failed" as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'Starting video failed'
             })
 
@@ -235,7 +234,7 @@ test('Videomail Error:', function(t) {
         tt.test('with DevicesNotFoundError as name in object', function(tt) {
             tt.plan(3)
 
-            var err = VideomailError.create({
+            const err = VideomailError.create({
                 name: 'DevicesNotFoundError'
             })
 

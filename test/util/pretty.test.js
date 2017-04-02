@@ -1,6 +1,5 @@
-var test = require('tape'),
-
-    pretty = require('./../../src/util/pretty')
+const test = require('tape'),
+      pretty = require('./../../src/util/pretty')
 
 test('pretty:', function(t) {
 

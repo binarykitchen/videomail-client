@@ -1,7 +1,7 @@
-var h      = require('hyperscript'),
-    hidden = require('hidden'),
+const h      = require('hyperscript'),
+      hidden = require('hidden'),
 
-    VideomailError  = require('./../../../../util/videomailError')
+      VideomailError  = require('./../../../../util/videomailError')
 
 module.exports = function(visuals, options) {
 

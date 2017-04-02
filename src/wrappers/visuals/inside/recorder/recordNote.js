@@ -1,5 +1,5 @@
-var h      = require('hyperscript'),
-    hidden = require('hidden')
+const h      = require('hyperscript'),
+      hidden = require('hidden')
 
 module.exports = function(visuals) {
 
