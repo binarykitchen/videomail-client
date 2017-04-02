@@ -1,6 +1,5 @@
-var test = require('tape'),
-
-    EventEmitter = require('./../../src/util/eventEmitter')
+const test = require('tape'),
+      EventEmitter = require('./../../src/util/eventEmitter')
 
 test('EventEmitter:', function(t) {
 

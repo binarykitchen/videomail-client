@@ -1,24 +1,23 @@
-var merge           = require('merge-recursive'),
-    readystate      = require('readystate'),
-    util            = require('util'),
+const merge           = require('merge-recursive'),
+     readystate      = require('readystate'),
+     util            = require('util'),
 
-    defaultOptions = require('./options'),
-    Constants      = require('./constants'),
-    Events         = require('./events'),
-    CollectLogger  = require('./util/collectLogger'),
-    EventEmitter   = require('./util/eventEmitter'),
-    Container      = require('./wrappers/container'),
-    OptionsWrapper = require('./wrappers/optionsWrapper'),
-    Replay         = require('./wrappers/visuals/replay'),
+     defaultOptions = require('./options'),
+     Constants      = require('./constants'),
+     Events         = require('./events'),
+     CollectLogger  = require('./util/collectLogger'),
+     EventEmitter   = require('./util/eventEmitter'),
+     Container      = require('./wrappers/container'),
+     OptionsWrapper = require('./wrappers/optionsWrapper'),
+     Replay         = require('./wrappers/visuals/replay'),
 
-    Browser         = require('./util/browser'),
-    Resource        = require('./resource'),
+     Browser         = require('./util/browser'),
+     Resource        = require('./resource')
 
-    collectLogger,
-    browser
+var collectLogger, browser
 
 function adjustOptions(options) {
-    var localOptions = merge.recursive(defaultOptions, options || {})
+    const localOptions = merge.recursive(defaultOptions, options || {})
 
     collectLogger = collectLogger || new CollectLogger(localOptions)
 
@@ -39,9 +38,10 @@ function getBrowser(localOptions) {
 
 var VideomailClient = function(options) {
 
-    var localOptions = adjustOptions(options),
-        container    = new Container(localOptions),
-        replay
+    const localOptions = adjustOptions(options),
+          container    = new Container(localOptions)
+
+    var replay
 
     EventEmitter.call(this, localOptions, 'VideomailClient')
 
@@ -49,8 +49,10 @@ var VideomailClient = function(options) {
     this.events = Events
 
     function build() {
-        readystate.interactive(function() {
-            if (!container.isBuilt())
+        readystate.interactive(function(previousState) {
+            // it can happen that it gets called twice, i.E. when an error is thrown
+            // in the middle of the build() fn
+            if (previousState !== readystate.INTERACTIVE && !container.isBuilt())
                 container.build()
         })
     }

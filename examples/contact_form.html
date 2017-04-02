@@ -49,33 +49,33 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({
-                    verbose: true,
-                    video: {limitSeconds: 120, width: 320, countdown: false},
-                    selectors: {
-                        submitButtonSelector: 'body input[value="Submit"]',
-                        formId:               "someForm"
-                    },
-                    callbacks: {
-                        adjustFormDataBeforePosting: function(videomail, cb) {
-                            videomail.subject = 'Adjusted: ' + videomail.subject
+            const   VideomailClient = require('videomail-client'),
+                    videomailClient = new VideomailClient({
+                        verbose: true,
+                        video: {limitSeconds: 120, width: 320, countdown: false},
+                        selectors: {
+                            submitButtonSelector: 'body input[value="Submit"]',
+                            formId:               "someForm"
+                        },
+                        callbacks: {
+                            adjustFormDataBeforePosting: function(videomail, cb) {
+                                videomail.subject = 'Adjusted: ' + videomail.subject
 
-                            cb(null, videomail)
+                                cb(null, videomail)
+                            }
+                        },
+                        defaults: {
+                            body: "No body content"
                         }
-                    },
-                    defaults: {
-                        body: "No body content"
-                    }
-                }),
+                    }),
 
-                startOverButton    = document.getElementById('startOver'),
-                writingOption      = document.getElementById('writingOption'),
-                signLanguageOption = document.getElementById('signLanguageOption'),
-                body               = document.getElementById('body')
+                    startOverButton    = document.getElementById('startOver'),
+                    writingOption      = document.getElementById('writingOption'),
+                    signLanguageOption = document.getElementById('signLanguageOption'),
+                    body               = document.getElementById('body')
 
-            var onSubmitted = function(videomail, response) {
-                var statusHeader = document.querySelector('h3.status')
+            const onSubmitted = function(videomail, response) {
+                const statusHeader = document.querySelector('h3.status')
 
                 // status has been generated on server side, see gulp task 'connect'
                 statusHeader.innerHTML = response.status

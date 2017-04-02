@@ -1,23 +1,23 @@
-var util         = require('util'),
+const util         = require('util'),
 
-    Events       = require('./../../../events'),
-    EventEmitter = require('./../../../util/eventEmitter'),
+      Events       = require('./../../../events'),
+      EventEmitter = require('./../../../util/eventEmitter'),
 
-    Countdown   = require('./recorder/countdown'),
-    PausedNote  = require('./recorder/pausedNote'),
-    RecordNote  = require('./recorder/recordNote'),
-    RecordTimer = require('./recorder/recordTimer')
+      Countdown   = require('./recorder/countdown'),
+      PausedNote  = require('./recorder/pausedNote'),
+      RecordNote  = require('./recorder/recordNote'),
+      RecordTimer = require('./recorder/recordTimer')
 
-var RecorderInsides = function(visuals, options) {
+const RecorderInsides = function(visuals, options) {
 
     EventEmitter.call(this, options, 'RecorderInsides')
 
-    var self = this,
+    const self = this,
 
-        recordNote  = new RecordNote(visuals),
-        recordTimer = new RecordTimer(visuals, recordNote, options),
+          recordNote  = new RecordNote(visuals),
+          recordTimer = new RecordTimer(visuals, recordNote, options)
 
-        countdown,
+    var countdown,
         pausedNote,
         built
 

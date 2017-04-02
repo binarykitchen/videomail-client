@@ -1,18 +1,18 @@
-var h = require('hyperscript'),
+const   h = require('hyperscript'),
 
-    AudioRecorder   = require('./../../util/audioRecorder'),
-    VideomailError  = require('./../../util/videomailError'),
-    EventEmitter    = require('./../../util/eventEmitter'),
-    Events          = require('./../../events')
+        AudioRecorder   = require('./../../util/audioRecorder'),
+        VideomailError  = require('./../../util/videomailError'),
+        EventEmitter    = require('./../../util/eventEmitter'),
+        Events          = require('./../../events')
 
 module.exports = function(recorder, options) {
 
     EventEmitter.call(this, options, 'UserMedia')
 
-    var rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia(),
+    const rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia(),
+          self   = this
 
-        self   = this,
-        paused = false,
+    var paused = false,
         record = false,
 
         audioRecorder,
@@ -25,7 +25,7 @@ module.exports = function(recorder, options) {
             rawVisualUserMedia.srcObject = stream
 
         else if (typeof rawVisualUserMedia.src !== 'undefined') {
-            var URL = window.URL || window.webkitURL
+            const URL = window.URL || window.webkitURL
             rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
 
         } else
@@ -58,7 +58,7 @@ module.exports = function(recorder, options) {
         if (rawVisualUserMedia.ended)
             return rawVisualUserMedia.ended
         else {
-            var visualStream = getVisualStream()
+            const visualStream = getVisualStream()
             return visualStream && visualStream.ended
         }
     }
@@ -89,8 +89,8 @@ module.exports = function(recorder, options) {
     }
 
     function getFirstVideoTrack(localMediaStream) {
-        var videoTracks = getVideoTracks(localMediaStream),
-            videoTrack
+        const videoTracks = getVideoTracks(localMediaStream)
+        var videoTrack
 
         if (videoTracks && videoTracks[0])
             videoTrack = videoTracks[0]
@@ -187,7 +187,7 @@ module.exports = function(recorder, options) {
         // }
 
         try {
-            var videoTrack = getFirstVideoTrack(localMediaStream)
+            const videoTrack = getFirstVideoTrack(localMediaStream)
 
             if (!videoTrack)
                 options.debug('UserMedia: detected (but no video tracks exist')
@@ -202,11 +202,11 @@ module.exports = function(recorder, options) {
                 options.debug('UserMedia: detected', description ? description : '')
             }
 
-            var heavyDebugging = false
+            const heavyDebugging = false
 
             if (heavyDebugging) {
                 // useful list of all available user media related events
-                var EVENTS = [
+                const EVENTS = [
                     'audioprocess',
                     'canplay',
                     'canplaythrough',
@@ -260,7 +260,7 @@ module.exports = function(recorder, options) {
                 if (!visualStream)
                     visualStream = getVisualStream()
 
-                var tracks = getTracks(visualStream)
+                const tracks = getTracks(visualStream)
 
                 if (tracks)
                     tracks.forEach(function(track) {
@@ -300,8 +300,8 @@ module.exports = function(recorder, options) {
     }
 
     this.getRawWidth = function(responsive) {
-        var rawWidth     = this.getVideoWidth(),
-            widthDefined = options.hasDefinedWidth()
+        var rawWidth = this.getVideoWidth()
+        const widthDefined = options.hasDefinedWidth()
 
         if (widthDefined || options.hasDefinedHeight()) {
             if (!responsive && widthDefined)
