@@ -1,6 +1,5 @@
-var test = require('tape'),
-
-    Resource = require('./../../src/resource')
+const test = require('tape'),
+      Resource = require('./../../src/resource')
 
 test('Resource:', function(t) {
 

@@ -1,5 +1,5 @@
-var h           = require('hyperscript'),
-    hidden      = require('hidden')
+const h           = require('hyperscript'),
+      hidden      = require('hidden')
 
 module.exports = function(visuals, recordNote, options) {
 
@@ -44,7 +44,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.check = function(opts) {
-        var intervalSum = opts.intervalSum // it is in ms
+        const intervalSum = opts.intervalSum // it is in ms
 
         countdown = getStartSeconds() - Math.floor(intervalSum / 1e3)
 
@@ -56,8 +56,8 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     function update() {
-        var mins = parseInt(countdown / 60, 10),
-            secs = countdown - mins * 60
+        const mins = parseInt(countdown / 60, 10),
+              secs = countdown - mins * 60
 
         if (!nearComputed || !endNighComputed) {
             var remainingSeconds = options.video.limitSeconds - countdown

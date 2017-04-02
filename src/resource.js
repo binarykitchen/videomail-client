@@ -1,10 +1,10 @@
-var superagent = require('superagent'),
-    Constants  = require('./constants'),
-    CACHE_KEY  = 'alias'
+const superagent = require('superagent'),
+      Constants  = require('./constants'),
+      CACHE_KEY  = 'alias'
 
 module.exports = function(options) {
 
-    var cache = {}
+    const cache = {}
 
     function applyDefaultValue(videomail, name) {
         if (options.defaults[name] && !videomail[name])
@@ -49,7 +49,7 @@ module.exports = function(options) {
                 if (err)
                     cb(err)
                 else {
-                    var videomail = res.body
+                    const videomail = res.body
 
                     if (options.cache)
                         cache[CACHE_KEY] = videomail
@@ -66,9 +66,9 @@ module.exports = function(options) {
             identifier = null
         }
 
-        var url         = options.baseUrl + '/videomail/',
-            queryParams = {},
+        const queryParams = {}
 
+        var url = options.baseUrl + '/videomail/',
             request
 
         if (identifier)

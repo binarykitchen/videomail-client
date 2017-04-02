@@ -1,19 +1,19 @@
-var h            = require('hyperscript'),
-    util         = require('util'),
-    hidden       = require('hidden'),
-    getFormData  = require('get-form-data'),
+const   h            = require('hyperscript'),
+        util         = require('util'),
+        hidden       = require('hidden'),
+        getFormData  = require('get-form-data'),
 
-    Events         = require('./../events'),
-    EventEmitter   = require('./../util/eventEmitter'),
-    VideomailError = require('./../util/videomailError')
+        Events         = require('./../events'),
+        EventEmitter   = require('./../util/eventEmitter'),
+        VideomailError = require('./../util/videomailError')
 
-var Form = function(container, formElement, options) {
+const Form = function(container, formElement, options) {
 
     EventEmitter.call(this, options, 'Form')
 
-    var self = this,
+    const self = this
 
-        disableContainerValidation,
+    var disableContainerValidation,
         keyInput
 
     function getData() {
@@ -21,8 +21,8 @@ var Form = function(container, formElement, options) {
     }
 
     this.loadVideomail = function(videomail) {
-        var limit = formElement.elements.length,
-            input,
+        const limit = formElement.elements.length
+        var input,
             name
 
         for (var i = 0; i < limit; i++) {
@@ -46,7 +46,7 @@ var Form = function(container, formElement, options) {
     }
 
     function setDisabled(disabled, buttonsToo) {
-        var limit = formElement.elements.length
+        const limit = formElement.elements.length
 
         for (var i = 0; i < limit; i++) {
             if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i])))
@@ -55,7 +55,7 @@ var Form = function(container, formElement, options) {
     }
 
     function hideAll() {
-        var limit = formElement.elements.length
+        const limit = formElement.elements.length
 
         for (var i = 0; i < limit; i++) {
             hidden(formElement.elements[i], true)
@@ -82,8 +82,8 @@ var Form = function(container, formElement, options) {
 
     this.build = function() {
         if (options.enableAutoValidation) {
-            var inputElements = getInputElements(),
-                inputElement
+            const inputElements = getInputElements()
+            var inputElement
 
             for (var i = 0, len = inputElements.length; i < len; i++) {
                 inputElement = inputElements[i]
@@ -105,7 +105,7 @@ var Form = function(container, formElement, options) {
                 })
             }
 
-            var selectElements = getSelectElements()
+            const selectElements = getSelectElements()
 
             for (var i = 0, len = selectElements.length; i < len; i++) {
                 selectElements[i].addEventListener('change', function() {
@@ -162,7 +162,7 @@ var Form = function(container, formElement, options) {
     }
 
     function startListeningToSubmitEvents() {
-        var submitButton = container.getSubmitButton()
+        const submitButton = container.getSubmitButton()
         submitButton.addEventListener('click', self.doTheSubmit.bind(self))
     }
 
@@ -187,14 +187,14 @@ var Form = function(container, formElement, options) {
     }
 
     this.getInvalidElement = function() {
-        var inputElements = getInputElements()
+        const inputElements = getInputElements()
 
         for (var i = 0, len = inputElements.length; i < len; i++) {
             if (!inputElements[i].validity.valid)
                 return inputElements[i]
         }
 
-        var selectElements = getSelectElements()
+        const selectElements = getSelectElements()
 
         for (var i = 0, len = selectElements.length; i < len; i++) {
             if (!selectElements[i].validity.valid)
@@ -208,7 +208,7 @@ var Form = function(container, formElement, options) {
         // prevents endless validation loop
         disableContainerValidation = true
 
-        var formIsValid = formElement.checkValidity()
+        const formIsValid = formElement.checkValidity()
 
         disableContainerValidation = false
 

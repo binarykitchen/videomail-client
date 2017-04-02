@@ -9,12 +9,12 @@
         <div id="videomail"></div>
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({
-                    verbose:                  true,
-                    adjustFormOnBrowserError: true,
-                    fakeUaString:             'Internet Explorer 8.0'
-                })
+            const   VideomailClient = require('videomail-client'),
+                    videomailClient = new VideomailClient({
+                        verbose:                  true,
+                        adjustFormOnBrowserError: true,
+                        fakeUaString:             'Internet Explorer 8.0'
+                    })
 
             videomailClient.show()
         </script>

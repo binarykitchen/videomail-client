@@ -1,5 +1,5 @@
-var filesize         = require('filesize'),
-    humanizeDuration = require('humanize-duration')
+const filesize         = require('filesize'),
+      humanizeDuration = require('humanize-duration')
 
 module.exports = {
     filesize: function(bytes, round) {

@@ -1,20 +1,20 @@
-var util   = require('util'),
-    h      = require('hyperscript'),
-    hidden = require('hidden'),
+const   util   = require('util'),
+        h      = require('hyperscript'),
+        hidden = require('hidden'),
 
-    Replay          = require('./visuals/replay'),
-    Recorder        = require('./visuals/recorder'),
-    Notifier        = require('./visuals/notifier'),
-    RecorderInsides = require('./visuals/inside/recorderInsides'),
+        Replay          = require('./visuals/replay'),
+        Recorder        = require('./visuals/recorder'),
+        Notifier        = require('./visuals/notifier'),
+        RecorderInsides = require('./visuals/inside/recorderInsides'),
 
-    EventEmitter    = require('./../util/eventEmitter'),
-    Events          = require('./../events')
+        EventEmitter    = require('./../util/eventEmitter'),
+        Events          = require('./../events')
 
-var Visuals = function(container, options) {
+const Visuals = function(container, options) {
 
     EventEmitter.call(this, options, 'Visuals')
 
-    var self  = this,
+    const self  = this,
 
         replay          = new Replay(this, options),
         recorder        = new Recorder(this, replay, options),
@@ -22,9 +22,9 @@ var Visuals = function(container, options) {
 
         notifier        = new Notifier(this, options),
 
-        debug           = options.debug,
+        debug           = options.debug
 
-        visualsElement,
+    var visualsElement,
         built
 
     function buildNoScriptTag() {
@@ -102,7 +102,7 @@ var Visuals = function(container, options) {
         if (!visualsElement) {
             visualsElement = h('div.' + options.selectors.visualsClass)
 
-            var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+            const buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
             // make sure it's placed before the buttons
             if (buttonsElement)

@@ -1,9 +1,9 @@
-var DASH      = '- ',
-    SEPARATOR = '<br/>' + DASH
+const DASH      = '- ',
+      SEPARATOR = '<br/>' + DASH
 
 function arrayToString(array) {
     if (array.length > 0) {
-        var lines = []
+        const lines = []
 
         array.forEach(function(element) {
             if (element && element.toString)
@@ -15,10 +15,10 @@ function arrayToString(array) {
 }
 
 function objectToString(object) {
-    var propertyNames = Object.getOwnPropertyNames(object)
+    const propertyNames = Object.getOwnPropertyNames(object)
 
     if (propertyNames.length > 0) {
-        var lines = []
+        const lines = []
 
         propertyNames.forEach(function(name) {
             if (object[name] && object[name].toString)

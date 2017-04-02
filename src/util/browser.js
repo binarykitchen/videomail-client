@@ -1,21 +1,21 @@
-var UAParser        = require('ua-parser-js'),
-    defined         = require('defined'),
-    VideomailError  = require('./videomailError')
+const UAParser        = require('ua-parser-js'),
+      defined         = require('defined'),
+      VideomailError  = require('./videomailError')
 
 module.exports = function(options) {
 
     options = options || {}
 
-    var firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
-        edgeDownload     = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126',
-        chromeDownload   = 'http://www.google.com/chrome/',
-        chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
-        browseHappyLink  = 'http://browsehappy.com',
-        ua               = defined(options.fakeUaString, (
-                            typeof window !== 'undefined' &&
-                            window.navigator &&
-                            window.navigator.userAgent
-                           ), ''),
+    const   firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
+            edgeDownload     = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126',
+            chromeDownload   = 'http://www.google.com/chrome/',
+            chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
+            browseHappyLink  = 'http://browsehappy.com',
+            ua               = defined(options.fakeUaString, (
+                                typeof window !== 'undefined' &&
+                                window.navigator &&
+                                window.navigator.userAgent
+                               ), ''),
 
         uaParser = new UAParser(ua).getResult(),
 
@@ -33,9 +33,9 @@ module.exports = function(options) {
         chromeBased   = isChrome || isChromium,
         okBrowser     = chromeBased || firefox || isAndroid || isOpera || isEdge,
 
-        self = this,
+        self = this
 
-        videoType
+    var videoType
 
     function getRecommendation() {
         var warning
@@ -113,8 +113,8 @@ module.exports = function(options) {
 
     // just temporary
     this.canRecord = function() {
-        var hasNavigator = typeof navigator !== 'undefined',
-            canRecord = false
+        const hasNavigator = typeof navigator !== 'undefined'
+        var canRecord = false
 
         if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             canRecord = true

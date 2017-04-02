@@ -1,13 +1,13 @@
-var test = require('tape'),
-    h    = require('hyperscript'),
+const test = require('tape'),
+      h    = require('hyperscript'),
 
-    VideomailClient = require('./../../src/client')
+      VideomailClient = require('./../../src/client')
 
-var SILENT = true
+const SILENT = true
 
 function addDivForVideomail() {
-    var body = document.getElementsByTagName('body')[0],
-        div  = h('div#videomail')
+    const body = document.getElementsByTagName('body')[0],
+          div  = h('div#videomail')
 
     body.appendChild(div)
 }

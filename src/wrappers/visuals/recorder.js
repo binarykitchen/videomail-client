@@ -1,20 +1,20 @@
-var websocket    = require('websocket-stream'),
-    Frame        = require('canvas-to-buffer'),
-    util         = require('util'),
-    h            = require('hyperscript'),
-    hidden       = require('hidden'),
-    animitter    = require('animitter'),
+const   websocket    = require('websocket-stream'),
+        Frame        = require('canvas-to-buffer'),
+        util         = require('util'),
+        h            = require('hyperscript'),
+        hidden       = require('hidden'),
+        animitter    = require('animitter'),
 
-    UserMedia = require('./userMedia'),
+        UserMedia = require('./userMedia'),
 
-    Events          = require('./../../events'),
-    Constants       = require('./../../constants'),
-    EventEmitter    = require('./../../util/eventEmitter'),
-    Browser         = require('./../../util/browser'),
-    Humanize        = require('./../../util/humanize'),
-    VideomailError  = require('./../../util/videomailError')
+        Events          = require('./../../events'),
+        Constants       = require('./../../constants'),
+        EventEmitter    = require('./../../util/eventEmitter'),
+        Browser         = require('./../../util/browser'),
+        Humanize        = require('./../../util/humanize'),
+        VideomailError  = require('./../../util/videomailError')
 
-var Recorder = function(visuals, replay, options) {
+const Recorder = function(visuals, replay, options) {
 
     EventEmitter.call(this, options, 'Recorder')
 
@@ -22,12 +22,12 @@ var Recorder = function(visuals, replay, options) {
     if (!options || !options.video || !options.video.fps)
         throw VideomailError.create('FPS must be defined', options)
 
-    var self            = this,
-        browser         = new Browser(options),
+    const self            = this,
+          browser         = new Browser(options),
+          debug = options.debug
 
-        loop = null, // animatter instance
+    var loop = null, // animatter instance
 
-        debug = options.debug,
 
         samplesCount = 0,
         framesCount  = 0,
@@ -75,7 +75,7 @@ var Recorder = function(visuals, replay, options) {
                       options
                   ))
               else {
-                  var onFlushedCallback = opts && opts.onFlushedCallback
+                  const onFlushedCallback = opts && opts.onFlushedCallback
 
                   stream.write(buffer, function() {
                     onFlushedCallback && onFlushedCallback(opts)
@@ -98,7 +98,7 @@ var Recorder = function(visuals, replay, options) {
     function onAudioSample(audioSample) {
         samplesCount++
 
-        var audioBuffer = audioSample.toBuffer()
+        const audioBuffer = audioSample.toBuffer()
 
         // if (options.verbose) {
         //     debug(
@@ -231,20 +231,21 @@ var Recorder = function(visuals, replay, options) {
             // we use query parameters here because we cannot set custom headers in web sockets,
             // see https://github.com/websockets/ws/issues/467
 
+            const url2Connect =
+                 options.socketUrl +
+                 '?' +
+                 encodeURIComponent(Constants.SITE_NAME_LABEL) +
+                 '=' +
+                 encodeURIComponent(options.siteName)
+
             try {
-                stream = websocket(
-                    options.socketUrl +
-                    '?' +
-                    encodeURIComponent(Constants.SITE_NAME_LABEL) +
-                    '=' +
-                    encodeURIComponent(options.siteName)
-                )
+                stream = websocket(url2Connect)
             } catch (exc) {
                 connecting = connected = false
 
-                var err = VideomailError.create(
+                const err = VideomailError.create(
                     'Failed to create websocket',
-                    exc.toString(),
+                    'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
                     options
                 )
 
@@ -259,7 +260,7 @@ var Recorder = function(visuals, replay, options) {
             // stream.emit = function(type) {
             //     if (stream) {
             //         debug('Websocket stream emitted:', type)
-            //         var args = Array.prototype.slice.call(arguments, 0)
+            //         const args = Array.prototype.slice.call(arguments, 0)
             //         return stream.originalEmit.apply(stream, args)
             //     }
             // }
@@ -313,7 +314,7 @@ var Recorder = function(visuals, replay, options) {
 
         clearUserMediaTimeout()
 
-        var errorListeners = self.listeners(Events.ERROR)
+        const errorListeners = self.listeners(Events.ERROR)
 
         if (errorListeners.length) {
             self.emit(Events.ERROR, err)
@@ -357,7 +358,7 @@ var Recorder = function(visuals, replay, options) {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // prefer the front camera (if one is available) over the rear one
 
-            var constraints = {
+            const constraints = {
                 video: {
                     facingMode: "user",
                     frameRate: {ideal: options.video.fps}
@@ -412,7 +413,7 @@ var Recorder = function(visuals, replay, options) {
         } catch (exc) {
             userMediaLoading = false
 
-            var errorListeners = self.listeners(Events.ERROR)
+            const errorListeners = self.listeners(Events.ERROR)
 
             if (errorListeners.length)
                 self.emit(Events.ERROR, exc)
@@ -425,8 +426,8 @@ var Recorder = function(visuals, replay, options) {
 
     function executeCommand(data) {
         try {
-            var command = JSON.parse(data.toString()),
-                result
+            const command = JSON.parse(data.toString())
+            var result
 
             debug(
                 'Server commanded: %s',
@@ -495,12 +496,12 @@ var Recorder = function(visuals, replay, options) {
         } else if (stream) {
             debug('$ %s', command, args ? JSON.stringify(args) : '')
 
-            var command = {
+            const commandObj = {
                 command:    command,
                 args:       args
             }
 
-            writeStream(new Buffer(JSON.stringify(command)))
+            writeStream(new Buffer(JSON.stringify(commandObj)))
 
             if (cb) {
                 // keep all callbacks async
@@ -726,13 +727,13 @@ var Recorder = function(visuals, replay, options) {
 
         bytesSum = 0
 
-        var frame = new Frame(canvas, options),
+        const frame = new Frame(canvas, options)
 
-            bufferLength,
+        var bufferLength,
             buffer
 
         function onFlushed(opts) {
-            var frameNumber = opts && opts.frameNumber
+            const frameNumber = opts && opts.frameNumber
 
             if (frameNumber === 1)
                 self.emit(Events.FIRST_FRAME_SENT)

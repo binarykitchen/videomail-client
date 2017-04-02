@@ -1,17 +1,17 @@
-var util    = require('util'),
-    Browser = require('./browser')
+const   util    = require('util'),
+        Browser = require('./browser')
 
 module.exports = function(localOptions) {
 
     localOptions = localOptions || {}
 
-    var browser     = new Browser(localOptions),
-        logger      = localOptions.logger || console,
-        containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id',
-        stack       = []
+    const   browser     = new Browser(localOptions),
+            logger      = localOptions.logger || console,
+            containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id',
+            stack       = []
 
     function lifo(level, parameters) {
-        var line = util.format.apply(util, parameters)
+        const line = util.format.apply(util, parameters)
 
         if (stack.length > localOptions.logStackSize)
             stack.pop()
@@ -30,9 +30,11 @@ module.exports = function(localOptions) {
     this.debug = function() {
         if (localOptions.verbose) {
 
-            arguments[0] = addContainerId(arguments[0])
+            const args = [].slice.call(arguments, 0)
 
-            var output = lifo('debug', arguments)
+            args[0] = addContainerId(args[0])
+
+            const output = lifo('debug', args)
 
             if (browser.isFirefox()) {
                 logger.debug(output)
@@ -53,13 +55,15 @@ module.exports = function(localOptions) {
     }
 
     this.error = function() {
-        arguments[0] = addContainerId(arguments[0])
-        logger.error(lifo('error', arguments))
+        const args = [].slice.call(arguments, 0)
+        args[0] = addContainerId(args[0])
+        logger.error(lifo('error', args))
     }
 
     this.warn = function() {
-        arguments[0] = addContainerId(arguments[0])
-        logger.warn(lifo('warn', arguments))
+        const args = [].slice.call(arguments, 0)
+        args[0] = addContainerId(args[0])
+        logger.warn(lifo('warn', args))
     }
 
     this.getLines = function() {

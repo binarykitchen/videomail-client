@@ -41,17 +41,17 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({
-                    verbose: true,
-                    video: {
-                        width: 400
-                    },
-                    selectors: {
-                        formId:       'email',
-                        keyInputName: 'key'
-                    }
-                })
+            const   VideomailClient = require('videomail-client'),
+                    videomailClient = new VideomailClient({
+                        verbose: true,
+                        video: {
+                            width: 400
+                        },
+                        selectors: {
+                            formId:       'email',
+                            keyInputName: 'key'
+                        }
+                    })
 
             videomailClient.replay({
                 "subject": "i am a subject",

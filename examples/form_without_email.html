@@ -36,31 +36,31 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            var VideomailClient = require('videomail-client'),
-                videomailClient = new VideomailClient({
-                    verbose:              true,
-                    enableAutoValidation: false,
-                    enablePause: false,
-                    video: {
-                      limitSeconds: 80,
-                      width: 640,
-                      height: 340,
-                      countdown: false,
-                    }
-                }),
+            const   VideomailClient = require('videomail-client'),
+                    videomailClient = new VideomailClient({
+                        verbose:              true,
+                        enableAutoValidation: false,
+                        enablePause: false,
+                        video: {
+                          limitSeconds: 80,
+                          width: 640,
+                          height: 340,
+                          countdown: false,
+                        }
+                    }),
 
-                startOverButton = document.getElementById('startOver')
+                    startOverButton = document.getElementById('startOver')
 
             function setAttribute(videomail, name) {
                 if (videomail[name]) {
-                    var element = document.querySelector('a.' + name)
+                    const element = document.querySelector('a.' + name)
                     element.innerHTML = videomail[name]
                     element.setAttribute('href', videomail[name])
                     element.parentElement.style.display = 'block'
                 }
             }
 
-            var onSubmitted = function(videomail) {
+            const onSubmitted = function(videomail) {
                 setAttribute(videomail, 'url')
                 setAttribute(videomail, 'webm')
                 setAttribute(videomail, 'mp4')
