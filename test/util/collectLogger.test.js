@@ -1,6 +1,5 @@
-var test = require('tape'),
-
-    CollectLogger = require('./../../src/util/collectLogger')
+const test = require('tape'),
+      CollectLogger = require('./../../src/util/collectLogger')
 
 test('CollectLogger:', function(t) {
 

@@ -1,24 +1,24 @@
-var util   = require('util'),
-    h      = require('hyperscript'),
-    hidden = require('hidden'),
+const   util   = require('util'),
+        h      = require('hyperscript'),
+        hidden = require('hidden'),
 
-    Events          = require('./../../events'),
-    Browser         = require('./../../util/browser'),
-    EventEmitter    = require('./../../util/eventEmitter'),
+        Events          = require('./../../events'),
+        Browser         = require('./../../util/browser'),
+        EventEmitter    = require('./../../util/eventEmitter')
 
-    enableInlineVideo
+var enableInlineVideo
 
 if ('undefined' != typeof navigator)
     enableInlineVideo = require('iphone-inline-video')
 
-var Replay = function(parentElement, options) {
+const Replay = function(parentElement, options) {
 
     EventEmitter.call(this, options, 'Replay')
 
-    var self    = this,
-        browser = new Browser(options),
+    const self    = this,
+          browser = new Browser(options)
 
-        built,
+    var built,
         replayElement,
         videomail
 
@@ -172,16 +172,17 @@ var Replay = function(parentElement, options) {
     }
 
     this.getVideoSource = function(type) {
-        var sources = replayElement.getElementsByTagName('source'),
-            l       = sources.length,
-            type    = 'video/' + type,
-            source
+        const sources   = replayElement.getElementsByTagName('source'),
+              l         = sources.length,
+              videoType = 'video/' + type
+
+        var source
 
         if (l) {
             var i
 
             for (i = 0; i < l && !source; i++) {
-                if (sources[i].getAttribute('type') === type)
+                if (sources[i].getAttribute('type') === videoType)
                     source = sources[i]
             }
         }
@@ -191,7 +192,7 @@ var Replay = function(parentElement, options) {
 
     function setVideoSource(type, src) {
         var source = self.getVideoSource(type)
-        var timestamp = Date.now()
+        const timestamp = Date.now()
 
         if (src)
             src += '?' +  timestamp
@@ -234,7 +235,7 @@ var Replay = function(parentElement, options) {
 
     function play(cb) {
         if (replayElement && replayElement.play && replayElement.duration) {
-            var p = replayElement.play()
+            const p = replayElement.play()
 
             if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
                 p.then(function() {

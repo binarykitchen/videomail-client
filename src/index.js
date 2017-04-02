@@ -1,5 +1,5 @@
-var standardize = require('./util/standardize'),
-    Client = require('./client')
+const standardize = require('./util/standardize'),
+      Client = require('./client')
 
 if (!navigator) {
     throw new Error('Navigator is missing!')

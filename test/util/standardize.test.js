@@ -1,7 +1,7 @@
-var test = require('tape'),
+const test = require('tape'),
 
-    standardize = require('./../../src/util/standardize'),
-    root        = this
+      standardize = require('./../../src/util/standardize'),
+      root        = this
 
 test('standardize:', function(t) {
 

@@ -1,17 +1,17 @@
-var util         = require('util'),
-    h            = require('hyperscript'),
-    hidden       = require('hidden'),
+const   util         = require('util'),
+        h            = require('hyperscript'),
+        hidden       = require('hidden'),
 
-    Events       = require('./../events'),
-    EventEmitter = require('./../util/eventEmitter')
+        Events       = require('./../events'),
+        EventEmitter = require('./../util/eventEmitter')
 
-var Buttons = function(container, options) {
+const Buttons = function(container, options) {
 
     EventEmitter.call(this, options, 'Buttons')
 
-    var self = this,
+    const self = this
 
-        buttonsElement,
+    var buttonsElement,
 
         recordButton,
         pauseButton,
@@ -97,7 +97,7 @@ var Buttons = function(container, options) {
 
     function replaceClickHandler(element, clickHandler) {
 
-        var wrappedClickHandler = function(e) {
+        const wrappedClickHandler = function(e) {
             e && e.preventDefault()
 
             try {

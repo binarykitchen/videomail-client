@@ -1,34 +1,35 @@
-var insertCss      = require('insert-css'),
-    merge          = require('merge-recursive'),
-    hidden         = require('hidden'),
-    util           = require('util'),
-    Visibility     = require('document-visibility'),
+const   insertCss      = require('insert-css'),
+        merge          = require('merge-recursive'),
+        hidden         = require('hidden'),
+        util           = require('util'),
+        Visibility     = require('document-visibility'),
 
-    Dimension      = require('./dimension'),
-    Visuals        = require('./visuals'),
-    Buttons        = require('./buttons'),
-    Form           = require('./form'),
+        Dimension      = require('./dimension'),
+        Visuals        = require('./visuals'),
+        Buttons        = require('./buttons'),
+        Form           = require('./form'),
 
-    Resource       = require('./../resource'),
-    Events         = require('./../events'),
+        Resource       = require('./../resource'),
+        Events         = require('./../events'),
 
-    EventEmitter   = require('./../util/eventEmitter'),
-    VideomailError = require('./../util/videomailError'),
-    css            = require('./../assets/css/main.min.css.js')
+        EventEmitter   = require('./../util/eventEmitter'),
+        VideomailError = require('./../util/videomailError'),
+        css            = require('./../assets/css/main.min.css.js')
 
-var Container = function(options) {
+const Container = function(options) {
 
     EventEmitter.call(this, options, 'Container')
 
-    var self  = this,
+    const self  = this,
 
         visibility      = Visibility(),
         visuals         = new Visuals(this, options),
         buttons         = new Buttons(this, options),
         resource        = new Resource(options),
         htmlElement     = document && document.querySelector && document.querySelector('html'),
-        debug           = options.debug,
-        hasError        = false,
+        debug           = options.debug
+
+    var hasError        = false,
         submitted       = false,
         lastValidation  = false,
 
@@ -61,12 +62,12 @@ var Container = function(options) {
     }
 
     function buildForm() {
-        var formElement = getFormElement()
+        const formElement = getFormElement()
 
         if (formElement) {
             form = new Form(self, formElement, options)
 
-            var submitButton = form.findSubmitButton()
+            const submitButton = form.findSubmitButton()
             submitButton && buttons.setSubmitButton(submitButton)
 
             form.build()
@@ -116,11 +117,11 @@ var Container = function(options) {
 
         if (options.enableSpace)
             window.addEventListener('keypress', function(e) {
-                var tagName = e.target.tagName
+                const tagName = e.target.tagName
 
                 if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
 
-                    var code = e.keyCode ? e.keyCode : e.which
+                    const code = e.keyCode ? e.keyCode : e.which
 
                     if (code == 32) {
                         e.preventDefault()
@@ -148,10 +149,18 @@ var Container = function(options) {
             })
     }
 
+    function validateOptions() {
+        if (options.hasDefinedWidth() && options.video.width % 2 !== 0)
+            throw VideomailError.create('Width must be divisible by two.')
+
+        if (options.hasDefinedHeight() && options.video.height % 2 !== 0)
+            throw VideomailError.create('Height must be divisible by two.')
+    }
+
     // this will just set the width but not the height because
     // it can be a form with more inputs elements
     function correctDimensions() {
-        var width = visuals.getRecorderWidth(true);
+        const width = visuals.getRecorderWidth(true);
 
         if (width < 1)
             throw VideomailError.create('Recorder width cannot be less than 1!')
@@ -179,7 +188,7 @@ var Container = function(options) {
     }
 
     function submitVideomail(formData, method, cb) {
-        var FORM_FIELDS = {
+        const FORM_FIELDS = {
                 'subject':      options.selectors.subjectInputName,
                 'from':         options.selectors.fromInputName,
                 'to':           options.selectors.toInputName,
@@ -309,6 +318,7 @@ var Container = function(options) {
                 options.insertCss && prependDefaultCss()
 
                 !built && initEvents()
+                validateOptions()
                 correctDimensions()
                 buildForm()
                 buildChildren()
@@ -320,7 +330,11 @@ var Container = function(options) {
             }
 
         } catch (exc) {
-            self.emit(Events.ERROR, exc)
+            if (built) {
+                self.emit(Events.ERROR, exc)
+            } else {
+                throw exc
+            }
         }
     }
 
@@ -367,7 +381,7 @@ var Container = function(options) {
 
             if (!hasError) {
 
-                var paused = self.isPaused()
+                const paused = self.isPaused()
 
                 if (paused) {
                     buttons.adjustButtonsForPause()
@@ -453,8 +467,8 @@ var Container = function(options) {
         if (runValidation) {
             this.emit(Events.VALIDATING)
 
-            var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled(),
-                whyInvalid
+            const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled()
+            var whyInvalid
 
             if (form) {
                 valid = form.validate()
@@ -469,7 +483,7 @@ var Container = function(options) {
                             whyInvalid = 'Video is not recorded'
                     }
                 } else {
-                    var invalidInput = form.getInvalidElement()
+                    const invalidInput = form.getInvalidElement()
 
                     if (invalidInput) {
                         whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid'
@@ -520,10 +534,10 @@ var Container = function(options) {
         this.disableForm(true)
         this.emit(Events.SUBMITTING)
 
-        var post = isPost(method)
+        const post = isPost(method)
 
         // a closure so that we can access method
-        var submitVideomailCallback = function(err1, videomail, videomailResponse) {
+        const submitVideomailCallback = function(err1, videomail, videomailResponse) {
             if (err1) {
                 finalizeSubmissions(err1, method, videomail, videomailResponse)
 

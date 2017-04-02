@@ -13,6 +13,11 @@
     "undef"         : true,     // This option prohibits the use of explicitly undeclared variables
     "unused"        : true,     // This option warns when you define and never use your variables.
 
+    // Inspired by http://elijahmanor.github.io/talks/js-smells/
+    // "maxstatements" : 10,       // Max number of statements allowed per function
+    // "maxdepth"      : 3,        // Control nesting of blocks
+    // "maxcomplexity" : 5,        // Control cyclomatic complexity throughout code
+
     // Relaxing
     "shadow"        : true,     // true: Allows re-define variables later in code e.g. `var x=1; x=2;`
     "supernew"      : true,     // true: Tolerate `new function () { ... };` and `new Object;`
@@ -25,6 +30,7 @@
     "browser"       : true,     // Web Browser (window, document, etc)
     "devel"         : true,     // Development/debugging (alert, confirm, etc)
     "node"          : true,     // Node.js
+    "esnext"        : true,     // enable es6
     "-W003"         : true,     // 'x' was used before it was defined
     "-W008"         : true,     // A leading decimal point can be confused with a dot
     "-W044"         : true,     // Bad escaping

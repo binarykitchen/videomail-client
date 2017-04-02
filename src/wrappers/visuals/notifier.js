@@ -1,18 +1,18 @@
-var util           = require('util'),
-    h              = require('hyperscript'),
-    hidden         = require('hidden'),
+const util           = require('util'),
+      h              = require('hyperscript'),
+      hidden         = require('hidden'),
 
-    EventEmitter   = require('./../../util/eventEmitter'),
-    Events         = require('./../../events')
+      EventEmitter   = require('./../../util/eventEmitter'),
+      Events         = require('./../../events')
 
-var Notifier = function(visuals, options) {
+const Notifier = function(visuals, options) {
 
     EventEmitter.call(this, options, 'Notifier')
 
-    var self    = this,
-        debug   = options && options.debug,
+    const self    = this,
+          debug   = options && options.debug
 
-        notifyElement,
+    var notifyElement,
         messageElement,
         explanationElement,
         entertainTimeoutId,
@@ -58,7 +58,7 @@ var Notifier = function(visuals, options) {
     function onBeginVideoEncoding() {
         visuals.beginWaiting()
 
-        var lead = options.text.encoding + ' …'
+        const lead = options.text.encoding + ' …'
 
         self.notify(lead, null, {
             stillWait: true,
@@ -148,8 +148,8 @@ var Notifier = function(visuals, options) {
     }
 
     this.error = function(err) {
-        var message     = err.message ? err.message.toString() : err.toString(),
-            explanation = err.explanation ? err.explanation.toString() : null
+        const message     = err.message ? err.message.toString() : err.toString(),
+              explanation = err.explanation ? err.explanation.toString() : null
 
         if (!message)
             options.debug('Weird empty message generated for error', err)
@@ -230,10 +230,10 @@ var Notifier = function(visuals, options) {
         if (!notifyOptions)
             notifyOptions = {}
 
-        var stillWait        = notifyOptions.stillWait ? notifyOptions.stillWait : false,
-            entertain        = notifyOptions.entertain  ? notifyOptions.entertain  : false,
-            blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
-            isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
+        const stillWait        = notifyOptions.stillWait ? notifyOptions.stillWait : false,
+              entertain        = notifyOptions.entertain  ? notifyOptions.entertain  : false,
+              blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
+              isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
 
         if (!messageElement && notifyElement) {
             messageElement = h('h2')
