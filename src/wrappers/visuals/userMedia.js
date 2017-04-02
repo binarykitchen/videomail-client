@@ -116,8 +116,10 @@ module.exports = function(recorder, options) {
         function fireCallbacks() {
             options.debug(
                 'UserMedia: fireCallbacks(' +
+                'readyState=' + rawVisualUserMedia.readyState + ', ' +
                 'onPlayReached=' + onPlayReached + ', ' +
                 'onLoadedMetaDataReached=' + onLoadedMetaDataReached + ')'
+                // todo display readyState
             )
 
             if (onPlayReached && onLoadedMetaDataReached) {
@@ -236,7 +238,7 @@ module.exports = function(recorder, options) {
                 ]
 
                 const outputEvent = function(e) {
-                    options.debug('UserMedia: ... event', e.type)
+                    options.debug('UserMedia: ... event', e.type, 'ready state', rawVisualUserMedia.readyState)
 
                     // remove myself
                     rawVisualUserMedia.removeEventListener &&
