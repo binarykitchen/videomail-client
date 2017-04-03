@@ -426,7 +426,18 @@ const Recorder = function(visuals, replay, options) {
 
     function executeCommand(data) {
         try {
-            const command = JSON.parse(data.toString())
+            var command
+
+            try {
+                command = JSON.parse(data.toString())
+            } catch (excInner) {
+                self.emit(Events.ERROR, VideomailError.create(
+                    'Failed to parse command.',
+                    data,
+                    options
+                ))
+            }
+
             var result
 
             debug(
