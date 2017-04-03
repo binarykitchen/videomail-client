@@ -1,6 +1,7 @@
 const   util         = require('util'),
         h            = require('hyperscript'),
         hidden       = require('hidden'),
+        contains     = require('contains'),
 
         Events       = require('./../events'),
         EventEmitter = require('./../util/eventEmitter')
@@ -130,8 +131,8 @@ const Buttons = function(container, options) {
                 'htmlFor': options.id
             }, options.label))
 
-            // double check that submit button is already in the buttonsElement container
-            if (submitButton && buttonsElement.contains(submitButton))
+            // double check that submit button is already in the buttonsElement container as a child?
+            if (submitButton && contains(buttonsElement, submitButton))
                 buttonsElement.insertBefore(radioButtonGroup, submitButton)
             else
                 buttonsElement.appendChild(radioButtonGroup)
@@ -165,7 +166,7 @@ const Buttons = function(container, options) {
             buttonElement.innerHTML = text
 
             // double check that submit button is already in the buttonsElement container
-            if (submitButton && buttonsElement.contains(submitButton))
+            if (submitButton && contains(buttonsElement, submitButton))
                 buttonsElement.insertBefore(buttonElement, submitButton)
             else
                 buttonsElement.appendChild(buttonElement)
