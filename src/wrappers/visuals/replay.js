@@ -195,7 +195,7 @@ const Replay = function(parentElement, options) {
         const timestamp = Date.now()
 
         if (src)
-            src += '?' +  timestamp
+            src += '/videomail.' + type + '?' +  timestamp
 
         if (!source) {
             if (src) {
