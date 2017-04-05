@@ -37,5 +37,9 @@ module.exports = {
         options.setAudioEnabled = function(enabled) {
             audioEnabled = enabled
         }
+
+        options.isAutoPauseEnabled = function() {
+            return options.enableAutoPause && options.enablePause
+        }
     }
 }

@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "body-parser": "1.17.1",
-    "browserify": "14.1.0",
+    "browserify": "14.3.0",
     "connect-send-json": "1.0.0",
     "del": "2.2.2",
     "gulp": "3.9.1",

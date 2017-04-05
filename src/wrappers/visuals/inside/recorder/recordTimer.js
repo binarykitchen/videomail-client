@@ -44,14 +44,13 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.check = function(opts) {
-        const intervalSum = opts.intervalSum // it is in ms
+        const newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
 
-        countdown = getStartSeconds() - Math.floor(intervalSum / 1e3)
-
-        update()
-
-        if (countdown < 1) {
-            visuals.stop(true)
+        // performance optimisation (another reason we need react here!)
+        if (newCountdown !== countdown) {
+            countdown = newCountdown
+            update()
+            countdown < 1 && visuals.stop(true)
         }
     }
 
