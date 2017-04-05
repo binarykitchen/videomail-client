@@ -28,6 +28,7 @@ const Recorder = function(visuals, replay, options) {
 
     var loop = null, // animatter instance
 
+        originalAnimationFrameObject,
 
         samplesCount = 0,
         framesCount  = 0,
@@ -797,6 +798,7 @@ const Recorder = function(visuals, replay, options) {
         }
 
         loop = animitter({fps: options.video.fps}, draw)
+        originalAnimationFrameObject = loop.getRequestAnimationFrameObject()
 
         debug('Recorder: record()')
         userMedia.record()
@@ -804,6 +806,31 @@ const Recorder = function(visuals, replay, options) {
         self.emit(Events.RECORDING, framesCount)
 
         loop.start()
+    }
+
+    // not working yet
+    function restoreAnimationFrameObject() {
+        debug('Recorder: restoreAnimationFrameObject()')
+
+        loop.setRequestAnimationFrameObject(originalAnimationFrameObject)
+    }
+
+    // not working yet
+    function loopWithTimeouts() {
+        debug('Recorder: loopWithTimeouts()')
+
+        function raf(fn) {
+            setTimeout(fn, 1e3 / Math.min(options.video.fps, loop.getFPSLimit()))
+        }
+
+        function cancel(id) {
+            clearTimeout(id)
+        }
+
+        loop.setRequestAnimationFrameObject({
+            requestAnimationFrame: raf,
+            cancelAnimationFrame: cancel
+        })
     }
 
     function buildElement() {
@@ -843,6 +870,12 @@ const Recorder = function(visuals, replay, options) {
             })
             .on(Events.ENABLING_AUDIO, function() {
                 reInitialiseAudio()
+            })
+            .on(Events.INVISIBLE, function() {
+                self.isRecording() && loopWithTimeouts()
+            })
+            .on(Events.VISIBLE, function() {
+                self.isRecording()&& restoreAnimationFrameObject()
             })
     }
 
