@@ -104,16 +104,21 @@ const Container = function(options) {
             self.unload(e)
         })
 
-        if (options.enablePause && options.enableAutoPause) {
-            visibility.onChange(function(visible) {
-                if (visible) {
-                    if (self.isCountingDown())
-                        self.resume()
-                } else if (self.isCountingDown() || self.isRecording()) {
+        visibility.onChange(function(visible) {
+            if (visible) {
+                if (options.isAutoPauseEnabled() && self.isCountingDown()) {
+                    self.resume()
+                }
+
+                self.emit(Events.VISIBLE)
+            } else {
+                if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
                     self.pause('document invisible')
                 }
-            })
-        }
+
+                self.emit(Events.INVISIBLE)
+            }
+        })
 
         if (options.enableSpace)
             window.addEventListener('keypress', function(e) {
