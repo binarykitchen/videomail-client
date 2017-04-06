@@ -1,4 +1,4 @@
-const   util         = require('util'),
+var     util         = require('util'),
         h            = require('hyperscript'),
         hidden       = require('hidden'),
         contains     = require('contains'),
@@ -6,11 +6,11 @@ const   util         = require('util'),
         Events       = require('./../events'),
         EventEmitter = require('./../util/eventEmitter')
 
-const Buttons = function(container, options) {
+var   Buttons = function(container, options) {
 
     EventEmitter.call(this, options, 'Buttons')
 
-    const self = this
+    var   self = this
 
     var buttonsElement,
 
@@ -98,7 +98,7 @@ const Buttons = function(container, options) {
 
     function replaceClickHandler(element, clickHandler) {
 
-        const wrappedClickHandler = function(e) {
+        var   wrappedClickHandler = function(e) {
             e && e.preventDefault()
 
             try {

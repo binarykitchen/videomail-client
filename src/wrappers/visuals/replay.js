@@ -1,4 +1,4 @@
-const   util   = require('util'),
+var     util   = require('util'),
         h      = require('hyperscript'),
         hidden = require('hidden'),
 
@@ -11,11 +11,11 @@ var enableInlineVideo
 if ('undefined' != typeof navigator)
     enableInlineVideo = require('iphone-inline-video')
 
-const Replay = function(parentElement, options) {
+var   Replay = function(parentElement, options) {
 
     EventEmitter.call(this, options, 'Replay')
 
-    const self    = this,
+    var   self    = this,
           browser = new Browser(options)
 
     var built,
@@ -172,7 +172,7 @@ const Replay = function(parentElement, options) {
     }
 
     this.getVideoSource = function(type) {
-        const sources   = replayElement.getElementsByTagName('source'),
+        var   sources   = replayElement.getElementsByTagName('source'),
               l         = sources.length,
               videoType = 'video/' + type
 
@@ -192,7 +192,7 @@ const Replay = function(parentElement, options) {
 
     function setVideoSource(type, src) {
         var source = self.getVideoSource(type)
-        const timestamp = Date.now()
+        var   timestamp = Date.now()
 
         if (src)
             src += '/videomail.' + type + '?' +  timestamp
@@ -235,7 +235,7 @@ const Replay = function(parentElement, options) {
 
     function play(cb) {
         if (replayElement && replayElement.play && replayElement.duration) {
-            const p = replayElement.play()
+            var   p = replayElement.play()
 
             if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
                 p.then(function() {

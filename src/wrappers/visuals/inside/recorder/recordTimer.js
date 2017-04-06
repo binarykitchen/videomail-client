@@ -1,4 +1,4 @@
-const h           = require('hyperscript'),
+var   h           = require('hyperscript'),
       hidden      = require('hidden')
 
 module.exports = function(visuals, recordNote, options) {
@@ -44,7 +44,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     this.check = function(opts) {
-        const newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
+        var   newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
 
         // performance optimisation (another reason we need react here!)
         if (newCountdown !== countdown) {
@@ -55,7 +55,7 @@ module.exports = function(visuals, recordNote, options) {
     }
 
     function update() {
-        const mins = parseInt(countdown / 60, 10),
+        var   mins = parseInt(countdown / 60, 10),
               secs = countdown - mins * 60
 
         if (!nearComputed || !endNighComputed) {

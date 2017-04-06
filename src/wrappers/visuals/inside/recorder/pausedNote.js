@@ -1,4 +1,4 @@
-const h      = require('hyperscript'),
+var   h      = require('hyperscript'),
       hidden = require('hidden'),
 
       VideomailError  = require('./../../../../util/videomailError')

@@ -1,4 +1,4 @@
-const   isPOT           = require('is-power-of-two'),
+var     isPOT           = require('is-power-of-two'),
         AudioSample     = require('audio-sample'),
 
         VideomailError  = require('./videomailError'),
@@ -12,7 +12,7 @@ module.exports = function(userMedia, options) {
     function getAudioContext() {
         // instantiate only once
         if (!window.audioContext) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext
+            var   AudioContext = window.AudioContext || window.webkitAudioContext
             window.audioContext = new AudioContext
         }
 
@@ -25,7 +25,7 @@ module.exports = function(userMedia, options) {
 
         // Returns a Float32Array containing the PCM data associated with the channel,
         // defined by the channel parameter (with 0 representing the first channel)
-        const float32Array = e.inputBuffer.getChannelData(0)
+        var   float32Array = e.inputBuffer.getChannelData(0)
 
         cb(new AudioSample(float32Array))
     }
@@ -34,7 +34,7 @@ module.exports = function(userMedia, options) {
         options.debug('AudioRecorder: init()')
 
         // creates an audio node from the microphone incoming stream
-        const   volume     = getAudioContext().createGain(),
+        var     volume     = getAudioContext().createGain(),
                 channels   = CHANNELS
 
         var audioInput

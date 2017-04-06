@@ -1,15 +1,15 @@
-const util           = require('util'),
+var   util           = require('util'),
       h              = require('hyperscript'),
       hidden         = require('hidden'),
 
       EventEmitter   = require('./../../util/eventEmitter'),
       Events         = require('./../../events')
 
-const Notifier = function(visuals, options) {
+var   Notifier = function(visuals, options) {
 
     EventEmitter.call(this, options, 'Notifier')
 
-    const self    = this,
+    var   self    = this,
           debug   = options && options.debug
 
     var notifyElement,
@@ -58,7 +58,7 @@ const Notifier = function(visuals, options) {
     function onBeginVideoEncoding() {
         visuals.beginWaiting()
 
-        const lead = options.text.encoding + ' …'
+        var   lead = options.text.encoding + ' …'
 
         self.notify(lead, null, {
             stillWait: true,
@@ -148,7 +148,7 @@ const Notifier = function(visuals, options) {
     }
 
     this.error = function(err) {
-        const message     = err.message ? err.message.toString() : err.toString(),
+        var   message     = err.message ? err.message.toString() : err.toString(),
               explanation = err.explanation ? err.explanation.toString() : null
 
         if (!message)
@@ -230,7 +230,7 @@ const Notifier = function(visuals, options) {
         if (!notifyOptions)
             notifyOptions = {}
 
-        const stillWait        = notifyOptions.stillWait ? notifyOptions.stillWait : false,
+        var   stillWait        = notifyOptions.stillWait ? notifyOptions.stillWait : false,
               entertain        = notifyOptions.entertain  ? notifyOptions.entertain  : false,
               blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
               isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
