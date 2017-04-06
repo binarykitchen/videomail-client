@@ -1,9 +1,9 @@
-const h      = require('hyperscript'),
+var   h      = require('hyperscript'),
       hidden = require('hidden')
 
 module.exports = function(visuals, options) {
 
-    const self = this
+    var   self = this
 
     var countdownElement,
         intervalId,

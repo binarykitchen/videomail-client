@@ -1,4 +1,4 @@
-const UAParser        = require('ua-parser-js'),
+var   UAParser        = require('ua-parser-js'),
       defined         = require('defined'),
       VideomailError  = require('./videomailError')
 
@@ -6,7 +6,7 @@ module.exports = function(options) {
 
     options = options || {}
 
-    const   firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
+    var     firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
             edgeDownload     = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126',
             chromeDownload   = 'http://www.google.com/chrome/',
             chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
@@ -113,7 +113,7 @@ module.exports = function(options) {
 
     // just temporary
     this.canRecord = function() {
-        const hasNavigator = typeof navigator !== 'undefined'
+        var   hasNavigator = typeof navigator !== 'undefined'
         var canRecord = false
 
         if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {

@@ -49,7 +49,7 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            const   VideomailClient = require('videomail-client'),
+            var     VideomailClient = require('videomail-client'),
                     videomailClient = new VideomailClient({
                         verbose: true,
                         video: {limitSeconds: 120, width: 320, countdown: false},
@@ -74,8 +74,8 @@
                     signLanguageOption = document.getElementById('signLanguageOption'),
                     body               = document.getElementById('body')
 
-            const onSubmitted = function(videomail, response) {
-                const statusHeader = document.querySelector('h3.status')
+            var   onSubmitted = function(videomail, response) {
+                var   statusHeader = document.querySelector('h3.status')
 
                 // status has been generated on server side, see gulp task 'connect'
                 statusHeader.innerHTML = response.status

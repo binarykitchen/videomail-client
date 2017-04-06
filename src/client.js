@@ -1,4 +1,4 @@
-const merge           = require('merge-recursive'),
+var   merge           = require('merge-recursive'),
      readystate      = require('readystate'),
      util            = require('util'),
 
@@ -17,7 +17,7 @@ const merge           = require('merge-recursive'),
 var collectLogger, browser
 
 function adjustOptions(options) {
-    const localOptions = merge.recursive(defaultOptions, options || {})
+    var   localOptions = merge.recursive(defaultOptions, options || {})
 
     collectLogger = collectLogger || new CollectLogger(localOptions)
 
@@ -38,7 +38,7 @@ function getBrowser(localOptions) {
 
 var VideomailClient = function(options) {
 
-    const localOptions = adjustOptions(options),
+    var   localOptions = adjustOptions(options),
           container    = new Container(localOptions)
 
     var replay

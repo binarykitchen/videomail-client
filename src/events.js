@@ -1,4 +1,4 @@
-const keymirror = require('keymirror')
+var   keymirror = require('keymirror')
 
 module.exports = keymirror({
   BUILT:                null, // all dom elements are ready, are in the DOM

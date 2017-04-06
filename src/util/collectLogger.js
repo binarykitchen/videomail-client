@@ -1,17 +1,17 @@
-const   util    = require('util'),
+var     util    = require('util'),
         Browser = require('./browser')
 
 module.exports = function(localOptions) {
 
     localOptions = localOptions || {}
 
-    const   browser     = new Browser(localOptions),
+    var     browser     = new Browser(localOptions),
             logger      = localOptions.logger || console,
             containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id',
             stack       = []
 
     function lifo(level, parameters) {
-        const line = util.format.apply(util, parameters)
+        var   line = util.format.apply(util, parameters)
 
         if (stack.length > localOptions.logStackSize)
             stack.pop()
@@ -30,11 +30,11 @@ module.exports = function(localOptions) {
     this.debug = function() {
         if (localOptions.verbose) {
 
-            const args = [].slice.call(arguments, 0)
+            var   args = [].slice.call(arguments, 0)
 
             args[0] = addContainerId(args[0])
 
-            const output = lifo('debug', args)
+            var   output = lifo('debug', args)
 
             if (browser.isFirefox()) {
                 logger.debug(output)
@@ -55,13 +55,13 @@ module.exports = function(localOptions) {
     }
 
     this.error = function() {
-        const args = [].slice.call(arguments, 0)
+        var   args = [].slice.call(arguments, 0)
         args[0] = addContainerId(args[0])
         logger.error(lifo('error', args))
     }
 
     this.warn = function() {
-        const args = [].slice.call(arguments, 0)
+        var   args = [].slice.call(arguments, 0)
         args[0] = addContainerId(args[0])
         logger.warn(lifo('warn', args))
     }

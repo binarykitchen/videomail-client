@@ -1,8 +1,8 @@
-const numberIsInteger = require('number-is-integer'),
+var   numberIsInteger = require('number-is-integer'),
       VideomailError  = require('./../util/videomailError')
 
 function getOuterWidth(element) {
-    const rect = element.getBoundingClientRect()
+    var   rect = element.getBoundingClientRect()
     return rect.right - rect.left
 }
 
@@ -28,8 +28,8 @@ function figureMinHeight(height, options) {
 module.exports = {
 
     limitWidth: function(element, width) {
-        const outerWidth   = getOuterWidth(element)
-        const limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
+        var   outerWidth   = getOuterWidth(element)
+        var   limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
 
         if (numberIsInteger(limitedWidth) && limitedWidth < 1)
             throw VideomailError.create('Limited width cannot be less than 1!')
@@ -43,7 +43,7 @@ module.exports = {
         if (numberIsInteger(height) && height < 1)
             throw VideomailError.create('Passed limit-height argument cannot be less than 1!')
         else {
-            const limitedHeight = Math.min(
+            var   limitedHeight = Math.min(
                 height,
                 document.body.scrollHeight,
                 document.documentElement.clientHeight
@@ -58,7 +58,7 @@ module.exports = {
 
     calculateWidth: function(options) {
         var height = options.videoHeight || null
-        const ratio  = options.ratio     || options.getRatio()
+        var   ratio  = options.ratio     || options.getRatio()
 
         height = figureMinHeight(height, options)
 
@@ -68,7 +68,7 @@ module.exports = {
         if (numberIsInteger(height) && height < 1)
             throw new Error('Height cannot be smaller than 1 when calculating width.')
         else {
-            const calculatedWidth = parseInt(height / ratio)
+            var   calculatedWidth = parseInt(height / ratio)
 
             if (calculatedWidth < 1)
                 throw new Error('Calculated width cannot be smaller than 1!')
@@ -81,7 +81,7 @@ module.exports = {
         var width = options.videoWidth || null,
             height
 
-        const ratio = options.ratio || options.getRatio()
+        var   ratio = options.ratio || options.getRatio()
 
         if (options.hasDefinedWidth())
             width = options.video.width
