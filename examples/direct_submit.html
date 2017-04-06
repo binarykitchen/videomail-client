@@ -27,7 +27,7 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            const   VideomailClient = require('videomail-client'),
+            var     VideomailClient = require('videomail-client'),
                     videomailClient = new VideomailClient({
                       verbose:      true,
                       enablePause:  false,
@@ -35,7 +35,7 @@
                     ),
                     startOverButton = document.getElementById('startOver')
 
-            const onSubmitted = function(videomail) {
+            var   onSubmitted = function(videomail) {
                 this.replay(videomail, 'viewVideo')
 
                 startOverButton.onclick = this.startOver

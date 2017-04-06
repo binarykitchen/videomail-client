@@ -1,4 +1,4 @@
-const   insertCss      = require('insert-css'),
+var     insertCss      = require('insert-css'),
         merge          = require('merge-recursive'),
         hidden         = require('hidden'),
         util           = require('util'),
@@ -16,11 +16,11 @@ const   insertCss      = require('insert-css'),
         VideomailError = require('./../util/videomailError'),
         css            = require('./../assets/css/main.min.css.js')
 
-const Container = function(options) {
+var   Container = function(options) {
 
     EventEmitter.call(this, options, 'Container')
 
-    const self  = this,
+    var   self  = this,
 
         visibility      = Visibility(),
         visuals         = new Visuals(this, options),
@@ -62,12 +62,12 @@ const Container = function(options) {
     }
 
     function buildForm() {
-        const formElement = getFormElement()
+        var   formElement = getFormElement()
 
         if (formElement) {
             form = new Form(self, formElement, options)
 
-            const submitButton = form.findSubmitButton()
+            var   submitButton = form.findSubmitButton()
             submitButton && buttons.setSubmitButton(submitButton)
 
             form.build()
@@ -122,11 +122,11 @@ const Container = function(options) {
 
         if (options.enableSpace)
             window.addEventListener('keypress', function(e) {
-                const tagName = e.target.tagName
+                var   tagName = e.target.tagName
 
                 if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
 
-                    const code = e.keyCode ? e.keyCode : e.which
+                    var   code = e.keyCode ? e.keyCode : e.which
 
                     if (code == 32) {
                         e.preventDefault()
@@ -165,7 +165,7 @@ const Container = function(options) {
     // this will just set the width but not the height because
     // it can be a form with more inputs elements
     function correctDimensions() {
-        const width = visuals.getRecorderWidth(true);
+        var   width = visuals.getRecorderWidth(true);
 
         if (width < 1)
             throw VideomailError.create('Recorder width cannot be less than 1!')
@@ -193,7 +193,7 @@ const Container = function(options) {
     }
 
     function submitVideomail(formData, method, cb) {
-        const FORM_FIELDS = {
+        var   FORM_FIELDS = {
                 'subject':      options.selectors.subjectInputName,
                 'from':         options.selectors.fromInputName,
                 'to':           options.selectors.toInputName,
@@ -386,7 +386,7 @@ const Container = function(options) {
 
             if (!hasError) {
 
-                const paused = self.isPaused()
+                var   paused = self.isPaused()
 
                 if (paused) {
                     buttons.adjustButtonsForPause()
@@ -472,7 +472,7 @@ const Container = function(options) {
         if (runValidation) {
             this.emit(Events.VALIDATING)
 
-            const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled()
+            var   visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled()
             var whyInvalid
 
             if (form) {
@@ -488,7 +488,7 @@ const Container = function(options) {
                             whyInvalid = 'Video is not recorded'
                     }
                 } else {
-                    const invalidInput = form.getInvalidElement()
+                    var   invalidInput = form.getInvalidElement()
 
                     if (invalidInput) {
                         whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid'
@@ -539,10 +539,10 @@ const Container = function(options) {
         this.disableForm(true)
         this.emit(Events.SUBMITTING)
 
-        const post = isPost(method)
+        var   post = isPost(method)
 
         // a closure so that we can access method
-        const submitVideomailCallback = function(err1, videomail, videomailResponse) {
+        var   submitVideomailCallback = function(err1, videomail, videomailResponse) {
             if (err1) {
                 finalizeSubmissions(err1, method, videomail, videomailResponse)
 

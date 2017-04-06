@@ -36,7 +36,7 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            const   VideomailClient = require('videomail-client'),
+            var     VideomailClient = require('videomail-client'),
                     videomailClient = new VideomailClient({
                         verbose:              true,
                         enableAutoValidation: false,
@@ -53,14 +53,14 @@
 
             function setAttribute(videomail, name) {
                 if (videomail[name]) {
-                    const element = document.querySelector('a.' + name)
+                    var   element = document.querySelector('a.' + name)
                     element.innerHTML = videomail[name]
                     element.setAttribute('href', videomail[name])
                     element.parentElement.style.display = 'block'
                 }
             }
 
-            const onSubmitted = function(videomail) {
+            var   onSubmitted = function(videomail) {
                 setAttribute(videomail, 'url')
                 setAttribute(videomail, 'webm')
                 setAttribute(videomail, 'mp4')

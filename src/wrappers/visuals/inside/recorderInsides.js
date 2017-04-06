@@ -1,4 +1,4 @@
-const util         = require('util'),
+var   util         = require('util'),
 
       Events       = require('./../../../events'),
       EventEmitter = require('./../../../util/eventEmitter'),
@@ -8,11 +8,11 @@ const util         = require('util'),
       RecordNote  = require('./recorder/recordNote'),
       RecordTimer = require('./recorder/recordTimer')
 
-const RecorderInsides = function(visuals, options) {
+var   RecorderInsides = function(visuals, options) {
 
     EventEmitter.call(this, options, 'RecorderInsides')
 
-    const self = this,
+    var   self = this,
 
           recordNote  = new RecordNote(visuals),
           recordTimer = new RecordTimer(visuals, recordNote, options)

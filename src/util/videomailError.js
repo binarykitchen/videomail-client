@@ -1,10 +1,10 @@
 // https://github.com/tgriesser/create-error
-const createError = require('create-error'),
+var   createError = require('create-error'),
       pretty      = require('./pretty'),
 
       VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
-const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
+var   VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
     'explanation': undefined,
     'logLines':    undefined
 })
@@ -42,7 +42,7 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
 
     // Require Browser here, not at the top of the file to avoid
     // recursion. Because the Browser class is requiring this file as well.
-    const Browser = require('./browser'),
+    var   Browser = require('./browser'),
           browser = new Browser(options)
 
     var errType,
@@ -186,7 +186,7 @@ VideomailError.create = function(err, explanation, options, isBrowserProblem) {
         message.stack = stack
     }
 
-    const videomailError = new VideomailError(message, {
+    var   videomailError = new VideomailError(message, {
         explanation: explanation,
         logLines:    logLines
     })

@@ -24,7 +24,7 @@ module.exports = function(window, navigator) {
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
 
-    const   methods = [
+    var     methods = [
                 'debug', 'groupCollapsed', 'groupEnd', 'error',
                 'exception', 'info', 'log', 'trace', 'warn'
             ],
