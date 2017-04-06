@@ -1,4 +1,4 @@
-const   util   = require('util'),
+var     util   = require('util'),
         h      = require('hyperscript'),
         hidden = require('hidden'),
 
@@ -10,11 +10,11 @@ const   util   = require('util'),
         EventEmitter    = require('./../util/eventEmitter'),
         Events          = require('./../events')
 
-const Visuals = function(container, options) {
+var   Visuals = function(container, options) {
 
     EventEmitter.call(this, options, 'Visuals')
 
-    const self  = this,
+    var   self  = this,
 
         replay          = new Replay(this, options),
         recorder        = new Recorder(this, replay, options),
@@ -102,7 +102,7 @@ const Visuals = function(container, options) {
         if (!visualsElement) {
             visualsElement = h('div.' + options.selectors.visualsClass)
 
-            const buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+            var   buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
             // make sure it's placed before the buttons
             if (buttonsElement)
