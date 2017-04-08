@@ -9,17 +9,17 @@
         <div id="videomail"></div>
         <script src="/videomail-client.js"></script>
         <script>
-            var   VideomailClient = require('videomail-client'),
-                    videomailClient = new VideomailClient({
-                        verbose:       true,
-                        disableSubmit: true,
-                        enablePause:   false,
-                        video: {
-                            countdown:    false,
-                            width:        280,
-                            limitSeconds: 20
-                        }
-                    })
+            var VideomailClient = require('videomail-client')
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              disableSubmit: true,
+              enablePause: false,
+              video: {
+                countdown: false,
+                width: 280,
+                limitSeconds: 20
+              }
+            })
 
             videomailClient.show()
         </script>

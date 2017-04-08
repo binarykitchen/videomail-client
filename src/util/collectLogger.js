@@ -1,72 +1,66 @@
-var     util    = require('util'),
-        Browser = require('./browser')
+var util = require('util')
+var Browser = require('./browser')
 
-module.exports = function(localOptions) {
+module.exports = function (localOptions) {
+  localOptions = localOptions || {}
 
-    localOptions = localOptions || {}
+  var browser = new Browser(localOptions)
+  var logger = localOptions.logger || console
+  var containerId = (localOptions.selectors && localOptions.selectors.containerId) || 'undefined container id'
+  var stack = []
 
-    var     browser     = new Browser(localOptions),
-            logger      = localOptions.logger || console,
-            containerId = localOptions.selectors && localOptions.selectors.containerId || 'undefined container id',
-            stack       = []
+  function lifo (level, parameters) {
+    var line = util.format.apply(util, parameters)
 
-    function lifo(level, parameters) {
-        var   line = util.format.apply(util, parameters)
+    if (stack.length > localOptions.logStackSize) { stack.pop() }
 
-        if (stack.length > localOptions.logStackSize)
-            stack.pop()
+    stack.push('[' + level + '] ' + line)
 
-        stack.push('[' + level + '] ' +  line)
+    return line
+  }
 
-        return line
-    }
-
-    function addContainerId(firstArgument) {
-        return '#' + containerId + ' > ' + firstArgument
-    }
+  function addContainerId (firstArgument) {
+    return '#' + containerId + ' > ' + firstArgument
+  }
 
     // workaround: since we cannot overwrite console.log without having the correct file and line number
     // we'll use groupCollapsed() and trace() instead to get these.
-    this.debug = function() {
-        if (localOptions.verbose) {
+  this.debug = function () {
+    if (localOptions.verbose) {
+      var args = [].slice.call(arguments, 0)
 
-            var   args = [].slice.call(arguments, 0)
+      args[0] = addContainerId(args[0])
 
-            args[0] = addContainerId(args[0])
+      var output = lifo('debug', args)
 
-            var   output = lifo('debug', args)
-
-            if (browser.isFirefox()) {
-                logger.debug(output)
-
-            } else if (logger.groupCollapsed) {
-                logger.groupCollapsed(output)
-                logger.trace('Trace')
-                logger.groupEnd()
-
-            } else if (logger.debug) {
-                logger.debug(output)
-
-            } else {
+      if (browser.isFirefox()) {
+        logger.debug(output)
+      } else if (logger.groupCollapsed) {
+        logger.groupCollapsed(output)
+        logger.trace('Trace')
+        logger.groupEnd()
+      } else if (logger.debug) {
+        logger.debug(output)
+      } else {
                 // last resort if everything else fails for any weird reasons
-                console.log(output)
-            }
-        }
+        console.log(output)
+      }
     }
+  }
 
-    this.error = function() {
-        var   args = [].slice.call(arguments, 0)
-        args[0] = addContainerId(args[0])
-        logger.error(lifo('error', args))
-    }
+  this.error = function () {
+    var args = [].slice.call(arguments, 0)
+    args[0] = addContainerId(args[0])
+    logger.error(lifo('error', args))
+  }
 
-    this.warn = function() {
-        var   args = [].slice.call(arguments, 0)
-        args[0] = addContainerId(args[0])
-        logger.warn(lifo('warn', args))
-    }
+  this.warn = function () {
+    var args = [].slice.call(arguments, 0)
+    args[0] = addContainerId(args[0])
+    logger.warn(lifo('warn', args))
+  }
 
-    this.getLines = function() {
-        return stack
-    }
+  this.getLines = function () {
+    return stack
+  }
 }

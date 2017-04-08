@@ -36,43 +36,43 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            var     VideomailClient = require('videomail-client'),
-                    videomailClient = new VideomailClient({
-                        verbose:              true,
-                        enableAutoValidation: false,
-                        enablePause: false,
-                        video: {
-                          limitSeconds: 80,
-                          width: 640,
-                          height: 340,
-                          countdown: false,
-                        }
-                    }),
+            var VideomailClient = require('videomail-client')
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              enableAutoValidation: false,
+              enablePause: false,
+              video: {
+                limitSeconds: 80,
+                width: 640,
+                height: 340,
+                countdown: false
+              }
+            })
 
-                    startOverButton = document.getElementById('startOver')
+            var startOverButton = document.getElementById('startOver')
 
-            function setAttribute(videomail, name) {
-                if (videomail[name]) {
-                    var   element = document.querySelector('a.' + name)
-                    element.innerHTML = videomail[name]
-                    element.setAttribute('href', videomail[name])
-                    element.parentElement.style.display = 'block'
-                }
+            function setAttribute (videomail, name) {
+              if (videomail[name]) {
+                var element = document.querySelector('a.' + name)
+                element.innerHTML = videomail[name]
+                element.setAttribute('href', videomail[name])
+                element.parentElement.style.display = 'block'
+              }
             }
 
-            var   onSubmitted = function(videomail) {
-                setAttribute(videomail, 'url')
-                setAttribute(videomail, 'webm')
-                setAttribute(videomail, 'mp4')
+            var onSubmitted = function (videomail) {
+              setAttribute(videomail, 'url')
+              setAttribute(videomail, 'webm')
+              setAttribute(videomail, 'mp4')
 
-                this.replay(videomail, 'viewVideo')
+              this.replay(videomail, 'viewVideo')
 
-                startOverButton.onclick = this.startOver
+              startOverButton.onclick = this.startOver
             }
 
             videomailClient.on(
-                videomailClient.events.SUBMITTED,
-                onSubmitted.bind(videomailClient)
+              videomailClient.events.SUBMITTED,
+              onSubmitted.bind(videomailClient)
             )
 
             videomailClient.show()

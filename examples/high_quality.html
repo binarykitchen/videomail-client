@@ -10,22 +10,22 @@
         <div id="videomail"></div>
         <script src="/videomail-client.js"></script>
         <script>
-            var     VideomailClient = require('videomail-client'),
-                    videomailClient = new VideomailClient({
-                        verbose:            true,
-                        enableAutoPause:    false,
-                        disableSubmit:      true,
-                        video: {
-                            countdown:    false,
-                            fps:          30,
-                            limitSeconds: 60,
-                            width:        1024,
-                            height:       768
-                        },
-                        image: {
-                            quality: .9,
-                        }
-                    })
+            var VideomailClient = require('videomail-client')
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              enableAutoPause: false,
+              disableSubmit: true,
+              video: {
+                countdown: false,
+                fps: 30,
+                limitSeconds: 60,
+                width: 1024,
+                height: 768
+              },
+              image: {
+                quality: 0.9
+              }
+            })
 
             videomailClient.show()
         </script>

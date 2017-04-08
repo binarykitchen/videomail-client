@@ -1,81 +1,80 @@
-const test = require('tape'),
-      h    = require('hyperscript'),
+const test = require('tape')
+const h = require('hyperscript')
 
-      VideomailClient = require('./../../src/client')
+const VideomailClient = require('./../../src/client')
 
 const SILENT = true
 
-function addDivForVideomail() {
-    const body = document.getElementsByTagName('body')[0],
-          div  = h('div#videomail')
+function addDivForVideomail () {
+  const body = document.getElementsByTagName('body')[0]
+  const div = h('div#videomail')
 
-    body.appendChild(div)
+  body.appendChild(div)
 }
 
-test('VideomailClient:', {timeout: 2000}, function(t) {
+test('VideomailClient:', {timeout: 2000}, function (t) {
+  var client
 
-    var client
+  addDivForVideomail()
 
-    addDivForVideomail()
+  t.test('can be instantiated and emits built event', function (tt) {
+    tt.plan(2)
 
-    t.test('can be instantiated and emits built event', function(tt) {
-        tt.plan(2)
+    var consoleFacade = console
 
-        var consoleFacade = console
+    if (SILENT) {
+      consoleFacade.error = function () {}
+      consoleFacade.warn = function () {}
+      consoleFacade.debug = function () {}
+    }
 
-        if (SILENT) {
-            consoleFacade.error = function() {}
-            consoleFacade.warn  = function() {}
-            consoleFacade.debug = function() {}
-        }
+    tt.doesNotThrow(function () {
+      client = new VideomailClient({verbose: !SILENT, logger: consoleFacade})
 
-        tt.doesNotThrow(function() {
-            client = new VideomailClient({verbose: !SILENT, logger: consoleFacade})
-
-            client.once(
+      client.once(
                 client.events.BUILT,
-                function() {
-                    tt.pass("Built event received")
+                function () {
+                  tt.pass('Built event received')
                 }
             )
-        })
     })
+  })
 
     // todo: add test for fn show() once tape-run + electronjs allow getUserMedia access
 
-    t.test('replay without videomail parameter emits error', function(tt) {
-        tt.plan(1)
+  t.test('replay without videomail parameter emits error', function (tt) {
+    tt.plan(1)
 
-        client.once(
+    client.once(
             client.events.ERROR,
-            function() {
-                tt.pass("Error event received")
+            function () {
+              tt.pass('Error event received')
             }
         )
 
-        client.replay()
-    })
+    client.replay()
+  })
 
-    t.test('hiding does not throw error and emits event', function(tt) {
-        tt.plan(2)
+  t.test('hiding does not throw error and emits event', function (tt) {
+    tt.plan(2)
 
-        client.once(
+    client.once(
             client.events.HIDE,
-            function() {
-                tt.pass("Hide event received")
+            function () {
+              tt.pass('Hide event received')
             }
         )
 
-        tt.doesNotThrow(function() {
-            client.hide()
-        })
+    tt.doesNotThrow(function () {
+      client.hide()
     })
+  })
 
-    t.test('unload does not throw an error and emits event', function(tt) {
-        tt.plan(1)
+  t.test('unload does not throw an error and emits event', function (tt) {
+    tt.plan(1)
 
-        tt.doesNotThrow(function() {
-            client.unload()
-        })
+    tt.doesNotThrow(function () {
+      client.unload()
     })
+  })
 })
