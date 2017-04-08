@@ -1,366 +1,328 @@
-var     h = require('hyperscript'),
+var h = require('hyperscript')
 
-        AudioRecorder   = require('./../../util/audioRecorder'),
-        VideomailError  = require('./../../util/videomailError'),
-        EventEmitter    = require('./../../util/eventEmitter'),
-        MEDIA_EVENTS    = require('./../../util/mediaEvents'),
-        Events          = require('./../../events')
+var AudioRecorder = require('./../../util/audioRecorder')
+var VideomailError = require('./../../util/videomailError')
+var EventEmitter = require('./../../util/eventEmitter')
+var MEDIA_EVENTS = require('./../../util/mediaEvents')
+var Events = require('./../../events')
 
-module.exports = function(recorder, options) {
+module.exports = function (recorder, options) {
+  EventEmitter.call(this, options, 'UserMedia')
 
-    EventEmitter.call(this, options, 'UserMedia')
+  var rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia()
+  var self = this
 
-    var   rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia(),
-          self   = this
+  var paused = false
+  var record = false
 
-    var paused = false,
-        record = false,
+  var audioRecorder
+  var currentVisualStream
 
-        audioRecorder,
-        currentVisualStream
+  function attachMediaStream (stream) {
+    currentVisualStream = stream
 
-    function attachMediaStream(stream) {
-        currentVisualStream = stream
+    if (typeof rawVisualUserMedia.srcObject !== 'undefined') { rawVisualUserMedia.srcObject = stream } else if (typeof rawVisualUserMedia.src !== 'undefined') {
+      var URL = window.URL || window.webkitURL
+      rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
+    } else { throw VideomailError.create('Error attaching stream to element.') }
+  }
 
-        if (typeof rawVisualUserMedia.srcObject !== 'undefined')
-            rawVisualUserMedia.srcObject = stream
+  function setVisualStream (localMediaStream) {
+    if (localMediaStream) { attachMediaStream(localMediaStream) } else {
+      rawVisualUserMedia.removeAttribute('srcObject')
+      rawVisualUserMedia.removeAttribute('src')
 
-        else if (typeof rawVisualUserMedia.src !== 'undefined') {
-            var   URL = window.URL || window.webkitURL
-            rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
-
-        } else
-            throw VideomailError.create('Error attaching stream to element.')
+      currentVisualStream = null
     }
+  }
 
-    function setVisualStream(localMediaStream) {
-        if (localMediaStream)
-            attachMediaStream(localMediaStream)
-        else {
-            rawVisualUserMedia.removeAttribute('srcObject')
-            rawVisualUserMedia.removeAttribute('src')
+  function getVisualStream () {
+    if (rawVisualUserMedia.mozSrcObject) { return rawVisualUserMedia.mozSrcObject } else if (rawVisualUserMedia.srcObject) { return rawVisualUserMedia.srcObject } else { return currentVisualStream }
+  }
 
-            currentVisualStream = null
-        }
+  function hasEnded () {
+    if (rawVisualUserMedia.ended) { return rawVisualUserMedia.ended } else {
+      var visualStream = getVisualStream()
+      return visualStream && visualStream.ended
     }
+  }
 
-    function getVisualStream() {
-        if (rawVisualUserMedia.mozSrcObject)
-            return rawVisualUserMedia.mozSrcObject
-
-        else if (rawVisualUserMedia.srcObject)
-            return rawVisualUserMedia.srcObject
-
-        else
-            return currentVisualStream
-    }
-
-    function hasEnded() {
-        if (rawVisualUserMedia.ended)
-            return rawVisualUserMedia.ended
-        else {
-            var   visualStream = getVisualStream()
-            return visualStream && visualStream.ended
-        }
-    }
-
-    function hasInvalidDimensions() {
-        if ((rawVisualUserMedia.videoWidth && rawVisualUserMedia.videoWidth < 3) ||
+  function hasInvalidDimensions () {
+    if ((rawVisualUserMedia.videoWidth && rawVisualUserMedia.videoWidth < 3) ||
             (rawVisualUserMedia.height && rawVisualUserMedia.height < 3)) {
-            return true
-        }
+      return true
+    }
+  }
+
+  function getTracks (localMediaStream) {
+    var tracks
+
+    if (localMediaStream && localMediaStream.getTracks) { tracks = localMediaStream.getTracks() }
+
+    return tracks
+  }
+
+  function getVideoTracks (localMediaStream) {
+    var videoTracks
+
+    if (localMediaStream && localMediaStream.getVideoTracks) { videoTracks = localMediaStream.getVideoTracks() }
+
+    return videoTracks
+  }
+
+  function getFirstVideoTrack (localMediaStream) {
+    var videoTracks = getVideoTracks(localMediaStream)
+    var videoTrack
+
+    if (videoTracks && videoTracks[0]) { videoTrack = videoTracks[0] }
+
+    return videoTrack
+  }
+
+  this.init = function (localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
+    this.stop(localMediaStream, true)
+
+    var onPlayReached = false
+    var onLoadedMetaDataReached = false
+
+    if (options && options.isAudioEnabled()) { audioRecorder = audioRecorder || new AudioRecorder(this, options) }
+
+    function audioRecord () {
+      self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord)
+      audioRecorder && audioRecorder.record(audioCallback)
     }
 
-    function getTracks(localMediaStream) {
-        var tracks
-
-        if (localMediaStream && localMediaStream.getTracks)
-            tracks = localMediaStream.getTracks()
-
-        return tracks
+    function logEvent (event, params) {
+      options.debug('UserMedia: ... event ' + event, JSON.stringify(params))
     }
 
-    function getVideoTracks(localMediaStream) {
-        var videoTracks
-
-        if (localMediaStream && localMediaStream.getVideoTracks)
-            videoTracks = localMediaStream.getVideoTracks()
-
-        return videoTracks
-    }
-
-    function getFirstVideoTrack(localMediaStream) {
-        var   videoTracks = getVideoTracks(localMediaStream)
-        var videoTrack
-
-        if (videoTracks && videoTracks[0])
-            videoTrack = videoTracks[0]
-
-        return videoTrack
-    }
-
-    this.init = function(localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
-
-        this.stop(localMediaStream, true)
-
-        var onPlayReached           = false,
-            onLoadedMetaDataReached = false
-
-        if (options && options.isAudioEnabled())
-            audioRecorder = audioRecorder || new AudioRecorder(this, options)
-
-        function audioRecord() {
-            self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord)
-            audioRecorder && audioRecorder.record(audioCallback)
-        }
-
-        function logEvent(event, params) {
-            options.debug('UserMedia: ... event ' + event, JSON.stringify(params))
-        }
-
-        function fireCallbacks() {
-            var   readyState = rawVisualUserMedia.readyState
+    function fireCallbacks () {
+      var readyState = rawVisualUserMedia.readyState
 
             // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
-            options.debug(
+      options.debug(
                 'UserMedia: fireCallbacks(' +
                 'readyState=' + readyState + ', ' +
                 'onPlayReached=' + onPlayReached + ', ' +
                 'onLoadedMetaDataReached=' + onLoadedMetaDataReached + ')'
             )
 
-            if (onPlayReached && onLoadedMetaDataReached) {
-                videoCallback()
+      if (onPlayReached && onLoadedMetaDataReached) {
+        videoCallback()
 
-                if (audioRecorder && audioCallback) {
-                    try {
-                        audioRecorder.init(localMediaStream)
-                    } catch (exc) {
-                        self.emit(Events.ERROR, exc)
-                    }
+        if (audioRecorder && audioCallback) {
+          try {
+            audioRecorder.init(localMediaStream)
+          } catch (exc) {
+            self.emit(Events.ERROR, exc)
+          }
 
-                    self.on(Events.SENDING_FIRST_FRAME, audioRecord)
-                }
-            }
+          self.on(Events.SENDING_FIRST_FRAME, audioRecord)
         }
+      }
+    }
 
-        function onPlay() {
-            try {
-                logEvent('play', {audio: options.isAudioEnabled()})
+    function onPlay () {
+      try {
+        logEvent('play', {audio: options.isAudioEnabled()})
 
-                rawVisualUserMedia.removeEventListener &&
+        rawVisualUserMedia.removeEventListener &&
                 rawVisualUserMedia.removeEventListener('play', onPlay)
 
-                localMediaStream.removeEventListener &&
+        localMediaStream.removeEventListener &&
                 localMediaStream.removeEventListener('ended', onPlay)
 
-                if (hasEnded() || hasInvalidDimensions())
-                    endedEarlyCallback(
+        if (hasEnded() || hasInvalidDimensions()) {
+          endedEarlyCallback(
                         VideomailError.create(
                             'Already busy',
                             'Probably another browser window is using your webcam?',
                             options
                         )
                     )
-                else {
-                    onPlayReached = true
-                    fireCallbacks()
-                }
-            } catch (exc) {
-                self.emit(Events.ERROR, exc)
-            }
+        } else {
+          onPlayReached = true
+          fireCallbacks()
         }
+      } catch (exc) {
+        self.emit(Events.ERROR, exc)
+      }
+    }
 
         // player modifications to perform that must wait until `loadedmetadata` has been triggered
-        function onLoadedMetaData() {
-            logEvent('loadedmetadata', {readyState: rawVisualUserMedia.readyState})
+    function onLoadedMetaData () {
+      logEvent('loadedmetadata', {readyState: rawVisualUserMedia.readyState})
 
-            rawVisualUserMedia.removeEventListener &&
+      rawVisualUserMedia.removeEventListener &&
             rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
 
-            if (!hasEnded() && !hasInvalidDimensions()) {
-                self.emit(Events.LOADED_META_DATA)
+      if (!hasEnded() && !hasInvalidDimensions()) {
+        self.emit(Events.LOADED_META_DATA)
 
                 // for android devices, we cannot call play() unless meta data has been loaded!
-                rawVisualUserMedia.play()
+        rawVisualUserMedia.play()
 
-                onLoadedMetaDataReached = true
-                fireCallbacks()
-            }
-        }
+        onLoadedMetaDataReached = true
+        fireCallbacks()
+      }
+    }
 
-        try {
-            var   videoTrack = getFirstVideoTrack(localMediaStream)
+    try {
+      var videoTrack = getFirstVideoTrack(localMediaStream)
 
-            if (!videoTrack)
-                options.debug('UserMedia: detected (but no video tracks exist')
-            else {
-                var description
+      if (!videoTrack) { options.debug('UserMedia: detected (but no video tracks exist') } else {
+        var description
 
-                if (videoTrack.label && videoTrack.label.length > 0)
-                    description = videoTrack.label
-                else
-                    description = videoTrack.kind
+        if (videoTrack.label && videoTrack.label.length > 0) { description = videoTrack.label } else { description = videoTrack.kind }
 
-                options.debug('UserMedia: detected', description ? description : '')
-            }
+        options.debug('UserMedia: detected', description || '')
+      }
 
             // very useful i think, so leave this and just use options.debug()
-            var   heavyDebugging = true
+      var heavyDebugging = true
 
-            if (heavyDebugging) {
-                var   outputEvent = function(e) {
-                    logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
+      if (heavyDebugging) {
+        var outputEvent = function (e) {
+          logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
 
                     // remove myself
-                    rawVisualUserMedia.removeEventListener &&
+          rawVisualUserMedia.removeEventListener &&
                     rawVisualUserMedia.removeEventListener(e.type, outputEvent)
-                }
+        }
 
-                MEDIA_EVENTS.forEach(function(eventName) {
-                    rawVisualUserMedia.addEventListener(eventName, outputEvent, false)
-                })
-            }
+        MEDIA_EVENTS.forEach(function (eventName) {
+          rawVisualUserMedia.addEventListener(eventName, outputEvent, false)
+        })
+      }
 
-            rawVisualUserMedia.addEventListener('loadedmetadata',  onLoadedMetaData)
-            rawVisualUserMedia.addEventListener('play',            onPlay)
+      rawVisualUserMedia.addEventListener('loadedmetadata', onLoadedMetaData)
+      rawVisualUserMedia.addEventListener('play', onPlay)
 
             // experimental, not sure if this is ever needed/called? since 2 apr 2017
             // An error occurs while fetching the media data.
             // Error is an object with the code MEDIA_ERR_NETWORK or higher.
             // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
-            rawVisualUserMedia.addEventListener('error', function(err) {
-                self.emit(Events.ERROR, VideomailError.create(
+      rawVisualUserMedia.addEventListener('error', function (err) {
+        self.emit(Events.ERROR, VideomailError.create(
                     'User Media Error',
                     err.toString(),
                     options
                 ))
-            })
+      })
 
-            setVisualStream(localMediaStream)
+      setVisualStream(localMediaStream)
 
-            rawVisualUserMedia.play()
-        } catch (exc) {
-            self.emit(Events.ERROR, exc)
-        }
+      rawVisualUserMedia.play()
+    } catch (exc) {
+      self.emit(Events.ERROR, exc)
     }
+  }
 
-    this.isReady = function() {
-        return !!rawVisualUserMedia.src
-    }
+  this.isReady = function () {
+    return !!rawVisualUserMedia.src
+  }
 
-    this.stop = function(visualStream, aboutToInitialize) {
-        try {
+  this.stop = function (visualStream, aboutToInitialize) {
+    try {
             // do not stop "too much" when going to initialize anyway
-            if (!aboutToInitialize) {
-                if (!visualStream)
-                    visualStream = getVisualStream()
+      if (!aboutToInitialize) {
+        if (!visualStream) { visualStream = getVisualStream() }
 
-                var   tracks = getTracks(visualStream)
+        var tracks = getTracks(visualStream)
 
-                if (tracks)
-                    tracks.forEach(function(track) {
-                        track.stop()
-                    })
+        if (tracks) {
+          tracks.forEach(function (track) {
+            track.stop()
+          })
+        }
 
                 // will probably become obsolete in one year (after june 2017)
-                visualStream && visualStream.stop && visualStream.stop()
+        visualStream && visualStream.stop && visualStream.stop()
 
-                setVisualStream(null)
+        setVisualStream(null)
 
-                audioRecorder && audioRecorder.stop()
+        audioRecorder && audioRecorder.stop()
 
-                audioRecorder = null
-            }
+        audioRecorder = null
+      }
 
-            paused = record = false
+      paused = record = false
+    } catch (exc) {
+      self.emit(Events.ERROR, exc)
+    }
+  }
 
-        } catch (exc) {
-            self.emit(Events.ERROR, exc)
-        }
+  this.createCanvas = function () {
+    return h('canvas', {
+      width: this.getRawWidth(true),
+      height: this.getRawHeight(true)
+    })
+  }
+
+  this.getVideoHeight = function () {
+    return rawVisualUserMedia.videoHeight
+  }
+
+  this.getVideoWidth = function () {
+    return rawVisualUserMedia.videoWidth
+  }
+
+  this.getRawWidth = function (responsive) {
+    var rawWidth = this.getVideoWidth()
+    var widthDefined = options.hasDefinedWidth()
+
+    if (widthDefined || options.hasDefinedHeight()) {
+      if (!responsive && widthDefined) { rawWidth = options.video.width } else { rawWidth = recorder.calculateWidth(responsive) }
     }
 
-    this.createCanvas = function() {
-        return h('canvas', {
-            width:  this.getRawWidth(true),
-            height: this.getRawHeight(true)
-        })
+    if (responsive) { rawWidth = recorder.limitWidth(rawWidth) }
+
+    return rawWidth
+  }
+
+  this.getRawHeight = function (responsive) {
+    var rawHeight
+
+    if (options.hasDefinedDimension()) {
+      rawHeight = recorder.calculateHeight(responsive)
+
+      if (rawHeight < 1) { throw VideomailError.create('Calculated raw height cannot be less than 1!') }
+    } else {
+      rawHeight = this.getVideoHeight()
+
+      if (rawHeight < 1) { throw VideomailError.create('Raw video height from DOM element cannot be less than 1!') }
     }
 
-    this.getVideoHeight = function() {
-        return rawVisualUserMedia.videoHeight
-    }
+    if (responsive) { rawHeight = recorder.limitHeight(rawHeight) }
 
-    this.getVideoWidth = function() {
-        return rawVisualUserMedia.videoWidth
-    }
+    return rawHeight
+  }
 
-    this.getRawWidth = function(responsive) {
-        var rawWidth = this.getVideoWidth()
-        var   widthDefined = options.hasDefinedWidth()
+  this.getRawVisuals = function () {
+    return rawVisualUserMedia
+  }
 
-        if (widthDefined || options.hasDefinedHeight()) {
-            if (!responsive && widthDefined)
-                rawWidth = options.video.width
-            else
-                rawWidth = recorder.calculateWidth(responsive)
-        }
+  this.pause = function () {
+    paused = true
+  }
 
-        if (responsive)
-            rawWidth = recorder.limitWidth(rawWidth)
+  this.isPaused = function () {
+    return paused
+  }
 
-        return rawWidth
-    }
+  this.resume = function () {
+    paused = false
+  }
 
-    this.getRawHeight = function(responsive) {
-        var rawHeight
+  this.record = function () {
+    record = true
+  }
 
-        if (options.hasDefinedDimension()) {
-            rawHeight = recorder.calculateHeight(responsive)
+  this.isRecording = function () {
+    return record
+  }
 
-            if (rawHeight < 1)
-                throw VideomailError.create('Calculated raw height cannot be less than 1!')
-        } else {
-            rawHeight =  this.getVideoHeight()
-
-            if (rawHeight < 1)
-                throw VideomailError.create('Raw video height from DOM element cannot be less than 1!')
-        }
-
-        if (responsive)
-            rawHeight = recorder.limitHeight(rawHeight)
-
-        return rawHeight
-    }
-
-    this.getRawVisuals = function() {
-        return rawVisualUserMedia
-    }
-
-    this.pause = function() {
-        paused = true
-    }
-
-    this.isPaused = function() {
-        return paused
-    }
-
-    this.resume = function() {
-        paused = false
-    }
-
-    this.record = function() {
-        record = true
-    }
-
-    this.isRecording = function() {
-        return record
-    }
-
-    this.getAudioSampleRate = function() {
-        if (audioRecorder)
-            return audioRecorder.getSampleRate()
-        else
-            return -1
-    }
+  this.getAudioSampleRate = function () {
+    if (audioRecorder) { return audioRecorder.getSampleRate() } else { return -1 }
+  }
 }

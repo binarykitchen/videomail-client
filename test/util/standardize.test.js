@@ -1,15 +1,14 @@
-const test = require('tape'),
+const test = require('tape')
 
-      standardize = require('./../../src/util/standardize'),
-      root        = this
+const standardize = require('./../../src/util/standardize')
+const root = this
 
-test('standardize:', function(t) {
+test('standardize:', function (t) {
+  t.test('can be called', function (tt) {
+    tt.plan(1)
 
-    t.test('can be called', function(tt) {
-        tt.plan(1)
-
-        tt.doesNotThrow(function() {
-            standardize(this, root)
-        })
+    tt.doesNotThrow(function () {
+      standardize(this, root)
     })
+  })
 })

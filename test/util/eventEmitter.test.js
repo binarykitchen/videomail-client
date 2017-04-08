@@ -1,13 +1,12 @@
-const test = require('tape'),
-      EventEmitter = require('./../../src/util/eventEmitter')
+const test = require('tape')
+const EventEmitter = require('./../../src/util/eventEmitter')
 
-test('EventEmitter:', function(t) {
+test('EventEmitter:', function (t) {
+  t.test('can be instantiated', function (tt) {
+    tt.plan(1)
 
-    t.test('can be instantiated', function(tt) {
-        tt.plan(1)
-
-        tt.doesNotThrow(function() {
-            new EventEmitter()
-        })
+    tt.doesNotThrow(function () {
+      return new EventEmitter()
     })
+  })
 })

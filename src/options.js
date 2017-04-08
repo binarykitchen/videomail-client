@@ -1,130 +1,130 @@
 module.exports = {
-    logger:          null,                   // define logging instance. leave null for default, console.
-    logStackSize:    20,                     // limits the stack size of log outputs to collect
-    verbose:         false,                  // set true to log more info
-    baseUrl:         'https://videomail.io', // leave as it, permanent url to post videos
-    socketUrl:       'wss://videomail.io',   // leave as it, permanent url to send frames
-    siteName:        'videomail-client-demo',// Required for the API. If you change it, contact me
-    cache:           true,                   // reduces GET queries when loading videos
-    insertCss:       true,                   // inserts predefined CSS, see examples
-    enablePause:     true,                   // enable pause/resume button
-    enableAutoPause: true,                   // automatically pauses when window becomes inactive
-    enableSpace:     true,                   // hitting space can pause recording
-    disableSubmit:   false,                  // set this to true if you do not want to submit videos,
+  logger: null,                   // define logging instance. leave null for default, console.
+  logStackSize: 20,                     // limits the stack size of log outputs to collect
+  verbose: false,                  // set true to log more info
+  baseUrl: 'https://videomail.io', // leave as it, permanent url to post videos
+  socketUrl: 'wss://videomail.io',   // leave as it, permanent url to send frames
+  siteName: 'videomail-client-demo', // Required for the API. If you change it, contact me
+  cache: true,                   // reduces GET queries when loading videos
+  insertCss: true,                   // inserts predefined CSS, see examples
+  enablePause: true,                   // enable pause/resume button
+  enableAutoPause: true,                   // automatically pauses when window becomes inactive
+  enableSpace: true,                   // hitting space can pause recording
+  disableSubmit: false,                  // set this to true if you do not want to submit videos,
                                              // but just want to record and replay these temporarily
-    enableAutoValidation: true,              // automatically validates all form inputs if any exist and
+  enableAutoValidation: true,              // automatically validates all form inputs if any exist and
                                              // does not /enable disable submit button after recording
                                              // when something else seems invalid.
 
-    enctype: 'application/json',             // enctype for the form submission. currently implemented are:
+  enctype: 'application/json',             // enctype for the form submission. currently implemented are:
                                              // 'application/json' and 'application/x-www-form-urlencoded'
 
     // default CSS selectors you can alter, see examples
-    selectors: {
-        containerId:    'videomail',
-        replayClass:    'replay',
-        userMediaClass: 'userMedia',
-        visualsClass:   'visuals',
-        buttonClass:    null,                // can also be used as a default class for all buttons
-        buttonsClass:   'buttons',
+  selectors: {
+    containerId: 'videomail',
+    replayClass: 'replay',
+    userMediaClass: 'userMedia',
+    visualsClass: 'visuals',
+    buttonClass: null,                // can also be used as a default class for all buttons
+    buttonsClass: 'buttons',
 
-        recordButtonClass:      'record',
-        pauseButtonClass:       'pause',
-        resumeButtonClass:      'resume',
-        previewButtonClass:     'preview',
-        recordAgainButtonClass: 'recordAgain',
-        submitButtonClass:      'submit',
+    recordButtonClass: 'record',
+    pauseButtonClass: 'pause',
+    resumeButtonClass: 'resume',
+    previewButtonClass: 'preview',
+    recordAgainButtonClass: 'recordAgain',
+    submitButtonClass: 'submit',
 
-        subjectInputName: 'subject',               // the form input name for subject
-        fromInputName:    'from',                  // the form input name for the from email
-        toInputName:      'to',                    // the form input name for the to email
-        bodyInputName:    'body',                  // the form input name for the message (body)
+    subjectInputName: 'subject',               // the form input name for subject
+    fromInputName: 'from',                  // the form input name for the from email
+    toInputName: 'to',                    // the form input name for the to email
+    bodyInputName: 'body',                  // the form input name for the message (body)
 
-        keyInputName:       'videomail_key',
-        parentKeyInputName: 'videomail_parent_key',
-        aliasInputName:     'videomail_alias',
+    keyInputName: 'videomail_key',
+    parentKeyInputName: 'videomail_parent_key',
+    aliasInputName: 'videomail_alias',
 
-        formId:         null,                    // automatically detects form if any
-        submitButtonId: null,                    // semi-automatically detects submit button in the form
+    formId: null,                    // automatically detects form if any
+    submitButtonId: null,                    // semi-automatically detects submit button in the form
                                                  // but if that does not work, try using the
-        submitButtonSelector: null               // submitButtonSelector
-    },
+    submitButtonSelector: null               // submitButtonSelector
+  },
 
-    audio: {
-        enabled:    false,      // set to true for experimential audio recording
-        switch:     false,      // enables a switcher for audio recording (on/off)
-        volume:     .2,         // must be between 0 .. 1 but 0.20 is recommeded to avoid
+  audio: {
+    enabled: false,      // set to true for experimential audio recording
+    switch: false,      // enables a switcher for audio recording (on/off)
+    volume: 0.2,         // must be between 0 .. 1 but 0.20 is recommeded to avoid
                                 // distorting at the higher volume peaks
-        bufferSize: 1024        // decides how often the audio is being sampled, must be a power of two.
+    bufferSize: 1024        // decides how often the audio is being sampled, must be a power of two.
                                 // the higher the less traffic, but harder to adjust with rubberband
                                 // to match with the video length on server side during encoding
-    },
+  },
 
-    video: {
-        fps:          15,          // depends on your connection
-        limitSeconds: 30,          // recording automatically stops after that limit
-        countdown:    3,           // set it to 0 or false to disable it
+  video: {
+    fps: 15,          // depends on your connection
+    limitSeconds: 30,          // recording automatically stops after that limit
+    countdown: 3,           // set it to 0 or false to disable it
 
         // it is recommended to set one dimension only and leave the other one to auto
         // because each webcam has a different aspect ratio
 
-        width:        'auto',      // or use an integer for exact pixels
-        height:       'auto'       // or use an integer for exact pixels
-    },
+    width: 'auto',      // or use an integer for exact pixels
+    height: 'auto'       // or use an integer for exact pixels
+  },
 
-    image: {
-        quality:    .35,
-        types:      ['webp', 'jpeg']                // recommended settings to make most of all browsers
-    },
+  image: {
+    quality: 0.35,
+    types: ['webp', 'jpeg']                // recommended settings to make most of all browsers
+  },
 
     // alter these text for internationalisation
-    text: {
-        pausedHeader: 'Paused',
-        pausedHint:   null,
-        sending:      'Teleporting',
-        encoding:     'Encoding',
-        limitReached: 'Limit reached',
-        buttons: {
-            'record':       'Record video',
-            'recordAgain':  'Record again',
-            'resume':       'Resume',
-            'pause':        'Pause',
-            'preview':      'Preview'
-        }
-    },
+  text: {
+    pausedHeader: 'Paused',
+    pausedHint: null,
+    sending: 'Teleporting',
+    encoding: 'Encoding',
+    limitReached: 'Limit reached',
+    buttons: {
+      'record': 'Record video',
+      'recordAgain': 'Record again',
+      'resume': 'Resume',
+      'pause': 'Pause',
+      'preview': 'Preview'
+    }
+  },
 
-    notifier: {
-        entertain:         false,   // when true, user is entertained while waiting, see examples
-        entertainClass:    'bg',
-        entertainLimit:    6,
-        entertainInterval: 9000
-    },
+  notifier: {
+    entertain: false,   // when true, user is entertained while waiting, see examples
+    entertainClass: 'bg',
+    entertainLimit: 6,
+    entertainInterval: 9000
+  },
 
-    timeouts: {
-        userMedia:    10e3,         // in milliseconds, increase if you want user give more time to enable webcam
-        connection:   1e4,          // in seconds, increase if api is slow
-        pingInterval: 45e3          // in milliseconds, keeps webstream (connection) alive when pausing
-    },
+  timeouts: {
+    userMedia: 10e3,         // in milliseconds, increase if you want user give more time to enable webcam
+    connection: 1e4,          // in seconds, increase if api is slow
+    pingInterval: 45e3          // in milliseconds, keeps webstream (connection) alive when pausing
+  },
 
-    callbacks: {
+  callbacks: {
         // a custom callback to tweak form data before posting to server
         // this is for advanced use only and shouldn't be used if possible
-        adjustFormDataBeforePosting: null
-    },
+    adjustFormDataBeforePosting: null
+  },
 
-    defaults: {
-        from:       null,   // define default FROM email address
-        to:         null,   // define default TO email address
-        subject:    null,   // define default subject line
-        body:       null    // define default body content
-    },
+  defaults: {
+    from: null,   // define default FROM email address
+    to: null,   // define default TO email address
+    subject: null,   // define default subject line
+    body: null    // define default body content
+  },
 
     // show errors inside the container?
-    displayErrors: true,
+  displayErrors: true,
 
     // true = all form inputs get disabled and disappear when browser can't record
-    adjustFormOnBrowserError: false,
+  adjustFormOnBrowserError: false,
 
     // just for testing purposes to simulate browser agent handling
-    fakeUaString: null
+  fakeUaString: null
 }

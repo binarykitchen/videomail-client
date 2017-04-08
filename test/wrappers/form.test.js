@@ -1,14 +1,13 @@
-var test = require('tape'),
+const test = require('tape')
 
-    Form = require('./../../src/wrappers/form')
+const Form = require('./../../src/wrappers/form')
 
-test('Form:', function(t) {
+test('Form:', function (t) {
+  t.test('can be instantiated', function (tt) {
+    tt.plan(1)
 
-    t.test('can be instantiated', function(tt) {
-        tt.plan(1)
-
-        tt.doesNotThrow(function() {
-            new Form()
-        })
+    tt.doesNotThrow(function () {
+      return new Form()
     })
+  })
 })

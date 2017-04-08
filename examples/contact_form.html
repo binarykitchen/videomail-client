@@ -49,59 +49,59 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            var     VideomailClient = require('videomail-client'),
-                    videomailClient = new VideomailClient({
-                        verbose: true,
-                        video: {limitSeconds: 120, width: 320, countdown: false},
-                        selectors: {
-                            submitButtonSelector: 'body input[value="Submit"]',
-                            formId:               "someForm"
-                        },
-                        callbacks: {
-                            adjustFormDataBeforePosting: function(videomail, cb) {
-                                videomail.subject = 'Adjusted: ' + videomail.subject
+            var VideomailClient = require('videomail-client')
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              video: {limitSeconds: 120, width: 320, countdown: false},
+              selectors: {
+                submitButtonSelector: 'body input[value="Submit"]',
+                formId: 'someForm'
+              },
+              callbacks: {
+                adjustFormDataBeforePosting: function (videomail, cb) {
+                  videomail.subject = 'Adjusted: ' + videomail.subject
 
-                                cb(null, videomail)
-                            }
-                        },
-                        defaults: {
-                            body: "No body content"
-                        }
-                    }),
+                  cb(null, videomail)
+                }
+              },
+              defaults: {
+                body: 'No body content'
+              }
+            })
 
-                    startOverButton    = document.getElementById('startOver'),
-                    writingOption      = document.getElementById('writingOption'),
-                    signLanguageOption = document.getElementById('signLanguageOption'),
-                    body               = document.getElementById('body')
+            var startOverButton = document.getElementById('startOver')
+            var writingOption = document.getElementById('writingOption')
+            var signLanguageOption = document.getElementById('signLanguageOption')
+            var body = document.getElementById('body')
 
-            var   onSubmitted = function(videomail, response) {
-                var   statusHeader = document.querySelector('h3.status')
+            var onSubmitted = function (videomail, response) {
+              var statusHeader = document.querySelector('h3.status')
 
-                // status has been generated on server side, see gulp task 'connect'
-                statusHeader.innerHTML = response.status
+              // status has been generated on server side, see gulp task 'connect'
+              statusHeader.innerHTML = response.status
 
-                this.replay(videomail, 'viewVideo')
+              this.replay(videomail, 'viewVideo')
 
-                startOverButton.onclick = this.startOver
+              startOverButton.onclick = this.startOver
             }
 
-            writingOption.onclick = function() {
-                videomailClient.hide()
+            writingOption.onclick = function () {
+              videomailClient.hide()
 
-                body.style.display = 'block'
-                body.required = true
+              body.style.display = 'block'
+              body.required = true
             }
 
-            signLanguageOption.onclick = function() {
-                videomailClient.show()
+            signLanguageOption.onclick = function () {
+              videomailClient.show()
 
-                body.style.display = 'none'
-                body.required = false
+              body.style.display = 'none'
+              body.required = false
             }
 
             videomailClient.on(
-                videomailClient.events.SUBMITTED,
-                onSubmitted.bind(videomailClient)
+              videomailClient.events.SUBMITTED,
+              onSubmitted.bind(videomailClient)
             )
         </script>
     </body>

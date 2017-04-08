@@ -1,123 +1,120 @@
-var   util         = require('util'),
+var util = require('util')
 
-      Events       = require('./../../../events'),
-      EventEmitter = require('./../../../util/eventEmitter'),
+var Events = require('./../../../events')
+var EventEmitter = require('./../../../util/eventEmitter')
 
-      Countdown   = require('./recorder/countdown'),
-      PausedNote  = require('./recorder/pausedNote'),
-      RecordNote  = require('./recorder/recordNote'),
-      RecordTimer = require('./recorder/recordTimer')
+var Countdown = require('./recorder/countdown')
+var PausedNote = require('./recorder/pausedNote')
+var RecordNote = require('./recorder/recordNote')
+var RecordTimer = require('./recorder/recordTimer')
 
-var   RecorderInsides = function(visuals, options) {
+var RecorderInsides = function (visuals, options) {
+  EventEmitter.call(this, options, 'RecorderInsides')
 
-    EventEmitter.call(this, options, 'RecorderInsides')
+  var self = this
 
-    var   self = this,
+  var recordNote = new RecordNote(visuals)
+  var recordTimer = new RecordTimer(visuals, recordNote, options)
 
-          recordNote  = new RecordNote(visuals),
-          recordTimer = new RecordTimer(visuals, recordNote, options)
+  var countdown,
+    pausedNote,
+    built
 
-    var countdown,
-        pausedNote,
-        built
+  if (options.video.countdown) { countdown = new Countdown(visuals, options) }
 
-    if (options.video.countdown)
-        countdown = new Countdown(visuals, options)
+  if (options.enablePause) { pausedNote = new PausedNote(visuals, options) }
 
-    if (options.enablePause)
-        pausedNote = new PausedNote(visuals, options)
+  function startRecording () {
+    recordTimer.start()
+  }
 
-    function startRecording() {
-        recordTimer.start()
+  function resumeRecording () {
+    recordTimer.resume()
+  }
+
+  function stopRecording () {
+    recordTimer.stop()
+  }
+
+  function pauseRecording () {
+    if (self.isCountingDown()) {
+      countdown.pause()
+    } else {
+      recordTimer.pause()
     }
+  }
 
-    function resumeRecording() {
-        recordTimer.resume()
-    }
+  function onResetting () {
+    self.hidePause()
+    self.hideCountdown()
+    recordTimer.stop()
+  }
 
-    function stopRecording() {
-        recordTimer.stop()
-    }
-
-    function pauseRecording() {
-        if (self.isCountingDown()) {
-            countdown.pause()
-        } else {
-            recordTimer.pause()
-        }
-    }
-
-    function onResetting() {
-        self.hidePause()
-        self.hideCountdown()
-        recordTimer.stop()
-    }
-
-    function initEvents() {
-        self
-            .on(Events.RECORDING, function() {
-                startRecording()
+  function initEvents () {
+    self
+            .on(Events.RECORDING, function () {
+              startRecording()
             })
-            .on(Events.RESUMING, function() {
-                resumeRecording()
+            .on(Events.RESUMING, function () {
+              resumeRecording()
             })
-            .on(Events.STOPPING, function() {
-                stopRecording()
+            .on(Events.STOPPING, function () {
+              stopRecording()
             })
-            .on(Events.PAUSED, function() {
-                pauseRecording()
+            .on(Events.PAUSED, function () {
+              pauseRecording()
             })
             .on(Events.RESETTING, onResetting)
-            .on(Events.HIDE, function() {
-                self.hideCountdown()
+            .on(Events.HIDE, function () {
+              self.hideCountdown()
             })
-    }
+  }
 
-    this.build = function() {
-        countdown && countdown.build()
-        pausedNote&& pausedNote.build()
+  this.build = function () {
+    countdown && countdown.build()
+    pausedNote && pausedNote.build()
 
-        recordNote.build()
-        recordTimer.build()
+    recordNote.build()
+    recordTimer.build()
 
-        !built && initEvents()
+    !built && initEvents()
 
-        built = true
-    }
+    built = true
+  }
 
-    this.unload = function() {
-        countdown && countdown.unload()
+  this.unload = function () {
+    countdown && countdown.unload()
 
-        built = false
-    }
+    built = false
+  }
 
-    this.showPause = function() {
-        pausedNote && pausedNote.show()
-    }
+  this.showPause = function () {
+    pausedNote && pausedNote.show()
+  }
 
-    this.hidePause = function() {
-        pausedNote && pausedNote.hide()
-    }
+  this.hidePause = function () {
+    pausedNote && pausedNote.hide()
+  }
 
-    this.hideCountdown = function() {
-        countdown && countdown.hide()
-    }
+  this.hideCountdown = function () {
+    countdown && countdown.hide()
+  }
 
-    this.startCountdown = function(cb) {
-        countdown && countdown.start(cb)
-    }
+  this.startCountdown = function (cb) {
+    countdown && countdown.start(cb)
+  }
 
-    this.resumeCountdown = function() {
-        countdown && countdown.resume()
-    }
+  this.resumeCountdown = function () {
+    countdown && countdown.resume()
+  }
 
-    this.isCountingDown = function() {
-        return countdown && countdown.isCountingDown()
-    }
+  this.isCountingDown = function () {
+    return countdown && countdown.isCountingDown()
+  }
 
-    this.checkTimer = function(intervalSum) {
-        recordTimer.check(intervalSum)
-    }
+  this.checkTimer = function (intervalSum) {
+    recordTimer.check(intervalSum)
+  }
 }
 
 util.inherits(RecorderInsides, EventEmitter)

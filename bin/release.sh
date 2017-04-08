@@ -4,7 +4,7 @@ set -e
 export GIT_MERGE_AUTOEDIT=no
 
 die() {
-    use unset GIT_MERGE_AUTOEDIT
+    unset GIT_MERGE_AUTOEDIT
     echo >&2 "☠ ☠ ☠ ☠ ☠ ☠ ☠  $@  ☠ ☠ ☠ ☠ ☠ ☠ ☠"
     exit 1
 }

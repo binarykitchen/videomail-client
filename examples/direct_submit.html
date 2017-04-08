@@ -27,18 +27,18 @@
 
         <script src="/videomail-client.js"></script>
         <script>
-            var     VideomailClient = require('videomail-client'),
-                    videomailClient = new VideomailClient({
-                      verbose:      true,
-                      enablePause:  false,
-                      video:        {limitSeconds: 3600, width: 460}}
-                    ),
-                    startOverButton = document.getElementById('startOver')
+            var VideomailClient = require('videomail-client')
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              enablePause: false,
+              video: {limitSeconds: 3600, width: 460}}
+            )
+            var startOverButton = document.getElementById('startOver')
 
-            var   onSubmitted = function(videomail) {
-                this.replay(videomail, 'viewVideo')
+            var onSubmitted = function (videomail) {
+              this.replay(videomail, 'viewVideo')
 
-                startOverButton.onclick = this.startOver
+              startOverButton.onclick = this.startOver
             }
 
             // allow direct submits, means:
@@ -46,8 +46,8 @@
             // if you do not want that, look at the other example contact_form.html where
             // you grab the key from the videomail server and use it in your own form (preferred solution).
             videomailClient.on(
-                videomailClient.events.SUBMITTED,
-                onSubmitted.bind(videomailClient)
+              videomailClient.events.SUBMITTED,
+              onSubmitted.bind(videomailClient)
             )
 
             videomailClient.show()

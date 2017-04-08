@@ -1,214 +1,183 @@
-var   UAParser        = require('ua-parser-js'),
-      defined         = require('defined'),
-      VideomailError  = require('./videomailError')
+var UAParser = require('ua-parser-js')
+var defined = require('defined')
+var VideomailError = require('./videomailError')
 
-module.exports = function(options) {
+module.exports = function (options) {
+  options = options || {}
 
-    options = options || {}
-
-    var     firefoxDownload  = 'http://www.mozilla.org/firefox/update/',
-            edgeDownload     = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126',
-            chromeDownload   = 'http://www.google.com/chrome/',
-            chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium',
-            browseHappyLink  = 'http://browsehappy.com',
-            ua               = defined(options.fakeUaString, (
+  var firefoxDownload = 'http://www.mozilla.org/firefox/update/'
+  var edgeDownload = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126'
+  var chromeDownload = 'http://www.google.com/chrome/'
+  var chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium'
+  var browseHappyLink = 'http://browsehappy.com'
+  var ua = defined(options.fakeUaString, (
                                 typeof window !== 'undefined' &&
                                 window.navigator &&
                                 window.navigator.userAgent
-                               ), ''),
+                               ), '')
 
-        uaParser = new UAParser(ua).getResult(),
+  var uaParser = new UAParser(ua).getResult()
 
-        isIOS         = uaParser.os.name === 'iOS',
-        isChrome      = uaParser.browser.name === 'Chrome',
-        isChromium    = uaParser.browser.name === 'Chromium',
-        firefox       = uaParser.browser.name === 'Firefox',
-        osVersion     = parseFloat(uaParser.os.version),
-        isWindows     = uaParser.os.name === 'Windows',
-        isEdge        = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10),
-        isIE          = /IE/.test(uaParser.browser.name),
-        isSafari      = /Safari/.test(uaParser.browser.name),
-        isOpera       = /Opera/.test(uaParser.browser.name),
-        isAndroid     = /Android/.test(uaParser.os.name),
-        chromeBased   = isChrome || isChromium,
-        okBrowser     = chromeBased || firefox || isAndroid || isOpera || isEdge,
+  var isIOS = uaParser.os.name === 'iOS'
+  var isChrome = uaParser.browser.name === 'Chrome'
+  var isChromium = uaParser.browser.name === 'Chromium'
+  var firefox = uaParser.browser.name === 'Firefox'
+  var osVersion = parseFloat(uaParser.os.version)
+  var isWindows = uaParser.os.name === 'Windows'
+  var isEdge = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10)
+  var isIE = /IE/.test(uaParser.browser.name)
+  var isSafari = /Safari/.test(uaParser.browser.name)
+  var isOpera = /Opera/.test(uaParser.browser.name)
+  var isAndroid = /Android/.test(uaParser.os.name)
+  var chromeBased = isChrome || isChromium
+  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge
 
-        self = this
+  var self = this
 
-    var videoType
+  var videoType
 
-    function getRecommendation() {
-        var warning
+  function getRecommendation () {
+    var warning
 
-        if (firefox)
-            warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
+    if (firefox) {
+      warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
                       'upgrade Firefox</a> to fix this.'
-
-        else if (isChrome)
-            warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
+    } else if (isChrome) {
+      warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
                       'upgrade Chrome</a> to fix this.'
-
-        else if (isChromium)
-            warning = '<a href="' + chromiumDownload + '" target="_blank">' +
+    } else if (isChromium) {
+      warning = '<a href="' + chromiumDownload + '" target="_blank">' +
                       'Upgrade Chromium</a> to fix this.'
-
-        else if (isIE)
-            warning = 'Instead of Internet Explorer better pick' +
+    } else if (isIE) {
+      warning = 'Instead of Internet Explorer better pick' +
                       ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
                       ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>,' +
                       ' <a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
-
-        else if (isSafari)
-            warning = 'Safari has no webcam support yet.<br/>Better pick' +
+    } else if (isSafari) {
+      warning = 'Safari has no webcam support yet.<br/>Better pick' +
                       ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
                       ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
-
-        return warning
     }
 
-    function getUserMediaWarning() {
-        var warning
+    return warning
+  }
 
-        if (isIOS)
-            warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' +
+  function getUserMediaWarning () {
+    var warning
+
+    if (isIOS) {
+      warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' +
                       'For now, we recommend you to use a desktop computer or an Android device.'
+    } else { warning = getRecommendation() }
 
-        else
-            warning = getRecommendation()
-
-        if (!warning) {
-            if (self.isChromeBased() || self.isFirefox())
-                warning = 'For the webcam feature, your browser needs an upgrade.'
-            else
-                warning = 'Hence we recommend you to use either ' +
+    if (!warning) {
+      if (self.isChromeBased() || self.isFirefox()) { warning = 'For the webcam feature, your browser needs an upgrade.' } else {
+        warning = 'Hence we recommend you to use either ' +
                           '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
                           '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
                           '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
-        }
+      }
+    }
 
-        warning = 'Your browser does not have the getUserMedia feature to access webcams.' +
+    warning = 'Your browser does not have the getUserMedia feature to access webcams.' +
                   '<br/><br/>' + warning
 
-        return warning
-    }
+    return warning
+  }
 
-    function getPlaybackWarning() {
-        var warning = getRecommendation()
+  function getPlaybackWarning () {
+    var warning = getRecommendation()
 
-        if (!warning)
-            warning =   '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> ' +
+    if (!warning) {
+      warning = '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> ' +
                         'might help.'
-
-        return warning
     }
 
-    function canPlayType(video, type) {
-        var canPlayType
+    return warning
+  }
 
-        if (video && video.canPlayType)
-            canPlayType = video.canPlayType('video/' + type)
+  function canPlayType (video, type) {
+    var canPlayType
 
-        return canPlayType
-    }
+    if (video && video.canPlayType) { canPlayType = video.canPlayType('video/' + type) }
+
+    return canPlayType
+  }
 
     // just temporary
-    this.canRecord = function() {
-        var   hasNavigator = typeof navigator !== 'undefined'
-        var canRecord = false
+  this.canRecord = function () {
+    var hasNavigator = typeof navigator !== 'undefined'
+    var canRecord = false
 
-        if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            canRecord = true
-        } else {
-            var getUserMediaType = hasNavigator && typeof navigator.getUserMedia_
+    if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      canRecord = true
+    } else {
+      var getUserMediaType = hasNavigator && typeof navigator.getUserMedia_
 
-            canRecord = getUserMediaType == 'function'
-        }
-
-        return canRecord
+      canRecord = getUserMediaType === 'function'
     }
 
-    this.checkRecordingCapabilities = function() {
-        var err
+    return canRecord
+  }
 
-        if (!okBrowser || !this.canRecord()) {
-            err = VideomailError.create({
-                message: 'Sorry, your browser won\'t let you access your webcam.',
-            }, getUserMediaWarning(), options, true)
-        }
+  this.checkRecordingCapabilities = function () {
+    var err
 
-        return err
+    if (!okBrowser || !this.canRecord()) {
+      err = VideomailError.create({
+        message: 'Sorry, your browser won\'t let you access your webcam.'
+      }, getUserMediaWarning(), options, true)
     }
 
-    this.checkPlaybackCapabilities = function(video) {
-        var err,
-            message
+    return err
+  }
 
-        if (!video)
-            message = 'No HTML5 support for video tag!'
+  this.checkPlaybackCapabilities = function (video) {
+    var err,
+      message
 
-        else if (!this.getVideoType(video))
-            message = 'No H264 nor webm support found.'
+    if (!video) { message = 'No HTML5 support for video tag!' } else if (!this.getVideoType(video)) { message = 'No H264 nor webm support found.' }
 
-        if (message)
-            err = VideomailError.create(message, getPlaybackWarning(), options)
+    if (message) { err = VideomailError.create(message, getPlaybackWarning(), options) }
 
-        return err
-    }
+    return err
+  }
 
-    this.checkBufferTypes = function() {
-        var err
+  this.checkBufferTypes = function () {
+    var err
 
-        if (typeof window === 'undefined' || typeof window.atob === 'undefined')
-            err = VideomailError.create('atob is not supported', options)
+    if (typeof window === 'undefined' || typeof window.atob === 'undefined') { err = VideomailError.create('atob is not supported', options) } else if (typeof window.ArrayBuffer === 'undefined') { err = VideomailError.create('ArrayBuffers are not supported', options) } else if (typeof window.Uint8Array === 'undefined') { err = VideomailError.create('Uint8Arrays are not supported', options) }
 
-        else if (typeof window.ArrayBuffer === 'undefined')
-            err = VideomailError.create('ArrayBuffers are not supported', options)
+    return err
+  }
 
-        else if (typeof window.Uint8Array === 'undefined')
-            err = VideomailError.create('Uint8Arrays are not supported', options)
-
-        return err
-    }
-
-    this.getVideoType = function(video) {
-
-        if (!videoType) {
+  this.getVideoType = function (video) {
+    if (!videoType) {
             // there is a bug in canPlayType within chrome for mp4
-            if (canPlayType(video, 'mp4') && !chromeBased)
-                videoType = 'mp4'
-
-            else if (canPlayType(video, 'webm'))
-                videoType = 'webm'
-        }
-
-        return videoType
+      if (canPlayType(video, 'mp4') && !chromeBased) { videoType = 'mp4' } else if (canPlayType(video, 'webm')) { videoType = 'webm' }
     }
 
-    this.getNoAccessIssue = function() {
-        var message = 'Cannot access webcam!',
-            explanation
+    return videoType
+  }
 
-        if (this.isChromeBased())
-            explanation = 'Click on the allow button to grant access to your webcam.'
+  this.getNoAccessIssue = function () {
+    var message = 'Cannot access webcam!'
+    var explanation
 
-        else if (this.isFirefox())
-            explanation = 'Please share your webcam under Firefox.'
+    if (this.isChromeBased()) { explanation = 'Click on the allow button to grant access to your webcam.' } else if (this.isFirefox()) { explanation = 'Please share your webcam under Firefox.' } else { explanation = 'Your operating system does not let your browser access your webcam.' }
 
-        else
-            explanation = 'Your operating system does not let your browser access your webcam.'
+    return VideomailError.create(message, explanation, options)
+  }
 
-        return VideomailError.create(message, explanation, options)
-    }
+  this.isChromeBased = function () {
+    return chromeBased
+  }
 
-    this.isChromeBased = function() {
-        return chromeBased
-    }
+  this.isFirefox = function () {
+    return firefox
+  }
 
-    this.isFirefox = function() {
-        return firefox
-    }
-
-    this.isEdge = function() {
-        return isEdge
-    }
+  this.isEdge = function () {
+    return isEdge
+  }
 }
