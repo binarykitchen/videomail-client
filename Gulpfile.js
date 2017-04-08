@@ -1,41 +1,41 @@
-var path       = require('path'),
-    fs         = require('fs'),
-    gulp       = require('gulp'),
-    plugins    = require('gulp-load-plugins')(),
-    nib        = require('nib'),
-    browserify = require('browserify'),
-    source     = require('vinyl-source-stream'),
-    buffer     = require('vinyl-buffer'),
-    Router     = require('router'),
-    bodyParser = require('body-parser'),
-    send       = require('connect-send-json'),
-    del        = require('del'),
-    minimist   = require('minimist'),
-    sslRootCas = require('ssl-root-cas'),
+const path = require('path')
+const fs = require('fs')
+const gulp = require('gulp')
+const plugins = require('gulp-load-plugins')()
+const nib = require('nib')
+const browserify = require('browserify')
+const source = require('vinyl-source-stream')
+const buffer = require('vinyl-buffer')
+const Router = require('router')
+const bodyParser = require('body-parser')
+const send = require('connect-send-json')
+const del = require('del')
+const minimist = require('minimist')
+const sslRootCas = require('ssl-root-cas')
 
-    defaultOptions = {
-        minify:     false,
-        importance: null,
-        write:      false,
-        version:    null
-    },
+const defaultOptions = {
+  minify: false,
+  importance: null,
+  write: false,
+  version: null
+}
 
-    options = minimist(process.argv.slice(2), {default: defaultOptions})
+const options = minimist(process.argv.slice(2), {default: defaultOptions})
 
 plugins.util.log('Options:', options)
 
-gulp.task('clean:js', function(cb) {
-    del(['dist/*.js']).then(function() {
-        cb()
-    })
+gulp.task('clean:js', function (cb) {
+  del(['dist/*.js']).then(function () {
+    cb()
+  })
 })
 
-gulp.task('stylus', function() {
-    gulp.src('src/styles/styl/main.styl')
+gulp.task('stylus', function () {
+  gulp.src('src/styles/styl/main.styl')
         .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
         .pipe(plugins.stylus({
-            use:    [nib()],
-            errors: true
+          use: [nib()],
+          errors: true
         }))
         // https://github.com/ai/autoprefixer#browsers
         .pipe(plugins.autoprefixer(
@@ -58,31 +58,31 @@ gulp.task('stylus', function() {
         .pipe(plugins.connect.reload())
 })
 
-gulp.task('todo', function() {
-    gulp.src(
+gulp.task('todo', function () {
+  gulp.src(
             ['src/**/*.{js, styl}', 'Gulpfile.js', 'examples/*.html'],
             {base: './'}
         )
         .pipe(plugins.todo({
-            fileName: 'TODO.md'
+          fileName: 'TODO.md'
         }))
         .pipe(gulp.dest('./'))
 })
 
-gulp.task('browserify', ['clean:js'], function(cb) {
-    var entry   = path.join(__dirname, '/src/index.js'),
-        bundler = browserify({
-            entries: [entry],
-            basedir: __dirname,
-            globals: false,
-            debug:   true // enables source maps
-        })
+gulp.task('browserify', ['clean:js'], function (cb) {
+  const entry = path.join(__dirname, '/src/index.js')
+  const bundler = browserify({
+    entries: [entry],
+    basedir: __dirname,
+    globals: false,
+    debug: true // enables source maps
+  })
 
-    bundler
+  bundler
         .require(entry, {expose: 'videomail-client'})
         .bundle()
-        .on('error',    cb)
-        .on('log',      plugins.util.log)
+        .on('error', cb)
+        .on('log', plugins.util.log)
         .pipe(source('./src/')) // gives streaming vinyl file object
         .pipe(buffer()) // required because the next steps do not support streams
         .pipe(plugins.concat('videomail-client.js'))
@@ -94,74 +94,70 @@ gulp.task('browserify', ['clean:js'], function(cb) {
         .on('end', cb)
 })
 
-gulp.task('connect', ['build'], function() {
-    var SSL_CERTS_PATH = __dirname + '/etc/ssl-certs/'
+gulp.task('connect', ['build'], function () {
+  var SSL_CERTS_PATH = path.join(__dirname, '/etc/ssl-certs/')
 
-    sslRootCas
+  sslRootCas
       .inject()
       .addFile(path.join(SSL_CERTS_PATH, 'server', 'my-root-ca.crt.pem'))
 
-    plugins.connect.server({
-        root:       ['examples', 'dist'],
-        port:       8080,
-        debug:      true,
-        livereload: true,
-        https: {
-            key:  fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
-            cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
-        },
-        middleware: function() {
-            var router = new Router()
+  plugins.connect.server({
+    root: ['examples', 'dist'],
+    port: 8080,
+    debug: true,
+    livereload: true,
+    https: {
+      key: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
+      cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
+    },
+    middleware: function () {
+      var router = new Router()
 
-            router.use(bodyParser.json())
-            router.use(send.json())
+      router.use(bodyParser.json())
+      router.use(send.json())
 
             // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
-            router.post('/contact', function(req, res) {
-                console.log('Videomail data received:', req.body)
+      router.post('/contact', function (req, res) {
+        console.log('Videomail data received:', req.body)
 
                 // At this stage, a backend could store the videomail_key in req.body
                 // into a database for replay functionality
 
                 // Just an example to see that the backend can do anything with the data
-                res.json({
-                    status: 'Inserted on ' + new Date().toISOString()
-                })
-            })
+        res.json({
+          status: 'Inserted on ' + new Date().toISOString()
+        })
+      })
 
-            return [router]
-        }
-    })
+      return [router]
+    }
+  })
 })
 
-gulp.task('reload', function() {
-    plugins.connect.reload()
+gulp.task('reload', function () {
+  plugins.connect.reload()
 })
 
-gulp.task('watch', ['connect'], function() {
-    gulp.watch(['src/styles/styl/**/*.styl'],   ['stylus'])
-    gulp.watch(['src/**/*.js'],                 ['browserify'])
-    gulp.watch(['examples/*.html'],             ['reload'])
+gulp.task('watch', ['connect'], function () {
+  gulp.watch(['src/styles/styl/**/*.styl'], ['stylus'])
+  gulp.watch(['src/**/*.js'], ['browserify'])
+  gulp.watch(['examples/*.html'], ['reload'])
 })
 
 // get inspired by
 // https://www.npmjs.com/package/gulp-tag-version and
 // https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
-gulp.task('bumpVersion', function() {
-    var bumpOptions = {}
+gulp.task('bumpVersion', function () {
+  var bumpOptions = {}
 
-    if (options.version)
-        bumpOptions.version = options.version
+  if (options.version) { bumpOptions.version = options.version } else if (options.importance) { bumpOptions.type = options.importance }
 
-    else if (options.importance)
-        bumpOptions.type = options.importance
-
-    return gulp.src(['./package.json'])
+  return gulp.src(['./package.json'])
         .pipe(plugins.bump(bumpOptions))
         .pipe(plugins.if(options.write, gulp.dest('./')))
         .on('error', plugins.util.log)
 })
 
-gulp.task('examples',  ['connect', 'watch'])
-gulp.task('build',     ['stylus', 'browserify', 'todo'])
-gulp.task('default',   ['build'])
+gulp.task('examples', ['connect', 'watch'])
+gulp.task('build', ['stylus', 'browserify', 'todo'])
+gulp.task('default', ['build'])

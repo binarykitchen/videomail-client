@@ -1,49 +1,47 @@
-var   h      = require('hyperscript'),
-      hidden = require('hidden'),
+var h = require('hyperscript')
+var hidden = require('hidden')
 
-      VideomailError  = require('./../../../../util/videomailError')
+var VideomailError = require('./../../../../util/videomailError')
 
-module.exports = function(visuals, options) {
+module.exports = function (visuals, options) {
+  if (!options.text.pausedHeader) { throw VideomailError.create('Paused header cannot be empty', options) }
 
-    if (!options.text.pausedHeader)
-        throw VideomailError.create('Paused header cannot be empty', options)
+  var pausedBlockElement,
+    pausedHeaderElement,
+    pausedHintElement
 
-    var pausedBlockElement,
-        pausedHeaderElement,
-        pausedHintElement
+  this.build = function () {
+    pausedBlockElement = visuals.querySelector('.paused')
+    pausedHeaderElement = visuals.querySelector('.pausedHeader')
+    pausedHintElement = visuals.querySelector('.pausedHint')
 
-    this.build = function() {
-        pausedBlockElement  = visuals.querySelector('.paused')
-        pausedHeaderElement = visuals.querySelector('.pausedHeader')
-        pausedHintElement   = visuals.querySelector('.pausedHint')
+    if (!pausedHeaderElement) {
+      pausedBlockElement = h('div.paused')
+      pausedHeaderElement = h('p.pausedHeader')
+      pausedHintElement = h('p.pausedHint')
 
-        if (!pausedHeaderElement) {
-            pausedBlockElement  = h('div.paused')
-            pausedHeaderElement = h('p.pausedHeader')
-            pausedHintElement   = h('p.pausedHint')
+      this.hide()
 
-            this.hide()
+      pausedHeaderElement.innerHTML = options.text.pausedHeader
+      pausedHintElement.innerHTML = options.text.pausedHint
 
-            pausedHeaderElement.innerHTML = options.text.pausedHeader
-            pausedHintElement.innerHTML   = options.text.pausedHint
+      pausedBlockElement.appendChild(pausedHeaderElement)
+      pausedBlockElement.appendChild(pausedHintElement)
 
-            pausedBlockElement.appendChild(pausedHeaderElement)
-            pausedBlockElement.appendChild(pausedHintElement)
+      visuals.appendChild(pausedBlockElement)
+    } else {
+      this.hide()
 
-            visuals.appendChild(pausedBlockElement)
-        } else {
-            this.hide()
-
-            pausedHeaderElement.innerHTML = options.text.pausedHeader
-            pausedHintElement.innerHTML   = options.text.pausedHint
-        }
+      pausedHeaderElement.innerHTML = options.text.pausedHeader
+      pausedHintElement.innerHTML = options.text.pausedHint
     }
+  }
 
-    this.hide = function() {
-        hidden(pausedBlockElement, true)
-    }
+  this.hide = function () {
+    hidden(pausedBlockElement, true)
+  }
 
-    this.show = function() {
-        hidden(pausedBlockElement, false)
-    }
+  this.show = function () {
+    hidden(pausedBlockElement, false)
+  }
 }

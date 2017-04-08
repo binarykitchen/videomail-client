@@ -1,148 +1,139 @@
-var   merge           = require('merge-recursive'),
-     readystate      = require('readystate'),
-     util            = require('util'),
+var merge = require('merge-recursive')
+var readystate = require('readystate')
+var util = require('util')
 
-     defaultOptions = require('./options'),
-     Constants      = require('./constants'),
-     Events         = require('./events'),
-     CollectLogger  = require('./util/collectLogger'),
-     EventEmitter   = require('./util/eventEmitter'),
-     Container      = require('./wrappers/container'),
-     OptionsWrapper = require('./wrappers/optionsWrapper'),
-     Replay         = require('./wrappers/visuals/replay'),
+var defaultOptions = require('./options')
+var Constants = require('./constants')
+var Events = require('./events')
+var CollectLogger = require('./util/collectLogger')
+var EventEmitter = require('./util/eventEmitter')
+var Container = require('./wrappers/container')
+var OptionsWrapper = require('./wrappers/optionsWrapper')
+var Replay = require('./wrappers/visuals/replay')
 
-     Browser         = require('./util/browser'),
-     Resource        = require('./resource')
+var Browser = require('./util/browser')
+var Resource = require('./resource')
 
 var collectLogger, browser
 
-function adjustOptions(options) {
-    var   localOptions = merge.recursive(defaultOptions, options || {})
+function adjustOptions (options) {
+  var localOptions = merge.recursive(defaultOptions, options || {})
 
-    collectLogger = collectLogger || new CollectLogger(localOptions)
+  collectLogger = collectLogger || new CollectLogger(localOptions)
 
-    localOptions.logger = collectLogger
-    localOptions.debug  = localOptions.logger.debug
+  localOptions.logger = collectLogger
+  localOptions.debug = localOptions.logger.debug
 
-    OptionsWrapper.addFunctions(localOptions)
+  OptionsWrapper.addFunctions(localOptions)
 
-    return localOptions
+  return localOptions
 }
 
-function getBrowser(localOptions) {
-    if (!browser)
-        browser = new Browser(localOptions)
+function getBrowser (localOptions) {
+  if (!browser) { browser = new Browser(localOptions) }
 
-    return browser
+  return browser
 }
 
-var VideomailClient = function(options) {
+var VideomailClient = function (options) {
+  var localOptions = adjustOptions(options)
+  var container = new Container(localOptions)
 
-    var   localOptions = adjustOptions(options),
-          container    = new Container(localOptions)
+  var replay
 
-    var replay
-
-    EventEmitter.call(this, localOptions, 'VideomailClient')
+  EventEmitter.call(this, localOptions, 'VideomailClient')
 
     // expose all possible events
-    this.events = Events
+  this.events = Events
 
-    function build() {
-        readystate.interactive(function(previousState) {
+  function build () {
+    readystate.interactive(function (previousState) {
             // it can happen that it gets called twice, i.E. when an error is thrown
             // in the middle of the build() fn
-            if (previousState !== readystate.INTERACTIVE && !container.isBuilt())
-                container.build()
-        })
-    }
+      if (previousState !== readystate.INTERACTIVE && !container.isBuilt()) { container.build() }
+    })
+  }
 
-    this.show = function() {
-        if (container.isBuilt())
-            container.show()
-        else
-            this.once(Events.BUILT, container.show)
-    }
+  this.show = function () {
+    if (container.isBuilt()) { container.show() } else { this.once(Events.BUILT, container.show) }
+  }
 
     // automatically adds a <video> element inside the given parentElement and loads
     // it with the videomail
-    this.replay = function(videomail, parentElement) {
-        function buildReplay() {
-            if (typeof parentElement === 'string')
-                parentElement = document.getElementById(parentElement)
+  this.replay = function (videomail, parentElement) {
+    function buildReplay () {
+      if (typeof parentElement === 'string') { parentElement = document.getElementById(parentElement) }
 
             // if there is none, use the automatically generated one
-            if (!parentElement) {
-                replay        = container.getReplay()
-                parentElement = replay.getParentElement()
-            } else {
-                replay = new Replay(parentElement, localOptions)
-                replay.build()
-            }
+      if (!parentElement) {
+        replay = container.getReplay()
+        parentElement = replay.getParentElement()
+      } else {
+        replay = new Replay(parentElement, localOptions)
+        replay.build()
+      }
 
-            videomail = container.addPlayerDimensions(videomail, parentElement)
+      videomail = container.addPlayerDimensions(videomail, parentElement)
 
-            if (videomail) {
+      if (videomail) {
                 // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-                setTimeout(function() {
-                    replay.setVideomail(videomail)
+        setTimeout(function () {
+          replay.setVideomail(videomail)
 
-                    if (container.isOutsideElementOf(parentElement))
-                        // replay element must be outside of the container
-                        container.hideForm()
-                    else
-                        container.loadForm(videomail)
+          if (container.isOutsideElementOf(parentElement)) {
+            // replay element must be outside of the container
+            container.hideForm()
+          } else {
+            container.loadForm(videomail)
+          }
 
-                    container.showReplayOnly()
-                }, 150)
-            }
-        }
-
-        readystate.interactive(buildReplay)
+          container.showReplayOnly()
+        }, 150)
+      }
     }
 
-    this.startOver = function() {
-        replay && replay.hide()
-        container.startOver()
-    }
+    readystate.interactive(buildReplay)
+  }
 
-    this.unload = function(e) {
-        container.unload(e)
-    }
+  this.startOver = function () {
+    replay && replay.hide()
+    container.startOver()
+  }
 
-    this.hide = function() {
-        container.hide()
-    }
+  this.unload = function (e) {
+    container.unload(e)
+  }
 
-    this.get = function(key, cb) {
-        new Resource(localOptions).get(key, function(err, videomail) {
-            if (err)
-                cb(err)
-            else
-                cb(null, container.addPlayerDimensions(videomail))
-        })
-    }
+  this.hide = function () {
+    container.hide()
+  }
 
-    this.canRecord = function() {
-        return getBrowser(localOptions).canRecord()
-    }
+  this.get = function (key, cb) {
+    new Resource(localOptions).get(key, function (err, videomail) {
+      if (err) { cb(err) } else { cb(null, container.addPlayerDimensions(videomail)) }
+    })
+  }
+
+  this.canRecord = function () {
+    return getBrowser(localOptions).canRecord()
+  }
 
     // return true when a video has been recorded but is not sent yet
-    this.isDirty = function() {
-        return container.isDirty()
-    }
+  this.isDirty = function () {
+    return container.isDirty()
+  }
 
-    this.submit = function() {
-        container.submit()
-    }
+  this.submit = function () {
+    container.submit()
+  }
 
-    build()
+  build()
 }
 
 util.inherits(VideomailClient, EventEmitter)
 
-Object.keys(Constants.public).forEach(function(name) {
-    VideomailClient[name] = Constants.public[name]
+Object.keys(Constants.public).forEach(function (name) {
+  VideomailClient[name] = Constants.public[name]
 })
 
 // just another convenient thing
