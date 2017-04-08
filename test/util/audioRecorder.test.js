@@ -1,13 +1,12 @@
-const test = require('tape'),
-      AudioRecorder = require('./../../src/util/audioRecorder')
+const test = require('tape')
+const AudioRecorder = require('./../../src/util/audioRecorder')
 
-test('AudioRecorder:', function(t) {
+test('AudioRecorder:', function (t) {
+  t.test('can be instantiated', function (tt) {
+    tt.plan(1)
 
-    t.test('can be instantiated', function(tt) {
-        tt.plan(1)
-
-        tt.doesNotThrow(function() {
-            new AudioRecorder()
-        })
+    tt.doesNotThrow(function () {
+      return new AudioRecorder()
     })
+  })
 })

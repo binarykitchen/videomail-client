@@ -1,278 +1,254 @@
-var   util           = require('util'),
-      h              = require('hyperscript'),
-      hidden         = require('hidden'),
+var util = require('util')
+var h = require('hyperscript')
+var hidden = require('hidden')
 
-      EventEmitter   = require('./../../util/eventEmitter'),
-      Events         = require('./../../events')
+var EventEmitter = require('./../../util/eventEmitter')
+var Events = require('./../../events')
 
-var   Notifier = function(visuals, options) {
+var Notifier = function (visuals, options) {
+  EventEmitter.call(this, options, 'Notifier')
 
-    EventEmitter.call(this, options, 'Notifier')
+  var self = this
+  var debug = options && options.debug
 
-    var   self    = this,
-          debug   = options && options.debug
+  var notifyElement
+  var messageElement
+  var explanationElement
+  var entertainTimeoutId
+  var entertaining
+  var built
 
-    var notifyElement,
-        messageElement,
-        explanationElement,
-        entertainTimeoutId,
-        entertaining,
-        built
+  function onStopping (limitReached) {
+    var lead = ''
 
-    function onStopping(limitReached) {
-        var lead = ''
+    visuals.beginWaiting()
 
-        visuals.beginWaiting()
-
-        if (limitReached) {
-            debug('Limit reached')
-            lead += options.text.limitReached + '.<br/>'
-        }
-
-        lead += options.text.sending + ' …'
-
-        self.notify(lead, null, {
-            stillWait: true,
-            entertain: options.notifier.entertain
-        })
+    if (limitReached) {
+      debug('Limit reached')
+      lead += options.text.limitReached + '.<br/>'
     }
 
-    function onLoadingUserMedia() {
-        self.notify('Loading webcam …')
-    }
+    lead += options.text.sending + ' …'
 
-    function onProgress(frameProgress, sampleProgress) {
-        var overallProgress
+    self.notify(lead, null, {
+      stillWait: true,
+      entertain: options.notifier.entertain
+    })
+  }
 
-        if (options.isAudioEnabled()) {
-            overallProgress = 'Video: ' + frameProgress
+  function onLoadingUserMedia () {
+    self.notify('Loading webcam …')
+  }
 
-            if (sampleProgress)
-                 overallProgress += ', Audio: ' + sampleProgress
-        } else
-            overallProgress = frameProgress
+  function onProgress (frameProgress, sampleProgress) {
+    var overallProgress
 
-        self.setExplanation(overallProgress)
-    }
+    if (options.isAudioEnabled()) {
+      overallProgress = 'Video: ' + frameProgress
 
-    function onBeginVideoEncoding() {
-        visuals.beginWaiting()
+      if (sampleProgress) { overallProgress += ', Audio: ' + sampleProgress }
+    } else { overallProgress = frameProgress }
 
-        var   lead = options.text.encoding + ' …'
+    self.setExplanation(overallProgress)
+  }
 
-        self.notify(lead, null, {
-            stillWait: true,
-            entertain: options.notifier.entertain
-        })
+  function onBeginVideoEncoding () {
+    visuals.beginWaiting()
 
-        hideExplanation()
-    }
+    var lead = options.text.encoding + ' …'
 
-    function initEvents() {
-        debug('Notifier: initEvents()')
+    self.notify(lead, null, {
+      stillWait: true,
+      entertain: options.notifier.entertain
+    })
 
-        self
-            .on(Events.LOADING_USER_MEDIA, function() {
-                onLoadingUserMedia()
+    hideExplanation()
+  }
+
+  function initEvents () {
+    debug('Notifier: initEvents()')
+
+    self
+            .on(Events.LOADING_USER_MEDIA, function () {
+              onLoadingUserMedia()
             })
-            .on(Events.USER_MEDIA_READY, function() {
-                self.hide()
+            .on(Events.USER_MEDIA_READY, function () {
+              self.hide()
             })
-            .on(Events.LOADED_META_DATA, function() {
-                correctDimensions()
+            .on(Events.LOADED_META_DATA, function () {
+              correctDimensions()
             })
-            .on(Events.PREVIEW, function() {
-                self.hide()
+            .on(Events.PREVIEW, function () {
+              self.hide()
             })
-            .on(Events.STOPPING, function(limitReached) {
-                onStopping(limitReached)
+            .on(Events.STOPPING, function (limitReached) {
+              onStopping(limitReached)
             })
-            .on(Events.PROGRESS, function(frameProgress, sampleProgress) {
-                onProgress(frameProgress, sampleProgress)
+            .on(Events.PROGRESS, function (frameProgress, sampleProgress) {
+              onProgress(frameProgress, sampleProgress)
             })
-            .on(Events.BEGIN_VIDEO_ENCODING, function() {
-                onBeginVideoEncoding()
+            .on(Events.BEGIN_VIDEO_ENCODING, function () {
+              onBeginVideoEncoding()
             })
-    }
+  }
 
-    function correctDimensions() {
-        notifyElement.style.width  = visuals.getRecorderWidth(true) + 'px'
-        notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
-    }
+  function correctDimensions () {
+    notifyElement.style.width = visuals.getRecorderWidth(true) + 'px'
+    notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
+  }
 
-    function removeDimensions() {
-        notifyElement.style.width  = 'auto'
-        notifyElement.style.height = 'auto'
-    }
+  function removeDimensions () {
+    notifyElement.style.width = 'auto'
+    notifyElement.style.height = 'auto'
+  }
 
-    function show() {
-        notifyElement && hidden(notifyElement, false)
-    }
+  function show () {
+    notifyElement && hidden(notifyElement, false)
+  }
 
-    function runEntertainment() {
-        if (options.notifier.entertain) {
+  function runEntertainment () {
+    if (options.notifier.entertain) {
+      if (!entertaining) {
+        var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
 
-            if (!entertaining) {
-                var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
-
-                notifyElement.className =   'notifier entertain ' +
+        notifyElement.className = 'notifier entertain ' +
                 options.notifier.entertainClass +
                 randomBackgroundClass
 
-                entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
-                entertaining = true
-            }
-        } else
-            cancelEntertainment()
-    }
+        entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
+        entertaining = true
+      }
+    } else { cancelEntertainment() }
+  }
 
-    function cancelEntertainment() {
-        if (notifyElement)
-            notifyElement.className = 'notifier'
+  function cancelEntertainment () {
+    if (notifyElement) { notifyElement.className = 'notifier' }
 
-        clearTimeout(entertainTimeoutId)
-        entertainTimeoutId = null
-        entertaining = false
-    }
+    clearTimeout(entertainTimeoutId)
+    entertainTimeoutId = null
+    entertaining = false
+  }
 
-    function setMessage(message, messageOptions) {
-        var problem = messageOptions.problem ? messageOptions.problem : false
+  function setMessage (message, messageOptions) {
+    var problem = messageOptions.problem ? messageOptions.problem : false
 
-        if (messageElement)
-            messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message
-        else
-            options.logger.warn(
+    if (messageElement) { messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message } else {
+      options.logger.warn(
                 'Unable to show following because messageElement is empty:',
                 message
             )
     }
+  }
 
-    this.error = function(err) {
-        var   message     = err.message ? err.message.toString() : err.toString(),
-              explanation = err.explanation ? err.explanation.toString() : null
+  this.error = function (err) {
+    var message = err.message ? err.message.toString() : err.toString()
+    var explanation = err.explanation ? err.explanation.toString() : null
 
-        if (!message)
-            options.debug('Weird empty message generated for error', err)
+    if (!message) { options.debug('Weird empty message generated for error', err) }
 
-        self.notify(message, explanation, {
-            blocking:         true,
-            problem:          true,
-            isBrowserProblem: err.isBrowserProblem && err.isBrowserProblem()
-        })
-    }
+    self.notify(message, explanation, {
+      blocking: true,
+      problem: true,
+      isBrowserProblem: err.isBrowserProblem && err.isBrowserProblem()
+    })
+  }
 
-    this.setExplanation = function(explanation) {
+  this.setExplanation = function (explanation) {
+    if (!explanationElement) {
+      explanationElement = h('p')
 
-        if (!explanationElement) {
-            explanationElement = h('p')
-
-            if (notifyElement)
-                notifyElement.appendChild(explanationElement)
-            else
-                options.logger.warn(
+      if (notifyElement) { notifyElement.appendChild(explanationElement) } else {
+        options.logger.warn(
                     'Unable to show explanation because notifyElement is empty:',
                     explanation
                 )
-        }
-
-        explanationElement.innerHTML = explanation
-
-        hidden(explanationElement, false)
-    }
-
-    this.build = function() {
-        notifyElement = visuals.querySelector('.notifier')
-
-        if (!notifyElement) {
-            notifyElement = h('.notifier') // defaults to div
-
-            this.hide()
-
-            visuals.appendChild(notifyElement)
-        } else
-            this.hide()
-
-        !built && initEvents()
-
-        built = true
-    }
-
-    function hideExplanation() {
-      if (explanationElement) {
-        explanationElement.innerHTML = null
-        hidden(explanationElement, true)
       }
     }
 
-    this.hide = function() {
-        cancelEntertainment()
+    explanationElement.innerHTML = explanation
 
-        if (notifyElement) {
-            hidden(notifyElement, true)
-            notifyElement.classList.remove('blocking')
-        }
+    hidden(explanationElement, false)
+  }
 
-        if (messageElement)
-            messageElement.innerHTML = null
+  this.build = function () {
+    notifyElement = visuals.querySelector('.notifier')
 
-        hideExplanation()
+    if (!notifyElement) {
+      notifyElement = h('.notifier') // defaults to div
+
+      this.hide()
+
+      visuals.appendChild(notifyElement)
+    } else { this.hide() }
+
+    !built && initEvents()
+
+    built = true
+  }
+
+  function hideExplanation () {
+    if (explanationElement) {
+      explanationElement.innerHTML = null
+      hidden(explanationElement, true)
+    }
+  }
+
+  this.hide = function () {
+    cancelEntertainment()
+
+    if (notifyElement) {
+      hidden(notifyElement, true)
+      notifyElement.classList.remove('blocking')
     }
 
-    this.isVisible = function() {
-        if (!built)
-            return false
-        else
-            return notifyElement && !hidden(notifyElement)
+    if (messageElement) { messageElement.innerHTML = null }
+
+    hideExplanation()
+  }
+
+  this.isVisible = function () {
+    if (!built) { return false } else { return notifyElement && !hidden(notifyElement) }
+  }
+
+  this.notify = function (message, explanation, notifyOptions) {
+    if (!notifyOptions) { notifyOptions = {} }
+
+    var stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false
+    var entertain = notifyOptions.entertain ? notifyOptions.entertain : false
+    var blocking = notifyOptions.blocking ? notifyOptions.blocking : false
+    var isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
+
+    if (!messageElement && notifyElement) {
+      messageElement = h('h2')
+
+      if (explanationElement) { notifyElement.insertBefore(messageElement, explanationElement) } else { notifyElement.appendChild(messageElement) }
     }
 
-    this.notify = function(message, explanation, notifyOptions) {
-
-        if (!notifyOptions)
-            notifyOptions = {}
-
-        var   stillWait        = notifyOptions.stillWait ? notifyOptions.stillWait : false,
-              entertain        = notifyOptions.entertain  ? notifyOptions.entertain  : false,
-              blocking         = notifyOptions.blocking   ? notifyOptions.blocking   : false,
-              isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
-
-        if (!messageElement && notifyElement) {
-            messageElement = h('h2')
-
-            if (explanationElement)
-                notifyElement.insertBefore(messageElement, explanationElement)
-            else
-                notifyElement.appendChild(messageElement)
-        }
-
-        if (notifyElement)
-            if (isBrowserProblem) {
-                notifyElement.classList.add('browserProblem')
-                removeDimensions()
-            } else
-                notifyElement.classList.remove('browserProblem')
-
-        if (blocking) {
-            notifyElement && notifyElement.classList.add('blocking')
-            this.emit(Events.BLOCKING, notifyOptions)
-        } else
-            this.emit(Events.NOTIFYING, notifyOptions)
-
-        visuals.hideReplay()
-        visuals.hideRecorder()
-
-        setMessage(message, notifyOptions)
-
-        explanation && this.setExplanation(explanation)
-
-        if (entertain)
-            runEntertainment()
-        else
-            cancelEntertainment()
-
-        show()
-
-        !stillWait && visuals.endWaiting()
+    if (notifyElement) {
+      if (isBrowserProblem) {
+        notifyElement.classList.add('browserProblem')
+        removeDimensions()
+      } else { notifyElement.classList.remove('browserProblem') }
     }
+
+    if (blocking) {
+      notifyElement && notifyElement.classList.add('blocking')
+      this.emit(Events.BLOCKING, notifyOptions)
+    } else { this.emit(Events.NOTIFYING, notifyOptions) }
+
+    visuals.hideReplay()
+    visuals.hideRecorder()
+
+    setMessage(message, notifyOptions)
+
+    explanation && this.setExplanation(explanation)
+
+    if (entertain) { runEntertainment() } else { cancelEntertainment() }
+
+    show()
+
+    !stillWait && visuals.endWaiting()
+  }
 }
 
 util.inherits(Notifier, EventEmitter)
