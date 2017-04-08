@@ -808,26 +808,47 @@ var   Recorder = function(visuals, replay, options) {
         loop.start()
     }
 
-    // not working yet
+    function setAnimationFrameObject(newObj) {
+        // must stop and then start to make it become effective, see
+        // https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
+        loop.stop()
+        loop.setRequestAnimationFrameObject(newObj)
+        loop.start()
+    }
+
     function restoreAnimationFrameObject() {
         debug('Recorder: restoreAnimationFrameObject()')
 
-        loop.setRequestAnimationFrameObject(originalAnimationFrameObject)
+        setAnimationFrameObject(originalAnimationFrameObject)
     }
 
-    // not working yet
     function loopWithTimeouts() {
         debug('Recorder: loopWithTimeouts()')
 
+        const wantedInterval  = 1e3 / options.video.fps
+
+        var processingTime = 0,
+            start
+
         function raf(fn) {
-            setTimeout(fn, 1e3 / Math.min(options.video.fps, loop.getFPSLimit()))
+            return setTimeout(
+                function() {
+                    start = Date.now()
+                    fn()
+                    processingTime = Date.now() - start
+                },
+                // reducing wanted interval by respecting the time it takes to
+                // compute internally since this is not multi-threaded like
+                // requestAnimationFrame
+                wantedInterval - processingTime
+            )
         }
 
         function cancel(id) {
             clearTimeout(id)
         }
 
-        loop.setRequestAnimationFrameObject({
+        setAnimationFrameObject({
             requestAnimationFrame: raf,
             cancelAnimationFrame: cancel
         })
