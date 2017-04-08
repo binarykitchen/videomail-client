@@ -31,7 +31,7 @@ gulp.task('clean:js', function(cb) {
 })
 
 gulp.task('stylus', function() {
-    gulp.src('src/assets/styl/main.styl')
+    gulp.src('src/styles/styl/main.styl')
         .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
         .pipe(plugins.stylus({
             use:    [nib()],
@@ -54,7 +54,7 @@ gulp.task('stylus', function() {
         .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
         .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
         // todo: location is bad, should be in a temp folder or so
-        .pipe(gulp.dest('src/assets/css'))
+        .pipe(gulp.dest('src/styles/css'))
         .pipe(plugins.connect.reload())
 })
 
@@ -139,7 +139,7 @@ gulp.task('reload', function() {
 })
 
 gulp.task('watch', ['connect'], function() {
-    gulp.watch(['src/assets/styl/**/*.styl'],   ['stylus'])
+    gulp.watch(['src/styles/styl/**/*.styl'],   ['stylus'])
     gulp.watch(['src/**/*.js'],                 ['browserify'])
     gulp.watch(['examples/*.html'],             ['reload'])
 })
