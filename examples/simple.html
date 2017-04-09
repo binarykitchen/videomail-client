@@ -13,9 +13,10 @@
             var videomailClient = new VideomailClient({
               verbose: true,
               disableSubmit: true,
-              enablePause: false,
+              enablePause: true,
+              enableAutoPause: true,
               video: {
-                countdown: false,
+                countdown: 3,
                 width: 280,
                 limitSeconds: 20
               }

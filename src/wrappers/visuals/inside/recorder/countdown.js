@@ -13,7 +13,7 @@ module.exports = function (visuals, options) {
     self.unload()
     self.hide()
 
-        // keep all callbacks async
+    // keep all callbacks async
     setTimeout(function () {
       cb()
     }, 0)
@@ -21,9 +21,14 @@ module.exports = function (visuals, options) {
 
   function countBackward (cb) {
     if (!paused) {
+      options.debug('Countdown', countdown)
       countdown--
 
-      if (countdown < 1) { fire(cb) } else { countdownElement.innerHTML = countdown }
+      if (countdown < 1) {
+        fire(cb)
+      } else {
+        countdownElement.innerHTML = countdown
+      }
     }
   }
 
@@ -32,7 +37,7 @@ module.exports = function (visuals, options) {
 
     this.show()
 
-    intervalId = setInterval(countBackward.bind(this, cb), 1e3)
+    intervalId = setInterval(countBackward.bind(this, cb), 950)
   }
 
   this.pause = function () {

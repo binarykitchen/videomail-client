@@ -150,7 +150,8 @@ gulp.task('lint', function () {
 gulp.task('watch', ['connect'], function () {
   gulp.watch(['src/styles/styl/**/*.styl'], ['stylus'])
   gulp.watch(['src/**/*.js'], ['browserify'])
-  gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
+  // commented out so that it reloads faster
+  // gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
   gulp.watch(['examples/*.html'], ['reload'])
 })
 
