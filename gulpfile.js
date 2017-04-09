@@ -32,41 +32,41 @@ gulp.task('clean:js', function (cb) {
 
 gulp.task('stylus', function () {
   gulp.src('src/styles/styl/main.styl')
-        .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
-        .pipe(plugins.stylus({
-          use: [nib()],
-          errors: true
-        }))
-        // https://github.com/ai/autoprefixer#browsers
-        .pipe(plugins.autoprefixer(
-            'last 3 versions',
-            '> 1%',
-            'Explorer >= 10',
-            'Chrome >= 40',
-            'Firefox ESR',
-            'iOS >= 7', 'android >= 4'
-        ))
-        // always minify otherwise it gets broken with line-breaks
-        // when surrounded with `'s when injected
-        // todo: fix this, so that it also works when not minified, this
-        // for faster builds during development
-        .pipe(plugins.cssnano())
-        .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
-        .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
-        // todo: location is bad, should be in a temp folder or so
-        .pipe(gulp.dest('src/styles/css'))
-        .pipe(plugins.connect.reload())
+    .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
+    .pipe(plugins.stylus({
+      use: [nib()],
+      errors: true
+    }))
+    // https://github.com/ai/autoprefixer#browsers
+    .pipe(plugins.autoprefixer(
+        'last 3 versions',
+        '> 1%',
+        'Explorer >= 10',
+        'Chrome >= 45',
+        'Firefox ESR',
+        'iOS >= 8', 'android >= 4'
+    ))
+    // always minify otherwise it gets broken with line-breaks
+    // when surrounded with `'s when injected
+    // todo: fix this, so that it also works when not minified, this
+    // for faster builds during development
+    .pipe(plugins.cssnano())
+    .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
+    .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
+    // todo: location is bad, should be in a temp folder or so
+    .pipe(gulp.dest('src/styles/css'))
+    .pipe(plugins.connect.reload())
 })
 
 gulp.task('todo', function () {
   gulp.src(
-            ['src/**/*.{js, styl}', 'Gulpfile.js', 'examples/*.html'],
-            {base: './'}
-        )
-        .pipe(plugins.todo({
-          fileName: 'TODO.md'
-        }))
-        .pipe(gulp.dest('./'))
+    ['src/**/*.{js, styl}', 'gulpfile.js', 'examples/*.html'],
+    {base: './'}
+  )
+    .pipe(plugins.todo({
+      fileName: 'TODO.md'
+    }))
+    .pipe(gulp.dest('./'))
 })
 
 gulp.task('browserify', ['clean:js'], function (cb) {
@@ -79,19 +79,19 @@ gulp.task('browserify', ['clean:js'], function (cb) {
   })
 
   bundler
-        .require(entry, {expose: 'videomail-client'})
-        .bundle()
-        .on('error', cb)
-        .on('log', plugins.util.log)
-        .pipe(source('./src/')) // gives streaming vinyl file object
-        .pipe(buffer()) // required because the next steps do not support streams
-        .pipe(plugins.concat('videomail-client.js'))
-        .pipe(gulp.dest('dist'))
-        .pipe(plugins.if(options.minify, plugins.rename({suffix: '.min'})))
-        .pipe(plugins.if(options.minify, plugins.uglify()))
-        .pipe(plugins.if(options.minify, gulp.dest('dist')))
-        .pipe(plugins.connect.reload())
-        .on('end', cb)
+    .require(entry, {expose: 'videomail-client'})
+    .bundle()
+    .on('error', cb)
+    .on('log', plugins.util.log)
+    .pipe(source('./src/')) // gives streaming vinyl file object
+    .pipe(buffer()) // required because the next steps do not support streams
+    .pipe(plugins.concat('videomail-client.js'))
+    .pipe(gulp.dest('dist'))
+    .pipe(plugins.if(options.minify, plugins.rename({suffix: '.min'})))
+    .pipe(plugins.if(options.minify, plugins.uglify()))
+    .pipe(plugins.if(options.minify, gulp.dest('dist')))
+    .pipe(plugins.connect.reload())
+    .on('end', cb)
 })
 
 gulp.task('connect', ['build'], function () {
@@ -138,9 +138,19 @@ gulp.task('reload', function () {
   plugins.connect.reload()
 })
 
+gulp.task('lint', function () {
+  return gulp.src(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'])
+    .pipe(plugins.standard())
+    .pipe(plugins.standard.reporter('default', {
+      breakOnError: true,
+      quiet: true
+    }))
+})
+
 gulp.task('watch', ['connect'], function () {
   gulp.watch(['src/styles/styl/**/*.styl'], ['stylus'])
   gulp.watch(['src/**/*.js'], ['browserify'])
+  gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
   gulp.watch(['examples/*.html'], ['reload'])
 })
 
@@ -150,7 +160,11 @@ gulp.task('watch', ['connect'], function () {
 gulp.task('bumpVersion', function () {
   var bumpOptions = {}
 
-  if (options.version) { bumpOptions.version = options.version } else if (options.importance) { bumpOptions.type = options.importance }
+  if (options.version) {
+    bumpOptions.version = options.version
+  } else if (options.importance) {
+    bumpOptions.type = options.importance
+  }
 
   return gulp.src(['./package.json'])
         .pipe(plugins.bump(bumpOptions))
@@ -159,5 +173,5 @@ gulp.task('bumpVersion', function () {
 })
 
 gulp.task('examples', ['connect', 'watch'])
-gulp.task('build', ['stylus', 'browserify', 'todo'])
+gulp.task('build', ['lint', 'stylus', 'browserify', 'todo'])
 gulp.task('default', ['build'])
