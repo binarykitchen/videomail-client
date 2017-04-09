@@ -24,7 +24,7 @@ var Recorder = function (visuals, replay, options) {
   var browser = new Browser(options)
   var debug = options.debug
 
-  var loop = null // animatter instance
+  var loop = null
 
   var originalAnimationFrameObject
 
@@ -64,6 +64,11 @@ var Recorder = function (visuals, replay, options) {
   var waitingTime
 
   var pingInterval
+
+  var frame
+
+  var recordingBufferLength
+  var recordingBuffer
 
   function writeStream (buffer, opts) {
     if (stream) {
@@ -118,6 +123,8 @@ var Recorder = function (visuals, replay, options) {
 
       userMediaLoading = blocking = unloaded = submitting = false
       userMediaLoaded = true
+
+      loop = createLoop()
 
       show()
       self.emit(Events.USER_MEDIA_READY, {paused: self.isPaused()})
@@ -232,7 +239,10 @@ var Recorder = function (visuals, replay, options) {
                  encodeURIComponent(options.siteName)
 
       try {
-        stream = websocket(url2Connect)
+        stream = websocket(url2Connect, {
+          // see https://github.com/maxogden/websocket-stream/issues/116#issuecomment-292704362
+          perMessageDeflate: false
+        })
       } catch (exc) {
         connecting = connected = false
 
@@ -527,7 +537,7 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function getIntervalSum () {
-    return loop && loop.getElapsedTime()
+    return loop.getElapsedTime()
   }
 
   function getAvgInterval () {
@@ -547,12 +557,12 @@ var Recorder = function (visuals, replay, options) {
 
     this.emit(Events.STOPPING, limitReached)
 
-    loop && loop.complete()
+    loop.complete()
 
     stopTime = Date.now()
 
     recordingStats = {
-      avgFps: loop && loop.getFPS(),
+      avgFps: loop.getFPS(),
       wantedFps: options.video.fps,
       avgInterval: getAvgInterval(),
       wantedInterval: 1e3 / options.video.fps,
@@ -653,7 +663,7 @@ var Recorder = function (visuals, replay, options) {
     debug('pause()', details)
 
     userMedia.pause()
-    loop && loop.stop()
+    loop.stop()
 
     this.emit(Events.PAUSED)
 
@@ -675,10 +685,76 @@ var Recorder = function (visuals, replay, options) {
     loop.start()
   }
 
-  this.record = function () {
-    if (unloaded) { return false }
+  function onFlushed (opts) {
+    var frameNumber = opts && opts.frameNumber
 
-        // reconnect when needed
+    if (frameNumber === 1) {
+      self.emit(Events.FIRST_FRAME_SENT)
+    }
+  }
+
+  function createLoop () {
+    var newLoop = animitter({fps: options.video.fps}, draw)
+
+    // remember it first
+    originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject()
+
+    return newLoop
+  }
+
+  function draw (deltaTime, elapsedTime) {
+    try {
+      // ctx and stream might become null while unloading
+      if (!self.isPaused() && stream && ctx) {
+        if (framesCount === 0) {
+          self.emit(Events.SENDING_FIRST_FRAME)
+        }
+
+        framesCount++
+
+        ctx.drawImage(
+          userMedia.getRawVisuals(),
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        )
+
+        recordingBuffer = frame.toBuffer()
+        recordingBufferLength = recordingBuffer.length
+
+        if (recordingBufferLength < 1) {
+          throw VideomailError.create('Failed to extract webcam data.', options)
+        }
+
+        bytesSum += recordingBufferLength
+
+        writeStream(recordingBuffer, {
+          frameNumber: framesCount,
+          onFlushedCallback: onFlushed
+        })
+
+        // if (options.verbose) {
+        //   debug(
+        //     'Frame #' + framesCount + ' (' + recordingBufferLength + ' bytes):',
+        //     ' delta=' + deltaTime + 'ms, ' +
+        //     ' elapsed=' + elapsedTime + 'ms'
+        //   )
+        // }
+
+        visuals.checkTimer({intervalSum: elapsedTime})
+      }
+    } catch (exc) {
+      self.emit(Events.ERROR, exc)
+    }
+  }
+
+  this.record = function () {
+    if (unloaded) {
+      return false
+    }
+
+    // reconnect when needed
     if (!connected) {
       debug('Recorder: reconnecting before recording ...')
 
@@ -693,9 +769,9 @@ var Recorder = function (visuals, replay, options) {
       canvas = userMedia.createCanvas()
     } catch (exc) {
       self.emit(
-                Events.ERROR,
-                VideomailError.create('Failed to create canvas.', exc.toString(), options)
-            )
+        Events.ERROR,
+        VideomailError.create('Failed to create canvas.', exc.toString(), options)
+      )
       return false
     }
 
@@ -703,78 +779,23 @@ var Recorder = function (visuals, replay, options) {
 
     if (!canvas.width) {
       self.emit(
-                Events.ERROR,
-                VideomailError.create('Canvas has an invalid width.', options)
-            )
+        Events.ERROR,
+        VideomailError.create('Canvas has an invalid width.', options)
+      )
       return false
     }
 
     if (!canvas.height) {
       self.emit(
-                Events.ERROR,
-                VideomailError.create('Canvas has an invalid height.', options)
-            )
+        Events.ERROR,
+        VideomailError.create('Canvas has an invalid height.', options)
+      )
       return false
     }
 
     bytesSum = 0
 
-    var frame = new Frame(canvas, options)
-
-    var bufferLength,
-      buffer
-
-    function onFlushed (opts) {
-      var frameNumber = opts && opts.frameNumber
-
-      if (frameNumber === 1) { self.emit(Events.FIRST_FRAME_SENT) }
-    }
-
-    function draw (deltaTime, elapsedTime) {
-      try {
-                // ctx and stream might become null while unloading
-        if (!self.isPaused() && stream && ctx) {
-          if (framesCount === 0) { self.emit(Events.SENDING_FIRST_FRAME) }
-
-          framesCount++
-
-          ctx.drawImage(
-                        userMedia.getRawVisuals(),
-                        0,
-                        0,
-                        canvas.width,
-                        canvas.height
-                    )
-
-          buffer = frame.toBuffer()
-          bufferLength = buffer.length
-
-          if (bufferLength < 1) { throw VideomailError.create('Failed to extract webcam data.', options) }
-
-          bytesSum += bufferLength
-
-          writeStream(buffer, {
-            frameNumber: framesCount,
-            onFlushedCallback: onFlushed
-          })
-
-                    // if (options.verbose) {
-                    //     debug(
-                    //         'Frame #' + framesCount + ' (' + bufferLength + ' bytes):',
-                    //         ' delta=' + deltaTime + "ms, " +
-                    //         ' elapsed=' + elapsedTime + "ms"
-                    //     )
-                    // }
-
-          visuals.checkTimer({intervalSum: elapsedTime})
-        }
-      } catch (exc) {
-        self.emit(Events.ERROR, exc)
-      }
-    }
-
-    loop = animitter({fps: options.video.fps}, draw)
-    originalAnimationFrameObject = loop.getRequestAnimationFrameObject()
+    frame = new Frame(canvas, options)
 
     debug('Recorder: record()')
     userMedia.record()
@@ -785,11 +806,18 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function setAnimationFrameObject (newObj) {
-        // must stop and then start to make it become effective, see
-        // https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
-    loop.stop()
-    loop.setRequestAnimationFrameObject(newObj)
-    loop.start()
+    // must stop and then start to make it become effective, see
+    // https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
+    if (loop) {
+      var isRecording = self.isRecording()
+
+      loop.stop()
+      loop.setRequestAnimationFrameObject(newObj)
+
+      if (isRecording) {
+        loop.start()
+      }
+    }
   }
 
   function restoreAnimationFrameObject () {
@@ -808,16 +836,16 @@ var Recorder = function (visuals, replay, options) {
 
     function raf (fn) {
       return setTimeout(
-                function () {
-                  start = Date.now()
-                  fn()
-                  processingTime = Date.now() - start
-                },
-                // reducing wanted interval by respecting the time it takes to
-                // compute internally since this is not multi-threaded like
-                // requestAnimationFrame
-                wantedInterval - processingTime
-            )
+        function () {
+          start = Date.now()
+          fn()
+          processingTime = Date.now() - start
+        },
+        // reducing wanted interval by respecting the time it takes to
+        // compute internally since this is not multi-threaded like
+        // requestAnimationFrame
+        wantedInterval - processingTime
+      )
     }
 
     function cancel (id) {
@@ -843,35 +871,35 @@ var Recorder = function (visuals, replay, options) {
 
   function initEvents () {
     self
-            .on(Events.SUBMITTING, function () {
-              submitting = true
-            })
-            .on(Events.SUBMITTED, function () {
-              submitting = false
-              self.unload()
-            })
-            .on(Events.BLOCKING, function () {
-              blocking = true
-              clearUserMediaTimeout()
-            })
-            .on(Events.HIDE, function () {
-              self.hide()
-            })
-            .on(Events.LOADED_META_DATA, function () {
-              correctDimensions()
-            })
-            .on(Events.DISABLING_AUDIO, function () {
-              reInitialiseAudio()
-            })
-            .on(Events.ENABLING_AUDIO, function () {
-              reInitialiseAudio()
-            })
-            .on(Events.INVISIBLE, function () {
-              self.isRecording() && loopWithTimeouts()
-            })
-            .on(Events.VISIBLE, function () {
-              self.isRecording() && restoreAnimationFrameObject()
-            })
+      .on(Events.SUBMITTING, function () {
+        submitting = true
+      })
+      .on(Events.SUBMITTED, function () {
+        submitting = false
+        self.unload()
+      })
+      .on(Events.BLOCKING, function () {
+        blocking = true
+        clearUserMediaTimeout()
+      })
+      .on(Events.HIDE, function () {
+        self.hide()
+      })
+      .on(Events.LOADED_META_DATA, function () {
+        correctDimensions()
+      })
+      .on(Events.DISABLING_AUDIO, function () {
+        reInitialiseAudio()
+      })
+      .on(Events.ENABLING_AUDIO, function () {
+        reInitialiseAudio()
+      })
+      .on(Events.INVISIBLE, function () {
+        loopWithTimeouts()
+      })
+      .on(Events.VISIBLE, function () {
+        restoreAnimationFrameObject()
+      })
   }
 
   this.build = function () {
