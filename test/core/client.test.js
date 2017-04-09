@@ -32,11 +32,11 @@ test('VideomailClient:', {timeout: 2000}, function (t) {
       client = new VideomailClient({verbose: !SILENT, logger: consoleFacade})
 
       client.once(
-                client.events.BUILT,
-                function () {
-                  tt.pass('Built event received')
-                }
-            )
+        client.events.BUILT,
+        function () {
+          tt.pass('Built event received')
+        }
+      )
     })
   })
 
@@ -46,11 +46,11 @@ test('VideomailClient:', {timeout: 2000}, function (t) {
     tt.plan(1)
 
     client.once(
-            client.events.ERROR,
-            function () {
-              tt.pass('Error event received')
-            }
-        )
+      client.events.ERROR,
+      function () {
+        tt.pass('Error event received')
+      }
+    )
 
     client.replay()
   })
@@ -59,11 +59,11 @@ test('VideomailClient:', {timeout: 2000}, function (t) {
     tt.plan(2)
 
     client.once(
-            client.events.HIDE,
-            function () {
-              tt.pass('Hide event received')
-            }
-        )
+      client.events.HIDE,
+      function () {
+        tt.pass('Hide event received')
+      }
+    )
 
     tt.doesNotThrow(function () {
       client.hide()

@@ -1,8 +1,8 @@
 language: node_js
 node_js:
-  - "7.2.1"
+  - "7.7.2"
 before_install:
-  npm install -g npm@'>=3.10.10'
+  npm install -g yarn@'>=0.22.0'
 notifications:
   email:
     on_success: never
@@ -14,4 +14,4 @@ addons:
 install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  - npm install
+  - yarn install

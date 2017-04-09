@@ -808,14 +808,15 @@ var Recorder = function (visuals, replay, options) {
   function setAnimationFrameObject (newObj) {
     // must stop and then start to make it become effective, see
     // https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
+    if (loop) {
+      var isRecording = self.isRecording()
 
-    var isRecording = self.isRecording()
+      loop.stop()
+      loop.setRequestAnimationFrameObject(newObj)
 
-    loop.stop()
-    loop.setRequestAnimationFrameObject(newObj)
-
-    if (isRecording) {
-      loop.start()
+      if (isRecording) {
+        loop.start()
+      }
     }
   }
 
@@ -936,7 +937,7 @@ var Recorder = function (visuals, replay, options) {
   }
 
   this.isRecording = function () {
-    return loop.isRunning() && !this.isPaused() && !isNotifying()
+    return loop && loop.isRunning() && !this.isPaused() && !isNotifying()
   }
 
   this.hide = function () {
