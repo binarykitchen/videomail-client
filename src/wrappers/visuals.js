@@ -194,8 +194,9 @@ var Visuals = function (container, options) {
       recorderInsides.resumeCountdown()
     } else {
       recorder.resume()
-      recorderInsides.hidePause()
     }
+
+    recorderInsides.hidePause()
   }
 
   this.pauseOrResume = function () {

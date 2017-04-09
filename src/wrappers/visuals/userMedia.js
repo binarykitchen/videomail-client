@@ -85,7 +85,9 @@ module.exports = function (recorder, options) {
     var onPlayReached = false
     var onLoadedMetaDataReached = false
 
-    if (options && options.isAudioEnabled()) { audioRecorder = audioRecorder || new AudioRecorder(this, options) }
+    if (options && options.isAudioEnabled()) {
+      audioRecorder = audioRecorder || new AudioRecorder(this, options)
+    }
 
     function audioRecord () {
       self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord)
@@ -99,13 +101,13 @@ module.exports = function (recorder, options) {
     function fireCallbacks () {
       var readyState = rawVisualUserMedia.readyState
 
-            // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+      // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
       options.debug(
-                'UserMedia: fireCallbacks(' +
-                'readyState=' + readyState + ', ' +
-                'onPlayReached=' + onPlayReached + ', ' +
-                'onLoadedMetaDataReached=' + onLoadedMetaDataReached + ')'
-            )
+        'UserMedia: fireCallbacks(' +
+        'readyState=' + readyState + ', ' +
+        'onPlayReached=' + onPlayReached + ', ' +
+        'onLoadedMetaDataReached=' + onLoadedMetaDataReached + ')'
+      )
 
       if (onPlayReached && onLoadedMetaDataReached) {
         videoCallback()
@@ -127,19 +129,19 @@ module.exports = function (recorder, options) {
         logEvent('play', {audio: options.isAudioEnabled()})
 
         rawVisualUserMedia.removeEventListener &&
-                rawVisualUserMedia.removeEventListener('play', onPlay)
+        rawVisualUserMedia.removeEventListener('play', onPlay)
 
         localMediaStream.removeEventListener &&
-                localMediaStream.removeEventListener('ended', onPlay)
+        localMediaStream.removeEventListener('ended', onPlay)
 
         if (hasEnded() || hasInvalidDimensions()) {
           endedEarlyCallback(
-                        VideomailError.create(
-                            'Already busy',
-                            'Probably another browser window is using your webcam?',
-                            options
-                        )
-                    )
+            VideomailError.create(
+              'Already busy',
+              'Probably another browser window is using your webcam?',
+              options
+            )
+          )
         } else {
           onPlayReached = true
           fireCallbacks()
@@ -149,17 +151,17 @@ module.exports = function (recorder, options) {
       }
     }
 
-        // player modifications to perform that must wait until `loadedmetadata` has been triggered
+    // player modifications to perform that must wait until `loadedmetadata` has been triggered
     function onLoadedMetaData () {
       logEvent('loadedmetadata', {readyState: rawVisualUserMedia.readyState})
 
       rawVisualUserMedia.removeEventListener &&
-            rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
+      rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
 
       if (!hasEnded() && !hasInvalidDimensions()) {
         self.emit(Events.LOADED_META_DATA)
 
-                // for android devices, we cannot call play() unless meta data has been loaded!
+        // for android devices, we cannot call play() unless meta data has been loaded!
         rawVisualUserMedia.play()
 
         onLoadedMetaDataReached = true
@@ -170,24 +172,43 @@ module.exports = function (recorder, options) {
     try {
       var videoTrack = getFirstVideoTrack(localMediaStream)
 
-      if (!videoTrack) { options.debug('UserMedia: detected (but no video tracks exist') } else {
+      if (!videoTrack) {
+        options.debug('UserMedia: detected (but no video tracks exist')
+      } else if (!videoTrack.enabled) {
+        throw VideomailError.create(
+          'Webcam is disabled',
+          'The video track seems to be disabled. Enable it in your system.',
+          options
+        )
+      } else {
         var description
 
-        if (videoTrack.label && videoTrack.label.length > 0) { description = videoTrack.label } else { description = videoTrack.kind }
+        if (videoTrack.label && videoTrack.label.length > 0) {
+          description = videoTrack.label
+        }
 
-        options.debug('UserMedia: detected', description || '')
+        description += ' with enabled=' + videoTrack.enabled
+        description += ', muted=' + videoTrack.muted
+        description += ', remote=' + videoTrack.remote
+        description += ', readyState=' + videoTrack.readyState
+        description += ', error=' + videoTrack.error
+
+        options.debug(
+          'UserMedia: ' + videoTrack.kind + ' detected.',
+          description || ''
+        )
       }
 
-            // very useful i think, so leave this and just use options.debug()
+      // very useful i think, so leave this and just use options.debug()
       var heavyDebugging = true
 
       if (heavyDebugging) {
         var outputEvent = function (e) {
           logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
 
-                    // remove myself
+          // remove myself
           rawVisualUserMedia.removeEventListener &&
-                    rawVisualUserMedia.removeEventListener(e.type, outputEvent)
+          rawVisualUserMedia.removeEventListener(e.type, outputEvent)
         }
 
         MEDIA_EVENTS.forEach(function (eventName) {
@@ -198,20 +219,22 @@ module.exports = function (recorder, options) {
       rawVisualUserMedia.addEventListener('loadedmetadata', onLoadedMetaData)
       rawVisualUserMedia.addEventListener('play', onPlay)
 
-            // experimental, not sure if this is ever needed/called? since 2 apr 2017
-            // An error occurs while fetching the media data.
-            // Error is an object with the code MEDIA_ERR_NETWORK or higher.
-            // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
+      // experimental, not sure if this is ever needed/called? since 2 apr 2017
+      // An error occurs while fetching the media data.
+      // Error is an object with the code MEDIA_ERR_NETWORK or higher.
+      // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
         self.emit(Events.ERROR, VideomailError.create(
-                    'User Media Error',
-                    err.toString(),
-                    options
-                ))
+          'User Media Error',
+          err.toString(),
+          options
+        ))
       })
 
       setVisualStream(localMediaStream)
 
+      // Resets the media element and restarts the media resource. Any pending events are discarded.
+      rawVisualUserMedia.load()
       rawVisualUserMedia.play()
     } catch (exc) {
       self.emit(Events.ERROR, exc)
