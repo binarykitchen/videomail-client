@@ -93,7 +93,11 @@ var Replay = function (parentElement, options) {
         // this forces to actually fetch the videos from the server
     replayElement.load()
 
-    if (!videomail) { self.emit(Events.PREVIEW_SHOWN) } else { self.emit(Events.REPLAY_SHOWN) }
+    if (!videomail) {
+      self.emit(Events.PREVIEW_SHOWN)
+    } else {
+      self.emit(Events.REPLAY_SHOWN)
+    }
   }
 
   this.build = function () {
@@ -121,13 +125,21 @@ var Replay = function (parentElement, options) {
       replayElement.addEventListener('touchstart', function (e) {
         e && e.preventDefault()
 
-        if (this.paused) { play() } else { pause() }
+        if (this.paused) {
+          play()
+        } else {
+          pause()
+        }
       })
 
       replayElement.onclick = function (e) {
         e && e.preventDefault()
 
-        if (this.paused) { play() } else { pause() }
+        if (this.paused) {
+          play()
+        } else {
+          pause()
+        }
       }
     }
 
@@ -191,25 +203,31 @@ var Replay = function (parentElement, options) {
   }
 
   function pause (cb) {
-    if (replayElement && replayElement.pause) { replayElement.pause() }
+    // avoids race condition, inspired by
+    // http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
+    setTimeout(function () {
+      if (replayElement && replayElement.pause) {
+        replayElement.pause()
+      }
 
-    cb && cb()
+      cb && cb()
+    }, 0)
   }
 
-  function play (cb) {
-    if (replayElement && replayElement.play && replayElement.duration) {
+  function play () {
+    if (replayElement && replayElement.play) {
       var p = replayElement.play()
 
       if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
-        p.then(function () {
-          cb && cb()
+        p.catch(function (reason) {
+          options.debug('Caught pending play exception: %s', reason)
         })
-      } else { cb && cb() }
-    } else { cb && cb() }
+      }
+    }
   }
 
   this.reset = function (cb) {
-        // pause video to make sure it won't consume any memory
+    // pause video to make sure it won't consume any memory
     pause(function () {
       if (replayElement) {
         self.setMp4Source(null)
@@ -221,7 +239,11 @@ var Replay = function (parentElement, options) {
   }
 
   this.hide = function () {
-    if (isStandalone()) { hidden(parentElement, true) } else { replayElement && hidden(replayElement, true) }
+    if (isStandalone()) {
+      hidden(parentElement, true)
+    } else {
+      replayElement && hidden(replayElement, true)
+    }
   }
 
   this.isShown = function () {

@@ -69,27 +69,27 @@ var Notifier = function (visuals, options) {
     debug('Notifier: initEvents()')
 
     self
-            .on(Events.LOADING_USER_MEDIA, function () {
-              onLoadingUserMedia()
-            })
-            .on(Events.USER_MEDIA_READY, function () {
-              self.hide()
-            })
-            .on(Events.LOADED_META_DATA, function () {
-              correctDimensions()
-            })
-            .on(Events.PREVIEW, function () {
-              self.hide()
-            })
-            .on(Events.STOPPING, function (limitReached) {
-              onStopping(limitReached)
-            })
-            .on(Events.PROGRESS, function (frameProgress, sampleProgress) {
-              onProgress(frameProgress, sampleProgress)
-            })
-            .on(Events.BEGIN_VIDEO_ENCODING, function () {
-              onBeginVideoEncoding()
-            })
+      .on(Events.LOADING_USER_MEDIA, function () {
+        onLoadingUserMedia()
+      })
+      .on(Events.USER_MEDIA_READY, function () {
+        self.hide()
+      })
+      .on(Events.LOADED_META_DATA, function () {
+        correctDimensions()
+      })
+      .on(Events.PREVIEW, function () {
+        self.hide()
+      })
+      .on(Events.STOPPING, function (limitReached) {
+        onStopping(limitReached)
+      })
+      .on(Events.PROGRESS, function (frameProgress, sampleProgress) {
+        onProgress(frameProgress, sampleProgress)
+      })
+      .on(Events.BEGIN_VIDEO_ENCODING, function () {
+        onBeginVideoEncoding()
+      })
   }
 
   function correctDimensions () {
