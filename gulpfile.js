@@ -81,8 +81,12 @@ gulp.task('browserify', ['clean:js'], function (cb) {
   bundler
     .require(entry, {expose: 'videomail-client'})
     .bundle()
-    .on('error', cb)
+    .on('error', function (err) {
+      plugins.util.log(plugins.util.colors.red('[Error]'), err.toString())
+      this.emit('end')
+    })
     .on('log', plugins.util.log)
+    .on('end', cb)
     .pipe(source('./src/')) // gives streaming vinyl file object
     .pipe(buffer()) // required because the next steps do not support streams
     .pipe(plugins.concat('videomail-client.js'))
@@ -91,7 +95,6 @@ gulp.task('browserify', ['clean:js'], function (cb) {
     .pipe(plugins.if(options.minify, plugins.uglify()))
     .pipe(plugins.if(options.minify, gulp.dest('dist')))
     .pipe(plugins.connect.reload())
-    .on('end', cb)
 })
 
 gulp.task('connect', ['build'], function () {
