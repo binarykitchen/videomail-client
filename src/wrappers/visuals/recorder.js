@@ -74,10 +74,10 @@ var Recorder = function (visuals, replay, options) {
     if (stream) {
       if (stream.destroyed) {
         self.emit(Events.ERROR, VideomailError.create(
-                      'Already disconnected.',
-                      'Sorry, the connection to the server has been destroyed. Please reload.',
-                      options
-                  ))
+          'Already disconnected.',
+          'Sorry, the connection to the server has been destroyed. Please reload.',
+          options
+        ))
       } else {
         var onFlushedCallback = opts && opts.onFlushedCallback
 

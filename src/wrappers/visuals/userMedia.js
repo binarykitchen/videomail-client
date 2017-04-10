@@ -24,7 +24,9 @@ module.exports = function (recorder, options) {
     if (typeof rawVisualUserMedia.srcObject !== 'undefined') { rawVisualUserMedia.srcObject = stream } else if (typeof rawVisualUserMedia.src !== 'undefined') {
       var URL = window.URL || window.webkitURL
       rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
-    } else { throw VideomailError.create('Error attaching stream to element.') }
+    } else {
+      throw VideomailError.create('Error attaching stream to element.')
+    }
   }
 
   function setVisualStream (localMediaStream) {
@@ -234,8 +236,11 @@ module.exports = function (recorder, options) {
       setVisualStream(localMediaStream)
 
       // Resets the media element and restarts the media resource. Any pending events are discarded.
-      rawVisualUserMedia.load()
-      rawVisualUserMedia.play()
+      // But do them in the next tick to ensure event queue is ready for a lot to come
+      setTimeout(function () {
+        rawVisualUserMedia.load()
+        rawVisualUserMedia.play()
+      }, 0)
     } catch (exc) {
       self.emit(Events.ERROR, exc)
     }
