@@ -210,7 +210,9 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
   if (resource) {
     resource.reportError(videomailError, function (err) {
-      console.error('Unable to report error', err)
+      if (err) {
+        console.error('Unable to report error', err)
+      }
     })
   }
 
