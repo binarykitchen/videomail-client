@@ -21,11 +21,17 @@ module.exports = function (recorder, options) {
   function attachMediaStream (stream) {
     currentVisualStream = stream
 
-    if (typeof rawVisualUserMedia.srcObject !== 'undefined') { rawVisualUserMedia.srcObject = stream } else if (typeof rawVisualUserMedia.src !== 'undefined') {
+    if (typeof rawVisualUserMedia.srcObject !== 'undefined') {
+      rawVisualUserMedia.srcObject = stream
+    } else if (typeof rawVisualUserMedia.src !== 'undefined') {
       var URL = window.URL || window.webkitURL
       rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
     } else {
-      throw VideomailError.create('Error attaching stream to element.')
+      throw VideomailError.create(
+        'Error attaching stream to element.',
+        'Contact the developer about this',
+        options,
+        true)
     }
   }
 
@@ -141,7 +147,8 @@ module.exports = function (recorder, options) {
             VideomailError.create(
               'Already busy',
               'Probably another browser window is using your webcam?',
-              options
+              options,
+              true
             )
           )
         } else {
@@ -180,7 +187,8 @@ module.exports = function (recorder, options) {
         throw VideomailError.create(
           'Webcam is disabled',
           'The video track seems to be disabled. Enable it in your system.',
-          options
+          options,
+          true
         )
       } else {
         var description
@@ -229,7 +237,8 @@ module.exports = function (recorder, options) {
         self.emit(Events.ERROR, VideomailError.create(
           'User Media Error',
           err.toString(),
-          options
+          options,
+          true
         ))
       })
 
