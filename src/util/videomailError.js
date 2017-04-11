@@ -205,7 +205,8 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
   var videomailError = new VideomailError(message, {
     explanation: explanation,
-    logLines: logLines
+    logLines: logLines,
+    useragent: browser.getUa()
   })
 
   if (resource) {

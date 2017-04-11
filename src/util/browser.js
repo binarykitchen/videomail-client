@@ -11,10 +11,10 @@ module.exports = function (options) {
   var chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium'
   var browseHappyLink = 'http://browsehappy.com'
   var ua = defined(options.fakeUaString, (
-                                typeof window !== 'undefined' &&
-                                window.navigator &&
-                                window.navigator.userAgent
-                               ), '')
+    typeof window !== 'undefined' &&
+    window.navigator &&
+    window.navigator.userAgent
+  ), '')
 
   var uaParser = new UAParser(ua).getResult()
 
@@ -179,5 +179,9 @@ module.exports = function (options) {
 
   this.isEdge = function () {
     return isEdge
+  }
+
+  this.getUa = function () {
+    return ua
   }
 }
