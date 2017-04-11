@@ -1,6 +1,7 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
 var pretty = require('./pretty')
+var Resource = require('./../resource')
 
 var VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
@@ -17,14 +18,21 @@ VideomailError.STARTING_FAILED = 'Starting video failed'
 
 function stringify (anything) {
   if (anything) {
-    if (typeof anything === 'string') { return anything } else if (Object.keys(anything).length > 0) { return JSON.stringify(anything) } else { return anything.toString() }
+    if (typeof anything === 'string') {
+      return anything
+    } else if (Object.keys(anything).length > 0) {
+      return JSON.stringify(anything)
+    } else {
+      return anything.toString()
+    }
   } else { return undefined }
 }
 
 // static function to convert an error into a videomail error
-
 VideomailError.create = function (err, explanation, options, isBrowserProblem) {
-  if (err && err.name === VIDEOMAIL_ERR_NAME) { return err }
+  if (err && err.name === VIDEOMAIL_ERR_NAME) {
+    return err
+  }
 
   if (!options && explanation) {
     options = explanation
@@ -33,8 +41,14 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
   options = options || {}
 
-    // Require Browser here, not at the top of the file to avoid
-    // recursion. Because the Browser class is requiring this file as well.
+  var resource
+
+  if (options.reportErrors) {
+    resource = new Resource(options)
+  }
+
+  // Require Browser here, not at the top of the file to avoid
+  // recursion. Because the Browser class is requiring this file as well.
   var Browser = require('./browser')
   var browser = new Browser(options)
 
@@ -69,12 +83,15 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     case 'NO_DEVICES_FOUND':
       message = 'No webcam found'
       explanation = 'Your browser cannot find a webcam attached to your machine.'
+      isBrowserProblem = true
       break
 
     case 'PermissionDismissedError':
       message = 'Unknown permission!'
       explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
-                          'Please grant access next time the dialogue appears.'
+                    'Please grant access next time the dialogue appears.'
+
+      isBrowserProblem = true
 
       break
 
@@ -84,45 +101,56 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
       if (browser.isChromeBased() || browser.isFirefox() || browser.isEdge()) {
         explanation = 'Permission to access your webcam has been denied. ' +
-                              'This can have two reasons:<br/>' +
-                              'a) you blocked access to webcam; or<br/>' +
-                              'b) your webcam is already in use.'
+                      'This can have two reasons:<br/>' +
+                      'a) you blocked access to webcam; or<br/>' +
+                      'b) your webcam is already in use.'
       }
+
+      isBrowserProblem = true
+
       break
 
     case 'HARDWARE_UNAVAILABLE':
       message = 'Webcam is unavailable!'
       explanation = 'Maybe it is already busy in another window?'
+      isBrowserProblem = true
 
-      if (browser.isChromeBased()) { explanation += ' Or you have to allow access above?' }
+      if (browser.isChromeBased()) {
+        explanation += ' Or you have to allow access above?'
+      }
       break
 
     case VideomailError.NOT_CONNECTED:
       message = 'Unable to transfer data'
       explanation = 'Unable to maintain a binary websocket to the server. Either the server or ' +
-                          'your connection is down. Trying to reconnect every two seconds …'
+                    'your connection is down. Trying to reconnect every two seconds …'
       break
 
     case 'NO_VIDEO_FEED':
       message = 'No video feed found!'
       explanation = 'Your webcam is already used in another browser.'
+      isBrowserProblem = true
       break
 
     case VideomailError.STARTING_FAILED:
       message = 'Starting video failed'
       explanation = 'Most likely this happens when the webam is already active in another browser.'
+      isBrowserProblem = true
       break
 
     case 'DevicesNotFoundError':
       message = 'No available webcam could be found'
       explanation = 'Looks like you do not have any webcam attached to your machine; or ' +
-                          'the one you plugged in is already used.'
+                    'the one you plugged in is already used.'
+      isBrowserProblem = true
       break
 
     case VideomailError.DOM_EXCEPTION:
       if (err.code === 9) {
         message = 'Insecure origin detected'
-        explanation = 'To use the powerful webcam feature, security cannot be neglected. Please use HTTPS instead.'
+        explanation = 'To use the powerful webcam feature, security should not be neglected. ' +
+                      'Please change the location in your browser to HTTPS.'
+        isBrowserProblem = true
       } else {
         message = VideomailError.DOM_EXCEPTION
         explanation = stringify(err)
@@ -166,7 +194,9 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
   var logLines = null
 
-  if (options.logger && options.logger.getLines) { logLines = options.logger.getLines() }
+  if (options.logger && options.logger.getLines) {
+    logLines = options.logger.getLines()
+  }
 
   if (stack) {
     message = new Error(message)
@@ -178,7 +208,15 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     logLines: logLines
   })
 
-    // add some public functions
+  if (resource) {
+    resource.reportError(videomailError, function (err) {
+      console.error('Unable to report error', err)
+    })
+  }
+
+  // add some public functions
+
+  // this one is useful so that the notifier can have different css classes
   videomailError.isBrowserProblem = function () {
     return isBrowserProblem
   }
