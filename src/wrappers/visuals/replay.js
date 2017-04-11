@@ -211,7 +211,7 @@ var Replay = function (parentElement, options) {
       }
 
       cb && cb()
-    }, 0)
+    }, 10)
   }
 
   function play () {
