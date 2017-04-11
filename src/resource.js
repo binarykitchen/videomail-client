@@ -24,10 +24,12 @@ module.exports = function (options) {
 
   function packError (err, res) {
     if (res && res.body && res.body.error) {
-            // use the server generated text instead of the superagent's default text
+      // use the server generated text instead of the superagent's default text
       err = res.body.error
 
-      if (!err.message && res.text) { err.message = res.text }
+      if (!err.message && res.text) {
+        err.message = res.text
+      }
     }
 
     return err
@@ -35,21 +37,21 @@ module.exports = function (options) {
 
   function fetch (alias, cb) {
     superagent
-            .get('/videomail/' + alias + '/snapshot')
-            .set('Accept', 'application/json')
-            .set(Constants.SITE_NAME_LABEL, options.siteName)
-            .timeout(options.timeouts.connection)
-            .end(function (err, res) {
-              err = packError(err, res)
+      .get('/videomail/' + alias + '/snapshot')
+      .set('Accept', 'application/json')
+      .set(Constants.SITE_NAME_LABEL, options.siteName)
+      .timeout(options.timeouts.connection)
+      .end(function (err, res) {
+        err = packError(err, res)
 
-              if (err) { cb(err) } else {
-                var videomail = res.body
+        if (err) { cb(err) } else {
+          var videomail = res.body
 
-                if (options.cache) { cache[CACHE_KEY] = videomail }
+          if (options.cache) { cache[CACHE_KEY] = videomail }
 
-                cb(null, videomail)
-              }
-            })
+          cb(null, videomail)
+        }
+      })
   }
 
   function write (method, videomail, identifier, cb) {
@@ -63,25 +65,31 @@ module.exports = function (options) {
     var url = options.baseUrl + '/videomail/'
     var request
 
-    if (identifier) { url += identifier }
+    if (identifier) {
+      url += identifier
+    }
 
     request = superagent(method, url)
 
     queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
     request
-            .query(queryParams)
-            .send(videomail)
-            .timeout(options.timeout)
-            .end(function (err, res) {
-              err = packError(err, res)
+      .query(queryParams)
+      .send(videomail)
+      .timeout(options.timeout)
+      .end(function (err, res) {
+        err = packError(err, res)
 
-              if (err) { cb(err) } else {
-                if (options.cache && videomail[CACHE_KEY]) { cache[videomail[CACHE_KEY]] = res.body.videomail }
+        if (err) {
+          cb(err)
+        } else {
+          if (options.cache && videomail[CACHE_KEY]) {
+            cache[videomail[CACHE_KEY]] = res.body.videomail
+          }
 
-                cb(null, res.body.videomail, res.body)
-              }
-            })
+          cb(null, res.body.videomail, res.body)
+        }
+      })
   }
 
   this.get = function (alias, cb) {
@@ -93,17 +101,45 @@ module.exports = function (options) {
     } else { fetch(alias, cb) }
   }
 
+  this.reportError = function (err, cb) {
+    var queryParams = {}
+
+    var url = options.baseUrl + '/error/'
+    var request = superagent('post', url)
+
+    queryParams[Constants.SITE_NAME_LABEL] = options.siteName
+
+    request
+      .query(queryParams)
+      .send(err)
+      .timeout(options.timeout)
+      .end(function (err, res) {
+        err = packError(err, res)
+        if (err) {
+          cb && cb(err)
+        } else {
+          cb && cb()
+        }
+      })
+  }
+
   this.post = function (videomail, cb) {
     videomail = applyDefaultValues(videomail)
 
     if (options.callbacks.adjustFormDataBeforePosting) {
       options.callbacks.adjustFormDataBeforePosting(
-                videomail,
-                function (err, adjustedVideomail) {
-                  if (err) { cb(err) } else { write('post', adjustedVideomail, cb) }
-                }
-            )
-    } else { write('post', videomail, cb) }
+        videomail,
+        function (err, adjustedVideomail) {
+          if (err) {
+            cb(err)
+          } else {
+            write('post', adjustedVideomail, cb)
+          }
+        }
+      )
+    } else {
+      write('post', videomail, cb)
+    }
   }
 
   this.put = function (videomail, cb) {
@@ -121,7 +157,7 @@ module.exports = function (options) {
         formType = 'form'
         break
       default:
-                // keep all callbacks async
+        // keep all callbacks async
         setTimeout(function () {
           cb(new Error('Invalid enctype given: ' + options.enctype))
         }, 0)
@@ -129,15 +165,19 @@ module.exports = function (options) {
 
     if (formType) {
       superagent
-                .post(url)
-                .type(formType)
-                .send(formData)
-                .timeout(options.timeout)
-                .end(function (err, res) {
-                  err = packError(err, res)
+        .post(url)
+        .type(formType)
+        .send(formData)
+        .timeout(options.timeout)
+        .end(function (err, res) {
+          err = packError(err, res)
 
-                  if (err) { cb(err) } else { cb(null, res) }
-                })
+          if (err) {
+            cb(err)
+          } else {
+            cb(null, res)
+          }
+        })
     }
   }
 }

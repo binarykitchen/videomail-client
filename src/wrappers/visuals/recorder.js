@@ -247,10 +247,10 @@ var Recorder = function (visuals, replay, options) {
         connecting = connected = false
 
         var err = VideomailError.create(
-                    'Failed to create websocket',
-                    'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
-                    options
-                )
+          'Failed to create websocket',
+          'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
+          options
+        )
 
         self.emit(Events.ERROR, err)
       }
@@ -401,7 +401,9 @@ var Recorder = function (visuals, replay, options) {
 
     try {
       userMediaTimeout = setTimeout(function () {
-        if (!self.isReady()) { self.emit(Events.ERROR, browser.getNoAccessIssue()) }
+        if (!self.isReady()) {
+          self.emit(Events.ERROR, browser.getNoAccessIssue())
+        }
       }, options.timeouts.userMedia)
 
       userMediaLoading = true
@@ -412,7 +414,9 @@ var Recorder = function (visuals, replay, options) {
 
       var errorListeners = self.listeners(Events.ERROR)
 
-      if (errorListeners.length) { self.emit(Events.ERROR, exc) } else {
+      if (errorListeners.length) {
+        self.emit(Events.ERROR, exc)
+      } else {
         debug('Recorder: no error listeners attached but throwing exception', exc)
         throw exc // throw it further
       }
@@ -427,20 +431,20 @@ var Recorder = function (visuals, replay, options) {
         command = JSON.parse(data.toString())
       } catch (excInner) {
         self.emit(Events.ERROR, VideomailError.create(
-                    'Failed to parse command.',
-                    data,
-                    options
-                ))
+          'Failed to parse command.',
+          data,
+          options
+        ))
       }
 
       var result
 
       debug(
-                'Server commanded: %s',
-                command.command,
-                command.args ? ', ' + JSON.stringify(command.args) : '',
-                result ? '= ' + result : ''
-            )
+        'Server commanded: %s',
+        command.command,
+        command.args ? ', ' + JSON.stringify(command.args) : '',
+        result ? '= ' + result : ''
+      )
 
       switch (command.command) {
         case 'ready':
@@ -451,10 +455,10 @@ var Recorder = function (visuals, replay, options) {
           break
         case 'error':
           this.emit(Events.ERROR, VideomailError.create(
-                        'Oh no, server error!',
-                        command.args.err.toString() || '(No explanation given)',
-                        options
-                    ))
+            'Oh no, server error!',
+            command.args.err.toString() || '(No explanation given)',
+            options
+          ))
           break
         case 'confirmFrame':
           result = updateFrameProgress(command.args)
@@ -509,7 +513,7 @@ var Recorder = function (visuals, replay, options) {
       writeStream(Buffer.from(JSON.stringify(commandObj)))
 
       if (cb) {
-                // keep all callbacks async
+        // keep all callbacks async
         setTimeout(function () {
           cb()
         }, 0)
