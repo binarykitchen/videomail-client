@@ -13,7 +13,8 @@
             var videomailClient = new VideomailClient({
               verbose: true,
               adjustFormOnBrowserError: true,
-              fakeUaString: 'Internet Explorer 8.0'
+              fakeUaString: 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)',
+              reportErrors: true
             })
 
             videomailClient.show()

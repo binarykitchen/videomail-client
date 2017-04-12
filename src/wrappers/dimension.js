@@ -35,14 +35,20 @@ module.exports = {
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
   limitHeight: function (height) {
-    if (numberIsInteger(height) && height < 1) { throw VideomailError.create('Passed limit-height argument cannot be less than 1!') } else {
+    if (numberIsInteger(height) && height < 1) {
+      throw VideomailError.create('Passed limit-height argument cannot be less than 1!')
+    } else {
       var limitedHeight = Math.min(
-                height,
-                document.body.scrollHeight,
-                document.documentElement.clientHeight
-            )
+        height,
+        document.body.scrollHeight,
+        document.documentElement.clientHeight
+      )
 
-      if (limitedHeight < 1) { throw VideomailError.create('Limited height cannot be less than 1!') } else { return limitedHeight }
+      if (limitedHeight < 1) {
+        throw VideomailError.create('Limited height cannot be less than 1!')
+      } else {
+        return limitedHeight
+      }
     }
   },
 
@@ -54,10 +60,16 @@ module.exports = {
 
     if (options.responsive) { height = this.limitHeight(height) }
 
-    if (numberIsInteger(height) && height < 1) { throw new Error('Height cannot be smaller than 1 when calculating width.') } else {
+    if (numberIsInteger(height) && height < 1) {
+      throw VideomailError.create('Height cannot be smaller than 1 when calculating width.')
+    } else {
       var calculatedWidth = parseInt(height / ratio)
 
-      if (calculatedWidth < 1) { throw new Error('Calculated width cannot be smaller than 1!') } else { return calculatedWidth }
+      if (calculatedWidth < 1) {
+        throw VideomailError.create('Calculated width cannot be smaller than 1!')
+      } else {
+        return calculatedWidth
+      }
     }
   },
 

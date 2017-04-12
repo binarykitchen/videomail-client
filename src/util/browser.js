@@ -125,7 +125,7 @@ module.exports = function (options) {
 
     if (!okBrowser || !this.canRecord()) {
       err = VideomailError.create({
-        message: 'Sorry, your browser won\'t let you access your webcam.'
+        message: 'Sorry, your browser is unable to use a webcam.'
       }, getUserMediaWarning(), options, true)
     }
 
@@ -136,7 +136,11 @@ module.exports = function (options) {
     var err,
       message
 
-    if (!video) { message = 'No HTML5 support for video tag!' } else if (!this.getVideoType(video)) { message = 'No H264 nor webm support found.' }
+    if (!video) {
+      message = 'No HTML5 support for video tag!'
+    } else if (!this.getVideoType(video)) {
+      message = 'Your old browser cannot support H264 + WebM video codecs.'
+    }
 
     if (message) { err = VideomailError.create(message, getPlaybackWarning(), options) }
 
@@ -161,10 +165,16 @@ module.exports = function (options) {
   }
 
   this.getNoAccessIssue = function () {
-    var message = 'Cannot access webcam!'
+    var message = 'Unable to access webcam!'
     var explanation
 
-    if (this.isChromeBased()) { explanation = 'Click on the allow button to grant access to your webcam.' } else if (this.isFirefox()) { explanation = 'Please share your webcam under Firefox.' } else { explanation = 'Your operating system does not let your browser access your webcam.' }
+    if (this.isChromeBased()) {
+      explanation = 'Click on the allow button to grant access to your webcam.'
+    } else if (this.isFirefox()) {
+      explanation = 'Please grant Firefox to access your webcam.'
+    } else {
+      explanation = 'Your operating system does not let your browser access your webcam.'
+    }
 
     return VideomailError.create(message, explanation, options)
   }
@@ -181,7 +191,13 @@ module.exports = function (options) {
     return isEdge
   }
 
-  this.getUa = function () {
-    return ua
+  this.getUsefulData = function () {
+    return {
+      browser: uaParser.browser,
+      device: uaParser.device,
+      os: uaParser.os,
+      engine: uaParser.engine,
+      userAgent: ua
+    }
   }
 }
