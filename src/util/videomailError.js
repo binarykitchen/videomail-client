@@ -9,7 +9,8 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'explanation': undefined,
   'logLines': undefined,
   'useragent': undefined,
-  'url': undefined
+  'url': undefined,
+  'stack': undefined
 })
 
 // static and public attribute of this class

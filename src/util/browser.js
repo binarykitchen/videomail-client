@@ -139,7 +139,7 @@ module.exports = function (options) {
     if (!video) {
       message = 'No HTML5 support for video tag!'
     } else if (!this.getVideoType(video)) {
-      message = 'Your old browser cannot support H264 + WebM video codecs.'
+      message = 'Your old browser cannot support H264 + WebM video codecs'
     }
 
     if (message) { err = VideomailError.create(message, getPlaybackWarning(), options) }
