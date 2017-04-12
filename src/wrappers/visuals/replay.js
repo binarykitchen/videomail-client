@@ -54,11 +54,17 @@ var Replay = function (parentElement, options) {
   this.setVideomail = function (newVideomail) {
     videomail = newVideomail
 
-    if (videomail.webm) { this.setWebMSource(videomail.webm) }
+    if (videomail.webm) {
+      this.setWebMSource(videomail.webm)
+    }
 
-    if (videomail.mp4) { this.setMp4Source(videomail.mp4) }
+    if (videomail.mp4) {
+      this.setMp4Source(videomail.mp4)
+    }
 
-    if (videomail.poster) { replayElement.setAttribute('poster', videomail.poster) }
+    if (videomail.poster) {
+      replayElement.setAttribute('poster', videomail.poster)
+    }
 
     copyAttributes(newVideomail)
 
@@ -77,20 +83,24 @@ var Replay = function (parentElement, options) {
 
         // parent element can be any object, be careful!
     if (parentElement) {
-      if (parentElement.style) { hidden(parentElement, false) } else if (parentElement.show) { parentElement.show() }
+      if (parentElement.style) {
+        hidden(parentElement, false)
+      } else if (parentElement.show) {
+        parentElement.show()
+      }
     }
 
     if (!options.isAudioEnabled()) {
       replayElement.setAttribute('muted', true)
     }
 
-        // this must be called after setting the sources and when becoming visible
-        // see https://github.com/bfred-it/iphone-inline-video/issues/16
+    // this must be called after setting the sources and when becoming visible
+    // see https://github.com/bfred-it/iphone-inline-video/issues/16
     enableInlineVideo && enableInlineVideo(replayElement, {
       iPad: true
     })
 
-        // this forces to actually fetch the videos from the server
+    // this forces to actually fetch the videos from the server
     replayElement.load()
 
     if (!videomail) {
@@ -170,11 +180,12 @@ var Replay = function (parentElement, options) {
     return source
   }
 
-  function setVideoSource (type, src) {
+  function setVideoSource (type, src, bustCache) {
     var source = self.getVideoSource(type)
-    var timestamp = Date.now()
 
-    if (src) { src += '/videomail.' + type + '?' + timestamp }
+    if (src && bustCache) {
+      src += '?' + Date.now()
+    }
 
     if (!source) {
       if (src) {
@@ -186,16 +197,20 @@ var Replay = function (parentElement, options) {
         replayElement.appendChild(source)
       }
     } else {
-      if (src) { source.setAttribute('src', src) } else { replayElement.removeChild(source) }
+      if (src) {
+        source.setAttribute('src', src)
+      } else {
+        replayElement.removeChild(source)
+      }
     }
   }
 
-  this.setMp4Source = function (src) {
-    setVideoSource('mp4', src)
+  this.setMp4Source = function (src, bustCache) {
+    setVideoSource('mp4', src, bustCache)
   }
 
-  this.setWebMSource = function (src) {
-    setVideoSource('webm', src)
+  this.setWebMSource = function (src, bustCache) {
+    setVideoSource('webm', src, bustCache)
   }
 
   this.getVideoType = function () {

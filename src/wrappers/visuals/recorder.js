@@ -199,9 +199,19 @@ var Recorder = function (visuals, replay, options) {
 
     key = args.key
 
-    if (args.mp4) { replay.setMp4Source(args.mp4 + Constants.SITE_NAME_LABEL + '/' + options.siteName) }
+    if (args.mp4) {
+      replay.setMp4Source(
+        args.mp4 + Constants.SITE_NAME_LABEL + '/' + options.siteName + '/videomail.mp4',
+        true
+      )
+    }
 
-    if (args.webm) { replay.setWebMSource(args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName) }
+    if (args.webm) {
+      replay.setWebMSource(
+        args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName + '/videomail.webm',
+        true
+      )
+    }
 
     self.hide()
     self.emit(Events.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true))
@@ -918,8 +928,8 @@ var Recorder = function (visuals, replay, options) {
 
       correctDimensions()
 
-            // prevent audio feedback, see
-            // https://github.com/binarykitchen/videomail-client/issues/35
+      // prevent audio feedback, see
+      // https://github.com/binarykitchen/videomail-client/issues/35
       recorderElement.muted = true
 
       if (!userMedia) { userMedia = new UserMedia(this, options) }
