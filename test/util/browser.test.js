@@ -95,7 +95,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     var err
 
     err = browser.checkRecordingCapabilities()
-    tt.equal(err.message, 'Sorry, your browser is unable to use a webcam.')
+    tt.equal(err.message, 'Sorry, your browser is unable to use a webcam')
     tt.ok(err.explanation.indexOf('Instead of Internet Explorer better pick') >= 0)
 
     err = browser.checkPlaybackCapabilities()
@@ -127,7 +127,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     var err
 
     err = browser.checkRecordingCapabilities()
-    tt.equal(err.message, 'Sorry, your browser is unable to use a webcam.')
+    tt.equal(err.message, 'Sorry, your browser is unable to use a webcam')
     tt.ok(err.explanation.indexOf('Safari has no webcam support yet.') >= 0)
 
     err = browser.checkPlaybackCapabilities()
