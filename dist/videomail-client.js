@@ -19533,7 +19533,7 @@ module.exports = function (options) {
 
     if (!okBrowser || !this.canRecord()) {
       err = VideomailError.create({
-        message: 'Sorry, your browser is unable to use a webcam.'
+        message: 'Sorry, your browser is unable to use a webcam'
       }, getUserMediaWarning(), options, true)
     }
 
