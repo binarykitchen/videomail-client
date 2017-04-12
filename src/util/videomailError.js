@@ -7,7 +7,9 @@ var VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
 var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'explanation': undefined,
-  'logLines': undefined
+  'logLines': undefined,
+  'useragent': undefined,
+  'url': undefined
 })
 
 // static and public attribute of this class
@@ -76,7 +78,9 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     errType = err
   }
 
-  if (err && err.stack) { stack = err.stack }
+  if (err && err.stack) {
+    stack = err.stack
+  }
 
   switch (errType) {
     case 'NotFoundError':
@@ -87,7 +91,7 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
       break
 
     case 'PermissionDismissedError':
-      message = 'Unknown permission!'
+      message = 'Permission denied!'
       explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
                     'Please grant access next time the dialogue appears.'
 
@@ -161,9 +165,13 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
       if (typeof err === 'string') {
         message = err
       } else {
-        if (err && err.message) { message = stringify(err.message) }
+        if (err && err.message) {
+          message = stringify(err.message)
+        }
 
-        if (err && err.explanation) { explanation = stringify(err.explanation) }
+        if (err && err.explanation) {
+          explanation = stringify(err.explanation)
+        }
 
         if (err && err.details) {
           var details = pretty(err.details)
@@ -206,14 +214,15 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
   var videomailError = new VideomailError(message, {
     explanation: explanation,
     logLines: logLines,
-    useragent: browser.getUa(),
-    url: window.location.href
+    client: browser.getUsefulData(),
+    url: window.location.href,
+    stack: stack // have to assign it manually again because it is kinda protected
   })
 
   if (resource) {
-    resource.reportError(videomailError, function (err) {
-      if (err) {
-        console.error('Unable to report error', err)
+    resource.reportError(videomailError, function (err2) {
+      if (err2) {
+        console.error('Unable to report error', err2)
       }
     })
   }

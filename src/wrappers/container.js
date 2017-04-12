@@ -67,7 +67,9 @@ var Container = function (options) {
   }
 
   function buildChildren () {
-    if (!containerElement.classList) { self.emit(Events.ERROR, new Error('Sorry, your browser is too old!')) } else {
+    if (!containerElement.classList) {
+      self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!'))
+    } else {
       containerElement.classList.add('videomail')
 
       buttons.build()

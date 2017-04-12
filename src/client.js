@@ -62,9 +62,11 @@ var VideomailClient = function (options) {
     // it with the videomail
   this.replay = function (videomail, parentElement) {
     function buildReplay () {
-      if (typeof parentElement === 'string') { parentElement = document.getElementById(parentElement) }
+      if (typeof parentElement === 'string') {
+        parentElement = document.getElementById(parentElement)
+      }
 
-            // if there is none, use the automatically generated one
+      // if there is none, use the automatically generated one
       if (!parentElement) {
         replay = container.getReplay()
         parentElement = replay.getParentElement()
@@ -76,7 +78,7 @@ var VideomailClient = function (options) {
       videomail = container.addPlayerDimensions(videomail, parentElement)
 
       if (videomail) {
-                // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+        // slight delay needed to avoid HTTP 416 errors (request range unavailable)
         setTimeout(function () {
           replay.setVideomail(videomail)
 

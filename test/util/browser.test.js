@@ -20,7 +20,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(videoType, undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Cannot access webcam!')
+    tt.equal(err.message, 'Unable to access webcam!')
     tt.equal(err.explanation, 'Click on the allow button to grant access to your webcam.')
 
     tt.equal(browser.isChromeBased(), true)
@@ -48,8 +48,8 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Cannot access webcam!')
-    tt.equal(err.explanation, 'Please share your webcam under Firefox.')
+    tt.equal(err.message, 'Unable to access webcam!')
+    tt.equal(err.explanation, 'Please grant Firefox to access your webcam.')
 
     tt.equal(browser.isChromeBased(), false)
     tt.equal(browser.isFirefox(), true)
@@ -76,7 +76,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Cannot access webcam!')
+    tt.equal(err.message, 'Unable to access webcam!')
     tt.equal(err.explanation, 'Click on the allow button to grant access to your webcam.')
 
     tt.equal(browser.isChromeBased(), true)
@@ -95,7 +95,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     var err
 
     err = browser.checkRecordingCapabilities()
-    tt.equal(err.message, 'Sorry, your browser won\'t let you access your webcam.')
+    tt.equal(err.message, 'Sorry, your browser is unable to use a webcam.')
     tt.ok(err.explanation.indexOf('Instead of Internet Explorer better pick') >= 0)
 
     err = browser.checkPlaybackCapabilities()
@@ -108,7 +108,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Cannot access webcam!')
+    tt.equal(err.message, 'Unable to access webcam!')
     tt.equal(err.explanation, 'Your operating system does not let your browser access your webcam.')
 
     tt.equal(browser.isChromeBased(), false)
@@ -127,7 +127,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     var err
 
     err = browser.checkRecordingCapabilities()
-    tt.equal(err.message, 'Sorry, your browser won\'t let you access your webcam.')
+    tt.equal(err.message, 'Sorry, your browser is unable to use a webcam.')
     tt.ok(err.explanation.indexOf('Safari has no webcam support yet.') >= 0)
 
     err = browser.checkPlaybackCapabilities()
@@ -140,7 +140,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Cannot access webcam!')
+    tt.equal(err.message, 'Unable to access webcam!')
     tt.equal(err.explanation, 'Your operating system does not let your browser access your webcam.')
 
     tt.equal(browser.isChromeBased(), false)
