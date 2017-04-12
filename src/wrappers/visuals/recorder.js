@@ -330,13 +330,13 @@ var Recorder = function (visuals, replay, options) {
     if (errorListeners.length) {
       self.emit(Events.ERROR, err)
 
-            // retry after a while
+      // retry after a while
       retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
     } else {
       debug('Recorder: no error listeners attached but throwing error', err)
 
-            // weird situation, throw it since there are no error listeners
-      throw err
+      // weird situation, throw it since there are no error listeners
+      throw VideomailError.create(err)
     }
   }
 
@@ -348,13 +348,13 @@ var Recorder = function (visuals, replay, options) {
         clearUserMediaTimeout()
 
         userMedia.init(
-                    localStream,
-                    onUserMediaReady.bind(self),
-                    onAudioSample.bind(self),
-                    function (err) {
-                      self.emit(Events.ERROR, err)
-                    }
-                )
+          localStream,
+          onUserMediaReady.bind(self),
+          onAudioSample.bind(self),
+          function (err) {
+            self.emit(Events.ERROR, err)
+          }
+        )
       } catch (exc) {
         self.emit(Events.ERROR, exc)
       }
@@ -362,12 +362,13 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function loadGenuineUserMedia () {
-    if (!navigator) { throw new Error('Navigator is missing!') }
+    if (!navigator) {
+      throw new Error('Navigator is missing!')
+    }
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // prefer the front camera (if one is available) over the rear one
-
+      // prefer the front camera (if one is available) over the rear one
       var constraints = {
         video: {
           facingMode: 'user',
@@ -384,10 +385,15 @@ var Recorder = function (visuals, replay, options) {
         constraints.video.height = {ideal: options.video.height}
       }
 
-      navigator.mediaDevices.getUserMedia(constraints)
-            .then(getUserMediaCallback)
-            .catch(userMediaErrorCallback)
+      debug('Recorder: navigator.mediaDevices.getUserMedia()')
+
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then(getUserMediaCallback)
+        .catch(userMediaErrorCallback)
     } else {
+      debug('Recorder: navigator.getUserMedia()')
+
       navigator.getUserMedia_({
         video: true,
         audio: options.isAudioEnabled()
