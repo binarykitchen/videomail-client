@@ -19,7 +19,9 @@ module.exports = function (userMedia, options) {
   }
 
   function onAudioProcess (e, cb) {
-    if (!userMedia.isRecording() || userMedia.isPaused()) { return }
+    if (!userMedia.isRecording() || userMedia.isPaused()) {
+      return
+    }
 
         // Returns a Float32Array containing the PCM data associated with the channel,
         // defined by the channel parameter (with 0 representing the first channel)
@@ -43,20 +45,24 @@ module.exports = function (userMedia, options) {
       throw VideomailError.create('Failed to access media for audio.', exc.toString(), options)
     }
 
-    if (!isPOT(options.audio.bufferSize)) { throw VideomailError.create('Audio buffer size must be a power of two.', options) } else if (!options.audio.volume || options.audio.volume > 1) { throw VideomailError.create('Audio volume must be between zero and one.', options) }
+    if (!isPOT(options.audio.bufferSize)) {
+      throw VideomailError.create('Audio buffer size must be a power of two.', options)
+    } else if (!options.audio.volume || options.audio.volume > 1) {
+      throw VideomailError.create('Audio volume must be between zero and one.', options)
+    }
 
     volume.gain.value = options.audio.volume
 
-        // Create a ScriptProcessorNode with the given bufferSize and
-        // a single input and output channel
+    // Create a ScriptProcessorNode with the given bufferSize and
+    // a single input and output channel
     scriptProcessor =
-            getAudioContext().createScriptProcessor(
-                options.audio.bufferSize,
-                channels,
-                channels
-            )
+      getAudioContext().createScriptProcessor(
+          options.audio.bufferSize,
+          channels,
+          channels
+      )
 
-        // connect stream to our scriptProcessor
+    // connect stream to our scriptProcessor
     audioInput.connect(scriptProcessor)
 
         // connect our scriptProcessor to the previous destination

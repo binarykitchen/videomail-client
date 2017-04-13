@@ -177,8 +177,8 @@ test('Videomail Error:', function (t) {
         name: 'HARDWARE_UNAVAILABLE'
       })
 
-      tt.equal(err.toString(), 'Videomail Error: Webcam is unavailable!')
-      tt.equal(err.message, 'Webcam is unavailable!')
+      tt.equal(err.toString(), 'Videomail Error: Webcam is unavailable')
+      tt.equal(err.message, 'Webcam is unavailable')
       tt.equal(err.explanation, 'Maybe it is already busy in another window? Or you have to allow access above?')
     })
 

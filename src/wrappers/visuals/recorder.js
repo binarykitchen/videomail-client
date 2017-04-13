@@ -74,7 +74,7 @@ var Recorder = function (visuals, replay, options) {
     if (stream) {
       if (stream.destroyed) {
         self.emit(Events.ERROR, VideomailError.create(
-          'Already disconnected.',
+          'Already disconnected',
           'Sorry, the connection to the server has been destroyed. Please reload.',
           options
         ))
@@ -104,11 +104,11 @@ var Recorder = function (visuals, replay, options) {
 
     var audioBuffer = audioSample.toBuffer()
 
-        // if (options.verbose) {
-        //     debug(
-        //         'Sample #' + samplesCount + ' (' + audioBuffer.length + ' bytes):'
-        //     )
-        // }
+    // if (options.verbose) {
+    //     debug(
+    //         'Sample #' + samplesCount + ' (' + audioBuffer.length + ' bytes):'
+    //     )
+    // }
 
     writeStream(audioBuffer)
   }
@@ -284,7 +284,14 @@ var Recorder = function (visuals, replay, options) {
 
           connecting = connected = false
 
-          if (err) { self.emit(Events.ERROR, err || 'Unhandled websocket error') }
+          if (err) {
+            self.emit(Events.ERROR, err || 'Unhandled websocket error')
+          } else {
+            self.emit(Events.DISCONNECTED)
+
+            // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening i think
+            cancelAnimationFrame()
+          }
         })
 
         stream.on('connect', function () {
@@ -446,9 +453,12 @@ var Recorder = function (visuals, replay, options) {
       try {
         command = JSON.parse(data.toString())
       } catch (excInner) {
+        debug('Failed to parse command:', excInner)
+
         self.emit(Events.ERROR, VideomailError.create(
           'Failed to parse command.',
-          data,
+          // toString() since https://github.com/binarykitchen/videomail.io/issues/288
+          data.toString(),
           options
         ))
       }
@@ -654,7 +664,7 @@ var Recorder = function (visuals, replay, options) {
 
       cancelAnimationFrame()
 
-            // important to free memory
+      // important to free memory
       userMedia && userMedia.stop()
 
       replay.reset()
@@ -957,7 +967,9 @@ var Recorder = function (visuals, replay, options) {
   }
 
   this.isRecording = function () {
-    return loop && loop.isRunning() && !this.isPaused() && !isNotifying()
+    // checking for stream.destroyed needed since
+    // https://github.com/binarykitchen/videomail.io/issues/296
+    return loop && loop.isRunning() && !this.isPaused() && !isNotifying() && stream && !stream.destroyed
   }
 
   this.hide = function () {
