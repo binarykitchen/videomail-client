@@ -82,7 +82,9 @@ module.exports = function (recorder, options) {
     var videoTracks = getVideoTracks(localMediaStream)
     var videoTrack
 
-    if (videoTracks && videoTracks[0]) { videoTrack = videoTracks[0] }
+    if (videoTracks && videoTracks[0]) {
+      videoTrack = videoTracks[0]
+    }
 
     return videoTrack
   }

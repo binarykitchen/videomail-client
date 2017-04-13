@@ -20,7 +20,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(videoType, undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Unable to access webcam!')
+    tt.equal(err.message, 'Unable to access webcam')
     tt.equal(err.explanation, 'Click on the allow button to grant access to your webcam.')
 
     tt.equal(browser.isChromeBased(), true)
@@ -48,8 +48,8 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Unable to access webcam!')
-    tt.equal(err.explanation, 'Please grant Firefox to access your webcam.')
+    tt.equal(err.message, 'Unable to access webcam')
+    tt.equal(err.explanation, 'Please grant Firefox access to your webcam.')
 
     tt.equal(browser.isChromeBased(), false)
     tt.equal(browser.isFirefox(), true)
@@ -76,7 +76,7 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Unable to access webcam!')
+    tt.equal(err.message, 'Unable to access webcam')
     tt.equal(err.explanation, 'Click on the allow button to grant access to your webcam.')
 
     tt.equal(browser.isChromeBased(), true)
@@ -108,8 +108,8 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Unable to access webcam!')
-    tt.equal(err.explanation, 'Your operating system does not let your browser access your webcam.')
+    tt.equal(err.message, 'Unable to access webcam')
+    tt.equal(err.explanation, 'Your system does not let your browser access your webcam.')
 
     tt.equal(browser.isChromeBased(), false)
     tt.equal(browser.isFirefox(), false)
@@ -140,8 +140,8 @@ test('Browser:', {timeout: 2000}, function (t) {
     tt.equal(browser.getVideoType(), undefined)
 
     err = browser.getNoAccessIssue()
-    tt.equal(err.message, 'Unable to access webcam!')
-    tt.equal(err.explanation, 'Your operating system does not let your browser access your webcam.')
+    tt.equal(err.message, 'Unable to access webcam')
+    tt.equal(err.explanation, 'Your system does not let your browser access your webcam.')
 
     tt.equal(browser.isChromeBased(), false)
     tt.equal(browser.isFirefox(), false)
