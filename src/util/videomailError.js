@@ -92,7 +92,7 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
       break
 
     case 'PermissionDismissedError':
-      message = 'Permission denied!'
+      message = 'Ooops, you did not give me any permissions?'
       explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
                     'Please grant access next time the dialogue appears.'
 
@@ -116,7 +116,7 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
       break
 
     case 'HARDWARE_UNAVAILABLE':
-      message = 'Webcam is unavailable!'
+      message = 'Webcam is unavailable'
       explanation = 'Maybe it is already busy in another window?'
       isBrowserProblem = true
 
