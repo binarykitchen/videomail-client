@@ -23,8 +23,8 @@ module.exports = function (localOptions) {
     return '#' + containerId + ' > ' + firstArgument
   }
 
-    // workaround: since we cannot overwrite console.log without having the correct file and line number
-    // we'll use groupCollapsed() and trace() instead to get these.
+  // workaround: since we cannot overwrite console.log without having the correct file and line number
+  // we'll use groupCollapsed() and trace() instead to get these.
   this.debug = function () {
     if (localOptions.verbose) {
       var args = [].slice.call(arguments, 0)
@@ -42,7 +42,7 @@ module.exports = function (localOptions) {
       } else if (logger.debug) {
         logger.debug(output)
       } else {
-                // last resort if everything else fails for any weird reasons
+        // last resort if everything else fails for any weird reasons
         console.log(output)
       }
     }

@@ -139,7 +139,7 @@ module.exports = function (options) {
     if (!video) {
       message = 'No HTML5 support for video tag!'
     } else if (!this.getVideoType(video)) {
-      message = 'Your old browser cannot support H264 + WebM video codecs.'
+      message = 'Your old browser cannot support modern video codecs'
     }
 
     if (message) { err = VideomailError.create(message, getPlaybackWarning(), options) }
@@ -165,15 +165,15 @@ module.exports = function (options) {
   }
 
   this.getNoAccessIssue = function () {
-    var message = 'Unable to access webcam!'
+    var message = 'Unable to access webcam'
     var explanation
 
     if (this.isChromeBased()) {
       explanation = 'Click on the allow button to grant access to your webcam.'
     } else if (this.isFirefox()) {
-      explanation = 'Please grant Firefox to access your webcam.'
+      explanation = 'Please grant Firefox access to your webcam.'
     } else {
-      explanation = 'Your operating system does not let your browser access your webcam.'
+      explanation = 'Your system does not let your browser access your webcam.'
     }
 
     return VideomailError.create(message, explanation, options)
