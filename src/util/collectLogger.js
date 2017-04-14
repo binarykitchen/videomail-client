@@ -12,7 +12,9 @@ module.exports = function (localOptions) {
   function lifo (level, parameters) {
     var line = util.format.apply(util, parameters)
 
-    if (stack.length > localOptions.logStackSize) { stack.pop() }
+    if (stack.length > localOptions.logStackSize) {
+      stack.pop()
+    }
 
     stack.push('[' + level + '] ' + line)
 
@@ -26,13 +28,12 @@ module.exports = function (localOptions) {
   // workaround: since we cannot overwrite console.log without having the correct file and line number
   // we'll use groupCollapsed() and trace() instead to get these.
   this.debug = function () {
+    // always add it for better client error reports
+    var args = [].slice.call(arguments, 0)
+    args[0] = addContainerId(args[0])
+    var output = lifo('debug', args)
+
     if (localOptions.verbose) {
-      var args = [].slice.call(arguments, 0)
-
-      args[0] = addContainerId(args[0])
-
-      var output = lifo('debug', args)
-
       if (browser.isFirefox()) {
         logger.debug(output)
       } else if (logger.groupCollapsed) {

@@ -236,17 +236,17 @@ var Recorder = function (visuals, replay, options) {
 
       debug('Recorder: initialising web socket to %s', options.socketUrl)
 
-            // https://github.com/maxogden/websocket-stream#binary-sockets
+      // https://github.com/maxogden/websocket-stream#binary-sockets
 
-            // we use query parameters here because we cannot set custom headers in web sockets,
-            // see https://github.com/websockets/ws/issues/467
+      // we use query parameters here because we cannot set custom headers in web sockets,
+      // see https://github.com/websockets/ws/issues/467
 
       var url2Connect =
-                 options.socketUrl +
-                 '?' +
-                 encodeURIComponent(Constants.SITE_NAME_LABEL) +
-                 '=' +
-                 encodeURIComponent(options.siteName)
+        options.socketUrl +
+        '?' +
+        encodeURIComponent(Constants.SITE_NAME_LABEL) +
+        '=' +
+        encodeURIComponent(options.siteName)
 
       try {
         stream = websocket(url2Connect, {
@@ -256,27 +256,37 @@ var Recorder = function (visuals, replay, options) {
       } catch (exc) {
         connecting = connected = false
 
-        var err = VideomailError.create(
-          'Failed to create websocket',
-          'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
-          options
-        )
+        var err
+
+        if (typeof websocket === 'undefined') {
+          err = VideomailError.create(
+            'There is no websocket',
+            'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
+            options
+          )
+        } else {
+          err = VideomailError.create(
+            'Failed to create websocket',
+            'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
+            options
+          )
+        }
 
         self.emit(Events.ERROR, err)
       }
 
-            // useful for debugging streams
+      // useful for debugging streams
 
-            // if (!stream.originalEmit)
-            //     stream.originalEmit = stream.emit
+      // if (!stream.originalEmit)
+      //     stream.originalEmit = stream.emit
 
-            // stream.emit = function(type) {
-            //     if (stream) {
-            //         debug('Websocket stream emitted:', type)
-            //         var   args = Array.prototype.slice.call(arguments, 0)
-            //         return stream.originalEmit.apply(stream, args)
-            //     }
-            // }
+      // stream.emit = function(type) {
+      //     if (stream) {
+      //         debug('Websocket stream emitted:', type)
+      //         var   args = Array.prototype.slice.call(arguments, 0)
+      //         return stream.originalEmit.apply(stream, args)
+      //     }
+      // }
 
       if (stream) {
         stream.on('close', function (err) {
