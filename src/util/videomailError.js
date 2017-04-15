@@ -109,6 +109,8 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
                       'This can have two reasons:<br/>' +
                       'a) you blocked access to webcam; or<br/>' +
                       'b) your webcam is already in use.'
+      } else {
+        explanation = 'Permission to access your webcam has been denied.'
       }
 
       isBrowserProblem = true
