@@ -18,18 +18,7 @@ VideomailError.PERMISSION_DENIED = 'PERMISSION_DENIED'
 VideomailError.NOT_CONNECTED = 'Not connected'
 VideomailError.DOM_EXCEPTION = 'DOMException'
 VideomailError.STARTING_FAILED = 'Starting video failed'
-
-function stringify (anything) {
-  if (anything) {
-    if (typeof anything === 'string') {
-      return anything
-    } else if (Object.keys(anything).length > 0) {
-      return JSON.stringify(anything)
-    } else {
-      return anything.toString()
-    }
-  } else { return undefined }
-}
+VideomailError.MEDIA_DEVICE_NOT_SUPPORTED = 'MediaDeviceNotSupported'
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, isBrowserProblem) {
@@ -109,6 +98,8 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
                       'This can have two reasons:<br/>' +
                       'a) you blocked access to webcam; or<br/>' +
                       'b) your webcam is already in use.'
+      } else {
+        explanation = 'Permission to access your webcam has been denied.'
       }
 
       isBrowserProblem = true
@@ -158,8 +149,19 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
         isBrowserProblem = true
       } else {
         message = VideomailError.DOM_EXCEPTION
-        explanation = stringify(err)
+        explanation = pretty(err)
       }
+      break
+
+    // Chrome has a weird problem where if you try to do a getUserMedia request too early, it
+    // can return a MediaDeviceNotSupported error (even though nothing is wrong and permission
+    // has been granted). Look at userMediaErrorCallback() in recorder, there we do not
+    // emit those kind of errors further and just retry.
+    //
+    // but for whatever reasons, if it happens to reach this code, then investigate this further.
+    case VideomailError.MEDIA_DEVICE_NOT_SUPPORTED:
+      message = 'Media device not supported'
+      explanation = pretty(err)
       break
 
     default:
@@ -167,11 +169,11 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
         message = err
       } else {
         if (err && err.message) {
-          message = stringify(err.message)
+          message = pretty(err.message)
         }
 
         if (err && err.explanation) {
-          explanation = stringify(err.explanation)
+          explanation = pretty(err.explanation)
         }
 
         if (err && err.details) {
@@ -190,10 +192,10 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
         message = errType
 
         if (!explanation) {
-          explanation = stringify(err)
+          explanation = pretty(err, {excludes: ['stack']})
         }
 
-        if (stringify(message) === explanation) {
+        if (pretty(message) === explanation) {
           explanation = undefined
         }
       }
