@@ -12,13 +12,16 @@ var Constants = require('./../../constants')
 var EventEmitter = require('./../../util/eventEmitter')
 var Browser = require('./../../util/browser')
 var Humanize = require('./../../util/humanize')
+var pretty = require('./../../util/pretty')
 var VideomailError = require('./../../util/videomailError')
 
 var Recorder = function (visuals, replay, options) {
   EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
-  if (!options || !options.video || !options.video.fps) { throw VideomailError.create('FPS must be defined', options) }
+  if (!options || !options.video || !options.video.fps) {
+    throw VideomailError.create('FPS must be defined', options)
+  }
 
   var self = this
   var browser = new Browser(options)
@@ -267,7 +270,8 @@ var Recorder = function (visuals, replay, options) {
         } else {
           err = VideomailError.create(
             'Failed to create websocket',
-            'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
+            // todo change to exc.toString() once we have solved this one
+            'Cause: ' + pretty(exc) + ', URL: ' + url2Connect,
             options
           )
         }
@@ -345,7 +349,11 @@ var Recorder = function (visuals, replay, options) {
     var errorListeners = self.listeners(Events.ERROR)
 
     if (errorListeners.length) {
-      self.emit(Events.ERROR, err)
+      if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
+        self.emit(Events.ERROR, err)
+      } else {
+        // do not emit buy retry since MEDIA_DEVICE_NOT_SUPPORTED can be race conditions
+      }
 
       // retry after a while
       retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
@@ -649,7 +657,9 @@ var Recorder = function (visuals, replay, options) {
     if (!unloaded) {
       var cause
 
-      if (e) { cause = e.name || e.statusText || e.toString() }
+      if (e) {
+        cause = e.name || e.statusText || e.toString()
+      }
 
       debug('Recorder: unload()' + (cause ? ', cause: ' + cause : ''))
 
@@ -697,7 +707,7 @@ var Recorder = function (visuals, replay, options) {
     if (e instanceof window.Event) {
       details = e.type
     } else if (e) {
-      details = e.toString()
+      details = pretty(e)
     }
 
     debug('pause()', details)
