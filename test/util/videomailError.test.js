@@ -131,7 +131,7 @@ test('Videomail Error:', function (t) {
 
       tt.equal(err2.toString(), 'Videomail Error')
       tt.equal(err2.message, '')
-      tt.equal(err2.explanation, '{"code":2,"PERMISSION_DENIED":2}')
+      tt.equal(err2.explanation, '- 2<br/>- 2')
     })
 
     tt.test('with bad name in object', function (tt) {
@@ -143,7 +143,7 @@ test('Videomail Error:', function (t) {
 
       tt.equal(err.toString(), 'Videomail Error: 1')
       tt.equal(err.message, 1)
-      tt.equal(err.explanation, '{"name":1}')
+      tt.equal(err.explanation, '- 1')
     })
 
     tt.test('with NO_DEVICES_FOUND as name in object', function (tt) {
