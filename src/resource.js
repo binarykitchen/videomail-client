@@ -104,7 +104,7 @@ module.exports = function (options) {
   this.reportError = function (err, cb) {
     var queryParams = {}
 
-    var url = options.baseUrl + '/error/'
+    var url = options.baseUrl + '/client-error/'
     var request = superagent('post', url)
 
     queryParams[Constants.SITE_NAME_LABEL] = options.siteName
