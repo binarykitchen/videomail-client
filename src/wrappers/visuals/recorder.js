@@ -161,18 +161,18 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function updateOverallProgress () {
-        // when progresses aren't initialized,
-        // then do a first calculation to avoid `infinite` or `null` displays
+    // when progresses aren't initialized,
+    // then do a first calculation to avoid `infinite` or `null` displays
 
     if (!frameProgress) { frameProgress = calculateFrameProgress() }
 
     if (!sampleProgress) { sampleProgress = calculateSampleProgress() }
 
     self.emit(
-            Events.PROGRESS,
-            frameProgress,
-            sampleProgress
-        )
+      Events.PROGRESS,
+      frameProgress,
+      sampleProgress
+    )
   }
 
   function updateFrameProgress (args) {
@@ -219,17 +219,17 @@ var Recorder = function (visuals, replay, options) {
     self.hide()
     self.emit(Events.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true))
 
-        // keep it for recording stats
+    // keep it for recording stats
     waitingTime = Date.now() - stopTime
 
     recordingStats.waitingTime = waitingTime
 
     if (options.debug) {
       debug(
-                'While recording, %s have been transferred and waiting time was %s',
-                Humanize.filesize(bytesSum, 2),
-                Humanize.toTime(waitingTime)
-            )
+        'While recording, %s have been transferred and waiting time was %s',
+        Humanize.filesize(bytesSum, 2),
+        Humanize.toTime(waitingTime)
+      )
     }
   }
 
@@ -264,14 +264,13 @@ var Recorder = function (visuals, replay, options) {
         if (typeof websocket === 'undefined') {
           err = VideomailError.create(
             'There is no websocket',
-            'Cause: ' + exc.toString() + ', URL: ' + url2Connect,
+            'Cause: ' + exc.toString(),
             options
           )
         } else {
           err = VideomailError.create(
-            'Failed to create websocket',
-            // todo change to exc.toString() once we have solved this one
-            'Cause: ' + pretty(exc) + ', URL: ' + url2Connect,
+            'Failed to connect to server',
+            'Please upgrade your browser. Your current version does not seem to support websockets.',
             options
           )
         }
