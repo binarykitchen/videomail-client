@@ -120,8 +120,8 @@ test('Videomail Error:', function (t) {
         PERMISSION_DENIED: 1
       })
 
-      tt.equal(err1.toString(), 'Videomail Error: Permission denied!')
-      tt.equal(err1.message, 'Permission denied!')
+      tt.equal(err1.toString(), 'Videomail Error: Permission denied')
+      tt.equal(err1.message, 'Permission denied')
       tt.equal(err1.explanation, 'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
 
       const err2 = VideomailError.create({
@@ -165,8 +165,8 @@ test('Videomail Error:', function (t) {
         name: 'PermissionDeniedError'
       })
 
-      tt.equal(err.toString(), 'Videomail Error: Permission denied!')
-      tt.equal(err.message, 'Permission denied!')
+      tt.equal(err.toString(), 'Videomail Error: Permission denied')
+      tt.equal(err.message, 'Permission denied')
       tt.equal(err.explanation, 'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
     })
 
