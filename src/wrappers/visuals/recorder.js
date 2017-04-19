@@ -390,6 +390,8 @@ var Recorder = function (visuals, replay, options) {
       throw new Error('Navigator is missing!')
     }
 
+    self.emit(Events.ASKING_WEBCAM_PERMISSION)
+
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // prefer the front camera (if one is available) over the rear one
