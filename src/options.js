@@ -101,7 +101,7 @@ module.exports = {
   },
 
   timeouts: {
-    userMedia: 12e3,         // in milliseconds, increase if you want user give more time to enable webcam
+    userMedia: 10e3,         // in milliseconds, increase if you want user give more time to enable webcam
     connection: 1e4,         // in seconds, increase if api is slow
     pingInterval: 45e3       // in milliseconds, keeps webstream (connection) alive when pausing
   },
