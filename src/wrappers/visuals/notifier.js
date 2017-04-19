@@ -122,7 +122,9 @@ var Notifier = function (visuals, options) {
   }
 
   function cancelEntertainment () {
-    if (notifyElement) { notifyElement.className = 'notifier' }
+    if (notifyElement) {
+      notifyElement.classList.remove('entertain')
+    }
 
     clearTimeout(entertainTimeoutId)
     entertainTimeoutId = null
@@ -132,11 +134,13 @@ var Notifier = function (visuals, options) {
   function setMessage (message, messageOptions) {
     var problem = messageOptions.problem ? messageOptions.problem : false
 
-    if (messageElement) { messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message } else {
+    if (messageElement) {
+      messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message
+    } else {
       options.logger.warn(
-                'Unable to show following because messageElement is empty:',
-                message
-            )
+        'Unable to show following because messageElement is empty:',
+        message
+      )
     }
   }
 
@@ -144,7 +148,9 @@ var Notifier = function (visuals, options) {
     var message = err.message ? err.message.toString() : err.toString()
     var explanation = err.explanation ? err.explanation.toString() : null
 
-    if (!message) { options.debug('Weird empty message generated for error', err) }
+    if (!message) {
+      options.debug('Weird empty message generated for error', err)
+    }
 
     self.notify(message, explanation, {
       blocking: true,
@@ -157,11 +163,13 @@ var Notifier = function (visuals, options) {
     if (!explanationElement) {
       explanationElement = h('p')
 
-      if (notifyElement) { notifyElement.appendChild(explanationElement) } else {
+      if (notifyElement) {
+        notifyElement.appendChild(explanationElement)
+      } else {
         options.logger.warn(
-                    'Unable to show explanation because notifyElement is empty:',
-                    explanation
-                )
+          'Unable to show explanation because notifyElement is empty:',
+          explanation
+        )
       }
     }
 
@@ -221,20 +229,28 @@ var Notifier = function (visuals, options) {
     if (!messageElement && notifyElement) {
       messageElement = h('h2')
 
-      if (explanationElement) { notifyElement.insertBefore(messageElement, explanationElement) } else { notifyElement.appendChild(messageElement) }
+      if (explanationElement) {
+        notifyElement.insertBefore(messageElement, explanationElement)
+      } else {
+        notifyElement.appendChild(messageElement)
+      }
     }
 
     if (notifyElement) {
       if (isBrowserProblem) {
         notifyElement.classList.add('browserProblem')
         removeDimensions()
-      } else { notifyElement.classList.remove('browserProblem') }
+      } else {
+        notifyElement.classList.remove('browserProblem')
+      }
     }
 
     if (blocking) {
       notifyElement && notifyElement.classList.add('blocking')
       this.emit(Events.BLOCKING, notifyOptions)
-    } else { this.emit(Events.NOTIFYING, notifyOptions) }
+    } else {
+      this.emit(Events.NOTIFYING, notifyOptions)
+    }
 
     visuals.hideReplay()
     visuals.hideRecorder()
@@ -243,7 +259,11 @@ var Notifier = function (visuals, options) {
 
     explanation && this.setExplanation(explanation)
 
-    if (entertain) { runEntertainment() } else { cancelEntertainment() }
+    if (entertain) {
+      runEntertainment()
+    } else {
+      cancelEntertainment()
+    }
 
     show()
 
