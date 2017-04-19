@@ -81,7 +81,7 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
       break
 
     case 'PermissionDismissedError':
-      message = 'Ooops, you did not give me any permissions?'
+      message = 'Ooops, you didn\'t give me any permissions?'
       explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
                     'Please grant access next time the dialogue appears.'
 
@@ -118,7 +118,7 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
     case VideomailError.NOT_CONNECTED:
       message = 'Unable to transfer data'
-      explanation = 'Unable to maintain a binary websocket to the server. Either the server or ' +
+      explanation = 'Unable to maintain a websocket to the server. Either server or ' +
                     'your connection is down. Trying to reconnect every two seconds …'
       break
 
