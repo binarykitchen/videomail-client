@@ -33,7 +33,7 @@ module.exports = function (userMedia, options) {
   this.init = function (localMediaStream) {
     options.debug('AudioRecorder: init()')
 
-        // creates an audio node from the microphone incoming stream
+    // creates an audio node from the microphone incoming stream
     var volume = getAudioContext().createGain()
     var channels = CHANNELS
 
@@ -42,7 +42,7 @@ module.exports = function (userMedia, options) {
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
     } catch (exc) {
-      throw VideomailError.create('Failed to access media for audio.', exc.toString(), options)
+      throw VideomailError.create('Failed to access media for audio', exc.toString(), options)
     }
 
     if (!isPOT(options.audio.bufferSize)) {

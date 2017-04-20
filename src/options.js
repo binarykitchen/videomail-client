@@ -126,6 +126,7 @@ module.exports = {
   adjustFormOnBrowserError: false,
 
   // when true, any errors will be sent to the videomail server for analysis
+  // ps: can be a function too returning a boolean
   reportErrors: false,
 
   // just for testing purposes to simulate browser agent handling
