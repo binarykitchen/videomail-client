@@ -20,6 +20,7 @@ VideomailError.DOM_EXCEPTION = 'DOMException'
 VideomailError.STARTING_FAILED = 'Starting video failed'
 VideomailError.MEDIA_DEVICE_NOT_SUPPORTED = 'MediaDeviceNotSupported'
 VideomailError.BROWSER_PROBLEM = 'browser-problem'
+VideomailError.WEBCAM_PROBLEM = 'webcam-problem'
 VideomailError.IOS_PROBLEM = 'ios-problem'
 
 // static function to convert an error into a videomail error
@@ -76,13 +77,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case 'NO_DEVICES_FOUND':
       message = 'No webcam found'
       explanation = 'Your browser cannot find a webcam attached to your machine.'
+      classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
     case 'PermissionDismissedError':
       message = 'Ooops, you didn\'t give me any permissions?'
       explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
                     'Please grant access next time the dialogue appears.'
-
+      classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
     case VideomailError.PERMISSION_DENIED:
@@ -98,6 +100,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
         explanation = 'Permission to access your webcam has been denied.'
       }
 
+      classList.push(VideomailError.WEBCAM_PROBLEM)
+
       break
 
     case 'HARDWARE_UNAVAILABLE':
@@ -107,6 +111,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
       if (browser.isChromeBased()) {
         explanation += ' Or you have to allow access above?'
       }
+
+      classList.push(VideomailError.WEBCAM_PROBLEM)
+
       break
 
     case VideomailError.NOT_CONNECTED:
@@ -118,17 +125,20 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case 'NO_VIDEO_FEED':
       message = 'No video feed found!'
       explanation = 'Your webcam is already used in another browser.'
+      classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
     case VideomailError.STARTING_FAILED:
       message = 'Starting video failed'
       explanation = 'Most likely this happens when the webam is already active in another browser.'
+      classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
     case 'DevicesNotFoundError':
       message = 'No available webcam could be found'
       explanation = 'Looks like you do not have any webcam attached to your machine; or ' +
                     'the one you plugged in is already used.'
+      classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
     case VideomailError.DOM_EXCEPTION:
@@ -247,18 +257,17 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   videomailError.removeDimensions = function () {
-    return hasClass(VideomailError.BROWSER_PROBLEM) ||
-      hasClass(VideomailError.IOS_PROBLEM)
+    return hasClass(VideomailError.IOS_PROBLEM)
   }
 
   videomailError.disableButtons = function () {
     return hasClass(VideomailError.BROWSER_PROBLEM) ||
+      hasClass(VideomailError.WEBCAM_PROBLEM) ||
       hasClass(VideomailError.IOS_PROBLEM)
   }
 
   videomailError.hideForm = function () {
-    return hasClass(VideomailError.BROWSER_PROBLEM) ||
-      hasClass(VideomailError.IOS_PROBLEM)
+    return hasClass(VideomailError.IOS_PROBLEM)
   }
 
   return videomailError
