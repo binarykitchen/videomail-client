@@ -19,9 +19,11 @@ VideomailError.NOT_CONNECTED = 'Not connected'
 VideomailError.DOM_EXCEPTION = 'DOMException'
 VideomailError.STARTING_FAILED = 'Starting video failed'
 VideomailError.MEDIA_DEVICE_NOT_SUPPORTED = 'MediaDeviceNotSupported'
+VideomailError.BROWSER_PROBLEM = 'browser-problem'
+VideomailError.IOS_PROBLEM = 'ios-problem'
 
 // static function to convert an error into a videomail error
-VideomailError.create = function (err, explanation, options, isBrowserProblem) {
+VideomailError.create = function (err, explanation, options, parameters) {
   if (err && err.name === VIDEOMAIL_ERR_NAME) {
     return err
   }
@@ -32,6 +34,9 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
   }
 
   options = options || {}
+  parameters = parameters || {}
+
+  var classList = parameters.classList || []
 
   // Require Browser here, not at the top of the file to avoid
   // recursion. Because the Browser class is requiring this file as well.
@@ -131,7 +136,7 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
         message = 'Insecure origin detected'
         explanation = 'To use the powerful webcam feature, security should not be neglected. ' +
                       'Please change the location in your browser to HTTPS.'
-        isBrowserProblem = true
+        classList.push(VideomailError.BROWSER_PROBLEM)
       } else {
         message = VideomailError.DOM_EXCEPTION
         explanation = pretty(err)
@@ -230,11 +235,30 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     })
   }
 
+  function hasClass (name) {
+    return classList.indexOf(name) >= 0
+  }
+
   // add some public functions
 
   // this one is useful so that the notifier can have different css classes
-  videomailError.isBrowserProblem = function () {
-    return isBrowserProblem
+  videomailError.getClassList = function () {
+    return classList
+  }
+
+  videomailError.removeDimensions = function () {
+    return hasClass(VideomailError.BROWSER_PROBLEM) ||
+      hasClass(VideomailError.IOS_PROBLEM)
+  }
+
+  videomailError.disableButtons = function () {
+    return hasClass(VideomailError.BROWSER_PROBLEM) ||
+      hasClass(VideomailError.IOS_PROBLEM)
+  }
+
+  videomailError.hideForm = function () {
+    return hasClass(VideomailError.BROWSER_PROBLEM) ||
+      hasClass(VideomailError.IOS_PROBLEM)
   }
 
   return videomailError
