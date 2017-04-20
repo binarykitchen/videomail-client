@@ -141,11 +141,10 @@ var Form = function (container, formElement, options) {
     })
 
     this.on(Events.ERROR, function (err) {
-            // since https://github.com/binarykitchen/videomail-client/issues/60
-            // we hide areas to make it easier for the user to process an error
-            // (= less distractions)
-      if (err.isBrowserProblem && err.isBrowserProblem() &&
-                options.adjustFormOnBrowserError) {
+      // since https://github.com/binarykitchen/videomail-client/issues/60
+      // we hide areas to make it easier for the user to process an error
+      // (= less distractions)
+      if (err.hideForm && err.hideForm() && options.adjustFormOnBrowserError) {
         hideAll()
       }
     })

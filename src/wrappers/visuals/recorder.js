@@ -360,7 +360,7 @@ var Recorder = function (visuals, replay, options) {
       debug('Recorder: no error listeners attached but throwing error', err)
 
       // weird situation, throw it since there are no error listeners
-      throw VideomailError.create(err, 'A weird error happened.', options, true)
+      throw VideomailError.create(err, 'A weird error happened.', options)
     }
   }
 
