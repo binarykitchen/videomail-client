@@ -260,9 +260,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
     return hasClass(VideomailError.IOS_PROBLEM)
   }
 
-  videomailError.disableButtons = function () {
+  videomailError.hideButtons = function () {
     return hasClass(VideomailError.BROWSER_PROBLEM) ||
-      hasClass(VideomailError.WEBCAM_PROBLEM) ||
       hasClass(VideomailError.IOS_PROBLEM)
   }
 
