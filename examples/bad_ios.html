@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    </head>
+    <body>
+        <h1>How it looks on an unsupported iPhone</h1>
+        <div id="videomail"></div>
+        <script src="/videomail-client.js"></script>
+        <script>
+            var VideomailClient = require('videomail-client')
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              adjustFormOnBrowserError: true,
+              fakeUaString: 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25',
+              reportErrors: true
+            })
+
+            videomailClient.show()
+        </script>
+    </body>
+</html>
