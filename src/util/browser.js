@@ -128,10 +128,12 @@ module.exports = function (options) {
     var err
 
     if (!okBrowser || !this.canRecord()) {
-      var classList = [VideomailError.BROWSER_PROBLEM]
+      var classList = []
 
       if (isIOS) {
         classList.push(VideomailError.IOS_PROBLEM)
+      } else {
+        classList.push(VideomailError.BROWSER_PROBLEM)
       }
 
       err = VideomailError.create({
