@@ -33,12 +33,6 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
 
   options = options || {}
 
-  var resource
-
-  if (options.reportErrors) {
-    resource = new Resource(options)
-  }
-
   // Require Browser here, not at the top of the file to avoid
   // recursion. Because the Browser class is requiring this file as well.
   var Browser = require('./browser')
@@ -77,15 +71,12 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     case 'NO_DEVICES_FOUND':
       message = 'No webcam found'
       explanation = 'Your browser cannot find a webcam attached to your machine.'
-      isBrowserProblem = true
       break
 
     case 'PermissionDismissedError':
       message = 'Ooops, you didn\'t give me any permissions?'
       explanation = 'Looks like you skipped the webcam permission dialogue.<br/>' +
                     'Please grant access next time the dialogue appears.'
-
-      isBrowserProblem = true
 
       break
 
@@ -102,14 +93,11 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
         explanation = 'Permission to access your webcam has been denied.'
       }
 
-      isBrowserProblem = true
-
       break
 
     case 'HARDWARE_UNAVAILABLE':
       message = 'Webcam is unavailable'
       explanation = 'Maybe it is already busy in another window?'
-      isBrowserProblem = true
 
       if (browser.isChromeBased()) {
         explanation += ' Or you have to allow access above?'
@@ -125,20 +113,17 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     case 'NO_VIDEO_FEED':
       message = 'No video feed found!'
       explanation = 'Your webcam is already used in another browser.'
-      isBrowserProblem = true
       break
 
     case VideomailError.STARTING_FAILED:
       message = 'Starting video failed'
       explanation = 'Most likely this happens when the webam is already active in another browser.'
-      isBrowserProblem = true
       break
 
     case 'DevicesNotFoundError':
       message = 'No available webcam could be found'
       explanation = 'Looks like you do not have any webcam attached to your machine; or ' +
                     'the one you plugged in is already used.'
-      isBrowserProblem = true
       break
 
     case VideomailError.DOM_EXCEPTION:
@@ -221,6 +206,21 @@ VideomailError.create = function (err, explanation, options, isBrowserProblem) {
     url: window.location.href,
     stack: stack // have to assign it manually again because it is kinda protected
   })
+
+  var resource
+  var reportErrors = false
+
+  if (options.reportErrors) {
+    if (typeof options.reportErrors === 'function') {
+      reportErrors = options.reportErrors(videomailError)
+    } else {
+      reportErrors = options.reportErrors
+    }
+  }
+
+  if (reportErrors) {
+    resource = new Resource(options)
+  }
 
   if (resource) {
     resource.reportError(videomailError, function (err2) {
