@@ -48,32 +48,34 @@ var Visuals = function (container, options) {
 
   function initEvents () {
     self
-            .on(Events.USER_MEDIA_READY, function () {
-              built = true
-              self.endWaiting()
-              container.enableForm(false)
-            })
-            .on(Events.PREVIEW, function () {
-              self.endWaiting()
-            })
-            .on(Events.BLOCKING, function (blockingOptions) {
-              if (blockingOptions.isBrowserProblem && !options.adjustFormOnBrowserError) {
-                    // do nothing, user still can enter form inputs
-                    // can be useful when you are on i.E. seeflow's contact page and
-                    // still want to tick off the webcam option
-              } else {
-                container.disableForm(true)
-              }
-            })
-            .on(Events.PREVIEW_SHOWN, function () {
-              container.validate(true)
-            })
-            .on(Events.LOADED_META_DATA, function () {
-              correctDimensions()
-            })
-            .on(Events.ERROR, function (err) {
-              if (err.isBrowserProblem && err.isBrowserProblem()) { removeDimensions() }
-            })
+      .on(Events.USER_MEDIA_READY, function () {
+        built = true
+        self.endWaiting()
+        container.enableForm(false)
+      })
+      .on(Events.PREVIEW, function () {
+        self.endWaiting()
+      })
+      .on(Events.BLOCKING, function (blockingOptions) {
+        if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
+          // do nothing, user still can enter form inputs
+          // can be useful when you are on i.E. seeflow's contact page and
+          // still want to tick off the webcam option
+        } else {
+          container.disableForm(true)
+        }
+      })
+      .on(Events.PREVIEW_SHOWN, function () {
+        container.validate(true)
+      })
+      .on(Events.LOADED_META_DATA, function () {
+        correctDimensions()
+      })
+      .on(Events.ERROR, function (err) {
+        if (err.removeDimensions && err.removeDimensions()) {
+          removeDimensions()
+        }
+      })
   }
 
   function correctDimensions () {
