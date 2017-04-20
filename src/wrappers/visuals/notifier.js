@@ -239,7 +239,10 @@ var Notifier = function (visuals, options) {
 
     if (notifyElement) {
       // reset
-      notifyElement.className = 'notifier'
+      if (!entertain) {
+        notifyElement.className = 'notifier'
+      }
+
       if (classList) {
         classList.forEach(function (className) {
           notifyElement.classList.add(className)
