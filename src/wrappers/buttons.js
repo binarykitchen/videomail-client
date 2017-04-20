@@ -182,28 +182,28 @@ var Buttons = function (container, options) {
     }
 
     recordButton = makeButton(
-            options.selectors.recordButtonClass,
-            options.text.buttons.record,
-            record,
-            false
-        )
+      options.selectors.recordButtonClass,
+      options.text.buttons.record,
+      record,
+      false
+    )
 
     if (options.enablePause) {
       pauseButton = makeButton(
-                options.selectors.pauseButtonClass,
-                options.text.buttons.pause,
-                container.pause,
-                false
-            )
+          options.selectors.pauseButtonClass,
+          options.text.buttons.pause,
+          container.pause,
+          false
+      )
     }
 
     if (options.enablePause) {
       resumeButton = makeButton(
-                options.selectors.resumeButtonClass,
-                options.text.buttons.resume,
-                container.resume,
-                false
-            )
+          options.selectors.resumeButtonClass,
+          options.text.buttons.resume,
+          container.resume,
+          false
+      )
     }
 
         // show stop only when pause is enabled - looks better that way otherwise button
@@ -439,7 +439,7 @@ var Buttons = function (container, options) {
     }).on(Events.ERROR, function (err) {
       // since https://github.com/binarykitchen/videomail-client/issues/60
       // we hide areas to make it easier for the user
-      if (err.disableButtons && err.disableButtons() && options.adjustFormOnBrowserError) {
+      if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
         self.hide()
       }
     })
