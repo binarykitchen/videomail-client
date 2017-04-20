@@ -68,10 +68,14 @@ module.exports = function (options) {
     if (isIOS) {
       warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' +
                       'For now, we recommend you to use a desktop computer or an Android device.'
-    } else { warning = getRecommendation() }
+    } else {
+      warning = getRecommendation()
+    }
 
     if (!warning) {
-      if (self.isChromeBased() || self.isFirefox()) { warning = 'For the webcam feature, your browser needs an upgrade.' } else {
+      if (self.isChromeBased() || self.isFirefox()) {
+        warning = 'For the webcam feature, your browser needs an upgrade.'
+      } else {
         warning = 'Hence we recommend you to use either ' +
                           '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
                           '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
@@ -124,9 +128,17 @@ module.exports = function (options) {
     var err
 
     if (!okBrowser || !this.canRecord()) {
+      var classList = [VideomailError.BROWSER_PROBLEM]
+
+      if (isIOS) {
+        classList.push(VideomailError.IOS_PROBLEM)
+      }
+
       err = VideomailError.create({
         message: 'Sorry, your browser is unable to use webcams'
-      }, getUserMediaWarning(), options, true)
+      }, getUserMediaWarning(), options, {
+        classList: classList
+      })
     }
 
     return err

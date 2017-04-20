@@ -155,7 +155,8 @@ var Notifier = function (visuals, options) {
     self.notify(message, explanation, {
       blocking: true,
       problem: true,
-      isBrowserProblem: err.isBrowserProblem && err.isBrowserProblem()
+      hideForm: err.hideForm && err.hideForm(),
+      classList: err.getClassList && err.getClassList()
     })
   }
 
@@ -219,12 +220,15 @@ var Notifier = function (visuals, options) {
   }
 
   this.notify = function (message, explanation, notifyOptions) {
-    if (!notifyOptions) { notifyOptions = {} }
+    if (!notifyOptions) {
+      notifyOptions = {}
+    }
 
     var stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false
     var entertain = notifyOptions.entertain ? notifyOptions.entertain : false
     var blocking = notifyOptions.blocking ? notifyOptions.blocking : false
-    var isBrowserProblem = notifyOptions.isBrowserProblem ? notifyOptions.isBrowserProblem : false
+    var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false
+    var classList = notifyOptions.classList ? notifyOptions.classList : false
 
     if (!messageElement && notifyElement) {
       messageElement = h('h2')
@@ -237,19 +241,22 @@ var Notifier = function (visuals, options) {
     }
 
     if (notifyElement) {
-      if (isBrowserProblem) {
-        notifyElement.classList.add('browserProblem')
+      // reset
+      notifyElement.className = 'notifier'
+      if (classList) {
+        classList.forEach(function (className) {
+          notifyElement.classList.add(className)
+        })
+
         removeDimensions()
-      } else {
-        notifyElement.classList.remove('browserProblem')
       }
     }
 
     if (blocking) {
       notifyElement && notifyElement.classList.add('blocking')
-      this.emit(Events.BLOCKING, notifyOptions)
+      this.emit(Events.BLOCKING, {hideForm: hideForm})
     } else {
-      this.emit(Events.NOTIFYING, notifyOptions)
+      this.emit(Events.NOTIFYING)
     }
 
     visuals.hideReplay()

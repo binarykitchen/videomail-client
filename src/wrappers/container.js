@@ -126,18 +126,20 @@ var Container = function (options) {
       })
     }
 
-        // better to keep the one and only error listeners
-        // at one spot, here, because unload() will do a removeAllListeners()
+    // better to keep the one and only error listeners
+    // at one spot, here, because unload() will do a removeAllListeners()
     self
-            .on(Events.ERROR, function (err) {
-              processError(err)
-              unloadButKeepEventListeners(err)
+      .on(Events.ERROR, function (err) {
+        processError(err)
+        unloadButKeepEventListeners(err)
 
-              if (err.isBrowserProblem && err.isBrowserProblem()) { removeDimensions() }
-            })
-            .on(Events.LOADED_META_DATA, function () {
-              correctDimensions()
-            })
+        if (err.removeDimensions && err.removeDimensions()) {
+          removeDimensions()
+        }
+      })
+      .on(Events.LOADED_META_DATA, function () {
+        correctDimensions()
+      })
   }
 
   function validateOptions () {

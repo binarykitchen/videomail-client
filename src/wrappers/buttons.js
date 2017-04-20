@@ -437,10 +437,9 @@ var Buttons = function (container, options) {
     }).on(Events.GOING_BACK, function () {
       onGoingBack()
     }).on(Events.ERROR, function (err) {
-        // since https://github.com/binarykitchen/videomail-client/issues/60
-        // we hide areas to make it easier for the user
-      if (err.isBrowserProblem && err.isBrowserProblem() &&
-            options.adjustFormOnBrowserError) {
+      // since https://github.com/binarykitchen/videomail-client/issues/60
+      // we hide areas to make it easier for the user
+      if (err.disableButtons && err.disableButtons() && options.adjustFormOnBrowserError) {
         self.hide()
       }
     })
