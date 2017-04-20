@@ -97,11 +97,6 @@ var Notifier = function (visuals, options) {
     notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
   }
 
-  function removeDimensions () {
-    notifyElement.style.width = 'auto'
-    notifyElement.style.height = 'auto'
-  }
-
   function show () {
     notifyElement && hidden(notifyElement, false)
   }
@@ -156,7 +151,8 @@ var Notifier = function (visuals, options) {
       blocking: true,
       problem: true,
       hideForm: err.hideForm && err.hideForm(),
-      classList: err.getClassList && err.getClassList()
+      classList: err.getClassList && err.getClassList(),
+      removeDimensions: err.removeDimensions && err.removeDimensions()
     })
   }
 
@@ -229,6 +225,7 @@ var Notifier = function (visuals, options) {
     var blocking = notifyOptions.blocking ? notifyOptions.blocking : false
     var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false
     var classList = notifyOptions.classList ? notifyOptions.classList : false
+    var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false
 
     if (!messageElement && notifyElement) {
       messageElement = h('h2')
@@ -247,8 +244,11 @@ var Notifier = function (visuals, options) {
         classList.forEach(function (className) {
           notifyElement.classList.add(className)
         })
+      }
 
-        removeDimensions()
+      if (removeDimensions) {
+        notifyElement.style.width = 'auto'
+        notifyElement.style.height = 'auto'
       }
     }
 
