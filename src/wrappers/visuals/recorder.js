@@ -86,7 +86,6 @@ var Recorder = function (visuals, replay, options) {
 
         try {
           stream.write(buffer, function () {
-            console.log(arguments)
             onFlushedCallback && onFlushedCallback(opts)
           })
         } catch (exc) {
