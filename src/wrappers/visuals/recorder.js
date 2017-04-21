@@ -84,9 +84,18 @@ var Recorder = function (visuals, replay, options) {
       } else {
         var onFlushedCallback = opts && opts.onFlushedCallback
 
-        stream.write(buffer, function () {
-          onFlushedCallback && onFlushedCallback(opts)
-        })
+        try {
+          stream.write(buffer, function () {
+            console.log(arguments)
+            onFlushedCallback && onFlushedCallback(opts)
+          })
+        } catch (exc) {
+          self.emit(Events.ERROR, VideomailError.create(
+            'Failed writing to server',
+            'stream.write() failed because of ' + exc.toString(),
+            options
+          ))
+        }
       }
     }
   }
