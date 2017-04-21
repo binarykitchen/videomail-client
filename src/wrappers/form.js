@@ -146,12 +146,19 @@ var Form = function (container, formElement, options) {
       // (= less distractions)
       if (err.hideForm && err.hideForm() && options.adjustFormOnBrowserError) {
         hideAll()
+      } else if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
+        hideSubmitButton()
       }
     })
 
     this.on(Events.BUILT, function () {
       startListeningToSubmitEvents()
     })
+  }
+
+  function hideSubmitButton () {
+    var submitButton = self.findSubmitButton()
+    hidden(submitButton, true)
   }
 
   function startListeningToSubmitEvents () {
