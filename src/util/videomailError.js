@@ -247,7 +247,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   var errCode = 'none'
 
   if (err) {
-    errCode += 'code=' + (err.code ? err.code : 'undefined')
+    errCode = 'code=' + (err.code ? err.code : 'undefined')
     errCode += ', type=' + (err.type ? err.type : 'undefined')
     errCode += ', name=' + (err.name ? err.name : 'undefined')
   }
