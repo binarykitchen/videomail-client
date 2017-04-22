@@ -170,8 +170,20 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
 
     default:
+      var originalExplanation = explanation
+
       if (explanation && typeof explanation === 'object') {
         explanation = pretty(explanation)
+      }
+
+      // it can be that explanation itself is an error object
+      // error objects can be prettified to undefined sometimes
+      if (!explanation && originalExplanation) {
+        if (originalExplanation.message) {
+          explanation = originalExplanation.message
+        } else {
+          explanation = originalExplanation.toString()
+        }
       }
 
       if (err && typeof err === 'string') {
