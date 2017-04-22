@@ -299,7 +299,7 @@ var Recorder = function (visuals, replay, options) {
 
       if (stream) {
         stream.on('close', function (err) {
-          debug('x Stream has closed')
+          debug('= Stream has closed')
 
           connecting = connected = false
 
@@ -331,14 +331,32 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('error', function (err) {
-          debug('Recorder received stream error.')
+          debug('= Stream error event emitted')
 
           connecting = connected = false
           self.emit(Events.ERROR, err)
         })
 
+        // just experimental
+
         stream.on('drain', function () {
-          debug('Stream drain eveng emitted (should not happen!)')
+          debug('= Stream drain event emitted (should not happen!)')
+        })
+
+        stream.on('end', function () {
+          debug('= Stream end event emitted')
+        })
+
+        stream.on('drain', function () {
+          debug('= Stream drain event emitted')
+        })
+
+        stream.on('pipe', function () {
+          debug('= Stream pipe event emitted')
+        })
+
+        stream.on('unpipe', function () {
+          debug('= Stream unpipe event emitted')
         })
       }
     }
@@ -484,12 +502,15 @@ var Recorder = function (visuals, replay, options) {
       } catch (excInner) {
         debug('Failed to parse command:', excInner)
 
-        self.emit(Events.ERROR, VideomailError.create(
+        // throw further to avoid code below to get executed
+        // there is a catch block at end of the executeCommand fn
+        throw VideomailError.create(
           'Failed to parse command.',
           // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-          data.toString(),
+          'Data: ' + data.toString() + '. ' +
+          excInner.toString(),
           options
-        ))
+        )
       }
 
       var result
