@@ -275,7 +275,9 @@ var Recorder = function (visuals, replay, options) {
           err = VideomailError.create(
             'Failed to connect to server',
             'Please upgrade your browser. Your current version does not seem to support websockets.',
-            options
+            options, {
+              browserProblem: true
+            }
           )
         }
 
@@ -346,8 +348,9 @@ var Recorder = function (visuals, replay, options) {
 
   function userMediaErrorCallback (err) {
     userMediaLoading = false
-
     clearUserMediaTimeout()
+
+    debug('Recorder: userMediaErrorCallback()')
 
     var errorListeners = self.listeners(Events.ERROR)
 
@@ -356,6 +359,7 @@ var Recorder = function (visuals, replay, options) {
         self.emit(Events.ERROR, err)
       } else {
         // do not emit buy retry since MEDIA_DEVICE_NOT_SUPPORTED can be race conditions
+        debug('Recorder: ignore user media error', err)
       }
 
       // retry after a while
@@ -960,9 +964,13 @@ var Recorder = function (visuals, replay, options) {
   this.build = function () {
     var err = browser.checkRecordingCapabilities()
 
-    if (!err) { err = browser.checkBufferTypes() }
+    if (!err) {
+      err = browser.checkBufferTypes()
+    }
 
-    if (err) { this.emit(Events.ERROR, err) } else {
+    if (err) {
+      this.emit(Events.ERROR, err)
+    } else {
       recorderElement = visuals.querySelector('video.' + options.selectors.userMediaClass)
 
       if (!recorderElement) { buildElement() }
@@ -973,15 +981,23 @@ var Recorder = function (visuals, replay, options) {
       // https://github.com/binarykitchen/videomail-client/issues/35
       recorderElement.muted = true
 
-      if (!userMedia) { userMedia = new UserMedia(this, options) }
+      if (!userMedia) {
+        userMedia = new UserMedia(this, options)
+      }
 
       show()
 
       if (!built) {
         initEvents()
 
-        if (!connected) { initSocket() } else { loadUserMedia() }
-      } else { loadUserMedia() }
+        if (!connected) {
+          initSocket()
+        } else {
+          loadUserMedia()
+        }
+      } else {
+        loadUserMedia()
+      }
 
       built = true
     }
@@ -1014,11 +1030,19 @@ var Recorder = function (visuals, replay, options) {
     // needed because on mobiles they might be different.
 
   this.getRecorderWidth = function (responsive) {
-    if (userMedia) { return userMedia.getRawWidth(responsive) } else if (responsive && options.hasDefinedWidth()) { return this.limitWidth(options.video.width) }
+    if (userMedia) {
+      return userMedia.getRawWidth(responsive)
+    } else if (responsive && options.hasDefinedWidth()) {
+      return this.limitWidth(options.video.width)
+    }
   }
 
   this.getRecorderHeight = function (responsive) {
-    if (userMedia) { return userMedia.getRawHeight(responsive) } else if (responsive && options.hasDefinedHeight()) { return this.calculateHeight(responsive) }
+    if (userMedia) {
+      return userMedia.getRawHeight(responsive)
+    } else if (responsive && options.hasDefinedHeight()) {
+      return this.calculateHeight(responsive)
+    }
   }
 
   function getRatio () {
