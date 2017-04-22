@@ -331,6 +331,8 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('error', function (err) {
+          debug('Recorder received stream error.')
+
           connecting = connected = false
           self.emit(Events.ERROR, err)
         })
