@@ -67,7 +67,7 @@ module.exports = function (options) {
 
     if (isIOS) {
       warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' +
-                      'For now, we recommend you to use a desktop computer or an Android device.'
+                'For now, we recommend you to use a desktop computer or an Android device.'
     } else {
       warning = getRecommendation()
     }
@@ -77,14 +77,11 @@ module.exports = function (options) {
         warning = 'For the webcam feature, your browser needs an upgrade.'
       } else {
         warning = 'Hence we recommend you to use either ' +
-                          '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
-                          '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
-                          '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
+                  '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
+                  '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
+                  '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
       }
     }
-
-    warning = 'Your browser does not have the getUserMedia feature to access webcams.' +
-                  '<br/><br/>' + warning
 
     return warning
   }
