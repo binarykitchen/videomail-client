@@ -35,7 +35,9 @@ function objectToString (object, options) {
     })
   }
 
-  if (lines.length > 0) {
+  if (lines.length === 1) {
+    sLines = lines.join()
+  } else if (lines.length > 1) {
     sLines = DASH + lines.join(SEPARATOR)
   }
 

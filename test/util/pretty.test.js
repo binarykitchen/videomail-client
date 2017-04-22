@@ -58,6 +58,6 @@ test('pretty:', function (t) {
     tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: null}), '- ignore me<br/>- keep me')
     tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: []}), '- ignore me<br/>- keep me')
     tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: ['something else']}), '- ignore me<br/>- keep me')
-    tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: ['ignoreMe']}), '- keep me')
+    tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: ['ignoreMe']}), 'keep me')
   })
 })
