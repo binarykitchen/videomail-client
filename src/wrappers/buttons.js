@@ -166,19 +166,21 @@ var Buttons = function (container, options) {
     if (!options.disableSubmit) {
       if (!submitButton) {
         submitButton = makeButton(
-                    options.selectors.submitButtonClass,
-                    'Submit',
-                    null,
-                    true,
-                    options.selectors.submitButtonId,
-                    'submit',
-                    options.selectors.submitButtonSelector
-                )
+            options.selectors.submitButtonClass,
+            'Submit',
+            null,
+            true,
+            options.selectors.submitButtonId,
+            'submit',
+            options.selectors.submitButtonSelector
+        )
       } else { disable(submitButton) }
 
-            // no need to listen to the submit event when it's already listened
-            // within the form element class
-      if (!container.hasForm() && submitButton) { replaceClickHandler(submitButton, submit) }
+      // no need to listen to the submit event when it's already listened
+      // within the form element class
+      if (!container.hasForm() && submitButton) {
+        replaceClickHandler(submitButton, submit)
+      }
     }
 
     recordButton = makeButton(
@@ -372,11 +374,15 @@ var Buttons = function (container, options) {
   }
 
   function onInvalid () {
-    if (options.enableAutoValidation) { disable(submitButton) }
+    if (options.enableAutoValidation) {
+      disable(submitButton)
+    }
   }
 
   function onValid () {
-    if (options.enableAutoValidation) { enable(submitButton) }
+    if (options.enableAutoValidation) {
+      enable(submitButton)
+    }
   }
 
   function onHidden () {
@@ -384,6 +390,18 @@ var Buttons = function (container, options) {
     hide(previewButton)
     hide(recordAgainButton)
     hide(resumeButton)
+  }
+
+  function onEnablingAudio () {
+    disable(recordButton)
+    disable(audioOnRadioPair)
+    disable(audioOffRadioPair)
+  }
+
+  function onDisablingAudio () {
+    disable(recordButton)
+    disable(audioOnRadioPair)
+    disable(audioOffRadioPair)
   }
 
   function recordAgain () {
@@ -436,6 +454,10 @@ var Buttons = function (container, options) {
       onReplayShown()
     }).on(Events.GOING_BACK, function () {
       onGoingBack()
+    }).on(Events.ENABLING_AUDIO, function () {
+      onEnablingAudio()
+    }).on(Events.DISABLING_AUDIO, function () {
+      onDisablingAudio()
     }).on(Events.ERROR, function (err) {
       // since https://github.com/binarykitchen/videomail-client/issues/60
       // we hide areas to make it easier for the user
