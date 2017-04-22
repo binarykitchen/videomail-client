@@ -91,7 +91,7 @@ var Recorder = function (visuals, replay, options) {
         } catch (exc) {
           self.emit(Events.ERROR, VideomailError.create(
             'Failed writing to server',
-            'stream.write() failed because of ' + exc.toString(),
+            'stream.write() failed because of ' + pretty(exc),
             options
           ))
         }
@@ -270,11 +270,7 @@ var Recorder = function (visuals, replay, options) {
         var err
 
         if (typeof websocket === 'undefined') {
-          err = VideomailError.create(
-            'There is no websocket',
-            'Cause: ' + exc.toString(),
-            options
-          )
+          err = VideomailError.create('There is no websocket', 'Cause: ' + pretty(exc), options)
         } else {
           err = VideomailError.create(
             'Failed to connect to server',
@@ -829,7 +825,7 @@ var Recorder = function (visuals, replay, options) {
     } catch (exc) {
       self.emit(
         Events.ERROR,
-        VideomailError.create('Failed to create canvas.', exc.toString(), options)
+        VideomailError.create('Failed to create canvas.', exc, options)
       )
       return false
     }

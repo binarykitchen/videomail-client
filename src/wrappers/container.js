@@ -143,9 +143,13 @@ var Container = function (options) {
   }
 
   function validateOptions () {
-    if (options.hasDefinedWidth() && options.video.width % 2 !== 0) { throw VideomailError.create('Width must be divisible by two.') }
+    if (options.hasDefinedWidth() && options.video.width % 2 !== 0) {
+      throw VideomailError.create('Width must be divisible by two.')
+    }
 
-    if (options.hasDefinedHeight() && options.video.height % 2 !== 0) { throw VideomailError.create('Height must be divisible by two.') }
+    if (options.hasDefinedHeight() && options.video.height % 2 !== 0) {
+      throw VideomailError.create('Height must be divisible by two.')
+    }
   }
 
     // this will just set the width but not the height because
@@ -153,7 +157,11 @@ var Container = function (options) {
   function correctDimensions () {
     var width = visuals.getRecorderWidth(true)
 
-    if (width < 1) { throw VideomailError.create('Recorder width cannot be less than 1!') } else { containerElement.style.width = width + 'px' }
+    if (width < 1) {
+      throw VideomailError.create('Recorder width cannot be less than 1!')
+    } else {
+      containerElement.style.width = width + 'px'
+    }
   }
 
   function removeDimensions () {

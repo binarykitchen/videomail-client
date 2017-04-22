@@ -11,7 +11,7 @@ module.exports = [
 
   // The user agent is intentionally not currently fetching media data,
   // but does not have the entire media resource downloaded.
-  'suspend',
+  // 'suspend', // commented out, we are already listening to it in code
 
   // Event The user agent stops fetching the media data before it is completely downloaded,
   // but not due to an error.  error is an object with the code MEDIA_ERR_ABORTED.
