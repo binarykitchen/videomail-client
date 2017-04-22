@@ -227,12 +227,20 @@ VideomailError.create = function (err, explanation, options, parameters) {
     message.stack = stack
   }
 
+  var errCode = 'none'
+
+  if (err) {
+    errCode += 'code=' + (err.code ? err.code : 'undefined')
+    errCode += ', type=' + (err.type ? err.type : 'undefined')
+    errCode += ', name=' + (err.name ? err.name : 'undefined')
+  }
+
   var videomailError = new VideomailError(message, {
     explanation: explanation,
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
-    code: (err && err.code) || undefined,
+    code: errCode,
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
@@ -263,6 +271,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
     return classList.indexOf(name) >= 0
   }
 
+  function isBrowserProblem () {
+    return hasClass(VideomailError.BROWSER_PROBLEM) ||
+      parameters.browserProblem
+  }
+
   // add some public functions
 
   // this one is useful so that the notifier can have different css classes
@@ -275,8 +288,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   videomailError.hideButtons = function () {
-    return hasClass(VideomailError.BROWSER_PROBLEM) ||
-      hasClass(VideomailError.IOS_PROBLEM)
+    return isBrowserProblem() || hasClass(VideomailError.IOS_PROBLEM)
   }
 
   videomailError.hideForm = function () {
