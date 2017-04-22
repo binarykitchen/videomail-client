@@ -140,15 +140,15 @@ module.exports = function (recorder, options) {
           // using the promise here just experimental for now
           // and this to catch any weird errors early if possible
           if (isPromise(p)) {
-            p.then(() => {
+            p.then(function () {
               if (!playingPromiseReached) {
                 options.debug('UserMedia: ... play promise successful. Playing now.')
                 playingPromiseReached = true
               }
-            }).catch((err) => {
+            }).catch(function (reason) {
               self.emit(Events.ERROR, VideomailError.create(
                 'Failed to play webcam',
-                err,
+                reason,
                 options
               ))
             })
