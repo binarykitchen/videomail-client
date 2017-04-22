@@ -178,7 +178,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
       // it can be that explanation itself is an error object
       // error objects can be prettified to undefined sometimes
-      if (!explanation) {
+      if (!explanation && originalExplanation) {
         if (originalExplanation.message) {
           explanation = originalExplanation.message
         } else {
