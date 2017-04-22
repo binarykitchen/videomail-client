@@ -238,11 +238,11 @@ var Container = function (options) {
             )
 
       if (formResponse && formResponse.type === 'text/html' && formResponse.text) {
-                // server replied with HTML contents - display these
+        // server replied with HTML contents - display these
         document.body.innerHTML = formResponse.text
 
-                // todo: figure out how to fire dom's onload event again
-                // todo: or how to run all the scripts over again
+        // todo: figure out how to fire dom's onload event again
+        // todo: or how to run all the scripts over again
       }
     }
   }
