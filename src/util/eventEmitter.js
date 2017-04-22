@@ -9,7 +9,9 @@ module.exports = function (options, name) {
   this.emit = function (event) {
     var args = Array.prototype.slice.call(arguments, 0)
 
-    if (!event) { throw VideomailError.create('You cannot emit without an event.', options) }
+    if (!event) {
+      throw VideomailError.create('You cannot emit without an event.', options)
+    }
 
         // Automatically convert errors to videomail errors
     if (event === Events.ERROR) {

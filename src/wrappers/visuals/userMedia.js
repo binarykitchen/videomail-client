@@ -30,13 +30,14 @@ module.exports = function (recorder, options) {
       throw VideomailError.create(
         'Error attaching stream to element.',
         'Contact the developer about this',
-        options,
-        true)
+        options)
     }
   }
 
   function setVisualStream (localMediaStream) {
-    if (localMediaStream) { attachMediaStream(localMediaStream) } else {
+    if (localMediaStream) {
+      attachMediaStream(localMediaStream)
+    } else {
       rawVisualUserMedia.removeAttribute('srcObject')
       rawVisualUserMedia.removeAttribute('src')
 
@@ -45,11 +46,19 @@ module.exports = function (recorder, options) {
   }
 
   function getVisualStream () {
-    if (rawVisualUserMedia.mozSrcObject) { return rawVisualUserMedia.mozSrcObject } else if (rawVisualUserMedia.srcObject) { return rawVisualUserMedia.srcObject } else { return currentVisualStream }
+    if (rawVisualUserMedia.mozSrcObject) {
+      return rawVisualUserMedia.mozSrcObject
+    } else if (rawVisualUserMedia.srcObject) {
+      return rawVisualUserMedia.srcObject
+    } else {
+      return currentVisualStream
+    }
   }
 
   function hasEnded () {
-    if (rawVisualUserMedia.ended) { return rawVisualUserMedia.ended } else {
+    if (rawVisualUserMedia.ended) {
+      return rawVisualUserMedia.ended
+    } else {
       var visualStream = getVisualStream()
       return visualStream && visualStream.ended
     }
@@ -57,7 +66,7 @@ module.exports = function (recorder, options) {
 
   function hasInvalidDimensions () {
     if ((rawVisualUserMedia.videoWidth && rawVisualUserMedia.videoWidth < 3) ||
-            (rawVisualUserMedia.height && rawVisualUserMedia.height < 3)) {
+        (rawVisualUserMedia.height && rawVisualUserMedia.height < 3)) {
       return true
     }
   }
@@ -65,7 +74,9 @@ module.exports = function (recorder, options) {
   function getTracks (localMediaStream) {
     var tracks
 
-    if (localMediaStream && localMediaStream.getTracks) { tracks = localMediaStream.getTracks() }
+    if (localMediaStream && localMediaStream.getTracks) {
+      tracks = localMediaStream.getTracks()
+    }
 
     return tracks
   }
@@ -73,7 +84,9 @@ module.exports = function (recorder, options) {
   function getVideoTracks (localMediaStream) {
     var videoTracks
 
-    if (localMediaStream && localMediaStream.getVideoTracks) { videoTracks = localMediaStream.getVideoTracks() }
+    if (localMediaStream && localMediaStream.getVideoTracks) {
+      videoTracks = localMediaStream.getVideoTracks()
+    }
 
     return videoTracks
   }
@@ -89,11 +102,20 @@ module.exports = function (recorder, options) {
     return videoTrack
   }
 
+  function logEvent (event, params) {
+    options.debug('UserMedia: ... event ' + event, JSON.stringify(params))
+  }
+
+  function isPromise (anything) {
+    return (anything && (typeof Promise !== 'undefined') && (anything instanceof Promise))
+  }
+
   this.init = function (localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
     this.stop(localMediaStream, true)
 
     var onPlayReached = false
     var onLoadedMetaDataReached = false
+    var playingPromiseReached = false
 
     if (options && options.isAudioEnabled()) {
       audioRecorder = audioRecorder || new AudioRecorder(this, options)
@@ -104,8 +126,37 @@ module.exports = function (recorder, options) {
       audioRecorder && audioRecorder.record(audioCallback)
     }
 
-    function logEvent (event, params) {
-      options.debug('UserMedia: ... event ' + event, JSON.stringify(params))
+    function play () {
+      // Resets the media element and restarts the media resource. Any pending events are discarded.
+      // But do them in the next tick to ensure event queue is ready for a lot to come
+      //
+      // this also to have the abort and emptied event to be processed as early as possible before
+      // all the other important events to come
+      setTimeout(function () {
+        try {
+          rawVisualUserMedia.load()
+          var p = rawVisualUserMedia.play()
+
+          // using the promise here just experimental for now
+          // and this to catch any weird errors early if possible
+          if (isPromise(p)) {
+            p.then(function () {
+              if (!playingPromiseReached) {
+                options.debug('UserMedia: ... play promise successful. Playing now.')
+                playingPromiseReached = true
+              }
+            }).catch(function (reason) {
+              self.emit(Events.ERROR, VideomailError.create(
+                'Failed to play webcam',
+                reason,
+                options
+              ))
+            })
+          }
+        } catch (exc) {
+          self.emit(Events.ERROR, exc)
+        }
+      }, 0)
     }
 
     function fireCallbacks () {
@@ -136,7 +187,13 @@ module.exports = function (recorder, options) {
 
     function onPlay () {
       try {
-        logEvent('play', {audio: options.isAudioEnabled()})
+        logEvent('play', {
+          audio: options.isAudioEnabled(),
+          width: rawVisualUserMedia.width,
+          height: rawVisualUserMedia.height,
+          videoWidth: rawVisualUserMedia.videoWidth,
+          videoHeight: rawVisualUserMedia.videoHeight
+        })
 
         rawVisualUserMedia.removeEventListener &&
         rawVisualUserMedia.removeEventListener('play', onPlay)
@@ -164,7 +221,13 @@ module.exports = function (recorder, options) {
 
     // player modifications to perform that must wait until `loadedmetadata` has been triggered
     function onLoadedMetaData () {
-      logEvent('loadedmetadata', {readyState: rawVisualUserMedia.readyState})
+      logEvent('loadedmetadata', {
+        readyState: rawVisualUserMedia.readyState,
+        width: rawVisualUserMedia.width,
+        height: rawVisualUserMedia.height,
+        videoWidth: rawVisualUserMedia.videoWidth,
+        videoHeight: rawVisualUserMedia.videoHeight
+      })
 
       rawVisualUserMedia.removeEventListener &&
       rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
@@ -173,11 +236,21 @@ module.exports = function (recorder, options) {
         self.emit(Events.LOADED_META_DATA)
 
         // for android devices, we cannot call play() unless meta data has been loaded!
-        rawVisualUserMedia.play()
+        play()
 
         onLoadedMetaDataReached = true
         fireCallbacks()
       }
+    }
+
+    // The user agent is intentionally not currently fetching media data,
+    // but does not have the entire media resource downloaded.
+    function onSuspend () {
+      self.emit(Events.ERROR, VideomailError.create(
+        'Suspending the webcam loading process',
+        'It looks like your webcam is not fully set up; its drivers needs to be updated or is sleeping.',
+        options
+      ))
     }
 
     try {
@@ -189,8 +262,7 @@ module.exports = function (recorder, options) {
         throw VideomailError.create(
           'Webcam is disabled',
           'The video track seems to be disabled. Enable it in your system.',
-          options,
-          true
+          options
         )
       } else {
         var description
@@ -228,6 +300,7 @@ module.exports = function (recorder, options) {
         })
       }
 
+      rawVisualUserMedia.addEventListener('suspend', onSuspend)
       rawVisualUserMedia.addEventListener('loadedmetadata', onLoadedMetaData)
       rawVisualUserMedia.addEventListener('play', onPlay)
 
@@ -237,21 +310,15 @@ module.exports = function (recorder, options) {
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
         self.emit(Events.ERROR, VideomailError.create(
-          'User Media Error',
-          err.toString(),
-          options,
-          true
+          'Weird webcam error',
+          err,
+          options
         ))
       })
 
       setVisualStream(localMediaStream)
 
-      // Resets the media element and restarts the media resource. Any pending events are discarded.
-      // But do them in the next tick to ensure event queue is ready for a lot to come
-      setTimeout(function () {
-        rawVisualUserMedia.load()
-        rawVisualUserMedia.play()
-      }, 0)
+      play()
     } catch (exc) {
       self.emit(Events.ERROR, exc)
     }
@@ -275,7 +342,7 @@ module.exports = function (recorder, options) {
           })
         }
 
-                // will probably become obsolete in one year (after june 2017)
+        // will probably become obsolete in one year (after june 2017)
         visualStream && visualStream.stop && visualStream.stop()
 
         setVisualStream(null)
@@ -311,10 +378,16 @@ module.exports = function (recorder, options) {
     var widthDefined = options.hasDefinedWidth()
 
     if (widthDefined || options.hasDefinedHeight()) {
-      if (!responsive && widthDefined) { rawWidth = options.video.width } else { rawWidth = recorder.calculateWidth(responsive) }
+      if (!responsive && widthDefined) {
+        rawWidth = options.video.width
+      } else {
+        rawWidth = recorder.calculateWidth(responsive)
+      }
     }
 
-    if (responsive) { rawWidth = recorder.limitWidth(rawWidth) }
+    if (responsive) {
+      rawWidth = recorder.limitWidth(rawWidth)
+    }
 
     return rawWidth
   }
@@ -325,14 +398,20 @@ module.exports = function (recorder, options) {
     if (options.hasDefinedDimension()) {
       rawHeight = recorder.calculateHeight(responsive)
 
-      if (rawHeight < 1) { throw VideomailError.create('Calculated raw height cannot be less than 1!') }
+      if (rawHeight < 1) {
+        throw VideomailError.create('Bad dimensions', 'Calculated raw height cannot be less than 1!', options)
+      }
     } else {
       rawHeight = this.getVideoHeight()
 
-      if (rawHeight < 1) { throw VideomailError.create('Raw video height from DOM element cannot be less than 1!') }
+      if (rawHeight < 1) {
+        throw VideomailError.create('Bad dimensions', 'Raw video height from DOM element cannot be less than 1!', options)
+      }
     }
 
-    if (responsive) { rawHeight = recorder.limitHeight(rawHeight) }
+    if (responsive) {
+      rawHeight = recorder.limitHeight(rawHeight)
+    }
 
     return rawHeight
   }
@@ -362,6 +441,10 @@ module.exports = function (recorder, options) {
   }
 
   this.getAudioSampleRate = function () {
-    if (audioRecorder) { return audioRecorder.getSampleRate() } else { return -1 }
+    if (audioRecorder) {
+      return audioRecorder.getSampleRate()
+    } else {
+      return -1
+    }
   }
 }
