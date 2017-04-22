@@ -12,6 +12,7 @@ const send = require('connect-send-json')
 const del = require('del')
 const minimist = require('minimist')
 const sslRootCas = require('ssl-root-cas')
+const pump = require('pump')
 
 const defaultOptions = {
   minify: false,
@@ -78,23 +79,18 @@ gulp.task('browserify', ['clean:js'], function (cb) {
     debug: true // enables source maps
   })
 
-  bundler
-    .require(entry, {expose: 'videomail-client'})
-    .bundle()
-    .on('error', function (err) {
-      plugins.util.log(plugins.util.colors.red('[Error]'), err.toString())
-      this.emit('end')
-    })
-    .on('log', plugins.util.log)
-    .on('end', cb)
-    .pipe(source('./src/')) // gives streaming vinyl file object
-    .pipe(buffer()) // required because the next steps do not support streams
-    .pipe(plugins.concat('videomail-client.js'))
-    .pipe(gulp.dest('dist'))
-    .pipe(plugins.if(options.minify, plugins.rename({suffix: '.min'})))
-    .pipe(plugins.if(options.minify, plugins.uglify()))
-    .pipe(plugins.if(options.minify, gulp.dest('dist')))
-    .pipe(plugins.connect.reload())
+  pump([
+    bundler.require(entry, {expose: 'videomail-client'}).bundle(),
+    source('./src/'), // gives streaming vinyl file object
+    buffer(), // required because the next steps do not support streams
+    plugins.concat('videomail-client.js'),
+    gulp.dest('dist'),
+
+    plugins.if(options.minify, plugins.rename({suffix: '.min'})),
+    plugins.if(options.minify, plugins.uglify()),
+    plugins.if(options.minify, gulp.dest('dist')),
+    plugins.connect.reload()
+  ], cb)
 })
 
 gulp.task('connect', ['build'], function () {
@@ -123,10 +119,10 @@ gulp.task('connect', ['build'], function () {
       router.post('/contact', function (req, res) {
         console.log('Videomail data received:', req.body)
 
-                // At this stage, a backend could store the videomail_key in req.body
-                // into a database for replay functionality
+        // At this stage, a backend could store the videomail_key in req.body
+        // into a database for replay functionality
 
-                // Just an example to see that the backend can do anything with the data
+        // Just an example to see that the backend can do anything with the data
         res.json({
           status: 'Inserted on ' + new Date().toISOString()
         })
