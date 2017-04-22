@@ -18,10 +18,10 @@ function arrayToString (array) {
 function objectToString (object, options) {
   var propertyNames = Object.getOwnPropertyNames(object)
   var excludes = (options && options.excludes) || null
+  var lines = []
   var sLines
 
   if (propertyNames.length > 0) {
-    var lines = []
     var exclude = false
 
     propertyNames.forEach(function (name) {

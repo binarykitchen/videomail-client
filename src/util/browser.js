@@ -156,7 +156,9 @@ module.exports = function (options) {
       message = 'Your old browser cannot support modern video codecs'
     }
 
-    if (message) { err = VideomailError.create(message, getPlaybackWarning(), options) }
+    if (message) {
+      err = VideomailError.create(message, getPlaybackWarning(), options)
+    }
 
     return err
   }
@@ -164,7 +166,13 @@ module.exports = function (options) {
   this.checkBufferTypes = function () {
     var err
 
-    if (typeof window === 'undefined' || typeof window.atob === 'undefined') { err = VideomailError.create('atob is not supported', options) } else if (typeof window.ArrayBuffer === 'undefined') { err = VideomailError.create('ArrayBuffers are not supported', options) } else if (typeof window.Uint8Array === 'undefined') { err = VideomailError.create('Uint8Arrays are not supported', options) }
+    if (typeof window === 'undefined' || typeof window.atob === 'undefined') {
+      err = VideomailError.create('atob is not supported', options)
+    } else if (typeof window.ArrayBuffer === 'undefined') {
+      err = VideomailError.create('ArrayBuffers are not supported', options)
+    } else if (typeof window.Uint8Array === 'undefined') {
+      err = VideomailError.create('Uint8Arrays are not supported', options)
+    }
 
     return err
   }
