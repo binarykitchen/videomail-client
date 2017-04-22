@@ -40,7 +40,7 @@ test('VideomailClient:', {timeout: 2000}, function (t) {
     })
   })
 
-    // todo: add test for fn show() once tape-run + electronjs allow getUserMedia access
+  // todo: add test for fn show() once tape-run + electronjs allow getUserMedia access
 
   t.test('replay without videomail parameter emits error', function (tt) {
     tt.plan(1)
