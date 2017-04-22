@@ -50,7 +50,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     // whole code is ugly because all browsers behave so differently :(
 
-  if (typeof (err) === 'object') {
+  if (typeof err === 'object') {
     if (err.code === 1 && err.PERMISSION_DENIED === 1) {
       errType = VideomailError.PERMISSION_DENIED
     } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
@@ -165,15 +165,25 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
 
     default:
-      if (typeof err === 'string') {
+      if (explanation && typeof explanation === 'object') {
+        explanation = pretty(explanation)
+      }
+
+      if (err && typeof err === 'string') {
         message = err
       } else {
-        if (err && err.message) {
-          message = pretty(err.message)
+        if (err) {
+          if (err.message) {
+            message = pretty(err.message)
+          }
         }
 
         if (err && err.explanation) {
-          explanation = pretty(err.explanation)
+          if (!explanation) {
+            explanation = pretty(err.explanation)
+          } else {
+            explanation += ';<br/>' + pretty(err.explanation)
+          }
         }
 
         if (err && err.details) {
@@ -189,12 +199,15 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
       // for weird, undefined cases
       if (!message) {
-        message = errType
+        if (errType) {
+          message = errType
+        }
 
-        if (!explanation) {
+        if (!explanation && err) {
           explanation = pretty(err, {excludes: ['stack']})
         }
 
+        // avoid dupes
         if (pretty(message) === explanation) {
           explanation = undefined
         }
@@ -219,6 +232,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
+    code: (err && err.code) || undefined,
     stack: stack // have to assign it manually again because it is kinda protected
   })
 

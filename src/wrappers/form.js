@@ -127,15 +127,15 @@ var Form = function (container, formElement, options) {
 
       // only emit error if key is missing AND the input has no key (value) yet
       if (!videomailKey && !keyInput.value) {
-        self.emit(Events.ERROR, VideomailError.create(
-          'Videomail key for preview is missing!'
-        ))
-      } else if (videomailKey) { keyInput.value = videomailKey }
-            // else
-            // leave as it and use existing keyInput.value
+        self.emit(Events.ERROR, VideomailError.create('Videomail key for preview is missing!'))
+      } else if (videomailKey) {
+        keyInput.value = videomailKey
+      }
+      // else
+      // leave as it and use existing keyInput.value
     })
 
-        // fixes https://github.com/binarykitchen/videomail-client/issues/91
+    // fixes https://github.com/binarykitchen/videomail-client/issues/91
     this.on(Events.GOING_BACK, function () {
       keyInput.value = null
     })

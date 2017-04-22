@@ -42,7 +42,7 @@ module.exports = function (userMedia, options) {
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
     } catch (exc) {
-      throw VideomailError.create('Failed to access media for audio', exc.toString(), options)
+      throw VideomailError.create('Failed to access media for audio', exc, options)
     }
 
     if (!isPOT(options.audio.bufferSize)) {
