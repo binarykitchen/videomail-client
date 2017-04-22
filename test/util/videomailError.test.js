@@ -143,7 +143,7 @@ test('Videomail Error:', function (t) {
 
       tt.equal(err.toString(), 'Videomail Error: 1')
       tt.equal(err.message, 1)
-      tt.equal(err.explanation, '- 1')
+      tt.equal(err.explanation, undefined)
     })
 
     tt.test('with NO_DEVICES_FOUND as name in object', function (tt) {

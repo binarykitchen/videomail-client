@@ -1,6 +1,6 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
-var pretty = require('./pretty')
+var originalPretty = require('./pretty')
 var Resource = require('./../resource')
 
 var VIDEOMAIL_ERR_NAME = 'Videomail Error'
@@ -12,6 +12,11 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'url': undefined,
   'stack': undefined
 })
+
+// shim pretty to exclude stack always
+var pretty = function (anything) {
+  return originalPretty(anything, {excludes: ['stack']})
+}
 
 // static and public attribute of this class
 VideomailError.PERMISSION_DENIED = 'PERMISSION_DENIED'

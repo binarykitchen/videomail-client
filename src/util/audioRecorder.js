@@ -23,8 +23,8 @@ module.exports = function (userMedia, options) {
       return
     }
 
-        // Returns a Float32Array containing the PCM data associated with the channel,
-        // defined by the channel parameter (with 0 representing the first channel)
+    // Returns a Float32Array containing the PCM data associated with the channel,
+    // defined by the channel parameter (with 0 representing the first channel)
     var float32Array = e.inputBuffer.getChannelData(0)
 
     cb(new AudioSample(float32Array))
