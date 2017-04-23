@@ -134,6 +134,16 @@ module.exports = function (recorder, options) {
       // all the other important events to come
       setTimeout(function () {
         try {
+          // todo debug and fix that weird error
+          // The play() request was interrupted by a new load request.
+          options.debug(
+            'UserMedia: load() and play() both',
+            'media.readyState=' + rawVisualUserMedia.readyState,
+            'media.paused=' + rawVisualUserMedia.paused,
+            'media.ended=' + rawVisualUserMedia.ended,
+            'media.played=' + rawVisualUserMedia.played
+          )
+
           rawVisualUserMedia.load()
           var p = rawVisualUserMedia.play()
 
@@ -330,20 +340,26 @@ module.exports = function (recorder, options) {
 
   this.stop = function (visualStream, aboutToInitialize) {
     try {
-            // do not stop "too much" when going to initialize anyway
+      // do not stop "too much" when going to initialize anyway
       if (!aboutToInitialize) {
-        if (!visualStream) { visualStream = getVisualStream() }
+        if (!visualStream) {
+          visualStream = getVisualStream()
+        }
 
         var tracks = getTracks(visualStream)
+        var newStopApiFound = false
 
         if (tracks) {
           tracks.forEach(function (track) {
-            track.stop()
+            if (track.stop) {
+              newStopApiFound = true
+              track.stop()
+            }
           })
         }
 
         // will probably become obsolete in one year (after june 2017)
-        visualStream && visualStream.stop && visualStream.stop()
+        !newStopApiFound && visualStream && visualStream.stop && visualStream.stop()
 
         setVisualStream(null)
 

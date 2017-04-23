@@ -102,7 +102,7 @@ var Buttons = function (container, options) {
       e && e.preventDefault()
 
       try {
-        clickHandler(e)
+        clickHandler({event: e})
       } catch (exc) {
         self.emit(Events.ERROR, exc)
       }
@@ -143,10 +143,18 @@ var Buttons = function (container, options) {
   function makeButton (buttonClass, text, clickHandler, show, id, type, selector) {
     var buttonElement
 
-    if (id) { buttonElement = document.getElementById(id) } else if (selector) { buttonElement = document.querySelector(selector) } else { buttonElement = buttonsElement.querySelector('.' + buttonClass) }
+    if (id) {
+      buttonElement = document.getElementById(id)
+    } else if (selector) {
+      buttonElement = document.querySelector(selector)
+    } else {
+      buttonElement = buttonsElement.querySelector('.' + buttonClass)
+    }
 
     if (!buttonElement) {
-      if (options.selectors.buttonClass) { buttonClass += '.' + options.selectors.buttonClass }
+      if (options.selectors.buttonClass) {
+        buttonClass += '.' + options.selectors.buttonClass
+      }
 
       buttonElement = h('button.' + buttonClass)
       buttonElement = adjustButton(buttonElement, show, type)
@@ -154,10 +162,16 @@ var Buttons = function (container, options) {
       buttonElement.innerHTML = text
 
             // double check that submit button is already in the buttonsElement container
-      if (submitButton && contains(buttonsElement, submitButton)) { buttonsElement.insertBefore(buttonElement, submitButton) } else { buttonsElement.appendChild(buttonElement) }
+      if (submitButton && contains(buttonsElement, submitButton)) {
+        buttonsElement.insertBefore(buttonElement, submitButton)
+      } else {
+        buttonsElement.appendChild(buttonElement)
+      }
     } else { buttonElement = adjustButton(buttonElement, show, type) }
 
-    if (clickHandler) { replaceClickHandler(buttonElement, clickHandler) }
+    if (clickHandler) {
+      replaceClickHandler(buttonElement, clickHandler)
+    }
 
     return buttonElement
   }
@@ -414,9 +428,9 @@ var Buttons = function (container, options) {
     container.submit()
   }
 
-  function record (e) {
+  function record (params) {
     disable(recordButton)
-    container.record(e)
+    container.record(params)
   }
 
   function initEvents () {
