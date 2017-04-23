@@ -586,6 +586,17 @@ var Recorder = function (visuals, replay, options) {
         args: args
       }
 
+      // todo commented out because for some reasons server does not accept such a long
+      // array of many log lines. to examine later.
+      //
+      // add some useful debug info to examine weird stuff like this one
+      // UnprocessableError: Unable to encode a video with FPS near zero.
+      // todo consider removing this later or have it for debug=1 only?
+      //
+      // if (options.logger && options.logger.getLines) {
+      //   commandObj.logLines = options.logger.getLines()
+      // }
+
       writeStream(Buffer.from(JSON.stringify(commandObj)))
 
       if (cb) {
@@ -632,8 +643,10 @@ var Recorder = function (visuals, replay, options) {
     return userMedia.getAudioSampleRate()
   }
 
-  this.stop = function (limitReached) {
-    debug('stop()')
+  this.stop = function (params) {
+    debug('stop()', params)
+
+    var limitReached = params.limitReached
 
     this.emit(Events.STOPPING, limitReached)
 
@@ -659,7 +672,7 @@ var Recorder = function (visuals, replay, options) {
 
     writeCommand('stop', recordingStats)
 
-        // beware, resetting will set framesCount to zero, so leave this here
+    // beware, resetting will set framesCount to zero, so leave this here
     this.reset()
   }
 
@@ -733,16 +746,14 @@ var Recorder = function (visuals, replay, options) {
     return userMedia.isReady()
   }
 
-  this.pause = function (e) {
-    var details
+  this.pause = function (params) {
+    var e = params && params.event
 
     if (e instanceof window.Event) {
-      details = e.type
-    } else if (e) {
-      details = pretty(e)
+      params.eventType = e.type
     }
 
-    debug('pause()', details)
+    debug('pause()', params)
 
     userMedia.pause()
     loop.stop()
