@@ -182,7 +182,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
         if (originalExplanation.message) {
           explanation = originalExplanation.message
         } else {
-          explanation = originalExplanation.toString()
+          // tried toString before but nah
+          explanation = JSON.stringify(originalExplanation)
         }
       }
 
