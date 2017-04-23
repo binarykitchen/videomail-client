@@ -141,7 +141,7 @@ module.exports = function (recorder, options) {
             'media.readyState=' + rawVisualUserMedia.readyState,
             'media.paused=' + rawVisualUserMedia.paused,
             'media.ended=' + rawVisualUserMedia.ended,
-            'media.played=' + rawVisualUserMedia.played
+            'media.played=' + rawVisualUserMedia.played.toString()
           )
 
           rawVisualUserMedia.load()
@@ -257,8 +257,9 @@ module.exports = function (recorder, options) {
     // but does not have the entire media resource downloaded.
     function onSuspend () {
       self.emit(Events.ERROR, VideomailError.create(
-        'Suspending the webcam loading process',
-        'It looks like your webcam is not fully set up; its drivers needs to be updated or is sleeping.',
+        'Suspending webcam loading process',
+        'Looks like either your webcam is not fully set up; ' +
+        'its drivers needs to be updated or it is in a sleeping state.',
         options
       ))
     }

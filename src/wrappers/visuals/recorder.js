@@ -260,10 +260,9 @@ var Recorder = function (visuals, replay, options) {
         encodeURIComponent(options.siteName)
 
       try {
-        stream = websocket(url2Connect, {
-          // see https://github.com/maxogden/websocket-stream/issues/116#issuecomment-292704362
-          perMessageDeflate: false
-        })
+        // websocket options cannot be set on client side, only on server, see
+        // https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
+        stream = websocket(url2Connect)
       } catch (exc) {
         connecting = connected = false
 
@@ -382,7 +381,7 @@ var Recorder = function (visuals, replay, options) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
         self.emit(Events.ERROR, err)
       } else {
-        // do not emit buy retry since MEDIA_DEVICE_NOT_SUPPORTED can be race conditions
+        // do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
         debug('Recorder: ignore user media error', err)
       }
 
