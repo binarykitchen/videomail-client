@@ -463,4 +463,15 @@ module.exports = function (recorder, options) {
       return -1
     }
   }
+
+  this.getCharacteristics = function () {
+    return {
+      audioSampleRate: this.getAudioSampleRate(),
+      muted: rawVisualUserMedia && rawVisualUserMedia.muted,
+      width: rawVisualUserMedia && rawVisualUserMedia.width,
+      height: rawVisualUserMedia && rawVisualUserMedia.height,
+      videoWidth: rawVisualUserMedia && rawVisualUserMedia.videoWidth,
+      videoHeight: rawVisualUserMedia && rawVisualUserMedia.videoHeight
+    }
+  }
 }

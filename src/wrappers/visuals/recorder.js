@@ -370,7 +370,11 @@ var Recorder = function (visuals, replay, options) {
     userMediaLoading = false
     clearUserMediaTimeout()
 
-    debug('Recorder: userMediaErrorCallback()')
+    debug(
+      'Recorder: userMediaErrorCallback()',
+      'Webcam characteristics:',
+      userMedia.getCharacteristics()
+    )
 
     var errorListeners = self.listeners(Events.ERROR)
 
