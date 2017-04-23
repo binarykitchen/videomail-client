@@ -147,8 +147,8 @@ var Visuals = function (container, options) {
     container.endWaiting()
   }
 
-  this.stop = function (limitReached) {
-    recorder.stop(limitReached)
+  this.stop = function (params) {
+    recorder.stop(params)
     recorderInsides.hidePause()
   }
 
@@ -186,8 +186,8 @@ var Visuals = function (container, options) {
     return replay.isShown()
   }
 
-  this.pause = function (e) {
-    recorder.pause(e)
+  this.pause = function (params) {
+    recorder.pause(params)
     recorderInsides.showPause()
   }
 
