@@ -377,8 +377,8 @@ var Container = function (options) {
           buttons.adjustButtonsForPause()
         }
 
-                // since https://github.com/binarykitchen/videomail-client/issues/60
-                // we hide areas to make it easier for the user
+        // since https://github.com/binarykitchen/videomail-client/issues/60
+        // we hide areas to make it easier for the user
         buttons.show()
 
         if (self.isReplayShown()) { self.emit(Events.PREVIEW) } else {
@@ -420,8 +420,8 @@ var Container = function (options) {
     return visuals.isPaused()
   }
 
-  this.pause = function (e) {
-    visuals.pause(e)
+  this.pause = function (params) {
+    visuals.pause(params)
   }
 
   this.startOver = function () {
