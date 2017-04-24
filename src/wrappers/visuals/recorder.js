@@ -175,9 +175,13 @@ var Recorder = function (visuals, replay, options) {
     // when progresses aren't initialized,
     // then do a first calculation to avoid `infinite` or `null` displays
 
-    if (!frameProgress) { frameProgress = calculateFrameProgress() }
+    if (!frameProgress) {
+      frameProgress = calculateFrameProgress()
+    }
 
-    if (!sampleProgress) { sampleProgress = calculateSampleProgress() }
+    if (!sampleProgress) {
+      sampleProgress = calculateSampleProgress()
+    }
 
     self.emit(
       Events.PROGRESS,
@@ -344,14 +348,18 @@ var Recorder = function (visuals, replay, options) {
           } catch (err) {
             debug('Failed to parse command:', err)
 
-            // throw further to avoid code below to get executed
-            // there is a catch block at end of the executeCommand fn
+            /*
+            ignore for now. still happens:
+
+            Bad commmand was {"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}.
+
             self.emit(Events.ERROR, VideomailError.create(
               'Invalid server command',
               // toString() since https://github.com/binarykitchen/videomail.io/issues/288
               'Contact us asap. Bad commmand was ' + data.toString() + '. ',
               options
             ))
+            */
           }
         })
 
