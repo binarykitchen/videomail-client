@@ -6,6 +6,10 @@ module.exports = [
   // the resource selection algorithm.
   'loadstart',
 
+  // The user agent is intentionally not currently fetching media data,
+  // but does not have the entire media resource downloaded. networkState equals NETWORK_IDLE
+  'suspend',
+
   // The user agent is fetching media data.
   'progress',
 
