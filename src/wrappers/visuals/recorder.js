@@ -4,7 +4,6 @@ var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
 var animitter = require('animitter')
-var split2 = require('split2')
 
 var UserMedia = require('./userMedia')
 
@@ -15,8 +14,10 @@ var Browser = require('./../../util/browser')
 var Humanize = require('./../../util/humanize')
 var pretty = require('./../../util/pretty')
 var VideomailError = require('./../../util/videomailError')
+var parseMultipleJson = require('./../../util/parseMultipleJson')
 
-var PIPE_SYMBOL = '()=============) '
+// credits http://1lineart.kulaone.com/#/
+var PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
 
 var Recorder = function (visuals, replay, options) {
   EventEmitter.call(this, options, 'Recorder')
@@ -337,21 +338,16 @@ var Recorder = function (visuals, replay, options) {
         stream.on('data', function (data) {
           debug(PIPE_SYMBOL + 'Stream data event emitted')
 
-          // like that we are able to process weird jsons, see
-          // https://github.com/binarykitchen/videomail.io/issues/322
           try {
-            split2(JSON.parse)
-              .on('data', function (command) {
-                executeCommand.call(self, command)
-              })
-              .write(data + '\n')
+            // like that we are able to process weird jsons, see
+            // https://github.com/binarykitchen/videomail.io/issues/322
+            var commands = parseMultipleJson(data)
+
+            commands.forEach(function (command) {
+              executeCommand.call(self, command)
+            })
           } catch (err) {
             debug('Failed to parse command:', err)
-
-            /*
-            ignore for now. still happens:
-
-            Bad commmand was {"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}{"command":"confirmSample","args":{"sample":4872}}.
 
             self.emit(Events.ERROR, VideomailError.create(
               'Invalid server command',
@@ -359,7 +355,6 @@ var Recorder = function (visuals, replay, options) {
               'Contact us asap. Bad commmand was ' + data.toString() + '. ',
               options
             ))
-            */
           }
         })
 

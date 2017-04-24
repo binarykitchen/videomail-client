@@ -9,13 +9,13 @@ module.exports = function (userMedia, options) {
   var scriptProcessor
 
   function getAudioContext () {
-        // instantiate only once
-    if (!window.audioContext) {
+    // instantiate only once
+    if (!window.vcAudioContext) {
       var AudioContext = window.AudioContext || window.webkitAudioContext
-      window.audioContext = new AudioContext()
+      window.vcAudioContext = new AudioContext()
     }
 
-    return window.audioContext
+    return window.vcAudioContext
   }
 
   function onAudioProcess (e, cb) {
@@ -42,7 +42,12 @@ module.exports = function (userMedia, options) {
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
     } catch (exc) {
-      throw VideomailError.create('Failed to access media for audio', exc, options)
+      var explanation = exc.toString() + 'Details: ' + JSON.stringify(getAudioContext())
+      throw VideomailError.create(
+        'Webcam has no audio',
+        explanation,
+        options
+      )
     }
 
     if (!isPOT(options.audio.bufferSize)) {
@@ -84,10 +89,22 @@ module.exports = function (userMedia, options) {
   this.stop = function () {
     options.debug('AudioRecorder: stop()')
 
-    if (scriptProcessor) { scriptProcessor.onaudioprocess = undefined }
+    if (scriptProcessor) {
+      scriptProcessor.onaudioprocess = undefined
+    }
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
+    getAudioContext().close().then(function () {
+      options.debug('AudioRecorder: audio context is closed')
+      delete window.vcAudioContext
+    })
   }
 
   this.getSampleRate = function () {
-    if (getAudioContext()) { return getAudioContext().sampleRate } else { return -1 }
+    if (getAudioContext()) {
+      return getAudioContext().sampleRate
+    } else {
+      return -1
+    }
   }
 }
