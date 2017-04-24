@@ -397,8 +397,10 @@ var Recorder = function (visuals, replay, options) {
 
     debug(
       'Recorder: userMediaErrorCallback()',
-      'Webcam characteristics:',
-      userMedia.getCharacteristics()
+      ', Webcam characteristics:',
+      userMedia.getCharacteristics(),
+      ', temporary err stack',
+      err && err.stack
     )
 
     var errorListeners = self.listeners(Events.ERROR)
