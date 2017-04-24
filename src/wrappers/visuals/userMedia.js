@@ -254,22 +254,6 @@ module.exports = function (recorder, options) {
       }
     }
 
-    // The user agent is intentionally not currently fetching media data,
-    // but does not have the entire media resource downloaded.
-    function onSuspend (a, b) {
-      logEvent('suspend', a, b)
-
-      // commented out because it is weird and not clear, see
-      // https://github.com/binarykitchen/videomail.io/issues/328
-
-      // self.emit(Events.ERROR, VideomailError.create(
-      //   'Suspending webcam loading process',
-      //   'Looks like either your webcam is not fully set up; ' +
-      //   'its drivers needs to be updated or it is in a sleeping state.',
-      //   options
-      // ))
-    }
-
     try {
       var videoTrack = getFirstVideoTrack(localMediaStream)
 
@@ -317,7 +301,6 @@ module.exports = function (recorder, options) {
         })
       }
 
-      rawVisualUserMedia.addEventListener('suspend', onSuspend)
       rawVisualUserMedia.addEventListener('loadedmetadata', onLoadedMetaData)
       rawVisualUserMedia.addEventListener('play', onPlay)
 
