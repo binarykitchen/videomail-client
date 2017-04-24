@@ -10,6 +10,16 @@ module.exports = [
   // but does not have the entire media resource downloaded. networkState equals NETWORK_IDLE
   'suspend',
 
+  // Playback has begun. Fired after the play() method has returned,
+  // or when the autoplay attribute has caused playback to begin.
+  // paused is newly false.
+  // 'play', commented out since it has special treatment
+
+  // The user agent has just determined the duration and dimensions of the
+  // media resource and the timed tracks are ready.
+  // readyState is newly equal to HAVE_METADATA or greater for the first time.
+  // 'loadedmetadata', commented out since it has special treatment
+
   // The user agent is fetching media data.
   'progress',
 
