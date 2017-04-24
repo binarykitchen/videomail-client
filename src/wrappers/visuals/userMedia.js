@@ -4,6 +4,7 @@ var AudioRecorder = require('./../../util/audioRecorder')
 var VideomailError = require('./../../util/videomailError')
 var EventEmitter = require('./../../util/eventEmitter')
 var MEDIA_EVENTS = require('./../../util/mediaEvents')
+var pretty = require('./../../util/pretty')
 var Events = require('./../../events')
 
 module.exports = function (recorder, options) {
@@ -141,7 +142,7 @@ module.exports = function (recorder, options) {
             'media.readyState=' + rawVisualUserMedia.readyState,
             'media.paused=' + rawVisualUserMedia.paused,
             'media.ended=' + rawVisualUserMedia.ended,
-            'media.played=' + rawVisualUserMedia.played.toString()
+            'media.played=' + pretty(rawVisualUserMedia.played)
           )
 
           rawVisualUserMedia.load()
@@ -255,13 +256,18 @@ module.exports = function (recorder, options) {
 
     // The user agent is intentionally not currently fetching media data,
     // but does not have the entire media resource downloaded.
-    function onSuspend () {
-      self.emit(Events.ERROR, VideomailError.create(
-        'Suspending webcam loading process',
-        'Looks like either your webcam is not fully set up; ' +
-        'its drivers needs to be updated or it is in a sleeping state.',
-        options
-      ))
+    function onSuspend (a, b) {
+      logEvent('suspend', a, b)
+
+      // commented out because it is weird and not clear, see
+      // https://github.com/binarykitchen/videomail.io/issues/328
+
+      // self.emit(Events.ERROR, VideomailError.create(
+      //   'Suspending webcam loading process',
+      //   'Looks like either your webcam is not fully set up; ' +
+      //   'its drivers needs to be updated or it is in a sleeping state.',
+      //   options
+      // ))
     }
 
     try {
@@ -322,7 +328,8 @@ module.exports = function (recorder, options) {
       rawVisualUserMedia.addEventListener('error', function (err) {
         self.emit(Events.ERROR, VideomailError.create(
           'Weird webcam error',
-          err,
+          // https://github.com/binarykitchen/videomail.io/issues/323
+          JSON.stringify(err), // tried just with err but returns only "{}"
           options
         ))
       })

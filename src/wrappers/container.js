@@ -91,18 +91,21 @@ var Container = function (options) {
     })
 
     visibility.onChange(function (visible) {
-      if (visible) {
-        if (options.isAutoPauseEnabled() && self.isCountingDown()) {
-          self.resume()
-        }
+      // built? see https://github.com/binarykitchen/videomail.io/issues/326
+      if (built) {
+        if (visible) {
+          if (options.isAutoPauseEnabled() && self.isCountingDown()) {
+            self.resume()
+          }
 
-        self.emit(Events.VISIBLE)
-      } else {
-        if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
-          self.pause('document invisible')
-        }
+          self.emit(Events.VISIBLE)
+        } else {
+          if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
+            self.pause('document invisible')
+          }
 
-        self.emit(Events.INVISIBLE)
+          self.emit(Events.INVISIBLE)
+        }
       }
     })
 
