@@ -4,6 +4,7 @@ var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
 var animitter = require('animitter')
+var split2 = require('split2')
 
 var UserMedia = require('./userMedia')
 
@@ -14,6 +15,8 @@ var Browser = require('./../../util/browser')
 var Humanize = require('./../../util/humanize')
 var pretty = require('./../../util/pretty')
 var VideomailError = require('./../../util/videomailError')
+
+var PIPE_SYMBOL = '()=============) '
 
 var Recorder = function (visuals, replay, options) {
   EventEmitter.call(this, options, 'Recorder')
@@ -283,11 +286,11 @@ var Recorder = function (visuals, replay, options) {
         self.emit(Events.ERROR, err)
       }
 
-      // useful for debugging streams
-
+      // // useful for debugging streams
+      //
       // if (!stream.originalEmit)
       //     stream.originalEmit = stream.emit
-
+      //
       // stream.emit = function(type) {
       //     if (stream) {
       //         debug('Websocket stream emitted:', type)
@@ -298,7 +301,7 @@ var Recorder = function (visuals, replay, options) {
 
       if (stream) {
         stream.on('close', function (err) {
-          debug('= Stream has closed')
+          debug(PIPE_SYMBOL + 'Stream has closed')
 
           connecting = connected = false
 
@@ -313,6 +316,8 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('connect', function () {
+          debug(PIPE_SYMBOL + 'Stream connect event emitted')
+
           if (!connected) {
             connected = true
             connecting = unloaded = false
@@ -326,11 +331,32 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('data', function (data) {
-          executeCommand.call(self, data)
+          debug(PIPE_SYMBOL + 'Stream data event emitted')
+
+          // like that we are able to process weird jsons, see
+          // https://github.com/binarykitchen/videomail.io/issues/322
+          try {
+            split2(JSON.parse)
+              .on('data', function (command) {
+                executeCommand.call(self, command)
+              })
+              .write(data + '\n')
+          } catch (err) {
+            debug('Failed to parse command:', err)
+
+            // throw further to avoid code below to get executed
+            // there is a catch block at end of the executeCommand fn
+            self.emit(Events.ERROR, VideomailError.create(
+              'Invalid server command',
+              // toString() since https://github.com/binarykitchen/videomail.io/issues/288
+              'Contact us asap. Bad commmand was ' + data.toString() + '. ',
+              options
+            ))
+          }
         })
 
         stream.on('error', function (err) {
-          debug('= Stream error event emitted')
+          debug(PIPE_SYMBOL + 'Stream error event emitted')
 
           connecting = connected = false
           self.emit(Events.ERROR, err)
@@ -339,23 +365,23 @@ var Recorder = function (visuals, replay, options) {
         // just experimental
 
         stream.on('drain', function () {
-          debug('= Stream drain event emitted (should not happen!)')
+          debug(PIPE_SYMBOL + 'Stream drain event emitted (should not happen!)')
         })
 
         stream.on('end', function () {
-          debug('= Stream end event emitted')
+          debug(PIPE_SYMBOL + 'Stream end event emitted')
         })
 
         stream.on('drain', function () {
-          debug('= Stream drain event emitted')
+          debug(PIPE_SYMBOL + 'Stream drain event emitted')
         })
 
         stream.on('pipe', function () {
-          debug('= Stream pipe event emitted')
+          debug(PIPE_SYMBOL + 'Stream pipe event emitted')
         })
 
         stream.on('unpipe', function () {
-          debug('= Stream unpipe event emitted')
+          debug(PIPE_SYMBOL + 'Stream unpipe event emitted')
         })
       }
     }
@@ -496,33 +522,12 @@ var Recorder = function (visuals, replay, options) {
     }
   }
 
-  function executeCommand (data) {
+  function executeCommand (command) {
     try {
-      var command
-
-      try {
-        command = JSON.parse(data.toString())
-      } catch (excInner) {
-        debug('Failed to parse command:', excInner)
-
-        // throw further to avoid code below to get executed
-        // there is a catch block at end of the executeCommand fn
-        throw VideomailError.create(
-          'Failed to parse command.',
-          // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-          'Data: ' + data.toString() + '. ' +
-          excInner.toString(),
-          options
-        )
-      }
-
-      var result
-
       debug(
         'Server commanded: %s',
         command.command,
-        command.args ? ', ' + JSON.stringify(command.args) : '',
-        result ? '= ' + result : ''
+        command.args ? ', ' + JSON.stringify(command.args) : ''
       )
 
       switch (command.command) {
@@ -540,10 +545,10 @@ var Recorder = function (visuals, replay, options) {
           ))
           break
         case 'confirmFrame':
-          result = updateFrameProgress(command.args)
+          updateFrameProgress(command.args)
           break
         case 'confirmSample':
-          result = updateSampleProgress(command.args)
+          updateSampleProgress(command.args)
           break
         case 'beginAudioEncoding':
           this.emit(Events.BEGIN_AUDIO_ENCODING)
