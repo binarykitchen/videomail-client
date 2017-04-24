@@ -7,6 +7,8 @@ var MEDIA_EVENTS = require('./../../util/mediaEvents')
 var pretty = require('./../../util/pretty')
 var Events = require('./../../events')
 
+var EVENT_ASCII = '|—O—|'
+
 module.exports = function (recorder, options) {
   EventEmitter.call(this, options, 'UserMedia')
 
@@ -104,7 +106,7 @@ module.exports = function (recorder, options) {
   }
 
   function logEvent (event, params) {
-    options.debug('UserMedia: ... event ' + event, JSON.stringify(params))
+    options.debug('UserMedia: ...', EVENT_ASCII, 'event', event, JSON.stringify(params))
   }
 
   function isPromise (anything) {
@@ -138,7 +140,7 @@ module.exports = function (recorder, options) {
           // todo debug and fix that weird error
           // The play() request was interrupted by a new load request.
           options.debug(
-            'UserMedia: load() and play() both',
+            'UserMedia: play()',
             'media.readyState=' + rawVisualUserMedia.readyState,
             'media.paused=' + rawVisualUserMedia.paused,
             'media.ended=' + rawVisualUserMedia.ended,
@@ -199,6 +201,7 @@ module.exports = function (recorder, options) {
     function onPlay () {
       try {
         logEvent('play', {
+          readyState: rawVisualUserMedia.readyState,
           audio: options.isAudioEnabled(),
           width: rawVisualUserMedia.width,
           height: rawVisualUserMedia.height,
