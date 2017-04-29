@@ -134,6 +134,16 @@ test('Videomail Error:', function (t) {
       tt.equal(err2.explanation, '- 2<br/>- 2')
     })
 
+    tt.test('NOT_ALLOWED_ERROR', function (tt) {
+      tt.plan(3)
+
+      const err1 = VideomailError.create(VideomailError.NOT_ALLOWED_ERROR)
+
+      tt.equal(err1.toString(), 'Videomail Error: Permission denied')
+      tt.equal(err1.message, 'Permission denied')
+      tt.equal(err1.explanation, 'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
+    })
+
     tt.test('with bad name in object', function (tt) {
       tt.plan(3)
 
