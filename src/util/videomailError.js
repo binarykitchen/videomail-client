@@ -20,6 +20,7 @@ var pretty = function (anything) {
 
 // static and public attribute of this class
 VideomailError.PERMISSION_DENIED = 'PERMISSION_DENIED'
+VideomailError.NOT_ALLOWED_ERROR = 'NotAllowedError'
 VideomailError.NOT_CONNECTED = 'Not connected'
 VideomailError.DOM_EXCEPTION = 'DOMException'
 VideomailError.STARTING_FAILED = 'Starting video failed'
@@ -92,6 +93,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
+    case VideomailError.NOT_ALLOWED_ERROR:
     case VideomailError.PERMISSION_DENIED:
     case 'PermissionDeniedError':
       message = 'Permission denied'
