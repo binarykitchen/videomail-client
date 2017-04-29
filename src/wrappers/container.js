@@ -134,7 +134,7 @@ var Container = function (options) {
     self
       .on(Events.ERROR, function (err) {
         processError(err)
-        unloadButKeepEventListeners(err)
+        unloadChildren(err)
 
         if (err.removeDimensions && err.removeDimensions()) {
           removeDimensions()
@@ -171,7 +171,7 @@ var Container = function (options) {
     containerElement.style.width = 'auto'
   }
 
-  function unloadButKeepEventListeners (e) {
+  function unloadChildren (e) {
     visuals.unload(e)
     buttons.unload()
     self.endWaiting()
@@ -201,9 +201,13 @@ var Container = function (options) {
       if (formData.hasOwnProperty(FORM_FIELDS[key])) { videomailFormData[key] = formData[FORM_FIELDS[key]] }
     })
 
-    if (videomailFormData.from) { videomailFormData.from = trimEmail(videomailFormData.from) }
+    if (videomailFormData.from) {
+      videomailFormData.from = trimEmail(videomailFormData.from)
+    }
 
-    if (videomailFormData.to) { videomailFormData.to = trimEmail(videomailFormData.to) }
+    if (videomailFormData.to) {
+      videomailFormData.to = trimEmail(videomailFormData.to)
+    }
 
         // when method is undefined, treat it as a post
     if (isPost(method) || !method) {
@@ -224,7 +228,9 @@ var Container = function (options) {
   function finalizeSubmissions (err, method, videomail, response, formResponse) {
     self.endWaiting()
 
-    if (err) { self.emit(Events.ERROR, err) } else {
+    if (err) {
+      self.emit(Events.ERROR, err)
+    } else {
       submitted = true
 
             // merge two json response bodies to fake as if it were only one request
@@ -235,10 +241,10 @@ var Container = function (options) {
       }
 
       self.emit(
-                Events.SUBMITTED,
-                videomail,
-                response
-            )
+        Events.SUBMITTED,
+        videomail,
+        response
+      )
 
       if (formResponse && formResponse.type === 'text/html' && formResponse.text) {
         // server replied with HTML contents - display these
@@ -307,8 +313,8 @@ var Container = function (options) {
     try {
       containerElement = document.getElementById(options.selectors.containerId)
 
-            // only build when a container element hast been found, otherwise
-            // be silent and do nothing
+      // only build when a container element hast been found, otherwise
+      // be silent and do nothing
       if (containerElement) {
         options.insertCss && prependDefaultCss()
 
@@ -357,8 +363,10 @@ var Container = function (options) {
   }
 
   this.unload = function (e) {
+    debug('Container: unload()', e)
+
     try {
-      unloadButKeepEventListeners(e)
+      unloadChildren(e)
       this.removeAllListeners()
 
       built = submitted = false

@@ -315,7 +315,7 @@ var Recorder = function (visuals, replay, options) {
           } else {
             self.emit(Events.DISCONNECTED)
 
-            // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening i think
+            // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
             cancelAnimationFrame()
           }
         })
@@ -403,8 +403,8 @@ var Recorder = function (visuals, replay, options) {
       'Recorder: userMediaErrorCallback()',
       ', Webcam characteristics:',
       userMedia.getCharacteristics(),
-      ', temporary err stack',
-      err && err.stack
+      ', temporary err stack:',
+      (err && err.stack) || '(undefined)'
     )
 
     var errorListeners = self.listeners(Events.ERROR)
@@ -420,10 +420,20 @@ var Recorder = function (visuals, replay, options) {
       // retry after a while
       retryTimeout = setTimeout(initSocket, options.timeouts.userMedia)
     } else {
-      debug('Recorder: no error listeners attached but throwing error', err)
+      if (unloaded) {
+        // can happen that container is unloaded but some user media related callbacks
+        // are still in process. in that case ignore error.
+        debug('Recorder: already unloaded. Not going to throw error', err)
+      } else {
+        debug('Recorder: no error listeners attached but throwing error', err)
 
-      // weird situation, throw it since there are no error listeners
-      throw VideomailError.create(err, 'A weird error happened.', options)
+        // weird situation, throw it instead of emitting since there are no error listeners
+        throw VideomailError.create(
+          err,
+          'Unable to process this error since there are no error listeners anymore.',
+          options
+        )
+      }
     }
   }
 
@@ -971,9 +981,13 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function correctDimensions () {
-    if (options.hasDefinedWidth()) { recorderElement.width = self.getRecorderWidth(true) }
+    if (options.hasDefinedWidth()) {
+      recorderElement.width = self.getRecorderWidth(true)
+    }
 
-    if (options.hasDefinedHeight()) { recorderElement.height = self.getRecorderHeight(true) }
+    if (options.hasDefinedHeight()) {
+      recorderElement.height = self.getRecorderHeight(true)
+    }
   }
 
   function initEvents () {
@@ -1021,7 +1035,9 @@ var Recorder = function (visuals, replay, options) {
     } else {
       recorderElement = visuals.querySelector('video.' + options.selectors.userMediaClass)
 
-      if (!recorderElement) { buildElement() }
+      if (!recorderElement) {
+        buildElement()
+      }
 
       correctDimensions()
 
@@ -1096,7 +1112,11 @@ var Recorder = function (visuals, replay, options) {
   function getRatio () {
     var ratio
 
-    if (userMedia) { ratio = userMedia.getVideoHeight() / userMedia.getVideoWidth() } else { ratio = options.getRatio() }
+    if (userMedia) {
+      ratio = userMedia.getVideoHeight() / userMedia.getVideoWidth()
+    } else {
+      ratio = options.getRatio()
+    }
 
     return ratio
   }
@@ -1104,7 +1124,11 @@ var Recorder = function (visuals, replay, options) {
   this.calculateWidth = function (responsive) {
     var videoHeight
 
-    if (userMedia) { videoHeight = userMedia.getVideoHeight() } else if (recorderElement) { videoHeight = recorderElement.videoHeight }
+    if (userMedia) {
+      videoHeight = userMedia.getVideoHeight()
+    } else if (recorderElement) {
+      videoHeight = recorderElement.videoHeight
+    }
 
     return visuals.calculateWidth({
       responsive: responsive,
@@ -1116,7 +1140,11 @@ var Recorder = function (visuals, replay, options) {
   this.calculateHeight = function (responsive) {
     var videoWidth
 
-    if (userMedia) { videoWidth = userMedia.getVideoWidth() } else if (recorderElement) { videoWidth = recorderElement.videoWidth }
+    if (userMedia) {
+      videoWidth = userMedia.getVideoWidth()
+    } else if (recorderElement) {
+      videoWidth = recorderElement.videoWidth
+    }
 
     return visuals.calculateHeight({
       responsive: responsive,
