@@ -129,6 +129,22 @@ module.exports = function (recorder, options) {
       audioRecorder && audioRecorder.record(audioCallback)
     }
 
+    function unloadAllEventListeners () {
+      options.debug('UserMedia: unloadAllEventListeners()')
+
+      self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord)
+
+      rawVisualUserMedia.removeEventListener &&
+      rawVisualUserMedia.removeEventListener('play', onPlay)
+
+      rawVisualUserMedia.removeEventListener &&
+      rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
+
+      MEDIA_EVENTS.forEach(function (eventName) {
+        rawVisualUserMedia.removeEventListener(eventName, outputEvent)
+      })
+    }
+
     function play () {
       // Resets the media element and restarts the media resource. Any pending events are discarded.
       // But do them in the next tick to ensure event queue is ready for a lot to come
@@ -159,15 +175,15 @@ module.exports = function (recorder, options) {
                 playingPromiseReached = true
               }
             }).catch(function (reason) {
-              self.emit(Events.ERROR, VideomailError.create(
-                'Failed to play webcam',
-                reason,
-                options
-              ))
+              // promise can be interrupted, i.E. when switching tabs
+              // and promise can get resumed when switching back to tab, hence
+              // do not treat this like an error
+              options.debug('UserMedia:', reason.toString())
             })
           }
         } catch (exc) {
-          self.emit(Events.ERROR, exc)
+          unloadAllEventListeners()
+          endedEarlyCallback(exc)
         }
       }, 0)
     }
@@ -189,11 +205,11 @@ module.exports = function (recorder, options) {
         if (audioRecorder && audioCallback) {
           try {
             audioRecorder.init(localMediaStream)
+            self.on(Events.SENDING_FIRST_FRAME, audioRecord)
           } catch (exc) {
-            self.emit(Events.ERROR, exc)
+            unloadAllEventListeners()
+            endedEarlyCallback(exc)
           }
-
-          self.on(Events.SENDING_FIRST_FRAME, audioRecord)
         }
       }
     }
@@ -212,9 +228,6 @@ module.exports = function (recorder, options) {
         rawVisualUserMedia.removeEventListener &&
         rawVisualUserMedia.removeEventListener('play', onPlay)
 
-        localMediaStream.removeEventListener &&
-        localMediaStream.removeEventListener('ended', onPlay)
-
         if (hasEnded() || hasInvalidDimensions()) {
           endedEarlyCallback(
             VideomailError.create(
@@ -229,7 +242,8 @@ module.exports = function (recorder, options) {
           fireCallbacks()
         }
       } catch (exc) {
-        self.emit(Events.ERROR, exc)
+        unloadAllEventListeners()
+        endedEarlyCallback(exc)
       }
     }
 
