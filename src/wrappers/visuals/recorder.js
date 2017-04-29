@@ -343,6 +343,7 @@ var Recorder = function (visuals, replay, options) {
             // https://github.com/binarykitchen/videomail.io/issues/322
             var commands = parseMultipleJson(data)
 
+            // todo consider removing duplicate commands
             commands.forEach(function (command) {
               executeCommand.call(self, command)
             })
