@@ -76,7 +76,7 @@ gulp.task('browserify', ['clean:js'], function (cb) {
     entries: [entry],
     basedir: __dirname,
     globals: false,
-    debug: true // enables source maps
+    debug: !options.minify // enables inline source maps
   })
 
   pump([
@@ -85,9 +85,12 @@ gulp.task('browserify', ['clean:js'], function (cb) {
     buffer(), // required because the next steps do not support streams
     plugins.concat('videomail-client.js'),
     gulp.dest('dist'),
-
+    plugins.if(options.minify, plugins.sourcemaps.init({
+      loadMaps: true
+    })),
     plugins.if(options.minify, plugins.rename({suffix: '.min'})),
     plugins.if(options.minify, plugins.uglify()),
+    plugins.if(options.minify, plugins.sourcemaps.write('./')),
     plugins.if(options.minify, gulp.dest('dist')),
     plugins.connect.reload()
   ], cb)
@@ -97,8 +100,8 @@ gulp.task('connect', ['build'], function () {
   var SSL_CERTS_PATH = path.join(__dirname, '/etc/ssl-certs/')
 
   sslRootCas
-      .inject()
-      .addFile(path.join(SSL_CERTS_PATH, 'server', 'my-root-ca.crt.pem'))
+    .inject()
+    .addFile(path.join(SSL_CERTS_PATH, 'server', 'my-root-ca.crt.pem'))
 
   plugins.connect.server({
     root: ['examples', 'dist'],
