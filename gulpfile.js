@@ -115,7 +115,7 @@ gulp.task('connect', ['build'], function () {
       router.use(bodyParser.json())
       router.use(send.json())
 
-            // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
+      // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
       router.post('/contact', function (req, res) {
         console.log('Videomail data received:', req.body)
 
