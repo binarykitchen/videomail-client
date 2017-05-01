@@ -113,6 +113,22 @@ module.exports = function (recorder, options) {
     return (anything && (typeof Promise !== 'undefined') && (anything instanceof Promise))
   }
 
+  function outputEvent (e) {
+    logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
+
+    // remove myself
+    rawVisualUserMedia.removeEventListener &&
+    rawVisualUserMedia.removeEventListener(e.type, outputEvent)
+  }
+
+  this.unloadRemainingEventListeners = function () {
+    options.debug('UserMedia: unloadRemainingEventListeners()')
+
+    MEDIA_EVENTS.forEach(function (eventName) {
+      rawVisualUserMedia.removeEventListener(eventName, outputEvent)
+    })
+  }
+
   this.init = function (localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
     this.stop(localMediaStream, true)
 
@@ -140,9 +156,7 @@ module.exports = function (recorder, options) {
       rawVisualUserMedia.removeEventListener &&
       rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
 
-      MEDIA_EVENTS.forEach(function (eventName) {
-        rawVisualUserMedia.removeEventListener(eventName, outputEvent)
-      })
+      self.unloadRemainingEventListeners()
     }
 
     function play () {
@@ -305,14 +319,6 @@ module.exports = function (recorder, options) {
       var heavyDebugging = true
 
       if (heavyDebugging) {
-        var outputEvent = function (e) {
-          logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
-
-          // remove myself
-          rawVisualUserMedia.removeEventListener &&
-          rawVisualUserMedia.removeEventListener(e.type, outputEvent)
-        }
-
         MEDIA_EVENTS.forEach(function (eventName) {
           rawVisualUserMedia.addEventListener(eventName, outputEvent, false)
         })

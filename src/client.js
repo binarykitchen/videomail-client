@@ -48,14 +48,20 @@ var VideomailClient = function (options) {
 
   function build () {
     readystate.interactive(function (previousState) {
-            // it can happen that it gets called twice, i.E. when an error is thrown
-            // in the middle of the build() fn
-      if (previousState !== readystate.INTERACTIVE && !container.isBuilt()) { container.build() }
+      // it can happen that it gets called twice, i.E. when an error is thrown
+      // in the middle of the build() fn
+      if (previousState !== readystate.INTERACTIVE && !container.isBuilt()) {
+        container.build()
+      }
     })
   }
 
   this.show = function () {
-    if (container.isBuilt()) { container.show() } else { this.once(Events.BUILT, container.show) }
+    if (container.isBuilt()) {
+      container.show()
+    } else {
+      this.once(Events.BUILT, container.show)
+    }
   }
 
     // automatically adds a <video> element inside the given parentElement and loads
@@ -112,7 +118,11 @@ var VideomailClient = function (options) {
 
   this.get = function (key, cb) {
     new Resource(localOptions).get(key, function (err, videomail) {
-      if (err) { cb(err) } else { cb(null, container.addPlayerDimensions(videomail)) }
+      if (err) {
+        cb(err)
+      } else {
+        cb(null, container.addPlayerDimensions(videomail))
+      }
     })
   }
 
