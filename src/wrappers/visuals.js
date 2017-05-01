@@ -104,8 +104,12 @@ var Visuals = function (container, options) {
 
       var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
-            // make sure it's placed before the buttons
-      if (buttonsElement) { container.insertBefore(visualsElement, buttonsElement) } else { container.appendChild(visualsElement) }
+      // make sure it's placed before the buttons
+      if (buttonsElement) {
+        container.insertBefore(visualsElement, buttonsElement)
+      } else {
+        container.appendChild(visualsElement)
+      }
     }
 
     visualsElement.classList.add('visuals')
@@ -203,13 +207,23 @@ var Visuals = function (container, options) {
 
   this.pauseOrResume = function () {
     if (isRecordable.call(this)) {
-      if (this.isRecording()) { this.pause() } else if (recorder.isPaused()) { this.resume() } else if (recorder.isReady()) { this.record() }
+      if (this.isRecording()) {
+        this.pause()
+      } else if (recorder.isPaused()) {
+        this.resume()
+      } else if (recorder.isReady()) {
+        this.record()
+      }
     }
   }
 
   this.recordOrStop = function () {
     if (isRecordable()) {
-      if (this.isRecording()) { this.stop() } else if (recorder.isReady()) { this.record() }
+      if (this.isRecording()) {
+        this.stop()
+      } else if (recorder.isReady()) {
+        this.record()
+      }
     }
   }
 
@@ -256,7 +270,11 @@ var Visuals = function (container, options) {
   }
 
   this.isHidden = function () {
-    if (!built) { return true } else if (visualsElement) { return hidden(visualsElement) }
+    if (!built) {
+      return true
+    } else if (visualsElement) {
+      return hidden(visualsElement)
+    }
   }
 
   this.show = function () {

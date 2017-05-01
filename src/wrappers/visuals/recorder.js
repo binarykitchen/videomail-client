@@ -392,7 +392,9 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function showUserMedia () {
-    return isNotifying() || !isHidden() || blocking
+    // use connected flag to prevent this from happening
+    // https://github.com/binarykitchen/videomail.io/issues/323
+    return connected && (isNotifying() || !isHidden() || blocking)
   }
 
   function userMediaErrorCallback (err) {
@@ -636,11 +638,17 @@ var Recorder = function (visuals, replay, options) {
     if (connected) {
       debug('Recorder: disconnect()')
 
+      if (userMedia) {
+        // prevents https://github.com/binarykitchen/videomail-client/issues/114
+        userMedia.unloadRemainingEventListeners()
+      }
+
       if (submitting) {
         // server will disconnect socket automatically after submitting
         connecting = connected = false
       } else if (stream) {
         // force to disconnect socket right now to clean temp files on server
+        // event listeners will do the rest
         stream.end()
         stream = undefined
       }

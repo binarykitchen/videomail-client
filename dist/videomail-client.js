@@ -10255,7 +10255,7 @@ function isUndefined(arg) {
  *
  * @copyright 2017 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 3.5.6
+ * @version 3.5.9
  */
 (function (global) {
 	var b = /^(b|B)$/,
@@ -18834,14 +18834,20 @@ var VideomailClient = function (options) {
 
   function build () {
     readystate.interactive(function (previousState) {
-            // it can happen that it gets called twice, i.E. when an error is thrown
-            // in the middle of the build() fn
-      if (previousState !== readystate.INTERACTIVE && !container.isBuilt()) { container.build() }
+      // it can happen that it gets called twice, i.E. when an error is thrown
+      // in the middle of the build() fn
+      if (previousState !== readystate.INTERACTIVE && !container.isBuilt()) {
+        container.build()
+      }
     })
   }
 
   this.show = function () {
-    if (container.isBuilt()) { container.show() } else { this.once(Events.BUILT, container.show) }
+    if (container.isBuilt()) {
+      container.show()
+    } else {
+      this.once(Events.BUILT, container.show)
+    }
   }
 
     // automatically adds a <video> element inside the given parentElement and loads
@@ -18898,7 +18904,11 @@ var VideomailClient = function (options) {
 
   this.get = function (key, cb) {
     new Resource(localOptions).get(key, function (err, videomail) {
-      if (err) { cb(err) } else { cb(null, container.addPlayerDimensions(videomail)) }
+      if (err) {
+        cb(err)
+      } else {
+        cb(null, container.addPlayerDimensions(videomail))
+      }
     })
   }
 
@@ -20965,7 +20975,13 @@ var Container = function (options) {
   function getFormElement () {
     var formElement
 
-    if (containerElement.tagName === 'FORM') { formElement = containerElement } else if (options.selectors.formId) { formElement = document.getElementById(options.selectors.formId) } else { formElement = findParentFormElement() }
+    if (containerElement.tagName === 'FORM') {
+      formElement = containerElement
+    } else if (options.selectors.formId) {
+      formElement = document.getElementById(options.selectors.formId)
+    } else {
+      formElement = findParentFormElement()
+    }
 
     return formElement
   }
@@ -20997,9 +21013,17 @@ var Container = function (options) {
   function processError (err) {
     hasError = true
 
-    if (err.stack) { options.logger.error(err.stack) } else { options.logger.error(err) }
+    if (err.stack) {
+      options.logger.error(err.stack)
+    } else {
+      options.logger.error(err)
+    }
 
-    if (options.displayErrors) { visuals.error(err) } else { visuals.reset() }
+    if (options.displayErrors) {
+      visuals.error(err)
+    } else {
+      visuals.reset()
+    }
   }
 
   function initEvents () {
@@ -21115,7 +21139,9 @@ var Container = function (options) {
     var videomailFormData = {}
 
     Object.keys(FORM_FIELDS).forEach(function (key) {
-      if (formData.hasOwnProperty(FORM_FIELDS[key])) { videomailFormData[key] = formData[FORM_FIELDS[key]] }
+      if (formData.hasOwnProperty(FORM_FIELDS[key])) {
+        videomailFormData[key] = formData[FORM_FIELDS[key]]
+      }
     })
 
     if (videomailFormData.from) {
@@ -21227,6 +21253,7 @@ var Container = function (options) {
   }
 
   this.build = function () {
+    debug('Container: build()')
     try {
       containerElement = document.getElementById(options.selectors.containerId)
 
@@ -21245,6 +21272,8 @@ var Container = function (options) {
           built = true
           self.emit(Events.BUILT)
         }
+      } else {
+        debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
       }
     } catch (exc) {
       if (built) {
@@ -21391,7 +21420,9 @@ var Container = function (options) {
 
         if (valid) {
           if (!this.areVisualsHidden() && !visualsValid) {
-            if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) { valid = false }
+            if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
+              valid = false
+            }
 
             if (!valid) { whyInvalid = 'Video is not recorded' }
           }
@@ -21406,7 +21437,11 @@ var Container = function (options) {
         }
       } else { valid = visualsValid }
 
-      if (valid) { this.emit(Events.VALID) } else { this.emit(Events.INVALID, whyInvalid) }
+      if (valid) {
+        this.emit(Events.VALID)
+      } else {
+        this.emit(Events.INVALID, whyInvalid)
+      }
 
       lastValidation = valid
     }
@@ -21479,7 +21514,11 @@ var Container = function (options) {
     var isDirty = false
 
     if (form) {
-      if (visuals.isRecorderUnloaded()) { isDirty = false } else if (this.isReplayShown() || this.isPaused()) { isDirty = true }
+      if (visuals.isRecorderUnloaded()) {
+        isDirty = false
+      } else if (this.isReplayShown() || this.isPaused()) {
+        isDirty = true
+      }
     }
 
     return isDirty
@@ -22021,8 +22060,12 @@ var Visuals = function (container, options) {
 
       var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
-            // make sure it's placed before the buttons
-      if (buttonsElement) { container.insertBefore(visualsElement, buttonsElement) } else { container.appendChild(visualsElement) }
+      // make sure it's placed before the buttons
+      if (buttonsElement) {
+        container.insertBefore(visualsElement, buttonsElement)
+      } else {
+        container.appendChild(visualsElement)
+      }
     }
 
     visualsElement.classList.add('visuals')
@@ -22120,13 +22163,23 @@ var Visuals = function (container, options) {
 
   this.pauseOrResume = function () {
     if (isRecordable.call(this)) {
-      if (this.isRecording()) { this.pause() } else if (recorder.isPaused()) { this.resume() } else if (recorder.isReady()) { this.record() }
+      if (this.isRecording()) {
+        this.pause()
+      } else if (recorder.isPaused()) {
+        this.resume()
+      } else if (recorder.isReady()) {
+        this.record()
+      }
     }
   }
 
   this.recordOrStop = function () {
     if (isRecordable()) {
-      if (this.isRecording()) { this.stop() } else if (recorder.isReady()) { this.record() }
+      if (this.isRecording()) {
+        this.stop()
+      } else if (recorder.isReady()) {
+        this.record()
+      }
     }
   }
 
@@ -22173,7 +22226,11 @@ var Visuals = function (container, options) {
   }
 
   this.isHidden = function () {
-    if (!built) { return true } else if (visualsElement) { return hidden(visualsElement) }
+    if (!built) {
+      return true
+    } else if (visualsElement) {
+      return hidden(visualsElement)
+    }
   }
 
   this.show = function () {
@@ -23371,7 +23428,9 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function showUserMedia () {
-    return isNotifying() || !isHidden() || blocking
+    // use connected flag to prevent this from happening
+    // https://github.com/binarykitchen/videomail.io/issues/323
+    return connected && (isNotifying() || !isHidden() || blocking)
   }
 
   function userMediaErrorCallback (err) {
@@ -23615,11 +23674,17 @@ var Recorder = function (visuals, replay, options) {
     if (connected) {
       debug('Recorder: disconnect()')
 
+      if (userMedia) {
+        // prevents https://github.com/binarykitchen/videomail-client/issues/114
+        userMedia.unloadRemainingEventListeners()
+      }
+
       if (submitting) {
         // server will disconnect socket automatically after submitting
         connecting = connected = false
       } else if (stream) {
         // force to disconnect socket right now to clean temp files on server
+        // event listeners will do the rest
         stream.end()
         stream = undefined
       }
@@ -24555,6 +24620,22 @@ module.exports = function (recorder, options) {
     return (anything && (typeof Promise !== 'undefined') && (anything instanceof Promise))
   }
 
+  function outputEvent (e) {
+    logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
+
+    // remove myself
+    rawVisualUserMedia.removeEventListener &&
+    rawVisualUserMedia.removeEventListener(e.type, outputEvent)
+  }
+
+  this.unloadRemainingEventListeners = function () {
+    options.debug('UserMedia: unloadRemainingEventListeners()')
+
+    MEDIA_EVENTS.forEach(function (eventName) {
+      rawVisualUserMedia.removeEventListener(eventName, outputEvent)
+    })
+  }
+
   this.init = function (localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
     this.stop(localMediaStream, true)
 
@@ -24582,9 +24663,7 @@ module.exports = function (recorder, options) {
       rawVisualUserMedia.removeEventListener &&
       rawVisualUserMedia.removeEventListener('loadedmetadata', onLoadedMetaData)
 
-      MEDIA_EVENTS.forEach(function (eventName) {
-        rawVisualUserMedia.removeEventListener(eventName, outputEvent)
-      })
+      self.unloadRemainingEventListeners()
     }
 
     function play () {
@@ -24747,14 +24826,6 @@ module.exports = function (recorder, options) {
       var heavyDebugging = true
 
       if (heavyDebugging) {
-        var outputEvent = function (e) {
-          logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
-
-          // remove myself
-          rawVisualUserMedia.removeEventListener &&
-          rawVisualUserMedia.removeEventListener(e.type, outputEvent)
-        }
-
         MEDIA_EVENTS.forEach(function (eventName) {
           rawVisualUserMedia.addEventListener(eventName, outputEvent, false)
         })
