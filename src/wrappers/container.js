@@ -48,7 +48,13 @@ var Container = function (options) {
   function getFormElement () {
     var formElement
 
-    if (containerElement.tagName === 'FORM') { formElement = containerElement } else if (options.selectors.formId) { formElement = document.getElementById(options.selectors.formId) } else { formElement = findParentFormElement() }
+    if (containerElement.tagName === 'FORM') {
+      formElement = containerElement
+    } else if (options.selectors.formId) {
+      formElement = document.getElementById(options.selectors.formId)
+    } else {
+      formElement = findParentFormElement()
+    }
 
     return formElement
   }
@@ -80,9 +86,17 @@ var Container = function (options) {
   function processError (err) {
     hasError = true
 
-    if (err.stack) { options.logger.error(err.stack) } else { options.logger.error(err) }
+    if (err.stack) {
+      options.logger.error(err.stack)
+    } else {
+      options.logger.error(err)
+    }
 
-    if (options.displayErrors) { visuals.error(err) } else { visuals.reset() }
+    if (options.displayErrors) {
+      visuals.error(err)
+    } else {
+      visuals.reset()
+    }
   }
 
   function initEvents () {
@@ -198,7 +212,9 @@ var Container = function (options) {
     var videomailFormData = {}
 
     Object.keys(FORM_FIELDS).forEach(function (key) {
-      if (formData.hasOwnProperty(FORM_FIELDS[key])) { videomailFormData[key] = formData[FORM_FIELDS[key]] }
+      if (formData.hasOwnProperty(FORM_FIELDS[key])) {
+        videomailFormData[key] = formData[FORM_FIELDS[key]]
+      }
     })
 
     if (videomailFormData.from) {
@@ -310,6 +326,7 @@ var Container = function (options) {
   }
 
   this.build = function () {
+    debug('Container: build()')
     try {
       containerElement = document.getElementById(options.selectors.containerId)
 
@@ -328,6 +345,8 @@ var Container = function (options) {
           built = true
           self.emit(Events.BUILT)
         }
+      } else {
+        debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
       }
     } catch (exc) {
       if (built) {
@@ -474,7 +493,9 @@ var Container = function (options) {
 
         if (valid) {
           if (!this.areVisualsHidden() && !visualsValid) {
-            if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) { valid = false }
+            if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
+              valid = false
+            }
 
             if (!valid) { whyInvalid = 'Video is not recorded' }
           }
@@ -489,7 +510,11 @@ var Container = function (options) {
         }
       } else { valid = visualsValid }
 
-      if (valid) { this.emit(Events.VALID) } else { this.emit(Events.INVALID, whyInvalid) }
+      if (valid) {
+        this.emit(Events.VALID)
+      } else {
+        this.emit(Events.INVALID, whyInvalid)
+      }
 
       lastValidation = valid
     }
@@ -562,7 +587,11 @@ var Container = function (options) {
     var isDirty = false
 
     if (form) {
-      if (visuals.isRecorderUnloaded()) { isDirty = false } else if (this.isReplayShown() || this.isPaused()) { isDirty = true }
+      if (visuals.isRecorderUnloaded()) {
+        isDirty = false
+      } else if (this.isReplayShown() || this.isPaused()) {
+        isDirty = true
+      }
     }
 
     return isDirty
