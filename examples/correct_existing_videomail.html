@@ -52,17 +52,30 @@
               }
             })
 
+            // just a copy paste of json you normally would get from a xhr get request
             videomailClient.replay({
               'subject': 'i am a subject',
-              'from': 'noreply@videomail.io',
+              'from': 'automatic@videomail.io',
               'to': 'to1@binarykitchen.com, to2@binarykitchen.com',
               'body': 'i am a body\nand a have a second line',
               'width': 400,
               'height': 300,
-              'url': 'https://videomail.io/videomail/example-video-699097435048',
-              'key': '11e7-1f54-75dbc320-b61a-0f8c66bbb5f6',
-              'webm': 'https://videomail.io/videomail/example-video-699097435048/type/webm/',
-              'poster': 'https://videomail.io/videomail/example-video-699097435048/poster/'
+              'url': 'https://videomail.io/videomail/i-am-a-subject-94353121838',
+              'key': '11e7-2f1b-c08ba850-8592-f18f9e6dad0d',
+              'webm': 'https://videomail.io/videomail/i-am-a-subject-94353121838/type/webm/',
+              'poster': 'https://videomail.io/videomail/i-am-a-subject-94353121838/poster/',
+              'recordingStats': {
+                'avgFps': 14.925373134328359,
+                'avgInterval': 66.70238095238095,
+                'framesCount': 336,
+                'intervalSum': 22412,
+                'sampleRate': 44100,
+                'samplesCount': 964,
+                'videoType': 'webm',
+                'waitingTime': 6423,
+                'wantedFps': 15,
+                'wantedInterval': 66.66666666666667
+              }
             }, 'videomail')
         </script>
     </body>
