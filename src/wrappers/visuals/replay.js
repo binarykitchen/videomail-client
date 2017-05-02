@@ -112,7 +112,8 @@ var Replay = function (parentElement, options) {
 
     if (hasAudio) {
       // https://github.com/binarykitchen/videomail-client/issues/115
-      replayElement.setAttribute('muted', false)
+      // do not set mute to false as this will mess up. just do not mention this attribute at all
+      replayElement.setAttribute('volume', 1)
     } else if (!options.isAudioEnabled()) {
       replayElement.setAttribute('muted', true)
     }
