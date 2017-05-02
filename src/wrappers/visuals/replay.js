@@ -35,20 +35,38 @@ var Replay = function (parentElement, options) {
     Object.keys(newVideomail).forEach(function (attribute) {
       attributeContainer = parentElement.querySelector('.' + attribute)
 
-      if (attributeContainer) { attributeContainer.innerHTML = newVideomail[attribute] }
+      if (attributeContainer) {
+        attributeContainer.innerHTML = newVideomail[attribute]
+      }
     })
   }
 
   function correctDimensions (options) {
     var width, height
 
-    if (videomail && videomail.playerWidth) { width = videomail.playerWidth } else if (parentElement.calculateWidth) { width = parentElement.calculateWidth(options) }
+    if (videomail && videomail.playerWidth) {
+      width = videomail.playerWidth
+    } else if (parentElement.calculateWidth) {
+      width = parentElement.calculateWidth(options)
+    }
 
-    if (videomail && videomail.playerHeight) { height = videomail.playerHeight } else if (parentElement.calculateHeight) { height = parentElement.calculateHeight(options) }
+    if (videomail && videomail.playerHeight) {
+      height = videomail.playerHeight
+    } else if (parentElement.calculateHeight) {
+      height = parentElement.calculateHeight(options)
+    }
 
-    if (width > 0) { replayElement.style.width = width + 'px' } else { replayElement.style.width = 'auto' }
+    if (width > 0) {
+      replayElement.style.width = width + 'px'
+    } else {
+      replayElement.style.width = 'auto'
+    }
 
-    if (height > 0) { replayElement.style.height = height + 'px' } else { replayElement.style.height = 'auto' }
+    if (height > 0) {
+      replayElement.style.height = height + 'px'
+    } else {
+      replayElement.style.height = 'auto'
+    }
   }
 
   this.setVideomail = function (newVideomail) {
@@ -66,22 +84,24 @@ var Replay = function (parentElement, options) {
       replayElement.setAttribute('poster', videomail.poster)
     }
 
-    copyAttributes(newVideomail)
+    copyAttributes(videomail)
 
-    this.show(videomail.width, videomail.height)
+    var hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0
+
+    this.show(videomail.width, videomail.height, hasAudio)
   }
 
-  this.show = function (recorderWidth, recorderHeight) {
+  this.show = function (recorderWidth, recorderHeight, hasAudio) {
     correctDimensions({
       responsive: true,
-            // beware that recorderWidth and recorderHeight can be null sometimes
+      // beware that recorderWidth and recorderHeight can be null sometimes
       videoWidth: recorderWidth || replayElement.videoWidth,
       videoHeight: recorderHeight || replayElement.videoHeight
     })
 
     hidden(replayElement, false)
 
-        // parent element can be any object, be careful!
+    // parent element can be any object, be careful!
     if (parentElement) {
       if (parentElement.style) {
         hidden(parentElement, false)
@@ -90,7 +110,10 @@ var Replay = function (parentElement, options) {
       }
     }
 
-    if (!options.isAudioEnabled()) {
+    if (hasAudio) {
+      // https://github.com/binarykitchen/videomail-client/issues/115
+      replayElement.setAttribute('muted', false)
+    } else if (!options.isAudioEnabled()) {
       replayElement.setAttribute('muted', true)
     }
 
@@ -113,7 +136,9 @@ var Replay = function (parentElement, options) {
   this.build = function () {
     replayElement = parentElement.querySelector('video.' + options.selectors.replayClass)
 
-    if (!replayElement) { buildElement() }
+    if (!replayElement) {
+      buildElement()
+    }
 
     this.hide()
 
@@ -173,7 +198,9 @@ var Replay = function (parentElement, options) {
       var i
 
       for (i = 0; i < l && !source; i++) {
-        if (sources[i].getAttribute('type') === videoType) { source = sources[i] }
+        if (sources[i].getAttribute('type') === videoType) {
+          source = sources[i]
+        }
       }
     }
 
