@@ -14,7 +14,6 @@ var Browser = require('./../../util/browser')
 var Humanize = require('./../../util/humanize')
 var pretty = require('./../../util/pretty')
 var VideomailError = require('./../../util/videomailError')
-var parseMultipleJson = require('./../../util/parseMultipleJson')
 
 // credits http://1lineart.kulaone.com/#/
 var PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
@@ -271,7 +270,10 @@ var Recorder = function (visuals, replay, options) {
       try {
         // websocket options cannot be set on client side, only on server, see
         // https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
-        stream = websocket(url2Connect)
+        stream = websocket(url2Connect, {
+          // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
+          objectMode: true
+        })
       } catch (exc) {
         connecting = connected = false
 
@@ -340,17 +342,12 @@ var Recorder = function (visuals, replay, options) {
         stream.on('data', function (data) {
           debug(PIPE_SYMBOL + 'Stream *data* event emitted')
 
-          try {
-            // like that we are able to process weird jsons, see
-            // https://github.com/binarykitchen/videomail.io/issues/322
-            var commands = parseMultipleJson(data)
+          var command
 
-            // todo consider removing duplicate commands
-            commands.forEach(function (command) {
-              executeCommand.call(self, command)
-            })
-          } catch (err) {
-            debug('Failed to parse command:', err)
+          try {
+            command = JSON.parse(data.toString())
+          } catch (exc) {
+            debug('Failed to parse command:', exc)
 
             self.emit(Events.ERROR, VideomailError.create(
               'Invalid server command',
@@ -358,6 +355,8 @@ var Recorder = function (visuals, replay, options) {
               'Contact us asap. Bad commmand was ' + data.toString() + '. ',
               options
             ))
+          } finally {
+            executeCommand.call(self, command)
           }
         })
 
