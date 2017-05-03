@@ -23118,7 +23118,8 @@ var Recorder = function (visuals, replay, options) {
       if (stream.destroyed) {
         self.emit(Events.ERROR, VideomailError.create(
           'Already disconnected',
-          'Sorry, the connection to the server has been destroyed. Please reload.',
+          'Sorry, the connection to the server has been destroyed. Please reload. ' +
+          'Details of buffer: ' + buffer.toString(),
           options
         ))
       } else {
@@ -23245,9 +23246,9 @@ var Recorder = function (visuals, replay, options) {
 
   function preview (args) {
     confirmedFrameNumber =
-        confirmedSampleNumber =
-        samplesCount =
-        framesCount = 0
+    confirmedSampleNumber =
+    samplesCount =
+    framesCount = 0
 
     sampleProgress =
         frameProgress = null
@@ -23329,15 +23330,16 @@ var Recorder = function (visuals, replay, options) {
 
       // // useful for debugging streams
       //
-      // if (!stream.originalEmit)
-      //     stream.originalEmit = stream.emit
+      // if (!stream.originalEmit) {
+      //   stream.originalEmit = stream.emit
+      // }
       //
-      // stream.emit = function(type) {
-      //     if (stream) {
-      //         debug('Websocket stream emitted:', type)
-      //         var   args = Array.prototype.slice.call(arguments, 0)
-      //         return stream.originalEmit.apply(stream, args)
-      //     }
+      // stream.emit = function (type) {
+      //   if (stream) {
+      //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
+      //     var args = Array.prototype.slice.call(arguments, 0)
+      //     return stream.originalEmit.apply(stream, args)
+      //   }
       // }
 
       if (stream) {
@@ -23357,7 +23359,7 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('connect', function () {
-          debug(PIPE_SYMBOL + 'Stream connect event emitted')
+          debug(PIPE_SYMBOL + 'Stream *connect* event emitted')
 
           if (!connected) {
             connected = true
@@ -23372,7 +23374,7 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('data', function (data) {
-          debug(PIPE_SYMBOL + 'Stream data event emitted')
+          debug(PIPE_SYMBOL + 'Stream *data* event emitted')
 
           try {
             // like that we are able to process weird jsons, see
@@ -23396,7 +23398,7 @@ var Recorder = function (visuals, replay, options) {
         })
 
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream error event emitted')
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted')
 
           connecting = connected = false
           self.emit(Events.ERROR, err)
@@ -23405,23 +23407,47 @@ var Recorder = function (visuals, replay, options) {
         // just experimental
 
         stream.on('drain', function () {
-          debug(PIPE_SYMBOL + 'Stream drain event emitted (should not happen!)')
+          debug(PIPE_SYMBOL + 'Stream *drain* event emitted (should not happen!)')
+        })
+
+        stream.on('preend', function () {
+          debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
         })
 
         stream.on('end', function () {
-          debug(PIPE_SYMBOL + 'Stream end event emitted')
+          debug(PIPE_SYMBOL + 'Stream *end* event emitted')
         })
 
         stream.on('drain', function () {
-          debug(PIPE_SYMBOL + 'Stream drain event emitted')
+          debug(PIPE_SYMBOL + 'Stream *drain* event emitted')
         })
 
         stream.on('pipe', function () {
-          debug(PIPE_SYMBOL + 'Stream pipe event emitted')
+          debug(PIPE_SYMBOL + 'Stream *pipe* event emitted')
         })
 
         stream.on('unpipe', function () {
-          debug(PIPE_SYMBOL + 'Stream unpipe event emitted')
+          debug(PIPE_SYMBOL + 'Stream *unpipe* event emitted')
+        })
+
+        stream.on('resume', function () {
+          debug(PIPE_SYMBOL + 'Stream *resume* event emitted')
+        })
+
+        stream.on('uncork', function () {
+          debug(PIPE_SYMBOL + 'Stream *uncork* event emitted')
+        })
+
+        stream.on('readable', function () {
+          debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
+        })
+
+        stream.on('prefinish', function () {
+          debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
+        })
+
+        stream.on('finish', function () {
+          debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
         })
       }
     }
