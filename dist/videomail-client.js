@@ -18939,7 +18939,7 @@ VideomailClient.events = Events
 
 module.exports = VideomailClient
 
-},{"./constants":373,"./events":374,"./options":375,"./resource":376,"./util/browser":379,"./util/collectLogger":380,"./util/eventEmitter":381,"./wrappers/container":389,"./wrappers/optionsWrapper":392,"./wrappers/visuals/replay":401,"merge-recursive":334,"readystate":349,"util":367}],373:[function(require,module,exports){
+},{"./constants":373,"./events":374,"./options":375,"./resource":376,"./util/browser":379,"./util/collectLogger":380,"./util/eventEmitter":381,"./wrappers/container":388,"./wrappers/optionsWrapper":391,"./wrappers/visuals/replay":400,"merge-recursive":334,"readystate":349,"util":367}],373:[function(require,module,exports){
 // constants (changing these only break down functionality, so be careful)
 
 module.exports = {
@@ -19429,7 +19429,7 @@ module.exports = function (userMedia, options) {
   }
 }
 
-},{"./videomailError":387,"audio-sample":2,"is-power-of-two":330}],379:[function(require,module,exports){
+},{"./videomailError":386,"audio-sample":2,"is-power-of-two":330}],379:[function(require,module,exports){
 var UAParser = require('ua-parser-js')
 var defined = require('defined')
 var VideomailError = require('./videomailError')
@@ -19653,7 +19653,7 @@ module.exports = function (options) {
   }
 }
 
-},{"./videomailError":387,"defined":306,"ua-parser-js":363}],380:[function(require,module,exports){
+},{"./videomailError":386,"defined":306,"ua-parser-js":363}],380:[function(require,module,exports){
 var util = require('util')
 var Browser = require('./browser')
 
@@ -19793,7 +19793,7 @@ module.exports = function (options, name) {
   }
 }
 
-},{"./../events":374,"./videomailError":387,"despot":307}],382:[function(require,module,exports){
+},{"./../events":374,"./videomailError":386,"despot":307}],382:[function(require,module,exports){
 var filesize = require('filesize')
 var humanizeDuration = require('humanize-duration')
 
@@ -19920,33 +19920,6 @@ module.exports = [
 ]
 
 },{}],384:[function(require,module,exports){
-// credits https://gist.githubusercontent.com/jgornick/3786127/raw/86ef8cd4891b9b8f1853b1600c18efc4011f879c/gistfile1.js
-module.exports = function (data) {
-  data = (data && data.toString()) || ''
-  data = data.replace('\n', '', 'g')
-
-  var start = data.indexOf('{')
-  var open = 0
-  var i = start
-  var len = data.length
-  var result = []
-
-  for (; i < len; i++) {
-    if (data[i] === '{') {
-      open++
-    } else if (data[i] === '}') {
-      open--
-      if (open === 0) {
-        result.push(JSON.parse(data.substring(start, i + 1)))
-        start = i + 1
-      }
-    }
-  }
-
-  return result
-}
-
-},{}],385:[function(require,module,exports){
 var DASH = '- '
 var SEPARATOR = '<br/>' + DASH
 
@@ -20009,7 +19982,7 @@ module.exports = function (anything, options) {
   }
 }
 
-},{}],386:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 require('core-js/shim')
 require('classlist.js')
 require('element-closest') // needed for IE 11
@@ -20054,7 +20027,7 @@ module.exports = function (window, navigator) {
   }
 }
 
-},{"classlist.js":10,"core-js/shim":303,"element-closest":312,"request-frame":351}],387:[function(require,module,exports){
+},{"classlist.js":10,"core-js/shim":303,"element-closest":312,"request-frame":351}],386:[function(require,module,exports){
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
 var originalPretty = require('./pretty')
@@ -20377,7 +20350,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 module.exports = VideomailError
 
-},{"./../resource":376,"./browser":379,"./pretty":385,"create-error":305}],388:[function(require,module,exports){
+},{"./../resource":376,"./browser":379,"./pretty":384,"create-error":305}],387:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -20924,7 +20897,7 @@ util.inherits(Buttons, EventEmitter)
 
 module.exports = Buttons
 
-},{"./../events":374,"./../util/eventEmitter":381,"contains":12,"hidden":319,"hyperscript":321,"util":367}],389:[function(require,module,exports){
+},{"./../events":374,"./../util/eventEmitter":381,"contains":12,"hidden":319,"hyperscript":321,"util":367}],388:[function(require,module,exports){
 var insertCss = require('insert-css')
 var merge = require('merge-recursive')
 var hidden = require('hidden')
@@ -21567,7 +21540,7 @@ util.inherits(Container, EventEmitter)
 
 module.exports = Container
 
-},{"./../events":374,"./../resource":376,"./../styles/css/main.min.css.js":377,"./../util/eventEmitter":381,"./../util/videomailError":387,"./buttons":388,"./dimension":390,"./form":391,"./visuals":393,"document-visibility":308,"hidden":319,"insert-css":325,"merge-recursive":334,"util":367}],390:[function(require,module,exports){
+},{"./../events":374,"./../resource":376,"./../styles/css/main.min.css.js":377,"./../util/eventEmitter":381,"./../util/videomailError":386,"./buttons":387,"./dimension":389,"./form":390,"./visuals":392,"document-visibility":308,"hidden":319,"insert-css":325,"merge-recursive":334,"util":367}],389:[function(require,module,exports){
 var numberIsInteger = require('number-is-integer')
 var VideomailError = require('./../util/videomailError')
 
@@ -21675,7 +21648,7 @@ module.exports = {
   }
 }
 
-},{"./../util/videomailError":387,"number-is-integer":335}],391:[function(require,module,exports){
+},{"./../util/videomailError":386,"number-is-integer":335}],390:[function(require,module,exports){
 var h = require('hyperscript')
 var util = require('util')
 var hidden = require('hidden')
@@ -21908,7 +21881,7 @@ util.inherits(Form, EventEmitter)
 
 module.exports = Form
 
-},{"./../events":374,"./../util/eventEmitter":381,"./../util/videomailError":387,"get-form-data":315,"hidden":319,"hyperscript":321,"util":367}],392:[function(require,module,exports){
+},{"./../events":374,"./../util/eventEmitter":381,"./../util/videomailError":386,"get-form-data":315,"hidden":319,"hyperscript":321,"util":367}],391:[function(require,module,exports){
 // enhances options with useful functions we can reuse everywhere
 
 module.exports = {
@@ -21953,7 +21926,7 @@ module.exports = {
   }
 }
 
-},{}],393:[function(require,module,exports){
+},{}],392:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -22303,7 +22276,7 @@ util.inherits(Visuals, EventEmitter)
 
 module.exports = Visuals
 
-},{"./../events":374,"./../util/eventEmitter":381,"./visuals/inside/recorderInsides":398,"./visuals/notifier":399,"./visuals/recorder":400,"./visuals/replay":401,"hidden":319,"hyperscript":321,"util":367}],394:[function(require,module,exports){
+},{"./../events":374,"./../util/eventEmitter":381,"./visuals/inside/recorderInsides":397,"./visuals/notifier":398,"./visuals/recorder":399,"./visuals/replay":400,"hidden":319,"hyperscript":321,"util":367}],393:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22386,7 +22359,7 @@ module.exports = function (visuals, options) {
   }
 }
 
-},{"hidden":319,"hyperscript":321}],395:[function(require,module,exports){
+},{"hidden":319,"hyperscript":321}],394:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22435,7 +22408,7 @@ module.exports = function (visuals, options) {
   }
 }
 
-},{"./../../../../util/videomailError":387,"hidden":319,"hyperscript":321}],396:[function(require,module,exports){
+},{"./../../../../util/videomailError":386,"hidden":319,"hyperscript":321}],395:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22477,7 +22450,7 @@ module.exports = function (visuals) {
   }
 }
 
-},{"hidden":319,"hyperscript":321}],397:[function(require,module,exports){
+},{"hidden":319,"hyperscript":321}],396:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22620,7 +22593,7 @@ module.exports = function (visuals, recordNote, options) {
   }
 }
 
-},{"hidden":319,"hyperscript":321}],398:[function(require,module,exports){
+},{"hidden":319,"hyperscript":321}],397:[function(require,module,exports){
 var util = require('util')
 
 var Events = require('./../../../events')
@@ -22744,7 +22717,7 @@ util.inherits(RecorderInsides, EventEmitter)
 
 module.exports = RecorderInsides
 
-},{"./../../../events":374,"./../../../util/eventEmitter":381,"./recorder/countdown":394,"./recorder/pausedNote":395,"./recorder/recordNote":396,"./recorder/recordTimer":397,"util":367}],399:[function(require,module,exports){
+},{"./../../../events":374,"./../../../util/eventEmitter":381,"./recorder/countdown":393,"./recorder/pausedNote":394,"./recorder/recordNote":395,"./recorder/recordTimer":396,"util":367}],398:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -23032,7 +23005,7 @@ util.inherits(Notifier, EventEmitter)
 
 module.exports = Notifier
 
-},{"./../../events":374,"./../../util/eventEmitter":381,"hidden":319,"hyperscript":321,"util":367}],400:[function(require,module,exports){
+},{"./../../events":374,"./../../util/eventEmitter":381,"hidden":319,"hyperscript":321,"util":367}],399:[function(require,module,exports){
 (function (Buffer){
 var websocket = require('websocket-stream')
 var Frame = require('canvas-to-buffer')
@@ -23050,7 +23023,6 @@ var Browser = require('./../../util/browser')
 var Humanize = require('./../../util/humanize')
 var pretty = require('./../../util/pretty')
 var VideomailError = require('./../../util/videomailError')
-var parseMultipleJson = require('./../../util/parseMultipleJson')
 
 // credits http://1lineart.kulaone.com/#/
 var PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
@@ -23307,7 +23279,10 @@ var Recorder = function (visuals, replay, options) {
       try {
         // websocket options cannot be set on client side, only on server, see
         // https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
-        stream = websocket(url2Connect)
+        stream = websocket(url2Connect, {
+          // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
+          objectMode: true
+        })
       } catch (exc) {
         connecting = connected = false
 
@@ -23376,17 +23351,12 @@ var Recorder = function (visuals, replay, options) {
         stream.on('data', function (data) {
           debug(PIPE_SYMBOL + 'Stream *data* event emitted')
 
-          try {
-            // like that we are able to process weird jsons, see
-            // https://github.com/binarykitchen/videomail.io/issues/322
-            var commands = parseMultipleJson(data)
+          var command
 
-            // todo consider removing duplicate commands
-            commands.forEach(function (command) {
-              executeCommand.call(self, command)
-            })
-          } catch (err) {
-            debug('Failed to parse command:', err)
+          try {
+            command = JSON.parse(data.toString())
+          } catch (exc) {
+            debug('Failed to parse command:', exc)
 
             self.emit(Events.ERROR, VideomailError.create(
               'Invalid server command',
@@ -23394,6 +23364,8 @@ var Recorder = function (visuals, replay, options) {
               'Contact us asap. Bad commmand was ' + data.toString() + '. ',
               options
             ))
+          } finally {
+            executeCommand.call(self, command)
           }
         })
 
@@ -24253,7 +24225,7 @@ util.inherits(Recorder, EventEmitter)
 module.exports = Recorder
 
 }).call(this,require("buffer").Buffer)
-},{"./../../constants":373,"./../../events":374,"./../../util/browser":379,"./../../util/eventEmitter":381,"./../../util/humanize":382,"./../../util/parseMultipleJson":384,"./../../util/pretty":385,"./../../util/videomailError":387,"./userMedia":402,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":319,"hyperscript":321,"util":367,"websocket-stream":369}],401:[function(require,module,exports){
+},{"./../../constants":373,"./../../events":374,"./../../util/browser":379,"./../../util/eventEmitter":381,"./../../util/humanize":382,"./../../util/pretty":384,"./../../util/videomailError":386,"./userMedia":401,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":319,"hyperscript":321,"util":367,"websocket-stream":369}],400:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -24558,7 +24530,7 @@ util.inherits(Replay, EventEmitter)
 
 module.exports = Replay
 
-},{"./../../events":374,"./../../util/browser":379,"./../../util/eventEmitter":381,"hidden":319,"hyperscript":321,"iphone-inline-video":327,"util":367}],402:[function(require,module,exports){
+},{"./../../events":374,"./../../util/browser":379,"./../../util/eventEmitter":381,"hidden":319,"hyperscript":321,"iphone-inline-video":327,"util":367}],401:[function(require,module,exports){
 var h = require('hyperscript')
 
 var AudioRecorder = require('./../../util/audioRecorder')
@@ -25051,7 +25023,7 @@ module.exports = function (recorder, options) {
   }
 }
 
-},{"./../../events":374,"./../../util/audioRecorder":378,"./../../util/eventEmitter":381,"./../../util/mediaEvents":383,"./../../util/pretty":385,"./../../util/videomailError":387,"hyperscript":321}],"videomail-client":[function(require,module,exports){
+},{"./../../events":374,"./../../util/audioRecorder":378,"./../../util/eventEmitter":381,"./../../util/mediaEvents":383,"./../../util/pretty":384,"./../../util/videomailError":386,"hyperscript":321}],"videomail-client":[function(require,module,exports){
 var standardize = require('./util/standardize')
 var Client = require('./client')
 
@@ -25068,4 +25040,4 @@ if (!navigator) {
 
 module.exports = Client
 
-},{"./client":372,"./util/standardize":386}]},{},["videomail-client"]);
+},{"./client":372,"./util/standardize":385}]},{},["videomail-client"]);
