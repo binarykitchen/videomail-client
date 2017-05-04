@@ -109,6 +109,7 @@ var VideomailClient = function (options) {
   }
 
   this.unload = function (e) {
+    readystate.removeAllListeners()
     container.unload(e)
   }
 
@@ -130,7 +131,7 @@ var VideomailClient = function (options) {
     return getBrowser(localOptions).canRecord()
   }
 
-    // return true when a video has been recorded but is not sent yet
+  // return true when a video has been recorded but is not sent yet
   this.isDirty = function () {
     return container.isDirty()
   }
