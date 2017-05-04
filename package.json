@@ -25,8 +25,7 @@
   },
   "engines": {
     "node": ">=7.7.2",
-    "npm": ">=4.4.2",
-    "yarn": ">=0.22.0"
+    "yarn": ">=0.23.0"
   },
   "keywords": [
     "webcam",
@@ -60,7 +59,7 @@
     "keymirror": "0.1.1",
     "merge-recursive": "0.0.3",
     "number-is-integer": "1.0.1",
-    "readystate": "0.2.0",
+    "readystate": "0.3.0",
     "request-frame": "1.5.3",
     "superagent": "3.5.2",
     "ua-parser-js": "0.7.12",
