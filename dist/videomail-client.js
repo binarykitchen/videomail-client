@@ -14633,6 +14633,19 @@ RS.prototype.clean = function transform(state, nr) {
   return ('number' === type ? RS.states[state] : state).toUpperCase();
 };
 
+/**
+ * Removes all event listeners. Useful when you want to unload readystatechange
+ * completely so that it won't react to any events anymore. See
+ * https://github.com/unshiftio/readystate/issues/8
+ *
+ * @returns {Function} rs so that calls can be chained.
+ * @api public
+ */
+RS.prototype.removeAllListeners = function removeAllListeners() {
+  this._events = {};
+  return this;
+}
+
 //
 // Expose the module.
 //
@@ -18895,6 +18908,7 @@ var VideomailClient = function (options) {
   }
 
   this.unload = function (e) {
+    readystate.removeAllListeners()
     container.unload(e)
   }
 
@@ -18916,7 +18930,7 @@ var VideomailClient = function (options) {
     return getBrowser(localOptions).canRecord()
   }
 
-    // return true when a video has been recorded but is not sent yet
+  // return true when a video has been recorded but is not sent yet
   this.isDirty = function () {
     return container.isDirty()
   }
@@ -19678,7 +19692,7 @@ module.exports = function (localOptions) {
   }
 
   function addContainerId (firstArgument) {
-    return '#' + containerId + ' > ' + firstArgument
+    return '#' + containerId + ' [' + new Date().toLocaleTimeString() + '] > ' + firstArgument
   }
 
   // workaround: since we cannot overwrite console.log without having the correct file and line number
@@ -19988,16 +20002,16 @@ require('classlist.js')
 require('element-closest') // needed for IE 11
 
 module.exports = function (window, navigator) {
-    // https://github.com/julienetie/request-frame/issues/6
+  // https://github.com/julienetie/request-frame/issues/6
   window.screen = window.screen || {}
 
-    // https://github.com/julienetie/request-frame
+  // https://github.com/julienetie/request-frame
   require('request-frame')('native')
 
-    // avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
-    // see https://github.com/binarykitchen/videomail-client/issues/79
+  // avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
+  // see https://github.com/binarykitchen/videomail-client/issues/79
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // do not shim
+    // do not shim
   } else {
     navigator.getUserMedia_ =
             navigator.getUserMedia ||
@@ -25030,9 +25044,9 @@ var Client = require('./client')
 if (!navigator) {
   throw new Error('Navigator is missing!')
 } else {
-    // Ensures Videomail functionality is not broken on exotic browsers with shims.
-    //
-    // UMD (Universal Module Definition), inspired by https://github.com/es-shims/es5-shim
+  // Ensures Videomail functionality is not broken on exotic browsers with shims.
+  //
+  // UMD (Universal Module Definition), inspired by https://github.com/es-shims/es5-shim
   ;(function (navigator) {
     standardize(this, navigator)
   }(navigator))

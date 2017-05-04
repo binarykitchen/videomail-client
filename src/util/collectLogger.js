@@ -22,7 +22,7 @@ module.exports = function (localOptions) {
   }
 
   function addContainerId (firstArgument) {
-    return '#' + containerId + ' > ' + firstArgument
+    return '#' + containerId + ' [' + new Date().toLocaleTimeString() + '] > ' + firstArgument
   }
 
   // workaround: since we cannot overwrite console.log without having the correct file and line number
