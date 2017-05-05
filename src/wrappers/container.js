@@ -558,16 +558,19 @@ var Container = function (options) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse)
       } else if (post) {
-                // for now, accept POSTs only which have an URL unlike null and
-                // treat all other submissions as direct submissions
+        // for now, accept POSTs only which have an URL unlike null and
+        // treat all other submissions as direct submissions
 
-        if (!url || url === '') { url = document.baseURI } // figure out URL automatically then
+        if (!url || url === '') {
+          // figure out URL automatically then
+          url = document.baseURI
+        }
 
         submitForm(formData, videomailResponse, url, function (err2, formResponse) {
           finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse)
         })
       } else {
-                // it's a direct submission
+        // it's a direct submission
         finalizeSubmissions(null, method, videomail, videomailResponse)
       }
     }
