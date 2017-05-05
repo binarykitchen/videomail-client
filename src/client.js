@@ -10,7 +10,6 @@ var EventEmitter = require('./util/eventEmitter')
 var Container = require('./wrappers/container')
 var OptionsWrapper = require('./wrappers/optionsWrapper')
 var Replay = require('./wrappers/visuals/replay')
-
 var Browser = require('./util/browser')
 var Resource = require('./resource')
 
@@ -30,7 +29,9 @@ function adjustOptions (options) {
 }
 
 function getBrowser (localOptions) {
-  if (!browser) { browser = new Browser(localOptions) }
+  if (!browser) {
+    browser = new Browser(localOptions)
+  }
 
   return browser
 }
@@ -43,7 +44,7 @@ var VideomailClient = function (options) {
 
   EventEmitter.call(this, localOptions, 'VideomailClient')
 
-    // expose all possible events
+  // expose all possible events
   this.events = Events
 
   function build () {
