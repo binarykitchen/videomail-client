@@ -18809,7 +18809,6 @@ var EventEmitter = require('./util/eventEmitter')
 var Container = require('./wrappers/container')
 var OptionsWrapper = require('./wrappers/optionsWrapper')
 var Replay = require('./wrappers/visuals/replay')
-
 var Browser = require('./util/browser')
 var Resource = require('./resource')
 
@@ -18829,7 +18828,9 @@ function adjustOptions (options) {
 }
 
 function getBrowser (localOptions) {
-  if (!browser) { browser = new Browser(localOptions) }
+  if (!browser) {
+    browser = new Browser(localOptions)
+  }
 
   return browser
 }
@@ -18842,7 +18843,7 @@ var VideomailClient = function (options) {
 
   EventEmitter.call(this, localOptions, 'VideomailClient')
 
-    // expose all possible events
+  // expose all possible events
   this.events = Events
 
   function build () {
@@ -20194,9 +20195,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     case VideomailError.DOM_EXCEPTION:
       if (err.code === 9) {
-        message = 'Insecure origin detected'
-        explanation = 'To use the powerful webcam feature, security should not be neglected. ' +
-                      'Please change the location in your browser to HTTPS.'
+        var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
+        message = 'Security upgrade neded'
+        explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
+                      ' and enables encrypted videomail transfers.'
         classList.push(VideomailError.BROWSER_PROBLEM)
       } else {
         message = VideomailError.DOM_EXCEPTION
@@ -21472,16 +21474,19 @@ var Container = function (options) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse)
       } else if (post) {
-                // for now, accept POSTs only which have an URL unlike null and
-                // treat all other submissions as direct submissions
+        // for now, accept POSTs only which have an URL unlike null and
+        // treat all other submissions as direct submissions
 
-        if (!url || url === '') { url = document.baseURI } // figure out URL automatically then
+        if (!url || url === '') {
+          // figure out URL automatically then
+          url = document.baseURI
+        }
 
         submitForm(formData, videomailResponse, url, function (err2, formResponse) {
           finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse)
         })
       } else {
-                // it's a direct submission
+        // it's a direct submission
         finalizeSubmissions(null, method, videomail, videomailResponse)
       }
     }
