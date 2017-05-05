@@ -150,9 +150,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     case VideomailError.DOM_EXCEPTION:
       if (err.code === 9) {
-        message = 'Insecure origin detected'
-        explanation = 'To use the powerful webcam feature, security should not be neglected. ' +
-                      'Please change the location in your browser to HTTPS.'
+        var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
+        message = 'Security upgrade neded'
+        explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
+                      ' and enables encrypted videomail transfers.'
         classList.push(VideomailError.BROWSER_PROBLEM)
       } else {
         message = VideomailError.DOM_EXCEPTION
