@@ -31,8 +31,9 @@ var Form = function (container, formElement, options) {
       if (videomail[name]) { input.value = videomail[name] }
 
       if (name === options.selectors.subjectInputName ||
-          name === options.selectors.fromInputName ||
-          name === options.selectors.bodyInputName) { input.disabled = true }
+          name === options.selectors.bodyInputName) {
+        input.disabled = true
+      }
     }
 
     formElement.setAttribute('method', 'put')
@@ -46,7 +47,9 @@ var Form = function (container, formElement, options) {
     var limit = formElement.elements.length
 
     for (var i = 0; i < limit; i++) {
-      if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i]))) { formElement.elements[i].disabled = disabled }
+      if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i]))) {
+        formElement.elements[i].disabled = disabled
+      }
     }
   }
 
@@ -167,13 +170,13 @@ var Form = function (container, formElement, options) {
   }
 
   this.doTheSubmit = function (e) {
-        // when videomail-client is hidden, leave the form handling as it and
-        // do not mess with it at all
+    // when videomail-client is hidden, leave the form handling as it and
+    // do not mess with it at all
     if (!container.areVisualsHidden()) {
       e && e.preventDefault()
 
-            // only adjust submission when there is a container, otherwise
-            // do nothing and leave as it for robustness
+      // only adjust submission when there is a container, otherwise
+      // do nothing and leave as it for robustness
       if (container.hasElement()) {
         container.submitAll(
           getData(),
@@ -203,7 +206,7 @@ var Form = function (container, formElement, options) {
   }
 
   this.validate = function () {
-        // prevents endless validation loop
+    // prevents endless validation loop
     disableContainerValidation = true
 
     var formIsValid = formElement.checkValidity()
