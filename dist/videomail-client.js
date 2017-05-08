@@ -19331,7 +19331,7 @@ module.exports = function (options) {
 }
 
 },{"./constants":373,"superagent":355}],377:[function(require,module,exports){
-module.exports='@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{object-fit:scale-down}.videomail .replay,.videomail .userMedia{width:100%!important}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}'
+module.exports='@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{-o-object-fit:scale-down;object-fit:scale-down}.videomail .replay,.videomail .userMedia{width:100%!important}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;-webkit-transition:all 1s ease;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}'
 },{}],378:[function(require,module,exports){
 var isPOT = require('is-power-of-two')
 var AudioSample = require('audio-sample')
@@ -21701,8 +21701,9 @@ var Form = function (container, formElement, options) {
       if (videomail[name]) { input.value = videomail[name] }
 
       if (name === options.selectors.subjectInputName ||
-          name === options.selectors.fromInputName ||
-          name === options.selectors.bodyInputName) { input.disabled = true }
+          name === options.selectors.bodyInputName) {
+        input.disabled = true
+      }
     }
 
     formElement.setAttribute('method', 'put')
@@ -21716,7 +21717,9 @@ var Form = function (container, formElement, options) {
     var limit = formElement.elements.length
 
     for (var i = 0; i < limit; i++) {
-      if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i]))) { formElement.elements[i].disabled = disabled }
+      if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i]))) {
+        formElement.elements[i].disabled = disabled
+      }
     }
   }
 
@@ -21837,13 +21840,13 @@ var Form = function (container, formElement, options) {
   }
 
   this.doTheSubmit = function (e) {
-        // when videomail-client is hidden, leave the form handling as it and
-        // do not mess with it at all
+    // when videomail-client is hidden, leave the form handling as it and
+    // do not mess with it at all
     if (!container.areVisualsHidden()) {
       e && e.preventDefault()
 
-            // only adjust submission when there is a container, otherwise
-            // do nothing and leave as it for robustness
+      // only adjust submission when there is a container, otherwise
+      // do nothing and leave as it for robustness
       if (container.hasElement()) {
         container.submitAll(
           getData(),
@@ -21873,7 +21876,7 @@ var Form = function (container, formElement, options) {
   }
 
   this.validate = function () {
-        // prevents endless validation loop
+    // prevents endless validation loop
     disableContainerValidation = true
 
     var formIsValid = formElement.checkValidity()
