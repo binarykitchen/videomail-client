@@ -5,6 +5,7 @@ module.exports = keymirror({
   FORM_READY: null, // form is ready, available in the DOM
   LOADING_USER_MEDIA: null, // asking for webcam access
   USER_MEDIA_READY: null, // user media (= webcam) is ready, loaded
+  CONNECTING: null, // socket is connecting to server
   CONNECTED: null, // socket is connected to server
   DISCONNECTED: null, // socket to server is disconnected
   COUNTDOWN: null, // countdown for recording has started

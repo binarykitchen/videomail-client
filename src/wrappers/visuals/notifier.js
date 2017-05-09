@@ -36,6 +36,10 @@ var Notifier = function (visuals, options) {
     })
   }
 
+  function onConnecting () {
+    self.notify('Connecting to server …')
+  }
+
   function onLoadingUserMedia () {
     self.notify('Loading webcam …')
   }
@@ -69,6 +73,9 @@ var Notifier = function (visuals, options) {
     debug('Notifier: initEvents()')
 
     self
+      .on(Events.CONNECTING, function () {
+        onConnecting()
+      })
       .on(Events.LOADING_USER_MEDIA, function () {
         onLoadingUserMedia()
       })
