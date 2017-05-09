@@ -416,7 +416,7 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":313,"inherits":324,"raf":341}],2:[function(require,module,exports){
+},{"events":314,"inherits":325,"raf":340}],2:[function(require,module,exports){
 var toBuffer       = require('typedarray-to-buffer'),
     isFloat32Array = require('validate.io-float32array')
 
@@ -442,7 +442,7 @@ module.exports = function(float32Array) {
     }
 }
 
-},{"typedarray-to-buffer":362,"validate.io-float32array":368}],3:[function(require,module,exports){
+},{"typedarray-to-buffer":363,"validate.io-float32array":369}],3:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -1035,8 +1035,8 @@ function fromObject (obj) {
   }
 
   if (obj) {
-    if (ArrayBuffer.isView(obj) || 'length' in obj) {
-      if (typeof obj.length !== 'number' || isnan(obj.length)) {
+    if (isArrayBufferView(obj) || 'length' in obj) {
+      if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
         return createBuffer(0)
       }
       return fromArrayLike(obj)
@@ -1147,7 +1147,7 @@ function byteLength (string, encoding) {
   if (Buffer.isBuffer(string)) {
     return string.length
   }
-  if (ArrayBuffer.isView(string) || string instanceof ArrayBuffer) {
+  if (isArrayBufferView(string) || string instanceof ArrayBuffer) {
     return string.byteLength
   }
   if (typeof string !== 'string') {
@@ -1413,7 +1413,7 @@ function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
     byteOffset = -0x80000000
   }
   byteOffset = +byteOffset  // Coerce to Number.
-  if (isNaN(byteOffset)) {
+  if (numberIsNaN(byteOffset)) {
     // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
     byteOffset = dir ? 0 : (buffer.length - 1)
   }
@@ -1544,7 +1544,7 @@ function hexWrite (buf, string, offset, length) {
   }
   for (var i = 0; i < length; ++i) {
     var parsed = parseInt(string.substr(i * 2, 2), 16)
-    if (isNaN(parsed)) return i
+    if (numberIsNaN(parsed)) return i
     buf[offset + i] = parsed
   }
   return i
@@ -2347,7 +2347,7 @@ var INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g
 
 function base64clean (str) {
   // Node strips out invalid characters like \n and \t from the string, base64-js does not
-  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+  str = str.trim().replace(INVALID_BASE64_RE, '')
   // Node converts strings with length < 2 to ''
   if (str.length < 2) return ''
   // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
@@ -2355,11 +2355,6 @@ function base64clean (str) {
     str = str + '='
   }
   return str
-}
-
-function stringtrim (str) {
-  if (str.trim) return str.trim()
-  return str.replace(/^\s+|\s+$/g, '')
 }
 
 function toHex (n) {
@@ -2484,11 +2479,16 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
-function isnan (val) {
-  return val !== val // eslint-disable-line no-self-compare
+// Node 0.10 supports `ArrayBuffer` but lacks `ArrayBuffer.isView`
+function isArrayBufferView (obj) {
+  return (typeof ArrayBuffer.isView === 'function') && ArrayBuffer.isView(obj)
 }
 
-},{"base64-js":3,"ieee754":322}],8:[function(require,module,exports){
+function numberIsNaN (obj) {
+  return obj !== obj // eslint-disable-line no-self-compare
+}
+
+},{"base64-js":3,"ieee754":323}],8:[function(require,module,exports){
 var toBuffer  = require('typedarray-to-buffer'),
     isBrowser = typeof(document) !== 'undefined' && typeof(document.createElement) === 'function',
 
@@ -2719,7 +2719,7 @@ module.exports = function(canvas, options) {
     }
 }
 
-},{"typedarray-to-buffer":362}],9:[function(require,module,exports){
+},{"typedarray-to-buffer":363}],9:[function(require,module,exports){
 // contains, add, remove, toggle
 var indexof = require('indexof')
 
@@ -2820,7 +2820,7 @@ function isTruthy(value) {
     return !!value
 }
 
-},{"indexof":323}],10:[function(require,module,exports){
+},{"indexof":324}],10:[function(require,module,exports){
 /*
  * classList.js: Cross-browser full element.classList implementation.
  * 1.1.20150312
@@ -9388,7 +9388,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":328}],305:[function(require,module,exports){
+},{"../../is-buffer/index.js":329}],305:[function(require,module,exports){
 //     create-error.js 0.3.1
 //     (c) 2013 Tim Griesser
 //     This source may be freely distributed under the MIT license.
@@ -9537,7 +9537,7 @@ module.exports = function() {
   return new Despot()
 }()
 
-},{"events":313,"util":367}],308:[function(require,module,exports){
+},{"events":314,"util":368}],308:[function(require,module,exports){
 'use strict'
 
 var document = require('global/document')
@@ -9577,7 +9577,7 @@ function noopShim () {
 
 function noop () {}
 
-},{"./keys":309,"geval":317,"global/document":318}],309:[function(require,module,exports){
+},{"./keys":309,"geval":318,"global/document":319}],309:[function(require,module,exports){
 'use strict'
 
 module.exports = keys
@@ -9834,7 +9834,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 module.exports = Duplexify
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":340,"buffer":7,"end-of-stream":311,"inherits":324,"readable-stream":348,"stream-shift":353}],311:[function(require,module,exports){
+},{"_process":339,"buffer":7,"end-of-stream":311,"inherits":325,"readable-stream":350,"stream-shift":355}],311:[function(require,module,exports){
 var once = require('once');
 
 var noop = function() {};
@@ -9907,7 +9907,30 @@ var eos = function(stream, opts, callback) {
 };
 
 module.exports = eos;
-},{"once":337}],312:[function(require,module,exports){
+},{"once":312}],312:[function(require,module,exports){
+var wrappy = require('wrappy')
+module.exports = wrappy(once)
+
+once.proto = once(function () {
+  Object.defineProperty(Function.prototype, 'once', {
+    value: function () {
+      return once(this)
+    },
+    configurable: true
+  })
+})
+
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  f.called = false
+  return f
+}
+
+},{"wrappy":372}],313:[function(require,module,exports){
 // element-closest | CC0-1.0 | github.com/jonathantneal/closest
 
 (function (ElementProto) {
@@ -9942,7 +9965,7 @@ module.exports = eos;
 	}
 })(window.Element.prototype);
 
-},{}],313:[function(require,module,exports){
+},{}],314:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10246,7 +10269,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],314:[function(require,module,exports){
+},{}],315:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -10417,7 +10440,7 @@ function isUndefined(arg) {
 })(typeof window !== "undefined" ? window : global);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],315:[function(require,module,exports){
+},{}],316:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10602,7 +10625,7 @@ getFormData.getNamedFormElementData = getNamedFormElementData;
 
 exports['default'] = getFormData;
 module.exports = exports['default'];
-},{}],316:[function(require,module,exports){
+},{}],317:[function(require,module,exports){
 module.exports = Event
 
 function Event() {
@@ -10630,7 +10653,7 @@ function Event() {
     }
 }
 
-},{}],317:[function(require,module,exports){
+},{}],318:[function(require,module,exports){
 var Event = require('./event.js')
 
 module.exports = Source
@@ -10643,26 +10666,28 @@ function Source(broadcaster) {
     return tuple.listen
 }
 
-},{"./event.js":316}],318:[function(require,module,exports){
+},{"./event.js":317}],319:[function(require,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
 var minDoc = require('min-document');
 
+var doccy;
+
 if (typeof document !== 'undefined') {
-    module.exports = document;
+    doccy = document;
 } else {
-    var doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
+    doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
 
     if (!doccy) {
         doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
     }
-
-    module.exports = doccy;
 }
 
+module.exports = doccy;
+
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":4}],319:[function(require,module,exports){
+},{"min-document":4}],320:[function(require,module,exports){
 module.exports = shim
 
 function shim (element, value) {
@@ -10673,7 +10698,7 @@ function shim (element, value) {
     element.style.display = value ? 'none' : ''
 }
 
-},{}],320:[function(require,module,exports){
+},{}],321:[function(require,module,exports){
 // HumanizeDuration.js - http://git.io/j0HgmQ
 
 ;(function () {
@@ -11228,7 +11253,7 @@ function shim (element, value) {
   }
 })();  // eslint-disable-line semi
 
-},{}],321:[function(require,module,exports){
+},{}],322:[function(require,module,exports){
 var split = require('browser-split')
 var ClassList = require('class-list')
 
@@ -11390,7 +11415,7 @@ function isArray (arr) {
 
 
 
-},{"browser-split":5,"class-list":9,"html-element":4}],322:[function(require,module,exports){
+},{"browser-split":5,"class-list":9,"html-element":4}],323:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -11476,7 +11501,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],323:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -11487,7 +11512,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],324:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -11512,7 +11537,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],325:[function(require,module,exports){
+},{}],326:[function(require,module,exports){
 var containers = []; // will store container HTMLElement references
 var styleElements = []; // will store {prepend: HTMLElement, append: HTMLElement}
 
@@ -11572,7 +11597,7 @@ function createStyleElement() {
 module.exports = insertCss;
 module.exports.insertCss = insertCss;
 
-},{}],326:[function(require,module,exports){
+},{}],327:[function(require,module,exports){
 /*! npm.im/intervalometer */
 'use strict';
 
@@ -11615,7 +11640,7 @@ function timerIntervalometer(cb, delay) {
 exports.intervalometer = intervalometer;
 exports.frameIntervalometer = frameIntervalometer;
 exports.timerIntervalometer = timerIntervalometer;
-},{}],327:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 /*! npm.im/iphone-inline-video 2.0.2 */
 'use strict';
 
@@ -11961,7 +11986,7 @@ function enableInlineVideo(video, opts) {
 
 module.exports = enableInlineVideo;
 
-},{"intervalometer":326}],328:[function(require,module,exports){
+},{"intervalometer":327}],329:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -11984,7 +12009,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],329:[function(require,module,exports){
+},{}],330:[function(require,module,exports){
 'use strict';
 var numberIsNan = require('number-is-nan');
 
@@ -11992,13 +12017,13 @@ module.exports = Number.isFinite || function (val) {
 	return !(typeof val !== 'number' || numberIsNan(val) || val === Infinity || val === -Infinity);
 };
 
-},{"number-is-nan":336}],330:[function(require,module,exports){
+},{"number-is-nan":337}],331:[function(require,module,exports){
 module.exports = isPowerOfTwo
 
 function isPowerOfTwo(n) {
   return n !== 0 && (n & (n - 1)) === 0
 }
-},{}],331:[function(require,module,exports){
+},{}],332:[function(require,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -12041,14 +12066,14 @@ function isLooseTypedArray(arr) {
   return names[toString.call(arr)]
 }
 
-},{}],332:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],333:[function(require,module,exports){
+},{}],334:[function(require,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -12103,7 +12128,7 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],334:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 
 // Flat merge
 module.exports = exports = function(host) {
@@ -12177,7 +12202,7 @@ function recurser(host, donor) {
 /* End of file index.js */
 /* Location: ./lib/index.js */
 
-},{}],335:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 'use strict';
 var numberIsFinite = require('is-finite');
 
@@ -12185,72 +12210,13 @@ module.exports = Number.isInteger || function (x) {
 	return numberIsFinite(x) && Math.floor(x) === x;
 };
 
-},{"is-finite":329}],336:[function(require,module,exports){
+},{"is-finite":330}],337:[function(require,module,exports){
 'use strict';
 module.exports = Number.isNaN || function (x) {
 	return x !== x;
 };
 
-},{}],337:[function(require,module,exports){
-var wrappy = require('wrappy')
-module.exports = wrappy(once)
-
-once.proto = once(function () {
-  Object.defineProperty(Function.prototype, 'once', {
-    value: function () {
-      return once(this)
-    },
-    configurable: true
-  })
-})
-
-function once (fn) {
-  var f = function () {
-    if (f.called) return f.value
-    f.called = true
-    return f.value = fn.apply(this, arguments)
-  }
-  f.called = false
-  return f
-}
-
-},{"wrappy":371}],338:[function(require,module,exports){
-(function (process){
-// Generated by CoffeeScript 1.7.1
-(function() {
-  var getNanoSeconds, hrtime, loadTime;
-
-  if ((typeof performance !== "undefined" && performance !== null) && performance.now) {
-    module.exports = function() {
-      return performance.now();
-    };
-  } else if ((typeof process !== "undefined" && process !== null) && process.hrtime) {
-    module.exports = function() {
-      return (getNanoSeconds() - loadTime) / 1e6;
-    };
-    hrtime = process.hrtime;
-    getNanoSeconds = function() {
-      var hr;
-      hr = hrtime();
-      return hr[0] * 1e9 + hr[1];
-    };
-    loadTime = getNanoSeconds();
-  } else if (Date.now) {
-    module.exports = function() {
-      return Date.now() - loadTime;
-    };
-    loadTime = Date.now();
-  } else {
-    module.exports = function() {
-      return new Date().getTime() - loadTime;
-    };
-    loadTime = new Date().getTime();
-  }
-
-}).call(this);
-
-}).call(this,require('_process'))
-},{"_process":340}],339:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -12297,7 +12263,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":340}],340:[function(require,module,exports){
+},{"_process":339}],339:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -12468,6 +12434,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -12479,7 +12449,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],341:[function(require,module,exports){
+},{}],340:[function(require,module,exports){
 (function (global){
 var now = require('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -12555,7 +12525,47 @@ module.exports.polyfill = function() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":338}],342:[function(require,module,exports){
+},{"performance-now":341}],341:[function(require,module,exports){
+(function (process){
+// Generated by CoffeeScript 1.12.2
+(function() {
+  var getNanoSeconds, hrtime, loadTime, moduleLoadTime, nodeLoadTime, upTime;
+
+  if ((typeof performance !== "undefined" && performance !== null) && performance.now) {
+    module.exports = function() {
+      return performance.now();
+    };
+  } else if ((typeof process !== "undefined" && process !== null) && process.hrtime) {
+    module.exports = function() {
+      return (getNanoSeconds() - nodeLoadTime) / 1e6;
+    };
+    hrtime = process.hrtime;
+    getNanoSeconds = function() {
+      var hr;
+      hr = hrtime();
+      return hr[0] * 1e9 + hr[1];
+    };
+    moduleLoadTime = getNanoSeconds();
+    upTime = process.uptime() * 1e9;
+    nodeLoadTime = moduleLoadTime - upTime;
+  } else if (Date.now) {
+    module.exports = function() {
+      return Date.now() - loadTime;
+    };
+    loadTime = Date.now();
+  } else {
+    module.exports = function() {
+      return new Date().getTime() - loadTime;
+    };
+    loadTime = new Date().getTime();
+  }
+
+}).call(this);
+
+
+
+}).call(this,require('_process'))
+},{"_process":339}],342:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -12631,7 +12641,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":344,"./_stream_writable":346,"core-util-is":304,"inherits":324,"process-nextick-args":339}],343:[function(require,module,exports){
+},{"./_stream_readable":344,"./_stream_writable":346,"core-util-is":304,"inherits":325,"process-nextick-args":338}],343:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -12658,7 +12668,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":345,"core-util-is":304,"inherits":324}],344:[function(require,module,exports){
+},{"./_stream_transform":345,"core-util-is":304,"inherits":325}],344:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -12687,14 +12697,7 @@ var EElistenerCount = function (emitter, type) {
 /*</replacement>*/
 
 /*<replacement>*/
-var Stream;
-(function () {
-  try {
-    Stream = require('st' + 'ream');
-  } catch (_) {} finally {
-    if (!Stream) Stream = require('events').EventEmitter;
-  }
-})();
+var Stream = require('./internal/streams/stream');
 /*</replacement>*/
 
 var Buffer = require('buffer').Buffer;
@@ -12721,6 +12724,8 @@ var BufferList = require('./internal/streams/BufferList');
 var StringDecoder;
 
 util.inherits(Readable, Stream);
+
+var kProxyEvents = ['error', 'close', 'destroy', 'pause', 'resume'];
 
 function prependListener(emitter, event, fn) {
   // Sadly this is not cacheable as some libraries bundle their own
@@ -13446,10 +13451,9 @@ Readable.prototype.wrap = function (stream) {
   }
 
   // proxy certain important events.
-  var events = ['error', 'close', 'destroy', 'pause', 'resume'];
-  forEach(events, function (ev) {
-    stream.on(ev, self.emit.bind(self, ev));
-  });
+  for (var n = 0; n < kProxyEvents.length; n++) {
+    stream.on(kProxyEvents[n], self.emit.bind(self, kProxyEvents[n]));
+  }
 
   // when we try to consume some more bytes, simply unpause the
   // underlying stream.
@@ -13602,7 +13606,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":342,"./internal/streams/BufferList":347,"_process":340,"buffer":7,"buffer-shims":6,"core-util-is":304,"events":313,"inherits":324,"isarray":332,"process-nextick-args":339,"string_decoder/":354,"util":4}],345:[function(require,module,exports){
+},{"./_stream_duplex":342,"./internal/streams/BufferList":347,"./internal/streams/stream":348,"_process":339,"buffer":7,"buffer-shims":6,"core-util-is":304,"events":314,"inherits":325,"isarray":333,"process-nextick-args":338,"string_decoder/":349,"util":4}],345:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -13785,7 +13789,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":342,"core-util-is":304,"inherits":324}],346:[function(require,module,exports){
+},{"./_stream_duplex":342,"core-util-is":304,"inherits":325}],346:[function(require,module,exports){
 (function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
@@ -13821,14 +13825,7 @@ var internalUtil = {
 /*</replacement>*/
 
 /*<replacement>*/
-var Stream;
-(function () {
-  try {
-    Stream = require('st' + 'ream');
-  } catch (_) {} finally {
-    if (!Stream) Stream = require('events').EventEmitter;
-  }
-})();
+var Stream = require('./internal/streams/stream');
 /*</replacement>*/
 
 var Buffer = require('buffer').Buffer;
@@ -14339,7 +14336,7 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":342,"_process":340,"buffer":7,"buffer-shims":6,"core-util-is":304,"events":313,"inherits":324,"process-nextick-args":339,"util-deprecate":364}],347:[function(require,module,exports){
+},{"./_stream_duplex":342,"./internal/streams/stream":348,"_process":339,"buffer":7,"buffer-shims":6,"core-util-is":304,"inherits":325,"process-nextick-args":338,"util-deprecate":365}],347:[function(require,module,exports){
 'use strict';
 
 var Buffer = require('buffer').Buffer;
@@ -14405,26 +14402,292 @@ BufferList.prototype.concat = function (n) {
   return ret;
 };
 },{"buffer":7,"buffer-shims":6}],348:[function(require,module,exports){
-(function (process){
-var Stream = (function (){
-  try {
-    return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
-  } catch(_){}
-}());
+module.exports = require('events').EventEmitter;
+
+},{"events":314}],349:[function(require,module,exports){
+'use strict';
+
+var Buffer = require('buffer').Buffer;
+var bufferShim = require('buffer-shims');
+
+var isEncoding = Buffer.isEncoding || function (encoding) {
+  encoding = '' + encoding;
+  switch (encoding && encoding.toLowerCase()) {
+    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
+      return true;
+    default:
+      return false;
+  }
+};
+
+function _normalizeEncoding(enc) {
+  if (!enc) return 'utf8';
+  var retried;
+  while (true) {
+    switch (enc) {
+      case 'utf8':
+      case 'utf-8':
+        return 'utf8';
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return 'utf16le';
+      case 'latin1':
+      case 'binary':
+        return 'latin1';
+      case 'base64':
+      case 'ascii':
+      case 'hex':
+        return enc;
+      default:
+        if (retried) return; // undefined
+        enc = ('' + enc).toLowerCase();
+        retried = true;
+    }
+  }
+};
+
+// Do not cache `Buffer.isEncoding` when checking encoding names as some
+// modules monkey-patch it to support additional encodings
+function normalizeEncoding(enc) {
+  var nenc = _normalizeEncoding(enc);
+  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
+  return nenc || enc;
+}
+
+// StringDecoder provides an interface for efficiently splitting a series of
+// buffers into a series of JS strings without breaking apart multi-byte
+// characters.
+exports.StringDecoder = StringDecoder;
+function StringDecoder(encoding) {
+  this.encoding = normalizeEncoding(encoding);
+  var nb;
+  switch (this.encoding) {
+    case 'utf16le':
+      this.text = utf16Text;
+      this.end = utf16End;
+      nb = 4;
+      break;
+    case 'utf8':
+      this.fillLast = utf8FillLast;
+      nb = 4;
+      break;
+    case 'base64':
+      this.text = base64Text;
+      this.end = base64End;
+      nb = 3;
+      break;
+    default:
+      this.write = simpleWrite;
+      this.end = simpleEnd;
+      return;
+  }
+  this.lastNeed = 0;
+  this.lastTotal = 0;
+  this.lastChar = bufferShim.allocUnsafe(nb);
+}
+
+StringDecoder.prototype.write = function (buf) {
+  if (buf.length === 0) return '';
+  var r;
+  var i;
+  if (this.lastNeed) {
+    r = this.fillLast(buf);
+    if (r === undefined) return '';
+    i = this.lastNeed;
+    this.lastNeed = 0;
+  } else {
+    i = 0;
+  }
+  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
+  return r || '';
+};
+
+StringDecoder.prototype.end = utf8End;
+
+// Returns only complete characters in a Buffer
+StringDecoder.prototype.text = utf8Text;
+
+// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
+StringDecoder.prototype.fillLast = function (buf) {
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
+  this.lastNeed -= buf.length;
+};
+
+// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
+// continuation byte.
+function utf8CheckByte(byte) {
+  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
+  return -1;
+}
+
+// Checks at most 3 bytes at the end of a Buffer in order to detect an
+// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
+// needed to complete the UTF-8 character (if applicable) are returned.
+function utf8CheckIncomplete(self, buf, i) {
+  var j = buf.length - 1;
+  if (j < i) return 0;
+  var nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 1;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 2;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) {
+      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
+    }
+    return nb;
+  }
+  return 0;
+}
+
+// Validates as many continuation bytes for a multi-byte UTF-8 character as
+// needed or are available. If we see a non-continuation byte where we expect
+// one, we "replace" the validated continuation bytes we've seen so far with
+// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
+// behavior. The continuation byte check is included three times in the case
+// where all of the continuation bytes for a character exist in the same buffer.
+// It is also done this way as a slight performance increase instead of using a
+// loop.
+function utf8CheckExtraBytes(self, buf, p) {
+  if ((buf[0] & 0xC0) !== 0x80) {
+    self.lastNeed = 0;
+    return '\ufffd'.repeat(p);
+  }
+  if (self.lastNeed > 1 && buf.length > 1) {
+    if ((buf[1] & 0xC0) !== 0x80) {
+      self.lastNeed = 1;
+      return '\ufffd'.repeat(p + 1);
+    }
+    if (self.lastNeed > 2 && buf.length > 2) {
+      if ((buf[2] & 0xC0) !== 0x80) {
+        self.lastNeed = 2;
+        return '\ufffd'.repeat(p + 2);
+      }
+    }
+  }
+}
+
+// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
+function utf8FillLast(buf) {
+  var p = this.lastTotal - this.lastNeed;
+  var r = utf8CheckExtraBytes(this, buf, p);
+  if (r !== undefined) return r;
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, p, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, p, 0, buf.length);
+  this.lastNeed -= buf.length;
+}
+
+// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
+// partial character, the character's bytes are buffered until the required
+// number of bytes are available.
+function utf8Text(buf, i) {
+  var total = utf8CheckIncomplete(this, buf, i);
+  if (!this.lastNeed) return buf.toString('utf8', i);
+  this.lastTotal = total;
+  var end = buf.length - (total - this.lastNeed);
+  buf.copy(this.lastChar, 0, end);
+  return buf.toString('utf8', i, end);
+}
+
+// For UTF-8, a replacement character for each buffered byte of a (partial)
+// character needs to be added to the output.
+function utf8End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
+  return r;
+}
+
+// UTF-16LE typically needs two bytes per character, but even if we have an even
+// number of bytes available, we need to check if we end on a leading/high
+// surrogate. In that case, we need to wait for the next two bytes in order to
+// decode the last character properly.
+function utf16Text(buf, i) {
+  if ((buf.length - i) % 2 === 0) {
+    var r = buf.toString('utf16le', i);
+    if (r) {
+      var c = r.charCodeAt(r.length - 1);
+      if (c >= 0xD800 && c <= 0xDBFF) {
+        this.lastNeed = 2;
+        this.lastTotal = 4;
+        this.lastChar[0] = buf[buf.length - 2];
+        this.lastChar[1] = buf[buf.length - 1];
+        return r.slice(0, -1);
+      }
+    }
+    return r;
+  }
+  this.lastNeed = 1;
+  this.lastTotal = 2;
+  this.lastChar[0] = buf[buf.length - 1];
+  return buf.toString('utf16le', i, buf.length - 1);
+}
+
+// For UTF-16LE we do not explicitly append special replacement characters if we
+// end on a partial character, we simply let v8 handle that.
+function utf16End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) {
+    var end = this.lastTotal - this.lastNeed;
+    return r + this.lastChar.toString('utf16le', 0, end);
+  }
+  return r;
+}
+
+function base64Text(buf, i) {
+  var n = (buf.length - i) % 3;
+  if (n === 0) return buf.toString('base64', i);
+  this.lastNeed = 3 - n;
+  this.lastTotal = 3;
+  if (n === 1) {
+    this.lastChar[0] = buf[buf.length - 1];
+  } else {
+    this.lastChar[0] = buf[buf.length - 2];
+    this.lastChar[1] = buf[buf.length - 1];
+  }
+  return buf.toString('base64', i, buf.length - n);
+}
+
+function base64End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
+  return r;
+}
+
+// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
+function simpleWrite(buf) {
+  return buf.toString(this.encoding);
+}
+
+function simpleEnd(buf) {
+  return buf && buf.length ? this.write(buf) : '';
+}
+},{"buffer":7,"buffer-shims":6}],350:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
-exports.Stream = Stream || exports;
+exports.Stream = exports;
 exports.Readable = exports;
 exports.Writable = require('./lib/_stream_writable.js');
 exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-if (!process.browser && process.env.READABLE_STREAM === 'disable' && Stream) {
-  module.exports = Stream;
-}
-
-}).call(this,require('_process'))
-},{"./lib/_stream_duplex.js":342,"./lib/_stream_passthrough.js":343,"./lib/_stream_readable.js":344,"./lib/_stream_transform.js":345,"./lib/_stream_writable.js":346,"_process":340}],349:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":342,"./lib/_stream_passthrough.js":343,"./lib/_stream_readable.js":344,"./lib/_stream_transform.js":345,"./lib/_stream_writable.js":346}],351:[function(require,module,exports){
 'use strict';
 
 var readystate = module.exports = require('./readystate')
@@ -14497,7 +14760,7 @@ var readystate = module.exports = require('./readystate')
 } ());
 
 
-},{"./readystate":350}],350:[function(require,module,exports){
+},{"./readystate":352}],352:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14651,7 +14914,7 @@ RS.prototype.removeAllListeners = function removeAllListeners() {
 //
 module.exports = new RS();
 
-},{}],351:[function(require,module,exports){
+},{}],353:[function(require,module,exports){
 /**
  * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
  * @version v1.5.3
@@ -14882,10 +15145,10 @@ return requestFrame;
 
 })));
 
-},{}],352:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 module.exports = require('buffer')
 
-},{"buffer":7}],353:[function(require,module,exports){
+},{"buffer":7}],355:[function(require,module,exports){
 module.exports = shift
 
 function shift (stream) {
@@ -14907,230 +15170,7 @@ function getStateLength (state) {
   return state.length
 }
 
-},{}],354:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var Buffer = require('buffer').Buffer;
-
-var isBufferEncoding = Buffer.isEncoding
-  || function(encoding) {
-       switch (encoding && encoding.toLowerCase()) {
-         case 'hex': case 'utf8': case 'utf-8': case 'ascii': case 'binary': case 'base64': case 'ucs2': case 'ucs-2': case 'utf16le': case 'utf-16le': case 'raw': return true;
-         default: return false;
-       }
-     }
-
-
-function assertEncoding(encoding) {
-  if (encoding && !isBufferEncoding(encoding)) {
-    throw new Error('Unknown encoding: ' + encoding);
-  }
-}
-
-// StringDecoder provides an interface for efficiently splitting a series of
-// buffers into a series of JS strings without breaking apart multi-byte
-// characters. CESU-8 is handled as part of the UTF-8 encoding.
-//
-// @TODO Handling all encodings inside a single object makes it very difficult
-// to reason about this code, so it should be split up in the future.
-// @TODO There should be a utf8-strict encoding that rejects invalid UTF-8 code
-// points as used by CESU-8.
-var StringDecoder = exports.StringDecoder = function(encoding) {
-  this.encoding = (encoding || 'utf8').toLowerCase().replace(/[-_]/, '');
-  assertEncoding(encoding);
-  switch (this.encoding) {
-    case 'utf8':
-      // CESU-8 represents each of Surrogate Pair by 3-bytes
-      this.surrogateSize = 3;
-      break;
-    case 'ucs2':
-    case 'utf16le':
-      // UTF-16 represents each of Surrogate Pair by 2-bytes
-      this.surrogateSize = 2;
-      this.detectIncompleteChar = utf16DetectIncompleteChar;
-      break;
-    case 'base64':
-      // Base-64 stores 3 bytes in 4 chars, and pads the remainder.
-      this.surrogateSize = 3;
-      this.detectIncompleteChar = base64DetectIncompleteChar;
-      break;
-    default:
-      this.write = passThroughWrite;
-      return;
-  }
-
-  // Enough space to store all bytes of a single character. UTF-8 needs 4
-  // bytes, but CESU-8 may require up to 6 (3 bytes per surrogate).
-  this.charBuffer = new Buffer(6);
-  // Number of bytes received for the current incomplete multi-byte character.
-  this.charReceived = 0;
-  // Number of bytes expected for the current incomplete multi-byte character.
-  this.charLength = 0;
-};
-
-
-// write decodes the given buffer and returns it as JS string that is
-// guaranteed to not contain any partial multi-byte characters. Any partial
-// character found at the end of the buffer is buffered up, and will be
-// returned when calling write again with the remaining bytes.
-//
-// Note: Converting a Buffer containing an orphan surrogate to a String
-// currently works, but converting a String to a Buffer (via `new Buffer`, or
-// Buffer#write) will replace incomplete surrogates with the unicode
-// replacement character. See https://codereview.chromium.org/121173009/ .
-StringDecoder.prototype.write = function(buffer) {
-  var charStr = '';
-  // if our last write ended with an incomplete multibyte character
-  while (this.charLength) {
-    // determine how many remaining bytes this buffer has to offer for this char
-    var available = (buffer.length >= this.charLength - this.charReceived) ?
-        this.charLength - this.charReceived :
-        buffer.length;
-
-    // add the new bytes to the char buffer
-    buffer.copy(this.charBuffer, this.charReceived, 0, available);
-    this.charReceived += available;
-
-    if (this.charReceived < this.charLength) {
-      // still not enough chars in this buffer? wait for more ...
-      return '';
-    }
-
-    // remove bytes belonging to the current character from the buffer
-    buffer = buffer.slice(available, buffer.length);
-
-    // get the character that was split
-    charStr = this.charBuffer.slice(0, this.charLength).toString(this.encoding);
-
-    // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
-    var charCode = charStr.charCodeAt(charStr.length - 1);
-    if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-      this.charLength += this.surrogateSize;
-      charStr = '';
-      continue;
-    }
-    this.charReceived = this.charLength = 0;
-
-    // if there are no more bytes in this buffer, just emit our char
-    if (buffer.length === 0) {
-      return charStr;
-    }
-    break;
-  }
-
-  // determine and set charLength / charReceived
-  this.detectIncompleteChar(buffer);
-
-  var end = buffer.length;
-  if (this.charLength) {
-    // buffer the incomplete character bytes we got
-    buffer.copy(this.charBuffer, 0, buffer.length - this.charReceived, end);
-    end -= this.charReceived;
-  }
-
-  charStr += buffer.toString(this.encoding, 0, end);
-
-  var end = charStr.length - 1;
-  var charCode = charStr.charCodeAt(end);
-  // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
-  if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-    var size = this.surrogateSize;
-    this.charLength += size;
-    this.charReceived += size;
-    this.charBuffer.copy(this.charBuffer, size, 0, size);
-    buffer.copy(this.charBuffer, 0, 0, size);
-    return charStr.substring(0, end);
-  }
-
-  // or just emit the charStr
-  return charStr;
-};
-
-// detectIncompleteChar determines if there is an incomplete UTF-8 character at
-// the end of the given buffer. If so, it sets this.charLength to the byte
-// length that character, and sets this.charReceived to the number of bytes
-// that are available for this character.
-StringDecoder.prototype.detectIncompleteChar = function(buffer) {
-  // determine how many bytes we have to check at the end of this buffer
-  var i = (buffer.length >= 3) ? 3 : buffer.length;
-
-  // Figure out if one of the last i bytes of our buffer announces an
-  // incomplete char.
-  for (; i > 0; i--) {
-    var c = buffer[buffer.length - i];
-
-    // See http://en.wikipedia.org/wiki/UTF-8#Description
-
-    // 110XXXXX
-    if (i == 1 && c >> 5 == 0x06) {
-      this.charLength = 2;
-      break;
-    }
-
-    // 1110XXXX
-    if (i <= 2 && c >> 4 == 0x0E) {
-      this.charLength = 3;
-      break;
-    }
-
-    // 11110XXX
-    if (i <= 3 && c >> 3 == 0x1E) {
-      this.charLength = 4;
-      break;
-    }
-  }
-  this.charReceived = i;
-};
-
-StringDecoder.prototype.end = function(buffer) {
-  var res = '';
-  if (buffer && buffer.length)
-    res = this.write(buffer);
-
-  if (this.charReceived) {
-    var cr = this.charReceived;
-    var buf = this.charBuffer;
-    var enc = this.encoding;
-    res += buf.slice(0, cr).toString(enc);
-  }
-
-  return res;
-};
-
-function passThroughWrite(buffer) {
-  return buffer.toString(this.encoding);
-}
-
-function utf16DetectIncompleteChar(buffer) {
-  this.charReceived = buffer.length % 2;
-  this.charLength = this.charReceived ? 2 : 0;
-}
-
-function base64DetectIncompleteChar(buffer) {
-  this.charReceived = buffer.length % 3;
-  this.charLength = this.charReceived ? 3 : 0;
-}
-
-},{"buffer":7}],355:[function(require,module,exports){
+},{}],356:[function(require,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -16065,7 +16105,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-function":356,"./is-object":357,"./request-base":358,"./response-base":359,"./should-retry":360,"component-emitter":11}],356:[function(require,module,exports){
+},{"./is-function":357,"./is-object":358,"./request-base":359,"./response-base":360,"./should-retry":361,"component-emitter":11}],357:[function(require,module,exports){
 /**
  * Check if `fn` is a function.
  *
@@ -16082,7 +16122,7 @@ function isFunction(fn) {
 
 module.exports = isFunction;
 
-},{"./is-object":357}],357:[function(require,module,exports){
+},{"./is-object":358}],358:[function(require,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -16097,7 +16137,7 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],358:[function(require,module,exports){
+},{}],359:[function(require,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -16690,7 +16730,7 @@ RequestBase.prototype._setTimeouts = function() {
   }
 }
 
-},{"./is-object":357}],359:[function(require,module,exports){
+},{"./is-object":358}],360:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -16825,7 +16865,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
     this.notFound = 404 == status;
 };
 
-},{"./utils":361}],360:[function(require,module,exports){
+},{"./utils":362}],361:[function(require,module,exports){
 var ERROR_CODES = [
   'ECONNRESET',
   'ETIMEDOUT',
@@ -16850,7 +16890,7 @@ module.exports = function shouldRetry(err, res) {
   return false;
 };
 
-},{}],361:[function(require,module,exports){
+},{}],362:[function(require,module,exports){
 
 /**
  * Return the mime type for the given `str`.
@@ -16919,7 +16959,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
   return header;
 };
-},{}],362:[function(require,module,exports){
+},{}],363:[function(require,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -16948,7 +16988,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":7,"is-typedarray":331}],363:[function(require,module,exports){
+},{"buffer":7,"is-typedarray":332}],364:[function(require,module,exports){
 /**
  * UAParser.js v0.7.12
  * Lightweight JavaScript-based User-Agent string parser
@@ -17865,7 +17905,7 @@ module.exports = function typedarrayToBuffer (arr) {
 
 })(typeof window === 'object' ? window : this);
 
-},{}],364:[function(require,module,exports){
+},{}],365:[function(require,module,exports){
 (function (global){
 
 /**
@@ -17936,16 +17976,16 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],365:[function(require,module,exports){
-arguments[4][324][0].apply(exports,arguments)
-},{"dup":324}],366:[function(require,module,exports){
+},{}],366:[function(require,module,exports){
+arguments[4][325][0].apply(exports,arguments)
+},{"dup":325}],367:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],367:[function(require,module,exports){
+},{}],368:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -18535,7 +18575,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":366,"_process":340,"inherits":365}],368:[function(require,module,exports){
+},{"./support/isBuffer":367,"_process":339,"inherits":366}],369:[function(require,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -18561,7 +18601,7 @@ function isFloat32Array( value ) {
 
 module.exports = isFloat32Array;
 
-},{}],369:[function(require,module,exports){
+},{}],370:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -18747,7 +18787,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":340,"duplexify":310,"readable-stream":348,"safe-buffer":352,"ws":370}],370:[function(require,module,exports){
+},{"_process":339,"duplexify":310,"readable-stream":350,"safe-buffer":354,"ws":371}],371:[function(require,module,exports){
 
 var ws = null
 
@@ -18761,7 +18801,7 @@ if (typeof WebSocket !== 'undefined') {
 
 module.exports = ws
 
-},{}],371:[function(require,module,exports){
+},{}],372:[function(require,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -18796,7 +18836,7 @@ function wrappy (fn, cb) {
   }
 }
 
-},{}],372:[function(require,module,exports){
+},{}],373:[function(require,module,exports){
 var merge = require('merge-recursive')
 var readystate = require('readystate')
 var util = require('util')
@@ -18954,7 +18994,7 @@ VideomailClient.events = Events
 
 module.exports = VideomailClient
 
-},{"./constants":373,"./events":374,"./options":375,"./resource":376,"./util/browser":379,"./util/collectLogger":380,"./util/eventEmitter":381,"./wrappers/container":388,"./wrappers/optionsWrapper":391,"./wrappers/visuals/replay":400,"merge-recursive":334,"readystate":349,"util":367}],373:[function(require,module,exports){
+},{"./constants":374,"./events":375,"./options":376,"./resource":377,"./util/browser":380,"./util/collectLogger":381,"./util/eventEmitter":382,"./wrappers/container":389,"./wrappers/optionsWrapper":392,"./wrappers/visuals/replay":401,"merge-recursive":335,"readystate":351,"util":368}],374:[function(require,module,exports){
 // constants (changing these only break down functionality, so be careful)
 
 module.exports = {
@@ -18966,7 +19006,7 @@ module.exports = {
   }
 }
 
-},{}],374:[function(require,module,exports){
+},{}],375:[function(require,module,exports){
 var keymirror = require('keymirror')
 
 module.exports = keymirror({
@@ -19010,7 +19050,7 @@ module.exports = keymirror({
   INVISIBLE: null  // document just became INvisible
 })
 
-},{"keymirror":333}],375:[function(require,module,exports){
+},{"keymirror":334}],376:[function(require,module,exports){
 module.exports = {
   logger: null,                         // define logging instance. leave null for default, console.
   logStackSize: 30,                     // limits the stack size of log outputs to collect
@@ -19146,7 +19186,7 @@ module.exports = {
   fakeUaString: null
 }
 
-},{}],376:[function(require,module,exports){
+},{}],377:[function(require,module,exports){
 var superagent = require('superagent')
 var Constants = require('./constants')
 var CACHE_KEY = 'alias'
@@ -19331,9 +19371,9 @@ module.exports = function (options) {
   }
 }
 
-},{"./constants":373,"superagent":355}],377:[function(require,module,exports){
-module.exports='@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{-o-object-fit:scale-down;object-fit:scale-down}.videomail .replay,.videomail .userMedia{width:100%!important}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;-webkit-transition:all 1s ease;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}'
-},{}],378:[function(require,module,exports){
+},{"./constants":374,"superagent":356}],378:[function(require,module,exports){
+module.exports='@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{-o-object-fit:scale-down;object-fit:scale-down}.videomail .replay,.videomail .userMedia{width:100%!important}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}'
+},{}],379:[function(require,module,exports){
 var isPOT = require('is-power-of-two')
 var AudioSample = require('audio-sample')
 
@@ -19445,7 +19485,7 @@ module.exports = function (userMedia, options) {
   }
 }
 
-},{"./videomailError":386,"audio-sample":2,"is-power-of-two":330}],379:[function(require,module,exports){
+},{"./videomailError":387,"audio-sample":2,"is-power-of-two":331}],380:[function(require,module,exports){
 var UAParser = require('ua-parser-js')
 var defined = require('defined')
 var VideomailError = require('./videomailError')
@@ -19669,7 +19709,7 @@ module.exports = function (options) {
   }
 }
 
-},{"./videomailError":386,"defined":306,"ua-parser-js":363}],380:[function(require,module,exports){
+},{"./videomailError":387,"defined":306,"ua-parser-js":364}],381:[function(require,module,exports){
 var util = require('util')
 var Browser = require('./browser')
 
@@ -19738,7 +19778,7 @@ module.exports = function (localOptions) {
   }
 }
 
-},{"./browser":379,"util":367}],381:[function(require,module,exports){
+},{"./browser":380,"util":368}],382:[function(require,module,exports){
 var despot = require('despot')
 
 var VideomailError = require('./videomailError')
@@ -19809,7 +19849,7 @@ module.exports = function (options, name) {
   }
 }
 
-},{"./../events":374,"./videomailError":386,"despot":307}],382:[function(require,module,exports){
+},{"./../events":375,"./videomailError":387,"despot":307}],383:[function(require,module,exports){
 var filesize = require('filesize')
 var humanizeDuration = require('humanize-duration')
 
@@ -19825,7 +19865,7 @@ module.exports = {
   }
 }
 
-},{"filesize":314,"humanize-duration":320}],383:[function(require,module,exports){
+},{"filesize":315,"humanize-duration":321}],384:[function(require,module,exports){
 // taken from
 // https://bbc.github.io/tal/jsdoc/events_mediaevent.js.html
 
@@ -19935,7 +19975,7 @@ module.exports = [
   // 'timeupdate'
 ]
 
-},{}],384:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 var DASH = '- '
 var SEPARATOR = '<br/>' + DASH
 
@@ -19998,7 +20038,7 @@ module.exports = function (anything, options) {
   }
 }
 
-},{}],385:[function(require,module,exports){
+},{}],386:[function(require,module,exports){
 require('core-js/shim')
 require('classlist.js')
 require('element-closest') // needed for IE 11
@@ -20043,7 +20083,7 @@ module.exports = function (window, navigator) {
   }
 }
 
-},{"classlist.js":10,"core-js/shim":303,"element-closest":312,"request-frame":351}],386:[function(require,module,exports){
+},{"classlist.js":10,"core-js/shim":303,"element-closest":313,"request-frame":353}],387:[function(require,module,exports){
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
 var originalPretty = require('./pretty')
@@ -20367,7 +20407,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 module.exports = VideomailError
 
-},{"./../resource":376,"./browser":379,"./pretty":384,"create-error":305}],387:[function(require,module,exports){
+},{"./../resource":377,"./browser":380,"./pretty":385,"create-error":305}],388:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -20460,7 +20500,11 @@ var Buttons = function (container, options) {
   function adjustButton (buttonElement, show, type) {
     disable(buttonElement)
 
-    buttonElement.type = type || 'button'
+    if (type) {
+      buttonElement.type = type
+    } else if (!buttonElement.type) {
+      buttonElement.type = 'button'
+    }
 
     !show && hide(buttonElement)
 
@@ -20485,7 +20529,9 @@ var Buttons = function (container, options) {
     var radioButtonElement,
       radioButtonGroup
 
-    if (options.id) { radioButtonElement = document.getElementById(options.id) }
+    if (options.id) {
+      radioButtonElement = document.getElementById(options.id)
+    }
 
     if (!radioButtonElement) {
       radioButtonElement = h('input#' + options.id, {
@@ -20500,10 +20546,16 @@ var Buttons = function (container, options) {
       }, options.label))
 
             // double check that submit button is already in the buttonsElement container as a child?
-      if (submitButton && contains(buttonsElement, submitButton)) { buttonsElement.insertBefore(radioButtonGroup, submitButton) } else { buttonsElement.appendChild(radioButtonGroup) }
+      if (submitButton && contains(buttonsElement, submitButton)) {
+        buttonsElement.insertBefore(radioButtonGroup, submitButton)
+      } else {
+        buttonsElement.appendChild(radioButtonGroup)
+      }
     }
 
-    if (options.changeHandler) { radioButtonElement.onchange = options.changeHandler }
+    if (options.changeHandler) {
+      radioButtonElement.onchange = options.changeHandler
+    }
 
     disable(radioButtonElement)
 
@@ -20537,7 +20589,9 @@ var Buttons = function (container, options) {
       } else {
         buttonsElement.appendChild(buttonElement)
       }
-    } else { buttonElement = adjustButton(buttonElement, show, type) }
+    } else {
+      buttonElement = adjustButton(buttonElement, show)
+    }
 
     if (clickHandler) {
       replaceClickHandler(buttonElement, clickHandler)
@@ -20558,7 +20612,9 @@ var Buttons = function (container, options) {
             'submit',
             options.selectors.submitButtonSelector
         )
-      } else { disable(submitButton) }
+      } else {
+        disable(submitButton)
+      }
 
       // no need to listen to the submit event when it's already listened
       // within the form element class
@@ -20576,37 +20632,37 @@ var Buttons = function (container, options) {
 
     if (options.enablePause) {
       pauseButton = makeButton(
-          options.selectors.pauseButtonClass,
-          options.text.buttons.pause,
-          container.pause,
-          false
+        options.selectors.pauseButtonClass,
+        options.text.buttons.pause,
+        container.pause,
+        false
       )
     }
 
     if (options.enablePause) {
       resumeButton = makeButton(
-          options.selectors.resumeButtonClass,
-          options.text.buttons.resume,
-          container.resume,
-          false
+        options.selectors.resumeButtonClass,
+        options.text.buttons.resume,
+        container.resume,
+        false
       )
     }
 
-        // show stop only when pause is enabled - looks better that way otherwise button
-        // move left and right between record and stop (preview)
+    // show stop only when pause is enabled - looks better that way otherwise button
+    // move left and right between record and stop (preview)
     previewButton = makeButton(
-            options.selectors.previewButtonClass,
-            options.text.buttons.preview,
-            container.stop,
-            false
-        )
+      options.selectors.previewButtonClass,
+      options.text.buttons.preview,
+      container.stop,
+      false
+    )
 
     recordAgainButton = makeButton(
-            options.selectors.recordAgainButtonClass,
-            options.text.buttons.recordAgain,
-            recordAgain,
-            false
-        )
+      options.selectors.recordAgainButtonClass,
+      options.text.buttons.recordAgain,
+      recordAgain,
+      false
+    )
 
     if (options.audio && options.audio.switch) {
       audioOffRadioPair = makeRadioButtonPair({
@@ -20634,7 +20690,7 @@ var Buttons = function (container, options) {
   }
 
   function onFormReady (options) {
-        // no need to show record button when doing a record again
+    // no need to show record button when doing a record again
     if (!isShown(recordAgainButton)) {
       if (!options.paused) { show(recordButton) }
     }
@@ -20657,11 +20713,17 @@ var Buttons = function (container, options) {
   function onUserMediaReady (options) {
     onFormReady(options)
 
-    if (isShown(recordButton)) { enable(recordButton) }
+    if (isShown(recordButton)) {
+      enable(recordButton)
+    }
 
-    if (isShown(audioOnRadioPair)) { enable(audioOnRadioPair) }
+    if (isShown(audioOnRadioPair)) {
+      enable(audioOnRadioPair)
+    }
 
-    if (isShown(audioOffRadioPair)) { enable(audioOffRadioPair) }
+    if (isShown(audioOffRadioPair)) {
+      enable(audioOffRadioPair)
+    }
 
     disable(submitButton)
   }
@@ -20681,7 +20743,9 @@ var Buttons = function (container, options) {
     show(recordAgainButton)
     enable(recordAgainButton)
 
-    if (!options.enableAutoValidation) { enable(submitButton) }
+    if (!options.enableAutoValidation) {
+      enable(submitButton)
+    }
   }
 
   this.enableSubmit = function () {
@@ -20713,8 +20777,8 @@ var Buttons = function (container, options) {
   }
 
   function onRecording (framesCount) {
-        // it is possible to hide while recording, hence
-        // check framesCount first (coming from recorder)
+    // it is possible to hide while recording, hence
+    // check framesCount first (coming from recorder)
     if (framesCount > 1) { onFirstFrameSent() } else {
       disable(audioOffRadioPair)
       disable(audioOnRadioPair)
@@ -20914,7 +20978,7 @@ util.inherits(Buttons, EventEmitter)
 
 module.exports = Buttons
 
-},{"./../events":374,"./../util/eventEmitter":381,"contains":12,"hidden":319,"hyperscript":321,"util":367}],388:[function(require,module,exports){
+},{"./../events":375,"./../util/eventEmitter":382,"contains":12,"hidden":320,"hyperscript":322,"util":368}],389:[function(require,module,exports){
 var insertCss = require('insert-css')
 var merge = require('merge-recursive')
 var hidden = require('hidden')
@@ -21561,7 +21625,7 @@ util.inherits(Container, EventEmitter)
 
 module.exports = Container
 
-},{"./../events":374,"./../resource":376,"./../styles/css/main.min.css.js":377,"./../util/eventEmitter":381,"./../util/videomailError":386,"./buttons":387,"./dimension":389,"./form":390,"./visuals":392,"document-visibility":308,"hidden":319,"insert-css":325,"merge-recursive":334,"util":367}],389:[function(require,module,exports){
+},{"./../events":375,"./../resource":377,"./../styles/css/main.min.css.js":378,"./../util/eventEmitter":382,"./../util/videomailError":387,"./buttons":388,"./dimension":390,"./form":391,"./visuals":393,"document-visibility":308,"hidden":320,"insert-css":326,"merge-recursive":335,"util":368}],390:[function(require,module,exports){
 var numberIsInteger = require('number-is-integer')
 var VideomailError = require('./../util/videomailError')
 
@@ -21669,7 +21733,7 @@ module.exports = {
   }
 }
 
-},{"./../util/videomailError":386,"number-is-integer":335}],390:[function(require,module,exports){
+},{"./../util/videomailError":387,"number-is-integer":336}],391:[function(require,module,exports){
 var h = require('hyperscript')
 var util = require('util')
 var hidden = require('hidden')
@@ -21905,7 +21969,7 @@ util.inherits(Form, EventEmitter)
 
 module.exports = Form
 
-},{"./../events":374,"./../util/eventEmitter":381,"./../util/videomailError":386,"get-form-data":315,"hidden":319,"hyperscript":321,"util":367}],391:[function(require,module,exports){
+},{"./../events":375,"./../util/eventEmitter":382,"./../util/videomailError":387,"get-form-data":316,"hidden":320,"hyperscript":322,"util":368}],392:[function(require,module,exports){
 // enhances options with useful functions we can reuse everywhere
 
 module.exports = {
@@ -21950,7 +22014,7 @@ module.exports = {
   }
 }
 
-},{}],392:[function(require,module,exports){
+},{}],393:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -22300,7 +22364,7 @@ util.inherits(Visuals, EventEmitter)
 
 module.exports = Visuals
 
-},{"./../events":374,"./../util/eventEmitter":381,"./visuals/inside/recorderInsides":397,"./visuals/notifier":398,"./visuals/recorder":399,"./visuals/replay":400,"hidden":319,"hyperscript":321,"util":367}],393:[function(require,module,exports){
+},{"./../events":375,"./../util/eventEmitter":382,"./visuals/inside/recorderInsides":398,"./visuals/notifier":399,"./visuals/recorder":400,"./visuals/replay":401,"hidden":320,"hyperscript":322,"util":368}],394:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22383,7 +22447,7 @@ module.exports = function (visuals, options) {
   }
 }
 
-},{"hidden":319,"hyperscript":321}],394:[function(require,module,exports){
+},{"hidden":320,"hyperscript":322}],395:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22432,7 +22496,7 @@ module.exports = function (visuals, options) {
   }
 }
 
-},{"./../../../../util/videomailError":386,"hidden":319,"hyperscript":321}],395:[function(require,module,exports){
+},{"./../../../../util/videomailError":387,"hidden":320,"hyperscript":322}],396:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22474,7 +22538,7 @@ module.exports = function (visuals) {
   }
 }
 
-},{"hidden":319,"hyperscript":321}],396:[function(require,module,exports){
+},{"hidden":320,"hyperscript":322}],397:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22617,7 +22681,7 @@ module.exports = function (visuals, recordNote, options) {
   }
 }
 
-},{"hidden":319,"hyperscript":321}],397:[function(require,module,exports){
+},{"hidden":320,"hyperscript":322}],398:[function(require,module,exports){
 var util = require('util')
 
 var Events = require('./../../../events')
@@ -22741,7 +22805,7 @@ util.inherits(RecorderInsides, EventEmitter)
 
 module.exports = RecorderInsides
 
-},{"./../../../events":374,"./../../../util/eventEmitter":381,"./recorder/countdown":393,"./recorder/pausedNote":394,"./recorder/recordNote":395,"./recorder/recordTimer":396,"util":367}],398:[function(require,module,exports){
+},{"./../../../events":375,"./../../../util/eventEmitter":382,"./recorder/countdown":394,"./recorder/pausedNote":395,"./recorder/recordNote":396,"./recorder/recordTimer":397,"util":368}],399:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -23036,7 +23100,7 @@ util.inherits(Notifier, EventEmitter)
 
 module.exports = Notifier
 
-},{"./../../events":374,"./../../util/eventEmitter":381,"hidden":319,"hyperscript":321,"util":367}],399:[function(require,module,exports){
+},{"./../../events":375,"./../../util/eventEmitter":382,"hidden":320,"hyperscript":322,"util":368}],400:[function(require,module,exports){
 (function (Buffer){
 var websocket = require('websocket-stream')
 var Frame = require('canvas-to-buffer')
@@ -24258,7 +24322,7 @@ util.inherits(Recorder, EventEmitter)
 module.exports = Recorder
 
 }).call(this,require("buffer").Buffer)
-},{"./../../constants":373,"./../../events":374,"./../../util/browser":379,"./../../util/eventEmitter":381,"./../../util/humanize":382,"./../../util/pretty":384,"./../../util/videomailError":386,"./userMedia":401,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":319,"hyperscript":321,"util":367,"websocket-stream":369}],400:[function(require,module,exports){
+},{"./../../constants":374,"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"./../../util/humanize":383,"./../../util/pretty":385,"./../../util/videomailError":387,"./userMedia":402,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":320,"hyperscript":322,"util":368,"websocket-stream":370}],401:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -24563,7 +24627,7 @@ util.inherits(Replay, EventEmitter)
 
 module.exports = Replay
 
-},{"./../../events":374,"./../../util/browser":379,"./../../util/eventEmitter":381,"hidden":319,"hyperscript":321,"iphone-inline-video":327,"util":367}],401:[function(require,module,exports){
+},{"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"hidden":320,"hyperscript":322,"iphone-inline-video":328,"util":368}],402:[function(require,module,exports){
 var h = require('hyperscript')
 
 var AudioRecorder = require('./../../util/audioRecorder')
@@ -25056,7 +25120,7 @@ module.exports = function (recorder, options) {
   }
 }
 
-},{"./../../events":374,"./../../util/audioRecorder":378,"./../../util/eventEmitter":381,"./../../util/mediaEvents":383,"./../../util/pretty":384,"./../../util/videomailError":386,"hyperscript":321}],"videomail-client":[function(require,module,exports){
+},{"./../../events":375,"./../../util/audioRecorder":379,"./../../util/eventEmitter":382,"./../../util/mediaEvents":384,"./../../util/pretty":385,"./../../util/videomailError":387,"hyperscript":322}],"videomail-client":[function(require,module,exports){
 var standardize = require('./util/standardize')
 var Client = require('./client')
 
@@ -25073,4 +25137,4 @@ if (!navigator) {
 
 module.exports = Client
 
-},{"./client":372,"./util/standardize":385}]},{},["videomail-client"]);
+},{"./client":373,"./util/standardize":386}]},{},["videomail-client"]);
