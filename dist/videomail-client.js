@@ -18974,6 +18974,7 @@ module.exports = keymirror({
   FORM_READY: null, // form is ready, available in the DOM
   LOADING_USER_MEDIA: null, // asking for webcam access
   USER_MEDIA_READY: null, // user media (= webcam) is ready, loaded
+  CONNECTING: null, // socket is connecting to server
   CONNECTED: null, // socket is connected to server
   DISCONNECTED: null, // socket to server is disconnected
   COUNTDOWN: null, // countdown for recording has started
@@ -21327,9 +21328,10 @@ var Container = function (options) {
         // we hide areas to make it easier for the user
         buttons.show()
 
-        if (self.isReplayShown()) { self.emit(Events.PREVIEW) } else {
+        if (self.isReplayShown()) {
+          self.emit(Events.PREVIEW)
+        } else {
           self.emit(Events.FORM_READY, {paused: paused})
-          debug('Building stream connection to server ...')
         }
       }
     }
@@ -22778,6 +22780,10 @@ var Notifier = function (visuals, options) {
     })
   }
 
+  function onConnecting () {
+    self.notify('Connecting to server …')
+  }
+
   function onLoadingUserMedia () {
     self.notify('Loading webcam …')
   }
@@ -22811,6 +22817,9 @@ var Notifier = function (visuals, options) {
     debug('Notifier: initEvents()')
 
     self
+      .on(Events.CONNECTING, function () {
+        onConnecting()
+      })
       .on(Events.LOADING_USER_MEDIA, function () {
         onLoadingUserMedia()
       })
@@ -23286,6 +23295,8 @@ var Recorder = function (visuals, replay, options) {
 
       debug('Recorder: initialising web socket to %s', options.socketUrl)
 
+      self.emit(Events.CONNECTING)
+
       // https://github.com/maxogden/websocket-stream#binary-sockets
 
       // we use query parameters here because we cannot set custom headers in web sockets,
@@ -23325,21 +23336,21 @@ var Recorder = function (visuals, replay, options) {
         self.emit(Events.ERROR, err)
       }
 
-      // // useful for debugging streams
-      //
-      // if (!stream.originalEmit) {
-      //   stream.originalEmit = stream.emit
-      // }
-      //
-      // stream.emit = function (type) {
-      //   if (stream) {
-      //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
-      //     var args = Array.prototype.slice.call(arguments, 0)
-      //     return stream.originalEmit.apply(stream, args)
-      //   }
-      // }
-
       if (stream) {
+        // // useful for debugging streams
+        //
+        // if (!stream.originalEmit) {
+        //   stream.originalEmit = stream.emit
+        // }
+        //
+        // stream.emit = function (type) {
+        //   if (stream) {
+        //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
+        //     var args = Array.prototype.slice.call(arguments, 0)
+        //     return stream.originalEmit.apply(stream, args)
+        //   }
+        // }
+
         stream.on('close', function (err) {
           debug(PIPE_SYMBOL + 'Stream has closed')
 
