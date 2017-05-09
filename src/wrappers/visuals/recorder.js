@@ -255,6 +255,8 @@ var Recorder = function (visuals, replay, options) {
 
       debug('Recorder: initialising web socket to %s', options.socketUrl)
 
+      self.emit(Events.CONNECTING)
+
       // https://github.com/maxogden/websocket-stream#binary-sockets
 
       // we use query parameters here because we cannot set custom headers in web sockets,
@@ -294,21 +296,21 @@ var Recorder = function (visuals, replay, options) {
         self.emit(Events.ERROR, err)
       }
 
-      // // useful for debugging streams
-      //
-      // if (!stream.originalEmit) {
-      //   stream.originalEmit = stream.emit
-      // }
-      //
-      // stream.emit = function (type) {
-      //   if (stream) {
-      //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
-      //     var args = Array.prototype.slice.call(arguments, 0)
-      //     return stream.originalEmit.apply(stream, args)
-      //   }
-      // }
-
       if (stream) {
+        // // useful for debugging streams
+        //
+        // if (!stream.originalEmit) {
+        //   stream.originalEmit = stream.emit
+        // }
+        //
+        // stream.emit = function (type) {
+        //   if (stream) {
+        //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
+        //     var args = Array.prototype.slice.call(arguments, 0)
+        //     return stream.originalEmit.apply(stream, args)
+        //   }
+        // }
+
         stream.on('close', function (err) {
           debug(PIPE_SYMBOL + 'Stream has closed')
 

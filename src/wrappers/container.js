@@ -411,9 +411,10 @@ var Container = function (options) {
         // we hide areas to make it easier for the user
         buttons.show()
 
-        if (self.isReplayShown()) { self.emit(Events.PREVIEW) } else {
+        if (self.isReplayShown()) {
+          self.emit(Events.PREVIEW)
+        } else {
           self.emit(Events.FORM_READY, {paused: paused})
-          debug('Building stream connection to server ...')
         }
       }
     }
