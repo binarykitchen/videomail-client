@@ -37,7 +37,7 @@ var Notifier = function (visuals, options) {
   }
 
   function onConnecting () {
-    self.notify('Connecting to server …')
+    self.notify('Connecting …')
   }
 
   function onLoadingUserMedia () {
