@@ -66,9 +66,12 @@ git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
 echo "Publishing to npm ..."
-# todo use that when https://github.com/yarnpkg/yarn/issues/3011 is fixed
-# yarn publish --new-version $VERSION
-npm publish
+
+# since https://github.com/yarnpkg/yarn/issues/3011
+yarn publish --new-version $VERSION
+
+# used previously
+# npm publish
 
 # Complete the previous release
 git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
