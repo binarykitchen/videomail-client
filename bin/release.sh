@@ -66,7 +66,8 @@ git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
 echo "Publishing to npm ..."
-# todo use that when https://github.com/yarnpkg/yarn/issues/3011 is fixed
+
+# todo https://github.com/yarnpkg/yarn/issues/3011
 # yarn publish --new-version $VERSION
 npm publish
 

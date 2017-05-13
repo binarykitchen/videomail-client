@@ -18887,11 +18887,15 @@ var VideomailClient = function (options) {
   this.events = Events
 
   function build () {
-    readystate.interactive(function (previousState) {
+    var building = false
+
+    readystate.interactive(function () {
       // it can happen that it gets called twice, i.E. when an error is thrown
       // in the middle of the build() fn
-      if (previousState !== readystate.INTERACTIVE && !container.isBuilt()) {
+      if (!building && !container.isBuilt()) {
+        building = true
         container.build()
+        building = false
       }
     })
   }
@@ -22845,7 +22849,7 @@ var Notifier = function (visuals, options) {
   }
 
   function onConnecting () {
-    self.notify('Connecting to server …')
+    self.notify('Connecting …')
   }
 
   function onLoadingUserMedia () {
