@@ -24963,13 +24963,20 @@ module.exports = function (recorder, options) {
 
       // experimental, not sure if this is ever needed/called? since 2 apr 2017
       // An error occurs while fetching the media data.
-      // Error is an object with the code MEDIA_ERR_NETWORK or higher.
+      // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
         self.emit(Events.ERROR, VideomailError.create(
           'Weird webcam error',
           // https://github.com/binarykitchen/videomail.io/issues/323
-          JSON.stringify(err), // tried just with err but returns only "{}"
+          // tried just with err and JSON.stringify(err) but returns only "{}"
+          // adding more debug info just temporarily
+          //
+          // also i think should be ignored when fireCallbacks() was successful and it's
+          // playing fine anyway?
+          JSON.stringify(err) + ', ' +
+          JSON.stringify(arguments) + ', ' +
+          JSON.stringify(rawVisualUserMedia),
           options
         ))
       })
