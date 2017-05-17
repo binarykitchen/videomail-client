@@ -19592,7 +19592,9 @@ module.exports = function (options) {
   function canPlayType (video, type) {
     var canPlayType
 
-    if (video && video.canPlayType) { canPlayType = video.canPlayType('video/' + type) }
+    if (video && video.canPlayType) {
+      canPlayType = video.canPlayType('video/' + type)
+    }
 
     return canPlayType
   }
@@ -19636,13 +19638,15 @@ module.exports = function (options) {
   }
 
   this.checkPlaybackCapabilities = function (video) {
-    var err,
-      message
+    var err, message
 
     if (!video) {
       message = 'No HTML5 support for video tag!'
     } else if (!this.getVideoType(video)) {
       message = 'Your old browser cannot support modern video codecs'
+    } else if (!video.setAttribute) {
+      // fixes "Not implemented" error on older browsers
+      message = 'Unable to set video attributes in your old browser'
     }
 
     if (message) {
@@ -19669,7 +19673,11 @@ module.exports = function (options) {
   this.getVideoType = function (video) {
     if (!videoType) {
             // there is a bug in canPlayType within chrome for mp4
-      if (canPlayType(video, 'mp4') && !chromeBased) { videoType = 'mp4' } else if (canPlayType(video, 'webm')) { videoType = 'webm' }
+      if (canPlayType(video, 'mp4') && !chromeBased) {
+        videoType = 'mp4'
+      } else if (canPlayType(video, 'webm')) {
+        videoType = 'webm'
+      }
     }
 
     return videoType
@@ -24334,10 +24342,13 @@ var hidden = require('hidden')
 var Events = require('./../../events')
 var Browser = require('./../../util/browser')
 var EventEmitter = require('./../../util/eventEmitter')
+var VideomailError = require('./../../util/videomailError')
 
 var enableInlineVideo
 
-if (typeof navigator !== 'undefined') { enableInlineVideo = require('iphone-inline-video') }
+if (typeof navigator !== 'undefined') {
+  enableInlineVideo = require('iphone-inline-video')
+}
 
 var Replay = function (parentElement, options) {
   EventEmitter.call(this, options, 'Replay')
@@ -24351,7 +24362,18 @@ var Replay = function (parentElement, options) {
 
   function buildElement () {
     replayElement = h('video.' + options.selectors.replayClass)
-    parentElement.appendChild(replayElement)
+
+    if (!replayElement.setAttribute) {
+      throw VideomailError.create('Please upgrade browser', options)
+    }
+
+    var err = browser.checkPlaybackCapabilities(replayElement)
+
+    if (err) {
+      throw err
+    } else {
+      parentElement.appendChild(replayElement)
+    }
   }
 
   function isStandalone () {
@@ -24508,8 +24530,6 @@ var Replay = function (parentElement, options) {
       }
     }
 
-    browser.checkPlaybackCapabilities(replayElement)
-
     built = true
   }
 
@@ -24631,7 +24651,7 @@ util.inherits(Replay, EventEmitter)
 
 module.exports = Replay
 
-},{"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"hidden":320,"hyperscript":322,"iphone-inline-video":328,"util":368}],402:[function(require,module,exports){
+},{"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"./../../util/videomailError":387,"hidden":320,"hyperscript":322,"iphone-inline-video":328,"util":368}],402:[function(require,module,exports){
 var h = require('hyperscript')
 
 var AudioRecorder = require('./../../util/audioRecorder')
