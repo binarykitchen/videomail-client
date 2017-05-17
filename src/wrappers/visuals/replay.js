@@ -5,10 +5,13 @@ var hidden = require('hidden')
 var Events = require('./../../events')
 var Browser = require('./../../util/browser')
 var EventEmitter = require('./../../util/eventEmitter')
+var VideomailError = require('./../../util/videomailError')
 
 var enableInlineVideo
 
-if (typeof navigator !== 'undefined') { enableInlineVideo = require('iphone-inline-video') }
+if (typeof navigator !== 'undefined') {
+  enableInlineVideo = require('iphone-inline-video')
+}
 
 var Replay = function (parentElement, options) {
   EventEmitter.call(this, options, 'Replay')
@@ -22,7 +25,18 @@ var Replay = function (parentElement, options) {
 
   function buildElement () {
     replayElement = h('video.' + options.selectors.replayClass)
-    parentElement.appendChild(replayElement)
+
+    if (!replayElement.setAttribute) {
+      throw VideomailError.create('Please upgrade browser', options)
+    }
+
+    var err = browser.checkPlaybackCapabilities(replayElement)
+
+    if (err) {
+      throw err
+    } else {
+      parentElement.appendChild(replayElement)
+    }
   }
 
   function isStandalone () {
@@ -178,8 +192,6 @@ var Replay = function (parentElement, options) {
         }
       }
     }
-
-    browser.checkPlaybackCapabilities(replayElement)
 
     built = true
   }
