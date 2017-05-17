@@ -100,7 +100,9 @@ module.exports = function (options) {
   function canPlayType (video, type) {
     var canPlayType
 
-    if (video && video.canPlayType) { canPlayType = video.canPlayType('video/' + type) }
+    if (video && video.canPlayType) {
+      canPlayType = video.canPlayType('video/' + type)
+    }
 
     return canPlayType
   }
@@ -144,13 +146,15 @@ module.exports = function (options) {
   }
 
   this.checkPlaybackCapabilities = function (video) {
-    var err,
-      message
+    var err, message
 
     if (!video) {
       message = 'No HTML5 support for video tag!'
     } else if (!this.getVideoType(video)) {
       message = 'Your old browser cannot support modern video codecs'
+    } else if (!video.setAttribute) {
+      // fixes "Not implemented" error on older browsers
+      message = 'Unable to set video attributes in your old browser'
     }
 
     if (message) {
@@ -177,7 +181,11 @@ module.exports = function (options) {
   this.getVideoType = function (video) {
     if (!videoType) {
             // there is a bug in canPlayType within chrome for mp4
-      if (canPlayType(video, 'mp4') && !chromeBased) { videoType = 'mp4' } else if (canPlayType(video, 'webm')) { videoType = 'webm' }
+      if (canPlayType(video, 'mp4') && !chromeBased) {
+        videoType = 'mp4'
+      } else if (canPlayType(video, 'webm')) {
+        videoType = 'webm'
+      }
     }
 
     return videoType
