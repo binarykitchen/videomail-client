@@ -1125,8 +1125,8 @@ var Recorder = function (visuals, replay, options) {
     return unloaded
   }
 
-    // these two return the true dimensions of the webcam area.
-    // needed because on mobiles they might be different.
+  // these two return the true dimensions of the webcam area.
+  // needed because on mobiles they might be different.
 
   this.getRecorderWidth = function (responsive) {
     if (userMedia) {
