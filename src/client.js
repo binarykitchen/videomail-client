@@ -145,6 +145,12 @@ var VideomailClient = function (options) {
     container.submit()
   }
 
+  this.getLogLines = function () {
+    if (localOptions.logger && localOptions.logger.getLines) {
+      return localOptions.logger.getLines()
+    }
+  }
+
   build()
 }
 
