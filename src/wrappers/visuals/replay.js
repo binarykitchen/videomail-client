@@ -25,6 +25,8 @@ var Replay = function (parentElement, options) {
     videomail
 
   function buildElement () {
+    debug('Replay: buildElement()')
+
     replayElement = h('video.' + options.selectors.replayClass)
 
     if (!replayElement.setAttribute) {
@@ -197,6 +199,8 @@ var Replay = function (parentElement, options) {
     }
 
     built = true
+
+    debug('Replay: built.')
   }
 
   this.unload = function () {
@@ -297,6 +301,8 @@ var Replay = function (parentElement, options) {
   }
 
   this.hide = function () {
+    debug('Replay: hide()')
+
     if (isStandalone()) {
       hidden(parentElement, true)
     } else {
