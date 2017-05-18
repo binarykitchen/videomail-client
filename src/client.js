@@ -39,6 +39,7 @@ function getBrowser (localOptions) {
 var VideomailClient = function (options) {
   var localOptions = adjustOptions(options)
   var container = new Container(localOptions)
+  var debug = localOptions.debug
 
   var replay
 
@@ -50,7 +51,14 @@ var VideomailClient = function (options) {
   function build () {
     var building = false
 
-    readystate.interactive(function () {
+    readystate.interactive(function (previousState) {
+      debug(
+        'Client: interactive(),',
+        'previousState =', previousState + ',',
+        '!building =', !building + ',',
+        '!isBuilt() =', !container.isBuilt()
+      )
+
       // it can happen that it gets called twice, i.E. when an error is thrown
       // in the middle of the build() fn
       if (!building && !container.isBuilt()) {
