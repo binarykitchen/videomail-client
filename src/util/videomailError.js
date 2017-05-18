@@ -293,8 +293,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   function isBrowserProblem () {
-    return hasClass(VideomailError.BROWSER_PROBLEM) ||
-      parameters.browserProblem
+    return hasClass(VideomailError.BROWSER_PROBLEM) || parameters.browserProblem
   }
 
   // add some public functions
@@ -305,7 +304,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   videomailError.removeDimensions = function () {
-    return hasClass(VideomailError.IOS_PROBLEM)
+    return hasClass(VideomailError.IOS_PROBLEM) || browser.isMobile()
   }
 
   videomailError.hideButtons = function () {

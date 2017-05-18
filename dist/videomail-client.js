@@ -19676,7 +19676,7 @@ module.exports = function (options) {
 
   this.getVideoType = function (video) {
     if (!videoType) {
-            // there is a bug in canPlayType within chrome for mp4
+      // there is a bug in canPlayType within chrome for mp4
       if (canPlayType(video, 'mp4') && !chromeBased) {
         videoType = 'mp4'
       } else if (canPlayType(video, 'webm')) {
@@ -19712,6 +19712,10 @@ module.exports = function (options) {
 
   this.isEdge = function () {
     return isEdge
+  }
+
+  this.isMobile = function () {
+    return uaParser.device.type === 'mobile'
   }
 
   this.getUsefulData = function () {
@@ -20395,8 +20399,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   function isBrowserProblem () {
-    return hasClass(VideomailError.BROWSER_PROBLEM) ||
-      parameters.browserProblem
+    return hasClass(VideomailError.BROWSER_PROBLEM) || parameters.browserProblem
   }
 
   // add some public functions
@@ -20407,7 +20410,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   videomailError.removeDimensions = function () {
-    return hasClass(VideomailError.IOS_PROBLEM)
+    return hasClass(VideomailError.IOS_PROBLEM) || browser.isMobile()
   }
 
   videomailError.hideButtons = function () {
@@ -24245,8 +24248,8 @@ var Recorder = function (visuals, replay, options) {
     return unloaded
   }
 
-    // these two return the true dimensions of the webcam area.
-    // needed because on mobiles they might be different.
+  // these two return the true dimensions of the webcam area.
+  // needed because on mobiles they might be different.
 
   this.getRecorderWidth = function (responsive) {
     if (userMedia) {
