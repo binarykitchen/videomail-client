@@ -18878,6 +18878,7 @@ function getBrowser (localOptions) {
 var VideomailClient = function (options) {
   var localOptions = adjustOptions(options)
   var container = new Container(localOptions)
+  var debug = localOptions.debug
 
   var replay
 
@@ -18889,7 +18890,14 @@ var VideomailClient = function (options) {
   function build () {
     var building = false
 
-    readystate.interactive(function () {
+    readystate.interactive(function (previousState) {
+      debug(
+        'Client: interactive(),',
+        'previousState =', previousState + ',',
+        '!building =', !building + ',',
+        '!isBuilt() =', !container.isBuilt()
+      )
+
       // it can happen that it gets called twice, i.E. when an error is thrown
       // in the middle of the build() fn
       if (!building && !container.isBuilt()) {
@@ -21066,6 +21074,8 @@ var Container = function (options) {
   }
 
   function buildForm () {
+    debug('Container: buildForm()')
+
     var formElement = getFormElement()
 
     if (formElement) {
@@ -21079,6 +21089,8 @@ var Container = function (options) {
   }
 
   function buildChildren () {
+    debug('Container: buildChildren()')
+
     if (!containerElement.classList) {
       self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!'))
     } else {
@@ -21106,6 +21118,8 @@ var Container = function (options) {
   }
 
   function initEvents () {
+    debug('Container: initEvents()')
+
     window.addEventListener('beforeunload', function (e) {
       self.unload(e)
     })
@@ -21238,7 +21252,9 @@ var Container = function (options) {
       videomailFormData.height = visuals.getRecorderHeight(true)
 
       resource.post(videomailFormData, cb)
-    } else if (isPut(method)) { resource.put(videomailFormData, cb) }
+    } else if (isPut(method)) {
+      resource.put(videomailFormData, cb)
+    }
   }
 
   function submitForm (formData, videomailResponse, url, cb) {
@@ -21350,6 +21366,8 @@ var Container = function (options) {
         if (!hasError) {
           built = true
           self.emit(Events.BUILT)
+        } else {
+          debug('Container: building failed due to an error.')
         }
       } else {
         debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')

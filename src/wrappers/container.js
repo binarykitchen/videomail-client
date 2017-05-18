@@ -60,6 +60,8 @@ var Container = function (options) {
   }
 
   function buildForm () {
+    debug('Container: buildForm()')
+
     var formElement = getFormElement()
 
     if (formElement) {
@@ -73,6 +75,8 @@ var Container = function (options) {
   }
 
   function buildChildren () {
+    debug('Container: buildChildren()')
+
     if (!containerElement.classList) {
       self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!'))
     } else {
@@ -100,6 +104,8 @@ var Container = function (options) {
   }
 
   function initEvents () {
+    debug('Container: initEvents()')
+
     window.addEventListener('beforeunload', function (e) {
       self.unload(e)
     })
@@ -232,7 +238,9 @@ var Container = function (options) {
       videomailFormData.height = visuals.getRecorderHeight(true)
 
       resource.post(videomailFormData, cb)
-    } else if (isPut(method)) { resource.put(videomailFormData, cb) }
+    } else if (isPut(method)) {
+      resource.put(videomailFormData, cb)
+    }
   }
 
   function submitForm (formData, videomailResponse, url, cb) {
@@ -344,6 +352,8 @@ var Container = function (options) {
         if (!hasError) {
           built = true
           self.emit(Events.BUILT)
+        } else {
+          debug('Container: building failed due to an error.')
         }
       } else {
         debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
