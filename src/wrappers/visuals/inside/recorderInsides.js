@@ -12,6 +12,7 @@ var RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, 'RecorderInsides')
 
   var self = this
+  var debug = options.debug
 
   var recordNote = new RecordNote(visuals)
   var recordTimer = new RecordTimer(visuals, recordNote, options)
@@ -20,9 +21,13 @@ var RecorderInsides = function (visuals, options) {
     pausedNote,
     built
 
-  if (options.video.countdown) { countdown = new Countdown(visuals, options) }
+  if (options.video.countdown) {
+    countdown = new Countdown(visuals, options)
+  }
 
-  if (options.enablePause) { pausedNote = new PausedNote(visuals, options) }
+  if (options.enablePause) {
+    pausedNote = new PausedNote(visuals, options)
+  }
 
   function startRecording () {
     recordTimer.start()
@@ -52,25 +57,27 @@ var RecorderInsides = function (visuals, options) {
 
   function initEvents () {
     self
-            .on(Events.RECORDING, function () {
-              startRecording()
-            })
-            .on(Events.RESUMING, function () {
-              resumeRecording()
-            })
-            .on(Events.STOPPING, function () {
-              stopRecording()
-            })
-            .on(Events.PAUSED, function () {
-              pauseRecording()
-            })
-            .on(Events.RESETTING, onResetting)
-            .on(Events.HIDE, function () {
-              self.hideCountdown()
-            })
+      .on(Events.RECORDING, function () {
+        startRecording()
+      })
+      .on(Events.RESUMING, function () {
+        resumeRecording()
+      })
+      .on(Events.STOPPING, function () {
+        stopRecording()
+      })
+      .on(Events.PAUSED, function () {
+        pauseRecording()
+      })
+      .on(Events.RESETTING, onResetting)
+      .on(Events.HIDE, function () {
+        self.hideCountdown()
+      })
   }
 
   this.build = function () {
+    debug('RecorderInsides: build()')
+
     countdown && countdown.build()
     pausedNote && pausedNote.build()
 
