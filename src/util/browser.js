@@ -184,7 +184,7 @@ module.exports = function (options) {
 
   this.getVideoType = function (video) {
     if (!videoType) {
-            // there is a bug in canPlayType within chrome for mp4
+      // there is a bug in canPlayType within chrome for mp4
       if (canPlayType(video, 'mp4') && !chromeBased) {
         videoType = 'mp4'
       } else if (canPlayType(video, 'webm')) {
@@ -220,6 +220,10 @@ module.exports = function (options) {
 
   this.isEdge = function () {
     return isEdge
+  }
+
+  this.isMobile = function () {
+    return uaParser.device.type === 'mobile'
   }
 
   this.getUsefulData = function () {
