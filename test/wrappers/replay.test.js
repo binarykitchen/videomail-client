@@ -7,7 +7,9 @@ test('Replay:', function (t) {
     tt.plan(1)
 
     tt.doesNotThrow(function () {
-      return new Replay()
+      return new Replay(null, {
+        debug: function () {}
+      })
     })
   })
 })

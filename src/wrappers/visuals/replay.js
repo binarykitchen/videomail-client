@@ -18,6 +18,7 @@ var Replay = function (parentElement, options) {
 
   var self = this
   var browser = new Browser(options)
+  var debug = options.debug
 
   var built,
     replayElement,
@@ -149,6 +150,8 @@ var Replay = function (parentElement, options) {
   }
 
   this.build = function () {
+    debug('Replay: build()')
+
     replayElement = parentElement.querySelector('video.' + options.selectors.replayClass)
 
     if (!replayElement) {
