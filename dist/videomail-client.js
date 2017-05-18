@@ -21364,6 +21364,7 @@ var Container = function (options) {
         buildChildren()
 
         if (!hasError) {
+          debug('Container: built.')
           built = true
           self.emit(Events.BUILT)
         } else {
@@ -22101,6 +22102,7 @@ var Visuals = function (container, options) {
     debug('Visuals: buildChildren()')
 
     buildNoScriptTag()
+
     notifier.build()
     recorderInsides.build()
     replay.build()
@@ -22739,6 +22741,7 @@ var RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, 'RecorderInsides')
 
   var self = this
+  var debug = options.debug
 
   var recordNote = new RecordNote(visuals)
   var recordTimer = new RecordTimer(visuals, recordNote, options)
@@ -22747,9 +22750,13 @@ var RecorderInsides = function (visuals, options) {
     pausedNote,
     built
 
-  if (options.video.countdown) { countdown = new Countdown(visuals, options) }
+  if (options.video.countdown) {
+    countdown = new Countdown(visuals, options)
+  }
 
-  if (options.enablePause) { pausedNote = new PausedNote(visuals, options) }
+  if (options.enablePause) {
+    pausedNote = new PausedNote(visuals, options)
+  }
 
   function startRecording () {
     recordTimer.start()
@@ -22779,25 +22786,27 @@ var RecorderInsides = function (visuals, options) {
 
   function initEvents () {
     self
-            .on(Events.RECORDING, function () {
-              startRecording()
-            })
-            .on(Events.RESUMING, function () {
-              resumeRecording()
-            })
-            .on(Events.STOPPING, function () {
-              stopRecording()
-            })
-            .on(Events.PAUSED, function () {
-              pauseRecording()
-            })
-            .on(Events.RESETTING, onResetting)
-            .on(Events.HIDE, function () {
-              self.hideCountdown()
-            })
+      .on(Events.RECORDING, function () {
+        startRecording()
+      })
+      .on(Events.RESUMING, function () {
+        resumeRecording()
+      })
+      .on(Events.STOPPING, function () {
+        stopRecording()
+      })
+      .on(Events.PAUSED, function () {
+        pauseRecording()
+      })
+      .on(Events.RESETTING, onResetting)
+      .on(Events.HIDE, function () {
+        self.hideCountdown()
+      })
   }
 
   this.build = function () {
+    debug('RecorderInsides: build()')
+
     countdown && countdown.build()
     pausedNote && pausedNote.build()
 
@@ -24386,6 +24395,7 @@ var Replay = function (parentElement, options) {
 
   var self = this
   var browser = new Browser(options)
+  var debug = options.debug
 
   var built,
     replayElement,
@@ -24517,6 +24527,8 @@ var Replay = function (parentElement, options) {
   }
 
   this.build = function () {
+    debug('Replay: build()')
+
     replayElement = parentElement.querySelector('video.' + options.selectors.replayClass)
 
     if (!replayElement) {

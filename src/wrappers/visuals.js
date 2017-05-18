@@ -41,6 +41,7 @@ var Visuals = function (container, options) {
     debug('Visuals: buildChildren()')
 
     buildNoScriptTag()
+
     notifier.build()
     recorderInsides.build()
     replay.build()
