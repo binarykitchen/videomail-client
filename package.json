@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "1.27.8",
+  "version": "1.27.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -66,7 +66,7 @@
     "websocket-stream": "4.0.0"
   },
   "devDependencies": {
-    "body-parser": "1.17.1",
+    "body-parser": "1.17.2",
     "browserify": "14.3.0",
     "connect-send-json": "1.0.0",
     "del": "2.2.2",
