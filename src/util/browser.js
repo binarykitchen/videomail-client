@@ -59,6 +59,10 @@ module.exports = function (options) {
                       ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
     }
 
+    if (options.debug) {
+      warning += ' Your browser is ' + JSON.stringify(uaParser.browser)
+    }
+
     return warning
   }
 
