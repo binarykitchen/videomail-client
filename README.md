@@ -108,6 +108,7 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#isDirty">`videomailClient.isDirty()`</a>
 * <a href="#submit">`videomailClient.submit()`</a>
+* <a href="#getLogLines">`videomailClient.getLogLines()`</a>
 
 <a name="constructor"></a>
 ### new VideomailClient([options])
@@ -206,6 +207,11 @@ Returns true when a video has been recorded and a form exists. Useful when check
 For advanced use only: especially when the submit button is covered with other HTML layers and the videomail client fails to process the click event.
 
 Calling this function will manually trigger a submission of the recorded videomail. But only when everything else is valid. Nothing will happen when invalid.
+
+<a name="getLogLines"></a>
+### videomailClient.getLogLines()
+
+For advanced use only: returns you a collection of log lines that show what code has been covered recently. Useful if you want to debug something tricky.
 
 <a name="whitelist"></a>
 ## Whitelist
