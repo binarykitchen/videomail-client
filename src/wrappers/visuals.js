@@ -45,6 +45,8 @@ var Visuals = function (container, options) {
     notifier.build()
     recorderInsides.build()
     replay.build()
+
+    debug('Visuals: built.')
   }
 
   function initEvents () {
