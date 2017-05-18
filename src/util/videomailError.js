@@ -304,7 +304,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   videomailError.removeDimensions = function () {
-    return hasClass(VideomailError.IOS_PROBLEM) || browser.isMobile()
+    return true // just temporary hasClass(VideomailError.IOS_PROBLEM) || browser.isMobile()
   }
 
   videomailError.hideButtons = function () {
