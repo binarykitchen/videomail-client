@@ -270,7 +270,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   if (!caller) {
     // try again
+    /*eslint-disable */
     caller = arguments.callee.caller.toString()
+    /*eslint-enable */
   }
 
   var videomailError = new VideomailError(message, {
