@@ -43,6 +43,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
   options = options || {}
   parameters = parameters || {}
 
+  options.debug('VideomailError: create()')
+
   var classList = parameters.classList || []
 
   // Require Browser here, not at the top of the file to avoid

@@ -311,7 +311,7 @@ var Visuals = function (container, options) {
   }
 
   this.limitWidth = function (width) {
-    return container.limitWidth(width)
+    return container.limitWidth(width, options)
   }
 
   this.limitHeight = function (height) {
