@@ -492,6 +492,8 @@ var Recorder = function (visuals, replay, options) {
       throw new Error('Navigator is missing!')
     }
 
+    debug('Recorder: loadGenuineUserMedia()')
+
     self.emit(Events.ASKING_WEBCAM_PERMISSION)
 
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
@@ -554,6 +556,8 @@ var Recorder = function (visuals, replay, options) {
 
       loadGenuineUserMedia()
     } catch (exc) {
+      debug('Recorder: failed to load genuine user media')
+
       userMediaLoading = false
 
       var errorListeners = self.listeners(Events.ERROR)

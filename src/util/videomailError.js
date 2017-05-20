@@ -10,7 +10,8 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'logLines': undefined,
   'useragent': undefined,
   'url': undefined,
-  'stack': undefined
+  'stack': undefined,
+  'caller': undefined
 })
 
 // shim pretty to exclude stack always
@@ -261,12 +262,19 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode += ', name=' + (err.name ? err.name : 'undefined')
   }
 
+  var caller = 'undefined'
+
+  if (VideomailError.create.caller) {
+    caller = VideomailError.create.caller
+  }
+
   var videomailError = new VideomailError(message, {
     explanation: explanation,
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
+    caller: caller,
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
