@@ -1,6 +1,10 @@
 const test = require('tape')
 const VideomailError = require('./../../src/util/videomailError')
 
+const fakeOptions = {
+  debug: function () {}
+}
+
 test('Videomail Error:', function (t) {
   t.test('arguments', function (tt) {
     tt.test('no arguments', function (tt) {
@@ -21,7 +25,7 @@ test('Videomail Error:', function (t) {
 
       const err = new VideomailError(undefined, {
         explanation: undefined
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error')
       tt.equal(err.message, '')
@@ -31,7 +35,7 @@ test('Videomail Error:', function (t) {
     tt.test('one message', function (tt) {
       tt.plan(3)
 
-      const err = new VideomailError('one message')
+      const err = new VideomailError('one message', fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: one message')
       tt.equal(err.message, 'one message')
@@ -43,7 +47,7 @@ test('Videomail Error:', function (t) {
 
       const err = new VideomailError('one message', {
         explanation: 'and an explanation'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: one message')
       tt.equal(err.message, 'one message')
@@ -65,7 +69,7 @@ test('Videomail Error:', function (t) {
     tt.test('no arguments', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create(new Error())
+      const err = VideomailError.create(new Error(), fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Error')
       tt.equal(err.message, 'Error')
@@ -75,7 +79,7 @@ test('Videomail Error:', function (t) {
     tt.test('undefined message', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create(new Error(undefined))
+      const err = VideomailError.create(new Error(undefined), fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Error')
       tt.equal(err.message, 'Error')
@@ -85,7 +89,7 @@ test('Videomail Error:', function (t) {
     tt.test('bad integer', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create(123)
+      const err = VideomailError.create(123, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: 123')
       tt.equal(err.message, 123)
@@ -95,7 +99,7 @@ test('Videomail Error:', function (t) {
     tt.test('one message', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create('one message')
+      const err = VideomailError.create('one message', fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: one message')
       tt.equal(err.message, 'one message')
@@ -105,7 +109,7 @@ test('Videomail Error:', function (t) {
     tt.test('deals with VideomailError instance', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create(new VideomailError('i am already instantiated'))
+      const err = VideomailError.create(new VideomailError('i am already instantiated', fakeOptions))
 
       tt.equal(err.toString(), 'Videomail Error: i am already instantiated')
       tt.equal(err.message, 'i am already instantiated')
@@ -118,7 +122,7 @@ test('Videomail Error:', function (t) {
       const err1 = VideomailError.create({
         code: 1,
         PERMISSION_DENIED: 1
-      })
+      }, fakeOptions)
 
       tt.equal(err1.toString(), 'Videomail Error: Permission denied')
       tt.equal(err1.message, 'Permission denied')
@@ -127,7 +131,7 @@ test('Videomail Error:', function (t) {
       const err2 = VideomailError.create({
         code: 2,
         PERMISSION_DENIED: 2
-      })
+      }, fakeOptions)
 
       tt.equal(err2.toString(), 'Videomail Error')
       tt.equal(err2.message, '')
@@ -137,7 +141,7 @@ test('Videomail Error:', function (t) {
     tt.test('NOT_ALLOWED_ERROR', function (tt) {
       tt.plan(3)
 
-      const err1 = VideomailError.create(VideomailError.NOT_ALLOWED_ERROR)
+      const err1 = VideomailError.create(VideomailError.NOT_ALLOWED_ERROR, fakeOptions)
 
       tt.equal(err1.toString(), 'Videomail Error: Permission denied')
       tt.equal(err1.message, 'Permission denied')
@@ -149,7 +153,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 1
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: 1')
       tt.equal(err.message, 1)
@@ -161,7 +165,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'NO_DEVICES_FOUND'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: No webcam found')
       tt.equal(err.message, 'No webcam found')
@@ -173,7 +177,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'PermissionDeniedError'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Permission denied')
       tt.equal(err.message, 'Permission denied')
@@ -185,7 +189,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'HARDWARE_UNAVAILABLE'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Webcam is unavailable')
       tt.equal(err.message, 'Webcam is unavailable')
@@ -197,7 +201,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'Not connected'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Unable to transfer data')
       tt.equal(err.message, 'Unable to transfer data')
@@ -207,7 +211,7 @@ test('Videomail Error:', function (t) {
     tt.test('with "Not connected" as argument', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create('Not connected')
+      const err = VideomailError.create('Not connected', fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Unable to transfer data')
       tt.equal(err.message, 'Unable to transfer data')
@@ -219,7 +223,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'NO_VIDEO_FEED'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: No video feed found!')
       tt.equal(err.message, 'No video feed found!')
@@ -231,7 +235,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'Starting video failed'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: Starting video failed')
       tt.equal(err.message, 'Starting video failed')
@@ -243,7 +247,7 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create({
         name: 'DevicesNotFoundError'
-      })
+      }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: No available webcam could be found')
       tt.equal(err.message, 'No available webcam could be found')
