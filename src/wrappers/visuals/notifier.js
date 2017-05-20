@@ -189,6 +189,8 @@ var Notifier = function (visuals, options) {
   }
 
   this.build = function () {
+    options.debug('Notifier: build()')
+
     notifyElement = visuals.querySelector('.notifier')
 
     if (!notifyElement) {
@@ -239,6 +241,8 @@ var Notifier = function (visuals, options) {
   }
 
   this.notify = function (message, explanation, notifyOptions) {
+    options.debug('Notifier: notify()')
+
     if (!notifyOptions) {
       notifyOptions = {}
     }
