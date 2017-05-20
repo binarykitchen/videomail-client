@@ -1148,7 +1148,14 @@ var Recorder = function (visuals, replay, options) {
     var ratio
 
     if (userMedia) {
-      ratio = userMedia.getVideoHeight() / userMedia.getVideoWidth()
+      var userMediaVideoWidth = userMedia.getVideoWidth()
+
+      // avoid division by zero
+      if (userMediaVideoWidth < 1) {
+        ratio = 0
+      } else {
+        ratio = userMedia.getVideoHeight() / userMediaVideoWidth
+      }
     } else {
       ratio = options.getRatio()
     }

@@ -247,8 +247,7 @@ module.exports = function (recorder, options) {
             VideomailError.create(
               'Already busy',
               'Probably another browser window is using your webcam?',
-              options,
-              true
+              options
             )
           )
         } else {

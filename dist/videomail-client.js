@@ -10278,7 +10278,7 @@ function isUndefined(arg) {
  *
  * @copyright 2017 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 3.5.9
+ * @version 3.5.10
  */
 (function (global) {
 	var b = /^(b|B)$/,
@@ -19656,6 +19656,8 @@ module.exports = function (options) {
   }
 
   this.checkPlaybackCapabilities = function (video) {
+    options.debug('Browser: checkPlaybackCapabilities()')
+
     var err, message
 
     if (!video) {
@@ -20162,6 +20164,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   options = options || {}
   parameters = parameters || {}
+
+  // be super robust
+  var debug = (options && options.debug) || console.log
+
+  debug('VideomailError: create()')
 
   var classList = parameters.classList || []
 
@@ -21092,7 +21099,7 @@ var Container = function (options) {
     debug('Container: buildChildren()')
 
     if (!containerElement.classList) {
-      self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!'))
+      self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!', options))
     } else {
       containerElement.classList.add('videomail')
 
@@ -21181,11 +21188,11 @@ var Container = function (options) {
 
   function validateOptions () {
     if (options.hasDefinedWidth() && options.video.width % 2 !== 0) {
-      throw VideomailError.create('Width must be divisible by two.')
+      throw VideomailError.create('Width must be divisible by two.', options)
     }
 
     if (options.hasDefinedHeight() && options.video.height % 2 !== 0) {
-      throw VideomailError.create('Height must be divisible by two.')
+      throw VideomailError.create('Height must be divisible by two.', options)
     }
   }
 
@@ -21195,7 +21202,7 @@ var Container = function (options) {
     var width = visuals.getRecorderWidth(true)
 
     if (width < 1) {
-      throw VideomailError.create('Recorder width cannot be less than 1!')
+      throw VideomailError.create('Recorder width cannot be less than 1!', options)
     } else {
       containerElement.style.width = width + 'px'
     }
@@ -21315,11 +21322,11 @@ var Container = function (options) {
   }
 
   this.limitWidth = function (width) {
-    return Dimension.limitWidth(containerElement, width)
+    return Dimension.limitWidth(containerElement, width, options)
   }
 
   this.limitHeight = function (height) {
-    return Dimension.limitHeight(height)
+    return Dimension.limitHeight(height, options)
   }
 
   this.calculateWidth = function (fnOptions) {
@@ -21691,22 +21698,23 @@ function figureMinHeight (height, options) {
     throw VideomailError.create(
       'Got a video height less than 1 (' +
       height +
-      ') while figuring out the minimum!'
+      ') while figuring out the minimum!',
+      options
     )
   }
 
-    // just return it, can be "auto"
+  // just return it, can be "auto"
   return height
 }
 
 module.exports = {
 
-  limitWidth: function (element, width) {
+  limitWidth: function (element, width, options) {
     var outerWidth = getOuterWidth(element)
     var limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
 
     if (numberIsInteger(limitedWidth) && limitedWidth < 1) {
-      throw VideomailError.create('Limited width cannot be less than 1!')
+      throw VideomailError.create('Limited width cannot be less than 1!', options)
     } else {
       return limitedWidth
     }
@@ -21714,9 +21722,9 @@ module.exports = {
 
     // this is difficult to compute and is not entirely correct.
     // but good enough for now to ensure some stability.
-  limitHeight: function (height) {
+  limitHeight: function (height, options) {
     if (numberIsInteger(height) && height < 1) {
-      throw VideomailError.create('Passed limit-height argument cannot be less than 1!')
+      throw VideomailError.create('Passed limit-height argument cannot be less than 1!', options)
     } else {
       var limitedHeight = Math.min(
         height,
@@ -21725,7 +21733,7 @@ module.exports = {
       )
 
       if (limitedHeight < 1) {
-        throw VideomailError.create('Limited height cannot be less than 1!')
+        throw VideomailError.create('Limited height cannot be less than 1!', options)
       } else {
         return limitedHeight
       }
@@ -21738,15 +21746,17 @@ module.exports = {
 
     height = figureMinHeight(height, options)
 
-    if (options.responsive) { height = this.limitHeight(height) }
+    if (options.responsive) {
+      height = this.limitHeight(height, options)
+    }
 
     if (numberIsInteger(height) && height < 1) {
-      throw VideomailError.create('Height cannot be smaller than 1 when calculating width.')
+      throw VideomailError.create('Height cannot be smaller than 1 when calculating width.', options)
     } else {
       var calculatedWidth = parseInt(height / ratio)
 
       if (calculatedWidth < 1) {
-        throw VideomailError.create('Calculated width cannot be smaller than 1!')
+        throw VideomailError.create('Calculated width cannot be smaller than 1!', options)
       } else {
         return calculatedWidth
       }
@@ -21759,18 +21769,22 @@ module.exports = {
 
     var ratio = options.ratio || options.getRatio()
 
-    if (options.hasDefinedWidth()) { width = options.video.width }
-
-    if (numberIsInteger(width) && width < 1) {
-      throw VideomailError.create('Unable to calculate height when width is less than 1.')
-    } else if (options.responsive) {
-      width = this.limitWidth(element, width)
+    if (options.hasDefinedWidth()) {
+      width = options.video.width
     }
 
-    if (width) { height = parseInt(width * ratio) }
+    if (numberIsInteger(width) && width < 1) {
+      throw VideomailError.create('Unable to calculate height when width is less than 1.', options)
+    } else if (options.responsive) {
+      width = this.limitWidth(element, width, options)
+    }
+
+    if (width) {
+      height = parseInt(width * ratio)
+    }
 
     if (numberIsInteger(height) && height < 1) {
-      throw VideomailError.create('Just calculated a height less than 1 which is wrong.')
+      throw VideomailError.create('Just calculated a height less than 1 which is wrong.', options)
     } else {
       return figureMinHeight(height, options)
     }
@@ -21910,7 +21924,10 @@ var Form = function (container, formElement, options) {
 
       // only emit error if key is missing AND the input has no key (value) yet
       if (!videomailKey && !keyInput.value) {
-        self.emit(Events.ERROR, VideomailError.create('Videomail key for preview is missing!'))
+        self.emit(
+          Events.ERROR,
+          VideomailError.create('Videomail key for preview is missing!', options)
+        )
       } else if (videomailKey) {
         keyInput.value = videomailKey
       }
@@ -22372,7 +22389,7 @@ var Visuals = function (container, options) {
   }
 
   this.limitWidth = function (width) {
-    return container.limitWidth(width)
+    return container.limitWidth(width, options)
   }
 
   this.limitHeight = function (height) {
@@ -24306,7 +24323,14 @@ var Recorder = function (visuals, replay, options) {
     var ratio
 
     if (userMedia) {
-      ratio = userMedia.getVideoHeight() / userMedia.getVideoWidth()
+      var userMediaVideoWidth = userMedia.getVideoWidth()
+
+      // avoid division by zero
+      if (userMediaVideoWidth < 1) {
+        ratio = 0
+      } else {
+        ratio = userMedia.getVideoHeight() / userMediaVideoWidth
+      }
     } else {
       ratio = options.getRatio()
     }
@@ -24952,8 +24976,7 @@ module.exports = function (recorder, options) {
             VideomailError.create(
               'Already busy',
               'Probably another browser window is using your webcam?',
-              options,
-              true
+              options
             )
           )
         } else {
