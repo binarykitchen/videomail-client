@@ -21381,7 +21381,7 @@ var Container = function (options) {
         debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
       }
     } catch (exc) {
-      if (built) {
+      if (visuals.isNotifierBuilt()) {
         self.emit(Events.ERROR, exc)
       } else {
         throw exc
@@ -22358,16 +22358,19 @@ var Visuals = function (container, options) {
     }
   }
 
+  this.showVisuals = function () {
+    visualsElement && hidden(visualsElement, false)
+  }
+
   this.show = function () {
     !this.isReplayShown() && recorder.build()
-
-    visualsElement && hidden(visualsElement, false)
+    this.showVisuals()
   }
 
   this.showReplayOnly = function () {
     !this.isReplayShown() && replay.show()
 
-    self.show()
+    this.show()
     recorder.hide()
     notifier.hide()
   }
@@ -22414,6 +22417,10 @@ var Visuals = function (container, options) {
 
   this.checkTimer = function (intervalSum) {
     recorderInsides.checkTimer(intervalSum)
+  }
+
+  this.isNotifierBuilt = function () {
+    return notifier && notifier.isBuilt()
   }
 
   this.isReplayShown = replay.isShown.bind(replay)
@@ -22929,8 +22936,12 @@ var Notifier = function (visuals, options) {
     if (options.isAudioEnabled()) {
       overallProgress = 'Video: ' + frameProgress
 
-      if (sampleProgress) { overallProgress += ', Audio: ' + sampleProgress }
-    } else { overallProgress = frameProgress }
+      if (sampleProgress) {
+        overallProgress += ', Audio: ' + sampleProgress
+      }
+    } else {
+      overallProgress = frameProgress
+    }
 
     self.setExplanation(overallProgress)
   }
@@ -22999,7 +23010,9 @@ var Notifier = function (visuals, options) {
         entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
         entertaining = true
       }
-    } else { cancelEntertainment() }
+    } else {
+      cancelEntertainment()
+    }
   }
 
   function cancelEntertainment () {
@@ -23092,13 +23105,23 @@ var Notifier = function (visuals, options) {
       notifyElement.classList.remove('blocking')
     }
 
-    if (messageElement) { messageElement.innerHTML = null }
+    if (messageElement) {
+      messageElement.innerHTML = null
+    }
 
     hideExplanation()
   }
 
   this.isVisible = function () {
-    if (!built) { return false } else { return notifyElement && !hidden(notifyElement) }
+    if (!built) {
+      return false
+    } else {
+      return notifyElement && !hidden(notifyElement)
+    }
+  }
+
+  this.isBuilt = function () {
+    return built
   }
 
   this.notify = function (message, explanation, notifyOptions) {
@@ -23160,6 +23183,10 @@ var Notifier = function (visuals, options) {
     } else {
       cancelEntertainment()
     }
+
+    // just as a safety in case if an error is thrown in the middle of the build process
+    // and visuals aren't built/shown yet.
+    visuals.showVisuals()
 
     show()
 
@@ -24436,13 +24463,7 @@ var Replay = function (parentElement, options) {
       throw VideomailError.create('Please upgrade browser', options)
     }
 
-    var err = browser.checkPlaybackCapabilities(replayElement)
-
-    if (err) {
-      throw err
-    } else {
-      parentElement.appendChild(replayElement)
-    }
+    parentElement.appendChild(replayElement)
   }
 
   function isStandalone () {

@@ -360,7 +360,7 @@ var Container = function (options) {
         debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
       }
     } catch (exc) {
-      if (built) {
+      if (visuals.isNotifierBuilt()) {
         self.emit(Events.ERROR, exc)
       } else {
         throw exc
