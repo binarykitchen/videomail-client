@@ -239,6 +239,8 @@ var Notifier = function (visuals, options) {
   }
 
   this.notify = function (message, explanation, notifyOptions) {
+    options.debug('Notifier: notify()')
+
     if (!notifyOptions) {
       notifyOptions = {}
     }
