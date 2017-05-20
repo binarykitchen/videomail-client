@@ -280,16 +280,19 @@ var Visuals = function (container, options) {
     }
   }
 
+  this.showVisuals = function () {
+    visualsElement && hidden(visualsElement, false)
+  }
+
   this.show = function () {
     !this.isReplayShown() && recorder.build()
-
-    visualsElement && hidden(visualsElement, false)
+    this.showVisuals()
   }
 
   this.showReplayOnly = function () {
     !this.isReplayShown() && replay.show()
 
-    self.show()
+    this.show()
     recorder.hide()
     notifier.hide()
   }
@@ -336,6 +339,10 @@ var Visuals = function (container, options) {
 
   this.checkTimer = function (intervalSum) {
     recorderInsides.checkTimer(intervalSum)
+  }
+
+  this.isNotifierBuilt = function () {
+    return notifier && notifier.isBuilt()
   }
 
   this.isReplayShown = replay.isShown.bind(replay)
