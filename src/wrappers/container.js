@@ -78,7 +78,7 @@ var Container = function (options) {
     debug('Container: buildChildren()')
 
     if (!containerElement.classList) {
-      self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!'))
+      self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!', options))
     } else {
       containerElement.classList.add('videomail')
 
@@ -167,11 +167,11 @@ var Container = function (options) {
 
   function validateOptions () {
     if (options.hasDefinedWidth() && options.video.width % 2 !== 0) {
-      throw VideomailError.create('Width must be divisible by two.')
+      throw VideomailError.create('Width must be divisible by two.', options)
     }
 
     if (options.hasDefinedHeight() && options.video.height % 2 !== 0) {
-      throw VideomailError.create('Height must be divisible by two.')
+      throw VideomailError.create('Height must be divisible by two.', options)
     }
   }
 
@@ -181,7 +181,7 @@ var Container = function (options) {
     var width = visuals.getRecorderWidth(true)
 
     if (width < 1) {
-      throw VideomailError.create('Recorder width cannot be less than 1!')
+      throw VideomailError.create('Recorder width cannot be less than 1!', options)
     } else {
       containerElement.style.width = width + 'px'
     }
@@ -301,11 +301,11 @@ var Container = function (options) {
   }
 
   this.limitWidth = function (width) {
-    return Dimension.limitWidth(containerElement, width)
+    return Dimension.limitWidth(containerElement, width, options)
   }
 
   this.limitHeight = function (height) {
-    return Dimension.limitHeight(height)
+    return Dimension.limitHeight(height, options)
   }
 
   this.calculateWidth = function (fnOptions) {

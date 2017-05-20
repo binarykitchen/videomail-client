@@ -150,6 +150,8 @@ module.exports = function (options) {
   }
 
   this.checkPlaybackCapabilities = function (video) {
+    options.debug('Browser: checkPlaybackCapabilities()')
+
     var err, message
 
     if (!video) {
