@@ -33,13 +33,7 @@ var Replay = function (parentElement, options) {
       throw VideomailError.create('Please upgrade browser', options)
     }
 
-    var err = browser.checkPlaybackCapabilities(replayElement)
-
-    if (err) {
-      throw err
-    } else {
-      parentElement.appendChild(replayElement)
-    }
+    parentElement.appendChild(replayElement)
   }
 
   function isStandalone () {
