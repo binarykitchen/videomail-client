@@ -262,10 +262,15 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode += ', name=' + (err.name ? err.name : 'undefined')
   }
 
-  var caller = 'undefined'
+  var caller
 
   if (VideomailError.create.caller) {
     caller = VideomailError.create.caller
+  }
+
+  if (!caller) {
+    // try again
+    caller = arguments.callee.caller.toString()
   }
 
   var videomailError = new VideomailError(message, {
