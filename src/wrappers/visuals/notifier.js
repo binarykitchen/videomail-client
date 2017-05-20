@@ -50,8 +50,12 @@ var Notifier = function (visuals, options) {
     if (options.isAudioEnabled()) {
       overallProgress = 'Video: ' + frameProgress
 
-      if (sampleProgress) { overallProgress += ', Audio: ' + sampleProgress }
-    } else { overallProgress = frameProgress }
+      if (sampleProgress) {
+        overallProgress += ', Audio: ' + sampleProgress
+      }
+    } else {
+      overallProgress = frameProgress
+    }
 
     self.setExplanation(overallProgress)
   }
@@ -120,7 +124,9 @@ var Notifier = function (visuals, options) {
         entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
         entertaining = true
       }
-    } else { cancelEntertainment() }
+    } else {
+      cancelEntertainment()
+    }
   }
 
   function cancelEntertainment () {
@@ -213,13 +219,23 @@ var Notifier = function (visuals, options) {
       notifyElement.classList.remove('blocking')
     }
 
-    if (messageElement) { messageElement.innerHTML = null }
+    if (messageElement) {
+      messageElement.innerHTML = null
+    }
 
     hideExplanation()
   }
 
   this.isVisible = function () {
-    if (!built) { return false } else { return notifyElement && !hidden(notifyElement) }
+    if (!built) {
+      return false
+    } else {
+      return notifyElement && !hidden(notifyElement)
+    }
+  }
+
+  this.isBuilt = function () {
+    return built
   }
 
   this.notify = function (message, explanation, notifyOptions) {
@@ -281,6 +297,10 @@ var Notifier = function (visuals, options) {
     } else {
       cancelEntertainment()
     }
+
+    // just as a safety in case if an error is thrown in the middle of the build process
+    // and visuals aren't built/shown yet.
+    visuals.showVisuals()
 
     show()
 
