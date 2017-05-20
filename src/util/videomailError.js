@@ -43,7 +43,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
   options = options || {}
   parameters = parameters || {}
 
-  options.debug('VideomailError: create()')
+  // be super robust
+  var debug = (options && options.debug) || console.log
+
+  debug('VideomailError: create()')
 
   var classList = parameters.classList || []
 
