@@ -40,12 +40,12 @@ gulp.task('stylus', function () {
     }))
     // https://github.com/ai/autoprefixer#browsers
     .pipe(plugins.autoprefixer(
-        'last 3 versions',
+        'last 4 versions',
         '> 1%',
         'Explorer >= 10',
-        'Chrome >= 45',
         'Firefox ESR',
-        'iOS >= 8', 'android >= 4'
+        'iOS >= 8',
+        'android >= 4'
     ))
     // always minify otherwise it gets broken with line-breaks
     // when surrounded with `'s when injected

@@ -1,4 +1,5 @@
 var h = require('hyperscript')
+var util = require('util')
 
 var AudioRecorder = require('./../../util/audioRecorder')
 var VideomailError = require('./../../util/videomailError')
@@ -339,9 +340,9 @@ module.exports = function (recorder, options) {
           //
           // also i think should be ignored when fireCallbacks() was successful and it's
           // playing fine anyway?
-          JSON.stringify(err) + ', ' +
-          JSON.stringify(arguments) + ', ' +
-          JSON.stringify(rawVisualUserMedia),
+          'err: ' + util.inspect(err, {showHidden: true}) + ', ' +
+          'arguments: ' + util.inspect(arguments, {showHidden: true}) + ', ' +
+          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true}),
           options
         ))
       })
