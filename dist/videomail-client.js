@@ -20122,6 +20122,7 @@ module.exports = function (window, navigator) {
 },{"classlist.js":10,"core-js/shim":303,"element-closest":313,"request-frame":353}],387:[function(require,module,exports){
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
+var util = require('util')
 var originalPretty = require('./pretty')
 var Resource = require('./../resource')
 
@@ -20314,7 +20315,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message
         } else {
           // tried toString before but nah
-          explanation = JSON.stringify(originalExplanation)
+          explanation = util.inspect(originalExplanation, {showHidden: true})
         }
       }
 
@@ -20392,8 +20393,15 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   if (!caller) {
     // try again
+
     /*eslint-disable */
-    caller = arguments.callee.caller.toString()
+    if (arguments.callee.caller) {
+      caller = arguments.callee.caller.toString()
+    } else if (arguments.callee) {
+      caller = util.inspect(arguments.callee, {showHidden: true})
+    } else {
+      caller = '(no arguments.callee exist)'
+    }
     /*eslint-enable */
   }
 
@@ -20462,7 +20470,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 module.exports = VideomailError
 
-},{"./../resource":377,"./browser":380,"./pretty":385,"create-error":305}],388:[function(require,module,exports){
+},{"./../resource":377,"./browser":380,"./pretty":385,"create-error":305,"util":368}],388:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -23556,7 +23564,7 @@ var Recorder = function (visuals, replay, options) {
 
             self.emit(Events.CONNECTED)
 
-            debug('Asking for webcam permissons now.')
+            debug('Going to ask for webcam permissons now ...')
 
             cb && cb()
           }
@@ -24772,6 +24780,7 @@ module.exports = Replay
 
 },{"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"./../../util/videomailError":387,"hidden":320,"hyperscript":322,"iphone-inline-video":328,"util":368}],402:[function(require,module,exports){
 var h = require('hyperscript')
+var util = require('util')
 
 var AudioRecorder = require('./../../util/audioRecorder')
 var VideomailError = require('./../../util/videomailError')
@@ -25112,9 +25121,9 @@ module.exports = function (recorder, options) {
           //
           // also i think should be ignored when fireCallbacks() was successful and it's
           // playing fine anyway?
-          JSON.stringify(err) + ', ' +
-          JSON.stringify(arguments) + ', ' +
-          JSON.stringify(rawVisualUserMedia),
+          'err: ' + util.inspect(err, {showHidden: true}) + ', ' +
+          'arguments: ' + util.inspect(arguments, {showHidden: true}) + ', ' +
+          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true}),
           options
         ))
       })
@@ -25269,7 +25278,7 @@ module.exports = function (recorder, options) {
   }
 }
 
-},{"./../../events":375,"./../../util/audioRecorder":379,"./../../util/eventEmitter":382,"./../../util/mediaEvents":384,"./../../util/pretty":385,"./../../util/videomailError":387,"hyperscript":322}],"videomail-client":[function(require,module,exports){
+},{"./../../events":375,"./../../util/audioRecorder":379,"./../../util/eventEmitter":382,"./../../util/mediaEvents":384,"./../../util/pretty":385,"./../../util/videomailError":387,"hyperscript":322,"util":368}],"videomail-client":[function(require,module,exports){
 var standardize = require('./util/standardize')
 var Client = require('./client')
 

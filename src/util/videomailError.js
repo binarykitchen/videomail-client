@@ -1,5 +1,6 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
+var util = require('util')
 var originalPretty = require('./pretty')
 var Resource = require('./../resource')
 
@@ -192,7 +193,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message
         } else {
           // tried toString before but nah
-          explanation = JSON.stringify(originalExplanation)
+          explanation = util.inspect(originalExplanation, {showHidden: true})
         }
       }
 
@@ -270,8 +271,15 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   if (!caller) {
     // try again
+
     /*eslint-disable */
-    caller = arguments.callee.caller.toString()
+    if (arguments.callee.caller) {
+      caller = arguments.callee.caller.toString()
+    } else if (arguments.callee) {
+      caller = util.inspect(arguments.callee, {showHidden: true})
+    } else {
+      caller = '(no arguments.callee exist)'
+    }
     /*eslint-enable */
   }
 
