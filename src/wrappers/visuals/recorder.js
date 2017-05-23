@@ -335,7 +335,7 @@ var Recorder = function (visuals, replay, options) {
 
             self.emit(Events.CONNECTED)
 
-            debug('Asking for webcam permissons now.')
+            debug('Going to ask for webcam permissons now ...')
 
             cb && cb()
           }
