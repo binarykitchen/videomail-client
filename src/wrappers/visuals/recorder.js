@@ -273,6 +273,7 @@ var Recorder = function (visuals, replay, options) {
         // websocket options cannot be set on client side, only on server, see
         // https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
         stream = websocket(url2Connect, {
+          perMessageDeflate: false,
           // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
           objectMode: true
         })
