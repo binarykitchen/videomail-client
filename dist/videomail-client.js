@@ -20434,7 +20434,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: caller || 'unable to find caller',
+    caller: caller || '(unable to find caller)',
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
