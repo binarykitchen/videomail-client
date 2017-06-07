@@ -274,9 +274,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     /*eslint-disable */
     if (arguments.callee.caller) {
-      caller = arguments.callee.caller.toString()
+      caller = util.inspect(arguments.callee.caller, {showHidden: true, depth: 3})
     } else if (arguments.callee) {
-      caller = util.inspect(arguments.callee, {showHidden: true})
+      caller = util.inspect(arguments.callee, {showHidden: true, depth: 3})
     } else {
       caller = '(no arguments.callee exist)'
     }
@@ -289,7 +289,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: caller,
+    caller: caller || 'unable to find caller',
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
