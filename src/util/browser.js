@@ -60,7 +60,13 @@ module.exports = function (options) {
     }
 
     if (options.debug) {
-      warning += ' Your browser is ' + JSON.stringify(uaParser.browser)
+      if (warning) {
+        warning += ' '
+      } else {
+        warning = ''
+      }
+
+      warning += 'Your browser is ' + JSON.stringify(uaParser.browser)
     }
 
     return warning

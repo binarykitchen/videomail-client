@@ -340,9 +340,9 @@ module.exports = function (recorder, options) {
           //
           // also i think should be ignored when fireCallbacks() was successful and it's
           // playing fine anyway?
-          'err: ' + util.inspect(err, {showHidden: true}) + ', ' +
-          'arguments: ' + util.inspect(arguments, {showHidden: true}) + ', ' +
-          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true}),
+          'err: ' + util.inspect(err, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
+          'arguments: ' + util.inspect(arguments, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
+          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true, showProxy: true, depth: 4}),
           options
         ))
       })
