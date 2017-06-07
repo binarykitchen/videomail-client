@@ -416,7 +416,7 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":314,"inherits":325,"raf":340}],2:[function(require,module,exports){
+},{"events":314,"inherits":326,"raf":341}],2:[function(require,module,exports){
 var toBuffer       = require('typedarray-to-buffer'),
     isFloat32Array = require('validate.io-float32array')
 
@@ -442,7 +442,7 @@ module.exports = function(float32Array) {
     }
 }
 
-},{"typedarray-to-buffer":363,"validate.io-float32array":369}],3:[function(require,module,exports){
+},{"typedarray-to-buffer":364,"validate.io-float32array":370}],3:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -2488,7 +2488,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":3,"ieee754":323}],8:[function(require,module,exports){
+},{"base64-js":3,"ieee754":324}],8:[function(require,module,exports){
 var toBuffer  = require('typedarray-to-buffer'),
     isBrowser = typeof(document) !== 'undefined' && typeof(document.createElement) === 'function',
 
@@ -2719,7 +2719,7 @@ module.exports = function(canvas, options) {
     }
 }
 
-},{"typedarray-to-buffer":363}],9:[function(require,module,exports){
+},{"typedarray-to-buffer":364}],9:[function(require,module,exports){
 // contains, add, remove, toggle
 var indexof = require('indexof')
 
@@ -2820,7 +2820,7 @@ function isTruthy(value) {
     return !!value
 }
 
-},{"indexof":324}],10:[function(require,module,exports){
+},{"indexof":325}],10:[function(require,module,exports){
 /*
  * classList.js: Cross-browser full element.classList implementation.
  * 1.1.20150312
@@ -9388,7 +9388,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":329}],305:[function(require,module,exports){
+},{"../../is-buffer/index.js":330}],305:[function(require,module,exports){
 //     create-error.js 0.3.1
 //     (c) 2013 Tim Griesser
 //     This source may be freely distributed under the MIT license.
@@ -9516,28 +9516,28 @@ module.exports = function () {
 };
 
 },{}],307:[function(require,module,exports){
-var util         = require('util'),
-    events       = require('events'),
-    EventEmitter = events.EventEmitter
+var util = require('util')
+var global = require('global')
+var EventEmitter = require('events')
 
-module.exports = function() {
-
-  var Despot = function() {
-
-    if (arguments.callee._singletonInstance) {
-      return arguments.callee._singletonInstance
+var makeDespot = function () {
+  var Despot = function () {
+    if (global._singletonDespotInstance) {
+      return global._singletonDespotInstance
+    } else {
+      global._singletonDespotInstance = this
+      EventEmitter.call(this)
     }
-
-    arguments.callee._singletonInstance = this
-    EventEmitter.call(this)
   }
 
   util.inherits(Despot, EventEmitter)
 
   return new Despot()
-}()
+}
 
-},{"events":314,"util":368}],308:[function(require,module,exports){
+module.exports = makeDespot()
+
+},{"events":314,"global":320,"util":369}],308:[function(require,module,exports){
 'use strict'
 
 var document = require('global/document')
@@ -9834,7 +9834,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 module.exports = Duplexify
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":339,"buffer":7,"end-of-stream":311,"inherits":325,"readable-stream":350,"stream-shift":355}],311:[function(require,module,exports){
+},{"_process":340,"buffer":7,"end-of-stream":311,"inherits":326,"readable-stream":351,"stream-shift":356}],311:[function(require,module,exports){
 var once = require('once');
 
 var noop = function() {};
@@ -9930,7 +9930,7 @@ function once (fn) {
   return f
 }
 
-},{"wrappy":372}],313:[function(require,module,exports){
+},{"wrappy":373}],313:[function(require,module,exports){
 // element-closest | CC0-1.0 | github.com/jonathantneal/closest
 
 (function (ElementProto) {
@@ -10688,6 +10688,23 @@ module.exports = doccy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"min-document":4}],320:[function(require,module,exports){
+(function (global){
+var win;
+
+if (typeof window !== "undefined") {
+    win = window;
+} else if (typeof global !== "undefined") {
+    win = global;
+} else if (typeof self !== "undefined"){
+    win = self;
+} else {
+    win = {};
+}
+
+module.exports = win;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],321:[function(require,module,exports){
 module.exports = shim
 
 function shim (element, value) {
@@ -10698,7 +10715,7 @@ function shim (element, value) {
     element.style.display = value ? 'none' : ''
 }
 
-},{}],321:[function(require,module,exports){
+},{}],322:[function(require,module,exports){
 // HumanizeDuration.js - http://git.io/j0HgmQ
 
 ;(function () {
@@ -11253,7 +11270,7 @@ function shim (element, value) {
   }
 })();  // eslint-disable-line semi
 
-},{}],322:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 var split = require('browser-split')
 var ClassList = require('class-list')
 
@@ -11415,7 +11432,7 @@ function isArray (arr) {
 
 
 
-},{"browser-split":5,"class-list":9,"html-element":4}],323:[function(require,module,exports){
+},{"browser-split":5,"class-list":9,"html-element":4}],324:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -11501,7 +11518,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],324:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -11512,7 +11529,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],325:[function(require,module,exports){
+},{}],326:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -11537,7 +11554,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],326:[function(require,module,exports){
+},{}],327:[function(require,module,exports){
 var containers = []; // will store container HTMLElement references
 var styleElements = []; // will store {prepend: HTMLElement, append: HTMLElement}
 
@@ -11597,7 +11614,7 @@ function createStyleElement() {
 module.exports = insertCss;
 module.exports.insertCss = insertCss;
 
-},{}],327:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 /*! npm.im/intervalometer */
 'use strict';
 
@@ -11640,7 +11657,7 @@ function timerIntervalometer(cb, delay) {
 exports.intervalometer = intervalometer;
 exports.frameIntervalometer = frameIntervalometer;
 exports.timerIntervalometer = timerIntervalometer;
-},{}],328:[function(require,module,exports){
+},{}],329:[function(require,module,exports){
 /*! npm.im/iphone-inline-video 2.0.2 */
 'use strict';
 
@@ -11986,7 +12003,7 @@ function enableInlineVideo(video, opts) {
 
 module.exports = enableInlineVideo;
 
-},{"intervalometer":327}],329:[function(require,module,exports){
+},{"intervalometer":328}],330:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -12009,7 +12026,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],330:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 'use strict';
 var numberIsNan = require('number-is-nan');
 
@@ -12017,13 +12034,13 @@ module.exports = Number.isFinite || function (val) {
 	return !(typeof val !== 'number' || numberIsNan(val) || val === Infinity || val === -Infinity);
 };
 
-},{"number-is-nan":337}],331:[function(require,module,exports){
+},{"number-is-nan":338}],332:[function(require,module,exports){
 module.exports = isPowerOfTwo
 
 function isPowerOfTwo(n) {
   return n !== 0 && (n & (n - 1)) === 0
 }
-},{}],332:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -12066,14 +12083,14 @@ function isLooseTypedArray(arr) {
   return names[toString.call(arr)]
 }
 
-},{}],333:[function(require,module,exports){
+},{}],334:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],334:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -12128,7 +12145,7 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],335:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 
 // Flat merge
 module.exports = exports = function(host) {
@@ -12202,7 +12219,7 @@ function recurser(host, donor) {
 /* End of file index.js */
 /* Location: ./lib/index.js */
 
-},{}],336:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 'use strict';
 var numberIsFinite = require('is-finite');
 
@@ -12210,13 +12227,13 @@ module.exports = Number.isInteger || function (x) {
 	return numberIsFinite(x) && Math.floor(x) === x;
 };
 
-},{"is-finite":330}],337:[function(require,module,exports){
+},{"is-finite":331}],338:[function(require,module,exports){
 'use strict';
 module.exports = Number.isNaN || function (x) {
 	return x !== x;
 };
 
-},{}],338:[function(require,module,exports){
+},{}],339:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -12263,7 +12280,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":339}],339:[function(require,module,exports){
+},{"_process":340}],340:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -12449,7 +12466,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],340:[function(require,module,exports){
+},{}],341:[function(require,module,exports){
 (function (global){
 var now = require('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -12525,7 +12542,7 @@ module.exports.polyfill = function() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":341}],341:[function(require,module,exports){
+},{"performance-now":342}],342:[function(require,module,exports){
 (function (process){
 // Generated by CoffeeScript 1.12.2
 (function() {
@@ -12565,7 +12582,7 @@ module.exports.polyfill = function() {
 
 
 }).call(this,require('_process'))
-},{"_process":339}],342:[function(require,module,exports){
+},{"_process":340}],343:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -12641,7 +12658,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":344,"./_stream_writable":346,"core-util-is":304,"inherits":325,"process-nextick-args":338}],343:[function(require,module,exports){
+},{"./_stream_readable":345,"./_stream_writable":347,"core-util-is":304,"inherits":326,"process-nextick-args":339}],344:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -12668,7 +12685,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":345,"core-util-is":304,"inherits":325}],344:[function(require,module,exports){
+},{"./_stream_transform":346,"core-util-is":304,"inherits":326}],345:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -13606,7 +13623,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":342,"./internal/streams/BufferList":347,"./internal/streams/stream":348,"_process":339,"buffer":7,"buffer-shims":6,"core-util-is":304,"events":314,"inherits":325,"isarray":333,"process-nextick-args":338,"string_decoder/":349,"util":4}],345:[function(require,module,exports){
+},{"./_stream_duplex":343,"./internal/streams/BufferList":348,"./internal/streams/stream":349,"_process":340,"buffer":7,"buffer-shims":6,"core-util-is":304,"events":314,"inherits":326,"isarray":334,"process-nextick-args":339,"string_decoder/":350,"util":4}],346:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -13789,7 +13806,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":342,"core-util-is":304,"inherits":325}],346:[function(require,module,exports){
+},{"./_stream_duplex":343,"core-util-is":304,"inherits":326}],347:[function(require,module,exports){
 (function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
@@ -14336,7 +14353,7 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":342,"./internal/streams/stream":348,"_process":339,"buffer":7,"buffer-shims":6,"core-util-is":304,"inherits":325,"process-nextick-args":338,"util-deprecate":365}],347:[function(require,module,exports){
+},{"./_stream_duplex":343,"./internal/streams/stream":349,"_process":340,"buffer":7,"buffer-shims":6,"core-util-is":304,"inherits":326,"process-nextick-args":339,"util-deprecate":366}],348:[function(require,module,exports){
 'use strict';
 
 var Buffer = require('buffer').Buffer;
@@ -14401,10 +14418,10 @@ BufferList.prototype.concat = function (n) {
   }
   return ret;
 };
-},{"buffer":7,"buffer-shims":6}],348:[function(require,module,exports){
+},{"buffer":7,"buffer-shims":6}],349:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":314}],349:[function(require,module,exports){
+},{"events":314}],350:[function(require,module,exports){
 'use strict';
 
 var Buffer = require('buffer').Buffer;
@@ -14678,7 +14695,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"buffer":7,"buffer-shims":6}],350:[function(require,module,exports){
+},{"buffer":7,"buffer-shims":6}],351:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -14687,7 +14704,7 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":342,"./lib/_stream_passthrough.js":343,"./lib/_stream_readable.js":344,"./lib/_stream_transform.js":345,"./lib/_stream_writable.js":346}],351:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":343,"./lib/_stream_passthrough.js":344,"./lib/_stream_readable.js":345,"./lib/_stream_transform.js":346,"./lib/_stream_writable.js":347}],352:[function(require,module,exports){
 'use strict';
 
 var readystate = module.exports = require('./readystate')
@@ -14760,7 +14777,7 @@ var readystate = module.exports = require('./readystate')
 } ());
 
 
-},{"./readystate":352}],352:[function(require,module,exports){
+},{"./readystate":353}],353:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14914,7 +14931,7 @@ RS.prototype.removeAllListeners = function removeAllListeners() {
 //
 module.exports = new RS();
 
-},{}],353:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 /**
  * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
  * @version v1.5.3
@@ -15145,10 +15162,10 @@ return requestFrame;
 
 })));
 
-},{}],354:[function(require,module,exports){
+},{}],355:[function(require,module,exports){
 module.exports = require('buffer')
 
-},{"buffer":7}],355:[function(require,module,exports){
+},{"buffer":7}],356:[function(require,module,exports){
 module.exports = shift
 
 function shift (stream) {
@@ -15170,7 +15187,7 @@ function getStateLength (state) {
   return state.length
 }
 
-},{}],356:[function(require,module,exports){
+},{}],357:[function(require,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -16105,7 +16122,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-function":357,"./is-object":358,"./request-base":359,"./response-base":360,"./should-retry":361,"component-emitter":11}],357:[function(require,module,exports){
+},{"./is-function":358,"./is-object":359,"./request-base":360,"./response-base":361,"./should-retry":362,"component-emitter":11}],358:[function(require,module,exports){
 /**
  * Check if `fn` is a function.
  *
@@ -16122,7 +16139,7 @@ function isFunction(fn) {
 
 module.exports = isFunction;
 
-},{"./is-object":358}],358:[function(require,module,exports){
+},{"./is-object":359}],359:[function(require,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -16137,7 +16154,7 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],359:[function(require,module,exports){
+},{}],360:[function(require,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -16730,7 +16747,7 @@ RequestBase.prototype._setTimeouts = function() {
   }
 }
 
-},{"./is-object":358}],360:[function(require,module,exports){
+},{"./is-object":359}],361:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -16865,7 +16882,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
     this.notFound = 404 == status;
 };
 
-},{"./utils":362}],361:[function(require,module,exports){
+},{"./utils":363}],362:[function(require,module,exports){
 var ERROR_CODES = [
   'ECONNRESET',
   'ETIMEDOUT',
@@ -16890,7 +16907,7 @@ module.exports = function shouldRetry(err, res) {
   return false;
 };
 
-},{}],362:[function(require,module,exports){
+},{}],363:[function(require,module,exports){
 
 /**
  * Return the mime type for the given `str`.
@@ -16959,7 +16976,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
   return header;
 };
-},{}],363:[function(require,module,exports){
+},{}],364:[function(require,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -16988,7 +17005,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":7,"is-typedarray":332}],364:[function(require,module,exports){
+},{"buffer":7,"is-typedarray":333}],365:[function(require,module,exports){
 /**
  * UAParser.js v0.7.12
  * Lightweight JavaScript-based User-Agent string parser
@@ -17905,7 +17922,7 @@ module.exports = function typedarrayToBuffer (arr) {
 
 })(typeof window === 'object' ? window : this);
 
-},{}],365:[function(require,module,exports){
+},{}],366:[function(require,module,exports){
 (function (global){
 
 /**
@@ -17976,16 +17993,16 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],366:[function(require,module,exports){
-arguments[4][325][0].apply(exports,arguments)
-},{"dup":325}],367:[function(require,module,exports){
+},{}],367:[function(require,module,exports){
+arguments[4][326][0].apply(exports,arguments)
+},{"dup":326}],368:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],368:[function(require,module,exports){
+},{}],369:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -18575,7 +18592,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":367,"_process":339,"inherits":366}],369:[function(require,module,exports){
+},{"./support/isBuffer":368,"_process":340,"inherits":367}],370:[function(require,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -18601,7 +18618,7 @@ function isFloat32Array( value ) {
 
 module.exports = isFloat32Array;
 
-},{}],370:[function(require,module,exports){
+},{}],371:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -18787,7 +18804,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":339,"duplexify":310,"readable-stream":350,"safe-buffer":354,"ws":371}],371:[function(require,module,exports){
+},{"_process":340,"duplexify":310,"readable-stream":351,"safe-buffer":355,"ws":372}],372:[function(require,module,exports){
 
 var ws = null
 
@@ -18801,7 +18818,7 @@ if (typeof WebSocket !== 'undefined') {
 
 module.exports = ws
 
-},{}],372:[function(require,module,exports){
+},{}],373:[function(require,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -18836,7 +18853,7 @@ function wrappy (fn, cb) {
   }
 }
 
-},{}],373:[function(require,module,exports){
+},{}],374:[function(require,module,exports){
 var merge = require('merge-recursive')
 var readystate = require('readystate')
 var util = require('util')
@@ -19012,7 +19029,7 @@ VideomailClient.events = Events
 
 module.exports = VideomailClient
 
-},{"./constants":374,"./events":375,"./options":376,"./resource":377,"./util/browser":380,"./util/collectLogger":381,"./util/eventEmitter":382,"./wrappers/container":389,"./wrappers/optionsWrapper":392,"./wrappers/visuals/replay":401,"merge-recursive":335,"readystate":351,"util":368}],374:[function(require,module,exports){
+},{"./constants":375,"./events":376,"./options":377,"./resource":378,"./util/browser":381,"./util/collectLogger":382,"./util/eventEmitter":383,"./wrappers/container":390,"./wrappers/optionsWrapper":393,"./wrappers/visuals/replay":402,"merge-recursive":336,"readystate":352,"util":369}],375:[function(require,module,exports){
 // constants (changing these only break down functionality, so be careful)
 
 module.exports = {
@@ -19024,7 +19041,7 @@ module.exports = {
   }
 }
 
-},{}],375:[function(require,module,exports){
+},{}],376:[function(require,module,exports){
 var keymirror = require('keymirror')
 
 module.exports = keymirror({
@@ -19068,7 +19085,7 @@ module.exports = keymirror({
   INVISIBLE: null  // document just became INvisible
 })
 
-},{"keymirror":334}],376:[function(require,module,exports){
+},{"keymirror":335}],377:[function(require,module,exports){
 module.exports = {
   logger: null,                         // define logging instance. leave null for default, console.
   logStackSize: 30,                     // limits the stack size of log outputs to collect
@@ -19204,7 +19221,7 @@ module.exports = {
   fakeUaString: null
 }
 
-},{}],377:[function(require,module,exports){
+},{}],378:[function(require,module,exports){
 var superagent = require('superagent')
 var Constants = require('./constants')
 var CACHE_KEY = 'alias'
@@ -19389,9 +19406,9 @@ module.exports = function (options) {
   }
 }
 
-},{"./constants":374,"superagent":356}],378:[function(require,module,exports){
+},{"./constants":375,"superagent":357}],379:[function(require,module,exports){
 module.exports='@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{-o-object-fit:scale-down;object-fit:scale-down}.videomail .replay,.videomail .userMedia{width:100%!important}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}'
-},{}],379:[function(require,module,exports){
+},{}],380:[function(require,module,exports){
 var isPOT = require('is-power-of-two')
 var AudioSample = require('audio-sample')
 
@@ -19503,7 +19520,7 @@ module.exports = function (userMedia, options) {
   }
 }
 
-},{"./videomailError":387,"audio-sample":2,"is-power-of-two":331}],380:[function(require,module,exports){
+},{"./videomailError":388,"audio-sample":2,"is-power-of-two":332}],381:[function(require,module,exports){
 var UAParser = require('ua-parser-js')
 var defined = require('defined')
 var VideomailError = require('./videomailError')
@@ -19566,7 +19583,13 @@ module.exports = function (options) {
     }
 
     if (options.debug) {
-      warning += ' Your browser is ' + JSON.stringify(uaParser.browser)
+      if (warning) {
+        warning += ' '
+      } else {
+        warning = ''
+      }
+
+      warning += 'Your browser is ' + JSON.stringify(uaParser.browser)
     }
 
     return warning
@@ -19745,7 +19768,7 @@ module.exports = function (options) {
   }
 }
 
-},{"./videomailError":387,"defined":306,"ua-parser-js":364}],381:[function(require,module,exports){
+},{"./videomailError":388,"defined":306,"ua-parser-js":365}],382:[function(require,module,exports){
 var util = require('util')
 var Browser = require('./browser')
 
@@ -19814,7 +19837,7 @@ module.exports = function (localOptions) {
   }
 }
 
-},{"./browser":380,"util":368}],382:[function(require,module,exports){
+},{"./browser":381,"util":369}],383:[function(require,module,exports){
 var despot = require('despot')
 
 var VideomailError = require('./videomailError')
@@ -19885,7 +19908,7 @@ module.exports = function (options, name) {
   }
 }
 
-},{"./../events":375,"./videomailError":387,"despot":307}],383:[function(require,module,exports){
+},{"./../events":376,"./videomailError":388,"despot":307}],384:[function(require,module,exports){
 var filesize = require('filesize')
 var humanizeDuration = require('humanize-duration')
 
@@ -19901,7 +19924,7 @@ module.exports = {
   }
 }
 
-},{"filesize":315,"humanize-duration":321}],384:[function(require,module,exports){
+},{"filesize":315,"humanize-duration":322}],385:[function(require,module,exports){
 // taken from
 // https://bbc.github.io/tal/jsdoc/events_mediaevent.js.html
 
@@ -20011,7 +20034,7 @@ module.exports = [
   // 'timeupdate'
 ]
 
-},{}],385:[function(require,module,exports){
+},{}],386:[function(require,module,exports){
 var DASH = '- '
 var SEPARATOR = '<br/>' + DASH
 
@@ -20074,7 +20097,7 @@ module.exports = function (anything, options) {
   }
 }
 
-},{}],386:[function(require,module,exports){
+},{}],387:[function(require,module,exports){
 require('core-js/shim')
 require('classlist.js')
 require('element-closest') // needed for IE 11
@@ -20119,7 +20142,7 @@ module.exports = function (window, navigator) {
   }
 }
 
-},{"classlist.js":10,"core-js/shim":303,"element-closest":313,"request-frame":353}],387:[function(require,module,exports){
+},{"classlist.js":10,"core-js/shim":303,"element-closest":313,"request-frame":354}],388:[function(require,module,exports){
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
 var util = require('util')
@@ -20396,9 +20419,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     /*eslint-disable */
     if (arguments.callee.caller) {
-      caller = arguments.callee.caller.toString()
+      caller = util.inspect(arguments.callee.caller, {showHidden: true, depth: 3})
     } else if (arguments.callee) {
-      caller = util.inspect(arguments.callee, {showHidden: true})
+      caller = util.inspect(arguments.callee, {showHidden: true, depth: 3})
     } else {
       caller = '(no arguments.callee exist)'
     }
@@ -20411,7 +20434,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: caller,
+    caller: caller || 'unable to find caller',
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
@@ -20470,7 +20493,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 module.exports = VideomailError
 
-},{"./../resource":377,"./browser":380,"./pretty":385,"create-error":305,"util":368}],388:[function(require,module,exports){
+},{"./../resource":378,"./browser":381,"./pretty":386,"create-error":305,"util":369}],389:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -21041,7 +21064,7 @@ util.inherits(Buttons, EventEmitter)
 
 module.exports = Buttons
 
-},{"./../events":375,"./../util/eventEmitter":382,"contains":12,"hidden":320,"hyperscript":322,"util":368}],389:[function(require,module,exports){
+},{"./../events":376,"./../util/eventEmitter":383,"contains":12,"hidden":321,"hyperscript":323,"util":369}],390:[function(require,module,exports){
 var insertCss = require('insert-css')
 var merge = require('merge-recursive')
 var hidden = require('hidden')
@@ -21699,7 +21722,7 @@ util.inherits(Container, EventEmitter)
 
 module.exports = Container
 
-},{"./../events":375,"./../resource":377,"./../styles/css/main.min.css.js":378,"./../util/eventEmitter":382,"./../util/videomailError":387,"./buttons":388,"./dimension":390,"./form":391,"./visuals":393,"document-visibility":308,"hidden":320,"insert-css":326,"merge-recursive":335,"util":368}],390:[function(require,module,exports){
+},{"./../events":376,"./../resource":378,"./../styles/css/main.min.css.js":379,"./../util/eventEmitter":383,"./../util/videomailError":388,"./buttons":389,"./dimension":391,"./form":392,"./visuals":394,"document-visibility":308,"hidden":321,"insert-css":327,"merge-recursive":336,"util":369}],391:[function(require,module,exports){
 var numberIsInteger = require('number-is-integer')
 var VideomailError = require('./../util/videomailError')
 
@@ -21814,7 +21837,7 @@ module.exports = {
   }
 }
 
-},{"./../util/videomailError":387,"number-is-integer":336}],391:[function(require,module,exports){
+},{"./../util/videomailError":388,"number-is-integer":337}],392:[function(require,module,exports){
 var h = require('hyperscript')
 var util = require('util')
 var hidden = require('hidden')
@@ -22053,7 +22076,7 @@ util.inherits(Form, EventEmitter)
 
 module.exports = Form
 
-},{"./../events":375,"./../util/eventEmitter":382,"./../util/videomailError":387,"get-form-data":316,"hidden":320,"hyperscript":322,"util":368}],392:[function(require,module,exports){
+},{"./../events":376,"./../util/eventEmitter":383,"./../util/videomailError":388,"get-form-data":316,"hidden":321,"hyperscript":323,"util":369}],393:[function(require,module,exports){
 // enhances options with useful functions we can reuse everywhere
 
 module.exports = {
@@ -22098,7 +22121,7 @@ module.exports = {
   }
 }
 
-},{}],393:[function(require,module,exports){
+},{}],394:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -22458,7 +22481,7 @@ util.inherits(Visuals, EventEmitter)
 
 module.exports = Visuals
 
-},{"./../events":375,"./../util/eventEmitter":382,"./visuals/inside/recorderInsides":398,"./visuals/notifier":399,"./visuals/recorder":400,"./visuals/replay":401,"hidden":320,"hyperscript":322,"util":368}],394:[function(require,module,exports){
+},{"./../events":376,"./../util/eventEmitter":383,"./visuals/inside/recorderInsides":399,"./visuals/notifier":400,"./visuals/recorder":401,"./visuals/replay":402,"hidden":321,"hyperscript":323,"util":369}],395:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22541,7 +22564,7 @@ module.exports = function (visuals, options) {
   }
 }
 
-},{"hidden":320,"hyperscript":322}],395:[function(require,module,exports){
+},{"hidden":321,"hyperscript":323}],396:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22590,7 +22613,7 @@ module.exports = function (visuals, options) {
   }
 }
 
-},{"./../../../../util/videomailError":387,"hidden":320,"hyperscript":322}],396:[function(require,module,exports){
+},{"./../../../../util/videomailError":388,"hidden":321,"hyperscript":323}],397:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22632,7 +22655,7 @@ module.exports = function (visuals) {
   }
 }
 
-},{"hidden":320,"hyperscript":322}],397:[function(require,module,exports){
+},{"hidden":321,"hyperscript":323}],398:[function(require,module,exports){
 var h = require('hyperscript')
 var hidden = require('hidden')
 
@@ -22775,7 +22798,7 @@ module.exports = function (visuals, recordNote, options) {
   }
 }
 
-},{"hidden":320,"hyperscript":322}],398:[function(require,module,exports){
+},{"hidden":321,"hyperscript":323}],399:[function(require,module,exports){
 var util = require('util')
 
 var Events = require('./../../../events')
@@ -22906,7 +22929,7 @@ util.inherits(RecorderInsides, EventEmitter)
 
 module.exports = RecorderInsides
 
-},{"./../../../events":375,"./../../../util/eventEmitter":382,"./recorder/countdown":394,"./recorder/pausedNote":395,"./recorder/recordNote":396,"./recorder/recordTimer":397,"util":368}],399:[function(require,module,exports){
+},{"./../../../events":376,"./../../../util/eventEmitter":383,"./recorder/countdown":395,"./recorder/pausedNote":396,"./recorder/recordNote":397,"./recorder/recordTimer":398,"util":369}],400:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -23225,7 +23248,7 @@ util.inherits(Notifier, EventEmitter)
 
 module.exports = Notifier
 
-},{"./../../events":375,"./../../util/eventEmitter":382,"hidden":320,"hyperscript":322,"util":368}],400:[function(require,module,exports){
+},{"./../../events":376,"./../../util/eventEmitter":383,"hidden":321,"hyperscript":323,"util":369}],401:[function(require,module,exports){
 (function (Buffer){
 var websocket = require('websocket-stream')
 var Frame = require('canvas-to-buffer')
@@ -23502,6 +23525,7 @@ var Recorder = function (visuals, replay, options) {
         // websocket options cannot be set on client side, only on server, see
         // https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
         stream = websocket(url2Connect, {
+          perMessageDeflate: false,
           // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
           objectMode: true
         })
@@ -24458,7 +24482,7 @@ util.inherits(Recorder, EventEmitter)
 module.exports = Recorder
 
 }).call(this,require("buffer").Buffer)
-},{"./../../constants":374,"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"./../../util/humanize":383,"./../../util/pretty":385,"./../../util/videomailError":387,"./userMedia":402,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":320,"hyperscript":322,"util":368,"websocket-stream":370}],401:[function(require,module,exports){
+},{"./../../constants":375,"./../../events":376,"./../../util/browser":381,"./../../util/eventEmitter":383,"./../../util/humanize":384,"./../../util/pretty":386,"./../../util/videomailError":388,"./userMedia":403,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":321,"hyperscript":323,"util":369,"websocket-stream":371}],402:[function(require,module,exports){
 var util = require('util')
 var h = require('hyperscript')
 var hidden = require('hidden')
@@ -24778,7 +24802,7 @@ util.inherits(Replay, EventEmitter)
 
 module.exports = Replay
 
-},{"./../../events":375,"./../../util/browser":380,"./../../util/eventEmitter":382,"./../../util/videomailError":387,"hidden":320,"hyperscript":322,"iphone-inline-video":328,"util":368}],402:[function(require,module,exports){
+},{"./../../events":376,"./../../util/browser":381,"./../../util/eventEmitter":383,"./../../util/videomailError":388,"hidden":321,"hyperscript":323,"iphone-inline-video":329,"util":369}],403:[function(require,module,exports){
 var h = require('hyperscript')
 var util = require('util')
 
@@ -25121,9 +25145,9 @@ module.exports = function (recorder, options) {
           //
           // also i think should be ignored when fireCallbacks() was successful and it's
           // playing fine anyway?
-          'err: ' + util.inspect(err, {showHidden: true}) + ', ' +
-          'arguments: ' + util.inspect(arguments, {showHidden: true}) + ', ' +
-          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true}),
+          'err: ' + util.inspect(err, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
+          'arguments: ' + util.inspect(arguments, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
+          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true, showProxy: true, depth: 4}),
           options
         ))
       })
@@ -25278,7 +25302,7 @@ module.exports = function (recorder, options) {
   }
 }
 
-},{"./../../events":375,"./../../util/audioRecorder":379,"./../../util/eventEmitter":382,"./../../util/mediaEvents":384,"./../../util/pretty":385,"./../../util/videomailError":387,"hyperscript":322,"util":368}],"videomail-client":[function(require,module,exports){
+},{"./../../events":376,"./../../util/audioRecorder":380,"./../../util/eventEmitter":383,"./../../util/mediaEvents":385,"./../../util/pretty":386,"./../../util/videomailError":388,"hyperscript":323,"util":369}],"videomail-client":[function(require,module,exports){
 var standardize = require('./util/standardize')
 var Client = require('./client')
 
@@ -25295,4 +25319,4 @@ if (!navigator) {
 
 module.exports = Client
 
-},{"./client":373,"./util/standardize":386}]},{},["videomail-client"]);
+},{"./client":374,"./util/standardize":387}]},{},["videomail-client"]);
