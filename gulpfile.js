@@ -42,9 +42,9 @@ gulp.task('stylus', function () {
     .pipe(plugins.autoprefixer(
         'last 4 versions',
         '> 1%',
-        'Explorer >= 10',
+        'Explorer >= 11',
         'Firefox ESR',
-        'iOS >= 8',
+        'iOS >= 9',
         'android >= 4'
     ))
     // always minify otherwise it gets broken with line-breaks
