@@ -24,8 +24,9 @@
     "major": "./bin/release.sh --importance=major"
   },
   "engines": {
-    "node": ">=7.7.2",
-    "yarn": ">=0.24.0"
+    "node": ">=8.1.0",
+    "yarn": ">=0.24.5",
+    "npm": ">=5.0.3"
   },
   "keywords": [
     "webcam",
