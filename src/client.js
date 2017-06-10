@@ -109,7 +109,7 @@ var VideomailClient = function (options) {
           replay.setVideomail(videomail)
 
           container.showReplayOnly()
-        }, 1e3)
+        }, 2e3)
       }
     }
 
