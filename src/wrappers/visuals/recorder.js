@@ -82,7 +82,7 @@ var Recorder = function (visuals, replay, options) {
         self.emit(Events.ERROR, VideomailError.create(
           'Already disconnected',
           'Sorry, the connection to the server has been destroyed. Please reload. ' +
-          'Details of buffer: ' + buffer.toString(),
+          'Details of buffer: ' + pretty(buffer),
           options
         ))
       } else {
