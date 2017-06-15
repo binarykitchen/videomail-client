@@ -350,7 +350,7 @@ var Container = function (options) {
         buildChildren()
 
         if (!hasError) {
-          debug('Container: built.')
+          debug('Container: built')
           built = true
           self.emit(Events.BUILT)
         } else {
