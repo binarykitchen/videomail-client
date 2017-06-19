@@ -43,7 +43,7 @@ module.exports = function (visuals, recordNote, options) {
   this.check = function (opts) {
     var newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
 
-        // performance optimisation (another reason we need react here!)
+    // performance optimisation (another reason we need react here!)
     if (newCountdown !== countdown) {
       countdown = newCountdown
       update()
@@ -62,12 +62,12 @@ module.exports = function (visuals, recordNote, options) {
         recordNote.setNear()
         setNear()
 
-        options.debug('End is near, ' + countdown + ' seconds to go')
+        options.debug('End is near, %i seconds to go', countdown)
       } else if (endIsNigh(remainingSeconds)) {
         recordNote.setNigh()
         setNigh()
 
-        options.debug('End is nigh, ' + countdown + ' seconds to go')
+        options.debug('End is nigh, %i seconds to go', countdown)
       }
     }
 

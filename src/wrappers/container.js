@@ -357,7 +357,10 @@ var Container = function (options) {
           debug('Container: building failed due to an error.')
         }
       } else {
-        debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
+        debug(
+          'Container: no container element with ID %s found. Do nothing.',
+          options.selectors.containerId
+        )
       }
     } catch (exc) {
       if (visuals.isNotifierBuilt()) {
