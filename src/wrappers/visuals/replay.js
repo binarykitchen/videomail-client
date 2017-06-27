@@ -194,7 +194,7 @@ var Replay = function (parentElement, options) {
 
     built = true
 
-    debug('Replay: built.')
+    debug('Replay: built')
   }
 
   this.unload = function () {

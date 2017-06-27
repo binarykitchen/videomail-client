@@ -1,6 +1,7 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
 var util = require('util')
+var caller = require('caller')
 var originalPretty = require('./pretty')
 var Resource = require('./../resource')
 
@@ -263,33 +264,13 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode += ', name=' + (err.name ? err.name : 'undefined')
   }
 
-  var caller
-
-  if (VideomailError.create.caller) {
-    caller = VideomailError.create.caller
-  }
-
-  if (!caller) {
-    // try again
-
-    /*eslint-disable */
-    if (arguments.callee.caller) {
-      caller = util.inspect(arguments.callee.caller, {showHidden: true, depth: 3})
-    } else if (arguments.callee) {
-      caller = util.inspect(arguments.callee, {showHidden: true, depth: 3})
-    } else {
-      caller = '(no arguments.callee exist)'
-    }
-    /*eslint-enable */
-  }
-
   var videomailError = new VideomailError(message, {
     explanation: explanation,
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: caller || '(unable to find caller)',
+    caller: caller(2), // depth = 2, https://github.com/totherik/caller#depth
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
