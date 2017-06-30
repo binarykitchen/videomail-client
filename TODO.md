@@ -9,5 +9,5 @@
 | src/wrappers/visuals/recorder.js | 652 | consider removing this later or have it for debug=1 only?
 | src/wrappers/visuals/userMedia.js | 172 | debug and fix that weird error
 | src/wrappers/visuals/userMedia.js | 347 | see what videoCallbackCalled is (29 june 2017)
-| gulpfile.js | 52 | fix this, so that it also works when not minified, this
-| gulpfile.js | 57 | location is bad, should be in a temp folder or so
+| gulpfile.js | 53 | fix this, so that it also works when not minified, this
+| gulpfile.js | 58 | location is bad, should be in a temp folder or so
