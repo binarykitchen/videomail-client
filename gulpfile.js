@@ -13,7 +13,6 @@ const del = require('del')
 const minimist = require('minimist')
 const sslRootCas = require('ssl-root-cas')
 const pump = require('pump')
-// const rollupify = require('rollupify')
 
 const defaultOptions = {
   minify: false,
@@ -71,8 +70,6 @@ gulp.task('todo', function () {
     .pipe(gulp.dest('./'))
 })
 
-let cache
-
 gulp.task('browserify', ['clean:js'], function (cb) {
   const entry = path.join(__dirname, '/src/index.js')
   const bundler = browserify({
@@ -83,16 +80,7 @@ gulp.task('browserify', ['clean:js'], function (cb) {
   })
 
   pump([
-    bundler
-      .transform('rollupify', {
-        cache: cache,
-        format: 'sadfsdfsdf',
-        config: {
-          format: 'sadfsdf'
-        }
-      })
-      .require(entry, {expose: 'videomail-client'})
-      .bundle(),
+    bundler.require(entry, {expose: 'videomail-client'}).bundle(),
     source('./src/'), // gives streaming vinyl file object
     buffer(), // required because the next steps do not support streams
     plugins.concat('videomail-client.js'),

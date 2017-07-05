@@ -1,6 +1,6 @@
 // constants (changing these only break down functionality, so be careful)
 
-export default {
+module.exports = {
   SITE_NAME_LABEL: 'x-videomail-site-name',
 
   public: {
