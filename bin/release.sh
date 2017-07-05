@@ -65,6 +65,9 @@ yarn test
 git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
+echo "Logging to npm ..."
+yarn login
+
 echo "Publishing to npm ..."
 yarn publish --new-version $VERSION
 
