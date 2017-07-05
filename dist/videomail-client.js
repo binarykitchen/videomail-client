@@ -12697,7 +12697,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
 },{"./_stream_transform":346,"core-util-is":305,"inherits":326}],345:[function(require,module,exports){
-(function (process){
+(function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12754,11 +12754,12 @@ var Stream = require('./internal/streams/stream');
 // properly optimized away early in Ignition+TurboFan.
 /*<replacement>*/
 var Buffer = require('safe-buffer').Buffer;
+var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
 }
 function _isUint8Array(obj) {
-  return Object.prototype.toString.call(obj) === '[object Uint8Array]' || Buffer.isBuffer(obj);
+  return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
 /*</replacement>*/
 
@@ -12953,7 +12954,7 @@ function readableAddChunk(stream, chunk, encoding, addToFront, skipChunkCheck) {
     if (er) {
       stream.emit('error', er);
     } else if (state.objectMode || chunk && chunk.length > 0) {
-      if (typeof chunk !== 'string' && Object.getPrototypeOf(chunk) !== Buffer.prototype && !state.objectMode) {
+      if (typeof chunk !== 'string' && !state.objectMode && Object.getPrototypeOf(chunk) !== Buffer.prototype) {
         chunk = _uint8ArrayToBuffer(chunk);
       }
 
@@ -13704,7 +13705,7 @@ function indexOf(xs, x) {
   }
   return -1;
 }
-}).call(this,require('_process'))
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./_stream_duplex":343,"./internal/streams/BufferList":348,"./internal/streams/destroy":349,"./internal/streams/stream":350,"_process":6,"core-util-is":305,"events":314,"inherits":326,"isarray":334,"process-nextick-args":341,"safe-buffer":355,"string_decoder/":357,"util":4}],346:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -13921,7 +13922,7 @@ function done(stream, er, data) {
   return stream.push(null);
 }
 },{"./_stream_duplex":343,"core-util-is":305,"inherits":326}],347:[function(require,module,exports){
-(function (process){
+(function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -14004,11 +14005,12 @@ var Stream = require('./internal/streams/stream');
 
 /*<replacement>*/
 var Buffer = require('safe-buffer').Buffer;
+var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
 }
 function _isUint8Array(obj) {
-  return Object.prototype.toString.call(obj) === '[object Uint8Array]' || Buffer.isBuffer(obj);
+  return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
 /*</replacement>*/
 
@@ -14585,8 +14587,7 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-
-}).call(this,require('_process'))
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./_stream_duplex":343,"./internal/streams/destroy":349,"./internal/streams/stream":350,"_process":6,"core-util-is":305,"inherits":326,"process-nextick-args":341,"safe-buffer":355,"util-deprecate":367}],348:[function(require,module,exports){
 'use strict';
 
@@ -25200,7 +25201,6 @@ module.exports = Replay
 
 },{"./../../events":377,"./../../util/browser":382,"./../../util/eventEmitter":384,"./../../util/videomailError":389,"hidden":321,"hyperscript":323,"iphone-inline-video":329,"util":370}],404:[function(require,module,exports){
 var h = require('hyperscript')
-var util = require('util')
 
 var AudioRecorder = require('./../../util/audioRecorder')
 var VideomailError = require('./../../util/videomailError')
@@ -25235,7 +25235,8 @@ module.exports = function (recorder, options) {
       throw VideomailError.create(
         'Error attaching stream to element.',
         'Contact the developer about this',
-        options)
+        options
+      )
     }
   }
 
@@ -25337,7 +25338,6 @@ module.exports = function (recorder, options) {
     var onPlayReached = false
     var onLoadedMetaDataReached = false
     var playingPromiseReached = false
-    var videoCallbackCalled = false
 
     if (options && options.isAudioEnabled()) {
       audioRecorder = audioRecorder || new AudioRecorder(this, options)
@@ -25417,8 +25417,6 @@ module.exports = function (recorder, options) {
       )
 
       if (onPlayReached && onLoadedMetaDataReached) {
-        videoCallbackCalled = true
-
         videoCallback()
 
         if (audioRecorder && audioCallback) {
@@ -25536,24 +25534,8 @@ module.exports = function (recorder, options) {
       // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
-        self.emit(Events.ERROR, VideomailError.create(
-          'Weird webcam error',
-          // https://github.com/binarykitchen/videomail.io/issues/323
-          // tried just with err and JSON.stringify(err) but returns only "{}"
-          // adding more debug info just temporarily
-          //
-          // also i think should be ignored when fireCallbacks() was successful and it's
-          // playing fine anyway?
-          //
-          // todo see what videoCallbackCalled is (29 june 2017)
-          // if it is true, then we have the cause (= not unloaded)
-          // if it is false, then remove that error event and just turn it into a .warn()
-          'videoCallbackCalled: ' + videoCallbackCalled,
-          'err: ' + util.inspect(err, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
-          'arguments: ' + util.inspect(arguments, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
-          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true, showProxy: true, depth: 4}),
-          options
-        ))
+        // ignore here, do nothing. IE/Edge emit that sometimes for unknown reasons.
+        options.logger.warn(err)
       })
 
       setVisualStream(localMediaStream)
@@ -25706,7 +25688,7 @@ module.exports = function (recorder, options) {
   }
 }
 
-},{"./../../events":377,"./../../util/audioRecorder":381,"./../../util/eventEmitter":384,"./../../util/mediaEvents":386,"./../../util/pretty":387,"./../../util/videomailError":389,"hyperscript":323,"util":370}],"videomail-client":[function(require,module,exports){
+},{"./../../events":377,"./../../util/audioRecorder":381,"./../../util/eventEmitter":384,"./../../util/mediaEvents":386,"./../../util/pretty":387,"./../../util/videomailError":389,"hyperscript":323}],"videomail-client":[function(require,module,exports){
 var standardize = require('./util/standardize')
 var Client = require('./client')
 

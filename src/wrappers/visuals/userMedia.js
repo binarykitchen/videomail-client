@@ -1,5 +1,4 @@
 var h = require('hyperscript')
-var util = require('util')
 
 var AudioRecorder = require('./../../util/audioRecorder')
 var VideomailError = require('./../../util/videomailError')
@@ -34,7 +33,8 @@ module.exports = function (recorder, options) {
       throw VideomailError.create(
         'Error attaching stream to element.',
         'Contact the developer about this',
-        options)
+        options
+      )
     }
   }
 
@@ -136,7 +136,6 @@ module.exports = function (recorder, options) {
     var onPlayReached = false
     var onLoadedMetaDataReached = false
     var playingPromiseReached = false
-    var videoCallbackCalled = false
 
     if (options && options.isAudioEnabled()) {
       audioRecorder = audioRecorder || new AudioRecorder(this, options)
@@ -216,8 +215,6 @@ module.exports = function (recorder, options) {
       )
 
       if (onPlayReached && onLoadedMetaDataReached) {
-        videoCallbackCalled = true
-
         videoCallback()
 
         if (audioRecorder && audioCallback) {
@@ -335,24 +332,8 @@ module.exports = function (recorder, options) {
       // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
-        self.emit(Events.ERROR, VideomailError.create(
-          'Weird webcam error',
-          // https://github.com/binarykitchen/videomail.io/issues/323
-          // tried just with err and JSON.stringify(err) but returns only "{}"
-          // adding more debug info just temporarily
-          //
-          // also i think should be ignored when fireCallbacks() was successful and it's
-          // playing fine anyway?
-          //
-          // todo see what videoCallbackCalled is (29 june 2017)
-          // if it is true, then we have the cause (= not unloaded)
-          // if it is false, then remove that error event and just turn it into a .warn()
-          'videoCallbackCalled: ' + videoCallbackCalled,
-          'err: ' + util.inspect(err, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
-          'arguments: ' + util.inspect(arguments, {showHidden: true, showProxy: true, depth: 4}) + ',\n' +
-          'user media: ' + util.inspect(rawVisualUserMedia, {showHidden: true, showProxy: true, depth: 4}),
-          options
-        ))
+        // ignore here, do nothing. IE/Edge emit that sometimes for unknown reasons.
+        options.logger.warn(err)
       })
 
       setVisualStream(localMediaStream)
