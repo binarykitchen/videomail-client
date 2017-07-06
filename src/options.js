@@ -73,7 +73,7 @@ module.exports = {
   },
 
   image: {
-    quality: 0.35,
+    quality: 0.4,
     types: ['webp', 'jpeg']   // recommended settings to make most of all browsers
   },
 
@@ -101,7 +101,7 @@ module.exports = {
   },
 
   timeouts: {
-    userMedia: 10e3,         // in milliseconds, increase if you want user give more time to enable webcam
+    userMedia: 11e3,         // in milliseconds, increase if you want user give more time to enable webcam
     connection: 1e4,         // in seconds, increase if api is slow
     pingInterval: 45e3       // in milliseconds, keeps webstream (connection) alive when pausing
   },
