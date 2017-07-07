@@ -40,8 +40,8 @@
   "dependencies": {
     "animitter": "3.0.0",
     "audio-sample": "1.0.3",
-    "caller": "1.0.1",
     "canvas-to-buffer": "1.0.9",
+    "caller-path": "2.0.0",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "core-js": "2.4.1",
