@@ -1,7 +1,6 @@
 // https://github.com/tgriesser/create-error
 var createError = require('create-error')
 var util = require('util')
-var callerPath = require('caller-path')
 
 var originalPretty = require('./pretty')
 var Resource = require('./../resource')
@@ -271,7 +270,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: callerPath(), // https://www.npmjs.com/package/caller-path
+    caller: undefined, // todo after es6 migrations using https://www.npmjs.com/package/caller-path
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
