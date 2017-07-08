@@ -8,7 +8,7 @@ if (!navigator) {
   //
   // UMD (Universal Module Definition), inspired by https://github.com/es-shims/es5-shim
   ;(function (navigator) {
-    standardize(this, navigator)
+    standardize(window, navigator)
   }(navigator))
 }
 
