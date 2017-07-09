@@ -76,7 +76,7 @@ gulp.task('todo', () => {
 })
 
 function bundle (watching) {
-  const entry = path.join(__dirname, packageJson.main)
+  const entry = path.join(__dirname, packageJson.esnext)
   const bundler = browserify({
     entries: [entry],
     basedir: __dirname,
