@@ -1,27 +1,27 @@
-var util = require('util')
-var h = require('hyperscript')
-var hidden = require('hidden')
+import util from 'util'
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-var Replay = require('./visuals/replay')
-var Recorder = require('./visuals/recorder')
-var Notifier = require('./visuals/notifier')
-var RecorderInsides = require('./visuals/inside/recorderInsides')
+import Replay from './visuals/replay'
+import Recorder from './visuals/recorder'
+import Notifier from './visuals/notifier'
+import RecorderInsides from './visuals/inside/recorderInsides'
 
-var EventEmitter = require('./../util/eventEmitter')
-var Events = require('./../events')
+import EventEmitter from './../util/eventEmitter'
+import Events from './../events'
 
-var Visuals = function (container, options) {
+const Visuals = function (container, options) {
   EventEmitter.call(this, options, 'Visuals')
 
-  var self = this
+  const self = this
 
-  var replay = new Replay(this, options)
-  var recorder = new Recorder(this, replay, options)
-  var recorderInsides = new RecorderInsides(this, options)
+  const replay = new Replay(this, options)
+  const recorder = new Recorder(this, replay, options)
+  const recorderInsides = new RecorderInsides(this, options)
 
-  var notifier = new Notifier(this, options)
+  const notifier = new Notifier(this, options)
 
-  var debug = options.debug
+  const debug = options.debug
 
   var visualsElement
   var built
@@ -46,7 +46,7 @@ var Visuals = function (container, options) {
     recorderInsides.build()
     replay.build()
 
-    debug('Visuals: built')
+    debug('Visuals: built.')
   }
 
   function initEvents () {
@@ -56,7 +56,7 @@ var Visuals = function (container, options) {
         self.endWaiting()
         container.enableForm(false)
       })
-      .on(Events.PREVIEW, function () {
+      .on(Events.PREVIEW, () => {
         self.endWaiting()
       })
       .on(Events.BLOCKING, function (blockingOptions) {
@@ -105,7 +105,7 @@ var Visuals = function (container, options) {
     if (!visualsElement) {
       visualsElement = h('div.' + options.selectors.visualsClass)
 
-      var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+      const buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
       // make sure it's placed before the buttons
       if (buttonsElement) {
@@ -123,7 +123,7 @@ var Visuals = function (container, options) {
     !built && initEvents()
     buildChildren()
 
-        // needed for replay handling and container.isParentElementOf()
+    // needed for replay handling and container.isParentElementOf()
     self.parentNode = visualsElement.parentNode
 
     built = true
@@ -166,7 +166,7 @@ var Visuals = function (container, options) {
   }
 
   this.recordAgain = function () {
-    this.back(function () {
+    this.back(() => {
       self.once(Events.USER_MEDIA_READY, function () {
         self.record()
       })
@@ -355,4 +355,4 @@ var Visuals = function (container, options) {
 
 util.inherits(Visuals, EventEmitter)
 
-module.exports = Visuals
+export default Visuals

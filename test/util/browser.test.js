@@ -1,5 +1,6 @@
-const test = require('tape')
-const Browser = require('./../../src/util/browser')
+import test from 'tape'
+
+import Browser from './../../src/util/browser'
 
 test('Browser:', {timeout: 2000}, function (t) {
   t.test('without arguments', function (tt) {

@@ -1,7 +1,9 @@
-var filesize = require('filesize')
-var humanizeDuration = require('humanize-duration')
+import filesize from 'filesize'
+import humanizeDuration from 'humanize-duration'
 
-module.exports = {
+// todo get rid of this class and use those imports directly
+
+export default {
   filesize: function (bytes, round) {
     return filesize(bytes, {
       round: round

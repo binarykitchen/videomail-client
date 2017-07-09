@@ -1,6 +1,6 @@
-const test = require('tape')
+import test from 'tape'
 
-const Notifier = require('./../../src/wrappers/visuals/notifier')
+import Notifier from './../../src/wrappers/visuals/notifier'
 
 test('Notifier:', function (t) {
   t.test('can be instantiated', function (tt) {

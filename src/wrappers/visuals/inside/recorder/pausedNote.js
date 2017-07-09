@@ -1,14 +1,16 @@
-var h = require('hyperscript')
-var hidden = require('hidden')
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-var VideomailError = require('./../../../../util/videomailError')
+import VideomailError from './../../../../util/videomailError'
 
-module.exports = function (visuals, options) {
-  if (!options.text.pausedHeader) { throw VideomailError.create('Paused header cannot be empty', options) }
+export default function (visuals, options) {
+  if (!options.text.pausedHeader) {
+    throw VideomailError.create('Paused header cannot be empty', options)
+  }
 
-  var pausedBlockElement,
-    pausedHeaderElement,
-    pausedHintElement
+  var pausedBlockElement
+  var pausedHeaderElement
+  var pausedHintElement
 
   this.build = function () {
     pausedBlockElement = visuals.querySelector('.paused')

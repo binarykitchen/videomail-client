@@ -1,12 +1,15 @@
-var superagent = require('superagent')
-var Constants = require('./constants')
-var CACHE_KEY = 'alias'
+import superagent from 'superagent'
+import Constants from './constants'
 
-module.exports = function (options) {
-  var cache = {}
+const CACHE_KEY = 'alias'
+
+export default function (options) {
+  const cache = {}
 
   function applyDefaultValue (videomail, name) {
-    if (options.defaults[name] && !videomail[name]) { videomail[name] = options.defaults[name] }
+    if (options.defaults[name] && !videomail[name]) {
+      videomail[name] = options.defaults[name]
+    }
 
     return videomail
   }
@@ -44,10 +47,14 @@ module.exports = function (options) {
       .end(function (err, res) {
         err = packError(err, res)
 
-        if (err) { cb(err) } else {
-          var videomail = res.body
+        if (err) {
+          cb(err)
+        } else {
+          const videomail = res.body
 
-          if (options.cache) { cache[CACHE_KEY] = videomail }
+          if (options.cache) {
+            cache[CACHE_KEY] = videomail
+          }
 
           cb(null, videomail)
         }
@@ -60,7 +67,7 @@ module.exports = function (options) {
       identifier = null
     }
 
-    var queryParams = {}
+    const queryParams = {}
 
     var url = options.baseUrl + '/videomail/'
     var request
@@ -95,17 +102,18 @@ module.exports = function (options) {
   this.get = function (alias, cb) {
     if (options.cache && cache[alias]) {
       // keep all callbacks async
-      setTimeout(function () {
+      setTimeout(() => {
         cb(null, cache[alias])
       }, 0)
-    } else { fetch(alias, cb) }
+    } else {
+      fetch(alias, cb)
+    }
   }
 
   this.reportError = function (err, cb) {
-    var queryParams = {}
-
-    var url = options.baseUrl + '/client-error/'
-    var request = superagent('post', url)
+    const queryParams = {}
+    const url = options.baseUrl + '/client-error/'
+    const request = superagent('post', url)
 
     queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
@@ -158,7 +166,7 @@ module.exports = function (options) {
         break
       default:
         // keep all callbacks async
-        setTimeout(function () {
+        setTimeout(() => {
           cb(new Error('Invalid enctype given: ' + options.enctype))
         }, 0)
     }

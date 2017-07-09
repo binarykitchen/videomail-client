@@ -1,38 +1,38 @@
-var UAParser = require('ua-parser-js')
-var defined = require('defined')
-var VideomailError = require('./videomailError')
+import UAParser from 'ua-parser-js'
+import defined from 'defined'
+import VideomailError from './videomailError'
 
-module.exports = function (options) {
+const Browser = function (options) {
   options = options || {}
 
-  var firefoxDownload = 'http://www.mozilla.org/firefox/update/'
-  var edgeDownload = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126'
-  var chromeDownload = 'http://www.google.com/chrome/'
-  var chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium'
-  var browseHappyLink = 'http://browsehappy.com'
-  var ua = defined(options.fakeUaString, (
+  const firefoxDownload = 'http://www.mozilla.org/firefox/update/'
+  const edgeDownload = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126'
+  const chromeDownload = 'http://www.google.com/chrome/'
+  const chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium'
+  const browseHappyLink = 'http://browsehappy.com'
+  const ua = defined(options.fakeUaString, (
     typeof window !== 'undefined' &&
     window.navigator &&
     window.navigator.userAgent
   ), '')
 
-  var uaParser = new UAParser(ua).getResult()
+  const uaParser = new UAParser(ua).getResult()
 
-  var isIOS = uaParser.os.name === 'iOS'
-  var isChrome = uaParser.browser.name === 'Chrome'
-  var isChromium = uaParser.browser.name === 'Chromium'
-  var firefox = uaParser.browser.name === 'Firefox'
-  var osVersion = parseFloat(uaParser.os.version)
-  var isWindows = uaParser.os.name === 'Windows'
-  var isEdge = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10)
-  var isIE = /IE/.test(uaParser.browser.name)
-  var isSafari = /Safari/.test(uaParser.browser.name)
-  var isOpera = /Opera/.test(uaParser.browser.name)
-  var isAndroid = /Android/.test(uaParser.os.name)
-  var chromeBased = isChrome || isChromium
-  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge
+  const isIOS = uaParser.os.name === 'iOS'
+  const isChrome = uaParser.browser.name === 'Chrome'
+  const isChromium = uaParser.browser.name === 'Chromium'
+  const firefox = uaParser.browser.name === 'Firefox'
+  const osVersion = parseFloat(uaParser.os.version)
+  const isWindows = uaParser.os.name === 'Windows'
+  const isEdge = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10)
+  const isIE = /IE/.test(uaParser.browser.name)
+  const isSafari = /Safari/.test(uaParser.browser.name)
+  const isOpera = /Opera/.test(uaParser.browser.name)
+  const isAndroid = /Android/.test(uaParser.os.name)
+  const chromeBased = isChrome || isChromium
+  const okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge
 
-  var self = this
+  const self = this
 
   var videoType
 
@@ -119,7 +119,7 @@ module.exports = function (options) {
 
     // just temporary
   this.canRecord = function () {
-    var hasNavigator = typeof navigator !== 'undefined'
+    const hasNavigator = typeof navigator !== 'undefined'
     var canRecord = false
 
     if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -137,7 +137,7 @@ module.exports = function (options) {
     var err
 
     if (!okBrowser || !this.canRecord()) {
-      var classList = []
+      const classList = []
 
       if (isIOS) {
         classList.push(VideomailError.IOS_PROBLEM)
@@ -158,7 +158,8 @@ module.exports = function (options) {
   this.checkPlaybackCapabilities = function (video) {
     options.debug('Browser: checkPlaybackCapabilities()')
 
-    var err, message
+    var err
+    var message
 
     if (!video) {
       message = 'No HTML5 support for video tag!'
@@ -204,7 +205,7 @@ module.exports = function (options) {
   }
 
   this.getNoAccessIssue = function () {
-    var message = 'Unable to access webcam'
+    const message = 'Unable to access webcam'
     var explanation
 
     if (this.isChromeBased()) {
@@ -244,3 +245,8 @@ module.exports = function (options) {
     }
   }
 }
+
+export default Browser
+
+// so that we also can require() it from videomailError.js within
+module.exports = Browser
