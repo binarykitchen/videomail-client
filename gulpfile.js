@@ -16,6 +16,7 @@ const del = require('del')
 const minimist = require('minimist')
 const sslRootCas = require('ssl-root-cas')
 const watchify = require('watchify')
+const babelify = require('babelify')
 
 const packageJson = require('./package.json')
 
@@ -94,6 +95,7 @@ function bundle (watching) {
     plugins.util.log(msg)
   })
   .require(entry, {expose: 'videomail-client'})
+  .transform(babelify)
 
   function pump () {
     return bundler
