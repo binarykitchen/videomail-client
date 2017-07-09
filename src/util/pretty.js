@@ -1,9 +1,9 @@
-var DASH = '- '
-var SEPARATOR = '<br/>' + DASH
+const DASH = '- '
+const SEPARATOR = '<br/>' + DASH
 
 function arrayToString (array) {
   if (array.length > 0) {
-    var lines = []
+    const lines = []
 
     array.forEach(function (element) {
       if (element && element.toString) {
@@ -16,9 +16,9 @@ function arrayToString (array) {
 }
 
 function objectToString (object, options) {
-  var propertyNames = Object.getOwnPropertyNames(object)
-  var excludes = (options && options.excludes) || null
-  var lines = []
+  const propertyNames = Object.getOwnPropertyNames(object)
+  const excludes = (options && options.excludes) || null
+  const lines = []
   var sLines
 
   if (propertyNames.length > 0) {
@@ -44,7 +44,7 @@ function objectToString (object, options) {
   return sLines
 }
 
-module.exports = function (anything, options) {
+export default function (anything, options) {
   if (anything === null) {
     return 'null'
   } else if (typeof anything === 'undefined') {

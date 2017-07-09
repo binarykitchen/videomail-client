@@ -1,17 +1,17 @@
-var isPOT = require('is-power-of-two')
-var AudioSample = require('audio-sample')
+import isPOT from 'is-power-of-two'
+import AudioSample from 'audio-sample'
 
-var VideomailError = require('./videomailError')
+import VideomailError from './videomailError'
 
-var CHANNELS = 1
+const CHANNELS = 1
 
-module.exports = function (userMedia, options) {
+export default function (userMedia, options) {
   var scriptProcessor
 
   function getAudioContext () {
     // instantiate only once
     if (!window.vcAudioContext) {
-      var AudioContext = window.AudioContext || window.webkitAudioContext
+      const AudioContext = window.AudioContext || window.webkitAudioContext
       window.vcAudioContext = new AudioContext()
     }
 
@@ -25,7 +25,7 @@ module.exports = function (userMedia, options) {
 
     // Returns a Float32Array containing the PCM data associated with the channel,
     // defined by the channel parameter (with 0 representing the first channel)
-    var float32Array = e.inputBuffer.getChannelData(0)
+    const float32Array = e.inputBuffer.getChannelData(0)
 
     cb(new AudioSample(float32Array))
   }
@@ -34,15 +34,14 @@ module.exports = function (userMedia, options) {
     options.debug('AudioRecorder: init()')
 
     // creates an audio node from the microphone incoming stream
-    var volume = getAudioContext().createGain()
-    var channels = CHANNELS
+    const volume = getAudioContext().createGain()
 
     var audioInput
 
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
     } catch (exc) {
-      var explanation = exc.toString() + 'Details: ' + JSON.stringify(getAudioContext())
+      const explanation = exc.toString() + 'Details: ' + JSON.stringify(getAudioContext())
       throw VideomailError.create(
         'Webcam has no audio',
         explanation,
@@ -60,20 +59,19 @@ module.exports = function (userMedia, options) {
 
     // Create a ScriptProcessorNode with the given bufferSize and
     // a single input and output channel
-    scriptProcessor =
-      getAudioContext().createScriptProcessor(
-          options.audio.bufferSize,
-          channels,
-          channels
-      )
+    scriptProcessor = getAudioContext().createScriptProcessor(
+      options.audio.bufferSize,
+      CHANNELS,
+      CHANNELS
+    )
 
     // connect stream to our scriptProcessor
     audioInput.connect(scriptProcessor)
 
-        // connect our scriptProcessor to the previous destination
+    // connect our scriptProcessor to the previous destination
     scriptProcessor.connect(getAudioContext().destination)
 
-        // connect volume
+    // connect volume
     audioInput.connect(volume)
     volume.connect(scriptProcessor)
   }

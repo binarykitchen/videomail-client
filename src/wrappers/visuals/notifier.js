@@ -1,15 +1,15 @@
-var util = require('util')
-var h = require('hyperscript')
-var hidden = require('hidden')
+import util from 'util'
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-var EventEmitter = require('./../../util/eventEmitter')
-var Events = require('./../../events')
+import EventEmitter from './../../util/eventEmitter'
+import Events from './../../events'
 
-var Notifier = function (visuals, options) {
+const Notifier = function (visuals, options) {
   EventEmitter.call(this, options, 'Notifier')
 
-  var self = this
-  var debug = options && options.debug
+  const self = this
+  const debug = options && options.debug
 
   var notifyElement
   var messageElement
@@ -63,7 +63,7 @@ var Notifier = function (visuals, options) {
   function onBeginVideoEncoding () {
     visuals.beginWaiting()
 
-    var lead = options.text.encoding + ' …'
+    const lead = options.text.encoding + ' …'
 
     self.notify(lead, null, {
       stillWait: true,
@@ -115,7 +115,7 @@ var Notifier = function (visuals, options) {
   function runEntertainment () {
     if (options.notifier.entertain) {
       if (!entertaining) {
-        var randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
+        const randomBackgroundClass = Math.floor((Math.random() * options.notifier.entertainLimit) + 1)
 
         notifyElement.className = 'notifier entertain ' +
                 options.notifier.entertainClass +
@@ -140,7 +140,7 @@ var Notifier = function (visuals, options) {
   }
 
   function setMessage (message, messageOptions) {
-    var problem = messageOptions.problem ? messageOptions.problem : false
+    const problem = messageOptions.problem ? messageOptions.problem : false
 
     if (messageElement) {
       messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message
@@ -153,8 +153,8 @@ var Notifier = function (visuals, options) {
   }
 
   this.error = function (err) {
-    var message = err.message ? err.message.toString() : err.toString()
-    var explanation = err.explanation ? err.explanation.toString() : null
+    const message = err.message ? err.message.toString() : err.toString()
+    const explanation = err.explanation ? err.explanation.toString() : null
 
     if (!message) {
       options.debug('Weird empty message generated for error', err)
@@ -199,7 +199,9 @@ var Notifier = function (visuals, options) {
       this.hide()
 
       visuals.appendChild(notifyElement)
-    } else { this.hide() }
+    } else {
+      this.hide()
+    }
 
     !built && initEvents()
 
@@ -247,12 +249,12 @@ var Notifier = function (visuals, options) {
       notifyOptions = {}
     }
 
-    var stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false
-    var entertain = notifyOptions.entertain ? notifyOptions.entertain : false
-    var blocking = notifyOptions.blocking ? notifyOptions.blocking : false
-    var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false
-    var classList = notifyOptions.classList ? notifyOptions.classList : false
-    var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false
+    const stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false
+    const entertain = notifyOptions.entertain ? notifyOptions.entertain : false
+    const blocking = notifyOptions.blocking ? notifyOptions.blocking : false
+    const hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false
+    const classList = notifyOptions.classList ? notifyOptions.classList : false
+    const removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false
 
     if (!messageElement && notifyElement) {
       messageElement = h('h2')
@@ -314,4 +316,4 @@ var Notifier = function (visuals, options) {
 
 util.inherits(Notifier, EventEmitter)
 
-module.exports = Notifier
+export default Notifier

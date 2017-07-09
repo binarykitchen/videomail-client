@@ -1,6 +1,6 @@
-const test = require('tape')
+import test from 'tape'
 
-const Replay = require('./../../src/wrappers/visuals/replay')
+import Replay from './../../src/wrappers/visuals/replay'
 
 test('Replay:', function (t) {
   t.test('can be instantiated', function (tt) {

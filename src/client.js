@@ -1,22 +1,23 @@
-var merge = require('merge-recursive')
-var readystate = require('readystate')
-var util = require('util')
+import merge from 'merge-recursive'
+import readystate from 'readystate'
+import util from 'util'
 
-var defaultOptions = require('./options')
-var Constants = require('./constants')
-var Events = require('./events')
-var CollectLogger = require('./util/collectLogger')
-var EventEmitter = require('./util/eventEmitter')
-var Container = require('./wrappers/container')
-var OptionsWrapper = require('./wrappers/optionsWrapper')
-var Replay = require('./wrappers/visuals/replay')
-var Browser = require('./util/browser')
-var Resource = require('./resource')
+import defaultOptions from './options'
+import Constants from './constants'
+import Events from './events'
+import CollectLogger from './util/collectLogger'
+import EventEmitter from './util/eventEmitter'
+import Container from './wrappers/container'
+import OptionsWrapper from './wrappers/optionsWrapper'
+import Replay from './wrappers/visuals/replay'
+import Browser from './util/browser'
+import Resource from './resource'
 
-var collectLogger, browser
+var collectLogger
+var browser
 
-function adjustOptions (options) {
-  var localOptions = merge.recursive(defaultOptions, options || {})
+function adjustOptions (options = {}) {
+  const localOptions = merge.recursive(defaultOptions, options)
 
   collectLogger = collectLogger || new CollectLogger(localOptions)
 
@@ -36,10 +37,10 @@ function getBrowser (localOptions) {
   return browser
 }
 
-var VideomailClient = function (options) {
-  var localOptions = adjustOptions(options)
-  var container = new Container(localOptions)
-  var debug = localOptions.debug
+const VideomailClient = function (options) {
+  const localOptions = adjustOptions(options)
+  const container = new Container(localOptions)
+  const debug = localOptions.debug
 
   var replay
 
@@ -51,7 +52,7 @@ var VideomailClient = function (options) {
   function build () {
     var building = false
 
-    readystate.interactive(function (previousState) {
+    readystate.interactive((previousState) => {
       debug(
         'Client: interactive(),',
         'previousState =', previousState + ',',
@@ -69,7 +70,7 @@ var VideomailClient = function (options) {
     })
   }
 
-  this.show = function () {
+  this.show = () => {
     if (container.isBuilt()) {
       container.show()
     } else {
@@ -77,9 +78,9 @@ var VideomailClient = function (options) {
     }
   }
 
-    // automatically adds a <video> element inside the given parentElement and loads
-    // it with the videomail
-  this.replay = function (videomail, parentElement) {
+  // automatically adds a <video> element inside the given parentElement and loads
+  // it with the videomail
+  this.replay = (videomail, parentElement) => {
     function buildReplay () {
       if (typeof parentElement === 'string') {
         parentElement = document.getElementById(parentElement)
@@ -116,12 +117,12 @@ var VideomailClient = function (options) {
     readystate.interactive(buildReplay)
   }
 
-  this.startOver = function () {
+  this.startOver = () => {
     replay && replay.hide()
     container.startOver()
   }
 
-  this.unload = function (e) {
+  this.unload = (e) => {
     readystate.removeAllListeners()
     container.unload(e)
   }
@@ -171,4 +172,4 @@ Object.keys(Constants.public).forEach(function (name) {
 // just another convenient thing
 VideomailClient.events = Events
 
-module.exports = VideomailClient
+export default VideomailClient

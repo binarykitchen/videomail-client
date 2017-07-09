@@ -21,7 +21,7 @@ videomail-client ✉
 
 Record videos in contact forms!
 
-Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript.
+Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript written in ES6.
 
 * <a href="#examples">Examples</a>
 * <a href="#demo">Demo / Fully working version</a>
@@ -82,7 +82,7 @@ Check out the full version with all its features on [videomail.io](https://video
 
 That site runs on AngularJS where I just include `require('videomail-client')` in the app logic and bundle all that through Browserify.
 
-More live examples are coming.
+Another live example would be https://seeflow.co.nz/contact/. More will follow ...
 
 <a name="options"></a>
 ## Options
@@ -126,12 +126,12 @@ The VideomailClient class is inherited from EventEmitter and emits lots of usefu
 
 ```js
 videomailClient.on('FORM_READY', function() {
-    // form is ready for recording
+  // form is ready for recording
 })
 
 videomailClient.on('SUBMITTED', function(videomail, response) {
-    // continue with your own app logic
-    // check out /examples/contact_form.html on how to integrate into your contact form
+  // continue with your own app logic
+  // check out /examples/contact_form.html on how to integrate into your contact form
 })
 ```
 
