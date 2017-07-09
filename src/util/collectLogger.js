@@ -1,16 +1,14 @@
-var util = require('util')
-var Browser = require('./browser')
+import util from 'util'
+import Browser from './browser'
 
-module.exports = function (localOptions) {
-  localOptions = localOptions || {}
-
-  var browser = new Browser(localOptions)
-  var logger = localOptions.logger || console
-  var containerId = (localOptions.selectors && localOptions.selectors.containerId) || 'undefined container id'
-  var stack = []
+export default function (localOptions = {}) {
+  const browser = new Browser(localOptions)
+  const logger = localOptions.logger || console
+  const containerId = (localOptions.selectors && localOptions.selectors.containerId) || 'undefined container id'
+  const stack = []
 
   function lifo (level, parameters) {
-    var line = util.format.apply(util, parameters)
+    const line = util.format.apply(util, parameters)
 
     if (stack.length > localOptions.logStackSize) {
       stack.pop()
@@ -29,9 +27,10 @@ module.exports = function (localOptions) {
   // we'll use groupCollapsed() and trace() instead to get these.
   this.debug = function () {
     // always add it for better client error reports
-    var args = [].slice.call(arguments, 0)
+    const args = [].slice.call(arguments, 0)
     args[0] = addContainerId(args[0])
-    var output = lifo('debug', args)
+
+    const output = lifo('debug', args)
 
     if (localOptions.verbose) {
       if (browser.isFirefox()) {
@@ -50,14 +49,16 @@ module.exports = function (localOptions) {
   }
 
   this.error = function () {
-    var args = [].slice.call(arguments, 0)
+    const args = [].slice.call(arguments, 0)
     args[0] = addContainerId(args[0])
+
     logger.error(lifo('error', args))
   }
 
   this.warn = function () {
-    var args = [].slice.call(arguments, 0)
+    const args = [].slice.call(arguments, 0)
     args[0] = addContainerId(args[0])
+
     logger.warn(lifo('warn', args))
   }
 

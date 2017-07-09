@@ -1,5 +1,6 @@
-const test = require('tape')
-const CollectLogger = require('./../../src/util/collectLogger')
+import test from 'tape'
+
+import CollectLogger from './../../src/util/collectLogger'
 
 test('CollectLogger:', function (t) {
   t.test('can be instantiated', function (tt) {

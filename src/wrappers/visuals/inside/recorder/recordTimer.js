@@ -1,7 +1,7 @@
-var h = require('hyperscript')
-var hidden = require('hidden')
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-module.exports = function (visuals, recordNote, options) {
+export default function (visuals, recordNote, options) {
   var recordTimerElement
 
   var nearComputed = false
@@ -22,14 +22,18 @@ module.exports = function (visuals, recordNote, options) {
     if (!nearComputed && thresholdReached(secs, 0.6)) {
       nearComputed = true
       return true
-    } else { return false }
+    } else {
+      return false
+    }
   }
 
   function endIsNigh (secs) {
     if (!endNighComputed && thresholdReached(secs, 0.8)) {
       endNighComputed = true
       return true
-    } else { return false }
+    } else {
+      return false
+    }
   }
 
   function setNear () {
@@ -41,7 +45,7 @@ module.exports = function (visuals, recordNote, options) {
   }
 
   this.check = function (opts) {
-    var newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
+    const newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
 
     // performance optimisation (another reason we need react here!)
     if (newCountdown !== countdown) {
@@ -52,22 +56,22 @@ module.exports = function (visuals, recordNote, options) {
   }
 
   function update () {
-    var mins = parseInt(countdown / 60, 10)
-    var secs = countdown - mins * 60
+    const mins = parseInt(countdown / 60, 10)
+    const secs = countdown - mins * 60
 
     if (!nearComputed || !endNighComputed) {
-      var remainingSeconds = options.video.limitSeconds - countdown
+      const remainingSeconds = options.video.limitSeconds - countdown
 
       if (isNear(remainingSeconds)) {
         recordNote.setNear()
         setNear()
 
-        options.debug('End is near, %i seconds to go', countdown)
+        options.debug('End is near, ' + countdown + ' seconds to go')
       } else if (endIsNigh(remainingSeconds)) {
         recordNote.setNigh()
         setNigh()
 
-        options.debug('End is nigh, %i seconds to go', countdown)
+        options.debug('End is nigh, ' + countdown + ' seconds to go')
       }
     }
 
@@ -136,6 +140,8 @@ module.exports = function (visuals, recordNote, options) {
       hide()
 
       visuals.appendChild(recordTimerElement)
-    } else { hide() }
+    } else {
+      hide()
+    }
   }
 }

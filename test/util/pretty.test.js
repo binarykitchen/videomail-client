@@ -1,5 +1,6 @@
-const test = require('tape')
-const pretty = require('./../../src/util/pretty')
+import test from 'tape'
+
+import pretty from './../../src/util/pretty'
 
 test('pretty:', function (t) {
   t.test('prettifies undefined fine', function (tt) {
