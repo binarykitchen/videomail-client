@@ -1,5 +1,6 @@
-const test = require('tape')
-const humanize = require('./../../src/util/humanize')
+import test from 'tape'
+
+import humanize from './../../src/util/humanize'
 
 test('humanize:', function (t) {
   t.test('filesize throws error on missing params', function (tt) {

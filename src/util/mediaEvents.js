@@ -1,7 +1,7 @@
 // taken from
 // https://bbc.github.io/tal/jsdoc/events_mediaevent.js.html
 
-module.exports = [
+export default [
   // The user agent begins looking for media data, as part of
   // the resource selection algorithm.
   'loadstart',

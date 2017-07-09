@@ -1,6 +1,6 @@
-const test = require('tape')
+import test from 'tape'
 
-const Visuals = require('./../../src/wrappers/visuals')
+import Visuals from './../../src/wrappers/visuals'
 
 test('Visuals:', function (t) {
   t.test('can be instantiated', function (tt) {

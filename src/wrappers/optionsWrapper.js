@@ -1,6 +1,6 @@
 // enhances options with useful functions we can reuse everywhere
 
-module.exports = {
+export default {
   addFunctions: function (options) {
     var audioEnabled = options.audio && options.audio.enabled
 
@@ -20,10 +20,12 @@ module.exports = {
       return options.hasDefinedWidth() && options.hasDefinedHeight()
     }
 
-    options.getRatio = function () {
+    options.getRatio = () => {
       var ratio = 1 // just a default one when no computations are possible
 
-      if (options.hasDefinedDimensions()) { ratio = options.video.height / options.video.width }
+      if (options.hasDefinedDimensions()) {
+        ratio = options.video.height / options.video.width
+      }
 
       return ratio
     }

@@ -18,10 +18,24 @@
   "readmeFilename": "README.md",
   "main": "src/index.js",
   "scripts": {
-    "test": "browserify test/**/*.test.js --debug | tape-run --wait 4000",
+    "test": "browserify test/**/*.test.js -d | tape-run --wait 4000",
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major"
+  },
+  "browserify": {
+    "transform": [["babelify", {
+      "presets": [["env", {
+        "targets": {
+          "chrome": 50,
+          "firefox": 45,
+          "ie": 11,
+          "edge": 12,
+          "browsers": ["last 3 versions"]
+        },
+        "debug": false
+      }]]
+    }]]
   },
   "engines": {
     "node": ">=8.1.0",

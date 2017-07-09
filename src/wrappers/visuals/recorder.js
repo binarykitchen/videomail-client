@@ -1,24 +1,24 @@
-var websocket = require('websocket-stream')
-var Frame = require('canvas-to-buffer')
-var util = require('util')
-var h = require('hyperscript')
-var hidden = require('hidden')
-var animitter = require('animitter')
+import websocket from 'websocket-stream'
+import Frame from 'canvas-to-buffer'
+import util from 'util'
+import h from 'hyperscript'
+import hidden from 'hidden'
+import animitter from 'animitter'
 
-var UserMedia = require('./userMedia')
+import UserMedia from './userMedia'
 
-var Events = require('./../../events')
-var Constants = require('./../../constants')
-var EventEmitter = require('./../../util/eventEmitter')
-var Browser = require('./../../util/browser')
-var Humanize = require('./../../util/humanize')
-var pretty = require('./../../util/pretty')
-var VideomailError = require('./../../util/videomailError')
+import Events from './../../events'
+import Constants from './../../constants'
+import EventEmitter from './../../util/eventEmitter'
+import Browser from './../../util/browser'
+import Humanize from './../../util/humanize'
+import pretty from './../../util/pretty'
+import VideomailError from './../../util/videomailError'
 
 // credits http://1lineart.kulaone.com/#/
-var PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
+const PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
 
-var Recorder = function (visuals, replay, options) {
+const Recorder = function (visuals, replay, options) {
   EventEmitter.call(this, options, 'Recorder')
 
     // validate some options this class needs
@@ -26,9 +26,9 @@ var Recorder = function (visuals, replay, options) {
     throw VideomailError.create('FPS must be defined', options)
   }
 
-  var self = this
-  var browser = new Browser(options)
-  var debug = options.debug
+  const self = this
+  const browser = new Browser(options)
+  const debug = options.debug
 
   var loop = null
 
@@ -81,12 +81,12 @@ var Recorder = function (visuals, replay, options) {
       if (stream.destroyed) {
         self.emit(Events.ERROR, VideomailError.create(
           'Already disconnected',
-          'Sorry, the connection to the server has been destroyed. ' +
-          'Best is to wait one minute and then to reload.',
+          'Sorry, the connection to the server has been destroyed. Please reload. ' +
+          'Details of buffer: ' + buffer.toString(),
           options
         ))
       } else {
-        var onFlushedCallback = opts && opts.onFlushedCallback
+        const onFlushedCallback = opts && opts.onFlushedCallback
 
         try {
           stream.write(buffer, function () {
@@ -117,7 +117,7 @@ var Recorder = function (visuals, replay, options) {
   function onAudioSample (audioSample) {
     samplesCount++
 
-    var audioBuffer = audioSample.toBuffer()
+    const audioBuffer = audioSample.toBuffer()
 
     // if (options.verbose) {
     //     debug(
@@ -213,8 +213,7 @@ var Recorder = function (visuals, replay, options) {
     samplesCount =
     framesCount = 0
 
-    sampleProgress =
-        frameProgress = null
+    sampleProgress = frameProgress = null
 
     key = args.key
 
@@ -262,7 +261,7 @@ var Recorder = function (visuals, replay, options) {
       // we use query parameters here because we cannot set custom headers in web sockets,
       // see https://github.com/websockets/ws/issues/467
 
-      var url2Connect =
+      const url2Connect =
         options.socketUrl +
         '?' +
         encodeURIComponent(Constants.SITE_NAME_LABEL) +
@@ -437,7 +436,7 @@ var Recorder = function (visuals, replay, options) {
       (err && err.stack) || '(undefined)'
     )
 
-    var errorListeners = self.listeners(Events.ERROR)
+    const errorListeners = self.listeners(Events.ERROR)
 
     if (errorListeners.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
@@ -500,7 +499,7 @@ var Recorder = function (visuals, replay, options) {
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // prefer the front camera (if one is available) over the rear one
-      var constraints = {
+      const constraints = {
         video: {
           facingMode: 'user',
           frameRate: {ideal: options.video.fps}
@@ -561,7 +560,7 @@ var Recorder = function (visuals, replay, options) {
 
       userMediaLoading = false
 
-      var errorListeners = self.listeners(Events.ERROR)
+      const errorListeners = self.listeners(Events.ERROR)
 
       if (errorListeners.length) {
         self.emit(Events.ERROR, exc)
@@ -639,7 +638,7 @@ var Recorder = function (visuals, replay, options) {
     } else if (stream) {
       debug('$ %s', command, args ? JSON.stringify(args) : '')
 
-      var commandObj = {
+      const commandObj = {
         command: command,
         args: args
       }
@@ -710,7 +709,7 @@ var Recorder = function (visuals, replay, options) {
   this.stop = function (params) {
     debug('stop()', params)
 
-    var limitReached = params.limitReached
+    const limitReached = params.limitReached
 
     this.emit(Events.STOPPING, limitReached)
 
@@ -785,7 +784,7 @@ var Recorder = function (visuals, replay, options) {
   }
 
   this.reset = function () {
-        // no need to reset when already unloaded
+    // no need to reset when already unloaded
     if (!unloaded) {
       debug('Recorder: reset()')
 
@@ -811,7 +810,7 @@ var Recorder = function (visuals, replay, options) {
   }
 
   this.pause = function (params) {
-    var e = params && params.event
+    const e = params && params.event
 
     if (e instanceof window.Event) {
       params.eventType = e.type
@@ -843,7 +842,7 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function onFlushed (opts) {
-    var frameNumber = opts && opts.frameNumber
+    const frameNumber = opts && opts.frameNumber
 
     if (frameNumber === 1) {
       self.emit(Events.FIRST_FRAME_SENT)
@@ -851,7 +850,7 @@ var Recorder = function (visuals, replay, options) {
   }
 
   function createLoop () {
-    var newLoop = animitter({fps: options.video.fps}, draw)
+    const newLoop = animitter({fps: options.video.fps}, draw)
 
     // remember it first
     originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject()
@@ -929,6 +928,7 @@ var Recorder = function (visuals, replay, options) {
         Events.ERROR,
         VideomailError.create('Failed to create canvas.', exc, options)
       )
+
       return false
     }
 
@@ -939,6 +939,7 @@ var Recorder = function (visuals, replay, options) {
         Events.ERROR,
         VideomailError.create('Canvas has an invalid width.', options)
       )
+
       return false
     }
 
@@ -947,6 +948,7 @@ var Recorder = function (visuals, replay, options) {
         Events.ERROR,
         VideomailError.create('Canvas has an invalid height.', options)
       )
+
       return false
     }
 
@@ -966,7 +968,7 @@ var Recorder = function (visuals, replay, options) {
     // must stop and then start to make it become effective, see
     // https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
     if (loop) {
-      var isRecording = self.isRecording()
+      const isRecording = self.isRecording()
 
       loop.stop()
       loop.setRequestAnimationFrameObject(newObj)
@@ -1153,7 +1155,7 @@ var Recorder = function (visuals, replay, options) {
     var ratio
 
     if (userMedia) {
-      var userMediaVideoWidth = userMedia.getVideoWidth()
+      const userMediaVideoWidth = userMedia.getVideoWidth()
 
       // avoid division by zero
       if (userMediaVideoWidth < 1) {
@@ -1227,4 +1229,4 @@ var Recorder = function (visuals, replay, options) {
 
 util.inherits(Recorder, EventEmitter)
 
-module.exports = Recorder
+export default Recorder

@@ -1,7 +1,7 @@
-const test = require('tape')
-const h = require('hyperscript')
+import test from 'tape'
+import h from 'hyperscript'
 
-const VideomailClient = require('./../../src/client')
+import VideomailClient from './../../src/client'
 
 const SILENT = true
 
@@ -20,7 +20,7 @@ test('VideomailClient:', {timeout: 2000}, function (t) {
   t.test('can be instantiated and emits built event', function (tt) {
     tt.plan(2)
 
-    var consoleFacade = console
+    const consoleFacade = console
 
     if (SILENT) {
       consoleFacade.error = function () {}
@@ -29,7 +29,10 @@ test('VideomailClient:', {timeout: 2000}, function (t) {
     }
 
     tt.doesNotThrow(function () {
-      client = new VideomailClient({verbose: !SILENT, logger: consoleFacade})
+      client = new VideomailClient({
+        verbose: !SILENT,
+        logger: consoleFacade
+      })
 
       client.once(
         client.events.BUILT,

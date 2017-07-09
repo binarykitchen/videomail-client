@@ -1,29 +1,28 @@
-var util = require('util')
-var h = require('hyperscript')
-var hidden = require('hidden')
-var contains = require('contains')
+import util from 'util'
+import h from 'hyperscript'
+import hidden from 'hidden'
+import contains from 'contains'
 
-var Events = require('./../events')
-var EventEmitter = require('./../util/eventEmitter')
+import Events from './../events'
+import EventEmitter from './../util/eventEmitter'
 
-var Buttons = function (container, options) {
+const Buttons = function (container, options) {
   EventEmitter.call(this, options, 'Buttons')
 
-  var self = this
+  const self = this
 
-  var buttonsElement,
+  var buttonsElement
+  var recordButton
+  var pauseButton
+  var resumeButton
+  var previewButton
+  var recordAgainButton
+  var submitButton
 
-    recordButton,
-    pauseButton,
-    resumeButton,
-    previewButton,
-    recordAgainButton,
-    submitButton,
+  var audioOnRadioPair
+  var audioOffRadioPair
 
-    audioOnRadioPair,
-    audioOffRadioPair,
-
-    built
+  var built
 
   function hide (elements) {
     if (elements && !Array.isArray(elements)) {
@@ -102,7 +101,7 @@ var Buttons = function (container, options) {
   }
 
   function replaceClickHandler (element, clickHandler) {
-    var wrappedClickHandler = function (e) {
+    const wrappedClickHandler = (e) => {
       e && e.preventDefault()
 
       try {
@@ -116,8 +115,8 @@ var Buttons = function (container, options) {
   }
 
   function makeRadioButtonPair (options) {
-    var radioButtonElement,
-      radioButtonGroup
+    var radioButtonElement
+    var radioButtonGroup
 
     if (options.id) {
       radioButtonElement = document.getElementById(options.id)
@@ -135,7 +134,7 @@ var Buttons = function (container, options) {
         'htmlFor': options.id
       }, options.label))
 
-            // double check that submit button is already in the buttonsElement container as a child?
+      // double check that submit button is already in the buttonsElement container as a child?
       if (submitButton && contains(buttonsElement, submitButton)) {
         buttonsElement.insertBefore(radioButtonGroup, submitButton)
       } else {
@@ -173,7 +172,7 @@ var Buttons = function (container, options) {
 
       buttonElement.innerHTML = text
 
-            // double check that submit button is already in the buttonsElement container
+      // double check that submit button is already in the buttonsElement container
       if (submitButton && contains(buttonsElement, submitButton)) {
         buttonsElement.insertBefore(buttonElement, submitButton)
       } else {
@@ -194,13 +193,13 @@ var Buttons = function (container, options) {
     if (!options.disableSubmit) {
       if (!submitButton) {
         submitButton = makeButton(
-            options.selectors.submitButtonClass,
-            'Submit',
-            null,
-            true,
-            options.selectors.submitButtonId,
-            'submit',
-            options.selectors.submitButtonSelector
+          options.selectors.submitButtonClass,
+          'Submit',
+          null,
+          true,
+          options.selectors.submitButtonId,
+          'submit',
+          options.selectors.submitButtonSelector
         )
       } else {
         disable(submitButton)
@@ -282,7 +281,9 @@ var Buttons = function (container, options) {
   function onFormReady (options) {
     // no need to show record button when doing a record again
     if (!isShown(recordAgainButton)) {
-      if (!options.paused) { show(recordButton) }
+      if (!options.paused) {
+        show(recordButton)
+      }
     }
 
     if (!options.paused) {
@@ -369,7 +370,9 @@ var Buttons = function (container, options) {
   function onRecording (framesCount) {
     // it is possible to hide while recording, hence
     // check framesCount first (coming from recorder)
-    if (framesCount > 1) { onFirstFrameSent() } else {
+    if (framesCount > 1) {
+      onFirstFrameSent()
+    } else {
       disable(audioOffRadioPair)
       disable(audioOnRadioPair)
       disable(recordAgainButton)
@@ -566,4 +569,4 @@ var Buttons = function (container, options) {
 
 util.inherits(Buttons, EventEmitter)
 
-module.exports = Buttons
+export default Buttons

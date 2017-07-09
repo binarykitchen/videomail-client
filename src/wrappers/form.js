@@ -1,34 +1,37 @@
-var h = require('hyperscript')
-var util = require('util')
-var hidden = require('hidden')
-var getFormData = require('get-form-data')
+import h from 'hyperscript'
+import util from 'util'
+import hidden from 'hidden'
+import getFormData from 'get-form-data'
 
-var Events = require('./../events')
-var EventEmitter = require('./../util/eventEmitter')
-var VideomailError = require('./../util/videomailError')
+import Events from './../events'
+import EventEmitter from './../util/eventEmitter'
+import VideomailError from './../util/videomailError'
 
-var Form = function (container, formElement, options) {
+const Form = function (container, formElement, options) {
   EventEmitter.call(this, options, 'Form')
 
-  var self = this
+  const self = this
 
-  var disableContainerValidation,
-    keyInput
+  var disableContainerValidation
+  var keyInput
 
   function getData () {
     return getFormData(formElement)
   }
 
   this.loadVideomail = function (videomail) {
-    var limit = formElement.elements.length
-    var input,
-      name
+    const limit = formElement.elements.length
+
+    var input
+    var name
 
     for (var i = 0; i < limit; i++) {
       input = formElement.elements[i]
       name = input.name
 
-      if (videomail[name]) { input.value = videomail[name] }
+      if (videomail[name]) {
+        input.value = videomail[name]
+      }
 
       if (name === options.selectors.subjectInputName ||
           name === options.selectors.bodyInputName) {
@@ -44,7 +47,7 @@ var Form = function (container, formElement, options) {
   }
 
   function setDisabled (disabled, buttonsToo) {
-    var limit = formElement.elements.length
+    const limit = formElement.elements.length
 
     for (var i = 0; i < limit; i++) {
       if (buttonsToo || (!buttonsToo && isNotButton(formElement.elements[i]))) {
@@ -54,7 +57,7 @@ var Form = function (container, formElement, options) {
   }
 
   function hideAll () {
-    var limit = formElement.elements.length
+    const limit = formElement.elements.length
 
     for (var i = 0; i < limit; i++) {
       hidden(formElement.elements[i], true)
@@ -81,7 +84,7 @@ var Form = function (container, formElement, options) {
 
   this.build = function () {
     if (options.enableAutoValidation) {
-      var inputElements = getInputElements()
+      const inputElements = getInputElements()
       var inputElement
 
       for (var i = 0, len = inputElements.length; i < len; i++) {
@@ -97,13 +100,15 @@ var Form = function (container, formElement, options) {
           })
         }
 
-                // because of angular's digest cycle, validate again when it became invalid
+        // because of angular's digest cycle, validate again when it became invalid
         inputElement.addEventListener('invalid', function () {
-          if (!disableContainerValidation) { container.validate() }
+          if (!disableContainerValidation) {
+            container.validate()
+          }
         })
       }
 
-      var selectElements = getSelectElements()
+      const selectElements = getSelectElements()
 
       for (var j = 0, len2 = selectElements.length; j < len2; j++) {
         selectElements[j].addEventListener('change', function () {
@@ -142,7 +147,7 @@ var Form = function (container, formElement, options) {
     })
 
     // fixes https://github.com/binarykitchen/videomail-client/issues/91
-    this.on(Events.GOING_BACK, function () {
+    this.on(Events.GOING_BACK, () => {
       keyInput.value = null
     })
 
@@ -163,16 +168,16 @@ var Form = function (container, formElement, options) {
   }
 
   function hideSubmitButton () {
-    var submitButton = self.findSubmitButton()
+    const submitButton = self.findSubmitButton()
     hidden(submitButton, true)
   }
 
   function startListeningToSubmitEvents () {
-    var submitButton = container.getSubmitButton()
+    const submitButton = container.getSubmitButton()
     submitButton.addEventListener('click', self.doTheSubmit.bind(self))
   }
 
-  this.doTheSubmit = function (e) {
+  this.doTheSubmit = (e) => {
     // when videomail-client is hidden, leave the form handling as it and
     // do not mess with it at all
     if (!container.areVisualsHidden()) {
@@ -192,17 +197,21 @@ var Form = function (container, formElement, options) {
     }
   }
 
-  this.getInvalidElement = function () {
-    var inputElements = getInputElements()
+  this.getInvalidElement = () => {
+    const inputElements = getInputElements()
 
     for (var i = 0, len = inputElements.length; i < len; i++) {
-      if (!inputElements[i].validity.valid) { return inputElements[i] }
+      if (!inputElements[i].validity.valid) {
+        return inputElements[i]
+      }
     }
 
-    var selectElements = getSelectElements()
+    const selectElements = getSelectElements()
 
     for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-      if (!selectElements[i].validity.valid) { return selectElements[j] }
+      if (!selectElements[i].validity.valid) {
+        return selectElements[j]
+      }
     }
 
     return null
@@ -212,7 +221,7 @@ var Form = function (container, formElement, options) {
     // prevents endless validation loop
     disableContainerValidation = true
 
-    var formIsValid = formElement.checkValidity()
+    const formIsValid = formElement.checkValidity()
 
     disableContainerValidation = false
 
@@ -234,4 +243,4 @@ var Form = function (container, formElement, options) {
 
 util.inherits(Form, EventEmitter)
 
-module.exports = Form
+export default Form

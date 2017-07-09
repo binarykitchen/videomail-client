@@ -1,7 +1,7 @@
-var h = require('hyperscript')
-var hidden = require('hidden')
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-module.exports = function (visuals) {
+export default function (visuals) {
   var recordNoteElement
 
   this.build = function () {
@@ -13,7 +13,9 @@ module.exports = function (visuals) {
       this.hide()
 
       visuals.appendChild(recordNoteElement)
-    } else { this.hide() }
+    } else {
+      this.hide()
+    }
   }
 
   this.stop = function () {

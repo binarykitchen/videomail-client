@@ -1,6 +1,6 @@
-var keymirror = require('keymirror')
+import keymirror from 'keymirror'
 
-module.exports = keymirror({
+export default keymirror({
   BUILT: null, // all dom elements are ready, are in the DOM
   FORM_READY: null, // form is ready, available in the DOM
   LOADING_USER_MEDIA: null, // asking for webcam access
