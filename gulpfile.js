@@ -1,3 +1,6 @@
+// todo write this in ES6 once i have figured out how to
+// transpile it with babelify itself without adding babel-core
+
 const path = require('path')
 const fs = require('fs')
 const gulp = require('gulp')
@@ -12,8 +15,9 @@ const send = require('connect-send-json')
 const del = require('del')
 const minimist = require('minimist')
 const sslRootCas = require('ssl-root-cas')
-const babelify = require('babelify')
 const watchify = require('watchify')
+
+const packageJson = require('./package.json')
 
 const defaultOptions = {
   minify: false,
@@ -72,7 +76,7 @@ gulp.task('todo', () => {
 })
 
 function bundle (watching) {
-  const entry = path.join(__dirname, '/src/index.js')
+  const entry = path.join(__dirname, packageJson.main)
   const bundler = browserify({
     entries: [entry],
     basedir: __dirname,
@@ -90,27 +94,12 @@ function bundle (watching) {
     plugins.util.log(msg)
   })
   .require(entry, {expose: 'videomail-client'})
-  .transform(babelify, {
-    babelrc: false,
-    presets: [['env', {
-      targets: {
-        'chrome': 50,
-        'firefox': 45,
-        'ie': 11,
-        'edge': 12,
-        'browsers': ['last 3 versions']
-      },
-      // set to true if you want to see a summary of the browers the above
-      // is going to be compiled for
-      'debug': false
-    }]]
-  })
 
   function pump () {
     return bundler
       .bundle()
       .on('error', function (err) {
-        console.error(err)
+        console.error(err.toString())
       })
       .pipe(source('./src/')) // gives streaming vinyl file object
       .pipe(buffer()) // required because the next steps do not support streams

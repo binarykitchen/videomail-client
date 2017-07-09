@@ -1,28 +1,24 @@
-var util = require('util')
-var h = require('hyperscript')
-var hidden = require('hidden')
+import util from 'util'
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-var Events = require('./../../events')
-var Browser = require('./../../util/browser')
-var EventEmitter = require('./../../util/eventEmitter')
-var VideomailError = require('./../../util/videomailError')
+import Events from './../../events'
+import Browser from './../../util/browser'
+import EventEmitter from './../../util/eventEmitter'
+import VideomailError from './../../util/videomailError'
 
-var enableInlineVideo
+import enableInlineVideo from 'iphone-inline-video'
 
-if (typeof navigator !== 'undefined') {
-  enableInlineVideo = require('iphone-inline-video')
-}
-
-var Replay = function (parentElement, options) {
+const Replay = function (parentElement, options) {
   EventEmitter.call(this, options, 'Replay')
 
-  var self = this
-  var browser = new Browser(options)
-  var debug = options.debug
+  const self = this
+  const browser = new Browser(options)
+  const debug = options.debug
 
-  var built,
-    replayElement,
-    videomail
+  var built
+  var replayElement
+  var videomail
 
   function buildElement () {
     debug('Replay: buildElement()')
@@ -97,7 +93,7 @@ var Replay = function (parentElement, options) {
 
     copyAttributes(videomail)
 
-    var hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0
+    const hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0
 
     this.show(videomail.width, videomail.height, hasAudio)
   }
@@ -194,7 +190,7 @@ var Replay = function (parentElement, options) {
 
     built = true
 
-    debug('Replay: built')
+    debug('Replay: built.')
   }
 
   this.unload = function () {
@@ -202,9 +198,9 @@ var Replay = function (parentElement, options) {
   }
 
   this.getVideoSource = function (type) {
-    var sources = replayElement.getElementsByTagName('source')
-    var l = sources.length
-    var videoType = 'video/' + type
+    const sources = replayElement.getElementsByTagName('source')
+    const l = sources.length
+    const videoType = 'video/' + type
 
     var source
 
@@ -261,7 +257,7 @@ var Replay = function (parentElement, options) {
   function pause (cb) {
     // avoids race condition, inspired by
     // http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
-    setTimeout(function () {
+    setTimeout(() => {
       if (replayElement && replayElement.pause) {
         replayElement.pause()
       }
@@ -272,10 +268,10 @@ var Replay = function (parentElement, options) {
 
   function play () {
     if (replayElement && replayElement.play) {
-      var p = replayElement.play()
+      const p = replayElement.play()
 
       if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
-        p.catch(function (reason) {
+        p.catch((reason) => {
           options.debug('Caught pending play exception: %s', reason)
         })
       }
@@ -284,7 +280,7 @@ var Replay = function (parentElement, options) {
 
   this.reset = function (cb) {
     // pause video to make sure it won't consume any memory
-    pause(function () {
+    pause(() => {
       if (replayElement) {
         self.setMp4Source(null)
         self.setWebMSource(null)
@@ -315,4 +311,4 @@ var Replay = function (parentElement, options) {
 
 util.inherits(Replay, EventEmitter)
 
-module.exports = Replay
+export default Replay

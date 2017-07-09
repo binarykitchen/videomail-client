@@ -2,6 +2,10 @@
 
 To keep it sweet and short, we're listing breaking or hot changes here only. Rest assured that we kill bugs all the time and they would make that list way too long (and are documented in GitHub tickets anyway).
 
+### v2.0.0 (2017-07-09)
+
+Migrated source code to ES6. Now **VideomailClient** can be imported using the module approach.
+
 ### v1.18.0 (2016-08-28)
 
 - **VideomailClient:** New function `submit()` to manually submit a videomail

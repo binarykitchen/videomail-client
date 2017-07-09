@@ -1,25 +1,25 @@
-var util = require('util')
+import util from 'util'
 
-var Events = require('./../../../events')
-var EventEmitter = require('./../../../util/eventEmitter')
+import Events from './../../../events'
+import EventEmitter from './../../../util/eventEmitter'
 
-var Countdown = require('./recorder/countdown')
-var PausedNote = require('./recorder/pausedNote')
-var RecordNote = require('./recorder/recordNote')
-var RecordTimer = require('./recorder/recordTimer')
+import Countdown from './recorder/countdown'
+import PausedNote from './recorder/pausedNote'
+import RecordNote from './recorder/recordNote'
+import RecordTimer from './recorder/recordTimer'
 
-var RecorderInsides = function (visuals, options) {
+const RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, 'RecorderInsides')
 
-  var self = this
-  var debug = options.debug
+  const self = this
+  const debug = options.debug
 
-  var recordNote = new RecordNote(visuals)
-  var recordTimer = new RecordTimer(visuals, recordNote, options)
+  const recordNote = new RecordNote(visuals)
+  const recordTimer = new RecordTimer(visuals, recordNote, options)
 
-  var countdown,
-    pausedNote,
-    built
+  var countdown
+  var pausedNote
+  var built
 
   if (options.video.countdown) {
     countdown = new Countdown(visuals, options)
@@ -126,4 +126,4 @@ var RecorderInsides = function (visuals, options) {
 
 util.inherits(RecorderInsides, EventEmitter)
 
-module.exports = RecorderInsides
+export default RecorderInsides

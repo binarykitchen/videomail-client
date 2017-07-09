@@ -1,6 +1,6 @@
-const test = require('tape')
+import test from 'tape'
 
-const Form = require('./../../src/wrappers/form')
+import Form from './../../src/wrappers/form'
 
 test('Form:', function (t) {
   t.test('can be instantiated', function (tt) {

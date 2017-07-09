@@ -1,13 +1,13 @@
 // https://github.com/tgriesser/create-error
-var createError = require('create-error')
-var util = require('util')
+import createError from 'create-error'
+import util from 'util'
 
-var originalPretty = require('./pretty')
-var Resource = require('./../resource')
+import originalPretty from './pretty'
+import Resource from './../resource'
 
-var VIDEOMAIL_ERR_NAME = 'Videomail Error'
+const VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
-var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
+const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'explanation': undefined,
   'logLines': undefined,
   'useragent': undefined,
@@ -17,7 +17,7 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
 })
 
 // shim pretty to exclude stack always
-var pretty = function (anything) {
+const pretty = function (anything) {
   return originalPretty(anything, {excludes: ['stack']})
 }
 
@@ -47,16 +47,16 @@ VideomailError.create = function (err, explanation, options, parameters) {
   parameters = parameters || {}
 
   // be super robust
-  var debug = (options && options.debug) || console.log
+  const debug = (options && options.debug) || console.log
 
   debug('VideomailError: create()')
 
-  var classList = parameters.classList || []
+  const classList = parameters.classList || []
 
   // Require Browser here, not at the top of the file to avoid
   // recursion. Because the Browser class is requiring this file as well.
-  var Browser = require('./browser')
-  var browser = new Browser(options)
+  const Browser = require('./browser')
+  const browser = new Browser(options)
 
   var errType
   var message
@@ -158,7 +158,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     case VideomailError.DOM_EXCEPTION:
       if (err.code === 9) {
-        var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
+        const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
         message = 'Security upgrade neded'
         explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
                       ' and enables encrypted videomail transfers.'
@@ -181,7 +181,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
 
     default:
-      var originalExplanation = explanation
+      const originalExplanation = explanation
 
       if (explanation && typeof explanation === 'object') {
         explanation = pretty(explanation)
@@ -264,7 +264,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode += ', name=' + (err.name ? err.name : 'undefined')
   }
 
-  var videomailError = new VideomailError(message, {
+  const videomailError = new VideomailError(message, {
     explanation: explanation,
     logLines: logLines,
     client: browser.getUsefulData(),
@@ -327,4 +327,4 @@ VideomailError.create = function (err, explanation, options, parameters) {
   return videomailError
 }
 
-module.exports = VideomailError
+export default VideomailError
