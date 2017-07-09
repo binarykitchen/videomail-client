@@ -1,6 +1,7 @@
-const test = require('tape')
+import test from 'tape'
 
-const standardize = require('./../../src/util/standardize')
+import standardize from './../../src/util/standardize'
+
 const root = this
 
 test('standardize:', function (t) {

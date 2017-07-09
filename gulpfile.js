@@ -1,3 +1,6 @@
+// todo write this in ES6 once i have figured out how to
+// transpile it with babelify itself without adding babel-core
+
 const path = require('path')
 const fs = require('fs')
 const gulp = require('gulp')
@@ -12,7 +15,9 @@ const send = require('connect-send-json')
 const del = require('del')
 const minimist = require('minimist')
 const sslRootCas = require('ssl-root-cas')
-const pump = require('pump')
+const watchify = require('watchify')
+
+const packageJson = require('./package.json')
 
 const defaultOptions = {
   minify: false,
@@ -25,13 +30,13 @@ const options = minimist(process.argv.slice(2), {default: defaultOptions})
 
 plugins.util.log('Options:', options)
 
-gulp.task('clean:js', function (cb) {
+gulp.task('clean:js', (cb) => {
   del(['dist/*.js']).then(function () {
     cb()
   })
 })
 
-gulp.task('stylus', function () {
+gulp.task('stylus', () => {
   gulp.src('src/styles/styl/main.styl')
     .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
     .pipe(plugins.stylus({
@@ -40,12 +45,12 @@ gulp.task('stylus', function () {
     }))
     // https://github.com/ai/autoprefixer#browsers
     .pipe(plugins.autoprefixer(
-        'last 4 versions',
-        '> 1%',
-        'Explorer >= 11',
-        'Firefox ESR',
-        'iOS >= 9',
-        'android >= 4'
+      'last 3 versions',
+      '> 1%',
+      'Explorer >= 11',
+      'Firefox ESR',
+      'iOS >= 9',
+      'android >= 4'
     ))
     // always minify otherwise it gets broken with line-breaks
     // when surrounded with `'s when injected
@@ -59,7 +64,7 @@ gulp.task('stylus', function () {
     .pipe(plugins.connect.reload())
 })
 
-gulp.task('todo', function () {
+gulp.task('todo', () => {
   gulp.src(
     ['src/**/*.{js, styl}', 'gulpfile.js', 'examples/*.html'],
     {base: './'}
@@ -70,32 +75,53 @@ gulp.task('todo', function () {
     .pipe(gulp.dest('./'))
 })
 
-gulp.task('browserify', ['clean:js'], function (cb) {
-  const entry = path.join(__dirname, '/src/index.js')
+function bundle (watching) {
+  const entry = path.join(__dirname, packageJson.main)
   const bundler = browserify({
     entries: [entry],
     basedir: __dirname,
     globals: false,
+    cache: {},
+    packageCache: {},
+    plugin: (watching) ? [watchify] : null,
     debug: !options.minify // enables inline source maps
   })
+  .on('update', () => {
+    pump()
+    plugins.util.log('Re-bundling ...')
+  })
+  .on('log', (msg) => {
+    plugins.util.log(msg)
+  })
+  .require(entry, {expose: 'videomail-client'})
 
-  pump([
-    bundler.require(entry, {expose: 'videomail-client'}).bundle(),
-    source('./src/'), // gives streaming vinyl file object
-    buffer(), // required because the next steps do not support streams
-    plugins.concat('videomail-client.js'),
-    gulp.dest('dist'),
-    plugins.if(options.minify, plugins.sourcemaps.init()),
-    plugins.if(options.minify, plugins.uglify()),
-    plugins.if(options.minify, plugins.rename({suffix: '.min'})),
-    plugins.if(options.minify, plugins.sourcemaps.write('/')),
-    plugins.if(options.minify, gulp.dest('dist')),
-    plugins.connect.reload()
-  ], cb)
+  function pump () {
+    return bundler
+      .bundle()
+      .on('error', function (err) {
+        console.error(err.toString())
+      })
+      .pipe(source('./src/')) // gives streaming vinyl file object
+      .pipe(buffer()) // required because the next steps do not support streams
+      .pipe(plugins.concat('videomail-client.js'))
+      .pipe(gulp.dest('dist'))
+      .pipe(plugins.if(options.minify, plugins.sourcemaps.init()))
+      .pipe(plugins.if(options.minify, plugins.uglify()))
+      .pipe(plugins.if(options.minify, plugins.rename({suffix: '.min'})))
+      .pipe(plugins.if(options.minify, plugins.sourcemaps.write('/')))
+      .pipe(plugins.if(options.minify, gulp.dest('dist')))
+      .pipe(plugins.connect.reload())
+  }
+
+  return pump()
+}
+
+gulp.task('scripts', ['clean:js'], () => {
+  return bundle()
 })
 
-gulp.task('connect', ['build'], function () {
-  var SSL_CERTS_PATH = path.join(__dirname, '/etc/ssl-certs/')
+gulp.task('connect', ['build'], () => {
+  const SSL_CERTS_PATH = path.join(__dirname, '/env/dev/ssl-certs/')
 
   sslRootCas
     .inject()
@@ -111,7 +137,7 @@ gulp.task('connect', ['build'], function () {
       cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
     },
     middleware: function () {
-      var router = new Router()
+      const router = new Router()
 
       router.use(bodyParser.json())
       router.use(send.json())
@@ -134,11 +160,11 @@ gulp.task('connect', ['build'], function () {
   })
 })
 
-gulp.task('reload', function () {
+gulp.task('reload', () => {
   plugins.connect.reload()
 })
 
-gulp.task('lint', function () {
+gulp.task('lint', () => {
   return gulp.src(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'])
     .pipe(plugins.standard())
     .pipe(plugins.standard.reporter('default', {
@@ -147,9 +173,10 @@ gulp.task('lint', function () {
     }))
 })
 
-gulp.task('watch', ['connect'], function () {
+gulp.task('watch', ['connect'], () => {
+  bundle(true)
+
   gulp.watch(['src/styles/styl/**/*.styl'], ['stylus'])
-  gulp.watch(['src/**/*.js'], ['browserify'])
   // commented out so that it reloads faster
   // gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
   gulp.watch(['examples/*.html'], ['reload'])
@@ -158,8 +185,8 @@ gulp.task('watch', ['connect'], function () {
 // get inspired by
 // https://www.npmjs.com/package/gulp-tag-version and
 // https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
-gulp.task('bumpVersion', function () {
-  var bumpOptions = {}
+gulp.task('bumpVersion', () => {
+  const bumpOptions = {}
 
   if (options.version) {
     bumpOptions.version = options.version
@@ -174,5 +201,5 @@ gulp.task('bumpVersion', function () {
 })
 
 gulp.task('examples', ['connect', 'watch'])
-gulp.task('build', ['lint', 'stylus', 'browserify', 'todo'])
+gulp.task('build', ['lint', 'stylus', 'scripts', 'todo'])
 gulp.task('default', ['build'])

@@ -1,6 +1,6 @@
-const test = require('tape')
+import test from 'tape'
 
-const Container = require('./../../src/wrappers/container')
+import Container from './../../src/wrappers/container'
 
 test('Container:', function (t) {
   t.test('can be instantiated', function (tt) {

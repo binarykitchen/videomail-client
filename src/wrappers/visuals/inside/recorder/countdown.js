@@ -1,13 +1,13 @@
-var h = require('hyperscript')
-var hidden = require('hidden')
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-module.exports = function (visuals, options) {
-  var self = this
+export default function (visuals, options) {
+  const self = this
 
-  var countdownElement,
-    intervalId,
-    countdown,
-    paused
+  var countdownElement
+  var intervalId
+  var countdown
+  var paused
 
   function fire (cb) {
     self.unload()
@@ -57,7 +57,9 @@ module.exports = function (visuals, options) {
       this.hide()
 
       visuals.appendChild(countdownElement)
-    } else { this.hide() }
+    } else {
+      this.hide()
+    }
   }
 
   this.show = function () {

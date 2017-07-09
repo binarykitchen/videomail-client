@@ -1,7 +1,11 @@
-module.exports = {
+import {version} from '../package.json'
+
+const PRODUCTION = process.env.NODE_ENV === 'production'
+
+export default {
   logger: null,                         // define logging instance. leave null for default, console.
   logStackSize: 30,                     // limits the stack size of log outputs to collect
-  verbose: false,                       // set true to log more info
+  verbose: !PRODUCTION,                 // set true to log more info
   baseUrl: 'https://videomail.io',      // leave as it, permanent url to post videos
   socketUrl: 'wss://videomail.io',      // leave as it, permanent url to send frames
   siteName: 'videomail-client-demo',    // Required for the API. If you change it, contact me
@@ -130,5 +134,8 @@ module.exports = {
   reportErrors: false,
 
   // just for testing purposes to simulate browser agent handling
-  fakeUaString: null
+  fakeUaString: null,
+
+  // todo pass on version to server
+  version: version
 }

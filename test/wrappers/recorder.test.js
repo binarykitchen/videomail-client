@@ -1,6 +1,6 @@
-const test = require('tape')
+import test from 'tape'
 
-const Recorder = require('./../../src/wrappers/visuals/recorder')
+import Recorder from './../../src/wrappers/visuals/recorder'
 
 test('Recorder:', function (t) {
   t.test('can be instantiated', function (tt) {
