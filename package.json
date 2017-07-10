@@ -18,9 +18,6 @@
   "readmeFilename": "README.md",
   "esnext": "src/index.js",
   "main": "dist/videomail-client.js",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "test": "gulp test",
     "patch": "./env/dev/release.sh --importance=patch",
