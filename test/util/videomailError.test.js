@@ -60,7 +60,9 @@ test('Videomail Error:', function (t) {
     tt.test('null', function (tt) {
       tt.plan(3)
 
-      const err = VideomailError.create()
+      const err = VideomailError.create(undefined, undefined, {
+        debug: function () {} // so that it wont pollute output during tests
+      })
 
       tt.equal(err.toString(), 'Videomail Error')
       tt.equal(err.message, '')
