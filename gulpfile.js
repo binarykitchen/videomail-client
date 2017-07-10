@@ -16,6 +16,10 @@ const del = require('del')
 const minimist = require('minimist')
 const sslRootCas = require('ssl-root-cas')
 const watchify = require('watchify')
+const babelify = require('babelify')
+const tapeRun = require('tape-run')
+const tapSpec = require('tap-spec')
+const glob = require('glob')
 
 const packageJson = require('./package.json')
 
@@ -75,14 +79,17 @@ gulp.task('todo', () => {
     .pipe(gulp.dest('./'))
 })
 
+let cache = {}
+let packageCache = {}
+
 function bundle (watching) {
   const entry = path.join(__dirname, packageJson.esnext)
   const bundler = browserify({
     entries: [entry],
     basedir: __dirname,
     globals: false,
-    cache: {},
-    packageCache: {},
+    cache: cache,
+    packageCache: packageCache,
     plugin: (watching) ? [watchify] : null,
     debug: !options.minify // enables inline source maps
   })
@@ -94,12 +101,14 @@ function bundle (watching) {
     plugins.util.log(msg)
   })
   .require(entry, {expose: 'videomail-client'})
+  .transform(babelify)
 
   function pump () {
     return bundler
       .bundle()
       .on('error', function (err) {
         console.error(err.toString())
+        this.emit('end')
       })
       .pipe(source('./src/')) // gives streaming vinyl file object
       .pipe(buffer()) // required because the next steps do not support streams
@@ -118,6 +127,26 @@ function bundle (watching) {
 
 gulp.task('scripts', ['clean:js'], () => {
   return bundle()
+})
+
+gulp.task('test', () => {
+  const testFiles = glob.sync('test/**/*.test.js')
+  const bundler = browserify({
+    entries: testFiles
+  })
+  .transform(babelify)
+
+  return bundler
+    .bundle()
+    .on('error', function (err) {
+      console.error(err.toString())
+      this.emit('end')
+    })
+    .pipe(tapeRun({
+      wait: 4e3
+    }))
+    .pipe(tapSpec())
+    .pipe(process.stdout)
 })
 
 gulp.task('connect', ['build'], () => {
