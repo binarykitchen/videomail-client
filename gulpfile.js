@@ -35,7 +35,7 @@ const options = minimist(process.argv.slice(2), {default: defaultOptions})
 plugins.util.log('Options:', options)
 
 gulp.task('clean:js', (cb) => {
-  return del(['dist/*.js'])
+  return del(['dist/*.js', 'dist/*.js.map'])
 })
 
 gulp.task('stylus', () => {
