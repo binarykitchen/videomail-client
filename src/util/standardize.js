@@ -1,4 +1,3 @@
-import 'core-js/shim'
 import 'classlist.js'
 
 // needed for IE 11

@@ -35,9 +35,7 @@ const options = minimist(process.argv.slice(2), {default: defaultOptions})
 plugins.util.log('Options:', options)
 
 gulp.task('clean:js', (cb) => {
-  del(['dist/*.js']).then(function () {
-    cb()
-  })
+  return del(['dist/*.js'])
 })
 
 gulp.task('stylus', () => {
@@ -83,11 +81,10 @@ let cache = {}
 let packageCache = {}
 
 function bundle (watching) {
-  const entry = path.join(__dirname, packageJson.esnext)
+  const entry = path.join(__dirname, packageJson.module)
   const bundler = browserify({
     entries: [entry],
     basedir: __dirname,
-    globals: false,
     cache: cache,
     packageCache: packageCache,
     plugin: (watching) ? [watchify] : null,
