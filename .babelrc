@@ -8,7 +8,6 @@
         "edge": 12,
         "browsers": ["last 3 versions"]
       },
-      "useBuiltIns": true,
       "debug": false
     }]
   ]
