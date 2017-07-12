@@ -216,9 +216,9 @@ For advanced use only: returns you a collection of log lines that show what code
 <a name="whitelist"></a>
 ## Whitelist
 
-Examples will work right away on [http://localhost:8080](http://localhost:8080). This is because localhost is whitelisted on the remote Videomail server. `127.0.0.1:8080` is whitelisted too for local development. Other IP addresses won't work.
+Examples will work right away on [https://localhost:8080](https://localhost:8080). This is because localhost is whitelisted on the remote Videomail server. `https://localhost` and `https://localhost:443` are whitelisted too for local development. Other IP addresses won't work. If this is a problem, contact me and I can whitelist more.
 
-In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, please reach me at [https://binarykitchen.com](https://binarykitchen.com) and you will get a new site name and a list of whitelisted URLs for your own usage.
+In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, just lodge a whitelist request at [https://videomail.io/whitelist](https://videomail.io/whitelist). Then you should get a new site name and a list of whitelisted URLs for your own usage pretty fast (within less than 48 hours).
 
 <a name="compatibility"></a>
 ## Backward compatibility
@@ -227,7 +227,7 @@ Forget the old IE, Safari and iPhones/iPads because they still don't support `ge
 
 * Firefox >= 34
 * Google Chrome >= 32
-* Microsoft Edge >= 1 (is that IE 12?)
+* Microsoft Edge >= 12
 * Internet Explorer >= 12
 * Opera >= 26
 * Chrome for Android >= 39
@@ -235,7 +235,7 @@ Forget the old IE, Safari and iPhones/iPads because they still don't support `ge
 
 Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
 
-PS: On Safari and iPhones/iPads you can play the videomails fine without any issues. Repeating: there is just no recording functionality for them.
+PS: On Safari and iPhones/iPads you can play the videomails fine without any issues. Repeating: there is just no recording functionality for them yet until Apple made a move.
 
 <a name="super-fast-cdn"></a>
 ## Super fast global CDN
