@@ -47,7 +47,7 @@ gulp.task('stylus', () => {
     }))
     // https://github.com/ai/autoprefixer#browsers
     .pipe(plugins.autoprefixer(
-      'last 3 versions',
+      'last 5 versions',
       '> 1%',
       'Explorer >= 11',
       'Firefox ESR',
@@ -221,9 +221,9 @@ gulp.task('bumpVersion', () => {
   }
 
   return gulp.src(['./package.json'])
-        .pipe(plugins.bump(bumpOptions))
-        .pipe(plugins.if(options.write, gulp.dest('./')))
-        .on('error', plugins.util.log)
+    .pipe(plugins.bump(bumpOptions))
+    .pipe(plugins.if(options.write, gulp.dest('./')))
+    .on('error', plugins.util.log)
 })
 
 gulp.task('examples', ['connect', 'watch'])

@@ -13223,6 +13223,7 @@ module.exports={
   "main": "dist/videomail-client.js",
   "scripts": {
     "test": "gulp test",
+    "start": "gulp examples",
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major"
