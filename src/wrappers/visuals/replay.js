@@ -1,6 +1,7 @@
 import util from 'util'
 import h from 'hyperscript'
 import hidden from 'hidden'
+import addEventListenerWithOptions from 'add-eventlistener-with-options'
 
 import Events from './../../events'
 import Browser from './../../util/browser'
@@ -167,7 +168,9 @@ const Replay = function (parentElement, options) {
         })
       }
 
-      replayElement.addEventListener('touchstart', function (e) {
+      // makes use of passive option automatically for better performance
+      // https://www.npmjs.com/package/add-eventlistener-with-options
+      addEventListenerWithOptions(replayElement, 'touchstart', function (e) {
         e && e.preventDefault()
 
         if (this.paused) {
