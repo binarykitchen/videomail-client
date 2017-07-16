@@ -1,7 +1,156 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var EventEmitter          = require('events').EventEmitter,
-    inherits              = require('inherits'),
-    raf                   = require('raf'),
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.VideomailClient = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["add-eventlistener-with-options"] = factory();
+	else
+		root["add-eventlistener-with-options"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = addEventListenerWithOptions;
+
+	var _checkSupport = __webpack_require__(1);
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	/**
+	 * Add event listener with additional options
+	 * @param {EventTarget} target - The EventTarget element
+	 * @param {string} name - The name of the event
+	 * @param {function} listener - The event listener callback
+	 * @param {object} options - The options explicitly passed from caller
+	 * @param {string} optionName - The additioanl option to add to the event listener 
+	 */
+	function addEventListenerWithOptions(target, name, listener, options) {
+	    var optionName = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'passive';
+
+	    if (target.addEventListener !== undefined) {
+	        var listenerOptions = _checkSupport.SupportMap[optionName] ? Object.assign({}, options, _defineProperty({}, optionName, true)) : options;
+	        target.addEventListener(name, listener, listenerOptions);
+	    }
+	}
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.SupportMap = undefined;
+
+	var _OptionsMap;
+
+	var _constants = __webpack_require__(2);
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var OptionsMap = (_OptionsMap = {}, _defineProperty(_OptionsMap, _constants.PASSIVE, false), _defineProperty(_OptionsMap, _constants.CAPTURE, false), _defineProperty(_OptionsMap, _constants.ONCE, false), _OptionsMap);
+
+	var getOptionsMap = function getOptionsMap() {
+	    Object.keys(OptionsMap).forEach(function (k, i) {
+	        OptionsMap[k] = checkSupportForProperty(k);
+	    });
+
+	    return OptionsMap;
+	};
+
+	function checkSupportForProperty(property) {
+	    if (!!OptionsMap[property]) {
+	        return OptionsMap[property];
+	    }
+
+	    try {
+	        var opts = Object.defineProperty({}, property, {
+	            get: function get() {
+	                OptionsMap[property] = true;
+	            }
+	        });
+	        window.addEventListener("test", null, opts);
+	        window.removeListener("test", null);
+	    } catch (e) {}
+
+	    return OptionsMap[property];
+	}
+
+	var SupportMap = exports.SupportMap = getOptionsMap();
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var PASSIVE = exports.PASSIVE = 'passive';
+	var CAPTURE = exports.CAPTURE = 'capture';
+	var ONCE = exports.ONCE = 'once';
+
+/***/ }
+/******/ ])
+});
+;
+},{}],2:[function(_dereq_,module,exports){
+var EventEmitter          = _dereq_('events').EventEmitter,
+    inherits              = _dereq_('inherits'),
+    raf                   = _dereq_('raf'),
     methods;
 
 
@@ -416,9 +565,9 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":22,"inherits":34,"raf":50}],2:[function(require,module,exports){
-var toBuffer       = require('typedarray-to-buffer'),
-    isFloat32Array = require('validate.io-float32array')
+},{"events":23,"inherits":35,"raf":51}],3:[function(_dereq_,module,exports){
+var toBuffer       = _dereq_('typedarray-to-buffer'),
+    isFloat32Array = _dereq_('validate.io-float32array')
 
 module.exports = function(float32Array) {
 
@@ -442,7 +591,7 @@ module.exports = function(float32Array) {
     }
 }
 
-},{"typedarray-to-buffer":73,"validate.io-float32array":79}],3:[function(require,module,exports){
+},{"typedarray-to-buffer":74,"validate.io-float32array":80}],4:[function(_dereq_,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -558,9 +707,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -668,7 +817,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -854,7 +1003,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -865,8 +1014,8 @@ process.umask = function() { return 0; };
 
 'use strict'
 
-var base64 = require('base64-js')
-var ieee754 = require('ieee754')
+var base64 = _dereq_('base64-js')
+var ieee754 = _dereq_('ieee754')
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -2562,8 +2711,8 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":3,"ieee754":32}],8:[function(require,module,exports){
-var toBuffer  = require('typedarray-to-buffer'),
+},{"base64-js":4,"ieee754":33}],9:[function(_dereq_,module,exports){
+var toBuffer  = _dereq_('typedarray-to-buffer'),
     isBrowser = typeof(document) !== 'undefined' && typeof(document.createElement) === 'function',
 
     // cached, used only once for browser environments
@@ -2793,9 +2942,9 @@ module.exports = function(canvas, options) {
     }
 }
 
-},{"typedarray-to-buffer":73}],9:[function(require,module,exports){
+},{"typedarray-to-buffer":74}],10:[function(_dereq_,module,exports){
 // contains, add, remove, toggle
-var indexof = require('indexof')
+var indexof = _dereq_('indexof')
 
 module.exports = ClassList
 
@@ -2894,7 +3043,7 @@ function isTruthy(value) {
     return !!value
 }
 
-},{"indexof":33}],10:[function(require,module,exports){
+},{"indexof":34}],11:[function(_dereq_,module,exports){
 /*
  * classList.js: Cross-browser full element.classList implementation.
  * 1.1.20150312
@@ -3136,7 +3285,7 @@ if (objCtr.defineProperty) {
 }
 
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3301,7 +3450,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 var DOCUMENT_POSITION_CONTAINED_BY = 16
 
 module.exports = contains
@@ -3316,7 +3465,7 @@ function contains(container, elem) {
     return comparison === 0 || comparison & DOCUMENT_POSITION_CONTAINED_BY
 }
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3426,8 +3575,8 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 
-}).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":38}],14:[function(require,module,exports){
+}).call(this,{"isBuffer":_dereq_("../../is-buffer/index.js")})
+},{"../../is-buffer/index.js":39}],15:[function(_dereq_,module,exports){
 //     create-error.js 0.3.1
 //     (c) 2013 Tim Griesser
 //     This source may be freely distributed under the MIT license.
@@ -3547,17 +3696,17 @@ function clone(target) {
   }
 });
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 module.exports = function () {
     for (var i = 0; i < arguments.length; i++) {
         if (arguments[i] !== undefined) return arguments[i];
     }
 };
 
-},{}],16:[function(require,module,exports){
-var util = require('util')
-var global = require('global')
-var EventEmitter = require('events')
+},{}],17:[function(_dereq_,module,exports){
+var util = _dereq_('util')
+var global = _dereq_('global')
+var EventEmitter = _dereq_('events')
 
 var makeDespot = function () {
   var Despot = function () {
@@ -3576,14 +3725,12 @@ var makeDespot = function () {
 
 module.exports = makeDespot()
 
-},{"events":22,"global":28,"util":78}],17:[function(require,module,exports){
+},{"events":23,"global":29,"util":79}],18:[function(_dereq_,module,exports){
 'use strict'
 
-var document = require('global/document')
-var Event = require('geval')
-var Keys = require('./keys')
-
-module.exports = Visibility
+var document = _dereq_('global/document')
+var Event = _dereq_('geval')
+var Keys = _dereq_('./keys')
 
 function Visibility () {
   var keys = Keys(document)
@@ -3616,20 +3763,9 @@ function noopShim () {
 
 function noop () {}
 
-},{"./keys":18,"geval":26,"global/document":27}],18:[function(require,module,exports){
-'use strict'
+module.exports = Visibility
 
-module.exports = keys
-
-function keys (document) {
-  var prefix = detectPrefix(document)
-  if (prefix == null) return
-  return {
-    hidden: lowercaseFirst(prefix + 'Hidden'),
-    event: prefix + 'visibilitychange'
-  }
-}
-
+},{"./keys":19,"geval":27,"global/document":28}],19:[function(_dereq_,module,exports){
 function detectPrefix (document) {
   if (document.hidden != null) return ''
   if (document.mozHidden != null) return 'moz'
@@ -3641,12 +3777,21 @@ function lowercaseFirst (string) {
   return string.substring(0, 1).toLowerCase() + string.substring(1)
 }
 
-},{}],19:[function(require,module,exports){
+module.exports = function (document) {
+  var prefix = detectPrefix(document)
+  if (prefix == null) return
+  return {
+    hidden: lowercaseFirst(prefix + 'Hidden'),
+    event: prefix + 'visibilitychange'
+  }
+}
+
+},{}],20:[function(_dereq_,module,exports){
 (function (process,Buffer){
-var stream = require('readable-stream')
-var eos = require('end-of-stream')
-var inherits = require('inherits')
-var shift = require('stream-shift')
+var stream = _dereq_('readable-stream')
+var eos = _dereq_('end-of-stream')
+var inherits = _dereq_('inherits')
+var shift = _dereq_('stream-shift')
 
 var SIGNAL_FLUSH = new Buffer([0])
 
@@ -3872,8 +4017,8 @@ Duplexify.prototype.end = function(data, enc, cb) {
 
 module.exports = Duplexify
 
-}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":6,"buffer":7,"end-of-stream":21,"inherits":34,"readable-stream":59,"stream-shift":64}],20:[function(require,module,exports){
+}).call(this,_dereq_('_process'),_dereq_("buffer").Buffer)
+},{"_process":7,"buffer":8,"end-of-stream":22,"inherits":35,"readable-stream":60,"stream-shift":65}],21:[function(_dereq_,module,exports){
 // element-closest | CC0-1.0 | github.com/jonathantneal/closest
 
 (function (ElementProto) {
@@ -3908,8 +4053,8 @@ module.exports = Duplexify
 	}
 })(window.Element.prototype);
 
-},{}],21:[function(require,module,exports){
-var once = require('once');
+},{}],22:[function(_dereq_,module,exports){
+var once = _dereq_('once');
 
 var noop = function() {};
 
@@ -3981,7 +4126,7 @@ var eos = function(stream, opts, callback) {
 };
 
 module.exports = eos;
-},{"once":47}],22:[function(require,module,exports){
+},{"once":48}],23:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4285,7 +4430,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -4456,7 +4601,7 @@ function isUndefined(arg) {
 })(typeof window !== "undefined" ? window : global);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],24:[function(require,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -4641,7 +4786,7 @@ getFormData.getNamedFormElementData = getNamedFormElementData;
 
 exports['default'] = getFormData;
 module.exports = exports['default'];
-},{}],25:[function(require,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 module.exports = Event
 
 function Event() {
@@ -4669,8 +4814,8 @@ function Event() {
     }
 }
 
-},{}],26:[function(require,module,exports){
-var Event = require('./event.js')
+},{}],27:[function(_dereq_,module,exports){
+var Event = _dereq_('./event.js')
 
 module.exports = Source
 
@@ -4682,11 +4827,11 @@ function Source(broadcaster) {
     return tuple.listen
 }
 
-},{"./event.js":25}],27:[function(require,module,exports){
+},{"./event.js":26}],28:[function(_dereq_,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
-var minDoc = require('min-document');
+var minDoc = _dereq_('min-document');
 
 var doccy;
 
@@ -4703,7 +4848,7 @@ if (typeof document !== 'undefined') {
 module.exports = doccy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":4}],28:[function(require,module,exports){
+},{"min-document":5}],29:[function(_dereq_,module,exports){
 (function (global){
 var win;
 
@@ -4720,7 +4865,7 @@ if (typeof window !== "undefined") {
 module.exports = win;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(require,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 module.exports = shim
 
 function shim (element, value) {
@@ -4731,7 +4876,7 @@ function shim (element, value) {
     element.style.display = value ? 'none' : ''
 }
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 // HumanizeDuration.js - http://git.io/j0HgmQ
 
 ;(function () {
@@ -5286,11 +5431,11 @@ function shim (element, value) {
   }
 })();  // eslint-disable-line semi
 
-},{}],31:[function(require,module,exports){
-var split = require('browser-split')
-var ClassList = require('class-list')
+},{}],32:[function(_dereq_,module,exports){
+var split = _dereq_('browser-split')
+var ClassList = _dereq_('class-list')
 
-var w = typeof window === 'undefined' ? require('html-element') : window
+var w = typeof window === 'undefined' ? _dereq_('html-element') : window
 var document = w.document
 var Text = w.Text
 
@@ -5448,7 +5593,7 @@ function isArray (arr) {
 
 
 
-},{"browser-split":5,"class-list":9,"html-element":4}],32:[function(require,module,exports){
+},{"browser-split":6,"class-list":10,"html-element":5}],33:[function(_dereq_,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5534,7 +5679,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5545,7 +5690,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],34:[function(require,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5570,7 +5715,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 var containers = []; // will store container HTMLElement references
 var styleElements = []; // will store {prepend: HTMLElement, append: HTMLElement}
 
@@ -5630,7 +5775,7 @@ function createStyleElement() {
 module.exports = insertCss;
 module.exports.insertCss = insertCss;
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 /*! npm.im/intervalometer */
 'use strict';
 
@@ -5673,11 +5818,11 @@ function timerIntervalometer(cb, delay) {
 exports.intervalometer = intervalometer;
 exports.frameIntervalometer = frameIntervalometer;
 exports.timerIntervalometer = timerIntervalometer;
-},{}],37:[function(require,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 /*! npm.im/iphone-inline-video 2.2.2 */
 'use strict';
 
-var intervalometer = require('intervalometer');
+var intervalometer = _dereq_('intervalometer');
 
 function preventEvent(element, eventName, test) {
 	function handler(e) {
@@ -6041,7 +6186,7 @@ function enableInlineVideo(video, opts) {
 
 module.exports = enableInlineVideo;
 
-},{"intervalometer":36}],38:[function(require,module,exports){
+},{"intervalometer":37}],39:[function(_dereq_,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -6064,21 +6209,21 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 'use strict';
-var numberIsNan = require('number-is-nan');
+var numberIsNan = _dereq_('number-is-nan');
 
 module.exports = Number.isFinite || function (val) {
 	return !(typeof val !== 'number' || numberIsNan(val) || val === Infinity || val === -Infinity);
 };
 
-},{"number-is-nan":46}],40:[function(require,module,exports){
+},{"number-is-nan":47}],41:[function(_dereq_,module,exports){
 module.exports = isPowerOfTwo
 
 function isPowerOfTwo(n) {
   return n !== 0 && (n & (n - 1)) === 0
 }
-},{}],41:[function(require,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -6121,14 +6266,14 @@ function isLooseTypedArray(arr) {
   return names[toString.call(arr)]
 }
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -6183,7 +6328,7 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(_dereq_,module,exports){
 
 // Flat merge
 module.exports = exports = function(host) {
@@ -6257,22 +6402,22 @@ function recurser(host, donor) {
 /* End of file index.js */
 /* Location: ./lib/index.js */
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(_dereq_,module,exports){
 'use strict';
-var numberIsFinite = require('is-finite');
+var numberIsFinite = _dereq_('is-finite');
 
 module.exports = Number.isInteger || function (x) {
 	return numberIsFinite(x) && Math.floor(x) === x;
 };
 
-},{"is-finite":39}],46:[function(require,module,exports){
+},{"is-finite":40}],47:[function(_dereq_,module,exports){
 'use strict';
 module.exports = Number.isNaN || function (x) {
 	return x !== x;
 };
 
-},{}],47:[function(require,module,exports){
-var wrappy = require('wrappy')
+},{}],48:[function(_dereq_,module,exports){
+var wrappy = _dereq_('wrappy')
 module.exports = wrappy(once)
 
 once.proto = once(function () {
@@ -6294,7 +6439,7 @@ function once (fn) {
   return f
 }
 
-},{"wrappy":82}],48:[function(require,module,exports){
+},{"wrappy":83}],49:[function(_dereq_,module,exports){
 (function (process){
 // Generated by CoffeeScript 1.12.2
 (function() {
@@ -6333,8 +6478,8 @@ function once (fn) {
 
 
 
-}).call(this,require('_process'))
-},{"_process":6}],49:[function(require,module,exports){
+}).call(this,_dereq_('_process'))
+},{"_process":7}],50:[function(_dereq_,module,exports){
 (function (process){
 'use strict';
 
@@ -6380,10 +6525,10 @@ function nextTick(fn, arg1, arg2, arg3) {
   }
 }
 
-}).call(this,require('_process'))
-},{"_process":6}],50:[function(require,module,exports){
+}).call(this,_dereq_('_process'))
+},{"_process":7}],51:[function(_dereq_,module,exports){
 (function (global){
-var now = require('performance-now')
+var now = _dereq_('performance-now')
   , root = typeof window === 'undefined' ? global : window
   , vendors = ['moz', 'webkit']
   , suffix = 'AnimationFrame'
@@ -6457,7 +6602,7 @@ module.exports.polyfill = function() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":48}],51:[function(require,module,exports){
+},{"performance-now":49}],52:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6488,7 +6633,7 @@ module.exports.polyfill = function() {
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var processNextTick = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 /*<replacement>*/
@@ -6503,12 +6648,12 @@ var objectKeys = Object.keys || function (obj) {
 module.exports = Duplex;
 
 /*<replacement>*/
-var util = require('core-util-is');
-util.inherits = require('inherits');
+var util = _dereq_('core-util-is');
+util.inherits = _dereq_('inherits');
 /*</replacement>*/
 
-var Readable = require('./_stream_readable');
-var Writable = require('./_stream_writable');
+var Readable = _dereq_('./_stream_readable');
+var Writable = _dereq_('./_stream_writable');
 
 util.inherits(Duplex, Readable);
 
@@ -6582,7 +6727,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":53,"./_stream_writable":55,"core-util-is":13,"inherits":34,"process-nextick-args":49}],52:[function(require,module,exports){
+},{"./_stream_readable":54,"./_stream_writable":56,"core-util-is":14,"inherits":35,"process-nextick-args":50}],53:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6612,11 +6757,11 @@ function forEach(xs, f) {
 
 module.exports = PassThrough;
 
-var Transform = require('./_stream_transform');
+var Transform = _dereq_('./_stream_transform');
 
 /*<replacement>*/
-var util = require('core-util-is');
-util.inherits = require('inherits');
+var util = _dereq_('core-util-is');
+util.inherits = _dereq_('inherits');
 /*</replacement>*/
 
 util.inherits(PassThrough, Transform);
@@ -6630,7 +6775,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":54,"core-util-is":13,"inherits":34}],53:[function(require,module,exports){
+},{"./_stream_transform":55,"core-util-is":14,"inherits":35}],54:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6657,13 +6802,13 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var processNextTick = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 module.exports = Readable;
 
 /*<replacement>*/
-var isArray = require('isarray');
+var isArray = _dereq_('isarray');
 /*</replacement>*/
 
 /*<replacement>*/
@@ -6673,7 +6818,7 @@ var Duplex;
 Readable.ReadableState = ReadableState;
 
 /*<replacement>*/
-var EE = require('events').EventEmitter;
+var EE = _dereq_('events').EventEmitter;
 
 var EElistenerCount = function (emitter, type) {
   return emitter.listeners(type).length;
@@ -6681,13 +6826,13 @@ var EElistenerCount = function (emitter, type) {
 /*</replacement>*/
 
 /*<replacement>*/
-var Stream = require('./internal/streams/stream');
+var Stream = _dereq_('./internal/streams/stream');
 /*</replacement>*/
 
 // TODO(bmeurer): Change this back to const once hole checks are
 // properly optimized away early in Ignition+TurboFan.
 /*<replacement>*/
-var Buffer = require('safe-buffer').Buffer;
+var Buffer = _dereq_('safe-buffer').Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
@@ -6698,12 +6843,12 @@ function _isUint8Array(obj) {
 /*</replacement>*/
 
 /*<replacement>*/
-var util = require('core-util-is');
-util.inherits = require('inherits');
+var util = _dereq_('core-util-is');
+util.inherits = _dereq_('inherits');
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = require('util');
+var debugUtil = _dereq_('util');
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -6712,8 +6857,8 @@ if (debugUtil && debugUtil.debuglog) {
 }
 /*</replacement>*/
 
-var BufferList = require('./internal/streams/BufferList');
-var destroyImpl = require('./internal/streams/destroy');
+var BufferList = _dereq_('./internal/streams/BufferList');
+var destroyImpl = _dereq_('./internal/streams/destroy');
 var StringDecoder;
 
 util.inherits(Readable, Stream);
@@ -6735,7 +6880,7 @@ function prependListener(emitter, event, fn) {
 }
 
 function ReadableState(options, stream) {
-  Duplex = Duplex || require('./_stream_duplex');
+  Duplex = Duplex || _dereq_('./_stream_duplex');
 
   options = options || {};
 
@@ -6796,14 +6941,14 @@ function ReadableState(options, stream) {
   this.decoder = null;
   this.encoding = null;
   if (options.encoding) {
-    if (!StringDecoder) StringDecoder = require('string_decoder/').StringDecoder;
+    if (!StringDecoder) StringDecoder = _dereq_('string_decoder/').StringDecoder;
     this.decoder = new StringDecoder(options.encoding);
     this.encoding = options.encoding;
   }
 }
 
 function Readable(options) {
-  Duplex = Duplex || require('./_stream_duplex');
+  Duplex = Duplex || _dereq_('./_stream_duplex');
 
   if (!(this instanceof Readable)) return new Readable(options);
 
@@ -6952,7 +7097,7 @@ Readable.prototype.isPaused = function () {
 
 // backwards compatibility.
 Readable.prototype.setEncoding = function (enc) {
-  if (!StringDecoder) StringDecoder = require('string_decoder/').StringDecoder;
+  if (!StringDecoder) StringDecoder = _dereq_('string_decoder/').StringDecoder;
   this._readableState.decoder = new StringDecoder(enc);
   this._readableState.encoding = enc;
   return this;
@@ -7639,8 +7784,8 @@ function indexOf(xs, x) {
   }
   return -1;
 }
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":51,"./internal/streams/BufferList":56,"./internal/streams/destroy":57,"./internal/streams/stream":58,"_process":6,"core-util-is":13,"events":22,"inherits":34,"isarray":42,"process-nextick-args":49,"safe-buffer":63,"string_decoder/":65,"util":4}],54:[function(require,module,exports){
+}).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./_stream_duplex":52,"./internal/streams/BufferList":57,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":7,"core-util-is":14,"events":23,"inherits":35,"isarray":43,"process-nextick-args":50,"safe-buffer":64,"string_decoder/":66,"util":5}],55:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7708,11 +7853,11 @@ function indexOf(xs, x) {
 
 module.exports = Transform;
 
-var Duplex = require('./_stream_duplex');
+var Duplex = _dereq_('./_stream_duplex');
 
 /*<replacement>*/
-var util = require('core-util-is');
-util.inherits = require('inherits');
+var util = _dereq_('core-util-is');
+util.inherits = _dereq_('inherits');
 /*</replacement>*/
 
 util.inherits(Transform, Duplex);
@@ -7855,7 +8000,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":51,"core-util-is":13,"inherits":34}],55:[function(require,module,exports){
+},{"./_stream_duplex":52,"core-util-is":14,"inherits":35}],56:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7886,7 +8031,7 @@ function done(stream, er, data) {
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var processNextTick = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 module.exports = Writable;
@@ -7923,22 +8068,22 @@ var Duplex;
 Writable.WritableState = WritableState;
 
 /*<replacement>*/
-var util = require('core-util-is');
-util.inherits = require('inherits');
+var util = _dereq_('core-util-is');
+util.inherits = _dereq_('inherits');
 /*</replacement>*/
 
 /*<replacement>*/
 var internalUtil = {
-  deprecate: require('util-deprecate')
+  deprecate: _dereq_('util-deprecate')
 };
 /*</replacement>*/
 
 /*<replacement>*/
-var Stream = require('./internal/streams/stream');
+var Stream = _dereq_('./internal/streams/stream');
 /*</replacement>*/
 
 /*<replacement>*/
-var Buffer = require('safe-buffer').Buffer;
+var Buffer = _dereq_('safe-buffer').Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
@@ -7948,14 +8093,14 @@ function _isUint8Array(obj) {
 }
 /*</replacement>*/
 
-var destroyImpl = require('./internal/streams/destroy');
+var destroyImpl = _dereq_('./internal/streams/destroy');
 
 util.inherits(Writable, Stream);
 
 function nop() {}
 
 function WritableState(options, stream) {
-  Duplex = Duplex || require('./_stream_duplex');
+  Duplex = Duplex || _dereq_('./_stream_duplex');
 
   options = options || {};
 
@@ -8095,7 +8240,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
 }
 
 function Writable(options) {
-  Duplex = Duplex || require('./_stream_duplex');
+  Duplex = Duplex || _dereq_('./_stream_duplex');
 
   // Writable ctor is applied to Duplexes, too.
   // `realHasInstance` is necessary because using plain `instanceof`
@@ -8521,15 +8666,15 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":51,"./internal/streams/destroy":57,"./internal/streams/stream":58,"_process":6,"core-util-is":13,"inherits":34,"process-nextick-args":49,"safe-buffer":63,"util-deprecate":75}],56:[function(require,module,exports){
+}).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./_stream_duplex":52,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":7,"core-util-is":14,"inherits":35,"process-nextick-args":50,"safe-buffer":64,"util-deprecate":76}],57:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Buffer = require('safe-buffer').Buffer;
+var Buffer = _dereq_('safe-buffer').Buffer;
 /*</replacement>*/
 
 function copyBuffer(src, target, offset) {
@@ -8597,12 +8742,12 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":63}],57:[function(require,module,exports){
+},{"safe-buffer":64}],58:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var processNextTick = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 // undocumented cb() API, needed for core, not for public API
@@ -8670,22 +8815,22 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":49}],58:[function(require,module,exports){
-module.exports = require('events').EventEmitter;
+},{"process-nextick-args":50}],59:[function(_dereq_,module,exports){
+module.exports = _dereq_('events').EventEmitter;
 
-},{"events":22}],59:[function(require,module,exports){
-exports = module.exports = require('./lib/_stream_readable.js');
+},{"events":23}],60:[function(_dereq_,module,exports){
+exports = module.exports = _dereq_('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
-exports.Writable = require('./lib/_stream_writable.js');
-exports.Duplex = require('./lib/_stream_duplex.js');
-exports.Transform = require('./lib/_stream_transform.js');
-exports.PassThrough = require('./lib/_stream_passthrough.js');
+exports.Writable = _dereq_('./lib/_stream_writable.js');
+exports.Duplex = _dereq_('./lib/_stream_duplex.js');
+exports.Transform = _dereq_('./lib/_stream_transform.js');
+exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":51,"./lib/_stream_passthrough.js":52,"./lib/_stream_readable.js":53,"./lib/_stream_transform.js":54,"./lib/_stream_writable.js":55}],60:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":52,"./lib/_stream_passthrough.js":53,"./lib/_stream_readable.js":54,"./lib/_stream_transform.js":55,"./lib/_stream_writable.js":56}],61:[function(_dereq_,module,exports){
 'use strict';
 
-var readystate = module.exports = require('./readystate')
+var readystate = module.exports = _dereq_('./readystate')
   , win = (new Function('return this'))()
   , complete = 'complete'
   , root = true
@@ -8755,7 +8900,7 @@ var readystate = module.exports = require('./readystate')
 } ());
 
 
-},{"./readystate":61}],61:[function(require,module,exports){
+},{"./readystate":62}],62:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -8909,7 +9054,7 @@ RS.prototype.removeAllListeners = function removeAllListeners() {
 //
 module.exports = new RS();
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(_dereq_,module,exports){
 /**
  * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
  * @version v1.5.3
@@ -9140,9 +9285,9 @@ return requestFrame;
 
 })));
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(_dereq_,module,exports){
 /* eslint-disable node/no-deprecated-api */
-var buffer = require('buffer')
+var buffer = _dereq_('buffer')
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -9204,7 +9349,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":7}],64:[function(require,module,exports){
+},{"buffer":8}],65:[function(_dereq_,module,exports){
 module.exports = shift
 
 function shift (stream) {
@@ -9226,10 +9371,10 @@ function getStateLength (state) {
   return state.length
 }
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(_dereq_,module,exports){
 'use strict';
 
-var Buffer = require('safe-buffer').Buffer;
+var Buffer = _dereq_('safe-buffer').Buffer;
 
 var isEncoding = Buffer.isEncoding || function (encoding) {
   encoding = '' + encoding;
@@ -9499,7 +9644,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":63}],66:[function(require,module,exports){
+},{"safe-buffer":64}],67:[function(_dereq_,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -9514,12 +9659,12 @@ if (typeof window !== 'undefined') { // Browser window
   root = this;
 }
 
-var Emitter = require('component-emitter');
-var RequestBase = require('./request-base');
-var isObject = require('./is-object');
-var isFunction = require('./is-function');
-var ResponseBase = require('./response-base');
-var shouldRetry = require('./should-retry');
+var Emitter = _dereq_('component-emitter');
+var RequestBase = _dereq_('./request-base');
+var isObject = _dereq_('./is-object');
+var isFunction = _dereq_('./is-function');
+var ResponseBase = _dereq_('./response-base');
+var shouldRetry = _dereq_('./should-retry');
 
 /**
  * Noop.
@@ -10434,7 +10579,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-function":67,"./is-object":68,"./request-base":69,"./response-base":70,"./should-retry":71,"component-emitter":11}],67:[function(require,module,exports){
+},{"./is-function":68,"./is-object":69,"./request-base":70,"./response-base":71,"./should-retry":72,"component-emitter":12}],68:[function(_dereq_,module,exports){
 /**
  * Check if `fn` is a function.
  *
@@ -10442,7 +10587,7 @@ request.put = function(url, data, fn){
  * @return {Boolean}
  * @api private
  */
-var isObject = require('./is-object');
+var isObject = _dereq_('./is-object');
 
 function isFunction(fn) {
   var tag = isObject(fn) ? Object.prototype.toString.call(fn) : '';
@@ -10451,7 +10596,7 @@ function isFunction(fn) {
 
 module.exports = isFunction;
 
-},{"./is-object":68}],68:[function(require,module,exports){
+},{"./is-object":69}],69:[function(_dereq_,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -10466,11 +10611,11 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(_dereq_,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
-var isObject = require('./is-object');
+var isObject = _dereq_('./is-object');
 
 /**
  * Expose `RequestBase`.
@@ -11059,13 +11204,13 @@ RequestBase.prototype._setTimeouts = function() {
   }
 }
 
-},{"./is-object":68}],70:[function(require,module,exports){
+},{"./is-object":69}],71:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
  */
 
-var utils = require('./utils');
+var utils = _dereq_('./utils');
 
 /**
  * Expose `ResponseBase`.
@@ -11194,7 +11339,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
     this.notFound = 404 == status;
 };
 
-},{"./utils":72}],71:[function(require,module,exports){
+},{"./utils":73}],72:[function(_dereq_,module,exports){
 var ERROR_CODES = [
   'ECONNRESET',
   'ETIMEDOUT',
@@ -11219,7 +11364,7 @@ module.exports = function shouldRetry(err, res) {
   return false;
 };
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(_dereq_,module,exports){
 
 /**
  * Return the mime type for the given `str`.
@@ -11288,7 +11433,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
   return header;
 };
-},{}],73:[function(require,module,exports){
+},{}],74:[function(_dereq_,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -11299,7 +11444,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
  * `npm install typedarray-to-buffer`
  */
 
-var isTypedArray = require('is-typedarray').strict
+var isTypedArray = _dereq_('is-typedarray').strict
 
 module.exports = function typedarrayToBuffer (arr) {
   if (isTypedArray(arr)) {
@@ -11316,8 +11461,8 @@ module.exports = function typedarrayToBuffer (arr) {
   }
 }
 
-}).call(this,require("buffer").Buffer)
-},{"buffer":7,"is-typedarray":41}],74:[function(require,module,exports){
+}).call(this,_dereq_("buffer").Buffer)
+},{"buffer":8,"is-typedarray":42}],75:[function(_dereq_,module,exports){
 /**
  * UAParser.js v0.7.13
  * Lightweight JavaScript-based User-Agent string parser
@@ -12269,7 +12414,7 @@ module.exports = function typedarrayToBuffer (arr) {
 
 })(typeof window === 'object' ? window : this);
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -12340,16 +12485,16 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],76:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],77:[function(require,module,exports){
+},{}],77:[function(_dereq_,module,exports){
+arguments[4][35][0].apply(exports,arguments)
+},{"dup":35}],78:[function(_dereq_,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],78:[function(require,module,exports){
+},{}],79:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12876,7 +13021,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = require('./support/isBuffer');
+exports.isBuffer = _dereq_('./support/isBuffer');
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -12920,7 +13065,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = require('inherits');
+exports.inherits = _dereq_('inherits');
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -12938,8 +13083,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":77,"_process":6,"inherits":76}],79:[function(require,module,exports){
+}).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":78,"_process":7,"inherits":77}],80:[function(_dereq_,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -12965,14 +13110,14 @@ function isFloat32Array( value ) {
 
 module.exports = isFloat32Array;
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(_dereq_,module,exports){
 (function (process,global){
 'use strict'
 
-var Transform = require('readable-stream').Transform
-var duplexify = require('duplexify')
-var WS = require('ws')
-var Buffer = require('safe-buffer').Buffer
+var Transform = _dereq_('readable-stream').Transform
+var duplexify = _dereq_('duplexify')
+var WS = _dereq_('ws')
+var Buffer = _dereq_('safe-buffer').Buffer
 
 module.exports = WebSocketStream
 
@@ -13150,8 +13295,8 @@ function WebSocketStream(target, protocols, options) {
   return stream
 }
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6,"duplexify":19,"readable-stream":59,"safe-buffer":63,"ws":81}],81:[function(require,module,exports){
+}).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":7,"duplexify":20,"readable-stream":60,"safe-buffer":64,"ws":82}],82:[function(_dereq_,module,exports){
 
 var ws = null
 
@@ -13165,7 +13310,7 @@ if (typeof WebSocket !== 'undefined') {
 
 module.exports = ws
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(_dereq_,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -13200,10 +13345,10 @@ function wrappy (fn, cb) {
   }
 }
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13243,6 +13388,7 @@ module.exports={
     "recorder"
   ],
   "dependencies": {
+    "add-eventlistener-with-options": "1.25.0",
     "animitter": "3.0.0",
     "audio-sample": "1.0.3",
     "canvas-to-buffer": "1.0.9",
@@ -13285,6 +13431,7 @@ module.exports={
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.0.0",
     "gulp-cssnano": "2.1.2",
+    "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
     "gulp-inject-string": "1.1.0",
     "gulp-load-plugins": "1.5.0",
@@ -13310,62 +13457,62 @@ module.exports={
   }
 }
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _mergeRecursive = require('merge-recursive');
+var _mergeRecursive = _dereq_('merge-recursive');
 
 var _mergeRecursive2 = _interopRequireDefault(_mergeRecursive);
 
-var _readystate = require('readystate');
+var _readystate = _dereq_('readystate');
 
 var _readystate2 = _interopRequireDefault(_readystate);
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _options = require('./options');
+var _options = _dereq_('./options');
 
 var _options2 = _interopRequireDefault(_options);
 
-var _constants = require('./constants');
+var _constants = _dereq_('./constants');
 
 var _constants2 = _interopRequireDefault(_constants);
 
-var _events = require('./events');
+var _events = _dereq_('./events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _collectLogger = require('./util/collectLogger');
+var _collectLogger = _dereq_('./util/collectLogger');
 
 var _collectLogger2 = _interopRequireDefault(_collectLogger);
 
-var _eventEmitter = require('./util/eventEmitter');
+var _eventEmitter = _dereq_('./util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _container = require('./wrappers/container');
+var _container = _dereq_('./wrappers/container');
 
 var _container2 = _interopRequireDefault(_container);
 
-var _optionsWrapper = require('./wrappers/optionsWrapper');
+var _optionsWrapper = _dereq_('./wrappers/optionsWrapper');
 
 var _optionsWrapper2 = _interopRequireDefault(_optionsWrapper);
 
-var _replay = require('./wrappers/visuals/replay');
+var _replay = _dereq_('./wrappers/visuals/replay');
 
 var _replay2 = _interopRequireDefault(_replay);
 
-var _browser = require('./util/browser');
+var _browser = _dereq_('./util/browser');
 
 var _browser2 = _interopRequireDefault(_browser);
 
-var _resource = require('./resource');
+var _resource = _dereq_('./resource');
 
 var _resource2 = _interopRequireDefault(_resource);
 
@@ -13531,7 +13678,7 @@ VideomailClient.events = _events2.default;
 
 exports.default = VideomailClient;
 
-},{"./constants":85,"./events":86,"./options":87,"./resource":88,"./util/browser":91,"./util/collectLogger":92,"./util/eventEmitter":93,"./wrappers/container":100,"./wrappers/optionsWrapper":103,"./wrappers/visuals/replay":112,"merge-recursive":44,"readystate":60,"util":78}],85:[function(require,module,exports){
+},{"./constants":86,"./events":87,"./options":88,"./resource":89,"./util/browser":92,"./util/collectLogger":93,"./util/eventEmitter":94,"./wrappers/container":101,"./wrappers/optionsWrapper":104,"./wrappers/visuals/replay":113,"merge-recursive":45,"readystate":61,"util":79}],86:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13548,14 +13695,14 @@ exports.default = {
   }
 };
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _keymirror = require('keymirror');
+var _keymirror = _dereq_('keymirror');
 
 var _keymirror2 = _interopRequireDefault(_keymirror);
 
@@ -13602,7 +13749,7 @@ exports.default = (0, _keymirror2.default)({
   INVISIBLE: null // document just became INvisible
 });
 
-},{"keymirror":43}],87:[function(require,module,exports){
+},{"keymirror":44}],88:[function(_dereq_,module,exports){
 (function (process){
 'use strict';
 
@@ -13610,7 +13757,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _package = require('../package.json');
+var _package = _dereq_('../package.json');
 
 var PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -13752,8 +13899,8 @@ exports.default = {
   version: _package.version
 };
 
-}).call(this,require('_process'))
-},{"../package.json":83,"_process":6}],88:[function(require,module,exports){
+}).call(this,_dereq_('_process'))
+},{"../package.json":84,"_process":7}],89:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13926,11 +14073,11 @@ exports.default = function (options) {
   };
 };
 
-var _superagent = require('superagent');
+var _superagent = _dereq_('superagent');
 
 var _superagent2 = _interopRequireDefault(_superagent);
 
-var _constants = require('./constants');
+var _constants = _dereq_('./constants');
 
 var _constants2 = _interopRequireDefault(_constants);
 
@@ -13938,12 +14085,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var CACHE_KEY = 'alias';
 
-},{"./constants":85,"superagent":66}],89:[function(require,module,exports){
+},{"./constants":86,"superagent":67}],90:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = '@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{-o-object-fit:scale-down;object-fit:scale-down}.videomail .replay,.videomail .userMedia{width:100%!important}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
 
-},{}],90:[function(require,module,exports){
+},{}],91:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14044,15 +14191,15 @@ exports.default = function (userMedia, options) {
   };
 };
 
-var _isPowerOfTwo = require('is-power-of-two');
+var _isPowerOfTwo = _dereq_('is-power-of-two');
 
 var _isPowerOfTwo2 = _interopRequireDefault(_isPowerOfTwo);
 
-var _audioSample = require('audio-sample');
+var _audioSample = _dereq_('audio-sample');
 
 var _audioSample2 = _interopRequireDefault(_audioSample);
 
-var _videomailError = require('./videomailError');
+var _videomailError = _dereq_('./videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
@@ -14060,7 +14207,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var CHANNELS = 1;
 
-},{"./videomailError":98,"audio-sample":2,"is-power-of-two":40}],91:[function(require,module,exports){
+},{"./videomailError":99,"audio-sample":3,"is-power-of-two":41}],92:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14069,15 +14216,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _uaParserJs = require('ua-parser-js');
+var _uaParserJs = _dereq_('ua-parser-js');
 
 var _uaParserJs2 = _interopRequireDefault(_uaParserJs);
 
-var _defined = require('defined');
+var _defined = _dereq_('defined');
 
 var _defined2 = _interopRequireDefault(_defined);
 
-var _videomailError = require('./videomailError');
+var _videomailError = _dereq_('./videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
@@ -14316,7 +14463,7 @@ exports.default = Browser;
 
 module.exports = Browser;
 
-},{"./videomailError":98,"defined":15,"ua-parser-js":74}],92:[function(require,module,exports){
+},{"./videomailError":99,"defined":16,"ua-parser-js":75}],93:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14391,17 +14538,17 @@ exports.default = function () {
   };
 };
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _browser = require('./browser');
+var _browser = _dereq_('./browser');
 
 var _browser2 = _interopRequireDefault(_browser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./browser":91,"util":78}],93:[function(require,module,exports){
+},{"./browser":92,"util":79}],94:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14471,32 +14618,32 @@ exports.default = function (options, name) {
   };
 };
 
-var _despot = require('despot');
+var _despot = _dereq_('despot');
 
 var _despot2 = _interopRequireDefault(_despot);
 
-var _videomailError = require('./videomailError');
+var _videomailError = _dereq_('./videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
-var _events = require('./../events');
+var _events = _dereq_('./../events');
 
 var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./../events":86,"./videomailError":98,"despot":16}],94:[function(require,module,exports){
+},{"./../events":87,"./videomailError":99,"despot":17}],95:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _filesize2 = require('filesize');
+var _filesize2 = _dereq_('filesize');
 
 var _filesize3 = _interopRequireDefault(_filesize2);
 
-var _humanizeDuration = require('humanize-duration');
+var _humanizeDuration = _dereq_('humanize-duration');
 
 var _humanizeDuration2 = _interopRequireDefault(_humanizeDuration);
 
@@ -14516,7 +14663,7 @@ exports.default = {
   }
 };
 
-},{"filesize":23,"humanize-duration":30}],95:[function(require,module,exports){
+},{"filesize":24,"humanize-duration":31}],96:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14631,7 +14778,7 @@ exports.default = [
 // 'timeupdate'
 ];
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14702,7 +14849,7 @@ function objectToString(object, options) {
   return sLines;
 }
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14746,17 +14893,17 @@ exports.default = function () {
   }
 };
 
-require('classlist.js');
+_dereq_('classlist.js');
 
-require('element-closest');
+_dereq_('element-closest');
 
-var _requestFrame = require('request-frame');
+var _requestFrame = _dereq_('request-frame');
 
 var _requestFrame2 = _interopRequireDefault(_requestFrame);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"classlist.js":10,"element-closest":20,"request-frame":62}],98:[function(require,module,exports){
+},{"classlist.js":11,"element-closest":21,"request-frame":63}],99:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14766,19 +14913,19 @@ Object.defineProperty(exports, "__esModule", {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; // https://github.com/tgriesser/create-error
 
 
-var _createError = require('create-error');
+var _createError = _dereq_('create-error');
 
 var _createError2 = _interopRequireDefault(_createError);
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _pretty = require('./pretty');
+var _pretty = _dereq_('./pretty');
 
 var _pretty2 = _interopRequireDefault(_pretty);
 
-var _resource = require('./../resource');
+var _resource = _dereq_('./../resource');
 
 var _resource2 = _interopRequireDefault(_resource);
 
@@ -14834,7 +14981,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   // Require Browser here, not at the top of the file to avoid
   // recursion. Because the Browser class is requiring this file as well.
-  var Browser = require('./browser');
+  var Browser = _dereq_('./browser');
   var browser = new Browser(options);
 
   var errType;
@@ -15101,34 +15248,34 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 exports.default = VideomailError;
 
-},{"./../resource":88,"./browser":91,"./pretty":96,"create-error":14,"util":78}],99:[function(require,module,exports){
+},{"./../resource":89,"./browser":92,"./pretty":97,"create-error":15,"util":79}],100:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _contains = require('contains');
+var _contains = _dereq_('contains');
 
 var _contains2 = _interopRequireDefault(_contains);
 
-var _events = require('./../events');
+var _events = _dereq_('./../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventEmitter = require('./../util/eventEmitter');
+var _eventEmitter = _dereq_('./../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
@@ -15666,66 +15813,66 @@ _util2.default.inherits(Buttons, _eventEmitter2.default);
 
 exports.default = Buttons;
 
-},{"./../events":86,"./../util/eventEmitter":93,"contains":12,"hidden":29,"hyperscript":31,"util":78}],100:[function(require,module,exports){
+},{"./../events":87,"./../util/eventEmitter":94,"contains":13,"hidden":30,"hyperscript":32,"util":79}],101:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _insertCss = require('insert-css');
+var _insertCss = _dereq_('insert-css');
 
 var _insertCss2 = _interopRequireDefault(_insertCss);
 
-var _mergeRecursive = require('merge-recursive');
+var _mergeRecursive = _dereq_('merge-recursive');
 
 var _mergeRecursive2 = _interopRequireDefault(_mergeRecursive);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _documentVisibility = require('document-visibility');
+var _documentVisibility = _dereq_('document-visibility');
 
 var _documentVisibility2 = _interopRequireDefault(_documentVisibility);
 
-var _dimension = require('./dimension');
+var _dimension = _dereq_('./dimension');
 
 var _dimension2 = _interopRequireDefault(_dimension);
 
-var _visuals = require('./visuals');
+var _visuals = _dereq_('./visuals');
 
 var _visuals2 = _interopRequireDefault(_visuals);
 
-var _buttons = require('./buttons');
+var _buttons = _dereq_('./buttons');
 
 var _buttons2 = _interopRequireDefault(_buttons);
 
-var _form = require('./form');
+var _form = _dereq_('./form');
 
 var _form2 = _interopRequireDefault(_form);
 
-var _resource = require('./../resource');
+var _resource = _dereq_('./../resource');
 
 var _resource2 = _interopRequireDefault(_resource);
 
-var _events = require('./../events');
+var _events = _dereq_('./../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventEmitter = require('./../util/eventEmitter');
+var _eventEmitter = _dereq_('./../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _videomailError = require('./../util/videomailError');
+var _videomailError = _dereq_('./../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
-var _mainMinCss = require('./../styles/css/main.min.css.js');
+var _mainMinCss = _dereq_('./../styles/css/main.min.css.js');
 
 var _mainMinCss2 = _interopRequireDefault(_mainMinCss);
 
@@ -16370,18 +16517,18 @@ _util2.default.inherits(Container, _eventEmitter2.default);
 
 exports.default = Container;
 
-},{"./../events":86,"./../resource":88,"./../styles/css/main.min.css.js":89,"./../util/eventEmitter":93,"./../util/videomailError":98,"./buttons":99,"./dimension":101,"./form":102,"./visuals":104,"document-visibility":17,"hidden":29,"insert-css":35,"merge-recursive":44,"util":78}],101:[function(require,module,exports){
+},{"./../events":87,"./../resource":89,"./../styles/css/main.min.css.js":90,"./../util/eventEmitter":94,"./../util/videomailError":99,"./buttons":100,"./dimension":102,"./form":103,"./visuals":105,"document-visibility":18,"hidden":30,"insert-css":36,"merge-recursive":45,"util":79}],102:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _numberIsInteger = require('number-is-integer');
+var _numberIsInteger = _dereq_('number-is-integer');
 
 var _numberIsInteger2 = _interopRequireDefault(_numberIsInteger);
 
-var _videomailError = require('./../util/videomailError');
+var _videomailError = _dereq_('./../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
@@ -16489,38 +16636,38 @@ exports.default = {
   }
 };
 
-},{"./../util/videomailError":98,"number-is-integer":45}],102:[function(require,module,exports){
+},{"./../util/videomailError":99,"number-is-integer":46}],103:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _getFormData = require('get-form-data');
+var _getFormData = _dereq_('get-form-data');
 
 var _getFormData2 = _interopRequireDefault(_getFormData);
 
-var _events = require('./../events');
+var _events = _dereq_('./../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventEmitter = require('./../util/eventEmitter');
+var _eventEmitter = _dereq_('./../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _videomailError = require('./../util/videomailError');
+var _videomailError = _dereq_('./../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
@@ -16756,7 +16903,7 @@ _util2.default.inherits(Form, _eventEmitter2.default);
 
 exports.default = Form;
 
-},{"./../events":86,"./../util/eventEmitter":93,"./../util/videomailError":98,"get-form-data":24,"hidden":29,"hyperscript":31,"util":78}],103:[function(require,module,exports){
+},{"./../events":87,"./../util/eventEmitter":94,"./../util/videomailError":99,"get-form-data":25,"hidden":30,"hyperscript":32,"util":79}],104:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16808,46 +16955,46 @@ exports.default = {
   }
 };
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _replay = require('./visuals/replay');
+var _replay = _dereq_('./visuals/replay');
 
 var _replay2 = _interopRequireDefault(_replay);
 
-var _recorder = require('./visuals/recorder');
+var _recorder = _dereq_('./visuals/recorder');
 
 var _recorder2 = _interopRequireDefault(_recorder);
 
-var _notifier = require('./visuals/notifier');
+var _notifier = _dereq_('./visuals/notifier');
 
 var _notifier2 = _interopRequireDefault(_notifier);
 
-var _recorderInsides = require('./visuals/inside/recorderInsides');
+var _recorderInsides = _dereq_('./visuals/inside/recorderInsides');
 
 var _recorderInsides2 = _interopRequireDefault(_recorderInsides);
 
-var _eventEmitter = require('./../util/eventEmitter');
+var _eventEmitter = _dereq_('./../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _events = require('./../events');
+var _events = _dereq_('./../events');
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -17196,7 +17343,7 @@ _util2.default.inherits(Visuals, _eventEmitter2.default);
 
 exports.default = Visuals;
 
-},{"./../events":86,"./../util/eventEmitter":93,"./visuals/inside/recorderInsides":109,"./visuals/notifier":110,"./visuals/recorder":111,"./visuals/replay":112,"hidden":29,"hyperscript":31,"util":78}],105:[function(require,module,exports){
+},{"./../events":87,"./../util/eventEmitter":94,"./visuals/inside/recorderInsides":110,"./visuals/notifier":111,"./visuals/recorder":112,"./visuals/replay":113,"hidden":30,"hyperscript":32,"util":79}],106:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17284,17 +17431,17 @@ exports.default = function (visuals, options) {
   };
 };
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":29,"hyperscript":31}],106:[function(require,module,exports){
+},{"hidden":30,"hyperscript":32}],107:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17346,21 +17493,21 @@ exports.default = function (visuals, options) {
   };
 };
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _videomailError = require('./../../../../util/videomailError');
+var _videomailError = _dereq_('./../../../../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./../../../../util/videomailError":98,"hidden":29,"hyperscript":31}],107:[function(require,module,exports){
+},{"./../../../../util/videomailError":99,"hidden":30,"hyperscript":32}],108:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17407,17 +17554,17 @@ exports.default = function (visuals) {
   };
 };
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":29,"hyperscript":31}],108:[function(require,module,exports){
+},{"hidden":30,"hyperscript":32}],109:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17569,48 +17716,48 @@ exports.default = function (visuals, recordNote, options) {
   };
 };
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":29,"hyperscript":31}],109:[function(require,module,exports){
+},{"hidden":30,"hyperscript":32}],110:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _events = require('./../../../events');
+var _events = _dereq_('./../../../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventEmitter = require('./../../../util/eventEmitter');
+var _eventEmitter = _dereq_('./../../../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _countdown = require('./recorder/countdown');
+var _countdown = _dereq_('./recorder/countdown');
 
 var _countdown2 = _interopRequireDefault(_countdown);
 
-var _pausedNote = require('./recorder/pausedNote');
+var _pausedNote = _dereq_('./recorder/pausedNote');
 
 var _pausedNote2 = _interopRequireDefault(_pausedNote);
 
-var _recordNote = require('./recorder/recordNote');
+var _recordNote = _dereq_('./recorder/recordNote');
 
 var _recordNote2 = _interopRequireDefault(_recordNote);
 
-var _recordTimer = require('./recorder/recordTimer');
+var _recordTimer = _dereq_('./recorder/recordTimer');
 
 var _recordTimer2 = _interopRequireDefault(_recordTimer);
 
@@ -17730,30 +17877,30 @@ _util2.default.inherits(RecorderInsides, _eventEmitter2.default);
 
 exports.default = RecorderInsides;
 
-},{"./../../../events":86,"./../../../util/eventEmitter":93,"./recorder/countdown":105,"./recorder/pausedNote":106,"./recorder/recordNote":107,"./recorder/recordTimer":108,"util":78}],110:[function(require,module,exports){
+},{"./../../../events":87,"./../../../util/eventEmitter":94,"./recorder/countdown":106,"./recorder/pausedNote":107,"./recorder/recordNote":108,"./recorder/recordTimer":109,"util":79}],111:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _eventEmitter = require('./../../util/eventEmitter');
+var _eventEmitter = _dereq_('./../../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _events = require('./../../events');
+var _events = _dereq_('./../../events');
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -18056,7 +18203,7 @@ _util2.default.inherits(Notifier, _eventEmitter2.default);
 
 exports.default = Notifier;
 
-},{"./../../events":86,"./../../util/eventEmitter":93,"hidden":29,"hyperscript":31,"util":78}],111:[function(require,module,exports){
+},{"./../../events":87,"./../../util/eventEmitter":94,"hidden":30,"hyperscript":32,"util":79}],112:[function(_dereq_,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -18064,59 +18211,59 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _websocketStream = require('websocket-stream');
+var _websocketStream = _dereq_('websocket-stream');
 
 var _websocketStream2 = _interopRequireDefault(_websocketStream);
 
-var _canvasToBuffer = require('canvas-to-buffer');
+var _canvasToBuffer = _dereq_('canvas-to-buffer');
 
 var _canvasToBuffer2 = _interopRequireDefault(_canvasToBuffer);
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _animitter = require('animitter');
+var _animitter = _dereq_('animitter');
 
 var _animitter2 = _interopRequireDefault(_animitter);
 
-var _userMedia = require('./userMedia');
+var _userMedia = _dereq_('./userMedia');
 
 var _userMedia2 = _interopRequireDefault(_userMedia);
 
-var _events = require('./../../events');
+var _events = _dereq_('./../../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _constants = require('./../../constants');
+var _constants = _dereq_('./../../constants');
 
 var _constants2 = _interopRequireDefault(_constants);
 
-var _eventEmitter = require('./../../util/eventEmitter');
+var _eventEmitter = _dereq_('./../../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _browser = require('./../../util/browser');
+var _browser = _dereq_('./../../util/browser');
 
 var _browser2 = _interopRequireDefault(_browser);
 
-var _humanize = require('./../../util/humanize');
+var _humanize = _dereq_('./../../util/humanize');
 
 var _humanize2 = _interopRequireDefault(_humanize);
 
-var _pretty = require('./../../util/pretty');
+var _pretty = _dereq_('./../../util/pretty');
 
 var _pretty2 = _interopRequireDefault(_pretty);
 
-var _videomailError = require('./../../util/videomailError');
+var _videomailError = _dereq_('./../../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
@@ -19249,43 +19396,47 @@ _util2.default.inherits(Recorder, _eventEmitter2.default);
 
 exports.default = Recorder;
 
-}).call(this,require("buffer").Buffer)
-},{"./../../constants":85,"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/humanize":94,"./../../util/pretty":96,"./../../util/videomailError":98,"./userMedia":113,"animitter":1,"buffer":7,"canvas-to-buffer":8,"hidden":29,"hyperscript":31,"util":78,"websocket-stream":80}],112:[function(require,module,exports){
+}).call(this,_dereq_("buffer").Buffer)
+},{"./../../constants":86,"./../../events":87,"./../../util/browser":92,"./../../util/eventEmitter":94,"./../../util/humanize":95,"./../../util/pretty":97,"./../../util/videomailError":99,"./userMedia":114,"animitter":2,"buffer":8,"canvas-to-buffer":9,"hidden":30,"hyperscript":32,"util":79,"websocket-stream":81}],113:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _util = require('util');
+var _util = _dereq_('util');
 
 var _util2 = _interopRequireDefault(_util);
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _hidden = require('hidden');
+var _hidden = _dereq_('hidden');
 
 var _hidden2 = _interopRequireDefault(_hidden);
 
-var _events = require('./../../events');
+var _addEventlistenerWithOptions = _dereq_('add-eventlistener-with-options');
+
+var _addEventlistenerWithOptions2 = _interopRequireDefault(_addEventlistenerWithOptions);
+
+var _events = _dereq_('./../../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _browser = require('./../../util/browser');
+var _browser = _dereq_('./../../util/browser');
 
 var _browser2 = _interopRequireDefault(_browser);
 
-var _eventEmitter = require('./../../util/eventEmitter');
+var _eventEmitter = _dereq_('./../../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _videomailError = require('./../../util/videomailError');
+var _videomailError = _dereq_('./../../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
-var _iphoneInlineVideo = require('iphone-inline-video');
+var _iphoneInlineVideo = _dereq_('iphone-inline-video');
 
 var _iphoneInlineVideo2 = _interopRequireDefault(_iphoneInlineVideo);
 
@@ -19449,7 +19600,9 @@ var Replay = function Replay(parentElement, options) {
         });
       }
 
-      replayElement.addEventListener('touchstart', function (e) {
+      // makes use of passive option automatically for better performance
+      // https://www.npmjs.com/package/add-eventlistener-with-options
+      (0, _addEventlistenerWithOptions2.default)(replayElement, 'touchstart', function (e) {
         e && e.preventDefault();
 
         if (this.paused) {
@@ -19595,7 +19748,7 @@ _util2.default.inherits(Replay, _eventEmitter2.default);
 
 exports.default = Replay;
 
-},{"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/videomailError":98,"hidden":29,"hyperscript":31,"iphone-inline-video":37,"util":78}],113:[function(require,module,exports){
+},{"./../../events":87,"./../../util/browser":92,"./../../util/eventEmitter":94,"./../../util/videomailError":99,"add-eventlistener-with-options":1,"hidden":30,"hyperscript":32,"iphone-inline-video":38,"util":79}],114:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20045,31 +20198,31 @@ exports.default = function (recorder, options) {
   };
 };
 
-var _hyperscript = require('hyperscript');
+var _hyperscript = _dereq_('hyperscript');
 
 var _hyperscript2 = _interopRequireDefault(_hyperscript);
 
-var _audioRecorder = require('./../../util/audioRecorder');
+var _audioRecorder = _dereq_('./../../util/audioRecorder');
 
 var _audioRecorder2 = _interopRequireDefault(_audioRecorder);
 
-var _videomailError = require('./../../util/videomailError');
+var _videomailError = _dereq_('./../../util/videomailError');
 
 var _videomailError2 = _interopRequireDefault(_videomailError);
 
-var _eventEmitter = require('./../../util/eventEmitter');
+var _eventEmitter = _dereq_('./../../util/eventEmitter');
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _mediaEvents = require('./../../util/mediaEvents');
+var _mediaEvents = _dereq_('./../../util/mediaEvents');
 
 var _mediaEvents2 = _interopRequireDefault(_mediaEvents);
 
-var _pretty = require('./../../util/pretty');
+var _pretty = _dereq_('./../../util/pretty');
 
 var _pretty2 = _interopRequireDefault(_pretty);
 
-var _events = require('./../../events');
+var _events = _dereq_('./../../events');
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -20077,18 +20230,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var EVENT_ASCII = '|—O—|';
 
-},{"./../../events":86,"./../../util/audioRecorder":90,"./../../util/eventEmitter":93,"./../../util/mediaEvents":95,"./../../util/pretty":96,"./../../util/videomailError":98,"hyperscript":31}],"videomail-client":[function(require,module,exports){
+},{"./../../events":87,"./../../util/audioRecorder":91,"./../../util/eventEmitter":94,"./../../util/mediaEvents":96,"./../../util/pretty":97,"./../../util/videomailError":99,"hyperscript":32}],"videomail-client":[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _standardize = require('./util/standardize');
+var _standardize = _dereq_('./util/standardize');
 
 var _standardize2 = _interopRequireDefault(_standardize);
 
-var _client = require('./client');
+var _client = _dereq_('./client');
 
 var _client2 = _interopRequireDefault(_client);
 
@@ -20111,4 +20264,5 @@ exports.default = _client2.default;
 
 module.exports = _client2.default;
 
-},{"./client":84,"./util/standardize":97}]},{},["videomail-client"]);
+},{"./client":85,"./util/standardize":98}]},{},["videomail-client"])("videomail-client")
+});
