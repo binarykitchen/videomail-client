@@ -84,8 +84,8 @@ function bundle (watching) {
   const entry = path.join(__dirname, packageJson.module)
   const bundler = browserify({
     entries: [entry],
-    basedir: __dirname,
     cache: cache,
+    standalone: 'VideomailClient',
     packageCache: packageCache,
     plugin: (watching) ? [watchify] : null,
     debug: !options.minify // enables inline source maps
@@ -110,6 +110,7 @@ function bundle (watching) {
       .pipe(source('./src/')) // gives streaming vinyl file object
       .pipe(buffer()) // required because the next steps do not support streams
       .pipe(plugins.concat('videomail-client.js'))
+      .pipe(plugins.derequire())
       .pipe(gulp.dest('dist'))
       .pipe(plugins.if(options.minify, plugins.sourcemaps.init()))
       .pipe(plugins.if(options.minify, plugins.uglify()))
