@@ -1,7 +1,6 @@
 // https://github.com/tgriesser/create-error
 import createError from 'create-error'
 import util from 'util'
-import callerPath from 'caller-path'
 
 import originalPretty from './pretty'
 import Resource from './../resource'
@@ -13,8 +12,7 @@ const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'logLines': undefined,
   'useragent': undefined,
   'url': undefined,
-  'stack': undefined,
-  'caller': undefined
+  'stack': undefined
 })
 
 // shim pretty to exclude stack always
@@ -271,7 +269,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: callerPath(),
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
