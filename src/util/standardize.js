@@ -9,7 +9,9 @@ import requestFrame from 'request-frame'
 // use those default params for unit tests
 export default function (window = {}, navigator = {}) {
   // https://github.com/julienetie/request-frame/issues/6
-  window.screen = window.screen || {}
+  if (!window.screen) {
+    window.screen = {}
+  }
 
   requestFrame('native')
 
@@ -25,16 +27,26 @@ export default function (window = {}, navigator = {}) {
             navigator.msGetUserMedia
   }
 
-  window.AudioContext = window.AudioContext || window.webkitAudioContext
-  window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
+  if (!window.AudioContext && window.webkitAudioContext) {
+    window.AudioContext = window.webkitAudioContext
+  }
+
+  if (!window.URL) {
+    window.URL = window.webkitURL || window.mozURL || window.msURL
+  }
 
   const methods = [
     'debug', 'groupCollapsed', 'groupEnd', 'error',
     'exception', 'info', 'log', 'trace', 'warn'
   ]
 
-  const noop = function () {}
-  const console = (window.console = window.console || {})
+  var console = {}
+
+  if (window.console) {
+    console = window.console
+  } else {
+    window.console = function () {}
+  }
 
   var method
   var length = methods.length
@@ -43,7 +55,7 @@ export default function (window = {}, navigator = {}) {
     method = methods[length]
 
     if (!console[method]) {
-      console[method] = noop
+      console[method] = function () {}
     }
   }
 }
