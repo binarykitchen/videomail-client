@@ -59,16 +59,6 @@ const Browser = function (options) {
                       ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
     }
 
-    if (options.debug) {
-      if (warning) {
-        warning += ' '
-      } else {
-        warning = ''
-      }
-
-      warning += 'Your browser is ' + JSON.stringify(uaParser.browser)
-    }
-
     return warning
   }
 

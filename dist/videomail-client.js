@@ -3732,6 +3732,8 @@ var document = _dereq_('global/document')
 var Event = _dereq_('geval')
 var Keys = _dereq_('./keys')
 
+module.exports = Visibility
+
 function Visibility () {
   var keys = Keys(document)
   if (!keys) return noopShim()
@@ -3763,9 +3765,20 @@ function noopShim () {
 
 function noop () {}
 
-module.exports = Visibility
-
 },{"./keys":19,"geval":27,"global/document":28}],19:[function(_dereq_,module,exports){
+'use strict'
+
+module.exports = keys
+
+function keys (document) {
+  var prefix = detectPrefix(document)
+  if (prefix == null) return
+  return {
+    hidden: lowercaseFirst(prefix + 'Hidden'),
+    event: prefix + 'visibilitychange'
+  }
+}
+
 function detectPrefix (document) {
   if (document.hidden != null) return ''
   if (document.mozHidden != null) return 'moz'
@@ -3775,15 +3788,6 @@ function detectPrefix (document) {
 
 function lowercaseFirst (string) {
   return string.substring(0, 1).toLowerCase() + string.substring(1)
-}
-
-module.exports = function (document) {
-  var prefix = detectPrefix(document)
-  if (prefix == null) return
-  return {
-    hidden: lowercaseFirst(prefix + 'Hidden'),
-    event: prefix + 'visibilitychange'
-  }
 }
 
 },{}],20:[function(_dereq_,module,exports){
@@ -4893,14 +4897,14 @@ function shim (element, value) {
       decimal: ','
     },
     ca: {
-      y: function (c) { return 'any' + (c !== 1 ? 's' : '') },
-      mo: function (c) { return 'mes' + (c !== 1 ? 'os' : '') },
-      w: function (c) { return 'setman' + (c !== 1 ? 'es' : 'a') },
-      d: function (c) { return 'di' + (c !== 1 ? 'es' : 'a') },
-      h: function (c) { return 'hor' + (c !== 1 ? 'es' : 'a') },
-      m: function (c) { return 'minut' + (c !== 1 ? 's' : '') },
-      s: function (c) { return 'segon' + (c !== 1 ? 's' : '') },
-      ms: function (c) { return 'milisegon' + (c !== 1 ? 's' : '') },
+      y: function (c) { return 'any' + (c === 1 ? '' : 's') },
+      mo: function (c) { return 'mes' + (c === 1 ? '' : 'os') },
+      w: function (c) { return 'setman' + (c === 1 ? 'a' : 'es') },
+      d: function (c) { return 'di' + (c === 1 ? 'a' : 'es') },
+      h: function (c) { return 'hor' + (c === 1 ? 'a' : 'es') },
+      m: function (c) { return 'minut' + (c === 1 ? '' : 's') },
+      s: function (c) { return 'segon' + (c === 1 ? '' : 's') },
+      ms: function (c) { return 'milisegon' + (c === 1 ? '' : 's') },
       decimal: ','
     },
     cs: {
@@ -4916,68 +4920,68 @@ function shim (element, value) {
     },
     da: {
       y: 'år',
-      mo: function (c) { return 'måned' + (c !== 1 ? 'er' : '') },
-      w: function (c) { return 'uge' + (c !== 1 ? 'r' : '') },
-      d: function (c) { return 'dag' + (c !== 1 ? 'e' : '') },
-      h: function (c) { return 'time' + (c !== 1 ? 'r' : '') },
-      m: function (c) { return 'minut' + (c !== 1 ? 'ter' : '') },
-      s: function (c) { return 'sekund' + (c !== 1 ? 'er' : '') },
-      ms: function (c) { return 'millisekund' + (c !== 1 ? 'er' : '') },
+      mo: function (c) { return 'måned' + (c === 1 ? '' : 'er') },
+      w: function (c) { return 'uge' + (c === 1 ? '' : 'r') },
+      d: function (c) { return 'dag' + (c === 1 ? '' : 'e') },
+      h: function (c) { return 'time' + (c === 1 ? '' : 'r') },
+      m: function (c) { return 'minut' + (c === 1 ? '' : 'ter') },
+      s: function (c) { return 'sekund' + (c === 1 ? '' : 'er') },
+      ms: function (c) { return 'millisekund' + (c === 1 ? '' : 'er') },
       decimal: ','
     },
     de: {
-      y: function (c) { return 'Jahr' + (c !== 1 ? 'e' : '') },
-      mo: function (c) { return 'Monat' + (c !== 1 ? 'e' : '') },
-      w: function (c) { return 'Woche' + (c !== 1 ? 'n' : '') },
-      d: function (c) { return 'Tag' + (c !== 1 ? 'e' : '') },
-      h: function (c) { return 'Stunde' + (c !== 1 ? 'n' : '') },
-      m: function (c) { return 'Minute' + (c !== 1 ? 'n' : '') },
-      s: function (c) { return 'Sekunde' + (c !== 1 ? 'n' : '') },
-      ms: function (c) { return 'Millisekunde' + (c !== 1 ? 'n' : '') },
+      y: function (c) { return 'Jahr' + (c === 1 ? '' : 'e') },
+      mo: function (c) { return 'Monat' + (c === 1 ? '' : 'e') },
+      w: function (c) { return 'Woche' + (c === 1 ? '' : 'n') },
+      d: function (c) { return 'Tag' + (c === 1 ? '' : 'e') },
+      h: function (c) { return 'Stunde' + (c === 1 ? '' : 'n') },
+      m: function (c) { return 'Minute' + (c === 1 ? '' : 'n') },
+      s: function (c) { return 'Sekunde' + (c === 1 ? '' : 'n') },
+      ms: function (c) { return 'Millisekunde' + (c === 1 ? '' : 'n') },
       decimal: ','
     },
     en: {
-      y: function (c) { return 'year' + (c !== 1 ? 's' : '') },
-      mo: function (c) { return 'month' + (c !== 1 ? 's' : '') },
-      w: function (c) { return 'week' + (c !== 1 ? 's' : '') },
-      d: function (c) { return 'day' + (c !== 1 ? 's' : '') },
-      h: function (c) { return 'hour' + (c !== 1 ? 's' : '') },
-      m: function (c) { return 'minute' + (c !== 1 ? 's' : '') },
-      s: function (c) { return 'second' + (c !== 1 ? 's' : '') },
-      ms: function (c) { return 'millisecond' + (c !== 1 ? 's' : '') },
+      y: function (c) { return 'year' + (c === 1 ? '' : 's') },
+      mo: function (c) { return 'month' + (c === 1 ? '' : 's') },
+      w: function (c) { return 'week' + (c === 1 ? '' : 's') },
+      d: function (c) { return 'day' + (c === 1 ? '' : 's') },
+      h: function (c) { return 'hour' + (c === 1 ? '' : 's') },
+      m: function (c) { return 'minute' + (c === 1 ? '' : 's') },
+      s: function (c) { return 'second' + (c === 1 ? '' : 's') },
+      ms: function (c) { return 'millisecond' + (c === 1 ? '' : 's') },
       decimal: '.'
     },
     es: {
-      y: function (c) { return 'año' + (c !== 1 ? 's' : '') },
-      mo: function (c) { return 'mes' + (c !== 1 ? 'es' : '') },
-      w: function (c) { return 'semana' + (c !== 1 ? 's' : '') },
-      d: function (c) { return 'día' + (c !== 1 ? 's' : '') },
-      h: function (c) { return 'hora' + (c !== 1 ? 's' : '') },
-      m: function (c) { return 'minuto' + (c !== 1 ? 's' : '') },
-      s: function (c) { return 'segundo' + (c !== 1 ? 's' : '') },
-      ms: function (c) { return 'milisegundo' + (c !== 1 ? 's' : '') },
+      y: function (c) { return 'año' + (c === 1 ? '' : 's') },
+      mo: function (c) { return 'mes' + (c === 1 ? '' : 'es') },
+      w: function (c) { return 'semana' + (c === 1 ? '' : 's') },
+      d: function (c) { return 'día' + (c === 1 ? '' : 's') },
+      h: function (c) { return 'hora' + (c === 1 ? '' : 's') },
+      m: function (c) { return 'minuto' + (c === 1 ? '' : 's') },
+      s: function (c) { return 'segundo' + (c === 1 ? '' : 's') },
+      ms: function (c) { return 'milisegundo' + (c === 1 ? '' : 's') },
       decimal: ','
     },
     fi: {
       y: function (c) { return c === 1 ? 'vuosi' : 'vuotta' },
       mo: function (c) { return c === 1 ? 'kuukausi' : 'kuukautta' },
-      w: function (c) { return 'viikko' + (c !== 1 ? 'a' : '') },
-      d: function (c) { return 'päivä' + (c !== 1 ? 'ä' : '') },
-      h: function (c) { return 'tunti' + (c !== 1 ? 'a' : '') },
-      m: function (c) { return 'minuutti' + (c !== 1 ? 'a' : '') },
-      s: function (c) { return 'sekunti' + (c !== 1 ? 'a' : '') },
-      ms: function (c) { return 'millisekunti' + (c !== 1 ? 'a' : '') },
+      w: function (c) { return 'viikko' + (c === 1 ? '' : 'a') },
+      d: function (c) { return 'päivä' + (c === 1 ? '' : 'ä') },
+      h: function (c) { return 'tunti' + (c === 1 ? '' : 'a') },
+      m: function (c) { return 'minuutti' + (c === 1 ? '' : 'a') },
+      s: function (c) { return 'sekunti' + (c === 1 ? '' : 'a') },
+      ms: function (c) { return 'millisekunti' + (c === 1 ? '' : 'a') },
       decimal: ','
     },
     fr: {
-      y: function (c) { return 'an' + (c !== 1 ? 's' : '') },
+      y: function (c) { return 'an' + (c >= 2 ? 's' : '') },
       mo: 'mois',
-      w: function (c) { return 'semaine' + (c !== 1 ? 's' : '') },
-      d: function (c) { return 'jour' + (c !== 1 ? 's' : '') },
-      h: function (c) { return 'heure' + (c !== 1 ? 's' : '') },
-      m: function (c) { return 'minute' + (c !== 1 ? 's' : '') },
-      s: function (c) { return 'seconde' + (c !== 1 ? 's' : '') },
-      ms: function (c) { return 'milliseconde' + (c !== 1 ? 's' : '') },
+      w: function (c) { return 'semaine' + (c >= 2 ? 's' : '') },
+      d: function (c) { return 'jour' + (c >= 2 ? 's' : '') },
+      h: function (c) { return 'heure' + (c >= 2 ? 's' : '') },
+      m: function (c) { return 'minute' + (c >= 2 ? 's' : '') },
+      s: function (c) { return 'seconde' + (c >= 2 ? 's' : '') },
+      ms: function (c) { return 'milliseconde' + (c >= 2 ? 's' : '') },
       decimal: ','
     },
     gr: {
@@ -5015,24 +5019,24 @@ function shim (element, value) {
     },
     is: {
       y: 'ár',
-      mo: function (c) { return 'mánuð' + (c !== 1 ? 'ir' : 'ur') },
-      w: function (c) { return 'vik' + (c !== 1 ? 'ur' : 'a') },
-      d: function (c) { return 'dag' + (c !== 1 ? 'ar' : 'ur') },
-      h: function (c) { return 'klukkutím' + (c !== 1 ? 'ar' : 'i') },
-      m: function (c) { return 'mínút' + (c !== 1 ? 'ur' : 'a') },
-      s: function (c) { return 'sekúnd' + (c !== 1 ? 'ur' : 'a') },
-      ms: function (c) { return 'millisekúnd' + (c !== 1 ? 'ur' : 'a') },
+      mo: function (c) { return 'mánuð' + (c === 1 ? 'ur' : 'ir') },
+      w: function (c) { return 'vik' + (c === 1 ? 'a' : 'ur') },
+      d: function (c) { return 'dag' + (c === 1 ? 'ur' : 'ar') },
+      h: function (c) { return 'klukkutím' + (c === 1 ? 'i' : 'ar') },
+      m: function (c) { return 'mínút' + (c === 1 ? 'a' : 'ur') },
+      s: function (c) { return 'sekúnd' + (c === 1 ? 'a' : 'ur') },
+      ms: function (c) { return 'millisekúnd' + (c === 1 ? 'a' : 'ur') },
       decimal: '.'
     },
     it: {
-      y: function (c) { return 'ann' + (c !== 1 ? 'i' : 'o') },
-      mo: function (c) { return 'mes' + (c !== 1 ? 'i' : 'e') },
-      w: function (c) { return 'settiman' + (c !== 1 ? 'e' : 'a') },
-      d: function (c) { return 'giorn' + (c !== 1 ? 'i' : 'o') },
-      h: function (c) { return 'or' + (c !== 1 ? 'e' : 'a') },
-      m: function (c) { return 'minut' + (c !== 1 ? 'i' : 'o') },
-      s: function (c) { return 'second' + (c !== 1 ? 'i' : 'o') },
-      ms: function (c) { return 'millisecond' + (c !== 1 ? 'i' : 'o') },
+      y: function (c) { return 'ann' + (c === 1 ? 'o' : 'i') },
+      mo: function (c) { return 'mes' + (c === 1 ? 'e' : 'i') },
+      w: function (c) { return 'settiman' + (c === 1 ? 'a' : 'e') },
+      d: function (c) { return 'giorn' + (c === 1 ? 'o' : 'i') },
+      h: function (c) { return 'or' + (c === 1 ? 'a' : 'e') },
+      m: function (c) { return 'minut' + (c === 1 ? 'o' : 'i') },
+      s: function (c) { return 'second' + (c === 1 ? 'o' : 'i') },
+      ms: function (c) { return 'millisecond' + (c === 1 ? 'o' : 'i') },
       decimal: ','
     },
     ja: {
@@ -5092,13 +5096,13 @@ function shim (element, value) {
     },
     no: {
       y: 'år',
-      mo: function (c) { return 'måned' + (c !== 1 ? 'er' : '') },
-      w: function (c) { return 'uke' + (c !== 1 ? 'r' : '') },
-      d: function (c) { return 'dag' + (c !== 1 ? 'er' : '') },
-      h: function (c) { return 'time' + (c !== 1 ? 'r' : '') },
-      m: function (c) { return 'minutt' + (c !== 1 ? 'er' : '') },
-      s: function (c) { return 'sekund' + (c !== 1 ? 'er' : '') },
-      ms: function (c) { return 'millisekund' + (c !== 1 ? 'er' : '') },
+      mo: function (c) { return 'måned' + (c === 1 ? '' : 'er') },
+      w: function (c) { return 'uke' + (c === 1 ? '' : 'r') },
+      d: function (c) { return 'dag' + (c === 1 ? '' : 'er') },
+      h: function (c) { return 'time' + (c === 1 ? '' : 'r') },
+      m: function (c) { return 'minutt' + (c === 1 ? '' : 'er') },
+      s: function (c) { return 'sekund' + (c === 1 ? '' : 'er') },
+      ms: function (c) { return 'millisekund' + (c === 1 ? '' : 'er') },
       decimal: ','
     },
     pl: {
@@ -5113,14 +5117,14 @@ function shim (element, value) {
       decimal: ','
     },
     pt: {
-      y: function (c) { return 'ano' + (c !== 1 ? 's' : '') },
+      y: function (c) { return 'ano' + (c === 1 ? '' : 's') },
       mo: function (c) { return c !== 1 ? 'meses' : 'mês' },
-      w: function (c) { return 'semana' + (c !== 1 ? 's' : '') },
-      d: function (c) { return 'dia' + (c !== 1 ? 's' : '') },
-      h: function (c) { return 'hora' + (c !== 1 ? 's' : '') },
-      m: function (c) { return 'minuto' + (c !== 1 ? 's' : '') },
-      s: function (c) { return 'segundo' + (c !== 1 ? 's' : '') },
-      ms: function (c) { return 'milissegundo' + (c !== 1 ? 's' : '') },
+      w: function (c) { return 'semana' + (c === 1 ? '' : 's') },
+      d: function (c) { return 'dia' + (c === 1 ? '' : 's') },
+      h: function (c) { return 'hora' + (c === 1 ? '' : 's') },
+      m: function (c) { return 'minuto' + (c === 1 ? '' : 's') },
+      s: function (c) { return 'segundo' + (c === 1 ? '' : 's') },
+      ms: function (c) { return 'milissegundo' + (c === 1 ? '' : 's') },
       decimal: ','
     },
     ru: {
@@ -5147,13 +5151,13 @@ function shim (element, value) {
     },
     sv: {
       y: 'år',
-      mo: function (c) { return 'månad' + (c !== 1 ? 'er' : '') },
-      w: function (c) { return 'veck' + (c !== 1 ? 'or' : 'a') },
-      d: function (c) { return 'dag' + (c !== 1 ? 'ar' : '') },
-      h: function (c) { return 'timm' + (c !== 1 ? 'ar' : 'e') },
-      m: function (c) { return 'minut' + (c !== 1 ? 'er' : '') },
-      s: function (c) { return 'sekund' + (c !== 1 ? 'er' : '') },
-      ms: function (c) { return 'millisekund' + (c !== 1 ? 'er' : '') },
+      mo: function (c) { return 'månad' + (c === 1 ? '' : 'er') },
+      w: function (c) { return 'veck' + (c === 1 ? 'a' : 'or') },
+      d: function (c) { return 'dag' + (c === 1 ? '' : 'ar') },
+      h: function (c) { return 'timm' + (c === 1 ? 'e' : 'ar') },
+      m: function (c) { return 'minut' + (c === 1 ? '' : 'er') },
+      s: function (c) { return 'sekund' + (c === 1 ? '' : 'er') },
+      ms: function (c) { return 'millisekund' + (c === 1 ? '' : 'er') },
       decimal: ','
     },
     tr: {
@@ -11464,7 +11468,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }).call(this,_dereq_("buffer").Buffer)
 },{"buffer":8,"is-typedarray":42}],75:[function(_dereq_,module,exports){
 /**
- * UAParser.js v0.7.13
+ * UAParser.js v0.7.14
  * Lightweight JavaScript-based User-Agent string parser
  * https://github.com/faisalman/ua-parser-js
  *
@@ -11481,7 +11485,7 @@ module.exports = function typedarrayToBuffer (arr) {
     /////////////
 
 
-    var LIBVERSION  = '0.7.13',
+    var LIBVERSION  = '0.7.14',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -11735,10 +11739,7 @@ module.exports = function typedarrayToBuffer (arr) {
             /(puffin)\/([\w\.]+)/i                                              // Puffin
             ], [[NAME, 'Puffin'], VERSION], [
 
-            /(uc\s?browser)[\/\s]?([\w\.]+)/i,
-            /ucweb.+(ucbrowser)[\/\s]?([\w\.]+)/i,
-            /juc.+(ucweb)[\/\s]?([\w\.]+)/i,
-            /(ucbrowser)\/([\w\.]+)/i
+            /((?:[\s\/])uc?\s?browser|(?:juc.+)ucweb)[\/\s]?([\w\.]+)/i
                                                                                 // UCBrowser
             ], [[NAME, 'UCBrowser'], VERSION], [
 
@@ -11747,6 +11748,9 @@ module.exports = function typedarrayToBuffer (arr) {
 
             /(micromessenger)\/([\w\.]+)/i                                      // WeChat
             ], [[NAME, 'WeChat'], VERSION], [
+
+            /(QQ)\/([\d\.]+)/i                                                  // QQ, aka ShouQ
+            ], [NAME, VERSION], [
 
             /m?(qqbrowser)[\/\s]?([\w\.]+)/i                                    // QQBrowser
             ], [NAME, VERSION], [
@@ -11763,7 +11767,9 @@ module.exports = function typedarrayToBuffer (arr) {
             /\swv\).+(chrome)\/([\w\.]+)/i                                      // Chrome WebView
             ], [[NAME, /(.+)/, '$1 WebView'], VERSION], [
 
-            /android.+samsungbrowser\/([\w\.]+)/i,
+            /((?:oculus|samsung)browser)\/([\w\.]+)/i
+            ], [[NAME, /(.+(?:g|us))(.+)/, '$1 $2'], VERSION], [                // Oculus / Samsung Browser
+
             /android.+version\/([\w\.]+)\s+(?:mobile\s?safari|safari)*/i        // Android Browser
             ], [VERSION, [NAME, 'Android Browser']], [
 
@@ -11983,8 +11989,8 @@ module.exports = function typedarrayToBuffer (arr) {
             ], [MODEL, [VENDOR, 'Apple'], [TYPE, MOBILE]], [
 
             /(blackberry)[\s-]?(\w+)/i,                                         // BlackBerry
-            /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|huawei|meizu|motorola|polytron)[\s_-]?([\w-]+)*/i,
-                                                                                // BenQ/Palm/Sony-Ericsson/Acer/Asus/Dell/Huawei/Meizu/Motorola/Polytron
+            /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron)[\s_-]?([\w-]+)*/i,
+                                                                                // BenQ/Palm/Sony-Ericsson/Acer/Asus/Dell/Meizu/Motorola/Polytron
             /(hp)\s([\w\s]+\w)/i,                                               // HP iPAQ
             /(asus)-?(\w+)/i                                                    // Asus
             ], [VENDOR, MODEL, [TYPE, MOBILE]], [
@@ -11997,8 +12003,8 @@ module.exports = function typedarrayToBuffer (arr) {
             /(sony)\s(tablet\s[ps])\sbuild\//i,                                  // Sony
             /(sony)?(?:sgp.+)\sbuild\//i
             ], [[VENDOR, 'Sony'], [MODEL, 'Xperia Tablet'], [TYPE, TABLET]], [
-            /(?:sony)?(?:(?:(?:c|d)\d{4})|(?:so[-l].+))\sbuild\//i
-            ], [[VENDOR, 'Sony'], [MODEL, 'Xperia Phone'], [TYPE, MOBILE]], [
+            /android.+\s([c-g]\d{4}|so[-l]\w+)\sbuild\//i
+            ], [MODEL, [VENDOR, 'Sony'], [TYPE, MOBILE]], [
 
             /\s(ouya)\s/i,                                                      // Ouya
             /(nintendo)\s([wids3u]+)/i                                          // Nintendo
@@ -12018,14 +12024,15 @@ module.exports = function typedarrayToBuffer (arr) {
 
             /(htc)[;_\s-]+([\w\s]+(?=\))|\w+)*/i,                               // HTC
             /(zte)-(\w+)*/i,                                                    // ZTE
-            /(alcatel|geeksphone|huawei|lenovo|nexian|panasonic|(?=;\s)sony)[_\s-]?([\w-]+)*/i
-                                                                                // Alcatel/GeeksPhone/Huawei/Lenovo/Nexian/Panasonic/Sony
+            /(alcatel|geeksphone|lenovo|nexian|panasonic|(?=;\s)sony)[_\s-]?([\w-]+)*/i
+                                                                                // Alcatel/GeeksPhone/Lenovo/Nexian/Panasonic/Sony
             ], [VENDOR, [MODEL, /_/g, ' '], [TYPE, MOBILE]], [
 
             /(nexus\s9)/i                                                       // HTC Nexus 9
             ], [MODEL, [VENDOR, 'HTC'], [TYPE, TABLET]], [
 
-            /(nexus\s6p)/i                                                      // Huawei Nexus 6P
+            /d\/huawei([\w\s-]+)[;\)]/i,
+            /(nexus\s6p)/i                                                      // Huawei
             ], [MODEL, [VENDOR, 'Huawei'], [TYPE, MOBILE]], [
 
             /(microsoft);\s(lumia[\s\w]+)/i                                     // Microsoft Lumia
@@ -12074,12 +12081,15 @@ module.exports = function typedarrayToBuffer (arr) {
             /android\s3\.[\s\w;-]{10}(a\d{3})/i                                 // Acer
             ], [MODEL, [VENDOR, 'Acer'], [TYPE, TABLET]], [
 
+            /android.+([vl]k\-?\d{3})\s+build/i                                 // LG Tablet
+            ], [MODEL, [VENDOR, 'LG'], [TYPE, TABLET]], [
             /android\s3\.[\s\w;-]{10}(lg?)-([06cv9]{3,4})/i                     // LG Tablet
             ], [[VENDOR, 'LG'], MODEL, [TYPE, TABLET]], [
             /(lg) netcast\.tv/i                                                 // LG SmartTV
             ], [VENDOR, MODEL, [TYPE, SMARTTV]], [
             /(nexus\s[45])/i,                                                   // LG
-            /lg[e;\s\/-]+(\w+)*/i
+            /lg[e;\s\/-]+(\w+)*/i,
+            /android.+lg(\-?[\d\w]+)\s+build/i
             ], [MODEL, [VENDOR, 'LG'], [TYPE, MOBILE]], [
 
             /android.+(ideatab[a-z0-9\-\s]+)/i                                  // Lenovo
@@ -12111,14 +12121,85 @@ module.exports = function typedarrayToBuffer (arr) {
             /android.+(mi[\s\-_]*(?:one|one[\s_]plus|note lte)?[\s_]*(?:\d\w)?)\s+build/i    // Xiaomi Mi
             ], [[MODEL, /_/g, ' '], [VENDOR, 'Xiaomi'], [TYPE, MOBILE]], [
 
+            /android.+;\s(m[1-5]\snote)\sbuild/i                                // Meizu Tablet
+            ], [MODEL, [VENDOR, 'Meizu'], [TYPE, TABLET]], [
+
             /android.+a000(1)\s+build/i                                         // OnePlus
             ], [MODEL, [VENDOR, 'OnePlus'], [TYPE, MOBILE]], [
 
-            /\s(tablet)[;\/]/i,                                                 // Unidentifiable Tablet
-            /\s(mobile)(?:[;\/]|\ssafari)/i                                     // Unidentifiable Mobile
-            ], [[TYPE, util.lowerize], VENDOR, MODEL]
+            /android.+[;\/]\s*(RCT[\d\w]+)\s+build/i                            // RCA Tablets
+            ], [MODEL, [VENDOR, 'RCA'], [TYPE, TABLET]], [
 
-            /*//////////////////////////
+            /android.+[;\/]\s*(Venue[\d\s]*)\s+build/i                          // Dell Venue Tablets
+            ], [MODEL, [VENDOR, 'Dell'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(Q[T|M][\d\w]+)\s+build/i                         // Verizon Tablet
+            ], [MODEL, [VENDOR, 'Verizon'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s+(Barnes[&\s]+Noble\s+|BN[RT])(V?.*)\s+build/i     // Barnes & Noble Tablet
+            ], [[VENDOR, 'Barnes & Noble'], MODEL, [TYPE, TABLET]], [
+
+            /android.+[;\/]\s+(TM\d{3}.*\b)\s+build/i                           // Barnes & Noble Tablet
+            ], [MODEL, [VENDOR, 'NuVision'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(zte)?.+(k\d{2})\s+build/i                        // ZTE K Series Tablet
+            ], [[VENDOR, 'ZTE'], MODEL, [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(gen\d{3})\s+build.*49h/i                         // Swiss GEN Mobile
+            ], [MODEL, [VENDOR, 'Swiss'], [TYPE, MOBILE]], [
+
+            /android.+[;\/]\s*(zur\d{3})\s+build/i                              // Swiss ZUR Tablet
+            ], [MODEL, [VENDOR, 'Swiss'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*((Zeki)?TB.*\b)\s+build/i                         // Zeki Tablets
+            ], [MODEL, [VENDOR, 'Zeki'], [TYPE, TABLET]], [
+
+            /(android).+[;\/]\s+([YR]\d{2}x?.*)\s+build/i,
+            /android.+[;\/]\s+(Dragon[\-\s]+Touch\s+|DT)(.+)\s+build/i          // Dragon Touch Tablet
+            ], [[VENDOR, 'Dragon Touch'], MODEL, [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(NS-?.+)\s+build/i                                // Insignia Tablets
+            ], [MODEL, [VENDOR, 'Insignia'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*((NX|Next)-?.+)\s+build/i                         // NextBook Tablets
+            ], [MODEL, [VENDOR, 'NextBook'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(Xtreme\_?)?(V(1[045]|2[015]|30|40|60|7[05]|90))\s+build/i
+            ], [[VENDOR, 'Voice'], MODEL, [TYPE, MOBILE]], [                    // Voice Xtreme Phones
+
+            /android.+[;\/]\s*(LVTEL\-?)?(V1[12])\s+build/i                     // LvTel Phones
+            ], [[VENDOR, 'LvTel'], MODEL, [TYPE, MOBILE]], [
+
+            /android.+[;\/]\s*(V(100MD|700NA|7011|917G).*\b)\s+build/i          // Envizen Tablets
+            ], [MODEL, [VENDOR, 'Envizen'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(Le[\s\-]+Pan)[\s\-]+(.*\b)\s+build/i             // Le Pan Tablets
+            ], [VENDOR, MODEL, [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(Trio[\s\-]*.*)\s+build/i                         // MachSpeed Tablets
+            ], [MODEL, [VENDOR, 'MachSpeed'], [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*(Trinity)[\-\s]*(T\d{3})\s+build/i                // Trinity Tablets
+            ], [VENDOR, MODEL, [TYPE, TABLET]], [
+
+            /android.+[;\/]\s*TU_(1491)\s+build/i                               // Rotor Tablets
+            ], [MODEL, [VENDOR, 'Rotor'], [TYPE, TABLET]], [
+
+            /android.+(KS(.+))\s+build/i                                        // Amazon Kindle Tablets
+            ], [MODEL, [VENDOR, 'Amazon'], [TYPE, TABLET]], [
+
+            /android.+(Gigaset)[\s\-]+(Q.+)\s+build/i                           // Gigaset Tablets
+            ], [VENDOR, MODEL, [TYPE, TABLET]], [
+
+            /\s(tablet|tab)[;\/]/i,                                             // Unidentifiable Tablet
+            /\s(mobile)(?:[;\/]|\ssafari)/i                                     // Unidentifiable Mobile
+            ], [[TYPE, util.lowerize], VENDOR, MODEL], [
+
+            /(android.+)[;\/].+build/i                                          // Generic Android Device
+            ], [MODEL, [VENDOR, 'Generic']]
+
+
+        /*//////////////////////////
             // TODO: move to string map
             ////////////////////////////
 
@@ -12240,8 +12321,9 @@ module.exports = function typedarrayToBuffer (arr) {
             /(haiku)\s(\w+)/i                                                  // Haiku
             ], [NAME, VERSION],[
 
-            /(ip[honead]+)(?:.*os\s([\w]+)*\slike\smac|;\sopera)/i              // iOS
-            ], [[NAME, 'iOS'], [VERSION, /_/g, '.']], [
+            /cfnetwork\/.+darwin/i,
+            /ip[honead]+(?:.*os\s([\w]+)*\slike\smac|;\sopera)/i                // iOS
+            ], [[VERSION, /_/g, '.'], [NAME, 'iOS']], [
 
             /(mac\sos\sx)\s?([\w\s\.]+\w)*/i,
             /(macintosh|mac(?=_powerpc)\s)/i                                    // Mac OS
@@ -12278,6 +12360,11 @@ module.exports = function typedarrayToBuffer (arr) {
     var OS = Browser;
 
     var UAParser = function (uastring, extensions) {
+
+        if (typeof uastring === 'object') {
+            extensions = uastring;
+            uastring = undefined;
+        }
 
         if (!(this instanceof UAParser)) {
             return new UAParser(uastring, extensions).getResult();
@@ -12385,7 +12472,7 @@ module.exports = function typedarrayToBuffer (arr) {
             define(function () {
                 return UAParser;
             });
-        } else {
+        } else if (window) {
             // browser env
             window.UAParser = UAParser;
         }
@@ -12396,7 +12483,7 @@ module.exports = function typedarrayToBuffer (arr) {
     //   In AMD env the global scope should be kept clean, but jQuery is an exception.
     //   jQuery always exports to global scope, unless jQuery.noConflict(true) is used,
     //   and we should catch that.
-    var $ = window.jQuery || window.Zepto;
+    var $ = window && (window.jQuery || window.Zepto);
     if (typeof $ !== UNDEF_TYPE) {
         var parser = new UAParser();
         $.ua = parser.getResult();
@@ -13348,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13402,7 +13489,7 @@ module.exports={
     "filesize": "3.5.10",
     "get-form-data": "1.2.5",
     "hidden": "1.1.1",
-    "humanize-duration": "3.10.0",
+    "humanize-duration": "3.10.1",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -13413,7 +13500,7 @@ module.exports={
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
     "superagent": "3.5.2",
-    "ua-parser-js": "0.7.13",
+    "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.0"
   },
   "devDependencies": {
@@ -13428,6 +13515,7 @@ module.exports={
     "gulp": "3.9.1",
     "gulp-autoprefixer": "4.0.0",
     "gulp-bump": "2.7.0",
+    "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.0.0",
     "gulp-cssnano": "2.1.2",
@@ -14275,16 +14363,6 @@ var Browser = function Browser(options) {
       warning = 'Safari has no webcam support yet.<br/>Better pick' + ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' + ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.';
     }
 
-    if (options.debug) {
-      if (warning) {
-        warning += ' ';
-      } else {
-        warning = '';
-      }
-
-      warning += 'Your browser is ' + JSON.stringify(uaParser.browser);
-    }
-
     return warning;
   }
 
@@ -14861,7 +14939,9 @@ exports.default = function () {
   var navigator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
   // https://github.com/julienetie/request-frame/issues/6
-  window.screen = window.screen || {};
+  if (!window.screen) {
+    window.screen = {};
+  }
 
   (0, _requestFrame2.default)('native');
 
@@ -14873,13 +14953,23 @@ exports.default = function () {
     navigator.getUserMedia_ = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
   }
 
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
+  if (!window.AudioContext && window.webkitAudioContext) {
+    window.AudioContext = window.webkitAudioContext;
+  }
+
+  if (!window.URL) {
+    window.URL = window.webkitURL || window.mozURL || window.msURL;
+  }
 
   var methods = ['debug', 'groupCollapsed', 'groupEnd', 'error', 'exception', 'info', 'log', 'trace', 'warn'];
 
-  var noop = function noop() {};
-  var console = window.console = window.console || {};
+  var console = {};
+
+  if (window.console) {
+    console = window.console;
+  } else {
+    window.console = function () {};
+  }
 
   var method;
   var length = methods.length;
@@ -14888,7 +14978,7 @@ exports.default = function () {
     method = methods[length];
 
     if (!console[method]) {
-      console[method] = noop;
+      console[method] = function () {};
     }
   }
 };
@@ -14938,8 +15028,7 @@ var VideomailError = (0, _createError2.default)(Error, VIDEOMAIL_ERR_NAME, {
   'logLines': undefined,
   'useragent': undefined,
   'url': undefined,
-  'stack': undefined,
-  'caller': undefined
+  'stack': undefined
 });
 
 // shim pretty to exclude stack always
@@ -15189,7 +15278,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: undefined, // todo after es6 migrations using https://www.npmjs.com/package/caller-path
     stack: stack // have to assign it manually again because it is kinda protected
   });
 
