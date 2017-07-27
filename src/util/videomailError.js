@@ -86,6 +86,15 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   switch (errType) {
+    case 'SourceUnavailableError':
+      message = 'Source of your webcam cannot be accessed'
+      explanation = 'Probably it is locked from another process or has a hardware error.'
+
+      if (err.message) {
+        err.message += ' Details: ' + err.message
+      }
+
+      break
     case 'NotFoundError':
     case 'NO_DEVICES_FOUND':
       message = 'No webcam found'
