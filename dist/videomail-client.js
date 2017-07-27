@@ -13284,7 +13284,7 @@ function WebSocketStream(target, protocols, options) {
   }
 
   // was already open when passed in
-  if (socket.readyState === WS.OPEN) {
+  if (socket.readyState === socket.OPEN) {
     stream = proxy
   } else {
     stream = duplexify.obj()
@@ -13304,7 +13304,7 @@ function WebSocketStream(target, protocols, options) {
   function socketWriteNode(chunk, enc, next) {
     // avoid errors, this never happens unless
     // destroy() is called
-    if (socket.readyState !== WS.OPEN) {
+    if (socket.readyState !== socket.OPEN) {
       next()
       return
     }
@@ -13391,7 +13391,7 @@ if (typeof WebSocket !== 'undefined') {
   ws = WebSocket
 } else if (typeof MozWebSocket !== 'undefined') {
   ws = MozWebSocket
-} else {
+} else if (typeof window !== 'undefined') {
   ws = window.WebSocket || window.MozWebSocket
 }
 
@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13501,7 +13501,7 @@ module.exports={
     "request-frame": "1.5.3",
     "superagent": "3.5.2",
     "ua-parser-js": "0.7.14",
-    "websocket-stream": "5.0.0"
+    "websocket-stream": "5.0.1"
   },
   "devDependencies": {
     "babel-polyfill": "6.23.0",
@@ -15102,6 +15102,15 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   switch (errType) {
+    case 'SourceUnavailableError':
+      message = 'Source of your webcam cannot be accessed';
+      explanation = 'Probably it is locked from another process or has a hardware error.';
+
+      if (err.message) {
+        err.message += ' Details: ' + err.message;
+      }
+
+      break;
     case 'NotFoundError':
     case 'NO_DEVICES_FOUND':
       message = 'No webcam found';
