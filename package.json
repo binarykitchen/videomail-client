@@ -102,7 +102,7 @@
     "ssl-root-cas": "1.2.3",
     "standard": "10.0.2",
     "tap-spec": "4.1.1",
-    "tape": "4.7.0",
+    "tape": "4.8.0",
     "tape-run": "3.0.0",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",

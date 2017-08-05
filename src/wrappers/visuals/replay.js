@@ -261,12 +261,15 @@ const Replay = function (parentElement, options) {
     // avoids race condition, inspired by
     // http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
     setTimeout(() => {
-      if (replayElement && replayElement.pause) {
+      try {
         replayElement.pause()
+      } catch (exc) {
+        // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
+        options.logger.warn(exc)
       }
 
       cb && cb()
-    }, 10)
+    }, 15)
   }
 
   function play () {
@@ -275,7 +278,7 @@ const Replay = function (parentElement, options) {
 
       if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
         p.catch((reason) => {
-          options.debug('Caught pending play exception: %s', reason)
+          options.logger.warn('Caught pending play exception: %s', reason)
         })
       }
     }
