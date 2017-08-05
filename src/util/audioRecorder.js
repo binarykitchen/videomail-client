@@ -41,10 +41,9 @@ export default function (userMedia, options) {
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
     } catch (exc) {
-      const explanation = exc.toString() + 'Details: ' + JSON.stringify(getAudioContext())
       throw VideomailError.create(
         'Webcam has no audio',
-        explanation,
+        exc.toString(),
         options
       )
     }
