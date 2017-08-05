@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13537,7 +13537,7 @@ module.exports={
     "ssl-root-cas": "1.2.3",
     "standard": "10.0.2",
     "tap-spec": "4.1.1",
-    "tape": "4.7.0",
+    "tape": "4.8.0",
     "tape-run": "3.0.0",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
@@ -14221,8 +14221,7 @@ exports.default = function (userMedia, options) {
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream);
     } catch (exc) {
-      var explanation = exc.toString() + 'Details: ' + JSON.stringify(getAudioContext());
-      throw _videomailError2.default.create('Webcam has no audio', explanation, options);
+      throw _videomailError2.default.create('Webcam has no audio', exc.toString(), options);
     }
 
     if (!(0, _isPowerOfTwo2.default)(options.audio.bufferSize)) {
@@ -19790,12 +19789,15 @@ var Replay = function Replay(parentElement, options) {
     // avoids race condition, inspired by
     // http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
     setTimeout(function () {
-      if (replayElement && replayElement.pause) {
+      try {
         replayElement.pause();
+      } catch (exc) {
+        // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
+        options.logger.warn(exc);
       }
 
       cb && cb();
-    }, 10);
+    }, 15);
   }
 
   function play() {
@@ -19804,7 +19806,7 @@ var Replay = function Replay(parentElement, options) {
 
       if (p && typeof Promise !== 'undefined' && p instanceof Promise) {
         p.catch(function (reason) {
-          options.debug('Caught pending play exception: %s', reason);
+          options.logger.warn('Caught pending play exception: %s', reason);
         });
       }
     }
