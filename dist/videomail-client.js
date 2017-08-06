@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -16579,7 +16579,8 @@ var Container = function Container(options) {
   };
 
   this.hideForm = function () {
-    form.hide();
+    // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
+    form && form.hide();
   };
 
   this.loadForm = function (videomail) {
@@ -16632,7 +16633,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function getOuterWidth(element) {
   var rect = element.getBoundingClientRect();
-  return rect.right - rect.left;
+
+  if (rect) {
+    return rect.right - rect.left;
+  } else {
+    return 0;
+  }
 }
 
 function figureMinHeight(height, options) {
@@ -17416,7 +17422,8 @@ var Visuals = function Visuals(container, options) {
   };
 
   this.getBoundingClientRect = function () {
-    return visualsElement.getBoundingClientRect();
+    // fixes https://github.com/binarykitchen/videomail-client/issues/126
+    return visualsElement && visualsElement.getBoundingClientRect();
   };
 
   this.checkTimer = function (intervalSum) {
