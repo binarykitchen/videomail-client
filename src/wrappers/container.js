@@ -626,7 +626,8 @@ var Container = function (options) {
   }
 
   this.hideForm = function () {
-    form.hide()
+    // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
+    form && form.hide()
   }
 
   this.loadForm = function (videomail) {
