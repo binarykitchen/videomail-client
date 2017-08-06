@@ -4,7 +4,12 @@ import VideomailError from './../util/videomailError'
 
 function getOuterWidth (element) {
   const rect = element.getBoundingClientRect()
-  return rect.right - rect.left
+
+  if (rect) {
+    return rect.right - rect.left
+  } else {
+    return 0
+  }
 }
 
 function figureMinHeight (height, options) {

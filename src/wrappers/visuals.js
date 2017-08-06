@@ -334,7 +334,8 @@ const Visuals = function (container, options) {
   }
 
   this.getBoundingClientRect = function () {
-    return visualsElement.getBoundingClientRect()
+    // fixes https://github.com/binarykitchen/videomail-client/issues/126
+    return visualsElement && visualsElement.getBoundingClientRect()
   }
 
   this.checkTimer = function (intervalSum) {
