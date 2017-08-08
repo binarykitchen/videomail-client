@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13535,7 +13535,7 @@ module.exports={
     "nib": "1.1.2",
     "router": "1.3.1",
     "ssl-root-cas": "1.2.3",
-    "standard": "10.0.2",
+    "standard": "10.0.3",
     "tap-spec": "4.1.1",
     "tape": "4.8.0",
     "tape-run": "3.0.0",
@@ -13656,8 +13656,13 @@ var VideomailClient = function VideomailClient(options) {
       // in the middle of the build() fn
       if (!building && !container.isBuilt()) {
         building = true;
-        container.build();
-        building = false;
+        try {
+          container.build();
+        } catch (exc) {
+          throw exc;
+        } finally {
+          building = false;
+        }
       }
     });
   }
@@ -13680,6 +13685,11 @@ var VideomailClient = function VideomailClient(options) {
 
       // if there is none, use the automatically generated one
       if (!parentElement) {
+        if (!container.hasElement()) {
+          _readystate2.default.removeAllListeners();
+          throw new Error('Unable to replay video without a container or parent element.');
+        }
+
         replay = container.getReplay();
         parentElement = replay.getParentElement();
       } else {
