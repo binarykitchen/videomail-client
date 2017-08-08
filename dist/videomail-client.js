@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13695,6 +13695,10 @@ var VideomailClient = function VideomailClient(options) {
       } else {
         replay = new _replay2.default(parentElement, localOptions);
         replay.build();
+
+        // just assign replay to container, so that the
+        // container.showReplayOnly() call works fine
+        container.setReplay(replay);
       }
 
       videomail = container.addPlayerDimensions(videomail, parentElement);
@@ -16408,6 +16412,10 @@ var Container = function Container(options) {
     }
   };
 
+  this.setReplay = function (newReplay) {
+    visuals.setReplay(newReplay);
+  };
+
   this.showReplayOnly = function () {
     hasError = false;
 
@@ -17117,7 +17125,9 @@ var Visuals = function Visuals(container, options) {
 
   var self = this;
 
+  // can be overwritten with setter fn
   var replay = new _replay2.default(this, options);
+
   var recorder = new _recorder2.default(this, replay, options);
   var recorderInsides = new _recorderInsides2.default(this, options);
 
@@ -17429,6 +17439,10 @@ var Visuals = function Visuals(container, options) {
 
   this.getReplay = function () {
     return replay;
+  };
+
+  this.setReplay = function (newReplay) {
+    replay = newReplay;
   };
 
   this.getBoundingClientRect = function () {

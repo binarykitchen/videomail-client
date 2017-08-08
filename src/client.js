@@ -103,6 +103,10 @@ const VideomailClient = function (options) {
       } else {
         replay = new Replay(parentElement, localOptions)
         replay.build()
+
+        // just assign replay to container, so that the
+        // container.showReplayOnly() call works fine
+        container.setReplay(replay)
       }
 
       videomail = container.addPlayerDimensions(videomail, parentElement)
