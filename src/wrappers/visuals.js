@@ -287,7 +287,7 @@ const Visuals = function (container, options) {
   }
 
   this.show = function () {
-    !this.isReplayShown() && recorder.build()
+    !this.isReplayShown() && visualsElement && recorder.build()
     this.showVisuals()
   }
 
