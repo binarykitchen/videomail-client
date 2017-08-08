@@ -445,6 +445,10 @@ var Container = function (options) {
     }
   }
 
+  this.setReplay = function (newReplay) {
+    visuals.setReplay(newReplay)
+  }
+
   this.showReplayOnly = function () {
     hasError = false
 
