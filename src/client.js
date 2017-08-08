@@ -52,7 +52,7 @@ const VideomailClient = function (options) {
   function build () {
     var building = false
 
-    readystate.interactive((previousState) => {
+    readystate.interactive(function (previousState) {
       debug(
         'Client: interactive(),',
         'previousState =', previousState + ',',
@@ -64,8 +64,13 @@ const VideomailClient = function (options) {
       // in the middle of the build() fn
       if (!building && !container.isBuilt()) {
         building = true
-        container.build()
-        building = false
+        try {
+          container.build()
+        } catch (exc) {
+          throw exc
+        } finally {
+          building = false
+        }
       }
     })
   }
@@ -88,6 +93,11 @@ const VideomailClient = function (options) {
 
       // if there is none, use the automatically generated one
       if (!parentElement) {
+        if (!container.hasElement()) {
+          readystate.removeAllListeners()
+          throw new Error('Unable to replay video without a container or parent element.')
+        }
+
         replay = container.getReplay()
         parentElement = replay.getParentElement()
       } else {

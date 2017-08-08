@@ -153,7 +153,7 @@ Automatically fills the DOM with a form for video recording. By default the HTML
 <a name="replay"></a>
 ### videomailClient.replay(videomail[, parentElement])
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successfull submission. See `/examples/direct_submit.html` or `/examples/contact_form_json.html` for some inspiration.
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successful submission. See `/examples/direct_submit.html` or `/examples/contact_form.html` for some inspiration.
 
 If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally. If no parent element is given, then a replay container within the containerId is automatically generated.
 
