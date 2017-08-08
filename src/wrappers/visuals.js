@@ -15,7 +15,9 @@ const Visuals = function (container, options) {
 
   const self = this
 
-  const replay = new Replay(this, options)
+  // can be overwritten with setter fn
+  var replay = new Replay(this, options)
+
   const recorder = new Recorder(this, replay, options)
   const recorderInsides = new RecorderInsides(this, options)
 
@@ -331,6 +333,10 @@ const Visuals = function (container, options) {
 
   this.getReplay = function () {
     return replay
+  }
+
+  this.setReplay = function (newReplay) {
+    replay = newReplay
   }
 
   this.getBoundingClientRect = function () {
