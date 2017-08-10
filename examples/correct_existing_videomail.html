@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+        <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1'>
+
+        <style type='text/css'>
+            input[type='email'], input[type='text'], textarea, .buttons {
+                margin:  1em 0;
+                display: block;
+            }
+
+
+            #videomail, #email { float: left; }
+            #videomail { width: 400px; }
+
+            #email {
+                width:       400px;
+                margin-left: 1em;
+            }
+
+            #email input, #email textarea { width: 100%; }
+        </style>
+    </head>
+    <body>
+        <h1>A form to correct an existing videomail</h1>
+
+        <div id='videomail'></div>
+
+        <form id='email'>
+            <fieldset>
+                <input name='key' value='' type='hidden'>
+                <input name='from' type='email' required='required'>
+                <input name='to' type='email' required='required' multiple/>
+                <input name='subject'type='text' required='required'>
+                <textarea name='body' rows='4'></textarea>
+                <input id='send' disabled='' type='submit' value='✉ Send'>
+            </fieldset>
+        </form>
+
+        <script src='/videomail-client.js'></script>
+        <script>
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              video: {
+                width: 400
+              },
+              selectors: {
+                formId: 'email',
+                keyInputName: 'key'
+              }
+            })
+
+            // just a copy paste of json of the videomail
+            // you normally would get from a xhr get request
+            videomailClient.replay({
+              "subject":"i am a subject",
+              "from":"automatic@videomail.io",
+              "to":"to1@binarykitchen.com, to2@binarykitchen.com",
+              "body":"i am a body\nand a have a second line",
+              "width":400,
+              "height":300,
+              "siteName":"videomail.io",
+              "sending":true,
+              "alias":"i-am-a-subject-398090057753",
+              "dateCreated":1502359290283,
+              "accepted":["to1@binarykitchen.com","to2@binarykitchen.com"],
+              "dateUpdated":1502359298161,
+              "url":"https://videomail.io/videomail/i-am-a-subject-398090057753",
+              "key":"11e7-7db2-5a0076c0-a3a4-4fb4aba0888b",
+              "expirationPretty":"90 days",
+              "expiresAfter":1510135290283,
+              "mp4":"https://videomail.io/videomail/i-am-a-subject-398090057753/type/mp4/",
+              "webm":"https://videomail.io/videomail/i-am-a-subject-398090057753/type/webm/",
+              "poster":"https://videomail.io/videomail/i-am-a-subject-398090057753/poster/",
+              "replyUrl":"/reply/i-am-a-subject-398090057753",
+              "replyAllUrl":"/replyAll/i-am-a-subject-398090057753",
+              "correctUrl":"https://videomail.io/correct/i-am-a-subject-398090057753",
+              "dateCreatedPretty":"Aug 10, 2017, 10:01 PM",
+              "expiresAfterPretty":"Nov 8, 2017, 11:01 PM",
+              "sendingToPretty":"to1@binarykitchen.com, to2@binarykitchen.com",
+              "recordingStats":{
+                "avgFps":16.39344262295082,
+                "wantedFps":16,
+                "avgInterval":66.41304347826087,
+                "wantedInterval":62.5,
+                "intervalSum":15275,
+                "framesCount":230,
+                "videoType":"webm",
+                "waitingTime":1578
+              }
+            }, 'videomail')
+        </script>
+    </body>
+</html>
