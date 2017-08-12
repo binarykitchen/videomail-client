@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13592,10 +13592,6 @@ var _optionsWrapper = _dereq_('./wrappers/optionsWrapper');
 
 var _optionsWrapper2 = _interopRequireDefault(_optionsWrapper);
 
-var _replay = _dereq_('./wrappers/visuals/replay');
-
-var _replay2 = _interopRequireDefault(_replay);
-
 var _browser = _dereq_('./util/browser');
 
 var _browser2 = _interopRequireDefault(_browser);
@@ -13683,24 +13679,13 @@ var VideomailClient = function VideomailClient(options) {
         parentElement = document.getElementById(parentElement);
       }
 
-      // if there is none, use the automatically generated one
-      if (!parentElement) {
-        if (!container.hasElement()) {
-          _readystate2.default.removeAllListeners();
-          throw new Error('Unable to replay video without a container or parent element.');
-        }
-
-        replay = container.getReplay();
-        parentElement = replay.getParentElement();
-      } else {
-        replay = new _replay2.default(parentElement, localOptions);
-        replay.build();
-
-        // just assign replay to container, so that the
-        // container.showReplayOnly() call works fine
-        container.setReplay(replay);
+      if (!parentElement && !container.hasElement()) {
+        _readystate2.default.removeAllListeners();
+        throw new Error('Unable to replay video without a container nor parent element.');
       }
 
+      replay = container.getReplay();
+      parentElement = replay.getParentElement();
       videomail = container.addPlayerDimensions(videomail, parentElement);
 
       if (videomail) {
@@ -13711,12 +13696,8 @@ var VideomailClient = function VideomailClient(options) {
           container.loadForm(videomail);
         }
 
-        // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-        setTimeout(function () {
-          replay.setVideomail(videomail);
-
-          container.showReplayOnly();
-        }, 2e3);
+        replay.setVideomail(videomail);
+        container.showReplayOnly();
       }
     }
 
@@ -13780,7 +13761,7 @@ VideomailClient.events = _events2.default;
 
 exports.default = VideomailClient;
 
-},{"./constants":86,"./events":87,"./options":88,"./resource":89,"./util/browser":92,"./util/collectLogger":93,"./util/eventEmitter":94,"./wrappers/container":101,"./wrappers/optionsWrapper":104,"./wrappers/visuals/replay":113,"merge-recursive":45,"readystate":61,"util":79}],86:[function(_dereq_,module,exports){
+},{"./constants":86,"./events":87,"./options":88,"./resource":89,"./util/browser":92,"./util/collectLogger":93,"./util/eventEmitter":94,"./wrappers/container":101,"./wrappers/optionsWrapper":104,"merge-recursive":45,"readystate":61,"util":79}],86:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16412,10 +16393,6 @@ var Container = function Container(options) {
     }
   };
 
-  this.setReplay = function (newReplay) {
-    visuals.setReplay(newReplay);
-  };
-
   this.showReplayOnly = function () {
     hasError = false;
 
@@ -17439,10 +17416,6 @@ var Visuals = function Visuals(container, options) {
 
   this.getReplay = function () {
     return replay;
-  };
-
-  this.setReplay = function (newReplay) {
-    replay = newReplay;
   };
 
   this.getBoundingClientRect = function () {
