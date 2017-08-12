@@ -9,7 +9,6 @@ import CollectLogger from './util/collectLogger'
 import EventEmitter from './util/eventEmitter'
 import Container from './wrappers/container'
 import OptionsWrapper from './wrappers/optionsWrapper'
-import Replay from './wrappers/visuals/replay'
 import Browser from './util/browser'
 import Resource from './resource'
 
@@ -91,24 +90,13 @@ const VideomailClient = function (options) {
         parentElement = document.getElementById(parentElement)
       }
 
-      // if there is none, use the automatically generated one
-      if (!parentElement) {
-        if (!container.hasElement()) {
-          readystate.removeAllListeners()
-          throw new Error('Unable to replay video without a container or parent element.')
-        }
-
-        replay = container.getReplay()
-        parentElement = replay.getParentElement()
-      } else {
-        replay = new Replay(parentElement, localOptions)
-        replay.build()
-
-        // just assign replay to container, so that the
-        // container.showReplayOnly() call works fine
-        container.setReplay(replay)
+      if (!parentElement && !container.hasElement()) {
+        readystate.removeAllListeners()
+        throw new Error('Unable to replay video without a container nor parent element.')
       }
 
+      replay = container.getReplay()
+      parentElement = replay.getParentElement()
       videomail = container.addPlayerDimensions(videomail, parentElement)
 
       if (videomail) {
@@ -119,12 +107,8 @@ const VideomailClient = function (options) {
           container.loadForm(videomail)
         }
 
-        // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-        setTimeout(function () {
-          replay.setVideomail(videomail)
-
-          container.showReplayOnly()
-        }, 2e3)
+        replay.setVideomail(videomail)
+        container.showReplayOnly()
       }
     }
 
