@@ -335,10 +335,6 @@ const Visuals = function (container, options) {
     return replay
   }
 
-  this.setReplay = function (newReplay) {
-    replay = newReplay
-  }
-
   this.getBoundingClientRect = function () {
     // fixes https://github.com/binarykitchen/videomail-client/issues/126
     return visualsElement && visualsElement.getBoundingClientRect()
