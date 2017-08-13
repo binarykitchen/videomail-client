@@ -631,8 +631,10 @@ var Container = function (options) {
   }
 
   this.loadForm = function (videomail) {
-    form.loadVideomail(videomail)
-    this.validate()
+    if (form) {
+      form.loadVideomail(videomail)
+      this.validate()
+    }
   }
 
   this.enableAudio = function () {
