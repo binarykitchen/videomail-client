@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -16579,8 +16579,10 @@ var Container = function Container(options) {
   };
 
   this.loadForm = function (videomail) {
-    form.loadVideomail(videomail);
-    this.validate();
+    if (form) {
+      form.loadVideomail(videomail);
+      this.validate();
+    }
   };
 
   this.enableAudio = function () {
