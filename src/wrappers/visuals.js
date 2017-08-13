@@ -109,8 +109,9 @@ const Visuals = function (container, options) {
 
       const buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
-      // make sure it's placed before the buttons
-      if (buttonsElement) {
+      // make sure it's placed before the buttons, but only if it's a child
+      // element of the container = inside the container
+      if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
         container.insertBefore(visualsElement, buttonsElement)
       } else {
         container.appendChild(visualsElement)
@@ -125,7 +126,7 @@ const Visuals = function (container, options) {
     !built && initEvents()
     buildChildren()
 
-    // needed for replay handling and container.isParentElementOf()
+    // needed for replay handling and container.isOutsideElementOf()
     self.parentNode = visualsElement.parentNode
 
     built = true
