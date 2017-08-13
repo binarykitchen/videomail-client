@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -17190,8 +17190,9 @@ var Visuals = function Visuals(container, options) {
 
       var buttonsElement = container.querySelector('.' + options.selectors.buttonsClass);
 
-      // make sure it's placed before the buttons
-      if (buttonsElement) {
+      // make sure it's placed before the buttons, but only if it's a child
+      // element of the container = inside the container
+      if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
         container.insertBefore(visualsElement, buttonsElement);
       } else {
         container.appendChild(visualsElement);
@@ -17206,7 +17207,7 @@ var Visuals = function Visuals(container, options) {
     !built && initEvents();
     buildChildren();
 
-    // needed for replay handling and container.isParentElementOf()
+    // needed for replay handling and container.isOutsideElementOf()
     self.parentNode = visualsElement.parentNode;
 
     built = true;
