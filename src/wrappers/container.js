@@ -60,11 +60,10 @@ var Container = function (options) {
   }
 
   function buildForm () {
-    debug('Container: buildForm()')
-
     const formElement = getFormElement()
 
     if (formElement) {
+      debug('Container: buildForm()')
       form = new Form(self, formElement, options)
 
       const submitButton = form.findSubmitButton()
@@ -82,7 +81,10 @@ var Container = function (options) {
     } else {
       containerElement.classList.add('videomail')
 
-      buttons.build()
+      if (!options.playerOnly) {
+        buttons.build()
+      }
+
       visuals.build()
     }
   }
@@ -347,7 +349,11 @@ var Container = function (options) {
         !built && initEvents()
         validateOptions()
         correctDimensions()
-        buildForm()
+
+        if (!options.playerOnly) {
+          buildForm()
+        }
+
         buildChildren()
 
         if (!hasError) {
