@@ -1,4 +1,4 @@
-import merge from 'merge-recursive'
+import deepmerge from 'deepmerge'
 import readystate from 'readystate'
 import util from 'util'
 
@@ -16,7 +16,7 @@ var collectLogger
 var browser
 
 function adjustOptions (options = {}) {
-  const localOptions = merge.recursive(defaultOptions, options)
+  const localOptions = deepmerge(defaultOptions, options, true)
 
   collectLogger = collectLogger || new CollectLogger(localOptions)
 
