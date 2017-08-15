@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videomail-client examples</title>
+        <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1'>
+        <style type='text/css'>
+            #videomail { width: 400px; }
+        </style>
+    </head>
+    <body>
+        <h1>A form to plan an existing videomail, nothing else</h1>
+        <div id='videomail'></div>
+        <script src='/videomail-client.js'></script>
+        <script>
+            var videomailClient = new VideomailClient({
+              verbose: true,
+              playerOnly: true
+            })
+
+            // just a copy paste of json of the videomail
+            // you normally would get from a xhr get request
+            videomailClient.replay({
+              "subject":"i am a subject",
+              "from":"automatic@videomail.io",
+              "to":"to1@binarykitchen.com, to2@binarykitchen.com",
+              "body":"i am a body\nand a have a second line",
+              "width":400,
+              "height":300,
+              "siteName":"videomail.io",
+              "sending":true,
+              "alias":"i-am-a-subject-398090057753",
+              "dateCreated":1502359290283,
+              "accepted":["to1@binarykitchen.com","to2@binarykitchen.com"],
+              "dateUpdated":1502359298161,
+              "url":"https://videomail.io/videomail/i-am-a-subject-398090057753",
+              "key":"11e7-7db2-5a0076c0-a3a4-4fb4aba0888b",
+              "expirationPretty":"90 days",
+              "expiresAfter":1510135290283,
+              "mp4":"https://videomail.io/videomail/i-am-a-subject-398090057753/type/mp4/",
+              "webm":"https://videomail.io/videomail/i-am-a-subject-398090057753/type/webm/",
+              "poster":"https://videomail.io/videomail/i-am-a-subject-398090057753/poster/",
+              "replyUrl":"/reply/i-am-a-subject-398090057753",
+              "replyAllUrl":"/replyAll/i-am-a-subject-398090057753",
+              "correctUrl":"https://videomail.io/correct/i-am-a-subject-398090057753",
+              "dateCreatedPretty":"Aug 10, 2017, 10:01 PM",
+              "expiresAfterPretty":"Nov 8, 2017, 11:01 PM",
+              "sendingToPretty":"to1@binarykitchen.com, to2@binarykitchen.com",
+              "recordingStats":{
+                "avgFps":16.39344262295082,
+                "wantedFps":16,
+                "avgInterval":66.41304347826087,
+                "wantedInterval":62.5,
+                "intervalSum":15275,
+                "framesCount":230,
+                "videoType":"webm",
+                "waitingTime":1578
+              }
+            })
+        </script>
+    </body>
+</html>

@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13964,6 +13964,10 @@ exports.default = {
     subject: null, // define default subject line
     body: null // define default body content
   },
+
+  // a special flag to indicate that everything to be initialised
+  // serves only for playing existing videomails with the replay function
+  playerOnly: false,
 
   // show errors inside the container?
   displayErrors: true,
@@ -16013,11 +16017,10 @@ var Container = function Container(options) {
   }
 
   function buildForm() {
-    debug('Container: buildForm()');
-
     var formElement = getFormElement();
 
     if (formElement) {
+      debug('Container: buildForm()');
       form = new _form2.default(self, formElement, options);
 
       var submitButton = form.findSubmitButton();
@@ -16035,7 +16038,10 @@ var Container = function Container(options) {
     } else {
       containerElement.classList.add('videomail');
 
-      buttons.build();
+      if (!options.playerOnly) {
+        buttons.build();
+      }
+
       visuals.build();
     }
   }
@@ -16295,7 +16301,11 @@ var Container = function Container(options) {
         !built && initEvents();
         validateOptions();
         correctDimensions();
-        buildForm();
+
+        if (!options.playerOnly) {
+          buildForm();
+        }
+
         buildChildren();
 
         if (!hasError) {
@@ -17133,8 +17143,11 @@ var Visuals = function Visuals(container, options) {
 
     buildNoScriptTag();
 
-    notifier.build();
-    recorderInsides.build();
+    if (!options.playerOnly) {
+      notifier.build();
+      recorderInsides.build();
+    }
+
     replay.build();
 
     debug('Visuals: built.');
