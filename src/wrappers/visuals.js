@@ -44,8 +44,11 @@ const Visuals = function (container, options) {
 
     buildNoScriptTag()
 
-    notifier.build()
-    recorderInsides.build()
+    if (!options.playerOnly) {
+      notifier.build()
+      recorderInsides.build()
+    }
+
     replay.build()
 
     debug('Visuals: built.')
