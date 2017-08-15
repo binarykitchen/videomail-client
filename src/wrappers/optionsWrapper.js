@@ -1,30 +1,35 @@
 // enhances options with useful functions we can reuse everywhere
+import deepmerge from 'deepmerge'
 
 export default {
   addFunctions: function (options) {
     var audioEnabled = options.audio && options.audio.enabled
 
     options.hasDefinedHeight = function () {
-      return options.video.height && options.video.height !== 'auto'
+      return this.video.height && this.video.height !== 'auto'
     }
 
     options.hasDefinedWidth = function () {
-      return options.video.width && options.video.width !== 'auto'
+      return this.video.width && this.video.width !== 'auto'
     }
 
     options.hasDefinedDimension = function () {
-      return options.hasDefinedWidth() || options.hasDefinedHeight()
+      return this.hasDefinedWidth() || this.hasDefinedHeight()
     }
 
     options.hasDefinedDimensions = function () {
-      return options.hasDefinedWidth() && options.hasDefinedHeight()
+      return this.hasDefinedWidth() && this.hasDefinedHeight()
     }
 
-    options.getRatio = () => {
+    options.getRatio = function () {
       var ratio = 1 // just a default one when no computations are possible
 
-      if (options.hasDefinedDimensions()) {
-        ratio = options.video.height / options.video.width
+      if (this.hasDefinedDimensions()) {
+        ratio = this.video.height / this.video.width
+
+      // todo fix this, it's not really an option
+      } else if (this.videoHeight && this.videoWidth) {
+        ratio = this.videoHeight / this.videoWidth
       }
 
       return ratio
@@ -39,7 +44,15 @@ export default {
     }
 
     options.isAutoPauseEnabled = function () {
-      return options.enableAutoPause && options.enablePause
+      return this.enableAutoPause && this.enablePause
     }
+  },
+
+  merge: function (defaultOptions, newOptions) {
+    const options = deepmerge(defaultOptions, newOptions, true)
+
+    this.addFunctions(options)
+
+    return options
   }
 }

@@ -1,5 +1,4 @@
 import insertCss from 'insert-css'
-import merge from 'merge-recursive'
 import hidden from 'hidden'
 import util from 'util'
 import Visibility from 'document-visibility'
@@ -8,6 +7,7 @@ import Dimension from './dimension'
 import Visuals from './visuals'
 import Buttons from './buttons'
 import Form from './form'
+import OptionsWrapper from './optionsWrapper'
 
 import Resource from './../resource'
 import Events from './../events'
@@ -311,7 +311,9 @@ var Container = function (options) {
   }
 
   this.calculateWidth = function (fnOptions) {
-    return Dimension.calculateWidth(merge.recursive(options, fnOptions))
+    return Dimension.calculateWidth(
+      OptionsWrapper.merge(options, fnOptions, true)
+    )
   }
 
   this.calculateHeight = function (fnOptions, element) {
@@ -324,7 +326,10 @@ var Container = function (options) {
       }
     }
 
-    return Dimension.calculateHeight(element, merge.recursive(options, fnOptions))
+    return Dimension.calculateHeight(
+      element,
+      OptionsWrapper.merge(options, fnOptions, true)
+    )
   }
 
   this.areVisualsHidden = function () {
