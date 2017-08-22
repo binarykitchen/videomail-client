@@ -90,9 +90,17 @@ const VideomailClient = function (options) {
         parentElement = document.getElementById(parentElement)
       }
 
-      if (!parentElement && !container.hasElement()) {
-        readystate.removeAllListeners()
-        throw new Error('Unable to replay video without a container nor parent element.')
+      if (!parentElement) {
+        if (!container.isBuilt()) {
+          // this will try build all over again
+          container.build()
+        }
+
+        if (!container.hasElement()) {
+          // if container.setElement() failed too, then complain
+          readystate.removeAllListeners()
+          throw new Error('Unable to replay video without a container nor parent element.')
+        }
       }
 
       replay = container.getReplay()
