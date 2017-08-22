@@ -341,8 +341,6 @@ var Container = function (options) {
   }
 
   this.build = function () {
-    debug('Container: build()')
-
     try {
       containerElement = document.getElementById(options.selectors.containerId)
 
@@ -369,7 +367,8 @@ var Container = function (options) {
           debug('Container: building failed due to an error.')
         }
       } else {
-        debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
+        // commented out since it does too much noise on videomail's view page which is fine
+        // debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
       }
     } catch (exc) {
       if (visuals.isNotifierBuilt()) {
