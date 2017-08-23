@@ -8,8 +8,8 @@
 | src/wrappers/container.js | 279 | figure out how to fire dom's onload event again
 | src/wrappers/container.js | 280 | or how to run all the scripts over again
 | src/wrappers/optionsWrapper.js | 30 | fix this, it's not really an option
-| src/wrappers/visuals/recorder.js | 646 | commented out because for some reasons server does not accept such a long
-| src/wrappers/visuals/recorder.js | 651 | consider removing this later or have it for debug=1 only?
+| src/wrappers/visuals/recorder.js | 649 | commented out because for some reasons server does not accept such a long
+| src/wrappers/visuals/recorder.js | 654 | consider removing this later or have it for debug=1 only?
 | src/wrappers/visuals/userMedia.js | 171 | debug and fix that weird error
 | gulpfile.js | 1 | write this in ES6 once i have figured out how to
 | gulpfile.js | 59 | fix this, so that it also works when not minified, this
