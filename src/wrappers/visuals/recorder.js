@@ -79,6 +79,9 @@ const Recorder = function (visuals, replay, options) {
   function writeStream (buffer, opts) {
     if (stream) {
       if (stream.destroyed) {
+        // prevents https://github.com/binarykitchen/videomail.io/issues/393
+        stopPings()
+
         self.emit(Events.ERROR, VideomailError.create(
           'Already disconnected',
           'Sorry, the connection to the server has been destroyed. Please reload. ' +
