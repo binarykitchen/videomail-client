@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.21",
+  "version": "2.0.22",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13526,7 +13526,7 @@ module.exports={
     "gulp-plumber": "1.1.0",
     "gulp-rename": "1.2.2",
     "gulp-sourcemaps": "2.6.1",
-    "gulp-standard": "10.1.0",
+    "gulp-standard": "10.1.1",
     "gulp-stylus": "2.6.0",
     "gulp-todo": "5.4.0",
     "gulp-uglify": "3.0.0",
@@ -15388,6 +15388,7 @@ var Buttons = function Buttons(container, options) {
   _eventEmitter2.default.call(this, options, 'Buttons');
 
   var self = this;
+  var debug = options.debug;
 
   var buttonsElement;
   var recordButton;
@@ -15806,6 +15807,8 @@ var Buttons = function Buttons(container, options) {
   }
 
   function initEvents() {
+    debug('Buttons: initEvents()');
+
     self.on(_events2.default.USER_MEDIA_READY, function (options) {
       onUserMediaReady(options);
     }).on(_events2.default.PREVIEW, function () {
@@ -16077,43 +16080,47 @@ var Container = function Container(options) {
       self.unload(e);
     });
 
-    visibility.onChange(function (visible) {
-      // built? see https://github.com/binarykitchen/videomail.io/issues/326
-      if (built) {
-        if (visible) {
-          if (options.isAutoPauseEnabled() && self.isCountingDown()) {
-            self.resume();
-          }
-
-          self.emit(_events2.default.VISIBLE);
-        } else {
-          if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
-            self.pause('document invisible');
-          }
-
-          self.emit(_events2.default.INVISIBLE);
-        }
-      }
-    });
-
-    if (options.enableSpace) {
-      window.addEventListener('keypress', function (e) {
-        var tagName = e.target.tagName;
-
-        if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
-          var code = e.keyCode ? e.keyCode : e.which;
-
-          if (code === 32) {
-            e.preventDefault();
-
-            if (options.enablePause) {
-              visuals.pauseOrResume();
-            } else {
-              visuals.recordOrStop();
+    if (!options.playerOnly) {
+      visibility.onChange(function (visible) {
+        // built? see https://github.com/binarykitchen/videomail.io/issues/326
+        if (built) {
+          if (visible) {
+            if (options.isAutoPauseEnabled() && self.isCountingDown()) {
+              self.resume();
             }
+
+            self.emit(_events2.default.VISIBLE);
+          } else {
+            if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
+              self.pause('document invisible');
+            }
+
+            self.emit(_events2.default.INVISIBLE);
           }
         }
       });
+    }
+
+    if (options.enableSpace) {
+      if (!options.playerOnly) {
+        window.addEventListener('keypress', function (e) {
+          var tagName = e.target.tagName;
+
+          if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
+            var code = e.keyCode ? e.keyCode : e.which;
+
+            if (code === 32) {
+              e.preventDefault();
+
+              if (options.enablePause) {
+                visuals.pauseOrResume();
+              } else {
+                visuals.recordOrStop();
+              }
+            }
+          }
+        });
+      }
     }
 
     // better to keep the one and only error listeners
@@ -16125,9 +16132,13 @@ var Container = function Container(options) {
       if (err.removeDimensions && err.removeDimensions()) {
         removeDimensions();
       }
-    }).on(_events2.default.LOADED_META_DATA, function () {
-      correctDimensions();
     });
+
+    if (!options.playerOnly) {
+      self.on(_events2.default.LOADED_META_DATA, function () {
+        correctDimensions();
+      });
+    }
   }
 
   function validateOptions() {
@@ -17182,29 +17193,33 @@ var Visuals = function Visuals(container, options) {
   }
 
   function initEvents() {
-    self.on(_events2.default.USER_MEDIA_READY, function () {
-      built = true;
-      self.endWaiting();
-      container.enableForm(false);
-    }).on(_events2.default.PREVIEW, function () {
-      self.endWaiting();
-    }).on(_events2.default.BLOCKING, function (blockingOptions) {
-      if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
-        // do nothing, user still can enter form inputs
-        // can be useful when you are on i.E. seeflow's contact page and
-        // still want to tick off the webcam option
-      } else {
-        container.disableForm(true);
-      }
-    }).on(_events2.default.PREVIEW_SHOWN, function () {
-      container.validate(true);
-    }).on(_events2.default.LOADED_META_DATA, function () {
-      correctDimensions();
-    }).on(_events2.default.ERROR, function (err) {
-      if (err.removeDimensions && err.removeDimensions()) {
-        removeDimensions();
-      }
-    });
+    if (!options.playerOnly) {
+      debug('Visuals: initEvents()');
+
+      self.on(_events2.default.USER_MEDIA_READY, function () {
+        built = true;
+        self.endWaiting();
+        container.enableForm(false);
+      }).on(_events2.default.PREVIEW, function () {
+        self.endWaiting();
+      }).on(_events2.default.BLOCKING, function (blockingOptions) {
+        if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
+          // do nothing, user still can enter form inputs
+          // can be useful when you are on i.E. seeflow's contact page and
+          // still want to tick off the webcam option
+        } else {
+          container.disableForm(true);
+        }
+      }).on(_events2.default.PREVIEW_SHOWN, function () {
+        container.validate(true);
+      }).on(_events2.default.LOADED_META_DATA, function () {
+        correctDimensions();
+      }).on(_events2.default.ERROR, function (err) {
+        if (err.removeDimensions && err.removeDimensions()) {
+          removeDimensions();
+        }
+      });
+    }
   }
 
   function correctDimensions() {
@@ -17955,6 +17970,8 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
   }
 
   function initEvents() {
+    debug('RecorderInsides: initEvents()');
+
     self.on(_events2.default.RECORDING, function () {
       startRecording();
     }).on(_events2.default.RESUMING, function () {
@@ -19354,6 +19371,8 @@ var Recorder = function Recorder(visuals, replay, options) {
   }
 
   function initEvents() {
+    debug('Recorder: initEvents()');
+
     self.on(_events2.default.SUBMITTING, function () {
       submitting = true;
     }).on(_events2.default.SUBMITTED, function () {

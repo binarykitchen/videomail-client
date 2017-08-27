@@ -1036,6 +1036,8 @@ const Recorder = function (visuals, replay, options) {
   }
 
   function initEvents () {
+    debug('Recorder: initEvents()')
+
     self
       .on(Events.SUBMITTING, function () {
         submitting = true
