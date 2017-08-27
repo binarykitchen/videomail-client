@@ -7,7 +7,9 @@ test('Buttons:', function (t) {
     tt.plan(1)
 
     tt.doesNotThrow(function () {
-      return new Buttons()
+      return new Buttons(null, {
+        debug: function () {}
+      })
     })
   })
 })

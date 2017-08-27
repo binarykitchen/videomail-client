@@ -112,48 +112,52 @@ var Container = function (options) {
       self.unload(e)
     })
 
-    visibility.onChange((visible) => {
-      // built? see https://github.com/binarykitchen/videomail.io/issues/326
-      if (built) {
-        if (visible) {
-          if (options.isAutoPauseEnabled() && self.isCountingDown()) {
-            self.resume()
-          }
-
-          self.emit(Events.VISIBLE)
-        } else {
-          if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
-            self.pause('document invisible')
-          }
-
-          self.emit(Events.INVISIBLE)
-        }
-      }
-    })
-
-    if (options.enableSpace) {
-      window.addEventListener('keypress', (e) => {
-        const tagName = e.target.tagName
-
-        if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
-          const code = e.keyCode ? e.keyCode : e.which
-
-          if (code === 32) {
-            e.preventDefault()
-
-            if (options.enablePause) {
-              visuals.pauseOrResume()
-            } else {
-              visuals.recordOrStop()
+    if (!options.playerOnly) {
+      visibility.onChange(function (visible) {
+        // built? see https://github.com/binarykitchen/videomail.io/issues/326
+        if (built) {
+          if (visible) {
+            if (options.isAutoPauseEnabled() && self.isCountingDown()) {
+              self.resume()
             }
+
+            self.emit(Events.VISIBLE)
+          } else {
+            if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
+              self.pause('document invisible')
+            }
+
+            self.emit(Events.INVISIBLE)
           }
         }
       })
     }
 
+    if (options.enableSpace) {
+      if (!options.playerOnly) {
+        window.addEventListener('keypress', function (e) {
+          const tagName = e.target.tagName
+
+          if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
+            const code = e.keyCode ? e.keyCode : e.which
+
+            if (code === 32) {
+              e.preventDefault()
+
+              if (options.enablePause) {
+                visuals.pauseOrResume()
+              } else {
+                visuals.recordOrStop()
+              }
+            }
+          }
+        })
+      }
+    }
+
     // better to keep the one and only error listeners
     // at one spot, here, because unload() will do a removeAllListeners()
-    self.on(Events.ERROR, (err) => {
+    self.on(Events.ERROR, function (err) {
       processError(err)
       unloadChildren(err)
 
@@ -161,9 +165,12 @@ var Container = function (options) {
         removeDimensions()
       }
     })
-    .on(Events.LOADED_META_DATA, function () {
-      correctDimensions()
-    })
+
+    if (!options.playerOnly) {
+      self.on(Events.LOADED_META_DATA, function () {
+        correctDimensions()
+      })
+    }
   }
 
   function validateOptions () {

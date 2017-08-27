@@ -10,6 +10,7 @@ const Buttons = function (container, options) {
   EventEmitter.call(this, options, 'Buttons')
 
   const self = this
+  const debug = options.debug
 
   var buttonsElement
   var recordButton
@@ -461,6 +462,8 @@ const Buttons = function (container, options) {
   }
 
   function initEvents () {
+    debug('Buttons: initEvents()')
+
     self.on(Events.USER_MEDIA_READY, function (options) {
       onUserMediaReady(options)
     }).on(Events.PREVIEW, function () {

@@ -56,6 +56,8 @@ const RecorderInsides = function (visuals, options) {
   }
 
   function initEvents () {
+    debug('RecorderInsides: initEvents()')
+
     self
       .on(Events.RECORDING, function () {
         startRecording()
