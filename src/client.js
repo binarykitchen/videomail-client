@@ -74,7 +74,7 @@ const VideomailClient = function (options) {
     })
   }
 
-  this.show = () => {
+  this.show = function () {
     if (container.isBuilt()) {
       container.show()
     } else {
@@ -84,7 +84,7 @@ const VideomailClient = function (options) {
 
   // automatically adds a <video> element inside the given parentElement and loads
   // it with the videomail
-  this.replay = (videomail, parentElement) => {
+  this.replay = function (videomail, parentElement) {
     function buildReplay () {
       if (typeof parentElement === 'string') {
         parentElement = document.getElementById(parentElement)
@@ -123,12 +123,12 @@ const VideomailClient = function (options) {
     readystate.interactive(buildReplay)
   }
 
-  this.startOver = () => {
+  this.startOver = function () {
     replay && replay.hide()
     container.startOver()
   }
 
-  this.unload = (e) => {
+  this.unload = function (e) {
     readystate.removeAllListeners()
     container.unload(e)
   }
