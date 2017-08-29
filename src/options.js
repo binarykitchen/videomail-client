@@ -77,7 +77,7 @@ export default {
   },
 
   image: {
-    quality: 0.4,
+    quality: 0.45,
     types: ['webp', 'jpeg']   // recommended settings to make most of all browsers
   },
 
@@ -140,6 +140,5 @@ export default {
   // just for testing purposes to simulate browser agent handling
   fakeUaString: null,
 
-  // todo pass on version to server
   version: version
 }
