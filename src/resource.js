@@ -134,6 +134,10 @@ export default function (options) {
   this.post = function (videomail, cb) {
     videomail = applyDefaultValues(videomail)
 
+    // always good to know the version of the client
+    // the videomail was submitted with
+    videomail[Constants.VERSION_LABEL] = options.version
+
     if (options.callbacks.adjustFormDataBeforePosting) {
       options.callbacks.adjustFormDataBeforePosting(
         videomail,

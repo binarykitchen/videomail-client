@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.22",
+  "version": "2.0.23",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13629,8 +13629,6 @@ function getBrowser(localOptions) {
 }
 
 var VideomailClient = function VideomailClient(options) {
-  var _this = this;
-
   var localOptions = adjustOptions(options);
   var container = new _container2.default(localOptions);
   var debug = localOptions.debug;
@@ -13667,7 +13665,7 @@ var VideomailClient = function VideomailClient(options) {
     if (container.isBuilt()) {
       container.show();
     } else {
-      _this.once(_events2.default.BUILT, container.show);
+      this.once(_events2.default.BUILT, container.show);
     }
   };
 
@@ -13779,6 +13777,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = {
   SITE_NAME_LABEL: 'x-videomail-site-name',
+  VERSION_LABEL: 'videomailClientVersion',
 
   public: {
     ENC_TYPE_APP_JSON: 'application/json',
@@ -13927,7 +13926,7 @@ exports.default = {
   },
 
   image: {
-    quality: 0.4,
+    quality: 0.45,
     types: ['webp', 'jpeg'] // recommended settings to make most of all browsers
   },
 
@@ -13990,7 +13989,6 @@ exports.default = {
   // just for testing purposes to simulate browser agent handling
   fakeUaString: null,
 
-  // todo pass on version to server
   version: _package.version
 };
 
@@ -14119,6 +14117,10 @@ exports.default = function (options) {
 
   this.post = function (videomail, cb) {
     videomail = applyDefaultValues(videomail);
+
+    // always good to know the version of the client
+    // the videomail was submitted with
+    videomail[_constants2.default.VERSION_LABEL] = options.version;
 
     if (options.callbacks.adjustFormDataBeforePosting) {
       options.callbacks.adjustFormDataBeforePosting(videomail, function (err, adjustedVideomail) {
