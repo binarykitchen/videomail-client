@@ -162,14 +162,12 @@ export default function (recorder, options) {
 
     function play () {
       // Resets the media element and restarts the media resource. Any pending events are discarded.
-      // But do them in the next tick to ensure event queue is ready for a lot to come
-      //
-      // this also to have the abort and emptied event to be processed as early as possible before
-      // all the other important events to come
-      setTimeout(() => {
-        try {
-          // todo debug and fix that weird error
-          // The play() request was interrupted by a new load request.
+      try {
+        rawVisualUserMedia.load()
+
+        // fixes https://github.com/binarykitchen/videomail.io/issues/401
+        // see https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
+        if (rawVisualUserMedia.paused) {
           options.debug(
             'UserMedia: play()',
             'media.readyState=' + rawVisualUserMedia.readyState,
@@ -178,7 +176,6 @@ export default function (recorder, options) {
             'media.played=' + pretty(rawVisualUserMedia.played)
           )
 
-          rawVisualUserMedia.load()
           const p = rawVisualUserMedia.play()
 
           // using the promise here just experimental for now
@@ -186,7 +183,7 @@ export default function (recorder, options) {
           if (isPromise(p)) {
             p.then(function () {
               if (!playingPromiseReached) {
-                options.debug('UserMedia: ... play promise successful. Playing now.')
+                options.debug('UserMedia: play promise successful. Playing now.')
                 playingPromiseReached = true
               }
             }).catch(function (reason) {
@@ -196,11 +193,11 @@ export default function (recorder, options) {
               options.debug('UserMedia:', reason.toString())
             })
           }
-        } catch (exc) {
-          unloadAllEventListeners()
-          endedEarlyCallback(exc)
         }
-      }, 0)
+      } catch (exc) {
+        unloadAllEventListeners()
+        endedEarlyCallback(exc)
+      }
     }
 
     function fireCallbacks () {
@@ -265,6 +262,7 @@ export default function (recorder, options) {
     function onLoadedMetaData () {
       logEvent('loadedmetadata', {
         readyState: rawVisualUserMedia.readyState,
+        paused: rawVisualUserMedia.paused,
         width: rawVisualUserMedia.width,
         height: rawVisualUserMedia.height,
         videoWidth: rawVisualUserMedia.videoWidth,
@@ -278,7 +276,8 @@ export default function (recorder, options) {
         self.emit(Events.LOADED_META_DATA)
 
         // for android devices, we cannot call play() unless meta data has been loaded!
-        play()
+        // todo consider removing that if it's not the case anymore (for better performance)
+        // play()
 
         onLoadedMetaDataReached = true
         fireCallbacks()
@@ -332,8 +331,10 @@ export default function (recorder, options) {
       // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
-        // ignore here, do nothing. IE/Edge emit that sometimes for unknown reasons.
-        options.logger.warn(err)
+        options.logger.warn(
+          'Caught video element error event: %s',
+          pretty(err)
+        )
       })
 
       setVisualStream(localMediaStream)
@@ -425,13 +426,21 @@ export default function (recorder, options) {
       rawHeight = recorder.calculateHeight(responsive)
 
       if (rawHeight < 1) {
-        throw VideomailError.create('Bad dimensions', 'Calculated raw height cannot be less than 1!', options)
+        throw VideomailError.create(
+          'Bad dimensions',
+          'Calculated raw height cannot be less than 1!',
+          options
+        )
       }
     } else {
       rawHeight = this.getVideoHeight()
 
       if (rawHeight < 1) {
-        throw VideomailError.create('Bad dimensions', 'Raw video height from DOM element cannot be less than 1!', options)
+        throw VideomailError.create(
+          'Bad dimensions',
+          'Raw video height from DOM element cannot be less than 1!',
+          options
+        )
       }
     }
 

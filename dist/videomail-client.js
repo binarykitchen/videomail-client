@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.0.23",
+  "version": "2.1.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13954,7 +13954,7 @@ exports.default = {
   },
 
   timeouts: {
-    userMedia: 11e3, // in milliseconds, increase if you want user give more time to enable webcam
+    userMedia: 20e3, // in milliseconds, increase if you want user give more time to enable webcam
     connection: 1e4, // in seconds, increase if api is slow
     pingInterval: 45e3 // in milliseconds, keeps webstream (connection) alive when pausing
   },
@@ -17618,30 +17618,40 @@ exports.default = function (visuals, options) {
   var pausedHeaderElement;
   var pausedHintElement;
 
+  function hasPausedHint() {
+    return options.text.pausedHint;
+  }
+
   this.build = function () {
     pausedBlockElement = visuals.querySelector('.paused');
     pausedHeaderElement = visuals.querySelector('.pausedHeader');
-    pausedHintElement = visuals.querySelector('.pausedHint');
 
     if (!pausedHeaderElement) {
       pausedBlockElement = (0, _hyperscript2.default)('div.paused');
       pausedHeaderElement = (0, _hyperscript2.default)('p.pausedHeader');
-      pausedHintElement = (0, _hyperscript2.default)('p.pausedHint');
 
       this.hide();
 
       pausedHeaderElement.innerHTML = options.text.pausedHeader;
-      pausedHintElement.innerHTML = options.text.pausedHint;
 
       pausedBlockElement.appendChild(pausedHeaderElement);
-      pausedBlockElement.appendChild(pausedHintElement);
+
+      if (hasPausedHint()) {
+        pausedHintElement = visuals.querySelector('.pausedHint');
+        pausedHintElement = (0, _hyperscript2.default)('p.pausedHint');
+        pausedHintElement.innerHTML = options.text.pausedHint;
+        pausedBlockElement.appendChild(pausedHintElement);
+      }
 
       visuals.appendChild(pausedBlockElement);
     } else {
       this.hide();
 
       pausedHeaderElement.innerHTML = options.text.pausedHeader;
-      pausedHintElement.innerHTML = options.text.pausedHint;
+
+      if (hasPausedHint()) {
+        pausedHintElement.innerHTML = options.text.pausedHint;
+      }
     }
   };
 
@@ -18344,7 +18354,9 @@ var Notifier = function Notifier(visuals, options) {
 
     setMessage(message, notifyOptions);
 
-    explanation && this.setExplanation(explanation);
+    if (explanation && explanation.length > 0) {
+      this.setExplanation(explanation);
+    }
 
     if (entertain) {
       runEntertainment();
@@ -19469,7 +19481,7 @@ var Recorder = function Recorder(visuals, replay, options) {
   // needed because on mobiles they might be different.
 
   this.getRecorderWidth = function (responsive) {
-    if (userMedia) {
+    if (userMedia && userMediaLoaded) {
       return userMedia.getRawWidth(responsive);
     } else if (responsive && options.hasDefinedWidth()) {
       return this.limitWidth(options.video.width);
@@ -19477,7 +19489,7 @@ var Recorder = function Recorder(visuals, replay, options) {
   };
 
   this.getRecorderHeight = function (responsive) {
-    if (userMedia) {
+    if (userMedia && userMediaLoaded) {
       return userMedia.getRawHeight(responsive);
     } else if (responsive && options.hasDefinedHeight()) {
       return this.calculateHeight(responsive);
@@ -20071,17 +20083,14 @@ exports.default = function (recorder, options) {
 
     function play() {
       // Resets the media element and restarts the media resource. Any pending events are discarded.
-      // But do them in the next tick to ensure event queue is ready for a lot to come
-      //
-      // this also to have the abort and emptied event to be processed as early as possible before
-      // all the other important events to come
-      setTimeout(function () {
-        try {
-          // todo debug and fix that weird error
-          // The play() request was interrupted by a new load request.
+      try {
+        rawVisualUserMedia.load();
+
+        // fixes https://github.com/binarykitchen/videomail.io/issues/401
+        // see https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
+        if (rawVisualUserMedia.paused) {
           options.debug('UserMedia: play()', 'media.readyState=' + rawVisualUserMedia.readyState, 'media.paused=' + rawVisualUserMedia.paused, 'media.ended=' + rawVisualUserMedia.ended, 'media.played=' + (0, _pretty2.default)(rawVisualUserMedia.played));
 
-          rawVisualUserMedia.load();
           var p = rawVisualUserMedia.play();
 
           // using the promise here just experimental for now
@@ -20089,7 +20098,7 @@ exports.default = function (recorder, options) {
           if (isPromise(p)) {
             p.then(function () {
               if (!playingPromiseReached) {
-                options.debug('UserMedia: ... play promise successful. Playing now.');
+                options.debug('UserMedia: play promise successful. Playing now.');
                 playingPromiseReached = true;
               }
             }).catch(function (reason) {
@@ -20099,11 +20108,11 @@ exports.default = function (recorder, options) {
               options.debug('UserMedia:', reason.toString());
             });
           }
-        } catch (exc) {
-          unloadAllEventListeners();
-          endedEarlyCallback(exc);
         }
-      }, 0);
+      } catch (exc) {
+        unloadAllEventListeners();
+        endedEarlyCallback(exc);
+      }
     }
 
     function fireCallbacks() {
@@ -20156,6 +20165,7 @@ exports.default = function (recorder, options) {
     function onLoadedMetaData() {
       logEvent('loadedmetadata', {
         readyState: rawVisualUserMedia.readyState,
+        paused: rawVisualUserMedia.paused,
         width: rawVisualUserMedia.width,
         height: rawVisualUserMedia.height,
         videoWidth: rawVisualUserMedia.videoWidth,
@@ -20168,7 +20178,8 @@ exports.default = function (recorder, options) {
         self.emit(_events2.default.LOADED_META_DATA);
 
         // for android devices, we cannot call play() unless meta data has been loaded!
-        play();
+        // todo consider removing that if it's not the case anymore (for better performance)
+        // play()
 
         onLoadedMetaDataReached = true;
         fireCallbacks();
@@ -20215,8 +20226,7 @@ exports.default = function (recorder, options) {
       // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
       rawVisualUserMedia.addEventListener('error', function (err) {
-        // ignore here, do nothing. IE/Edge emit that sometimes for unknown reasons.
-        options.logger.warn(err);
+        options.logger.warn('Caught video element error event: %s', (0, _pretty2.default)(err));
       });
 
       setVisualStream(localMediaStream);
