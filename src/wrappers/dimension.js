@@ -47,8 +47,8 @@ export default {
     }
   },
 
-    // this is difficult to compute and is not entirely correct.
-    // but good enough for now to ensure some stability.
+  // this is difficult to compute and is not entirely correct.
+  // but good enough for now to ensure some stability.
   limitHeight: function (height, options) {
     if (numberIsInteger(height) && height < 1) {
       throw VideomailError.create('Passed limit-height argument cannot be less than 1!', options)
