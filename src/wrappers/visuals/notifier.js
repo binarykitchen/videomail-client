@@ -296,7 +296,9 @@ const Notifier = function (visuals, options) {
 
     setMessage(message, notifyOptions)
 
-    explanation && this.setExplanation(explanation)
+    if (explanation && explanation.length > 0) {
+      this.setExplanation(explanation)
+    }
 
     if (entertain) {
       runEntertainment()
