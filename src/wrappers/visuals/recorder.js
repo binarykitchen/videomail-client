@@ -1141,7 +1141,7 @@ const Recorder = function (visuals, replay, options) {
   // needed because on mobiles they might be different.
 
   this.getRecorderWidth = function (responsive) {
-    if (userMedia) {
+    if (userMedia && userMediaLoaded) {
       return userMedia.getRawWidth(responsive)
     } else if (responsive && options.hasDefinedWidth()) {
       return this.limitWidth(options.video.width)
@@ -1149,7 +1149,7 @@ const Recorder = function (visuals, replay, options) {
   }
 
   this.getRecorderHeight = function (responsive) {
-    if (userMedia) {
+    if (userMedia && userMediaLoaded) {
       return userMedia.getRawHeight(responsive)
     } else if (responsive && options.hasDefinedHeight()) {
       return this.calculateHeight(responsive)
