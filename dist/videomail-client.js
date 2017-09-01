@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14528,6 +14528,10 @@ var Browser = function Browser(options) {
     return isEdge;
   };
 
+  this.isAndroid = function () {
+    return isAndroid;
+  };
+
   this.isMobile = function () {
     return uaParser.device.type === 'mobile';
   };
@@ -15185,7 +15189,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.DOM_EXCEPTION:
       if (err.code === 9) {
         var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
-        message = 'Security upgrade neded';
+        message = 'Security upgrade needed';
         explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' + ' and enables encrypted videomail transfers.';
         classList.push(VideomailError.BROWSER_PROBLEM);
       } else {
@@ -19481,7 +19485,7 @@ var Recorder = function Recorder(visuals, replay, options) {
   // needed because on mobiles they might be different.
 
   this.getRecorderWidth = function (responsive) {
-    if (userMedia && userMediaLoaded) {
+    if (userMedia && userMedia.hasVideoWidth()) {
       return userMedia.getRawWidth(responsive);
     } else if (responsive && options.hasDefinedWidth()) {
       return this.limitWidth(options.video.width);
@@ -19489,7 +19493,7 @@ var Recorder = function Recorder(visuals, replay, options) {
   };
 
   this.getRecorderHeight = function (responsive) {
-    if (userMedia && userMediaLoaded) {
+    if (userMedia) {
       return userMedia.getRawHeight(responsive);
     } else if (responsive && options.hasDefinedHeight()) {
       return this.calculateHeight(responsive);
@@ -19942,6 +19946,7 @@ exports.default = function (recorder, options) {
   _eventEmitter2.default.call(this, options, 'UserMedia');
 
   var rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia();
+  var browser = new _browser2.default(options);
   var self = this;
 
   var paused = false;
@@ -20179,7 +20184,9 @@ exports.default = function (recorder, options) {
 
         // for android devices, we cannot call play() unless meta data has been loaded!
         // todo consider removing that if it's not the case anymore (for better performance)
-        // play()
+        if (browser.isAndroid()) {
+          play();
+        }
 
         onLoadedMetaDataReached = true;
         fireCallbacks();
@@ -20290,6 +20297,10 @@ exports.default = function (recorder, options) {
 
   this.getVideoWidth = function () {
     return rawVisualUserMedia.videoWidth;
+  };
+
+  this.hasVideoWidth = function () {
+    return this.getVideoWidth() > 0;
   };
 
   this.getRawWidth = function (responsive) {
@@ -20403,6 +20414,10 @@ var _pretty = _dereq_('./../../util/pretty');
 
 var _pretty2 = _interopRequireDefault(_pretty);
 
+var _browser = _dereq_('./../../util/browser');
+
+var _browser2 = _interopRequireDefault(_browser);
+
 var _events = _dereq_('./../../events');
 
 var _events2 = _interopRequireDefault(_events);
@@ -20411,7 +20426,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var EVENT_ASCII = '|—O—|';
 
-},{"./../../events":86,"./../../util/audioRecorder":90,"./../../util/eventEmitter":93,"./../../util/mediaEvents":95,"./../../util/pretty":96,"./../../util/videomailError":98,"hyperscript":33}],"videomail-client":[function(_dereq_,module,exports){
+},{"./../../events":86,"./../../util/audioRecorder":90,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/mediaEvents":95,"./../../util/pretty":96,"./../../util/videomailError":98,"hyperscript":33}],"videomail-client":[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
