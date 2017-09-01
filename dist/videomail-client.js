@@ -13435,7 +13435,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -17072,11 +17072,21 @@ exports.default = {
     options.getRatio = function () {
       var ratio = 1; // just a default one when no computations are possible
 
-      if (this.hasDefinedDimensions()) {
-        ratio = this.video.height / this.video.width;
+      // todo fix this, it's not really an option
+      var hasVideoDimensions = this.videoHeight && this.videoWidth;
 
-        // todo fix this, it's not really an option
-      } else if (this.videoHeight && this.videoWidth) {
+      if (this.hasDefinedDimensions()) {
+        if (hasVideoDimensions) {
+          // figure out first which one to pick
+          if (this.videoHeight < this.video.height) {
+            ratio = this.videoHeight / this.videoWidth;
+          } else {
+            ratio = this.video.height / this.video.width;
+          }
+        } else {
+          ratio = this.video.height / this.video.width;
+        }
+      } else if (hasVideoDimensions) {
         ratio = this.videoHeight / this.videoWidth;
       }
 
