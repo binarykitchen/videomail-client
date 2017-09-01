@@ -167,7 +167,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.DOM_EXCEPTION:
       if (err.code === 9) {
         const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
-        message = 'Security upgrade neded'
+        message = 'Security upgrade needed'
         explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
                       ' and enables encrypted videomail transfers.'
         classList.push(VideomailError.BROWSER_PROBLEM)

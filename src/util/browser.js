@@ -221,6 +221,10 @@ const Browser = function (options) {
     return isEdge
   }
 
+  this.isAndroid = function () {
+    return isAndroid
+  }
+
   this.isMobile = function () {
     return uaParser.device.type === 'mobile'
   }
