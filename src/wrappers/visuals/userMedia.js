@@ -5,6 +5,7 @@ import VideomailError from './../../util/videomailError'
 import EventEmitter from './../../util/eventEmitter'
 import MEDIA_EVENTS from './../../util/mediaEvents'
 import pretty from './../../util/pretty'
+import Browser from './../../util/browser'
 import Events from './../../events'
 
 const EVENT_ASCII = '|—O—|'
@@ -13,6 +14,7 @@ export default function (recorder, options) {
   EventEmitter.call(this, options, 'UserMedia')
 
   const rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia()
+  const browser = new Browser(options)
   const self = this
 
   var paused = false
@@ -277,7 +279,9 @@ export default function (recorder, options) {
 
         // for android devices, we cannot call play() unless meta data has been loaded!
         // todo consider removing that if it's not the case anymore (for better performance)
-        // play()
+        if (browser.isAndroid()) {
+          play()
+        }
 
         onLoadedMetaDataReached = true
         fireCallbacks()
@@ -398,6 +402,10 @@ export default function (recorder, options) {
 
   this.getVideoWidth = function () {
     return rawVisualUserMedia.videoWidth
+  }
+
+  this.hasVideoWidth = function () {
+    return this.getVideoWidth() > 0
   }
 
   this.getRawWidth = function (responsive) {
