@@ -30,7 +30,8 @@ export default {
       if (this.hasDefinedDimensions()) {
         if (hasVideoDimensions) {
           // figure out first which one to pick
-          if (this.videoHeight < this.video.height) {
+          if (this.videoHeight < this.video.height ||
+              this.videoWidth < this.video.width) {
             ratio = this.videoHeight / this.videoWidth
           } else {
             ratio = this.video.height / this.video.width
