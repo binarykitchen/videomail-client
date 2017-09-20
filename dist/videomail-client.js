@@ -565,7 +565,7 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":24,"inherits":36,"raf":51}],3:[function(_dereq_,module,exports){
+},{"events":23,"inherits":35,"raf":51}],3:[function(_dereq_,module,exports){
 var toBuffer       = _dereq_('typedarray-to-buffer'),
     isFloat32Array = _dereq_('validate.io-float32array')
 
@@ -818,192 +818,6 @@ module.exports = (function split(undef) {
 })();
 
 },{}],7:[function(_dereq_,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],8:[function(_dereq_,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1110,7 +924,7 @@ function from (value, encodingOrOffset, length) {
     throw new TypeError('"value" argument must not be a number')
   }
 
-  if (value instanceof ArrayBuffer) {
+  if (isArrayBuffer(value)) {
     return fromArrayBuffer(value, encodingOrOffset, length)
   }
 
@@ -1370,7 +1184,7 @@ function byteLength (string, encoding) {
   if (Buffer.isBuffer(string)) {
     return string.length
   }
-  if (isArrayBufferView(string) || string instanceof ArrayBuffer) {
+  if (isArrayBufferView(string) || isArrayBuffer(string)) {
     return string.byteLength
   }
   if (typeof string !== 'string') {
@@ -2702,6 +2516,14 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
+// ArrayBuffers from another context (i.e. an iframe) do not pass the `instanceof` check
+// but they should be treated as valid. See: https://github.com/feross/buffer/issues/166
+function isArrayBuffer (obj) {
+  return obj instanceof ArrayBuffer ||
+    (obj != null && obj.constructor != null && obj.constructor.name === 'ArrayBuffer' &&
+      typeof obj.byteLength === 'number')
+}
+
 // Node 0.10 supports `ArrayBuffer` but lacks `ArrayBuffer.isView`
 function isArrayBufferView (obj) {
   return (typeof ArrayBuffer.isView === 'function') && ArrayBuffer.isView(obj)
@@ -2711,7 +2533,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":4,"ieee754":34}],9:[function(_dereq_,module,exports){
+},{"base64-js":4,"ieee754":33}],8:[function(_dereq_,module,exports){
 var toBuffer  = _dereq_('typedarray-to-buffer'),
     isBrowser = typeof(document) !== 'undefined' && typeof(document.createElement) === 'function',
 
@@ -2942,7 +2764,7 @@ module.exports = function(canvas, options) {
     }
 }
 
-},{"typedarray-to-buffer":73}],10:[function(_dereq_,module,exports){
+},{"typedarray-to-buffer":73}],9:[function(_dereq_,module,exports){
 // contains, add, remove, toggle
 var indexof = _dereq_('indexof')
 
@@ -3043,7 +2865,7 @@ function isTruthy(value) {
     return !!value
 }
 
-},{"indexof":35}],11:[function(_dereq_,module,exports){
+},{"indexof":34}],10:[function(_dereq_,module,exports){
 /*
  * classList.js: Cross-browser full element.classList implementation.
  * 1.1.20150312
@@ -3285,7 +3107,7 @@ if (objCtr.defineProperty) {
 }
 
 
-},{}],12:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3450,7 +3272,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],13:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 var DOCUMENT_POSITION_CONTAINED_BY = 16
 
 module.exports = contains
@@ -3465,7 +3287,7 @@ function contains(container, elem) {
     return comparison === 0 || comparison & DOCUMENT_POSITION_CONTAINED_BY
 }
 
-},{}],14:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3576,7 +3398,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":_dereq_("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":40}],15:[function(_dereq_,module,exports){
+},{"../../is-buffer/index.js":39}],14:[function(_dereq_,module,exports){
 //     create-error.js 0.3.1
 //     (c) 2013 Tim Griesser
 //     This source may be freely distributed under the MIT license.
@@ -3696,7 +3518,7 @@ function clone(target) {
   }
 });
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 'use strict';
 
 var index$2 = function isMergeableObject(value) {
@@ -3785,14 +3607,14 @@ var index = deepmerge;
 
 module.exports = index;
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 module.exports = function () {
     for (var i = 0; i < arguments.length; i++) {
         if (arguments[i] !== undefined) return arguments[i];
     }
 };
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 var util = _dereq_('util')
 var global = _dereq_('global')
 var EventEmitter = _dereq_('events')
@@ -3814,7 +3636,7 @@ var makeDespot = function () {
 
 module.exports = makeDespot()
 
-},{"events":24,"global":30,"util":78}],19:[function(_dereq_,module,exports){
+},{"events":23,"global":29,"util":78}],18:[function(_dereq_,module,exports){
 'use strict'
 
 var document = _dereq_('global/document')
@@ -3854,7 +3676,7 @@ function noopShim () {
 
 function noop () {}
 
-},{"./keys":20,"geval":28,"global/document":29}],20:[function(_dereq_,module,exports){
+},{"./keys":19,"geval":27,"global/document":28}],19:[function(_dereq_,module,exports){
 'use strict'
 
 module.exports = keys
@@ -3879,7 +3701,7 @@ function lowercaseFirst (string) {
   return string.substring(0, 1).toLowerCase() + string.substring(1)
 }
 
-},{}],21:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 (function (process,Buffer){
 var stream = _dereq_('readable-stream')
 var eos = _dereq_('end-of-stream')
@@ -4111,7 +3933,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 module.exports = Duplexify
 
 }).call(this,_dereq_('_process'),_dereq_("buffer").Buffer)
-},{"_process":7,"buffer":8,"end-of-stream":23,"inherits":36,"readable-stream":60,"stream-shift":65}],22:[function(_dereq_,module,exports){
+},{"_process":50,"buffer":7,"end-of-stream":22,"inherits":35,"readable-stream":61,"stream-shift":66}],21:[function(_dereq_,module,exports){
 // element-closest | CC0-1.0 | github.com/jonathantneal/closest
 
 (function (ElementProto) {
@@ -4146,13 +3968,17 @@ module.exports = Duplexify
 	}
 })(window.Element.prototype);
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 var once = _dereq_('once');
 
 var noop = function() {};
 
 var isRequest = function(stream) {
 	return stream.setHeader && typeof stream.abort === 'function';
+};
+
+var isChildProcess = function(stream) {
+	return stream.stdio && Array.isArray(stream.stdio) && stream.stdio.length === 3
 };
 
 var eos = function(stream, opts, callback) {
@@ -4172,17 +3998,21 @@ var eos = function(stream, opts, callback) {
 
 	var onfinish = function() {
 		writable = false;
-		if (!readable) callback();
+		if (!readable) callback.call(stream);
 	};
 
 	var onend = function() {
 		readable = false;
-		if (!writable) callback();
+		if (!writable) callback.call(stream);
+	};
+
+	var onexit = function(exitCode) {
+		callback.call(stream, exitCode ? new Error('exited with error code: ' + exitCode) : null);
 	};
 
 	var onclose = function() {
-		if (readable && !(rs && rs.ended)) return callback(new Error('premature close'));
-		if (writable && !(ws && ws.ended)) return callback(new Error('premature close'));
+		if (readable && !(rs && rs.ended)) return callback.call(stream, new Error('premature close'));
+		if (writable && !(ws && ws.ended)) return callback.call(stream, new Error('premature close'));
 	};
 
 	var onrequest = function() {
@@ -4199,6 +4029,8 @@ var eos = function(stream, opts, callback) {
 		stream.on('close', onlegacyfinish);
 	}
 
+	if (isChildProcess(stream)) stream.on('exit', onexit);
+
 	stream.on('end', onend);
 	stream.on('finish', onfinish);
 	if (opts.error !== false) stream.on('error', callback);
@@ -4212,6 +4044,7 @@ var eos = function(stream, opts, callback) {
 		stream.removeListener('end', onlegacyfinish);
 		stream.removeListener('close', onlegacyfinish);
 		stream.removeListener('finish', onfinish);
+		stream.removeListener('exit', onexit);
 		stream.removeListener('end', onend);
 		stream.removeListener('error', callback);
 		stream.removeListener('close', onclose);
@@ -4219,7 +4052,8 @@ var eos = function(stream, opts, callback) {
 };
 
 module.exports = eos;
-},{"once":48}],24:[function(_dereq_,module,exports){
+
+},{"once":47}],23:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4523,7 +4357,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -4694,7 +4528,7 @@ function isUndefined(arg) {
 })(typeof window !== "undefined" ? window : global);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -4879,7 +4713,7 @@ getFormData.getNamedFormElementData = getNamedFormElementData;
 
 exports['default'] = getFormData;
 module.exports = exports['default'];
-},{}],27:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 module.exports = Event
 
 function Event() {
@@ -4907,7 +4741,7 @@ function Event() {
     }
 }
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 var Event = _dereq_('./event.js')
 
 module.exports = Source
@@ -4920,7 +4754,7 @@ function Source(broadcaster) {
     return tuple.listen
 }
 
-},{"./event.js":27}],29:[function(_dereq_,module,exports){
+},{"./event.js":26}],28:[function(_dereq_,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -4941,7 +4775,7 @@ if (typeof document !== 'undefined') {
 module.exports = doccy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":5}],30:[function(_dereq_,module,exports){
+},{"min-document":5}],29:[function(_dereq_,module,exports){
 (function (global){
 var win;
 
@@ -4958,7 +4792,7 @@ if (typeof window !== "undefined") {
 module.exports = win;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 module.exports = shim
 
 function shim (element, value) {
@@ -4969,7 +4803,7 @@ function shim (element, value) {
     element.style.display = value ? 'none' : ''
 }
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 // HumanizeDuration.js - http://git.io/j0HgmQ
 
 ;(function () {
@@ -5524,7 +5358,7 @@ function shim (element, value) {
   }
 })();  // eslint-disable-line semi
 
-},{}],33:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 var split = _dereq_('browser-split')
 var ClassList = _dereq_('class-list')
 
@@ -5686,7 +5520,7 @@ function isArray (arr) {
 
 
 
-},{"browser-split":6,"class-list":10,"html-element":5}],34:[function(_dereq_,module,exports){
+},{"browser-split":6,"class-list":9,"html-element":5}],33:[function(_dereq_,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5772,7 +5606,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5783,7 +5617,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],36:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5808,7 +5642,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 var containers = []; // will store container HTMLElement references
 var styleElements = []; // will store {prepend: HTMLElement, append: HTMLElement}
 
@@ -5868,7 +5702,7 @@ function createStyleElement() {
 module.exports = insertCss;
 module.exports.insertCss = insertCss;
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 /*! npm.im/intervalometer */
 'use strict';
 
@@ -5911,7 +5745,7 @@ function timerIntervalometer(cb, delay) {
 exports.intervalometer = intervalometer;
 exports.frameIntervalometer = frameIntervalometer;
 exports.timerIntervalometer = timerIntervalometer;
-},{}],39:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 /*! npm.im/iphone-inline-video 2.2.2 */
 'use strict';
 
@@ -6279,7 +6113,7 @@ function enableInlineVideo(video, opts) {
 
 module.exports = enableInlineVideo;
 
-},{"intervalometer":38}],40:[function(_dereq_,module,exports){
+},{"intervalometer":37}],39:[function(_dereq_,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -6302,7 +6136,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],41:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 'use strict';
 var numberIsNan = _dereq_('number-is-nan');
 
@@ -6310,13 +6144,13 @@ module.exports = Number.isFinite || function (val) {
 	return !(typeof val !== 'number' || numberIsNan(val) || val === Infinity || val === -Infinity);
 };
 
-},{"number-is-nan":47}],42:[function(_dereq_,module,exports){
+},{"number-is-nan":46}],41:[function(_dereq_,module,exports){
 module.exports = isPowerOfTwo
 
 function isPowerOfTwo(n) {
   return n !== 0 && (n & (n - 1)) === 0
 }
-},{}],43:[function(_dereq_,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -6359,14 +6193,14 @@ function isLooseTypedArray(arr) {
   return names[toString.call(arr)]
 }
 
-},{}],44:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],45:[function(_dereq_,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -6421,7 +6255,7 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],46:[function(_dereq_,module,exports){
+},{}],45:[function(_dereq_,module,exports){
 'use strict';
 var numberIsFinite = _dereq_('is-finite');
 
@@ -6429,20 +6263,28 @@ module.exports = Number.isInteger || function (x) {
 	return numberIsFinite(x) && Math.floor(x) === x;
 };
 
-},{"is-finite":41}],47:[function(_dereq_,module,exports){
+},{"is-finite":40}],46:[function(_dereq_,module,exports){
 'use strict';
 module.exports = Number.isNaN || function (x) {
 	return x !== x;
 };
 
-},{}],48:[function(_dereq_,module,exports){
+},{}],47:[function(_dereq_,module,exports){
 var wrappy = _dereq_('wrappy')
 module.exports = wrappy(once)
+module.exports.strict = wrappy(onceStrict)
 
 once.proto = once(function () {
   Object.defineProperty(Function.prototype, 'once', {
     value: function () {
       return once(this)
+    },
+    configurable: true
+  })
+
+  Object.defineProperty(Function.prototype, 'onceStrict', {
+    value: function () {
+      return onceStrict(this)
     },
     configurable: true
   })
@@ -6458,7 +6300,20 @@ function once (fn) {
   return f
 }
 
-},{"wrappy":82}],49:[function(_dereq_,module,exports){
+function onceStrict (fn) {
+  var f = function () {
+    if (f.called)
+      throw new Error(f.onceError)
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  var name = fn.name || 'Function wrapped with `once`'
+  f.onceError = name + " shouldn't be called more than once"
+  f.called = false
+  return f
+}
+
+},{"wrappy":82}],48:[function(_dereq_,module,exports){
 (function (process){
 // Generated by CoffeeScript 1.12.2
 (function() {
@@ -6498,7 +6353,7 @@ function once (fn) {
 
 
 }).call(this,_dereq_('_process'))
-},{"_process":7}],50:[function(_dereq_,module,exports){
+},{"_process":50}],49:[function(_dereq_,module,exports){
 (function (process){
 'use strict';
 
@@ -6545,7 +6400,193 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,_dereq_('_process'))
-},{"_process":7}],51:[function(_dereq_,module,exports){
+},{"_process":50}],50:[function(_dereq_,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],51:[function(_dereq_,module,exports){
 (function (global){
 var now = _dereq_('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -6621,7 +6662,7 @@ module.exports.polyfill = function() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":49}],52:[function(_dereq_,module,exports){
+},{"performance-now":48}],52:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6746,7 +6787,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":54,"./_stream_writable":56,"core-util-is":14,"inherits":36,"process-nextick-args":50}],53:[function(_dereq_,module,exports){
+},{"./_stream_readable":54,"./_stream_writable":56,"core-util-is":13,"inherits":35,"process-nextick-args":49}],53:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6794,7 +6835,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":55,"core-util-is":14,"inherits":36}],54:[function(_dereq_,module,exports){
+},{"./_stream_transform":55,"core-util-is":13,"inherits":35}],54:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7804,7 +7845,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":52,"./internal/streams/BufferList":57,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":7,"core-util-is":14,"events":24,"inherits":36,"isarray":44,"process-nextick-args":50,"safe-buffer":64,"string_decoder/":66,"util":5}],55:[function(_dereq_,module,exports){
+},{"./_stream_duplex":52,"./internal/streams/BufferList":57,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":50,"core-util-is":13,"events":23,"inherits":35,"isarray":43,"process-nextick-args":49,"safe-buffer":65,"string_decoder/":60,"util":5}],55:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8019,7 +8060,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":52,"core-util-is":14,"inherits":36}],56:[function(_dereq_,module,exports){
+},{"./_stream_duplex":52,"core-util-is":13,"inherits":35}],56:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8686,7 +8727,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":52,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":7,"core-util-is":14,"inherits":36,"process-nextick-args":50,"safe-buffer":64,"util-deprecate":75}],57:[function(_dereq_,module,exports){
+},{"./_stream_duplex":52,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":50,"core-util-is":13,"inherits":35,"process-nextick-args":49,"safe-buffer":65,"util-deprecate":75}],57:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8761,7 +8802,7 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":64}],58:[function(_dereq_,module,exports){
+},{"safe-buffer":65}],58:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8834,563 +8875,10 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":50}],59:[function(_dereq_,module,exports){
+},{"process-nextick-args":49}],59:[function(_dereq_,module,exports){
 module.exports = _dereq_('events').EventEmitter;
 
-},{"events":24}],60:[function(_dereq_,module,exports){
-exports = module.exports = _dereq_('./lib/_stream_readable.js');
-exports.Stream = exports;
-exports.Readable = exports;
-exports.Writable = _dereq_('./lib/_stream_writable.js');
-exports.Duplex = _dereq_('./lib/_stream_duplex.js');
-exports.Transform = _dereq_('./lib/_stream_transform.js');
-exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
-
-},{"./lib/_stream_duplex.js":52,"./lib/_stream_passthrough.js":53,"./lib/_stream_readable.js":54,"./lib/_stream_transform.js":55,"./lib/_stream_writable.js":56}],61:[function(_dereq_,module,exports){
-'use strict';
-
-var readystate = module.exports = _dereq_('./readystate')
-  , win = (new Function('return this'))()
-  , complete = 'complete'
-  , root = true
-  , doc = win.document
-  , html = doc.documentElement;
-
-(function wrapper() {
-  //
-  // Bail out early if the document is already fully loaded. This means that this
-  // script is loaded after the onload event.
-  //
-  if (complete === doc.readyState) {
-    return readystate.change(complete);
-  }
-
-  //
-  // Use feature detection to see what kind of browser environment we're dealing
-  // with. Old versions of Internet Explorer do not support the addEventListener
-  // interface so we can also safely assume that we need to fall back to polling.
-  //
-  var modern = !!doc.addEventListener
-    , prefix = modern ? '' : 'on'
-    , on = modern ? 'addEventListener' : 'attachEvent'
-    , off = modern ? 'removeEventListener' : 'detachEvent';
-
-  if (!modern && 'function' === typeof html.doScroll) {
-    try { root = !win.frameElement; }
-    catch (e) {}
-
-    if (root) (function polling() {
-      try { html.doScroll('left'); }
-      catch (e) { return setTimeout(polling, 50); }
-
-      readystate.change('interactive');
-    }());
-  }
-
-  /**
-   * Handle the various of event listener calls.
-   *
-   * @param {Event} evt Simple DOM event.
-   * @api private
-   */
-  function change(evt) {
-    evt = evt || win.event;
-
-    if ('readystatechange' === evt.type) {
-      readystate.change(doc.readyState);
-      if (complete !== doc.readyState) return;
-    }
-
-    if ('load' === evt.type) readystate.change('complete');
-    else readystate.change('interactive');
-
-    //
-    // House keeping, remove our assigned event listeners.
-    //
-    (evt.type === 'load' ? win : doc)[off](evt.type, change, false);
-  }
-
-  //
-  // Assign a shit load of event listeners so we can update our internal state.
-  //
-  doc[on](prefix +'DOMContentLoaded', change, false);
-  doc[on](prefix +'readystatechange', change, false);
-  win[on](prefix +'load', change, false);
-} ());
-
-
-},{"./readystate":62}],62:[function(_dereq_,module,exports){
-'use strict';
-
-/**
- * Generate a new prototype method which will the given function once the
- * desired state has been reached. The returned function accepts 2 arguments:
- *
- * - fn: The assigned function which needs to be called.
- * - context: Context/this value of the function we need to execute.
- *
- * @param {String} state The state we need to operate upon.
- * @returns {Function}
- * @api private
- */
-function generate(state) {
-  return function proxy(fn, context) {
-    var rs = this;
-
-    if (rs.is(state)) {
-      setTimeout(function () {
-        fn.call(context, rs.readyState);
-      }, 0);
-    } else {
-      if (!rs._events[state]) rs._events[state] = [];
-      rs._events[state].push({ fn: fn, context: context });
-    }
-
-    return rs;
-  };
-}
-
-/**
- * RS (readyState) instance.
- *
- * @constructor
- * @api public
- */
-function RS() {
-  this.readyState = RS.UNKNOWN;
-  this._events = {};
-}
-
-/**
- * The environment can be in different states. The following states are
- * generated:
- *
- * - ALL:         The I don't really give a fuck state.
- * - UNKNOWN:     We got an unknown readyState we should start listening for events.
- * - LOADING:     Environment is currently loading.
- * - INTERACTIVE: Environment is ready for modification.
- * - COMPLETE:    All resources have been loaded.
- *
- * Please note that the order of the `states` string/array is of vital
- * importance as it's used in the readyState check.
- *
- * @type {Number}
- * @private
- */
-RS.states = 'ALL,UNKNOWN,LOADING,INTERACTIVE,COMPLETE'.split(',');
-
-for (var s = 0, state; s < RS.states.length; s++) {
-  state = RS.states[s];
-
-  RS[state] = RS.prototype[state] = s;
-  RS.prototype[state.toLowerCase()] = generate(state);
-}
-
-/**
- * A change in the environment has been detected so we need to change our
- * readyState and call assigned event listeners and those of the previous
- * states.
- *
- * @param {Number} state The new readyState that we detected.
- * @returns {RS}
- * @api private
- */
-RS.prototype.change = function change(state) {
-  state = this.clean(state, true);
-
-  var j
-    , name
-    , i = 0
-    , listener
-    , rs = this
-    , previously = rs.readyState;
-
-  if (previously >= state) return rs;
-
-  rs.readyState = state;
-
-  for (; i < RS.states.length; i++) {
-    if (i > state) break;
-    name = RS.states[i];
-
-    if (name in rs._events) {
-      for (j = 0; j < rs._events[name].length; j++) {
-        listener = rs._events[name][j];
-        listener.fn.call(listener.context || rs, previously);
-      }
-
-      delete rs._events[name];
-    }
-  }
-
-  return rs;
-};
-
-/**
- * Check if we're currently in a given readyState.
- *
- * @param {String|Number} state The required readyState.
- * @returns {Boolean} Indication if this state has been reached.
- * @api public
- */
-RS.prototype.is = function is(state) {
-  return this.readyState >= this.clean(state, true);
-};
-
-/**
- * Transform a state to a number or toUpperCase.
- *
- * @param {Mixed} state State to transform.
- * @param {Boolean} nr Change to number.
- * @returns {Mixed}
- * @api public
- */
-RS.prototype.clean = function transform(state, nr) {
-  var type = typeof state;
-
-  if (nr) return 'number' !== type
-  ? +RS[state.toUpperCase()] || 0
-  : state;
-
-  return ('number' === type ? RS.states[state] : state).toUpperCase();
-};
-
-/**
- * Removes all event listeners. Useful when you want to unload readystatechange
- * completely so that it won't react to any events anymore. See
- * https://github.com/unshiftio/readystate/issues/8
- *
- * @returns {Function} rs so that calls can be chained.
- * @api public
- */
-RS.prototype.removeAllListeners = function removeAllListeners() {
-  this._events = {};
-  return this;
-}
-
-//
-// Expose the module.
-//
-module.exports = new RS();
-
-},{}],63:[function(_dereq_,module,exports){
-/**
- * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
- * @version v1.5.3
- * @license MIT
- * Copyright Julien Etienne 2015 All Rights Reserved.
- */
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global.requestFrame = factory());
-}(this, (function () { 'use strict';
-
-/**
- * @param  {String} type - request | cancel | native.
- * @return {Function} Timing function.
- */
-function requestFrame(type) {
-    // The only vendor prefixes required.
-    var vendors = ['moz', 'webkit'];
-
-    // Disassembled timing function abbreviations.
-    var aF = 'AnimationFrame';
-    var rqAF = 'Request' + aF;
-
-    // Checks for firefox 4 - 10 function pair mismatch.
-    var mozRAF = window.mozRequestAnimationFrame;
-    var mozCAF = window.mozCancelAnimationFrame;
-    var hasMozMismatch = mozRAF && !mozCAF;
-
-    // Final assigned functions.
-    var assignedRequestAnimationFrame;
-    var assignedCancelAnimationFrame;
-
-    // Initial time of the timing lapse.
-    var previousTime = 0;
-
-    var requestFrameMain;
-
-    // Date.now polyfill, mainly for legacy IE versions.
-    if (!Date.now) {
-        Date.now = function () {
-            return new Date().getTime();
-        };
-    }
-
-    /**
-     * hasIOS6RequestAnimationFrameBug.
-     * @See {@Link https://gist.github.com/julienetie/86ac394ec41f1271ff0a}
-     * - for Commentary.
-     * @Copyright 2015 - Julien Etienne. 
-     * @License: MIT.
-     */
-    function hasIOS6RequestAnimationFrameBug() {
-        var webkitRAF = window.webkitRequestAnimationFrame;
-        var rAF = window.requestAnimationFrame;
-
-        // CSS/ Device with max for iOS6 Devices.
-        var hasMobileDeviceWidth = screen.width <= 768 ? true : false;
-
-        // Only supports webkit prefixed requestAnimtionFrane.
-        var requiresWebkitprefix = !(webkitRAF && rAF);
-
-        // iOS6 webkit browsers don't support performance now.
-        var hasNoNavigationTiming = window.performance ? false : true;
-
-        var iOS6Notice = 'setTimeout is being used as a substitiue for \n            requestAnimationFrame due to a bug within iOS 6 builds';
-
-        var hasIOS6Bug = requiresWebkitprefix && hasMobileDeviceWidth && hasNoNavigationTiming;
-
-        var bugCheckresults = function bugCheckresults(timingFnA, timingFnB, notice) {
-            if (timingFnA || timingFnB) {
-                console.warn(notice);
-                return true;
-            } else {
-                return false;
-            }
-        };
-
-        var displayResults = function displayResults(hasBug, hasBugNotice, webkitFn, nativeFn) {
-            if (hasBug) {
-                return bugCheckresults(webkitFn, nativeFn, hasBugNotice);
-            } else {
-                return false;
-            }
-        };
-
-        return displayResults(hasIOS6Bug, iOS6Notice, webkitRAF, rAF);
-    }
-
-    /**
-     * Native clearTimeout function.
-     * @return {Function}
-     */
-    function clearTimeoutWithId(id) {
-        clearTimeout(id);
-    }
-
-    /**
-     * Based on a polyfill by Erik, introduced by Paul Irish & 
-     * further improved by Darius Bacon.
-     * @see  {@link http://www.paulirish.com/2011/
-     * requestanimationframe-for-smart-animating}
-     * @see  {@link https://github.com/darius/requestAnimationFrame/blob/
-     * master/requestAnimationFrame.js}
-     * @callback {Number} Timestamp.
-     * @return {Function} setTimeout Function.
-     */
-    function setTimeoutWithTimestamp(callback) {
-        var immediateTime = Date.now();
-        var lapsedTime = Math.max(previousTime + 16, immediateTime);
-        return setTimeout(function () {
-            callback(previousTime = lapsedTime);
-        }, lapsedTime - immediateTime);
-    }
-
-    /**
-     * Queries the native function, prefixed function 
-     * or use the setTimeoutWithTimestamp function.
-     * @return {Function}
-     */
-    function queryRequestAnimationFrame() {
-        if (Array.prototype.filter) {
-            assignedRequestAnimationFrame = window['request' + aF] || window[vendors.filter(function (vendor) {
-                if (window[vendor + rqAF] !== undefined) return vendor;
-            }) + rqAF] || setTimeoutWithTimestamp;
-        } else {
-            return setTimeoutWithTimestamp;
-        }
-        if (!hasIOS6RequestAnimationFrameBug()) {
-            return assignedRequestAnimationFrame;
-        } else {
-            return setTimeoutWithTimestamp;
-        }
-    }
-
-    /**
-     * Queries the native function, prefixed function 
-     * or use the clearTimeoutWithId function.
-     * @return {Function}
-     */
-    function queryCancelAnimationFrame() {
-        var cancellationNames = [];
-        if (Array.prototype.map) {
-            vendors.map(function (vendor) {
-                return ['Cancel', 'CancelRequest'].map(function (cancellationNamePrefix) {
-                    cancellationNames.push(vendor + cancellationNamePrefix + aF);
-                });
-            });
-        } else {
-            return clearTimeoutWithId;
-        }
-
-        /**
-         * Checks for the prefixed cancelAnimationFrame implementation.
-         * @param  {Array} prefixedNames - An array of the prefixed names. 
-         * @param  {Number} i - Iteration start point.
-         * @return {Function} prefixed cancelAnimationFrame function.
-         */
-        function prefixedCancelAnimationFrame(prefixedNames, i) {
-            var cancellationFunction = void 0;
-            for (; i < prefixedNames.length; i++) {
-                if (window[prefixedNames[i]]) {
-                    cancellationFunction = window[prefixedNames[i]];
-                    break;
-                }
-            }
-            return cancellationFunction;
-        }
-
-        // Use truthly function
-        assignedCancelAnimationFrame = window['cancel' + aF] || prefixedCancelAnimationFrame(cancellationNames, 0) || clearTimeoutWithId;
-
-        // Check for iOS 6 bug
-        if (!hasIOS6RequestAnimationFrameBug()) {
-            return assignedCancelAnimationFrame;
-        } else {
-            return clearTimeoutWithId;
-        }
-    }
-
-    function getRequestFn() {
-        if (hasMozMismatch) {
-            return setTimeoutWithTimestamp;
-        } else {
-            return queryRequestAnimationFrame();
-        }
-    }
-
-    function getCancelFn() {
-        return queryCancelAnimationFrame();
-    }
-
-    function setNativeFn() {
-        if (hasMozMismatch) {
-            window.requestAnimationFrame = setTimeoutWithTimestamp;
-            window.cancelAnimationFrame = clearTimeoutWithId;
-        } else {
-            window.requestAnimationFrame = queryRequestAnimationFrame();
-            window.cancelAnimationFrame = queryCancelAnimationFrame();
-        }
-    }
-
-    /**
-     * The type value "request" singles out firefox 4 - 10 and 
-     * assigns the setTimeout function if plausible.
-     */
-
-    switch (type) {
-        case 'request':
-        case '':
-            requestFrameMain = getRequestFn();
-            break;
-
-        case 'cancel':
-            requestFrameMain = getCancelFn();
-            break;
-
-        case 'native':
-            setNativeFn();
-            break;
-        default:
-            throw new Error('RequestFrame parameter is not a type.');
-    }
-    return requestFrameMain;
-}
-
-return requestFrame;
-
-})));
-
-},{}],64:[function(_dereq_,module,exports){
-/* eslint-disable node/no-deprecated-api */
-var buffer = _dereq_('buffer')
-var Buffer = buffer.Buffer
-
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-
-},{"buffer":8}],65:[function(_dereq_,module,exports){
-module.exports = shift
-
-function shift (stream) {
-  var rs = stream._readableState
-  if (!rs) return null
-  return rs.objectMode ? stream.read() : stream.read(getStateLength(rs))
-}
-
-function getStateLength (state) {
-  if (state.buffer.length) {
-    // Since node 6.3.0 state.buffer is a BufferList not an array
-    if (state.buffer.head) {
-      return state.buffer.head.data.length
-    }
-
-    return state.buffer[0].length
-  }
-
-  return state.length
-}
-
-},{}],66:[function(_dereq_,module,exports){
+},{"events":23}],60:[function(_dereq_,module,exports){
 'use strict';
 
 var Buffer = _dereq_('safe-buffer').Buffer;
@@ -9663,7 +9151,560 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":64}],67:[function(_dereq_,module,exports){
+},{"safe-buffer":65}],61:[function(_dereq_,module,exports){
+exports = module.exports = _dereq_('./lib/_stream_readable.js');
+exports.Stream = exports;
+exports.Readable = exports;
+exports.Writable = _dereq_('./lib/_stream_writable.js');
+exports.Duplex = _dereq_('./lib/_stream_duplex.js');
+exports.Transform = _dereq_('./lib/_stream_transform.js');
+exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
+
+},{"./lib/_stream_duplex.js":52,"./lib/_stream_passthrough.js":53,"./lib/_stream_readable.js":54,"./lib/_stream_transform.js":55,"./lib/_stream_writable.js":56}],62:[function(_dereq_,module,exports){
+'use strict';
+
+var readystate = module.exports = _dereq_('./readystate')
+  , win = (new Function('return this'))()
+  , complete = 'complete'
+  , root = true
+  , doc = win.document
+  , html = doc.documentElement;
+
+(function wrapper() {
+  //
+  // Bail out early if the document is already fully loaded. This means that this
+  // script is loaded after the onload event.
+  //
+  if (complete === doc.readyState) {
+    return readystate.change(complete);
+  }
+
+  //
+  // Use feature detection to see what kind of browser environment we're dealing
+  // with. Old versions of Internet Explorer do not support the addEventListener
+  // interface so we can also safely assume that we need to fall back to polling.
+  //
+  var modern = !!doc.addEventListener
+    , prefix = modern ? '' : 'on'
+    , on = modern ? 'addEventListener' : 'attachEvent'
+    , off = modern ? 'removeEventListener' : 'detachEvent';
+
+  if (!modern && 'function' === typeof html.doScroll) {
+    try { root = !win.frameElement; }
+    catch (e) {}
+
+    if (root) (function polling() {
+      try { html.doScroll('left'); }
+      catch (e) { return setTimeout(polling, 50); }
+
+      readystate.change('interactive');
+    }());
+  }
+
+  /**
+   * Handle the various of event listener calls.
+   *
+   * @param {Event} evt Simple DOM event.
+   * @api private
+   */
+  function change(evt) {
+    evt = evt || win.event;
+
+    if ('readystatechange' === evt.type) {
+      readystate.change(doc.readyState);
+      if (complete !== doc.readyState) return;
+    }
+
+    if ('load' === evt.type) readystate.change('complete');
+    else readystate.change('interactive');
+
+    //
+    // House keeping, remove our assigned event listeners.
+    //
+    (evt.type === 'load' ? win : doc)[off](evt.type, change, false);
+  }
+
+  //
+  // Assign a shit load of event listeners so we can update our internal state.
+  //
+  doc[on](prefix +'DOMContentLoaded', change, false);
+  doc[on](prefix +'readystatechange', change, false);
+  win[on](prefix +'load', change, false);
+} ());
+
+
+},{"./readystate":63}],63:[function(_dereq_,module,exports){
+'use strict';
+
+/**
+ * Generate a new prototype method which will the given function once the
+ * desired state has been reached. The returned function accepts 2 arguments:
+ *
+ * - fn: The assigned function which needs to be called.
+ * - context: Context/this value of the function we need to execute.
+ *
+ * @param {String} state The state we need to operate upon.
+ * @returns {Function}
+ * @api private
+ */
+function generate(state) {
+  return function proxy(fn, context) {
+    var rs = this;
+
+    if (rs.is(state)) {
+      setTimeout(function () {
+        fn.call(context, rs.readyState);
+      }, 0);
+    } else {
+      if (!rs._events[state]) rs._events[state] = [];
+      rs._events[state].push({ fn: fn, context: context });
+    }
+
+    return rs;
+  };
+}
+
+/**
+ * RS (readyState) instance.
+ *
+ * @constructor
+ * @api public
+ */
+function RS() {
+  this.readyState = RS.UNKNOWN;
+  this._events = {};
+}
+
+/**
+ * The environment can be in different states. The following states are
+ * generated:
+ *
+ * - ALL:         The I don't really give a fuck state.
+ * - UNKNOWN:     We got an unknown readyState we should start listening for events.
+ * - LOADING:     Environment is currently loading.
+ * - INTERACTIVE: Environment is ready for modification.
+ * - COMPLETE:    All resources have been loaded.
+ *
+ * Please note that the order of the `states` string/array is of vital
+ * importance as it's used in the readyState check.
+ *
+ * @type {Number}
+ * @private
+ */
+RS.states = 'ALL,UNKNOWN,LOADING,INTERACTIVE,COMPLETE'.split(',');
+
+for (var s = 0, state; s < RS.states.length; s++) {
+  state = RS.states[s];
+
+  RS[state] = RS.prototype[state] = s;
+  RS.prototype[state.toLowerCase()] = generate(state);
+}
+
+/**
+ * A change in the environment has been detected so we need to change our
+ * readyState and call assigned event listeners and those of the previous
+ * states.
+ *
+ * @param {Number} state The new readyState that we detected.
+ * @returns {RS}
+ * @api private
+ */
+RS.prototype.change = function change(state) {
+  state = this.clean(state, true);
+
+  var j
+    , name
+    , i = 0
+    , listener
+    , rs = this
+    , previously = rs.readyState;
+
+  if (previously >= state) return rs;
+
+  rs.readyState = state;
+
+  for (; i < RS.states.length; i++) {
+    if (i > state) break;
+    name = RS.states[i];
+
+    if (name in rs._events) {
+      for (j = 0; j < rs._events[name].length; j++) {
+        listener = rs._events[name][j];
+        listener.fn.call(listener.context || rs, previously);
+      }
+
+      delete rs._events[name];
+    }
+  }
+
+  return rs;
+};
+
+/**
+ * Check if we're currently in a given readyState.
+ *
+ * @param {String|Number} state The required readyState.
+ * @returns {Boolean} Indication if this state has been reached.
+ * @api public
+ */
+RS.prototype.is = function is(state) {
+  return this.readyState >= this.clean(state, true);
+};
+
+/**
+ * Transform a state to a number or toUpperCase.
+ *
+ * @param {Mixed} state State to transform.
+ * @param {Boolean} nr Change to number.
+ * @returns {Mixed}
+ * @api public
+ */
+RS.prototype.clean = function transform(state, nr) {
+  var type = typeof state;
+
+  if (nr) return 'number' !== type
+  ? +RS[state.toUpperCase()] || 0
+  : state;
+
+  return ('number' === type ? RS.states[state] : state).toUpperCase();
+};
+
+/**
+ * Removes all event listeners. Useful when you want to unload readystatechange
+ * completely so that it won't react to any events anymore. See
+ * https://github.com/unshiftio/readystate/issues/8
+ *
+ * @returns {Function} rs so that calls can be chained.
+ * @api public
+ */
+RS.prototype.removeAllListeners = function removeAllListeners() {
+  this._events = {};
+  return this;
+}
+
+//
+// Expose the module.
+//
+module.exports = new RS();
+
+},{}],64:[function(_dereq_,module,exports){
+/**
+ * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
+ * @version v1.5.3
+ * @license MIT
+ * Copyright Julien Etienne 2015 All Rights Reserved.
+ */
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global.requestFrame = factory());
+}(this, (function () { 'use strict';
+
+/**
+ * @param  {String} type - request | cancel | native.
+ * @return {Function} Timing function.
+ */
+function requestFrame(type) {
+    // The only vendor prefixes required.
+    var vendors = ['moz', 'webkit'];
+
+    // Disassembled timing function abbreviations.
+    var aF = 'AnimationFrame';
+    var rqAF = 'Request' + aF;
+
+    // Checks for firefox 4 - 10 function pair mismatch.
+    var mozRAF = window.mozRequestAnimationFrame;
+    var mozCAF = window.mozCancelAnimationFrame;
+    var hasMozMismatch = mozRAF && !mozCAF;
+
+    // Final assigned functions.
+    var assignedRequestAnimationFrame;
+    var assignedCancelAnimationFrame;
+
+    // Initial time of the timing lapse.
+    var previousTime = 0;
+
+    var requestFrameMain;
+
+    // Date.now polyfill, mainly for legacy IE versions.
+    if (!Date.now) {
+        Date.now = function () {
+            return new Date().getTime();
+        };
+    }
+
+    /**
+     * hasIOS6RequestAnimationFrameBug.
+     * @See {@Link https://gist.github.com/julienetie/86ac394ec41f1271ff0a}
+     * - for Commentary.
+     * @Copyright 2015 - Julien Etienne. 
+     * @License: MIT.
+     */
+    function hasIOS6RequestAnimationFrameBug() {
+        var webkitRAF = window.webkitRequestAnimationFrame;
+        var rAF = window.requestAnimationFrame;
+
+        // CSS/ Device with max for iOS6 Devices.
+        var hasMobileDeviceWidth = screen.width <= 768 ? true : false;
+
+        // Only supports webkit prefixed requestAnimtionFrane.
+        var requiresWebkitprefix = !(webkitRAF && rAF);
+
+        // iOS6 webkit browsers don't support performance now.
+        var hasNoNavigationTiming = window.performance ? false : true;
+
+        var iOS6Notice = 'setTimeout is being used as a substitiue for \n            requestAnimationFrame due to a bug within iOS 6 builds';
+
+        var hasIOS6Bug = requiresWebkitprefix && hasMobileDeviceWidth && hasNoNavigationTiming;
+
+        var bugCheckresults = function bugCheckresults(timingFnA, timingFnB, notice) {
+            if (timingFnA || timingFnB) {
+                console.warn(notice);
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        var displayResults = function displayResults(hasBug, hasBugNotice, webkitFn, nativeFn) {
+            if (hasBug) {
+                return bugCheckresults(webkitFn, nativeFn, hasBugNotice);
+            } else {
+                return false;
+            }
+        };
+
+        return displayResults(hasIOS6Bug, iOS6Notice, webkitRAF, rAF);
+    }
+
+    /**
+     * Native clearTimeout function.
+     * @return {Function}
+     */
+    function clearTimeoutWithId(id) {
+        clearTimeout(id);
+    }
+
+    /**
+     * Based on a polyfill by Erik, introduced by Paul Irish & 
+     * further improved by Darius Bacon.
+     * @see  {@link http://www.paulirish.com/2011/
+     * requestanimationframe-for-smart-animating}
+     * @see  {@link https://github.com/darius/requestAnimationFrame/blob/
+     * master/requestAnimationFrame.js}
+     * @callback {Number} Timestamp.
+     * @return {Function} setTimeout Function.
+     */
+    function setTimeoutWithTimestamp(callback) {
+        var immediateTime = Date.now();
+        var lapsedTime = Math.max(previousTime + 16, immediateTime);
+        return setTimeout(function () {
+            callback(previousTime = lapsedTime);
+        }, lapsedTime - immediateTime);
+    }
+
+    /**
+     * Queries the native function, prefixed function 
+     * or use the setTimeoutWithTimestamp function.
+     * @return {Function}
+     */
+    function queryRequestAnimationFrame() {
+        if (Array.prototype.filter) {
+            assignedRequestAnimationFrame = window['request' + aF] || window[vendors.filter(function (vendor) {
+                if (window[vendor + rqAF] !== undefined) return vendor;
+            }) + rqAF] || setTimeoutWithTimestamp;
+        } else {
+            return setTimeoutWithTimestamp;
+        }
+        if (!hasIOS6RequestAnimationFrameBug()) {
+            return assignedRequestAnimationFrame;
+        } else {
+            return setTimeoutWithTimestamp;
+        }
+    }
+
+    /**
+     * Queries the native function, prefixed function 
+     * or use the clearTimeoutWithId function.
+     * @return {Function}
+     */
+    function queryCancelAnimationFrame() {
+        var cancellationNames = [];
+        if (Array.prototype.map) {
+            vendors.map(function (vendor) {
+                return ['Cancel', 'CancelRequest'].map(function (cancellationNamePrefix) {
+                    cancellationNames.push(vendor + cancellationNamePrefix + aF);
+                });
+            });
+        } else {
+            return clearTimeoutWithId;
+        }
+
+        /**
+         * Checks for the prefixed cancelAnimationFrame implementation.
+         * @param  {Array} prefixedNames - An array of the prefixed names. 
+         * @param  {Number} i - Iteration start point.
+         * @return {Function} prefixed cancelAnimationFrame function.
+         */
+        function prefixedCancelAnimationFrame(prefixedNames, i) {
+            var cancellationFunction = void 0;
+            for (; i < prefixedNames.length; i++) {
+                if (window[prefixedNames[i]]) {
+                    cancellationFunction = window[prefixedNames[i]];
+                    break;
+                }
+            }
+            return cancellationFunction;
+        }
+
+        // Use truthly function
+        assignedCancelAnimationFrame = window['cancel' + aF] || prefixedCancelAnimationFrame(cancellationNames, 0) || clearTimeoutWithId;
+
+        // Check for iOS 6 bug
+        if (!hasIOS6RequestAnimationFrameBug()) {
+            return assignedCancelAnimationFrame;
+        } else {
+            return clearTimeoutWithId;
+        }
+    }
+
+    function getRequestFn() {
+        if (hasMozMismatch) {
+            return setTimeoutWithTimestamp;
+        } else {
+            return queryRequestAnimationFrame();
+        }
+    }
+
+    function getCancelFn() {
+        return queryCancelAnimationFrame();
+    }
+
+    function setNativeFn() {
+        if (hasMozMismatch) {
+            window.requestAnimationFrame = setTimeoutWithTimestamp;
+            window.cancelAnimationFrame = clearTimeoutWithId;
+        } else {
+            window.requestAnimationFrame = queryRequestAnimationFrame();
+            window.cancelAnimationFrame = queryCancelAnimationFrame();
+        }
+    }
+
+    /**
+     * The type value "request" singles out firefox 4 - 10 and 
+     * assigns the setTimeout function if plausible.
+     */
+
+    switch (type) {
+        case 'request':
+        case '':
+            requestFrameMain = getRequestFn();
+            break;
+
+        case 'cancel':
+            requestFrameMain = getCancelFn();
+            break;
+
+        case 'native':
+            setNativeFn();
+            break;
+        default:
+            throw new Error('RequestFrame parameter is not a type.');
+    }
+    return requestFrameMain;
+}
+
+return requestFrame;
+
+})));
+
+},{}],65:[function(_dereq_,module,exports){
+/* eslint-disable node/no-deprecated-api */
+var buffer = _dereq_('buffer')
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+},{"buffer":7}],66:[function(_dereq_,module,exports){
+module.exports = shift
+
+function shift (stream) {
+  var rs = stream._readableState
+  if (!rs) return null
+  return rs.objectMode ? stream.read() : stream.read(getStateLength(rs))
+}
+
+function getStateLength (state) {
+  if (state.buffer.length) {
+    // Since node 6.3.0 state.buffer is a BufferList not an array
+    if (state.buffer.head) {
+      return state.buffer.head.data.length
+    }
+
+    return state.buffer[0].length
+  }
+
+  return state.length
+}
+
+},{}],67:[function(_dereq_,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -10571,7 +10612,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-object":68,"./request-base":69,"./response-base":70,"./should-retry":71,"component-emitter":12}],68:[function(_dereq_,module,exports){
+},{"./is-object":68,"./request-base":69,"./response-base":70,"./should-retry":71,"component-emitter":11}],68:[function(_dereq_,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -11466,7 +11507,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":8,"is-typedarray":43}],74:[function(_dereq_,module,exports){
+},{"buffer":7,"is-typedarray":42}],74:[function(_dereq_,module,exports){
 /**
  * UAParser.js v0.7.14
  * Lightweight JavaScript-based User-Agent string parser
@@ -12573,8 +12614,8 @@ function config (name) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],76:[function(_dereq_,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],77:[function(_dereq_,module,exports){
+arguments[4][35][0].apply(exports,arguments)
+},{"dup":35}],77:[function(_dereq_,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
@@ -13171,7 +13212,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":77,"_process":7,"inherits":76}],79:[function(_dereq_,module,exports){
+},{"./support/isBuffer":77,"_process":50,"inherits":76}],79:[function(_dereq_,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -13383,7 +13424,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":7,"duplexify":21,"readable-stream":60,"safe-buffer":64,"ws":81}],81:[function(_dereq_,module,exports){
+},{"_process":50,"duplexify":20,"readable-stream":61,"safe-buffer":65,"ws":81}],81:[function(_dereq_,module,exports){
 
 var ws = null
 
@@ -13435,7 +13476,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13461,9 +13502,9 @@ module.exports={
     "major": "./env/dev/release.sh --importance=major"
   },
   "engines": {
-    "node": ">=8.1.0",
-    "yarn": ">=0.27.5",
-    "npm": ">=5.2.0"
+    "node": "^8.3.0",
+    "yarn": "^1.0.1",
+    "npm": "^5.3.0"
   },
   "keywords": [
     "webcam",
@@ -13507,7 +13548,7 @@ module.exports={
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.6.0",
     "babelify": "7.3.0",
-    "body-parser": "1.17.2",
+    "body-parser": "1.18.1",
     "browserify": "14.4.0",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
@@ -13534,10 +13575,11 @@ module.exports={
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.3.1",
-    "ssl-root-cas": "1.2.3",
+    "ssl-root-cas": "1.2.4",
     "standard": "10.0.3",
-    "tap-spec": "4.1.1",
+    "tap-summary": "4.0.0",
     "tape": "4.8.0",
+    "tape-catch": "1.0.6",
     "tape-run": "3.0.0",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
@@ -13767,7 +13809,7 @@ VideomailClient.events = _events2.default;
 
 exports.default = VideomailClient;
 
-},{"./constants":85,"./events":86,"./options":87,"./resource":88,"./util/browser":91,"./util/collectLogger":92,"./util/eventEmitter":93,"./wrappers/container":100,"./wrappers/optionsWrapper":103,"deepmerge":16,"readystate":61,"util":78}],85:[function(_dereq_,module,exports){
+},{"./constants":85,"./events":86,"./options":87,"./resource":88,"./util/browser":91,"./util/collectLogger":92,"./util/eventEmitter":93,"./wrappers/container":100,"./wrappers/optionsWrapper":103,"deepmerge":15,"readystate":62,"util":78}],85:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13839,7 +13881,7 @@ exports.default = (0, _keymirror2.default)({
   INVISIBLE: null // document just became INvisible
 });
 
-},{"keymirror":45}],87:[function(_dereq_,module,exports){
+},{"keymirror":44}],87:[function(_dereq_,module,exports){
 (function (process){
 'use strict';
 
@@ -13993,7 +14035,7 @@ exports.default = {
 };
 
 }).call(this,_dereq_('_process'))
-},{"../package.json":83,"_process":7}],88:[function(_dereq_,module,exports){
+},{"../package.json":83,"_process":50}],88:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14303,7 +14345,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var CHANNELS = 1;
 
-},{"./videomailError":98,"audio-sample":3,"is-power-of-two":42}],91:[function(_dereq_,module,exports){
+},{"./videomailError":98,"audio-sample":3,"is-power-of-two":41}],91:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14553,7 +14595,7 @@ exports.default = Browser;
 
 module.exports = Browser;
 
-},{"./videomailError":98,"defined":17,"ua-parser-js":74}],92:[function(_dereq_,module,exports){
+},{"./videomailError":98,"defined":16,"ua-parser-js":74}],92:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14722,7 +14764,7 @@ var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./../events":86,"./videomailError":98,"despot":18}],94:[function(_dereq_,module,exports){
+},{"./../events":86,"./videomailError":98,"despot":17}],94:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14753,7 +14795,7 @@ exports.default = {
   }
 };
 
-},{"filesize":25,"humanize-duration":32}],95:[function(_dereq_,module,exports){
+},{"filesize":24,"humanize-duration":31}],95:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15005,7 +15047,7 @@ var _requestFrame2 = _interopRequireDefault(_requestFrame);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"classlist.js":11,"element-closest":22,"request-frame":63}],98:[function(_dereq_,module,exports){
+},{"classlist.js":10,"element-closest":21,"request-frame":64}],98:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15075,6 +15117,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   // be super robust
   var debug = options && options.debug || console.log;
+  var audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled();
 
   debug('VideomailError: create()');
 
@@ -15125,8 +15168,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
     case 'NotFoundError':
     case 'NO_DEVICES_FOUND':
-      message = 'No webcam found';
-      explanation = 'Your browser cannot find a webcam attached to your machine.';
+      if (audioEnabled) {
+        message = 'No webcam nor microphone found';
+        explanation = 'Your browser cannot find a webcam with microphone attached to your machine.';
+      } else {
+        message = 'No webcam found';
+        explanation = 'Your browser cannot find a webcam attached to your machine.';
+      }
+
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
@@ -15357,7 +15406,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 exports.default = VideomailError;
 
-},{"./../resource":88,"./browser":91,"./pretty":96,"create-error":15,"util":78}],99:[function(_dereq_,module,exports){
+},{"./../resource":88,"./browser":91,"./pretty":96,"create-error":14,"util":78}],99:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15925,7 +15974,7 @@ _util2.default.inherits(Buttons, _eventEmitter2.default);
 
 exports.default = Buttons;
 
-},{"./../events":86,"./../util/eventEmitter":93,"contains":13,"hidden":31,"hyperscript":33,"util":78}],100:[function(_dereq_,module,exports){
+},{"./../events":86,"./../util/eventEmitter":93,"contains":12,"hidden":30,"hyperscript":32,"util":78}],100:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16645,7 +16694,7 @@ _util2.default.inherits(Container, _eventEmitter2.default);
 
 exports.default = Container;
 
-},{"./../events":86,"./../resource":88,"./../styles/css/main.min.css.js":89,"./../util/eventEmitter":93,"./../util/videomailError":98,"./buttons":99,"./dimension":101,"./form":102,"./optionsWrapper":103,"./visuals":104,"document-visibility":19,"hidden":31,"insert-css":37,"util":78}],101:[function(_dereq_,module,exports){
+},{"./../events":86,"./../resource":88,"./../styles/css/main.min.css.js":89,"./../util/eventEmitter":93,"./../util/videomailError":98,"./buttons":99,"./dimension":101,"./form":102,"./optionsWrapper":103,"./visuals":104,"document-visibility":18,"hidden":30,"insert-css":36,"util":78}],101:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16769,7 +16818,7 @@ exports.default = {
   }
 };
 
-},{"./../util/videomailError":98,"number-is-integer":46}],102:[function(_dereq_,module,exports){
+},{"./../util/videomailError":98,"number-is-integer":45}],102:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17036,7 +17085,7 @@ _util2.default.inherits(Form, _eventEmitter2.default);
 
 exports.default = Form;
 
-},{"./../events":86,"./../util/eventEmitter":93,"./../util/videomailError":98,"get-form-data":26,"hidden":31,"hyperscript":33,"util":78}],103:[function(_dereq_,module,exports){
+},{"./../events":86,"./../util/eventEmitter":93,"./../util/videomailError":98,"get-form-data":25,"hidden":30,"hyperscript":32,"util":78}],103:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17119,7 +17168,7 @@ exports.default = {
   }
 }; // enhances options with useful functions we can reuse everywhere
 
-},{"deepmerge":16}],104:[function(_dereq_,module,exports){
+},{"deepmerge":15}],104:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17518,7 +17567,7 @@ _util2.default.inherits(Visuals, _eventEmitter2.default);
 
 exports.default = Visuals;
 
-},{"./../events":86,"./../util/eventEmitter":93,"./visuals/inside/recorderInsides":109,"./visuals/notifier":110,"./visuals/recorder":111,"./visuals/replay":112,"hidden":31,"hyperscript":33,"util":78}],105:[function(_dereq_,module,exports){
+},{"./../events":86,"./../util/eventEmitter":93,"./visuals/inside/recorderInsides":109,"./visuals/notifier":110,"./visuals/recorder":111,"./visuals/replay":112,"hidden":30,"hyperscript":32,"util":78}],105:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17616,7 +17665,7 @@ var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":31,"hyperscript":33}],106:[function(_dereq_,module,exports){
+},{"hidden":30,"hyperscript":32}],106:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17692,7 +17741,7 @@ var _videomailError2 = _interopRequireDefault(_videomailError);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./../../../../util/videomailError":98,"hidden":31,"hyperscript":33}],107:[function(_dereq_,module,exports){
+},{"./../../../../util/videomailError":98,"hidden":30,"hyperscript":32}],107:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17749,7 +17798,7 @@ var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":31,"hyperscript":33}],108:[function(_dereq_,module,exports){
+},{"hidden":30,"hyperscript":32}],108:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17911,7 +17960,7 @@ var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":31,"hyperscript":33}],109:[function(_dereq_,module,exports){
+},{"hidden":30,"hyperscript":32}],109:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18392,7 +18441,7 @@ _util2.default.inherits(Notifier, _eventEmitter2.default);
 
 exports.default = Notifier;
 
-},{"./../../events":86,"./../../util/eventEmitter":93,"hidden":31,"hyperscript":33,"util":78}],111:[function(_dereq_,module,exports){
+},{"./../../events":86,"./../../util/eventEmitter":93,"hidden":30,"hyperscript":32,"util":78}],111:[function(_dereq_,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -19591,7 +19640,7 @@ _util2.default.inherits(Recorder, _eventEmitter2.default);
 exports.default = Recorder;
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"./../../constants":85,"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/humanize":94,"./../../util/pretty":96,"./../../util/videomailError":98,"./userMedia":113,"animitter":2,"buffer":8,"canvas-to-buffer":9,"hidden":31,"hyperscript":33,"util":78,"websocket-stream":80}],112:[function(_dereq_,module,exports){
+},{"./../../constants":85,"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/humanize":94,"./../../util/pretty":96,"./../../util/videomailError":98,"./userMedia":113,"animitter":2,"buffer":7,"canvas-to-buffer":8,"hidden":30,"hyperscript":32,"util":78,"websocket-stream":80}],112:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19945,7 +19994,7 @@ _util2.default.inherits(Replay, _eventEmitter2.default);
 
 exports.default = Replay;
 
-},{"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/videomailError":98,"add-eventlistener-with-options":1,"hidden":31,"hyperscript":33,"iphone-inline-video":39,"util":78}],113:[function(_dereq_,module,exports){
+},{"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/videomailError":98,"add-eventlistener-with-options":1,"hidden":30,"hyperscript":32,"iphone-inline-video":38,"util":78}],113:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20436,7 +20485,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var EVENT_ASCII = '|—O—|';
 
-},{"./../../events":86,"./../../util/audioRecorder":90,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/mediaEvents":95,"./../../util/pretty":96,"./../../util/videomailError":98,"hyperscript":33}],"videomail-client":[function(_dereq_,module,exports){
+},{"./../../events":86,"./../../util/audioRecorder":90,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/mediaEvents":95,"./../../util/pretty":96,"./../../util/videomailError":98,"hyperscript":32}],"videomail-client":[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 
 import UserMedia from './../../src/wrappers/visuals/userMedia'
 

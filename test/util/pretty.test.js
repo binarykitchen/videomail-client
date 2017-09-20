@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 
 import pretty from './../../src/util/pretty'
 

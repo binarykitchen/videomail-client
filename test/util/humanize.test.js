@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 
 import humanize from './../../src/util/humanize'
 

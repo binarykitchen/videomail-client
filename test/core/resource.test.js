@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 import Resource from './../../src/resource'
 
 test('Resource:', function (t) {

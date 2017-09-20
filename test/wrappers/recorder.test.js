@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 
 import Recorder from './../../src/wrappers/visuals/recorder'
 
