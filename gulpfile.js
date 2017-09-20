@@ -18,7 +18,7 @@ const sslRootCas = require('ssl-root-cas')
 const watchify = require('watchify')
 const babelify = require('babelify')
 const tapeRun = require('tape-run')
-const tapSpec = require('tap-spec')
+const tapSummarize = require('tap-summary')
 const glob = require('glob')
 
 const packageJson = require('./package.json')
@@ -145,7 +145,10 @@ gulp.task('test', () => {
     .pipe(tapeRun({
       wait: 4e3
     }))
-    .pipe(tapSpec())
+    .pipe(tapSummarize({
+      ansi: true,
+      progress: true
+    }))
     .pipe(process.stdout)
 })
 
