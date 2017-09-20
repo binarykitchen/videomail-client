@@ -47,6 +47,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   // be super robust
   const debug = (options && options.debug) || console.log
+  const audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled()
 
   debug('VideomailError: create()')
 
@@ -97,8 +98,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
     case 'NotFoundError':
     case 'NO_DEVICES_FOUND':
-      message = 'No webcam found'
-      explanation = 'Your browser cannot find a webcam attached to your machine.'
+      if (audioEnabled) {
+        message = 'No webcam nor microphone found'
+        explanation = 'Your browser cannot find a webcam with microphone attached to your machine.'
+      } else {
+        message = 'No webcam found'
+        explanation = 'Your browser cannot find a webcam attached to your machine.'
+      }
+
       classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 

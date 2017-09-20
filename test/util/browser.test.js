@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 
 import Browser from './../../src/util/browser'
 
@@ -8,16 +8,14 @@ test('Browser:', {timeout: 2000}, function (t) {
 
     const browser = new Browser({debug: function () {}})
 
-    var err
-
-    err = browser.checkPlaybackCapabilities()
+    var err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
     tt.ok(err.explanation.indexOf('Probably you need to') >= 0)
 
     err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    var videoType = browser.getVideoType()
+    const videoType = browser.getVideoType()
     tt.equal(videoType, undefined)
 
     err = browser.getNoAccessIssue()
