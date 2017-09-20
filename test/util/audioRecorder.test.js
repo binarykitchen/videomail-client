@@ -1,4 +1,4 @@
-import test from 'tape'
+import test from 'tape-catch'
 
 import AudioRecorder from './../../src/util/audioRecorder'
 

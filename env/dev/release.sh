@@ -39,8 +39,8 @@ fi
 read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
 # Ensures nothing is broken
-# yarn test
-npm run test
+yarn test
+# npm run test
 
 git checkout master
 git push
@@ -54,27 +54,26 @@ git flow release start $VERSION
 gulp bumpVersion --write --version=$VERSION
 
 # Ensure dependencies are okay
-# yarn clean
-npm prune
-# yarn install
-npm install
+# npm prune
+yarn
+# npm install
 
 # Rebuild all assets
 gulp build --minify
 
 # Ensures again that nothing is broken with the build
-# yarn test
-npm run test
+yarn test
+# npm run test
 
 git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
-# echo "Logging to npm ..."
-# yarn login
+echo "Logging to npm ..."
+yarn login
 
 echo "Publishing to npm ..."
-# yarn publish --new-version $VERSION
-npm publish
+yarn publish --new-version $VERSION
+# npm publish
 
 # Complete the previous release
 git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
