@@ -100,6 +100,15 @@ const Visuals = function (container, options) {
     visualsElement.style.height = 'auto'
   }
 
+  this.getRatio = function () {
+    if (visualsElement.clientWidth) {
+      // special case for safari, see getRatio() in recorder
+      return visualsElement.clientHeight / visualsElement.clientWidth
+    } else {
+      return 0
+    }
+  }
+
   function isRecordable () {
     return !self.isNotifying() && !replay.isShown() && !self.isCountingDown()
   }
