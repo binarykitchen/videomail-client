@@ -98,11 +98,11 @@ test('Browser:', {timeout: 2000}, function (t) {
 
     err = browser.checkRecordingCapabilities()
     tt.equal(err.message, 'Sorry, your browser is unable to use webcams')
-    tt.ok(err.explanation.indexOf('Instead of Internet Explorer better pick') >= 0)
+    tt.ok(err.explanation.indexOf('Instead of Internet Explorer you need to upgrade') >= 0)
 
     err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(err.explanation.indexOf('Instead of Internet Explorer better pick') >= 0)
+    tt.ok(err.explanation.indexOf('Instead of Internet Explorer you need to upgrade') >= 0)
 
     err = browser.checkBufferTypes()
     tt.equal(err, undefined)
@@ -131,11 +131,11 @@ test('Browser:', {timeout: 2000}, function (t) {
 
     err = browser.checkRecordingCapabilities()
     tt.equal(err.message, 'Sorry, your browser is unable to use webcams')
-    tt.ok(err.explanation.indexOf('Safari has no webcam support yet.') >= 0)
+    tt.ok(err.explanation.indexOf('Safari below version 11 has no webcam support.') >= 0)
 
     err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(err.explanation.indexOf('Safari has no webcam support yet.') >= 0)
+    tt.ok(err.explanation.indexOf('Safari below version 11 has no webcam support.') >= 0)
 
     err = browser.checkBufferTypes()
     tt.equal(err, undefined)

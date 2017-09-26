@@ -23,14 +23,23 @@ const Browser = function (options) {
   const isChromium = uaParser.browser.name === 'Chromium'
   const firefox = uaParser.browser.name === 'Firefox'
   const osVersion = parseFloat(uaParser.os.version)
+  const browserVersion = parseFloat(uaParser.browser.version)
   const isWindows = uaParser.os.name === 'Windows'
   const isEdge = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10)
   const isIE = /IE/.test(uaParser.browser.name)
   const isSafari = /Safari/.test(uaParser.browser.name)
+  const isOkSafari = isSafari && browserVersion >= 11
   const isOpera = /Opera/.test(uaParser.browser.name)
   const isAndroid = /Android/.test(uaParser.os.name)
   const chromeBased = isChrome || isChromium
-  const okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge
+
+  const okBrowser =
+    chromeBased ||
+    firefox ||
+    isAndroid ||
+    isOpera ||
+    isEdge ||
+    isOkSafari
 
   const self = this
 
@@ -41,22 +50,20 @@ const Browser = function (options) {
 
     if (firefox) {
       warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
-                      'upgrade Firefox</a> to fix this.'
+                'upgrade Firefox</a> to fix this.'
     } else if (isChrome) {
       warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
-                      'upgrade Chrome</a> to fix this.'
+                'upgrade Chrome</a> to fix this.'
     } else if (isChromium) {
-      warning = '<a href="' + chromiumDownload + '" target="_blank">' +
-                      'Upgrade Chromium</a> to fix this.'
+      warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' +
+                'upgrade Chromium</a> to fix this.'
     } else if (isIE) {
-      warning = 'Instead of Internet Explorer better pick' +
-                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
-                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>,' +
-                      ' <a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
+      warning = 'Instead of Internet Explorer you need to upgrade to' +
+                ' <a href="' + edgeDownload + '" target="_blank">Edge</a>.'
     } else if (isSafari) {
-      warning = 'Safari has no webcam support yet.<br/>Better pick' +
-                      ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
-                      ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
+      warning = 'Safari below version 11 has no webcam support.<br/>Better upgrade Safari or pick' +
+                ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +
+                ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.'
     }
 
     return warning
@@ -66,8 +73,8 @@ const Browser = function (options) {
     var warning
 
     if (isIOS) {
-      warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' +
-                'For now, we recommend you to use a desktop computer or an Android device.'
+      warning = 'On iPads/iPhones below iOS 11 this webcam feature is missing.<br/><br/>' +
+                'For now, we recommend you to upgrade iOS or to use an Android device.'
     } else {
       warning = getRecommendation()
     }
@@ -227,6 +234,10 @@ const Browser = function (options) {
 
   this.isMobile = function () {
     return uaParser.device.type === 'mobile'
+  }
+
+  this.isOkSafari = function () {
+    return isOkSafari
   }
 
   this.getUsefulData = function () {

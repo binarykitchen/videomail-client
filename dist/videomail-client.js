@@ -3521,19 +3521,29 @@ function clone(target) {
 },{}],15:[function(_dereq_,module,exports){
 'use strict';
 
-var index$2 = function isMergeableObject(value) {
-	return isNonNullObject(value) && isNotSpecial(value)
+var isMergeableObject = function isMergeableObject(value) {
+	return isNonNullObject(value)
+		&& !isSpecial(value)
 };
 
 function isNonNullObject(value) {
 	return !!value && typeof value === 'object'
 }
 
-function isNotSpecial(value) {
+function isSpecial(value) {
 	var stringValue = Object.prototype.toString.call(value);
 
-	return stringValue !== '[object RegExp]'
-		&& stringValue !== '[object Date]'
+	return stringValue === '[object RegExp]'
+		|| stringValue === '[object Date]'
+		|| isReactElement(value)
+}
+
+// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
+var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
+
+function isReactElement(value) {
+	return value.$$typeof === REACT_ELEMENT_TYPE
 }
 
 function emptyTarget(val) {
@@ -3542,7 +3552,7 @@ function emptyTarget(val) {
 
 function cloneIfNecessary(value, optionsArgument) {
     var clone = optionsArgument && optionsArgument.clone === true;
-    return (clone && index$2(value)) ? deepmerge(emptyTarget(value), value, optionsArgument) : value
+    return (clone && isMergeableObject(value)) ? deepmerge(emptyTarget(value), value, optionsArgument) : value
 }
 
 function defaultArrayMerge(target, source, optionsArgument) {
@@ -3550,7 +3560,7 @@ function defaultArrayMerge(target, source, optionsArgument) {
     source.forEach(function(e, i) {
         if (typeof destination[i] === 'undefined') {
             destination[i] = cloneIfNecessary(e, optionsArgument);
-        } else if (index$2(e)) {
+        } else if (isMergeableObject(e)) {
             destination[i] = deepmerge(target[i], e, optionsArgument);
         } else if (target.indexOf(e) === -1) {
             destination.push(cloneIfNecessary(e, optionsArgument));
@@ -3561,13 +3571,13 @@ function defaultArrayMerge(target, source, optionsArgument) {
 
 function mergeObject(target, source, optionsArgument) {
     var destination = {};
-    if (index$2(target)) {
+    if (isMergeableObject(target)) {
         Object.keys(target).forEach(function(key) {
             destination[key] = cloneIfNecessary(target[key], optionsArgument);
         });
     }
     Object.keys(source).forEach(function(key) {
-        if (!index$2(source[key]) || !target[key]) {
+        if (!isMergeableObject(source[key]) || !target[key]) {
             destination[key] = cloneIfNecessary(source[key], optionsArgument);
         } else {
             destination[key] = deepmerge(target[key], source[key], optionsArgument);
@@ -3603,9 +3613,9 @@ deepmerge.all = function deepmergeAll(array, optionsArgument) {
     })
 };
 
-var index = deepmerge;
+var deepmerge_1 = deepmerge;
 
-module.exports = index;
+module.exports = deepmerge_1;
 
 },{}],16:[function(_dereq_,module,exports){
 module.exports = function () {
@@ -13476,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13523,7 +13533,7 @@ module.exports={
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "1.5.1",
+    "deepmerge": "1.5.2",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
@@ -13544,11 +13554,14 @@ module.exports={
     "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.1"
   },
+  "resolutions": {
+    "electron": "1.7.8"
+  },
   "devDependencies": {
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.6.0",
     "babelify": "7.3.0",
-    "body-parser": "1.18.1",
+    "body-parser": "1.18.2",
     "browserify": "14.4.0",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
@@ -13574,7 +13587,7 @@ module.exports={
     "gulp-util": "3.0.8",
     "minimist": "1.2.0",
     "nib": "1.1.2",
-    "router": "1.3.1",
+    "router": "1.3.2",
     "ssl-root-cas": "1.2.4",
     "standard": "10.0.3",
     "tap-summary": "4.0.0",
@@ -14385,14 +14398,17 @@ var Browser = function Browser(options) {
   var isChromium = uaParser.browser.name === 'Chromium';
   var firefox = uaParser.browser.name === 'Firefox';
   var osVersion = parseFloat(uaParser.os.version);
+  var browserVersion = parseFloat(uaParser.browser.version);
   var isWindows = uaParser.os.name === 'Windows';
   var isEdge = uaParser.browser.name === 'Edge' || isWindows && osVersion >= 10;
   var isIE = /IE/.test(uaParser.browser.name);
   var isSafari = /Safari/.test(uaParser.browser.name);
+  var isOkSafari = isSafari && browserVersion >= 11;
   var isOpera = /Opera/.test(uaParser.browser.name);
   var isAndroid = /Android/.test(uaParser.os.name);
   var chromeBased = isChrome || isChromium;
-  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge;
+
+  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari;
 
   var self = this;
 
@@ -14406,11 +14422,11 @@ var Browser = function Browser(options) {
     } else if (isChrome) {
       warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' + 'upgrade Chrome</a> to fix this.';
     } else if (isChromium) {
-      warning = '<a href="' + chromiumDownload + '" target="_blank">' + 'Upgrade Chromium</a> to fix this.';
+      warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' + 'upgrade Chromium</a> to fix this.';
     } else if (isIE) {
-      warning = 'Instead of Internet Explorer better pick' + ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' + ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a>,' + ' <a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.';
+      warning = 'Instead of Internet Explorer you need to upgrade to' + ' <a href="' + edgeDownload + '" target="_blank">Edge</a>.';
     } else if (isSafari) {
-      warning = 'Safari has no webcam support yet.<br/>Better pick' + ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' + ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.';
+      warning = 'Safari below version 11 has no webcam support.<br/>Better upgrade Safari or pick' + ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' + ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.';
     }
 
     return warning;
@@ -14420,7 +14436,7 @@ var Browser = function Browser(options) {
     var warning;
 
     if (isIOS) {
-      warning = 'On iPads/iPhones this webcam feature is missing.<br/><br/>' + 'For now, we recommend you to use a desktop computer or an Android device.';
+      warning = 'On iPads/iPhones below iOS 11 this webcam feature is missing.<br/><br/>' + 'For now, we recommend you to upgrade iOS or to use an Android device.';
     } else {
       warning = getRecommendation();
     }
@@ -14576,6 +14592,10 @@ var Browser = function Browser(options) {
 
   this.isMobile = function () {
     return uaParser.device.type === 'mobile';
+  };
+
+  this.isOkSafari = function () {
+    return isOkSafari;
   };
 
   this.getUsefulData = function () {
@@ -17297,6 +17317,15 @@ var Visuals = function Visuals(container, options) {
     visualsElement.style.height = 'auto';
   }
 
+  this.getRatio = function () {
+    if (visualsElement.clientWidth) {
+      // special case for safari, see getRatio() in recorder
+      return visualsElement.clientHeight / visualsElement.clientWidth;
+    } else {
+      return 0;
+    }
+  };
+
   function isRecordable() {
     return !self.isNotifying() && !replay.isShown() && !self.isCountingDown();
   }
@@ -18705,7 +18734,11 @@ var Recorder = function Recorder(visuals, replay, options) {
     }
 
     self.hide();
-    self.emit(_events2.default.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true));
+
+    var width = self.getRecorderWidth(true);
+    var height = self.getRecorderHeight(true);
+
+    self.emit(_events2.default.PREVIEW, key, width, height);
 
     // keep it for recording stats
     waitingTime = Date.now() - stopTime;
@@ -18949,15 +18982,19 @@ var Recorder = function Recorder(visuals, replay, options) {
         audio: options.isAudioEnabled()
       };
 
-      if (options.hasDefinedWidth()) {
-        constraints.video.width = { ideal: options.video.width };
+      if (browser.isOkSafari()) {
+        // do not use those width/height constraints, safari would throw an error
+      } else {
+        if (options.hasDefinedWidth()) {
+          constraints.video.width = { ideal: options.video.width };
+        }
+
+        if (options.hasDefinedHeight()) {
+          constraints.video.height = { ideal: options.video.height };
+        }
       }
 
-      if (options.hasDefinedHeight()) {
-        constraints.video.height = { ideal: options.video.height };
-      }
-
-      debug('Recorder: navigator.mediaDevices.getUserMedia()');
+      debug('Recorder: navigator.mediaDevices.getUserMedia()', constraints);
 
       navigator.mediaDevices.getUserMedia(constraints).then(getUserMediaCallback).catch(userMediaErrorCallback);
     } else {
@@ -19567,7 +19604,8 @@ var Recorder = function Recorder(visuals, replay, options) {
 
       // avoid division by zero
       if (userMediaVideoWidth < 1) {
-        ratio = 0;
+        // use as a last resort fallback computation (needed for safari 11)
+        ratio = visuals.getRatio();
       } else {
         ratio = userMedia.getVideoHeight() / userMediaVideoWidth;
       }
@@ -19584,7 +19622,7 @@ var Recorder = function Recorder(visuals, replay, options) {
     if (userMedia) {
       videoHeight = userMedia.getVideoHeight();
     } else if (recorderElement) {
-      videoHeight = recorderElement.videoHeight;
+      videoHeight = recorderElement.videoHeight || recorderElement.height;
     }
 
     return visuals.calculateWidth({
@@ -19600,7 +19638,7 @@ var Recorder = function Recorder(visuals, replay, options) {
     if (userMedia) {
       videoWidth = userMedia.getVideoWidth();
     } else if (recorderElement) {
-      videoWidth = recorderElement.videoWidth;
+      videoWidth = recorderElement.videoWidth || recorderElement.width;
     }
 
     return visuals.calculateHeight({
