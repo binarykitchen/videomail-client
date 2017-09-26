@@ -235,7 +235,11 @@ const Recorder = function (visuals, replay, options) {
     }
 
     self.hide()
-    self.emit(Events.PREVIEW, key, self.getRecorderWidth(true), self.getRecorderHeight(true))
+
+    const width = self.getRecorderWidth(true)
+    const height = self.getRecorderHeight(true)
+
+    self.emit(Events.PREVIEW, key, width, height)
 
     // keep it for recording stats
     waitingTime = Date.now() - stopTime
@@ -510,15 +514,19 @@ const Recorder = function (visuals, replay, options) {
         audio: options.isAudioEnabled()
       }
 
-      if (options.hasDefinedWidth()) {
-        constraints.video.width = {ideal: options.video.width}
+      if (browser.isOkSafari()) {
+        // do not use those width/height constraints, safari would throw an error
+      } else {
+        if (options.hasDefinedWidth()) {
+          constraints.video.width = {ideal: options.video.width}
+        }
+
+        if (options.hasDefinedHeight()) {
+          constraints.video.height = {ideal: options.video.height}
+        }
       }
 
-      if (options.hasDefinedHeight()) {
-        constraints.video.height = {ideal: options.video.height}
-      }
-
-      debug('Recorder: navigator.mediaDevices.getUserMedia()')
+      debug('Recorder: navigator.mediaDevices.getUserMedia()', constraints)
 
       navigator.mediaDevices
         .getUserMedia(constraints)
@@ -1164,7 +1172,8 @@ const Recorder = function (visuals, replay, options) {
 
       // avoid division by zero
       if (userMediaVideoWidth < 1) {
-        ratio = 0
+        // use as a last resort fallback computation (needed for safari 11)
+        ratio = visuals.getRatio()
       } else {
         ratio = userMedia.getVideoHeight() / userMediaVideoWidth
       }
@@ -1181,7 +1190,7 @@ const Recorder = function (visuals, replay, options) {
     if (userMedia) {
       videoHeight = userMedia.getVideoHeight()
     } else if (recorderElement) {
-      videoHeight = recorderElement.videoHeight
+      videoHeight = recorderElement.videoHeight || recorderElement.height
     }
 
     return visuals.calculateWidth({
@@ -1197,7 +1206,7 @@ const Recorder = function (visuals, replay, options) {
     if (userMedia) {
       videoWidth = userMedia.getVideoWidth()
     } else if (recorderElement) {
-      videoWidth = recorderElement.videoWidth
+      videoWidth = recorderElement.videoWidth || recorderElement.width
     }
 
     return visuals.calculateHeight({
