@@ -262,6 +262,11 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 <a name="notes"></a>
 ## Notes
 
+### Noise
+
+Here some noise about Videomail in the wild:
+* [LimpingChicken](http://limpingchicken.com/2017/06/29/michael-heuberger-ive-created-a-web-form-to-send-emails-in-sign-language/)
+
 ### Unfinished Metamorphosis (aka Development)
 
 This is just the beginning. I will add a lot more over time.
