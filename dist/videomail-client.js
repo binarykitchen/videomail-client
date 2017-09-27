@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14422,8 +14422,18 @@ var Browser = function Browser(options) {
 
     if (firefox) {
       warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' + 'upgrade Firefox</a> to fix this.';
+
+      // just temporarily
+      warning += JSON.stringify(self.getUsefulData());
     } else if (isChrome) {
-      warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' + 'upgrade Chrome</a> to fix this.';
+      if (isIOS) {
+        warning = 'Chrome on iOS is not ready for webcams yet. Hopefully in near future ...';
+      } else {
+        warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' + 'upgrade Chrome</a> to fix this.';
+
+        // just temporarily
+        warning += JSON.stringify(self.getUsefulData());
+      }
     } else if (isChromium) {
       warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' + 'upgrade Chromium</a> to fix this.';
     } else if (isIE) {
@@ -14445,7 +14455,7 @@ var Browser = function Browser(options) {
     }
 
     if (!warning) {
-      if (self.isChromeBased() || self.isFirefox()) {
+      if (self.isChromeBased() || self.isFirefox() || isSafari) {
         warning = 'For the webcam feature, your browser needs an upgrade.';
       } else {
         warning = 'Hence we recommend you to use either ' + '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' + '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' + '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.';
@@ -15168,6 +15178,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
       errType = err.name;
     } else if (err.type === 'error' && err.target.bufferedAmount === 0) {
       errType = VideomailError.NOT_CONNECTED;
+    } else if (err.code === 35) {
+      // https://github.com/binarykitchen/videomail.io/issues/411
+      errType = VideomailError.NOT_ALLOWED_ERROR;
     }
   } else if (err === VideomailError.NOT_CONNECTED) {
     errType = VideomailError.NOT_CONNECTED;
@@ -15213,11 +15226,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case 'PermissionDeniedError':
       message = 'Permission denied';
 
-      if (browser.isChromeBased() || browser.isFirefox() || browser.isEdge()) {
-        explanation = 'Permission to access your webcam has been denied. ' + 'This can have two reasons:<br/>' + 'a) you blocked access to webcam; or<br/>' + 'b) your webcam is already in use.';
-      } else {
-        explanation = 'Permission to access your webcam has been denied.';
-      }
+      explanation = 'Cannot access your webcam. This can have two reasons:<br/>' + 'a) you blocked access to webcam; or<br/>' + 'b) your webcam is already in use.';
 
       classList.push(VideomailError.WEBCAM_PROBLEM);
 
