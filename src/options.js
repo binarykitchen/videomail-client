@@ -8,7 +8,7 @@ export default {
   verbose: !PRODUCTION,                 // set true to log more info
   baseUrl: 'https://videomail.io',      // leave as it, permanent url to post videos
   socketUrl: 'wss://videomail.io',      // leave as it, permanent url to send frames
-  siteName: 'videomail-client-demo',    // Required for the API. If you change it, contact me
+  siteName: 'videomail-client-demo',    // Required for API, use https://videomail.io/whitelist
   cache: true,                          // reduces GET queries when loading videos
   insertCss: true,                      // inserts predefined CSS, see examples
   enablePause: true,                    // enable pause/resume button
