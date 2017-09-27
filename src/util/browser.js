@@ -58,15 +58,17 @@ const Browser = function (options) {
 
       // just temporarily
       warning += JSON.stringify(self.getUsefulData())
+      warning += '<br/>okBrowser=' + okBrowser
+      warning += '<br/>isOkSafari=' + isOkSafari
+      warning += '<br/>isOkIOS=' + isOkIOS
+      warning += '<br/>isBadIOS=' + isBadIOS
+      warning += '<br/>canRecord=' + self.canRecord()
     } else if (isChrome) {
       if (isIOS) {
         warning = 'Chrome on iOS is not ready for webcams yet. Hopefully in near future ...'
       } else {
         warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
                   'upgrade Chrome</a> to fix this.'
-
-        // just temporarily
-        warning += JSON.stringify(self.getUsefulData())
       }
     } else if (isChromium) {
       warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' +
