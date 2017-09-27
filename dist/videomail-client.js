@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13912,7 +13912,7 @@ exports.default = {
   verbose: !PRODUCTION, // set true to log more info
   baseUrl: 'https://videomail.io', // leave as it, permanent url to post videos
   socketUrl: 'wss://videomail.io', // leave as it, permanent url to send frames
-  siteName: 'videomail-client-demo', // Required for the API. If you change it, contact me
+  siteName: 'videomail-client-demo', // Required for API, use https://videomail.io/whitelist
   cache: true, // reduces GET queries when loading videos
   insertCss: true, // inserts predefined CSS, see examples
   enablePause: true, // enable pause/resume button
@@ -14394,21 +14394,24 @@ var Browser = function Browser(options) {
   var uaParser = new _uaParserJs2.default(ua).getResult();
 
   var isIOS = uaParser.os.name === 'iOS';
+  var browserVersion = parseFloat(uaParser.browser.version);
   var isChrome = uaParser.browser.name === 'Chrome';
   var isChromium = uaParser.browser.name === 'Chromium';
   var firefox = uaParser.browser.name === 'Firefox';
   var osVersion = parseFloat(uaParser.os.version);
-  var browserVersion = parseFloat(uaParser.browser.version);
   var isWindows = uaParser.os.name === 'Windows';
   var isEdge = uaParser.browser.name === 'Edge' || isWindows && osVersion >= 10;
   var isIE = /IE/.test(uaParser.browser.name);
   var isSafari = /Safari/.test(uaParser.browser.name);
-  var isOkSafari = isSafari && browserVersion >= 11;
   var isOpera = /Opera/.test(uaParser.browser.name);
   var isAndroid = /Android/.test(uaParser.os.name);
   var chromeBased = isChrome || isChromium;
 
-  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari;
+  var isOkSafari = isSafari && browserVersion >= 11;
+  var isOkIOS = isIOS && osVersion >= 11;
+  var isBadIOS = isIOS && osVersion < 11;
+
+  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS;
 
   var self = this;
 
@@ -14435,8 +14438,8 @@ var Browser = function Browser(options) {
   function getUserMediaWarning() {
     var warning;
 
-    if (isIOS) {
-      warning = 'On iPads/iPhones below iOS 11 this webcam feature is missing.<br/><br/>' + 'For now, we recommend you to upgrade iOS or to use an Android device.';
+    if (isBadIOS) {
+      warning = 'On iPads/iPhones below iOS v11 this webcam feature is missing.<br/><br/>' + 'For now, we recommend you to upgrade iOS or to use an Android device.';
     } else {
       warning = getRecommendation();
     }
@@ -14456,7 +14459,7 @@ var Browser = function Browser(options) {
     var warning = getRecommendation();
 
     if (!warning) {
-      warning = '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> ' + 'might help.';
+      warning = '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> might help.';
     }
 
     return warning;
@@ -14494,7 +14497,7 @@ var Browser = function Browser(options) {
     if (!okBrowser || !this.canRecord()) {
       var classList = [];
 
-      if (isIOS) {
+      if (isBadIOS) {
         classList.push(_videomailError2.default.IOS_PROBLEM);
       } else {
         classList.push(_videomailError2.default.BROWSER_PROBLEM);

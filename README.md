@@ -223,7 +223,7 @@ In other words, if your web server is connected through a domain besides localho
 <a name="compatibility"></a>
 ## Backward compatibility
 
-Forget the old IE, Safari and iPhones/iPads because they still don't support `getUserMedia()`. Do not blame me but Apple + Microsoft *chuckle* - but these browsers work like a charm:
+Forget the old IE, Safari below version 11 and ancient iPhones/iPads because they don't support `getUserMedia()`. Do not blame me but Apple + Microsoft *chuckle* - for now, these browsers work like a charm:
 
 * Firefox >= 34
 * Google Chrome >= 32
@@ -232,6 +232,7 @@ Forget the old IE, Safari and iPhones/iPads because they still don't support `ge
 * Opera >= 26
 * Chrome for Android >= 39
 * Android Browser >= 37
+* Safari >= 11
 
 Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
 
@@ -260,6 +261,11 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 
 <a name="notes"></a>
 ## Notes
+
+### Noise
+
+Here some noise about Videomail in the wild:
+* [LimpingChicken](http://limpingchicken.com/2017/06/29/michael-heuberger-ive-created-a-web-form-to-send-emails-in-sign-language/)
 
 ### Unfinished Metamorphosis (aka Development)
 

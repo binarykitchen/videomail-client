@@ -19,19 +19,22 @@ const Browser = function (options) {
   const uaParser = new UAParser(ua).getResult()
 
   const isIOS = uaParser.os.name === 'iOS'
+  const browserVersion = parseFloat(uaParser.browser.version)
   const isChrome = uaParser.browser.name === 'Chrome'
   const isChromium = uaParser.browser.name === 'Chromium'
   const firefox = uaParser.browser.name === 'Firefox'
   const osVersion = parseFloat(uaParser.os.version)
-  const browserVersion = parseFloat(uaParser.browser.version)
   const isWindows = uaParser.os.name === 'Windows'
   const isEdge = uaParser.browser.name === 'Edge' || (isWindows && osVersion >= 10)
   const isIE = /IE/.test(uaParser.browser.name)
   const isSafari = /Safari/.test(uaParser.browser.name)
-  const isOkSafari = isSafari && browserVersion >= 11
   const isOpera = /Opera/.test(uaParser.browser.name)
   const isAndroid = /Android/.test(uaParser.os.name)
   const chromeBased = isChrome || isChromium
+
+  const isOkSafari = isSafari && browserVersion >= 11
+  const isOkIOS = isIOS && osVersion >= 11
+  const isBadIOS = isIOS && osVersion < 11
 
   const okBrowser =
     chromeBased ||
@@ -39,7 +42,8 @@ const Browser = function (options) {
     isAndroid ||
     isOpera ||
     isEdge ||
-    isOkSafari
+    isOkSafari ||
+    isOkIOS
 
   const self = this
 
@@ -72,8 +76,8 @@ const Browser = function (options) {
   function getUserMediaWarning () {
     var warning
 
-    if (isIOS) {
-      warning = 'On iPads/iPhones below iOS 11 this webcam feature is missing.<br/><br/>' +
+    if (isBadIOS) {
+      warning = 'On iPads/iPhones below iOS v11 this webcam feature is missing.<br/><br/>' +
                 'For now, we recommend you to upgrade iOS or to use an Android device.'
     } else {
       warning = getRecommendation()
@@ -97,8 +101,7 @@ const Browser = function (options) {
     var warning = getRecommendation()
 
     if (!warning) {
-      warning = '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> ' +
-                        'might help.'
+      warning = '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> might help.'
     }
 
     return warning
@@ -114,7 +117,7 @@ const Browser = function (options) {
     return canPlayType
   }
 
-    // just temporary
+  // just temporary
   this.canRecord = function () {
     const hasNavigator = typeof navigator !== 'undefined'
     var canRecord = false
@@ -136,7 +139,7 @@ const Browser = function (options) {
     if (!okBrowser || !this.canRecord()) {
       const classList = []
 
-      if (isIOS) {
+      if (isBadIOS) {
         classList.push(VideomailError.IOS_PROBLEM)
       } else {
         classList.push(VideomailError.BROWSER_PROBLEM)
