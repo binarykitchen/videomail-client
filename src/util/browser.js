@@ -55,9 +55,19 @@ const Browser = function (options) {
     if (firefox) {
       warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
                 'upgrade Firefox</a> to fix this.'
+
+      // just temporarily
+      warning += JSON.stringify(self.getUsefulData())
     } else if (isChrome) {
-      warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
-                'upgrade Chrome</a> to fix this.'
+      if (isIOS) {
+        warning = 'Chrome on iOS is not ready for webcams yet. Hopefully in near future ...'
+      } else {
+        warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
+                  'upgrade Chrome</a> to fix this.'
+
+        // just temporarily
+        warning += JSON.stringify(self.getUsefulData())
+      }
     } else if (isChromium) {
       warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' +
                 'upgrade Chromium</a> to fix this.'
@@ -84,7 +94,7 @@ const Browser = function (options) {
     }
 
     if (!warning) {
-      if (self.isChromeBased() || self.isFirefox()) {
+      if (self.isChromeBased() || self.isFirefox() || isSafari) {
         warning = 'For the webcam feature, your browser needs an upgrade.'
       } else {
         warning = 'Hence we recommend you to use either ' +

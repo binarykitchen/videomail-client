@@ -129,7 +129,7 @@ test('Videomail Error:', function (t) {
 
       tt.equal(err1.toString(), 'Videomail Error: Permission denied')
       tt.equal(err1.message, 'Permission denied')
-      tt.equal(err1.explanation, 'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
+      tt.equal(err1.explanation, 'Cannot access your webcam. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
 
       const err2 = VideomailError.create({
         code: 2,
@@ -148,7 +148,7 @@ test('Videomail Error:', function (t) {
 
       tt.equal(err1.toString(), 'Videomail Error: Permission denied')
       tt.equal(err1.message, 'Permission denied')
-      tt.equal(err1.explanation, 'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
+      tt.equal(err1.explanation, 'Cannot access your webcam. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
     })
 
     tt.test('with bad name in object', function (tt) {
@@ -184,7 +184,7 @@ test('Videomail Error:', function (t) {
 
       tt.equal(err.toString(), 'Videomail Error: Permission denied')
       tt.equal(err.message, 'Permission denied')
-      tt.equal(err.explanation, 'Permission to access your webcam has been denied. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
+      tt.equal(err.explanation, 'Cannot access your webcam. This can have two reasons:<br/>a) you blocked access to webcam; or<br/>b) your webcam is already in use.')
     })
 
     tt.test('with HARDWARE_UNAVAILABLE as name in object', function (tt) {
