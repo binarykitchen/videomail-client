@@ -75,6 +75,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
       errType = err.name
     } else if (err.type === 'error' && err.target.bufferedAmount === 0) {
       errType = VideomailError.NOT_CONNECTED
+    } else if (err.code === 35) {
+      // https://github.com/binarykitchen/videomail.io/issues/411
+      errType = VideomailError.NOT_ALLOWED_ERROR
     }
   } else if (err === VideomailError.NOT_CONNECTED) {
     errType = VideomailError.NOT_CONNECTED
@@ -121,14 +124,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case 'PermissionDeniedError':
       message = 'Permission denied'
 
-      if (browser.isChromeBased() || browser.isFirefox() || browser.isEdge()) {
-        explanation = 'Permission to access your webcam has been denied. ' +
-                      'This can have two reasons:<br/>' +
-                      'a) you blocked access to webcam; or<br/>' +
-                      'b) your webcam is already in use.'
-      } else {
-        explanation = 'Permission to access your webcam has been denied.'
-      }
+      explanation = 'Cannot access your webcam. This can have two reasons:<br/>' +
+                    'a) you blocked access to webcam; or<br/>' +
+                    'b) your webcam is already in use.'
 
       classList.push(VideomailError.WEBCAM_PROBLEM)
 
