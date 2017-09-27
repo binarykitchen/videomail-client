@@ -55,12 +55,18 @@ const Browser = function (options) {
     if (firefox) {
       warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
                 'upgrade Firefox</a> to fix this.'
+
+      // just temporarily
+      warning += JSON.stringify(self.getUsefulData())
     } else if (isChrome) {
       if (isIOS) {
         warning = 'Chrome on iOS is not ready for webcams yet. Hopefully in near future ...'
       } else {
         warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
                   'upgrade Chrome</a> to fix this.'
+
+        // just temporarily
+        warning += JSON.stringify(self.getUsefulData())
       }
     } else if (isChromium) {
       warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' +
