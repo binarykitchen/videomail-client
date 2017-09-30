@@ -65,7 +65,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
     // whole code is ugly because all browsers behave so differently :(
 
   if (typeof err === 'object') {
-    if (err.code === 1 && err.PERMISSION_DENIED === 1) {
+    if (err.code === 35) {
+      // https://github.com/binarykitchen/videomail.io/issues/411
+      errType = VideomailError.NOT_ALLOWED_ERROR
+    } else if (err.code === 1 && err.PERMISSION_DENIED === 1) {
       errType = VideomailError.PERMISSION_DENIED
     } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
       errType = VideomailError.DOM_EXCEPTION
@@ -75,9 +78,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
       errType = err.name
     } else if (err.type === 'error' && err.target.bufferedAmount === 0) {
       errType = VideomailError.NOT_CONNECTED
-    } else if (err.code === 35) {
-      // https://github.com/binarykitchen/videomail.io/issues/411
-      errType = VideomailError.NOT_ALLOWED_ERROR
     }
   } else if (err === VideomailError.NOT_CONNECTED) {
     errType = VideomailError.NOT_CONNECTED
