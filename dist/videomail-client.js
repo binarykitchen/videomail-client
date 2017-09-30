@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13513,8 +13513,7 @@ module.exports={
   },
   "engines": {
     "node": "^8.3.0",
-    "yarn": "^1.0.1",
-    "npm": "^5.3.0"
+    "yarn": "^1.1.0"
   },
   "keywords": [
     "webcam",
@@ -13550,7 +13549,7 @@ module.exports={
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.6.0",
+    "superagent": "3.6.1",
     "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.1"
   },
@@ -15166,7 +15165,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
   // whole code is ugly because all browsers behave so differently :(
 
   if ((typeof err === 'undefined' ? 'undefined' : _typeof(err)) === 'object') {
-    if (err.code === 1 && err.PERMISSION_DENIED === 1) {
+    if (err.code === 35) {
+      // https://github.com/binarykitchen/videomail.io/issues/411
+      errType = VideomailError.NOT_ALLOWED_ERROR;
+    } else if (err.code === 1 && err.PERMISSION_DENIED === 1) {
       errType = VideomailError.PERMISSION_DENIED;
     } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
       errType = VideomailError.DOM_EXCEPTION;
@@ -15176,9 +15178,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
       errType = err.name;
     } else if (err.type === 'error' && err.target.bufferedAmount === 0) {
       errType = VideomailError.NOT_CONNECTED;
-    } else if (err.code === 35) {
-      // https://github.com/binarykitchen/videomail.io/issues/411
-      errType = VideomailError.NOT_ALLOWED_ERROR;
     }
   } else if (err === VideomailError.NOT_CONNECTED) {
     errType = VideomailError.NOT_CONNECTED;
