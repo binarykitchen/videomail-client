@@ -157,9 +157,9 @@ const Replay = function (parentElement, options) {
     replayElement.setAttribute('autostart', true)
     replayElement.setAttribute('autobuffer', true)
     replayElement.setAttribute('playsinline', true)
+    replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
     replayElement.setAttribute('controls', 'controls')
     replayElement.setAttribute('preload', 'auto')
-    replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
 
     if (!built) {
       if (!isStandalone()) {

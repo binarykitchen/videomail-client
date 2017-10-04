@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.15",
+  "version": "2.1.16",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -19587,6 +19587,10 @@ var Recorder = function Recorder(visuals, replay, options) {
       // https://github.com/binarykitchen/videomail-client/issues/35
       recorderElement.muted = true;
 
+      // for iphones, see https://github.com/webrtc/samples/issues/929
+      recorderElement.setAttribute('playsinline', true);
+      recorderElement.setAttribute('webkit-playsinline', 'webkit-playsinline');
+
       if (!userMedia) {
         userMedia = new _userMedia2.default(this, options);
       }
@@ -19925,9 +19929,9 @@ var Replay = function Replay(parentElement, options) {
     replayElement.setAttribute('autostart', true);
     replayElement.setAttribute('autobuffer', true);
     replayElement.setAttribute('playsinline', true);
+    replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline');
     replayElement.setAttribute('controls', 'controls');
     replayElement.setAttribute('preload', 'auto');
-    replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline');
 
     if (!built) {
       if (!isStandalone()) {
