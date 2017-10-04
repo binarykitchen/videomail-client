@@ -450,6 +450,8 @@ var Container = function (options) {
   }
 
   this.hide = function () {
+    debug('Container: hide()')
+
     hasError = false
 
     this.isRecording() && this.pause()
@@ -642,9 +644,10 @@ var Container = function (options) {
     return element.parentNode !== containerElement && element !== containerElement
   }
 
-  this.hideForm = function () {
+  this.hideForm = function (params) {
     // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
     form && form.hide()
+    buttons && buttons.hide(params)
   }
 
   this.loadForm = function (videomail) {

@@ -296,6 +296,7 @@ const Buttons = function (container, options) {
   function onGoingBack () {
     hide(recordAgainButton)
     show(recordButton)
+    show(submitButton)
   }
 
   function onReplayShown () {
@@ -557,8 +558,17 @@ const Buttons = function (container, options) {
     built = false
   }
 
-  this.hide = function () {
+  this.hide = function (params) {
     hide(buttonsElement)
+
+    if (params && params.deep) {
+      hide(recordButton)
+      hide(pauseButton)
+      hide(resumeButton)
+      hide(previewButton)
+      hide(recordAgainButton)
+      hide(submitButton)
+    }
   }
 
   this.show = function () {
