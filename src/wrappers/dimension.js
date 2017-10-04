@@ -3,13 +3,20 @@ import numberIsInteger from 'number-is-integer'
 import VideomailError from './../util/videomailError'
 
 function getOuterWidth (element) {
-  const rect = element.getBoundingClientRect()
+  var outerWidth = 0
+  var rect = element.getBoundingClientRect()
 
   if (rect) {
-    return rect.right - rect.left
-  } else {
-    return 0
+    outerWidth = rect.right - rect.left
   }
+
+  if (outerWidth < 1) {
+    // last effort, can happen when replaying only
+    rect = document.body.getBoundingClientRect()
+    outerWidth = rect.right - rect.left
+  }
+
+  return outerWidth
 }
 
 function figureMinHeight (height, options) {
@@ -55,7 +62,7 @@ export default {
     } else {
       const limitedHeight = Math.min(
         height,
-        document.body.scrollHeight,
+        // document.body.scrollHeight,
         document.documentElement.clientHeight
       )
 
