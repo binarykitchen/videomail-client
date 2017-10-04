@@ -8,6 +8,7 @@ import Events from './events'
 import CollectLogger from './util/collectLogger'
 import EventEmitter from './util/eventEmitter'
 import Container from './wrappers/container'
+import Replay from './wrappers/visuals/replay'
 import OptionsWrapper from './wrappers/optionsWrapper'
 import Browser from './util/browser'
 import Resource from './resource'
@@ -101,16 +102,27 @@ const VideomailClient = function (options) {
           readystate.removeAllListeners()
           throw new Error('Unable to replay video without a container nor parent element.')
         }
+      } else {
+        if (container.isOutsideElementOf(parentElement)) {
+          replay = new Replay(parentElement, localOptions)
+          replay.build()
+        }
       }
 
-      replay = container.getReplay()
-      parentElement = replay.getParentElement()
+      if (!replay) {
+        replay = container.getReplay()
+      }
+
+      if (!parentElement) {
+        parentElement = replay.getParentElement()
+      }
+
       videomail = container.addPlayerDimensions(videomail, parentElement)
 
       if (videomail) {
         if (container.isOutsideElementOf(parentElement)) {
           // replay element must be outside of the container
-          container.hideForm()
+          container.hideForm({deep: true})
         } else {
           container.loadForm(videomail)
         }
@@ -127,7 +139,11 @@ const VideomailClient = function (options) {
   }
 
   this.startOver = function () {
-    replay && replay.hide()
+    if (replay) {
+      replay.hide()
+      replay.reset()
+    }
+
     container.startOver()
   }
 

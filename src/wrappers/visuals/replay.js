@@ -297,8 +297,6 @@ const Replay = function (parentElement, options) {
   }
 
   this.hide = function () {
-    debug('Replay: hide()')
-
     if (isStandalone()) {
       hidden(parentElement, true)
     } else {
