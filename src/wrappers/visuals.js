@@ -134,8 +134,10 @@ const Visuals = function (container, options) {
       }
     }
 
+    // do not hide visuals element so that apps can give it a predefined
+    // width or height through css but hide all children
+
     visualsElement.classList.add('visuals')
-    hidden(visualsElement, true)
 
     correctDimensions()
 
