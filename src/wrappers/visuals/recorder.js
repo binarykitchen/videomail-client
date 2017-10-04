@@ -1100,6 +1100,10 @@ const Recorder = function (visuals, replay, options) {
       // https://github.com/binarykitchen/videomail-client/issues/35
       recorderElement.muted = true
 
+      // for iphones, see https://github.com/webrtc/samples/issues/929
+      recorderElement.setAttribute('playsinline', true)
+      recorderElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
+
       if (!userMedia) {
         userMedia = new UserMedia(this, options)
       }
