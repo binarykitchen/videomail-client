@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13549,7 +13549,7 @@ module.exports={
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.6.1",
+    "superagent": "3.6.2",
     "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.1"
   },
@@ -13567,7 +13567,7 @@ module.exports={
     "glob": "7.1.2",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "4.0.0",
-    "gulp-bump": "2.7.0",
+    "gulp-bump": "2.8.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.0.0",
@@ -13641,6 +13641,10 @@ var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 var _container = _dereq_('./wrappers/container');
 
 var _container2 = _interopRequireDefault(_container);
+
+var _replay = _dereq_('./wrappers/visuals/replay');
+
+var _replay2 = _interopRequireDefault(_replay);
 
 var _optionsWrapper = _dereq_('./wrappers/optionsWrapper');
 
@@ -13742,22 +13746,36 @@ var VideomailClient = function VideomailClient(options) {
           _readystate2.default.removeAllListeners();
           throw new Error('Unable to replay video without a container nor parent element.');
         }
+      } else {
+        if (container.isOutsideElementOf(parentElement)) {
+          replay = new _replay2.default(parentElement, localOptions);
+          replay.build();
+        }
       }
 
-      replay = container.getReplay();
-      parentElement = replay.getParentElement();
+      if (!replay) {
+        replay = container.getReplay();
+      }
+
+      if (!parentElement) {
+        parentElement = replay.getParentElement();
+      }
+
       videomail = container.addPlayerDimensions(videomail, parentElement);
 
       if (videomail) {
         if (container.isOutsideElementOf(parentElement)) {
           // replay element must be outside of the container
-          container.hideForm();
+          container.hideForm({ deep: true });
         } else {
           container.loadForm(videomail);
         }
 
-        replay.setVideomail(videomail);
-        container.showReplayOnly();
+        // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+        setTimeout(function () {
+          replay.setVideomail(videomail);
+          container.showReplayOnly();
+        }, 2e3); // not sure, but probably can be reduced a bit
       }
     }
 
@@ -13765,7 +13783,11 @@ var VideomailClient = function VideomailClient(options) {
   };
 
   this.startOver = function () {
-    replay && replay.hide();
+    if (replay) {
+      replay.hide();
+      replay.reset();
+    }
+
     container.startOver();
   };
 
@@ -13821,7 +13843,7 @@ VideomailClient.events = _events2.default;
 
 exports.default = VideomailClient;
 
-},{"./constants":85,"./events":86,"./options":87,"./resource":88,"./util/browser":91,"./util/collectLogger":92,"./util/eventEmitter":93,"./wrappers/container":100,"./wrappers/optionsWrapper":103,"deepmerge":15,"readystate":62,"util":78}],85:[function(_dereq_,module,exports){
+},{"./constants":85,"./events":86,"./options":87,"./resource":88,"./util/browser":91,"./util/collectLogger":92,"./util/eventEmitter":93,"./wrappers/container":100,"./wrappers/optionsWrapper":103,"./wrappers/visuals/replay":112,"deepmerge":15,"readystate":62,"util":78}],85:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15725,6 +15747,7 @@ var Buttons = function Buttons(container, options) {
   function onGoingBack() {
     hide(recordAgainButton);
     show(recordButton);
+    show(submitButton);
   }
 
   function onReplayShown() {
@@ -15986,8 +16009,17 @@ var Buttons = function Buttons(container, options) {
     built = false;
   };
 
-  this.hide = function () {
+  this.hide = function (params) {
     hide(buttonsElement);
+
+    if (params && params.deep) {
+      hide(recordButton);
+      hide(pauseButton);
+      hide(resumeButton);
+      hide(previewButton);
+      hide(recordAgainButton);
+      hide(submitButton);
+    }
   };
 
   this.show = function () {
@@ -16493,6 +16525,8 @@ var Container = function Container(options) {
   };
 
   this.hide = function () {
+    debug('Container: hide()');
+
     hasError = false;
 
     this.isRecording() && this.pause();
@@ -16685,9 +16719,10 @@ var Container = function Container(options) {
     return element.parentNode !== containerElement && element !== containerElement;
   };
 
-  this.hideForm = function () {
+  this.hideForm = function (params) {
     // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
     form && form.hide();
+    buttons && buttons.hide(params);
   };
 
   this.loadForm = function (videomail) {
@@ -16741,13 +16776,20 @@ var _videomailError2 = _interopRequireDefault(_videomailError);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function getOuterWidth(element) {
+  var outerWidth = 0;
   var rect = element.getBoundingClientRect();
 
   if (rect) {
-    return rect.right - rect.left;
-  } else {
-    return 0;
+    outerWidth = rect.right - rect.left;
   }
+
+  if (outerWidth < 1) {
+    // last effort, can happen when replaying only
+    rect = document.body.getBoundingClientRect();
+    outerWidth = rect.right - rect.left;
+  }
+
+  return outerWidth;
 }
 
 function figureMinHeight(height, options) {
@@ -16786,7 +16828,9 @@ exports.default = {
     if ((0, _numberIsInteger2.default)(height) && height < 1) {
       throw _videomailError2.default.create('Passed limit-height argument cannot be less than 1!', options);
     } else {
-      var limitedHeight = Math.min(height, document.body.scrollHeight, document.documentElement.clientHeight);
+      var limitedHeight = Math.min(height,
+      // document.body.scrollHeight,
+      document.documentElement.clientHeight);
 
       if (limitedHeight < 1) {
         throw _videomailError2.default.create('Limited height cannot be less than 1!', options);
@@ -20019,8 +20063,6 @@ var Replay = function Replay(parentElement, options) {
   };
 
   this.hide = function () {
-    debug('Replay: hide()');
-
     if (isStandalone()) {
       (0, _hidden2.default)(parentElement, true);
     } else {

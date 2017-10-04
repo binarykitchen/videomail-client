@@ -36,6 +36,11 @@ if [[ `git status --porcelain` ]]; then
     die "Aborting the bump! You have uncommitted changes."
 fi
 
+# Ensures master is up to date
+git checkout master
+git pull
+git checkout develop
+
 read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
 # Ensures nothing is broken
