@@ -63,7 +63,7 @@
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.6.1",
+    "superagent": "3.6.2",
     "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.1"
   },
@@ -81,7 +81,7 @@
     "glob": "7.1.2",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "4.0.0",
-    "gulp-bump": "2.7.0",
+    "gulp-bump": "2.8.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.0.0",
