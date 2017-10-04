@@ -77,7 +77,7 @@ export default {
   },
 
   image: {
-    quality: 0.45,
+    quality: 0.44,
     types: ['webp', 'jpeg']   // recommended settings to make most of all browsers
   },
 
