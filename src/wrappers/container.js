@@ -183,8 +183,8 @@ var Container = function (options) {
     }
   }
 
-    // this will just set the width but not the height because
-    // it can be a form with more inputs elements
+  // this will just set the width but not the height because
+  // it can be a form with more inputs elements
   function correctDimensions () {
     const width = visuals.getRecorderWidth(true)
 
