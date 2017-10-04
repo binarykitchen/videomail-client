@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.13",
+  "version": "2.1.14",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -17404,8 +17404,10 @@ var Visuals = function Visuals(container, options) {
       }
     }
 
+    // do not hide visuals element so that apps can give it a predefined
+    // width or height through css but hide all children
+
     visualsElement.classList.add('visuals');
-    (0, _hidden2.default)(visualsElement, true);
 
     correctDimensions();
 
