@@ -2,6 +2,10 @@
 
 To keep it sweet and short, we're listing breaking or hot changes here only. Rest assured that we kill bugs all the time and they would make that list way too long (and are documented in GitHub tickets anyway).
 
+### v2.1.0 (2017-08-31)
+
+- **VideomailClient:** Works again on Edge, phew.
+
 ### v2.0.0 (2017-07-09)
 
 Migrated source code to ES6. Now **VideomailClient** can be imported using the module approach.

@@ -87,8 +87,10 @@ const Buttons = function (container, options) {
     })
   }
 
-  function adjustButton (buttonElement, show, type) {
-    disable(buttonElement)
+  function adjustButton (buttonElement, show, type, disabled) {
+    if (disabled) {
+      disable(buttonElement)
+    }
 
     if (type) {
       buttonElement.type = type
@@ -152,7 +154,7 @@ const Buttons = function (container, options) {
     return [radioButtonElement, radioButtonGroup]
   }
 
-  function makeButton (buttonClass, text, clickHandler, show, id, type, selector) {
+  function makeButton (buttonClass, text, clickHandler, show, id, type, selector, disabled = true) {
     var buttonElement
 
     if (id) {
@@ -169,7 +171,7 @@ const Buttons = function (container, options) {
       }
 
       buttonElement = h('button.' + buttonClass)
-      buttonElement = adjustButton(buttonElement, show, type)
+      buttonElement = adjustButton(buttonElement, show, type, disabled)
 
       buttonElement.innerHTML = text
 
@@ -180,7 +182,7 @@ const Buttons = function (container, options) {
         buttonsElement.appendChild(buttonElement)
       }
     } else {
-      buttonElement = adjustButton(buttonElement, show)
+      buttonElement = adjustButton(buttonElement, show, type, disabled)
     }
 
     if (clickHandler) {
@@ -200,7 +202,8 @@ const Buttons = function (container, options) {
           true,
           options.selectors.submitButtonId,
           'submit',
-          options.selectors.submitButtonSelector
+          options.selectors.submitButtonSelector,
+          options.enableAutoValidation
         )
       } else {
         disable(submitButton)
@@ -279,17 +282,21 @@ const Buttons = function (container, options) {
     }
   }
 
-  function onFormReady (options) {
+  function onFormReady (params) {
     // no need to show record button when doing a record again
     if (!isShown(recordAgainButton)) {
-      if (!options.paused) {
+      if (!params.paused) {
         show(recordButton)
       }
     }
 
-    if (!options.paused) {
+    if (!params.paused) {
       disable(previewButton)
       hide(previewButton)
+    }
+
+    if (!options.enableAutoValidation) {
+      enable(submitButton)
     }
   }
 
@@ -318,7 +325,9 @@ const Buttons = function (container, options) {
       enable(audioOffRadioPair)
     }
 
-    disable(submitButton)
+    if (options.enableAutoValidation) {
+      disable(submitButton)
+    }
   }
 
   function onResetting () {
@@ -453,6 +462,10 @@ const Buttons = function (container, options) {
     container.recordAgain()
   }
 
+  function onStartingOver () {
+    show(submitButton)
+  }
+
   function submit () {
     container.submit()
   }
@@ -503,6 +516,8 @@ const Buttons = function (container, options) {
       onEnablingAudio()
     }).on(Events.DISABLING_AUDIO, function () {
       onDisablingAudio()
+    }).on(Events.STARTING_OVER, function () {
+      onStartingOver()
     }).on(Events.ERROR, function (err) {
       // since https://github.com/binarykitchen/videomail-client/issues/60
       // we hide areas to make it easier for the user
