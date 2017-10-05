@@ -35,7 +35,8 @@ export default keymirror({
   DISABLING_AUDIO: null, // about to disable audio
   LOADED_META_DATA: null, // raised when webcam knows its dimensions
   EVENT_EMITTED: null, // for debugging only, is emitted when an event is emitted lol,
-  GOING_BACK: null, // going back, starting all over again,
+  GOING_BACK: null, // switch from replaying back to recording
+  STARTING_OVER: null, // starting all over again back to its inital state
   ASKING_WEBCAM_PERMISSION: null, // when about to ask for webcam permissions
   VISIBLE: null, // document just became visible
   INVISIBLE: null  // document just became INvisible
