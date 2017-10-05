@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.16",
+  "version": "2.1.17",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13549,7 +13549,7 @@ module.exports={
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.6.2",
+    "superagent": "3.6.3",
     "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.1"
   },
@@ -13761,34 +13761,34 @@ var VideomailClient = function VideomailClient(options) {
         parentElement = replay.getParentElement();
       }
 
-      videomail = container.addPlayerDimensions(videomail, parentElement);
-
       if (videomail) {
-        if (container.isOutsideElementOf(parentElement)) {
-          // replay element must be outside of the container
-          container.hideForm({ deep: true });
-        } else {
-          container.loadForm(videomail);
-        }
-
-        // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-        setTimeout(function () {
-          replay.setVideomail(videomail);
-          container.showReplayOnly();
-        }, 10e2); // not sure, but probably can be reduced a bit
+        videomail = container.addPlayerDimensions(videomail, parentElement);
       }
+
+      if (container.isOutsideElementOf(parentElement)) {
+        // replay element must be outside of the container
+        container.hideForm({ deep: true });
+      } else {
+        container.loadForm(videomail);
+      }
+
+      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+      setTimeout(function () {
+        replay.setVideomail(videomail);
+        container.showReplayOnly();
+      }, 10e2); // not sure, but probably can be reduced a bit
     }
 
     _readystate2.default.interactive(buildReplay);
   };
 
-  this.startOver = function () {
+  this.startOver = function (params) {
     if (replay) {
       replay.hide();
       replay.reset();
     }
 
-    container.startOver();
+    container.startOver(params);
   };
 
   this.unload = function (e) {
@@ -13909,7 +13909,8 @@ exports.default = (0, _keymirror2.default)({
   DISABLING_AUDIO: null, // about to disable audio
   LOADED_META_DATA: null, // raised when webcam knows its dimensions
   EVENT_EMITTED: null, // for debugging only, is emitted when an event is emitted lol,
-  GOING_BACK: null, // going back, starting all over again,
+  GOING_BACK: null, // switch from replaying back to recording
+  STARTING_OVER: null, // starting all over again back to its inital state
   ASKING_WEBCAM_PERMISSION: null, // when about to ask for webcam permissions
   VISIBLE: null, // document just became visible
   INVISIBLE: null // document just became INvisible
@@ -15571,8 +15572,10 @@ var Buttons = function Buttons(container, options) {
     });
   }
 
-  function adjustButton(buttonElement, show, type) {
-    disable(buttonElement);
+  function adjustButton(buttonElement, show, type, disabled) {
+    if (disabled) {
+      disable(buttonElement);
+    }
 
     if (type) {
       buttonElement.type = type;
@@ -15637,6 +15640,8 @@ var Buttons = function Buttons(container, options) {
   }
 
   function makeButton(buttonClass, text, clickHandler, show, id, type, selector) {
+    var disabled = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;
+
     var buttonElement;
 
     if (id) {
@@ -15653,7 +15658,7 @@ var Buttons = function Buttons(container, options) {
       }
 
       buttonElement = (0, _hyperscript2.default)('button.' + buttonClass);
-      buttonElement = adjustButton(buttonElement, show, type);
+      buttonElement = adjustButton(buttonElement, show, type, disabled);
 
       buttonElement.innerHTML = text;
 
@@ -15664,7 +15669,7 @@ var Buttons = function Buttons(container, options) {
         buttonsElement.appendChild(buttonElement);
       }
     } else {
-      buttonElement = adjustButton(buttonElement, show);
+      buttonElement = adjustButton(buttonElement, show, type, disabled);
     }
 
     if (clickHandler) {
@@ -15677,7 +15682,7 @@ var Buttons = function Buttons(container, options) {
   function buildButtons() {
     if (!options.disableSubmit) {
       if (!submitButton) {
-        submitButton = makeButton(options.selectors.submitButtonClass, 'Submit', null, true, options.selectors.submitButtonId, 'submit', options.selectors.submitButtonSelector);
+        submitButton = makeButton(options.selectors.submitButtonClass, 'Submit', null, true, options.selectors.submitButtonId, 'submit', options.selectors.submitButtonSelector, options.enableAutoValidation);
       } else {
         disable(submitButton);
       }
@@ -15730,17 +15735,21 @@ var Buttons = function Buttons(container, options) {
     }
   }
 
-  function onFormReady(options) {
+  function onFormReady(params) {
     // no need to show record button when doing a record again
     if (!isShown(recordAgainButton)) {
-      if (!options.paused) {
+      if (!params.paused) {
         show(recordButton);
       }
     }
 
-    if (!options.paused) {
+    if (!params.paused) {
       disable(previewButton);
       hide(previewButton);
+    }
+
+    if (!options.enableAutoValidation) {
+      enable(submitButton);
     }
   }
 
@@ -15769,7 +15778,9 @@ var Buttons = function Buttons(container, options) {
       enable(audioOffRadioPair);
     }
 
-    disable(submitButton);
+    if (options.enableAutoValidation) {
+      disable(submitButton);
+    }
   }
 
   function onResetting() {
@@ -15904,6 +15915,10 @@ var Buttons = function Buttons(container, options) {
     container.recordAgain();
   }
 
+  function onStartingOver() {
+    show(submitButton);
+  }
+
   function submit() {
     container.submit();
   }
@@ -15954,6 +15969,8 @@ var Buttons = function Buttons(container, options) {
       onEnablingAudio();
     }).on(_events2.default.DISABLING_AUDIO, function () {
       onDisablingAudio();
+    }).on(_events2.default.STARTING_OVER, function () {
+      onStartingOver();
     }).on(_events2.default.ERROR, function (err) {
       // since https://github.com/binarykitchen/videomail-client/issues/60
       // we hide areas to make it easier for the user
@@ -16337,7 +16354,18 @@ var Container = function Container(options) {
   }
 
   function submitForm(formData, videomailResponse, url, cb) {
-    formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias;
+    // for now, accept POSTs only which have an URL unlike null and
+    // treat all other submissions as direct submissions
+
+    if (!url || url === '') {
+      // figure out URL automatically then
+      url = document.baseURI;
+    }
+
+    // can be missing when no videomail was recorded and is not required
+    if (videomailResponse) {
+      formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias;
+    }
 
     resource.form(formData, url, cb);
   }
@@ -16351,13 +16379,13 @@ var Container = function Container(options) {
       submitted = true;
 
       // merge two json response bodies to fake as if it were only one request
-      if (formResponse && formResponse.body) {
+      if (response && formResponse && formResponse.body) {
         Object.keys(formResponse.body).forEach(function (key) {
           response[key] = formResponse.body[key];
         });
       }
 
-      self.emit(_events2.default.SUBMITTED, videomail, response);
+      self.emit(_events2.default.SUBMITTED, videomail, response || formResponse);
 
       if (formResponse && formResponse.type === 'text/html' && formResponse.text) {
         // server replied with HTML contents - display these
@@ -16539,6 +16567,27 @@ var Container = function Container(options) {
     }
   };
 
+  this.startOver = function (params) {
+    try {
+      self.emit(_events2.default.STARTING_OVER);
+
+      submitted = false;
+      form.show();
+      visuals.back(params, function () {
+        if (params.keepHidden) {
+          // just enable form, do nothing else.
+          // see example contact_form.html when you submit without videomil
+          // and go back
+          self.enableForm();
+        } else {
+          self.show(params);
+        }
+      });
+    } catch (exc) {
+      self.emit(_events2.default.ERROR, exc);
+    }
+  };
+
   this.showReplayOnly = function () {
     hasError = false;
 
@@ -16559,16 +16608,6 @@ var Container = function Container(options) {
 
   this.pause = function (params) {
     visuals.pause(params);
-  };
-
-  this.startOver = function () {
-    try {
-      submitted = false;
-      form.show();
-      visuals.back(this.show);
-    } catch (exc) {
-      self.emit(_events2.default.ERROR, exc);
-    }
   };
 
   // this code needs a good rewrite :(
@@ -16600,7 +16639,7 @@ var Container = function Container(options) {
 
         if (valid) {
           if (!this.areVisualsHidden() && !visualsValid) {
-            if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
+            if (submitted || this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
               valid = false;
             }
 
@@ -16663,20 +16702,13 @@ var Container = function Container(options) {
     this.emit(_events2.default.SUBMITTING);
 
     var post = isPost(method);
+    var hasVideomailKey = !!formData[options.selectors.keyInputName];
 
     // a closure so that we can access method
     var submitVideomailCallback = function submitVideomailCallback(err1, videomail, videomailResponse) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse);
       } else if (post) {
-        // for now, accept POSTs only which have an URL unlike null and
-        // treat all other submissions as direct submissions
-
-        if (!url || url === '') {
-          // figure out URL automatically then
-          url = document.baseURI;
-        }
-
         submitForm(formData, videomailResponse, url, function (err2, formResponse) {
           finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse);
         });
@@ -16686,7 +16718,13 @@ var Container = function Container(options) {
       }
     };
 
-    submitVideomail(formData, method, submitVideomailCallback);
+    if (!hasVideomailKey) {
+      submitForm(formData, null, url, function (err2, formResponse) {
+        finalizeSubmissions(err2, method, null, null, formResponse);
+      });
+    } else {
+      submitVideomail(formData, method, submitVideomailCallback);
+    }
   };
 
   this.isBuilt = function () {
@@ -17095,19 +17133,15 @@ var Form = function Form(container, formElement, options) {
   }
 
   this.doTheSubmit = function (e) {
-    // when videomail-client is hidden, leave the form handling as it and
-    // do not mess with it at all
-    if (!container.areVisualsHidden()) {
-      e && e.preventDefault();
+    e && e.preventDefault();
 
-      // only adjust submission when there is a container, otherwise
-      // do nothing and leave as it for robustness
-      if (container.hasElement()) {
-        container.submitAll(getData(), formElement.getAttribute('method'), formElement.getAttribute('action'));
-      }
-
-      return false; // important to stop submission
+    // only adjust submission when there is a container, otherwise
+    // do nothing and leave as it for robustness
+    if (container.hasElement()) {
+      container.submitAll(getData(), formElement.getAttribute('method'), formElement.getAttribute('action'));
     }
+
+    return false; // important to stop submission
   };
 
   this.getInvalidElement = function () {
@@ -17450,10 +17484,21 @@ var Visuals = function Visuals(container, options) {
     recorderInsides.hidePause();
   };
 
-  this.back = function (cb) {
+  this.back = function (params, cb) {
+    if (!cb && params) {
+      cb = params;
+      params = {};
+    }
+
     replay.hide();
     notifier.hide();
-    recorder.back(cb);
+
+    if (params.keepHidden) {
+      recorder.hide();
+      cb && cb();
+    } else {
+      recorder.back(cb);
+    }
   };
 
   this.recordAgain = function () {
@@ -19852,32 +19897,36 @@ var Replay = function Replay(parentElement, options) {
   this.setVideomail = function (newVideomail) {
     videomail = newVideomail;
 
-    if (videomail.webm) {
-      this.setWebMSource(videomail.webm);
+    if (videomail) {
+      if (videomail.webm) {
+        this.setWebMSource(videomail.webm);
+      }
+
+      if (videomail.mp4) {
+        this.setMp4Source(videomail.mp4);
+      }
+
+      if (videomail.poster) {
+        replayElement.setAttribute('poster', videomail.poster);
+      }
+
+      copyAttributes(videomail);
     }
 
-    if (videomail.mp4) {
-      this.setMp4Source(videomail.mp4);
-    }
+    var hasAudio = videomail && videomail.recordingStats && videomail.recordingStats.sampleRate > 0;
 
-    if (videomail.poster) {
-      replayElement.setAttribute('poster', videomail.poster);
-    }
-
-    copyAttributes(videomail);
-
-    var hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0;
-
-    this.show(videomail.width, videomail.height, hasAudio);
+    this.show(videomail && videomail.width, videomail && videomail.height, hasAudio);
   };
 
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
-    correctDimensions({
-      responsive: true,
-      // beware that recorderWidth and recorderHeight can be null sometimes
-      videoWidth: recorderWidth || replayElement.videoWidth,
-      videoHeight: recorderHeight || replayElement.videoHeight
-    });
+    if (videomail) {
+      correctDimensions({
+        responsive: true,
+        // beware that recorderWidth and recorderHeight can be null sometimes
+        videoWidth: recorderWidth || replayElement.videoWidth,
+        videoHeight: recorderHeight || replayElement.videoHeight
+      });
+    }
 
     (0, _hidden2.default)(replayElement, false);
 

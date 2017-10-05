@@ -12,32 +12,20 @@
         </style>
     </head>
     <body>
-        <h1>Contact Form Integration</h1>
-        <p>A JSON based contact form embracing Sign Language!</p>
+        <h1>Have Videomail optional in forms</h1>
+        <p>Another form example where the videomail input itself is optional.</p>
 
         <!-- Once you set the method to POST, then two request will be made internally. -->
         <!-- The first one to the videomail server and the second one to the specified action -->
-        <form action="/contact" method="post" id="someForm">
+        <form action="/contact" method="post" id="optionalVideomailForm">
             <input name='from'    type='email' placeholder='Enter your email address' required/>
             <input name='subject' type='text'  placeholder='Enter a subject' required/>
-            <fieldset>
-                <legend>How do you want to contact us?</legend>
-                <p>
-                    <input type="radio" name="how" id="writingOption" value="writing" checked/>
-                    <label for="writingOption">In Writing</label>
-                </p>
-                <p>
-                    <input type="radio" name="how" id="signLanguageOption" value="sign_language"/>
-                    <label for="signLanguageOption">In Sign Language</label>
-                </p>
-            </fieldset>
-            <textarea id='body' name='body' placeholder='Enter your message' cols='40' rows='5' required></textarea>
-
             <div id="videomail"></div>
+            <textarea id='body' name='body' placeholder='Enter your message' cols='40' rows='5' required></textarea>
         </form>
 
         <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
-        <input type="button" value="Submit" disabled>
+        <input type="button" value="Submit">
 
         <div id="viewVideo" style="display:none">
             <h2 class="subject"></h2>
@@ -52,26 +40,14 @@
             var videomailClient = new VideomailClient({
               verbose: true,
               video: {limitSeconds: 120, width: 320, countdown: false},
+              enableAutoValidation: false,
               selectors: {
                 submitButtonSelector: 'body input[value="Submit"]',
-                formId: 'someForm'
-              },
-              callbacks: {
-                adjustFormDataBeforePosting: function (videomail, cb) {
-                  videomail.subject = 'Adjusted: ' + videomail.subject
-
-                  cb(null, videomail)
-                }
-              },
-              defaults: {
-                body: 'No message content'
+                formId: 'optionalVideomailForm'
               }
             })
 
             var startOverButton = document.getElementById('startOver')
-            var writingOption = document.getElementById('writingOption')
-            var signLanguageOption = document.getElementById('signLanguageOption')
-            var body = document.getElementById('body')
 
             var onSubmitted = function (videomail, response) {
               var statusHeader = document.querySelector('h3.status')
@@ -81,29 +57,15 @@
 
               this.replay(videomail, 'viewVideo')
 
-              startOverButton.onclick = function () {
-                videomailClient.startOver({keepHidden: writingOption.checked})
-              }
-            }
-
-            writingOption.onclick = function () {
-              videomailClient.hide()
-
-              body.style.display = 'block'
-              body.required = true
-            }
-
-            signLanguageOption.onclick = function () {
-              videomailClient.show()
-
-              body.style.display = 'none'
-              body.required = false
+              startOverButton.onclick = this.startOver
             }
 
             videomailClient.on(
               videomailClient.events.SUBMITTED,
               onSubmitted.bind(videomailClient)
             )
+
+            videomailClient.show()
         </script>
     </body>
 </html>

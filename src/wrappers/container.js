@@ -253,7 +253,18 @@ var Container = function (options) {
   }
 
   function submitForm (formData, videomailResponse, url, cb) {
-    formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias
+    // for now, accept POSTs only which have an URL unlike null and
+    // treat all other submissions as direct submissions
+
+    if (!url || url === '') {
+      // figure out URL automatically then
+      url = document.baseURI
+    }
+
+    // can be missing when no videomail was recorded and is not required
+    if (videomailResponse) {
+      formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias
+    }
 
     resource.form(formData, url, cb)
   }
@@ -267,7 +278,7 @@ var Container = function (options) {
       submitted = true
 
       // merge two json response bodies to fake as if it were only one request
-      if (formResponse && formResponse.body) {
+      if (response && formResponse && formResponse.body) {
         Object.keys(formResponse.body).forEach(function (key) {
           response[key] = formResponse.body[key]
         })
@@ -276,7 +287,7 @@ var Container = function (options) {
       self.emit(
         Events.SUBMITTED,
         videomail,
-        response
+        response || formResponse
       )
 
       if (formResponse && formResponse.type === 'text/html' && formResponse.text) {
@@ -464,6 +475,27 @@ var Container = function (options) {
     }
   }
 
+  this.startOver = function (params) {
+    try {
+      self.emit(Events.STARTING_OVER)
+
+      submitted = false
+      form.show()
+      visuals.back(params, function () {
+        if (params.keepHidden) {
+          // just enable form, do nothing else.
+          // see example contact_form.html when you submit without videomil
+          // and go back
+          self.enableForm()
+        } else {
+          self.show(params)
+        }
+      })
+    } catch (exc) {
+      self.emit(Events.ERROR, exc)
+    }
+  }
+
   this.showReplayOnly = function () {
     hasError = false
 
@@ -484,16 +516,6 @@ var Container = function (options) {
 
   this.pause = function (params) {
     visuals.pause(params)
-  }
-
-  this.startOver = function () {
-    try {
-      submitted = false
-      form.show()
-      visuals.back(this.show)
-    } catch (exc) {
-      self.emit(Events.ERROR, exc)
-    }
   }
 
   // this code needs a good rewrite :(
@@ -525,7 +547,7 @@ var Container = function (options) {
 
         if (valid) {
           if (!this.areVisualsHidden() && !visualsValid) {
-            if (this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
+            if (submitted || this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
               valid = false
             }
 
@@ -588,20 +610,13 @@ var Container = function (options) {
     this.emit(Events.SUBMITTING)
 
     const post = isPost(method)
+    const hasVideomailKey = !!formData[options.selectors.keyInputName]
 
         // a closure so that we can access method
     var submitVideomailCallback = function (err1, videomail, videomailResponse) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse)
       } else if (post) {
-        // for now, accept POSTs only which have an URL unlike null and
-        // treat all other submissions as direct submissions
-
-        if (!url || url === '') {
-          // figure out URL automatically then
-          url = document.baseURI
-        }
-
         submitForm(formData, videomailResponse, url, function (err2, formResponse) {
           finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse)
         })
@@ -611,7 +626,13 @@ var Container = function (options) {
       }
     }
 
-    submitVideomail(formData, method, submitVideomailCallback)
+    if (!hasVideomailKey) {
+      submitForm(formData, null, url, function (err2, formResponse) {
+        finalizeSubmissions(err2, method, null, null, formResponse)
+      })
+    } else {
+      submitVideomail(formData, method, submitVideomailCallback)
+    }
   }
 
   this.isBuilt = function () {
