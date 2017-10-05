@@ -80,32 +80,40 @@ const Replay = function (parentElement, options) {
   this.setVideomail = function (newVideomail) {
     videomail = newVideomail
 
-    if (videomail.webm) {
-      this.setWebMSource(videomail.webm)
+    if (videomail) {
+      if (videomail.webm) {
+        this.setWebMSource(videomail.webm)
+      }
+
+      if (videomail.mp4) {
+        this.setMp4Source(videomail.mp4)
+      }
+
+      if (videomail.poster) {
+        replayElement.setAttribute('poster', videomail.poster)
+      }
+
+      copyAttributes(videomail)
     }
 
-    if (videomail.mp4) {
-      this.setMp4Source(videomail.mp4)
-    }
+    const hasAudio = videomail && videomail.recordingStats && videomail.recordingStats.sampleRate > 0
 
-    if (videomail.poster) {
-      replayElement.setAttribute('poster', videomail.poster)
-    }
-
-    copyAttributes(videomail)
-
-    const hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0
-
-    this.show(videomail.width, videomail.height, hasAudio)
+    this.show(
+      videomail && videomail.width,
+      videomail && videomail.height,
+      hasAudio
+    )
   }
 
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
-    correctDimensions({
-      responsive: true,
-      // beware that recorderWidth and recorderHeight can be null sometimes
-      videoWidth: recorderWidth || replayElement.videoWidth,
-      videoHeight: recorderHeight || replayElement.videoHeight
-    })
+    if (videomail) {
+      correctDimensions({
+        responsive: true,
+        // beware that recorderWidth and recorderHeight can be null sometimes
+        videoWidth: recorderWidth || replayElement.videoWidth,
+        videoHeight: recorderHeight || replayElement.videoHeight
+      })
+    }
 
     hidden(replayElement, false)
 
