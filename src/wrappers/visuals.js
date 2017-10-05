@@ -180,10 +180,21 @@ const Visuals = function (container, options) {
     recorderInsides.hidePause()
   }
 
-  this.back = function (cb) {
+  this.back = function (params, cb) {
+    if (!cb && params) {
+      cb = params
+      params = {}
+    }
+
     replay.hide()
     notifier.hide()
-    recorder.back(cb)
+
+    if (params.keepHidden) {
+      recorder.hide()
+      cb && cb()
+    } else {
+      recorder.back(cb)
+    }
   }
 
   this.recordAgain = function () {

@@ -117,34 +117,34 @@ const VideomailClient = function (options) {
         parentElement = replay.getParentElement()
       }
 
-      videomail = container.addPlayerDimensions(videomail, parentElement)
-
       if (videomail) {
-        if (container.isOutsideElementOf(parentElement)) {
-          // replay element must be outside of the container
-          container.hideForm({deep: true})
-        } else {
-          container.loadForm(videomail)
-        }
-
-        // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-        setTimeout(function () {
-          replay.setVideomail(videomail)
-          container.showReplayOnly()
-        }, 10e2) // not sure, but probably can be reduced a bit
+        videomail = container.addPlayerDimensions(videomail, parentElement)
       }
+
+      if (container.isOutsideElementOf(parentElement)) {
+        // replay element must be outside of the container
+        container.hideForm({deep: true})
+      } else {
+        container.loadForm(videomail)
+      }
+
+      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+      setTimeout(function () {
+        replay.setVideomail(videomail)
+        container.showReplayOnly()
+      }, 10e2) // not sure, but probably can be reduced a bit
     }
 
     readystate.interactive(buildReplay)
   }
 
-  this.startOver = function () {
+  this.startOver = function (params) {
     if (replay) {
       replay.hide()
       replay.reset()
     }
 
-    container.startOver()
+    container.startOver(params)
   }
 
   this.unload = function (e) {
