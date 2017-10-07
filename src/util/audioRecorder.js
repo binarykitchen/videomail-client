@@ -5,17 +5,22 @@ import VideomailError from './videomailError'
 
 const CHANNELS = 1
 
+// for inspiration see
+// https://github.com/saebekassebil/microphone-stream
+
 export default function (userMedia, options) {
   var scriptProcessor
+  var audioInput
+  var vcAudioContext
 
   function getAudioContext () {
     // instantiate only once
-    if (!window.vcAudioContext) {
+    if (!vcAudioContext) {
       const AudioContext = window.AudioContext || window.webkitAudioContext
-      window.vcAudioContext = new AudioContext()
+      vcAudioContext = new AudioContext()
     }
 
-    return window.vcAudioContext
+    return vcAudioContext
   }
 
   function onAudioProcess (e, cb) {
@@ -35,8 +40,6 @@ export default function (userMedia, options) {
 
     // creates an audio node from the microphone incoming stream
     const volume = getAudioContext().createGain()
-
-    var audioInput
 
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
@@ -90,10 +93,16 @@ export default function (userMedia, options) {
       scriptProcessor.onaudioprocess = undefined
     }
 
+    if (audioInput) {
+      audioInput.disconnect()
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
-    getAudioContext().close().then(function () {
+    getAudioContext()
+    .close()
+    .then(function () {
       options.debug('AudioRecorder: audio context is closed')
-      delete window.vcAudioContext
+      vcAudioContext = null
     })
   }
 
