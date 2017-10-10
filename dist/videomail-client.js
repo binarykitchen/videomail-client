@@ -3519,7 +3519,11 @@ function clone(target) {
 });
 
 },{}],15:[function(_dereq_,module,exports){
-'use strict';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.deepmerge = factory());
+}(this, (function () { 'use strict';
 
 var isMergeableObject = function isMergeableObject(value) {
 	return isNonNullObject(value)
@@ -3547,75 +3551,71 @@ function isReactElement(value) {
 }
 
 function emptyTarget(val) {
-    return Array.isArray(val) ? [] : {}
+	return Array.isArray(val) ? [] : {}
 }
 
-function cloneIfNecessary(value, optionsArgument) {
-    var clone = optionsArgument && optionsArgument.clone === true;
-    return (clone && isMergeableObject(value)) ? deepmerge(emptyTarget(value), value, optionsArgument) : value
+function cloneUnlessOtherwiseSpecified(value, optionsArgument) {
+	var clone = !optionsArgument || optionsArgument.clone !== false;
+
+	return (clone && isMergeableObject(value))
+		? deepmerge(emptyTarget(value), value, optionsArgument)
+		: value
 }
 
 function defaultArrayMerge(target, source, optionsArgument) {
-    var destination = target.slice();
-    source.forEach(function(e, i) {
-        if (typeof destination[i] === 'undefined') {
-            destination[i] = cloneIfNecessary(e, optionsArgument);
-        } else if (isMergeableObject(e)) {
-            destination[i] = deepmerge(target[i], e, optionsArgument);
-        } else if (target.indexOf(e) === -1) {
-            destination.push(cloneIfNecessary(e, optionsArgument));
-        }
-    });
-    return destination
+	return target.concat(source).map(function(element) {
+		return cloneUnlessOtherwiseSpecified(element, optionsArgument)
+	})
 }
 
 function mergeObject(target, source, optionsArgument) {
-    var destination = {};
-    if (isMergeableObject(target)) {
-        Object.keys(target).forEach(function(key) {
-            destination[key] = cloneIfNecessary(target[key], optionsArgument);
-        });
-    }
-    Object.keys(source).forEach(function(key) {
-        if (!isMergeableObject(source[key]) || !target[key]) {
-            destination[key] = cloneIfNecessary(source[key], optionsArgument);
-        } else {
-            destination[key] = deepmerge(target[key], source[key], optionsArgument);
-        }
-    });
-    return destination
+	var destination = {};
+	if (isMergeableObject(target)) {
+		Object.keys(target).forEach(function(key) {
+			destination[key] = cloneUnlessOtherwiseSpecified(target[key], optionsArgument);
+		});
+	}
+	Object.keys(source).forEach(function(key) {
+		if (!isMergeableObject(source[key]) || !target[key]) {
+			destination[key] = cloneUnlessOtherwiseSpecified(source[key], optionsArgument);
+		} else {
+			destination[key] = deepmerge(target[key], source[key], optionsArgument);
+		}
+	});
+	return destination
 }
 
 function deepmerge(target, source, optionsArgument) {
-    var sourceIsArray = Array.isArray(source);
-    var targetIsArray = Array.isArray(target);
-    var options = optionsArgument || { arrayMerge: defaultArrayMerge };
-    var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
+	var sourceIsArray = Array.isArray(source);
+	var targetIsArray = Array.isArray(target);
+	var options = optionsArgument || { arrayMerge: defaultArrayMerge };
+	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
 
-    if (!sourceAndTargetTypesMatch) {
-        return cloneIfNecessary(source, optionsArgument)
-    } else if (sourceIsArray) {
-        var arrayMerge = options.arrayMerge || defaultArrayMerge;
-        return arrayMerge(target, source, optionsArgument)
-    } else {
-        return mergeObject(target, source, optionsArgument)
-    }
+	if (!sourceAndTargetTypesMatch) {
+		return cloneUnlessOtherwiseSpecified(source, optionsArgument)
+	} else if (sourceIsArray) {
+		var arrayMerge = options.arrayMerge || defaultArrayMerge;
+		return arrayMerge(target, source, optionsArgument)
+	} else {
+		return mergeObject(target, source, optionsArgument)
+	}
 }
 
 deepmerge.all = function deepmergeAll(array, optionsArgument) {
-    if (!Array.isArray(array) || array.length < 2) {
-        throw new Error('first argument should be an array with at least two elements')
-    }
+	if (!Array.isArray(array)) {
+		throw new Error('first argument should be an array')
+	}
 
-    // we are sure there are at least 2 values, so it is safe to have no initial value
-    return array.reduce(function(prev, next) {
-        return deepmerge(prev, next, optionsArgument)
-    })
+	return array.reduce(function(prev, next) {
+		return deepmerge(prev, next, optionsArgument)
+	}, {})
 };
 
 var deepmerge_1 = deepmerge;
 
-module.exports = deepmerge_1;
+return deepmerge_1;
+
+})));
 
 },{}],16:[function(_dereq_,module,exports){
 module.exports = function () {
@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.17",
+  "version": "2.1.18",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13532,7 +13532,7 @@ module.exports={
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "1.5.2",
+    "deepmerge": "2.0.0",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
@@ -13666,7 +13666,7 @@ var browser;
 function adjustOptions() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-  var localOptions = (0, _deepmerge2.default)(_options2.default, options, true);
+  var localOptions = (0, _deepmerge2.default)(_options2.default, options);
 
   collectLogger = collectLogger || new _collectLogger2.default(localOptions);
 
@@ -14262,7 +14262,7 @@ var CACHE_KEY = 'alias';
 },{"./constants":85,"superagent":67}],89:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = '@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{-o-object-fit:contain;object-fit:contain}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
+module.exports = '@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{width:100%;height:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
 
 },{}],90:[function(_dereq_,module,exports){
 'use strict';
@@ -14273,15 +14273,17 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function (userMedia, options) {
   var scriptProcessor;
+  var audioInput;
+  var vcAudioContext;
 
   function getAudioContext() {
     // instantiate only once
-    if (!window.vcAudioContext) {
+    if (!vcAudioContext) {
       var AudioContext = window.AudioContext || window.webkitAudioContext;
-      window.vcAudioContext = new AudioContext();
+      vcAudioContext = new AudioContext();
     }
 
-    return window.vcAudioContext;
+    return vcAudioContext;
   }
 
   function onAudioProcess(e, cb) {
@@ -14301,8 +14303,6 @@ exports.default = function (userMedia, options) {
 
     // creates an audio node from the microphone incoming stream
     var volume = getAudioContext().createGain();
-
-    var audioInput;
 
     try {
       audioInput = getAudioContext().createMediaStreamSource(localMediaStream);
@@ -14348,10 +14348,14 @@ exports.default = function (userMedia, options) {
       scriptProcessor.onaudioprocess = undefined;
     }
 
+    if (audioInput) {
+      audioInput.disconnect();
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
     getAudioContext().close().then(function () {
       options.debug('AudioRecorder: audio context is closed');
-      delete window.vcAudioContext;
+      vcAudioContext = null;
     });
   };
 
@@ -14379,6 +14383,9 @@ var _videomailError2 = _interopRequireDefault(_videomailError);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var CHANNELS = 1;
+
+// for inspiration see
+// https://github.com/saebekassebil/microphone-stream
 
 },{"./videomailError":98,"audio-sample":3,"is-power-of-two":41}],91:[function(_dereq_,module,exports){
 'use strict';
@@ -15153,6 +15160,7 @@ VideomailError.MEDIA_DEVICE_NOT_SUPPORTED = 'MediaDeviceNotSupported';
 VideomailError.BROWSER_PROBLEM = 'browser-problem';
 VideomailError.WEBCAM_PROBLEM = 'webcam-problem';
 VideomailError.IOS_PROBLEM = 'ios-problem';
+VideomailError.OVERCONSTRAINED = 'OverconstrainedError';
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -15195,6 +15203,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       errType = VideomailError.PERMISSION_DENIED;
     } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
       errType = VideomailError.DOM_EXCEPTION;
+    } else if (err.constructor && err.constructor.name === VideomailError.OVERCONSTRAINED) {
+      errType = VideomailError.OVERCONSTRAINED;
     } else if (err.message === VideomailError.STARTING_FAILED) {
       errType = err.message;
     } else if (err.name) {
@@ -15213,6 +15223,17 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   switch (errType) {
+    case VideomailError.OVERCONSTRAINED:
+      message = 'Invalid webcam constraints';
+
+      if (err.constraint) {
+        if (err.constraint === 'width') {
+          explanation = 'Your webcam does not meet the width requirement.';
+        } else {
+          explanation = 'Unmet constraint: ' + err.constraint;
+        }
+      }
+      break;
     case 'SourceUnavailableError':
       message = 'Source of your webcam cannot be accessed';
       explanation = 'Probably it is locked from another process or has a hardware error.';
@@ -17267,7 +17288,7 @@ exports.default = {
   // and over again each day. and other large sites out there have their own
   // tech debts. hope i have shattered your illusion on perfection?
   merge: function merge(defaultOptions, newOptions) {
-    var options = (0, _deepmerge2.default)(defaultOptions, newOptions, true);
+    var options = (0, _deepmerge2.default)(defaultOptions, newOptions);
 
     this.addFunctions(options);
 
@@ -19024,7 +19045,7 @@ var Recorder = function Recorder(visuals, replay, options) {
 
     if (errorListeners.length) {
       if (err.name !== _videomailError2.default.MEDIA_DEVICE_NOT_SUPPORTED) {
-        self.emit(_events2.default.ERROR, err);
+        self.emit(_events2.default.ERROR, _videomailError2.default.create(err, options));
       } else {
         // do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
         debug('Recorder: ignore user media error', err);
@@ -19083,7 +19104,10 @@ var Recorder = function Recorder(visuals, replay, options) {
       };
 
       if (browser.isOkSafari()) {
-        // do not use those width/height constraints, safari would throw an error
+        // do not use those width/height constraints yet,
+        // current safari would throw an error
+        // todo in https://github.com/binarykitchen/videomail-client/issues/142
+
       } else {
         if (options.hasDefinedWidth()) {
           constraints.video.width = { ideal: options.video.width };

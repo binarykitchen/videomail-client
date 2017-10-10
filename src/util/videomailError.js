@@ -30,6 +30,7 @@ VideomailError.MEDIA_DEVICE_NOT_SUPPORTED = 'MediaDeviceNotSupported'
 VideomailError.BROWSER_PROBLEM = 'browser-problem'
 VideomailError.WEBCAM_PROBLEM = 'webcam-problem'
 VideomailError.IOS_PROBLEM = 'ios-problem'
+VideomailError.OVERCONSTRAINED = 'OverconstrainedError'
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -72,6 +73,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       errType = VideomailError.PERMISSION_DENIED
     } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
       errType = VideomailError.DOM_EXCEPTION
+    } else if (err.constructor && err.constructor.name === VideomailError.OVERCONSTRAINED) {
+      errType = VideomailError.OVERCONSTRAINED
     } else if (err.message === VideomailError.STARTING_FAILED) {
       errType = err.message
     } else if (err.name) {
@@ -90,6 +93,17 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   switch (errType) {
+    case VideomailError.OVERCONSTRAINED:
+      message = 'Invalid webcam constraints'
+
+      if (err.constraint) {
+        if (err.constraint === 'width') {
+          explanation = 'Your webcam does not meet the width requirement.'
+        } else {
+          explanation = 'Unmet constraint: ' + err.constraint
+        }
+      }
+      break
     case 'SourceUnavailableError':
       message = 'Source of your webcam cannot be accessed'
       explanation = 'Probably it is locked from another process or has a hardware error.'
