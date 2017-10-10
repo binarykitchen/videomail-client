@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.18",
+  "version": "2.1.19",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14276,6 +14276,10 @@ exports.default = function (userMedia, options) {
   var audioInput;
   var vcAudioContext;
 
+  function hasAudioContext() {
+    return !!getAudioContext();
+  }
+
   function getAudioContext() {
     // instantiate only once
     if (!vcAudioContext) {
@@ -14353,14 +14357,22 @@ exports.default = function (userMedia, options) {
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
-    getAudioContext().close().then(function () {
-      options.debug('AudioRecorder: audio context is closed');
-      vcAudioContext = null;
-    });
+    if (hasAudioContext()) {
+      if (getAudioContext().close) {
+        getAudioContext().close().then(function () {
+          options.debug('AudioRecorder: audio context is closed');
+          vcAudioContext = null;
+        }).catch(function (err) {
+          throw _videomailError2.default.create(err, options);
+        });
+      } else {
+        vcAudioContext = null;
+      }
+    }
   };
 
   this.getSampleRate = function () {
-    if (getAudioContext()) {
+    if (hasAudioContext()) {
       return getAudioContext().sampleRate;
     } else {
       return -1;
@@ -14386,6 +14398,8 @@ var CHANNELS = 1;
 
 // for inspiration see
 // https://github.com/saebekassebil/microphone-stream
+
+// todo code needs rewrite
 
 },{"./videomailError":98,"audio-sample":3,"is-power-of-two":41}],91:[function(_dereq_,module,exports){
 'use strict';
