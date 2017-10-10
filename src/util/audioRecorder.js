@@ -8,10 +8,16 @@ const CHANNELS = 1
 // for inspiration see
 // https://github.com/saebekassebil/microphone-stream
 
+// todo code needs rewrite
+
 export default function (userMedia, options) {
   var scriptProcessor
   var audioInput
   var vcAudioContext
+
+  function hasAudioContext () {
+    return !!getAudioContext()
+  }
 
   function getAudioContext () {
     // instantiate only once
@@ -98,16 +104,25 @@ export default function (userMedia, options) {
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
-    getAudioContext()
-    .close()
-    .then(function () {
-      options.debug('AudioRecorder: audio context is closed')
-      vcAudioContext = null
-    })
+    if (hasAudioContext()) {
+      if (getAudioContext().close) {
+        getAudioContext()
+          .close()
+          .then(function () {
+            options.debug('AudioRecorder: audio context is closed')
+            vcAudioContext = null
+          })
+          .catch(function (err) {
+            throw VideomailError.create(err, options)
+          })
+      } else {
+        vcAudioContext = null
+      }
+    }
   }
 
   this.getSampleRate = function () {
-    if (getAudioContext()) {
+    if (hasAudioContext()) {
       return getAudioContext().sampleRate
     } else {
       return -1
