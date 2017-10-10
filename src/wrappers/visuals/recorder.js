@@ -447,7 +447,10 @@ const Recorder = function (visuals, replay, options) {
 
     if (errorListeners.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
-        self.emit(Events.ERROR, err)
+        self.emit(Events.ERROR, VideomailError.create(
+          err,
+          options
+        ))
       } else {
         // do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
         debug('Recorder: ignore user media error', err)
@@ -515,7 +518,10 @@ const Recorder = function (visuals, replay, options) {
       }
 
       if (browser.isOkSafari()) {
-        // do not use those width/height constraints, safari would throw an error
+        // do not use those width/height constraints yet,
+        // current safari would throw an error
+        // todo in https://github.com/binarykitchen/videomail-client/issues/142
+
       } else {
         if (options.hasDefinedWidth()) {
           constraints.video.width = {ideal: options.video.width}
