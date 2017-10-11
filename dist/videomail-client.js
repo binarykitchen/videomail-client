@@ -13486,7 +13486,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.19",
+  "version": "2.1.20",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13552,9 +13552,6 @@ module.exports={
     "superagent": "3.6.3",
     "ua-parser-js": "0.7.14",
     "websocket-stream": "5.0.1"
-  },
-  "resolutions": {
-    "electron": "1.7.8"
   },
   "devDependencies": {
     "babel-polyfill": "6.26.0",
@@ -15246,6 +15243,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
         } else {
           explanation = 'Unmet constraint: ' + err.constraint;
         }
+      } else {
+        explanation = ' Details: ' + pretty(err);
       }
       break;
     case 'SourceUnavailableError':
