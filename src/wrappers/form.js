@@ -178,11 +178,13 @@ const Form = function (container, formElement, options) {
   }
 
   this.doTheSubmit = (e) => {
-    e && e.preventDefault()
+    if (e) {
+      e.preventDefault()
+    }
 
-    // only adjust submission when there is a container, otherwise
-    // do nothing and leave as it for robustness
-    if (container.hasElement()) {
+    // only submit when automatic and when there is a container,
+    // otherwise do nothing and leave as it
+    if (options.enableAutoSubmission && container.hasElement()) {
       container.submitAll(
         getData(),
         formElement.getAttribute('method'),
