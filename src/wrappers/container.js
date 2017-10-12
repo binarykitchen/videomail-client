@@ -605,14 +605,16 @@ var Container = function (options) {
   }
 
   this.submitAll = function (formData, method, url) {
-    this.beginWaiting()
-    this.disableForm(true)
-    this.emit(Events.SUBMITTING)
-
     const post = isPost(method)
     const hasVideomailKey = !!formData[options.selectors.keyInputName]
 
-        // a closure so that we can access method
+    function startSubmission () {
+      self.beginWaiting()
+      self.disableForm(true)
+      self.emit(Events.SUBMITTING)
+    }
+
+    // a closure so that we can access method
     var submitVideomailCallback = function (err1, videomail, videomailResponse) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse)
@@ -626,11 +628,21 @@ var Container = function (options) {
       }
     }
 
+    // !hasVideomailKey makes it possible to submit form when videomail itself
+    // is not optional.
     if (!hasVideomailKey) {
-      submitForm(formData, null, url, function (err2, formResponse) {
-        finalizeSubmissions(err2, method, null, null, formResponse)
-      })
+      if (options.enableAutoSubmission) {
+        startSubmission()
+        submitForm(formData, null, url, function (err2, formResponse) {
+          finalizeSubmissions(err2, method, null, null, formResponse)
+        })
+      }
+      // ... and when the enableAutoSubmission option is false,
+      // then that can mean, leave it to the framework to process with the form
+      // validation/handling/submission itself. for example the ninja form
+      // will want to highlight which one input are wrong.
     } else {
+      startSubmission()
       submitVideomail(formData, method, submitVideomailCallback)
     }
   }

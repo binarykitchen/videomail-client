@@ -13491,7 +13491,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.21",
+  "version": "2.1.22",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -16739,12 +16739,14 @@ var Container = function Container(options) {
   }
 
   this.submitAll = function (formData, method, url) {
-    this.beginWaiting();
-    this.disableForm(true);
-    this.emit(_events2.default.SUBMITTING);
-
     var post = isPost(method);
     var hasVideomailKey = !!formData[options.selectors.keyInputName];
+
+    function startSubmission() {
+      self.beginWaiting();
+      self.disableForm(true);
+      self.emit(_events2.default.SUBMITTING);
+    }
 
     // a closure so that we can access method
     var submitVideomailCallback = function submitVideomailCallback(err1, videomail, videomailResponse) {
@@ -16760,11 +16762,21 @@ var Container = function Container(options) {
       }
     };
 
+    // !hasVideomailKey makes it possible to submit form when videomail itself
+    // is not optional.
     if (!hasVideomailKey) {
-      submitForm(formData, null, url, function (err2, formResponse) {
-        finalizeSubmissions(err2, method, null, null, formResponse);
-      });
+      if (options.enableAutoSubmission) {
+        startSubmission();
+        submitForm(formData, null, url, function (err2, formResponse) {
+          finalizeSubmissions(err2, method, null, null, formResponse);
+        });
+      }
+      // ... and when the enableAutoSubmission option is false,
+      // then that can mean, leave it to the framework to process with the form
+      // validation/handling/submission itself. for example the ninja form
+      // will want to highlight which one input are wrong.
     } else {
+      startSubmission();
       submitVideomail(formData, method, submitVideomailCallback);
     }
   };
@@ -17179,9 +17191,9 @@ var Form = function Form(container, formElement, options) {
       e.preventDefault();
     }
 
-    // only submit when automatic and when there is a container,
+    // only submit when there is a container,
     // otherwise do nothing and leave as it
-    if (options.enableAutoSubmission && container.hasElement()) {
+    if (container.hasElement()) {
       container.submitAll(getData(), formElement.getAttribute('method'), formElement.getAttribute('action'));
     }
 
