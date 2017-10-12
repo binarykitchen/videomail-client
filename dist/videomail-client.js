@@ -11519,7 +11519,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }).call(this,_dereq_("buffer").Buffer)
 },{"buffer":7,"is-typedarray":42}],74:[function(_dereq_,module,exports){
 /**
- * UAParser.js v0.7.14
+ * UAParser.js v0.7.15
  * Lightweight JavaScript-based User-Agent string parser
  * https://github.com/faisalman/ua-parser-js
  *
@@ -11536,7 +11536,7 @@ module.exports = function typedarrayToBuffer (arr) {
     /////////////
 
 
-    var LIBVERSION  = '0.7.14',
+    var LIBVERSION  = '0.7.15',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -12394,7 +12394,7 @@ module.exports = function typedarrayToBuffer (arr) {
     /////////////////
     // Constructor
     ////////////////
-
+    /*
     var Browser = function (name, version) {
         this[NAME] = name;
         this[VERSION] = version;
@@ -12409,7 +12409,7 @@ module.exports = function typedarrayToBuffer (arr) {
     };
     var Engine = Browser;
     var OS = Browser;
-
+    */
     var UAParser = function (uastring, extensions) {
 
         if (typeof uastring === 'object') {
@@ -12423,30 +12423,35 @@ module.exports = function typedarrayToBuffer (arr) {
 
         var ua = uastring || ((window && window.navigator && window.navigator.userAgent) ? window.navigator.userAgent : EMPTY);
         var rgxmap = extensions ? util.extend(regexes, extensions) : regexes;
-        var browser = new Browser();
-        var cpu = new CPU();
-        var device = new Device();
-        var engine = new Engine();
-        var os = new OS();
+        //var browser = new Browser();
+        //var cpu = new CPU();
+        //var device = new Device();
+        //var engine = new Engine();
+        //var os = new OS();
 
         this.getBrowser = function () {
+            var browser = { name: undefined, version: undefined };
             mapper.rgx.call(browser, ua, rgxmap.browser);
             browser.major = util.major(browser.version); // deprecated
             return browser;
         };
         this.getCPU = function () {
+            var cpu = { architecture: undefined };
             mapper.rgx.call(cpu, ua, rgxmap.cpu);
             return cpu;
         };
         this.getDevice = function () {
+            var device = { vendor: undefined, model: undefined, type: undefined };
             mapper.rgx.call(device, ua, rgxmap.device);
             return device;
         };
         this.getEngine = function () {
+            var engine = { name: undefined, version: undefined };
             mapper.rgx.call(engine, ua, rgxmap.engine);
             return engine;
         };
         this.getOS = function () {
+            var os = { name: undefined, version: undefined };
             mapper.rgx.call(os, ua, rgxmap.os);
             return os;
         };
@@ -12465,11 +12470,11 @@ module.exports = function typedarrayToBuffer (arr) {
         };
         this.setUA = function (uastring) {
             ua = uastring;
-            browser = new Browser();
-            cpu = new CPU();
-            device = new Device();
-            engine = new Engine();
-            os = new OS();
+            //browser = new Browser();
+            //cpu = new CPU();
+            //device = new Device();
+            //engine = new Engine();
+            //os = new OS();
             return this;
         };
         return this;
@@ -13486,7 +13491,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.20",
+  "version": "2.1.21",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13550,7 +13555,7 @@ module.exports={
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
     "superagent": "3.6.3",
-    "ua-parser-js": "0.7.14",
+    "ua-parser-js": "0.7.15",
     "websocket-stream": "5.0.1"
   },
   "devDependencies": {
@@ -13942,6 +13947,9 @@ exports.default = {
   enableAutoValidation: true, // automatically validates all form inputs if any exist and
   // does not /enable disable submit button after recording
   // when something else seems invalid.
+  enableAutoSubmission: true, // automatically submits the form where the videomail-client
+  // appears upon press of submit button. disable it when
+  // you want a framework to deal with the form submission itself.
 
   enctype: 'application/json', // enctype for the form submission. currently implemented are:
   // 'application/json' and 'application/x-www-form-urlencoded'
@@ -17167,11 +17175,13 @@ var Form = function Form(container, formElement, options) {
   }
 
   this.doTheSubmit = function (e) {
-    e && e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
 
-    // only adjust submission when there is a container, otherwise
-    // do nothing and leave as it for robustness
-    if (container.hasElement()) {
+    // only submit when automatic and when there is a container,
+    // otherwise do nothing and leave as it
+    if (options.enableAutoSubmission && container.hasElement()) {
       container.submitAll(getData(), formElement.getAttribute('method'), formElement.getAttribute('action'));
     }
 
