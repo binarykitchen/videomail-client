@@ -19,6 +19,9 @@ export default {
   enableAutoValidation: true,           // automatically validates all form inputs if any exist and
                                         // does not /enable disable submit button after recording
                                         // when something else seems invalid.
+  enableAutoSubmission: true,           // automatically submits the form where the videomail-client
+                                        // appears upon press of submit button. disable it when
+                                        // you want a framework to deal with the form submission itself.
 
   enctype: 'application/json',          // enctype for the form submission. currently implemented are:
                                         // 'application/json' and 'application/x-www-form-urlencoded'
