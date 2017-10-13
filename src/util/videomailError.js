@@ -103,7 +103,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = 'Unmet constraint: ' + err.constraint
         }
       } else {
-        explanation = ' Details: ' + pretty(err)
+        explanation = ' Details: ' + util.inspect(err, {showHidden: true})
       }
       break
     case 'SourceUnavailableError':
