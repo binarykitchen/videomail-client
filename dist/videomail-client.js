@@ -4376,7 +4376,7 @@ function isUndefined(arg) {
  *
  * @copyright 2017 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 3.5.10
+ * @version 3.5.11
  */
 (function (global) {
 	var b = /^(b|B)$/,
@@ -13525,7 +13525,7 @@ function wrappy (fn, cb) {
 },{}],83:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.23",
+  "version": "2.1.24",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13576,7 +13576,7 @@ module.exports={
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
     "element-closest": "2.0.2",
-    "filesize": "3.5.10",
+    "filesize": "3.5.11",
     "get-form-data": "1.2.5",
     "hidden": "1.1.1",
     "humanize-duration": "3.10.1",
@@ -13594,7 +13594,7 @@ module.exports={
   },
   "devDependencies": {
     "babel-polyfill": "6.26.0",
-    "babel-preset-env": "1.6.0",
+    "babel-preset-env": "1.6.1",
     "babelify": "7.3.0",
     "body-parser": "1.18.2",
     "browserify": "14.4.0",
@@ -15286,7 +15286,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = 'Unmet constraint: ' + err.constraint;
         }
       } else {
-        explanation = ' Details: ' + _util2.default.inspect(err, { showHidden: true });
+        explanation = ' Details: ' + err.toString();
       }
       break;
     case 'SourceUnavailableError':
