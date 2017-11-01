@@ -50,7 +50,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   const debug = (options && options.debug) || console.log
   const audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled()
 
-  debug('VideomailError: create()')
+  debug('VideomailError: create()', err, explanation)
 
   const classList = parameters.classList || []
 
@@ -223,7 +223,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message
         } else {
           // tried toString before but nah
-          explanation = util.inspect(originalExplanation, {showHidden: true})
+          explanation = 'Inspected: ' + util.inspect(originalExplanation, {showHidden: true})
         }
       }
 
