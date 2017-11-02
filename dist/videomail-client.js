@@ -565,7 +565,47 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":23,"inherits":35,"raf":51}],3:[function(_dereq_,module,exports){
+},{"events":24,"inherits":36,"raf":52}],3:[function(_dereq_,module,exports){
+(function (Buffer){
+(function (w) {
+  "use strict";
+
+  var a2b = w.atob;
+
+  function atob(str) {
+    // normal window
+    if ('function' === typeof a2b) {
+      return a2b(str);
+    }
+    // browserify (web worker)
+    else if ('function' === typeof Buffer) {
+      return new Buffer(str, 'base64').toString('binary');
+    }
+    // ios web worker with base64js
+    else if ('object' === typeof w.base64js) {
+      // bufferToBinaryString
+      // https://github.com/coolaj86/unibabel-js/blob/master/index.js#L50
+      var buf = w.base64js.b64ToByteArray(str);
+
+      return Array.prototype.map.call(buf, function (ch) {
+        return String.fromCharCode(ch);
+      }).join('');
+    }
+    // ios web worker without base64js
+    else {
+      throw new Error("you're probably in an ios webworker. please include use beatgammit's base64-js");
+    }
+  }
+
+  w.atob = atob;
+
+  if (typeof module !== 'undefined') {
+    module.exports = atob;
+  }
+}(window));
+
+}).call(this,_dereq_("buffer").Buffer)
+},{"buffer":8}],4:[function(_dereq_,module,exports){
 var toBuffer       = _dereq_('typedarray-to-buffer'),
     isFloat32Array = _dereq_('validate.io-float32array')
 
@@ -591,7 +631,7 @@ module.exports = function(float32Array) {
     }
 }
 
-},{"typedarray-to-buffer":73,"validate.io-float32array":79}],4:[function(_dereq_,module,exports){
+},{"typedarray-to-buffer":74,"validate.io-float32array":80}],5:[function(_dereq_,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -707,9 +747,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],5:[function(_dereq_,module,exports){
-
 },{}],6:[function(_dereq_,module,exports){
+
+},{}],7:[function(_dereq_,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -817,7 +857,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],7:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -2533,238 +2573,243 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":4,"ieee754":33}],8:[function(_dereq_,module,exports){
-var toBuffer  = _dereq_('typedarray-to-buffer'),
-    isBrowser = typeof(document) !== 'undefined' && typeof(document.createElement) === 'function',
+},{"base64-js":5,"ieee754":34}],9:[function(_dereq_,module,exports){
+var toBuffer = _dereq_('typedarray-to-buffer')
+var atob = _dereq_('atob')
+var isBrowser = typeof (document) !== 'undefined' && typeof (document.createElement) === 'function'
 
-    // cached, used only once for browser environments
-    verifiedImageType
+// cached, used only once for browser environments
+var verifiedImageType
 
-module.exports = function(canvas, options) {
+module.exports = function (canvas, options) {
+  var self = this
+  var quality
 
-    var self = this, quality
+  options = options || {}
+  options.image = options.image ? options.image : {}
+  options.image.types = options.image.types ? options.image.types : []
 
-    options             = options               ? options :             {}
-    options.image       = options.image         ? options.image :       {}
-    options.image.types = options.image.types   ? options.image.types : []
+  // validate some options this class needs
+  if (options.image.types.length > 2) {
+    throw new Error('Too many image types are specified!')
+  } else if (options.image.types.length < 1) {
+    // Set a default image type, just to be robust
+    options.image.types = isBrowser ? ['webp', 'jpeg'] : ['png']
+  }
 
-    // validate some options this class needs
-    if (options.image.types.length > 2)
-        throw new Error('Too many image types are specified!')
+  if (!options.image.quality) {
+    options.image.quality = 0.5 // default
+  }
 
-    else if (options.image.types.length < 1) {
+  quality = parseFloat(options.image.quality)
 
-        // Set a default image type, just to be robust
-        options.image.types = isBrowser ? ['webp', 'jpeg'] : ['png']
+  function composeImageType (index) {
+    var imageType
+
+    if (options.image.types[index]) {
+      imageType = 'image/' + options.image.types[index]
     }
 
-    if (!options.image.quality)
-        options.image.quality = .5 // default
+    return imageType
+  }
 
-    quality = parseFloat(options.image.quality)
+  function isMatch (uri, imageType) {
+    var match = uri && uri.match(imageType)
 
-    function composeImageType(index) {
-        var imageType
+    match && options.debug && options.debug('Image type %s verified', imageType)
 
-        if (options.image.types[index])
-            imageType = 'image/' + options.image.types[index]
+    return match
+  }
 
-        return imageType
+  // Performance tweak, we do not need a big canvas for finding out the supported image type
+  function getTestCanvas () {
+    var testCanvas
+
+    if (isBrowser) {
+      testCanvas = document.createElement('canvas')
+      testCanvas.width = testCanvas.height = 1
+    } else {
+      testCanvas = canvas
     }
 
-    function isMatch(uri, imageType) {
-        var match = uri && uri.match(imageType)
+    return testCanvas
+  }
 
-        match && options.debug && options.debug('Image type %s verified', imageType)
-
-        return match
-    }
-
-    // Performance tweak, we do not need a big canvas for finding out the supported image type
-    function getTestCanvas() {
-
-        var testCanvas
-
-        if (isBrowser) {
-            testCanvas = document.createElement('canvas')
-            testCanvas.width = testCanvas.height = 1
-        } else
-            testCanvas = canvas
-
-        return testCanvas
-    }
-
-    function canvasSupportsImageTypeAsync(imageType, cb) {
-        try {
-            getTestCanvas().toDataURL(imageType, function(err, uri) {
-                if (err)
-                    cb(err)
-                else
-                    cb(null, isMatch(uri, imageType))
-            })
-        } catch (exc) {
-            cb(null, false)
+  function canvasSupportsImageTypeAsync (imageType, cb) {
+    try {
+      getTestCanvas().toDataURL(imageType, function (err, uri) {
+        if (err) {
+          cb(err)
+        } else {
+          cb(null, isMatch(uri, imageType))
         }
+      })
+    } catch (exc) {
+      cb(null, false)
+    }
+  }
+
+  function canvasSupportsImageTypeSync (imageType) {
+    var match
+
+    try {
+      var testCanvas = getTestCanvas()
+      var uri = testCanvas.toDataURL && testCanvas.toDataURL(imageType)
+
+      match = isMatch(uri, imageType)
+    } catch (exc) {
+      // Can happen when i.E. a spider is coming. Just be robust here and continue.
+      options.debug &&
+      options.logger.debug('Failed to call toDataURL() on canvas for image type %s', imageType)
     }
 
-    function canvasSupportsImageTypeSync(imageType) {
-        var match
+    return match
+  }
 
-        try {
-            var testCanvas = getTestCanvas(),
-                uri        = testCanvas.toDataURL && testCanvas.toDataURL(imageType)
+  function verifyImageTypeAsync (imageType, cb) {
+    canvasSupportsImageTypeAsync(imageType, function (err, match) {
+      if (err) {
+        cb(err)
+      } else {
+        if (match) {
+          cb(null, imageType)
+        } else {
+          imageType = composeImageType(1)
 
-            match = isMatch(uri, imageType)
-        } catch (exc) {
-
-            // Can happen when i.E. a spider is coming. Just be robust here and continue.
-            options.debug &&
-            options.logger.debug('Failed to call toDataURL() on canvas for image type %s', imageType)
-        }
-
-        return match
-    }
-
-    function verifyImageTypeAsync(imageType, cb) {
-        canvasSupportsImageTypeAsync(imageType, function(err, match) {
-            if (err)
-                cb(err)
-            else {
-
-                if (match)
-                    cb(null, imageType)
-                else {
-                    imageType = composeImageType(1)
-
-                    canvasSupportsImageTypeAsync(imageType, function(err, match) {
-                        if (err)
-                            cb(err)
-                        else
-                            cb(null, match ? imageType: null)
-                    })
-                }
+          canvasSupportsImageTypeAsync(imageType, function (err, match) {
+            if (err) {
+              cb(err)
+            } else {
+              cb(null, match ? imageType : null)
             }
-        })
-    }
+          })
+        }
+      }
+    })
+  }
 
-    function verifyImageTypeSync(imageType) {
+  function verifyImageTypeSync (imageType) {
+    if (!canvasSupportsImageTypeSync(imageType)) {
+      if (options.image.types[1]) {
+        imageType = composeImageType(1)
+
         if (!canvasSupportsImageTypeSync(imageType)) {
-
-            if (options.image.types[1]) {
-                imageType = composeImageType(1)
-
-                if (!canvasSupportsImageTypeSync(imageType))
-                    imageType = null
-            } else
-                imageType = null
+          imageType = null
         }
-
-        !imageType && options.debug && options.logger.debug('Unable to verify image type')
-
-        return imageType
+      } else {
+        imageType = null
+      }
     }
 
-    // callbacks are needed for server side tests
-    function verifyImageType(cb) {
-        var imageType = composeImageType(0)
+    !imageType && options.debug && options.logger.debug('Unable to verify image type')
 
-        if (cb) {
-            verifyImageTypeAsync(imageType, cb)
-        } else {
-            return verifyImageTypeSync(imageType)
-        }
+    return imageType
+  }
+
+  // callbacks are needed for server side tests
+  function verifyImageType (cb) {
+    var imageType = composeImageType(0)
+
+    if (cb) {
+      verifyImageTypeAsync(imageType, cb)
+    } else {
+      return verifyImageTypeSync(imageType)
+    }
+  }
+
+  // this method is proven to be fast, see
+  // http://jsperf.com/data-uri-to-buffer-performance/3
+  function uriToBuffer (uri) {
+    var uriSplitted = uri.split(',')[1]
+    var bytes
+
+    // Beware that the atob function might be a static one for server side tests
+    if (typeof (atob) === 'function') {
+      bytes = atob(uriSplitted)
+    } else if (typeof (self.constructor.atob) === 'function') {
+      bytes = self.constructor.atob(uriSplitted)
+    } else {
+      throw new Error('atob function is missing')
     }
 
-    // this method is proven to be fast, see
-    // http://jsperf.com/data-uri-to-buffer-performance/3
-    function uriToBuffer(uri) {
+    var arr = new Uint8Array(bytes.length)
 
-        var uri = uri.split(',')[1],
-            bytes
-
-        // Beware that the atob function might be a static one for server side tests
-        if (typeof(atob) === 'function')
-            bytes = atob(uri)
-        else if (typeof(self.constructor.atob) === 'function')
-            bytes = self.constructor.atob(uri)
-        else
-            throw new Error('atob function is missing')
-
-        var arr = new Uint8Array(bytes.length)
-
-        // http://mrale.ph/blog/2014/12/24/array-length-caching.html
-        for (var i = 0, l = bytes.length; i < l; i++) {
-            arr[i] = bytes.charCodeAt(i)
-        }
-
-        return toBuffer(arr)
+    // http://mrale.ph/blog/2014/12/24/array-length-caching.html
+    for (var i = 0, l = bytes.length; i < l; i++) {
+      arr[i] = bytes.charCodeAt(i)
     }
 
-    function toBufferSync() {
-        var imageType = self.getImageType(),
-            buffer
+    return toBuffer(arr)
+  }
 
-        if (imageType) {
-            var uri = canvas.toDataURL(imageType, quality)
-            buffer = uriToBuffer(uri)
-        }
+  function toBufferSync () {
+    var imageType = self.getImageType()
+    var buffer
 
-        return buffer
+    if (imageType) {
+      var uri = canvas.toDataURL(imageType, quality)
+      buffer = uriToBuffer(uri)
     }
 
-    function toBufferAsync(cb) {
-        self.getImageType(function(err, imageType) {
-            if (err)
-                cb(err)
-            else if (!imageType)
-                cb()
-            else
-                canvas.toDataURL(imageType, function(err, uri) {
-                    if (err)
-                        cb(err)
-                    else
-                        cb(null, uriToBuffer(uri))
-                })
+    return buffer
+  }
+
+  function toBufferAsync (cb) {
+    self.getImageType(function (err, imageType) {
+      if (err) {
+        cb(err)
+      } else if (!imageType) {
+        cb()
+      } else {
+        canvas.toDataURL(imageType, function (err, uri) {
+          if (err) {
+            cb(err)
+          } else {
+            cb(null, uriToBuffer(uri))
+          }
         })
+      }
+    })
+  }
+
+  this.toBuffer = function (cb) {
+    if (cb) {
+      toBufferAsync(cb)
+    } else {
+      return toBufferSync()
     }
+  }
 
-    this.toBuffer = function(cb) {
-        if (cb)
-            toBufferAsync(cb)
-        else
-            return toBufferSync()
+  // browsers do not need a callback, but tests do
+  this.getImageType = function (cb) {
+    // only run for the first time this constructor is called and
+    // cache result for the next calls
+
+    if (cb) {
+      if (!verifiedImageType || !isBrowser) {
+        verifyImageType(function (err, newVerifiedImageType) {
+          if (err) {
+            cb(err)
+          } else {
+            verifiedImageType = newVerifiedImageType
+            cb(null, verifiedImageType)
+          }
+        })
+      } else {
+        cb(null, verifiedImageType)
+      }
+    } else {
+      // on the browser side we do cache it for speed
+      if (!verifiedImageType || !isBrowser) {
+        verifiedImageType = verifyImageType()
+      }
+
+      return verifiedImageType
     }
-
-    // browsers do not need a callback, but tests do
-    this.getImageType = function(cb) {
-
-        // only run for the first time this constructor is called and
-        // cache result for the next calls
-
-        if (cb) {
-            if (!verifiedImageType || !isBrowser)
-                verifyImageType(function(err, newVerifiedImageType) {
-                    if (err)
-                        cb(err)
-                    else {
-                        verifiedImageType = newVerifiedImageType
-                        cb(null, verifiedImageType)
-                    }
-                })
-            else
-                cb(null, verifiedImageType)
-
-        } else {
-            // on the browser side we do cache it for speed
-            if (!verifiedImageType || !isBrowser)
-                verifiedImageType = verifyImageType()
-
-            return verifiedImageType
-        }
-    }
+  }
 }
 
-},{"typedarray-to-buffer":73}],9:[function(_dereq_,module,exports){
+},{"atob":3,"typedarray-to-buffer":74}],10:[function(_dereq_,module,exports){
 // contains, add, remove, toggle
 var indexof = _dereq_('indexof')
 
@@ -2865,7 +2910,7 @@ function isTruthy(value) {
     return !!value
 }
 
-},{"indexof":34}],10:[function(_dereq_,module,exports){
+},{"indexof":35}],11:[function(_dereq_,module,exports){
 /*
  * classList.js: Cross-browser full element.classList implementation.
  * 1.1.20150312
@@ -3107,7 +3152,7 @@ if (objCtr.defineProperty) {
 }
 
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3272,7 +3317,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],12:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 var DOCUMENT_POSITION_CONTAINED_BY = 16
 
 module.exports = contains
@@ -3287,7 +3332,7 @@ function contains(container, elem) {
     return comparison === 0 || comparison & DOCUMENT_POSITION_CONTAINED_BY
 }
 
-},{}],13:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3398,7 +3443,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":_dereq_("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":39}],14:[function(_dereq_,module,exports){
+},{"../../is-buffer/index.js":40}],15:[function(_dereq_,module,exports){
 //     create-error.js 0.3.1
 //     (c) 2013 Tim Griesser
 //     This source may be freely distributed under the MIT license.
@@ -3518,7 +3563,7 @@ function clone(target) {
   }
 });
 
-},{}],15:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
@@ -3617,14 +3662,14 @@ return deepmerge_1;
 
 })));
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 module.exports = function () {
     for (var i = 0; i < arguments.length; i++) {
         if (arguments[i] !== undefined) return arguments[i];
     }
 };
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 var util = _dereq_('util')
 var global = _dereq_('global')
 var EventEmitter = _dereq_('events')
@@ -3646,7 +3691,7 @@ var makeDespot = function () {
 
 module.exports = makeDespot()
 
-},{"events":23,"global":29,"util":78}],18:[function(_dereq_,module,exports){
+},{"events":24,"global":30,"util":79}],19:[function(_dereq_,module,exports){
 'use strict'
 
 var document = _dereq_('global/document')
@@ -3686,7 +3731,7 @@ function noopShim () {
 
 function noop () {}
 
-},{"./keys":19,"geval":27,"global/document":28}],19:[function(_dereq_,module,exports){
+},{"./keys":20,"geval":28,"global/document":29}],20:[function(_dereq_,module,exports){
 'use strict'
 
 module.exports = keys
@@ -3711,7 +3756,7 @@ function lowercaseFirst (string) {
   return string.substring(0, 1).toLowerCase() + string.substring(1)
 }
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 (function (process,Buffer){
 var stream = _dereq_('readable-stream')
 var eos = _dereq_('end-of-stream')
@@ -3943,7 +3988,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 module.exports = Duplexify
 
 }).call(this,_dereq_('_process'),_dereq_("buffer").Buffer)
-},{"_process":50,"buffer":7,"end-of-stream":22,"inherits":35,"readable-stream":61,"stream-shift":66}],21:[function(_dereq_,module,exports){
+},{"_process":51,"buffer":8,"end-of-stream":23,"inherits":36,"readable-stream":61,"stream-shift":66}],22:[function(_dereq_,module,exports){
 // element-closest | CC0-1.0 | github.com/jonathantneal/closest
 
 (function (ElementProto) {
@@ -3978,7 +4023,7 @@ module.exports = Duplexify
 	}
 })(window.Element.prototype);
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 var once = _dereq_('once');
 
 var noop = function() {};
@@ -4063,7 +4108,7 @@ var eos = function(stream, opts, callback) {
 
 module.exports = eos;
 
-},{"once":47}],23:[function(_dereq_,module,exports){
+},{"once":48}],24:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4367,7 +4412,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -4538,7 +4583,7 @@ function isUndefined(arg) {
 })(typeof window !== "undefined" ? window : global);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -4723,7 +4768,7 @@ getFormData.getNamedFormElementData = getNamedFormElementData;
 
 exports['default'] = getFormData;
 module.exports = exports['default'];
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 module.exports = Event
 
 function Event() {
@@ -4751,7 +4796,7 @@ function Event() {
     }
 }
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 var Event = _dereq_('./event.js')
 
 module.exports = Source
@@ -4764,7 +4809,7 @@ function Source(broadcaster) {
     return tuple.listen
 }
 
-},{"./event.js":26}],28:[function(_dereq_,module,exports){
+},{"./event.js":27}],29:[function(_dereq_,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -4785,7 +4830,7 @@ if (typeof document !== 'undefined') {
 module.exports = doccy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":5}],29:[function(_dereq_,module,exports){
+},{"min-document":6}],30:[function(_dereq_,module,exports){
 (function (global){
 var win;
 
@@ -4802,7 +4847,7 @@ if (typeof window !== "undefined") {
 module.exports = win;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],30:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 module.exports = shim
 
 function shim (element, value) {
@@ -4813,7 +4858,7 @@ function shim (element, value) {
     element.style.display = value ? 'none' : ''
 }
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 // HumanizeDuration.js - http://git.io/j0HgmQ
 
 ;(function () {
@@ -4894,6 +4939,17 @@ function shim (element, value) {
       s: function (c) { return 'segundo' + (c === 1 ? '' : 's') },
       ms: function (c) { return 'milisegundo' + (c === 1 ? '' : 's') },
       decimal: ','
+    },
+    fa: {
+      y: 'سال',
+      mo: 'ماه',
+      w: 'هفته',
+      d: 'روز',
+      h: 'ساعت',
+      m: 'دقیقه',
+      s: 'ثانیه',
+      ms: 'میلی ثانیه',
+      decimal: '.'
     },
     fi: {
       y: function (c) { return c === 1 ? 'vuosi' : 'vuotta' },
@@ -5368,7 +5424,7 @@ function shim (element, value) {
   }
 })();  // eslint-disable-line semi
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 var split = _dereq_('browser-split')
 var ClassList = _dereq_('class-list')
 
@@ -5530,7 +5586,7 @@ function isArray (arr) {
 
 
 
-},{"browser-split":6,"class-list":9,"html-element":5}],33:[function(_dereq_,module,exports){
+},{"browser-split":7,"class-list":10,"html-element":6}],34:[function(_dereq_,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5616,7 +5672,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5627,7 +5683,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],35:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5652,7 +5708,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 var containers = []; // will store container HTMLElement references
 var styleElements = []; // will store {prepend: HTMLElement, append: HTMLElement}
 
@@ -5712,7 +5768,7 @@ function createStyleElement() {
 module.exports = insertCss;
 module.exports.insertCss = insertCss;
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 /*! npm.im/intervalometer */
 'use strict';
 
@@ -5755,7 +5811,7 @@ function timerIntervalometer(cb, delay) {
 exports.intervalometer = intervalometer;
 exports.frameIntervalometer = frameIntervalometer;
 exports.timerIntervalometer = timerIntervalometer;
-},{}],38:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 /*! npm.im/iphone-inline-video 2.2.2 */
 'use strict';
 
@@ -6123,7 +6179,7 @@ function enableInlineVideo(video, opts) {
 
 module.exports = enableInlineVideo;
 
-},{"intervalometer":37}],39:[function(_dereq_,module,exports){
+},{"intervalometer":38}],40:[function(_dereq_,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -6146,7 +6202,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],40:[function(_dereq_,module,exports){
+},{}],41:[function(_dereq_,module,exports){
 'use strict';
 var numberIsNan = _dereq_('number-is-nan');
 
@@ -6154,13 +6210,13 @@ module.exports = Number.isFinite || function (val) {
 	return !(typeof val !== 'number' || numberIsNan(val) || val === Infinity || val === -Infinity);
 };
 
-},{"number-is-nan":46}],41:[function(_dereq_,module,exports){
+},{"number-is-nan":47}],42:[function(_dereq_,module,exports){
 module.exports = isPowerOfTwo
 
 function isPowerOfTwo(n) {
   return n !== 0 && (n & (n - 1)) === 0
 }
-},{}],42:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -6203,14 +6259,14 @@ function isLooseTypedArray(arr) {
   return names[toString.call(arr)]
 }
 
-},{}],43:[function(_dereq_,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],44:[function(_dereq_,module,exports){
+},{}],45:[function(_dereq_,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -6265,7 +6321,7 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],45:[function(_dereq_,module,exports){
+},{}],46:[function(_dereq_,module,exports){
 'use strict';
 var numberIsFinite = _dereq_('is-finite');
 
@@ -6273,13 +6329,13 @@ module.exports = Number.isInteger || function (x) {
 	return numberIsFinite(x) && Math.floor(x) === x;
 };
 
-},{"is-finite":40}],46:[function(_dereq_,module,exports){
+},{"is-finite":41}],47:[function(_dereq_,module,exports){
 'use strict';
 module.exports = Number.isNaN || function (x) {
 	return x !== x;
 };
 
-},{}],47:[function(_dereq_,module,exports){
+},{}],48:[function(_dereq_,module,exports){
 var wrappy = _dereq_('wrappy')
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
@@ -6323,7 +6379,7 @@ function onceStrict (fn) {
   return f
 }
 
-},{"wrappy":82}],48:[function(_dereq_,module,exports){
+},{"wrappy":83}],49:[function(_dereq_,module,exports){
 (function (process){
 // Generated by CoffeeScript 1.12.2
 (function() {
@@ -6363,7 +6419,7 @@ function onceStrict (fn) {
 
 
 }).call(this,_dereq_('_process'))
-},{"_process":50}],49:[function(_dereq_,module,exports){
+},{"_process":51}],50:[function(_dereq_,module,exports){
 (function (process){
 'use strict';
 
@@ -6410,7 +6466,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,_dereq_('_process'))
-},{"_process":50}],50:[function(_dereq_,module,exports){
+},{"_process":51}],51:[function(_dereq_,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -6596,7 +6652,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],51:[function(_dereq_,module,exports){
+},{}],52:[function(_dereq_,module,exports){
 (function (global){
 var now = _dereq_('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -6672,7 +6728,7 @@ module.exports.polyfill = function() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":48}],52:[function(_dereq_,module,exports){
+},{"performance-now":49}],53:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6797,7 +6853,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":54,"./_stream_writable":56,"core-util-is":13,"inherits":35,"process-nextick-args":49}],53:[function(_dereq_,module,exports){
+},{"./_stream_readable":55,"./_stream_writable":57,"core-util-is":14,"inherits":36,"process-nextick-args":50}],54:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6845,7 +6901,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":55,"core-util-is":13,"inherits":35}],54:[function(_dereq_,module,exports){
+},{"./_stream_transform":56,"core-util-is":14,"inherits":36}],55:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7855,7 +7911,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":52,"./internal/streams/BufferList":57,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":50,"core-util-is":13,"events":23,"inherits":35,"isarray":43,"process-nextick-args":49,"safe-buffer":65,"string_decoder/":60,"util":5}],55:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"./internal/streams/BufferList":58,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"events":24,"inherits":36,"isarray":44,"process-nextick-args":50,"safe-buffer":65,"string_decoder/":67,"util":6}],56:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8070,7 +8126,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":52,"core-util-is":13,"inherits":35}],56:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"core-util-is":14,"inherits":36}],57:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8737,7 +8793,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":52,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":50,"core-util-is":13,"inherits":35,"process-nextick-args":49,"safe-buffer":65,"util-deprecate":75}],57:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"inherits":36,"process-nextick-args":50,"safe-buffer":65,"util-deprecate":76}],58:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8812,7 +8868,7 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":65}],58:[function(_dereq_,module,exports){
+},{"safe-buffer":65}],59:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8885,283 +8941,10 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":49}],59:[function(_dereq_,module,exports){
+},{"process-nextick-args":50}],60:[function(_dereq_,module,exports){
 module.exports = _dereq_('events').EventEmitter;
 
-},{"events":23}],60:[function(_dereq_,module,exports){
-'use strict';
-
-var Buffer = _dereq_('safe-buffer').Buffer;
-
-var isEncoding = Buffer.isEncoding || function (encoding) {
-  encoding = '' + encoding;
-  switch (encoding && encoding.toLowerCase()) {
-    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
-      return true;
-    default:
-      return false;
-  }
-};
-
-function _normalizeEncoding(enc) {
-  if (!enc) return 'utf8';
-  var retried;
-  while (true) {
-    switch (enc) {
-      case 'utf8':
-      case 'utf-8':
-        return 'utf8';
-      case 'ucs2':
-      case 'ucs-2':
-      case 'utf16le':
-      case 'utf-16le':
-        return 'utf16le';
-      case 'latin1':
-      case 'binary':
-        return 'latin1';
-      case 'base64':
-      case 'ascii':
-      case 'hex':
-        return enc;
-      default:
-        if (retried) return; // undefined
-        enc = ('' + enc).toLowerCase();
-        retried = true;
-    }
-  }
-};
-
-// Do not cache `Buffer.isEncoding` when checking encoding names as some
-// modules monkey-patch it to support additional encodings
-function normalizeEncoding(enc) {
-  var nenc = _normalizeEncoding(enc);
-  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
-  return nenc || enc;
-}
-
-// StringDecoder provides an interface for efficiently splitting a series of
-// buffers into a series of JS strings without breaking apart multi-byte
-// characters.
-exports.StringDecoder = StringDecoder;
-function StringDecoder(encoding) {
-  this.encoding = normalizeEncoding(encoding);
-  var nb;
-  switch (this.encoding) {
-    case 'utf16le':
-      this.text = utf16Text;
-      this.end = utf16End;
-      nb = 4;
-      break;
-    case 'utf8':
-      this.fillLast = utf8FillLast;
-      nb = 4;
-      break;
-    case 'base64':
-      this.text = base64Text;
-      this.end = base64End;
-      nb = 3;
-      break;
-    default:
-      this.write = simpleWrite;
-      this.end = simpleEnd;
-      return;
-  }
-  this.lastNeed = 0;
-  this.lastTotal = 0;
-  this.lastChar = Buffer.allocUnsafe(nb);
-}
-
-StringDecoder.prototype.write = function (buf) {
-  if (buf.length === 0) return '';
-  var r;
-  var i;
-  if (this.lastNeed) {
-    r = this.fillLast(buf);
-    if (r === undefined) return '';
-    i = this.lastNeed;
-    this.lastNeed = 0;
-  } else {
-    i = 0;
-  }
-  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
-  return r || '';
-};
-
-StringDecoder.prototype.end = utf8End;
-
-// Returns only complete characters in a Buffer
-StringDecoder.prototype.text = utf8Text;
-
-// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
-StringDecoder.prototype.fillLast = function (buf) {
-  if (this.lastNeed <= buf.length) {
-    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
-    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
-  }
-  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
-  this.lastNeed -= buf.length;
-};
-
-// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
-// continuation byte.
-function utf8CheckByte(byte) {
-  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
-  return -1;
-}
-
-// Checks at most 3 bytes at the end of a Buffer in order to detect an
-// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
-// needed to complete the UTF-8 character (if applicable) are returned.
-function utf8CheckIncomplete(self, buf, i) {
-  var j = buf.length - 1;
-  if (j < i) return 0;
-  var nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) self.lastNeed = nb - 1;
-    return nb;
-  }
-  if (--j < i) return 0;
-  nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) self.lastNeed = nb - 2;
-    return nb;
-  }
-  if (--j < i) return 0;
-  nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) {
-      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
-    }
-    return nb;
-  }
-  return 0;
-}
-
-// Validates as many continuation bytes for a multi-byte UTF-8 character as
-// needed or are available. If we see a non-continuation byte where we expect
-// one, we "replace" the validated continuation bytes we've seen so far with
-// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
-// behavior. The continuation byte check is included three times in the case
-// where all of the continuation bytes for a character exist in the same buffer.
-// It is also done this way as a slight performance increase instead of using a
-// loop.
-function utf8CheckExtraBytes(self, buf, p) {
-  if ((buf[0] & 0xC0) !== 0x80) {
-    self.lastNeed = 0;
-    return '\ufffd'.repeat(p);
-  }
-  if (self.lastNeed > 1 && buf.length > 1) {
-    if ((buf[1] & 0xC0) !== 0x80) {
-      self.lastNeed = 1;
-      return '\ufffd'.repeat(p + 1);
-    }
-    if (self.lastNeed > 2 && buf.length > 2) {
-      if ((buf[2] & 0xC0) !== 0x80) {
-        self.lastNeed = 2;
-        return '\ufffd'.repeat(p + 2);
-      }
-    }
-  }
-}
-
-// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
-function utf8FillLast(buf) {
-  var p = this.lastTotal - this.lastNeed;
-  var r = utf8CheckExtraBytes(this, buf, p);
-  if (r !== undefined) return r;
-  if (this.lastNeed <= buf.length) {
-    buf.copy(this.lastChar, p, 0, this.lastNeed);
-    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
-  }
-  buf.copy(this.lastChar, p, 0, buf.length);
-  this.lastNeed -= buf.length;
-}
-
-// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
-// partial character, the character's bytes are buffered until the required
-// number of bytes are available.
-function utf8Text(buf, i) {
-  var total = utf8CheckIncomplete(this, buf, i);
-  if (!this.lastNeed) return buf.toString('utf8', i);
-  this.lastTotal = total;
-  var end = buf.length - (total - this.lastNeed);
-  buf.copy(this.lastChar, 0, end);
-  return buf.toString('utf8', i, end);
-}
-
-// For UTF-8, a replacement character for each buffered byte of a (partial)
-// character needs to be added to the output.
-function utf8End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
-  return r;
-}
-
-// UTF-16LE typically needs two bytes per character, but even if we have an even
-// number of bytes available, we need to check if we end on a leading/high
-// surrogate. In that case, we need to wait for the next two bytes in order to
-// decode the last character properly.
-function utf16Text(buf, i) {
-  if ((buf.length - i) % 2 === 0) {
-    var r = buf.toString('utf16le', i);
-    if (r) {
-      var c = r.charCodeAt(r.length - 1);
-      if (c >= 0xD800 && c <= 0xDBFF) {
-        this.lastNeed = 2;
-        this.lastTotal = 4;
-        this.lastChar[0] = buf[buf.length - 2];
-        this.lastChar[1] = buf[buf.length - 1];
-        return r.slice(0, -1);
-      }
-    }
-    return r;
-  }
-  this.lastNeed = 1;
-  this.lastTotal = 2;
-  this.lastChar[0] = buf[buf.length - 1];
-  return buf.toString('utf16le', i, buf.length - 1);
-}
-
-// For UTF-16LE we do not explicitly append special replacement characters if we
-// end on a partial character, we simply let v8 handle that.
-function utf16End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) {
-    var end = this.lastTotal - this.lastNeed;
-    return r + this.lastChar.toString('utf16le', 0, end);
-  }
-  return r;
-}
-
-function base64Text(buf, i) {
-  var n = (buf.length - i) % 3;
-  if (n === 0) return buf.toString('base64', i);
-  this.lastNeed = 3 - n;
-  this.lastTotal = 3;
-  if (n === 1) {
-    this.lastChar[0] = buf[buf.length - 1];
-  } else {
-    this.lastChar[0] = buf[buf.length - 2];
-    this.lastChar[1] = buf[buf.length - 1];
-  }
-  return buf.toString('base64', i, buf.length - n);
-}
-
-function base64End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
-  return r;
-}
-
-// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
-function simpleWrite(buf) {
-  return buf.toString(this.encoding);
-}
-
-function simpleEnd(buf) {
-  return buf && buf.length ? this.write(buf) : '';
-}
-},{"safe-buffer":65}],61:[function(_dereq_,module,exports){
+},{"events":24}],61:[function(_dereq_,module,exports){
 exports = module.exports = _dereq_('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -9170,7 +8953,7 @@ exports.Duplex = _dereq_('./lib/_stream_duplex.js');
 exports.Transform = _dereq_('./lib/_stream_transform.js');
 exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":52,"./lib/_stream_passthrough.js":53,"./lib/_stream_readable.js":54,"./lib/_stream_transform.js":55,"./lib/_stream_writable.js":56}],62:[function(_dereq_,module,exports){
+},{"./lib/_stream_duplex.js":53,"./lib/_stream_passthrough.js":54,"./lib/_stream_readable.js":55,"./lib/_stream_transform.js":56,"./lib/_stream_writable.js":57}],62:[function(_dereq_,module,exports){
 'use strict';
 
 var readystate = module.exports = _dereq_('./readystate')
@@ -9692,7 +9475,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":7}],66:[function(_dereq_,module,exports){
+},{"buffer":8}],66:[function(_dereq_,module,exports){
 module.exports = shift
 
 function shift (stream) {
@@ -9715,6 +9498,301 @@ function getStateLength (state) {
 }
 
 },{}],67:[function(_dereq_,module,exports){
+'use strict';
+
+var Buffer = _dereq_('safe-buffer').Buffer;
+
+var isEncoding = Buffer.isEncoding || function (encoding) {
+  encoding = '' + encoding;
+  switch (encoding && encoding.toLowerCase()) {
+    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
+      return true;
+    default:
+      return false;
+  }
+};
+
+function _normalizeEncoding(enc) {
+  if (!enc) return 'utf8';
+  var retried;
+  while (true) {
+    switch (enc) {
+      case 'utf8':
+      case 'utf-8':
+        return 'utf8';
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return 'utf16le';
+      case 'latin1':
+      case 'binary':
+        return 'latin1';
+      case 'base64':
+      case 'ascii':
+      case 'hex':
+        return enc;
+      default:
+        if (retried) return; // undefined
+        enc = ('' + enc).toLowerCase();
+        retried = true;
+    }
+  }
+};
+
+// Do not cache `Buffer.isEncoding` when checking encoding names as some
+// modules monkey-patch it to support additional encodings
+function normalizeEncoding(enc) {
+  var nenc = _normalizeEncoding(enc);
+  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
+  return nenc || enc;
+}
+
+// StringDecoder provides an interface for efficiently splitting a series of
+// buffers into a series of JS strings without breaking apart multi-byte
+// characters.
+exports.StringDecoder = StringDecoder;
+function StringDecoder(encoding) {
+  this.encoding = normalizeEncoding(encoding);
+  var nb;
+  switch (this.encoding) {
+    case 'utf16le':
+      this.text = utf16Text;
+      this.end = utf16End;
+      nb = 4;
+      break;
+    case 'utf8':
+      this.fillLast = utf8FillLast;
+      nb = 4;
+      break;
+    case 'base64':
+      this.text = base64Text;
+      this.end = base64End;
+      nb = 3;
+      break;
+    default:
+      this.write = simpleWrite;
+      this.end = simpleEnd;
+      return;
+  }
+  this.lastNeed = 0;
+  this.lastTotal = 0;
+  this.lastChar = Buffer.allocUnsafe(nb);
+}
+
+StringDecoder.prototype.write = function (buf) {
+  if (buf.length === 0) return '';
+  var r;
+  var i;
+  if (this.lastNeed) {
+    r = this.fillLast(buf);
+    if (r === undefined) return '';
+    i = this.lastNeed;
+    this.lastNeed = 0;
+  } else {
+    i = 0;
+  }
+  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
+  return r || '';
+};
+
+StringDecoder.prototype.end = utf8End;
+
+// Returns only complete characters in a Buffer
+StringDecoder.prototype.text = utf8Text;
+
+// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
+StringDecoder.prototype.fillLast = function (buf) {
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
+  this.lastNeed -= buf.length;
+};
+
+// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
+// continuation byte.
+function utf8CheckByte(byte) {
+  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
+  return -1;
+}
+
+// Checks at most 3 bytes at the end of a Buffer in order to detect an
+// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
+// needed to complete the UTF-8 character (if applicable) are returned.
+function utf8CheckIncomplete(self, buf, i) {
+  var j = buf.length - 1;
+  if (j < i) return 0;
+  var nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 1;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 2;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) {
+      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
+    }
+    return nb;
+  }
+  return 0;
+}
+
+// Validates as many continuation bytes for a multi-byte UTF-8 character as
+// needed or are available. If we see a non-continuation byte where we expect
+// one, we "replace" the validated continuation bytes we've seen so far with
+// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
+// behavior. The continuation byte check is included three times in the case
+// where all of the continuation bytes for a character exist in the same buffer.
+// It is also done this way as a slight performance increase instead of using a
+// loop.
+function utf8CheckExtraBytes(self, buf, p) {
+  if ((buf[0] & 0xC0) !== 0x80) {
+    self.lastNeed = 0;
+    return '\ufffd'.repeat(p);
+  }
+  if (self.lastNeed > 1 && buf.length > 1) {
+    if ((buf[1] & 0xC0) !== 0x80) {
+      self.lastNeed = 1;
+      return '\ufffd'.repeat(p + 1);
+    }
+    if (self.lastNeed > 2 && buf.length > 2) {
+      if ((buf[2] & 0xC0) !== 0x80) {
+        self.lastNeed = 2;
+        return '\ufffd'.repeat(p + 2);
+      }
+    }
+  }
+}
+
+// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
+function utf8FillLast(buf) {
+  var p = this.lastTotal - this.lastNeed;
+  var r = utf8CheckExtraBytes(this, buf, p);
+  if (r !== undefined) return r;
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, p, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, p, 0, buf.length);
+  this.lastNeed -= buf.length;
+}
+
+// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
+// partial character, the character's bytes are buffered until the required
+// number of bytes are available.
+function utf8Text(buf, i) {
+  var total = utf8CheckIncomplete(this, buf, i);
+  if (!this.lastNeed) return buf.toString('utf8', i);
+  this.lastTotal = total;
+  var end = buf.length - (total - this.lastNeed);
+  buf.copy(this.lastChar, 0, end);
+  return buf.toString('utf8', i, end);
+}
+
+// For UTF-8, a replacement character for each buffered byte of a (partial)
+// character needs to be added to the output.
+function utf8End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
+  return r;
+}
+
+// UTF-16LE typically needs two bytes per character, but even if we have an even
+// number of bytes available, we need to check if we end on a leading/high
+// surrogate. In that case, we need to wait for the next two bytes in order to
+// decode the last character properly.
+function utf16Text(buf, i) {
+  if ((buf.length - i) % 2 === 0) {
+    var r = buf.toString('utf16le', i);
+    if (r) {
+      var c = r.charCodeAt(r.length - 1);
+      if (c >= 0xD800 && c <= 0xDBFF) {
+        this.lastNeed = 2;
+        this.lastTotal = 4;
+        this.lastChar[0] = buf[buf.length - 2];
+        this.lastChar[1] = buf[buf.length - 1];
+        return r.slice(0, -1);
+      }
+    }
+    return r;
+  }
+  this.lastNeed = 1;
+  this.lastTotal = 2;
+  this.lastChar[0] = buf[buf.length - 1];
+  return buf.toString('utf16le', i, buf.length - 1);
+}
+
+// For UTF-16LE we do not explicitly append special replacement characters if we
+// end on a partial character, we simply let v8 handle that.
+function utf16End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) {
+    var end = this.lastTotal - this.lastNeed;
+    return r + this.lastChar.toString('utf16le', 0, end);
+  }
+  return r;
+}
+
+function base64Text(buf, i) {
+  var n = (buf.length - i) % 3;
+  if (n === 0) return buf.toString('base64', i);
+  this.lastNeed = 3 - n;
+  this.lastTotal = 3;
+  if (n === 1) {
+    this.lastChar[0] = buf[buf.length - 1];
+  } else {
+    this.lastChar[0] = buf[buf.length - 2];
+    this.lastChar[1] = buf[buf.length - 1];
+  }
+  return buf.toString('base64', i, buf.length - n);
+}
+
+function base64End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
+  return r;
+}
+
+// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
+function simpleWrite(buf) {
+  return buf.toString(this.encoding);
+}
+
+function simpleEnd(buf) {
+  return buf && buf.length ? this.write(buf) : '';
+}
+},{"safe-buffer":65}],68:[function(_dereq_,module,exports){
+function Agent() {
+  this._defaults = [];
+}
+
+["use", "on", "once", "set", "query", "type", "accept", "auth", "withCredentials", "sortQuery", "retry", "ok", "redirects",
+ "timeout", "buffer", "serialize", "parse", "ca", "key", "pfx", "cert"].forEach(function(fn) {
+  /** Default setting for all requests from this agent */
+  Agent.prototype[fn] = function(/*varargs*/) {
+    this._defaults.push({fn:fn, arguments:arguments});
+    return this;
+  }
+});
+
+Agent.prototype._setDefaults = function(req) {
+    this._defaults.forEach(function(def) {
+      req[def.fn].apply(req, def.arguments);
+    });
+};
+
+module.exports = Agent;
+
+},{}],69:[function(_dereq_,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -9733,7 +9811,7 @@ var Emitter = _dereq_('component-emitter');
 var RequestBase = _dereq_('./request-base');
 var isObject = _dereq_('./is-object');
 var ResponseBase = _dereq_('./response-base');
-var shouldRetry = _dereq_('./should-retry');
+var Agent = _dereq_('./agent-base');
 
 /**
  * Noop.
@@ -9840,9 +9918,9 @@ function pushEncodedKeyValuePair(pairs, key, val) {
  * Expose serialization method.
  */
 
- request.serializeObject = serialize;
+request.serializeObject = serialize;
 
- /**
+/**
   * Parse the given x-www-form-urlencoded `str`.
   *
   * @param {String} str
@@ -9901,12 +9979,12 @@ request.types = {
  *
  */
 
- request.serialize = {
-   'application/x-www-form-urlencoded': serialize,
-   'application/json': JSON.stringify
- };
+request.serialize = {
+  'application/x-www-form-urlencoded': serialize,
+  'application/json': JSON.stringify,
+};
 
- /**
+/**
   * Default parsers.
   *
   *     superagent.parse['application/xml'] = function(str){
@@ -9917,7 +9995,7 @@ request.types = {
 
 request.parse = {
   'application/x-www-form-urlencoded': parseString,
-  'application/json': JSON.parse
+  'application/json': JSON.parse,
 };
 
 /**
@@ -9937,11 +10015,12 @@ function parseHeader(str) {
   var field;
   var val;
 
-  lines.pop(); // trailing CRLF
-
   for (var i = 0, len = lines.length; i < len; ++i) {
     line = lines[i];
     index = line.indexOf(':');
+    if (index === -1) { // could be empty line, just skip it
+      continue;
+    }
     field = line.slice(0, index).toLowerCase();
     val = trim(line.slice(index + 1));
     fields[field] = val;
@@ -10019,7 +10098,7 @@ function Response(req) {
   var status = this.xhr.status;
   // handle IE9 bug: http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
   if (status === 1223) {
-      status = 204;
+    status = 204;
   }
   this._setStatusProperties(status);
   this.header = this.headers = parseHeader(this.xhr.getAllResponseHeaders());
@@ -10051,9 +10130,9 @@ ResponseBase(Response.prototype);
  * @api private
  */
 
-Response.prototype._parseBody = function(str){
+Response.prototype._parseBody = function(str) {
   var parse = request.parse[this.type];
-  if(this.req._parser) {
+  if (this.req._parser) {
     return this.req._parser(this, str);
   }
   if (!parse && isJSON(this.type)) {
@@ -10137,16 +10216,16 @@ function Request(method, url) {
     try {
       if (!self._isResponseOK(res)) {
         new_err = new Error(res.statusText || 'Unsuccessful HTTP response');
-        new_err.original = err;
-        new_err.response = res;
-        new_err.status = res.status;
       }
-    } catch(e) {
-      new_err = e; // #985 touching res may cause INVALID_STATE_ERR on old Android
+    } catch(custom_err) {
+      new_err = custom_err; // ok() callback can throw
     }
 
     // #1000 don't catch errors from the callback to avoid double calling it
     if (new_err) {
+      new_err.original = err;
+      new_err.response = res;
+      new_err.status = res.status;
       self.callback(new_err, res);
     } else {
       self.callback(null, res);
@@ -10224,30 +10303,25 @@ Request.prototype.accept = function(type){
  */
 
 Request.prototype.auth = function(user, pass, options){
-  if (typeof pass === 'object' && pass !== null) { // pass is optional and can substitute for options
+  if (1 === arguments.length) pass = '';
+  if (typeof pass === 'object' && pass !== null) { // pass is optional and can be replaced with options
     options = pass;
+    pass = '';
   }
   if (!options) {
     options = {
       type: 'function' === typeof btoa ? 'basic' : 'auto',
+    };
+  }
+
+  var encoder = function(string) {
+    if ('function' === typeof btoa) {
+      return btoa(string);
     }
-  }
+    throw new Error('Cannot use basic auth, btoa is not a function');
+  };
 
-  switch (options.type) {
-    case 'basic':
-      this.set('Authorization', 'Basic ' + btoa(user + ':' + pass));
-    break;
-
-    case 'auto':
-      this.username = user;
-      this.password = pass;
-    break;
-
-    case 'bearer': // usage would be .auth(accessToken, { type: 'bearer' })
-      this.set('Authorization', 'Bearer ' + user);
-    break;
-  }
-  return this;
+  return this._auth(user, pass, options, encoder);
 };
 
 /**
@@ -10315,8 +10389,7 @@ Request.prototype._getFormData = function(){
  */
 
 Request.prototype.callback = function(err, res){
-  // console.log(this._retries, this._maxRetries)
-  if (this._maxRetries && this._retries++ < this._maxRetries && shouldRetry(err, res)) {
+  if (this._shouldRetry(err, res)) {
     return this._retry();
   }
 
@@ -10398,7 +10471,7 @@ Request.prototype.end = function(fn){
 
 Request.prototype._end = function() {
   var self = this;
-  var xhr = this.xhr = request.getXHR();
+  var xhr = (this.xhr = request.getXHR());
   var data = this._formData || this._data;
 
   this._setTimeouts();
@@ -10432,7 +10505,7 @@ Request.prototype._end = function() {
     }
     e.direction = direction;
     self.emit('progress', e);
-  }
+  };
   if (this.hasListeners('progress')) {
     try {
       xhr.onprogress = handleProgress.bind(null, 'download');
@@ -10493,6 +10566,23 @@ Request.prototype._end = function() {
   return this;
 };
 
+request.agent = function() {
+  return new Agent();
+};
+
+["GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"].forEach(function(method) {
+  Agent.prototype[method.toLowerCase()] = function(url, fn) {
+    var req = new request.Request(method, url);
+    this._setDefaults(req);
+    if (fn) {
+      req.end(fn);
+    }
+    return req;
+  };
+});
+
+Agent.prototype.del = Agent.prototype['delete'];
+
 /**
  * GET `url` with optional callback `fn(res)`.
  *
@@ -10503,9 +10593,9 @@ Request.prototype._end = function() {
  * @api public
  */
 
-request.get = function(url, data, fn){
+request.get = function(url, data, fn) {
   var req = request('GET', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.query(data);
   if (fn) req.end(fn);
   return req;
@@ -10521,9 +10611,9 @@ request.get = function(url, data, fn){
  * @api public
  */
 
-request.head = function(url, data, fn){
+request.head = function(url, data, fn) {
   var req = request('HEAD', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.query(data);
   if (fn) req.end(fn);
   return req;
@@ -10539,9 +10629,9 @@ request.head = function(url, data, fn){
  * @api public
  */
 
-request.options = function(url, data, fn){
+request.options = function(url, data, fn) {
   var req = request('OPTIONS', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
   return req;
@@ -10557,13 +10647,13 @@ request.options = function(url, data, fn){
  * @api public
  */
 
-function del(url, data, fn){
+function del(url, data, fn) {
   var req = request('DELETE', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
   return req;
-};
+}
 
 request['del'] = del;
 request['delete'] = del;
@@ -10578,9 +10668,9 @@ request['delete'] = del;
  * @api public
  */
 
-request.patch = function(url, data, fn){
+request.patch = function(url, data, fn) {
   var req = request('PATCH', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
   return req;
@@ -10596,9 +10686,9 @@ request.patch = function(url, data, fn){
  * @api public
  */
 
-request.post = function(url, data, fn){
+request.post = function(url, data, fn) {
   var req = request('POST', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
   return req;
@@ -10614,15 +10704,17 @@ request.post = function(url, data, fn){
  * @api public
  */
 
-request.put = function(url, data, fn){
+request.put = function(url, data, fn) {
   var req = request('PUT', url);
-  if ('function' == typeof data) fn = data, data = null;
+  if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
   return req;
 };
 
-},{"./is-object":68,"./request-base":69,"./response-base":70,"./should-retry":71,"component-emitter":11}],68:[function(_dereq_,module,exports){
+},{"./agent-base":68,"./is-object":70,"./request-base":71,"./response-base":72,"component-emitter":12}],70:[function(_dereq_,module,exports){
+'use strict';
+
 /**
  * Check if `obj` is an object.
  *
@@ -10637,7 +10729,9 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],69:[function(_dereq_,module,exports){
+},{}],71:[function(_dereq_,module,exports){
+'use strict';
+
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -10781,17 +10875,58 @@ RequestBase.prototype.timeout = function timeout(options){
  * Failed requests will be retried 'count' times if timeout or err.code >= 500.
  *
  * @param {Number} count
+ * @param {Function} [fn]
  * @return {Request} for chaining
  * @api public
  */
 
-RequestBase.prototype.retry = function retry(count){
+RequestBase.prototype.retry = function retry(count, fn){
   // Default to 1 if no count passed or true
   if (arguments.length === 0 || count === true) count = 1;
   if (count <= 0) count = 0;
   this._maxRetries = count;
   this._retries = 0;
+  this._retryCallback = fn;
   return this;
+};
+
+var ERROR_CODES = [
+  'ECONNRESET',
+  'ETIMEDOUT',
+  'EADDRINFO',
+  'ESOCKETTIMEDOUT'
+];
+
+/**
+ * Determine if a request should be retried.
+ * (Borrowed from segmentio/superagent-retry)
+ *
+ * @param {Error} err
+ * @param {Response} [res]
+ * @returns {Boolean}
+ */
+RequestBase.prototype._shouldRetry = function(err, res) {
+  if (!this._maxRetries || this._retries++ >= this._maxRetries) {
+    return false;
+  }
+  if (this._retryCallback) {
+    try {
+      var override = this._retryCallback(err, res);
+      if (override === true) return true;
+      if (override === false) return false;
+      // undefined falls back to defaults
+    } catch(e) {
+      console.error(e);
+    }
+  }
+  if (res && res.status && res.status >= 500 && res.status != 501) return true;
+  if (err) {
+    if (err.code && ~ERROR_CODES.indexOf(err.code)) return true;
+    // Superagent timeout
+    if (err.timeout && err.code == 'ECONNABORTED') return true;
+    if (err.crossDomain) return true;
+  }
+  return false;
 };
 
 /**
@@ -10802,6 +10937,7 @@ RequestBase.prototype.retry = function retry(count){
  */
 
 RequestBase.prototype._retry = function() {
+
   this.clearTimeout();
 
   // node
@@ -10830,14 +10966,15 @@ RequestBase.prototype.then = function then(resolve, reject) {
     if (this._endCalled) {
       console.warn("Warning: superagent request was sent twice, because both .end() and .then() were called. Never call .end() if you use promises");
     }
-    this._fullfilledPromise = new Promise(function(innerResolve, innerReject){
-      self.end(function(err, res){
-        if (err) innerReject(err); else innerResolve(res);
+    this._fullfilledPromise = new Promise(function(innerResolve, innerReject) {
+      self.end(function(err, res) {
+        if (err) innerReject(err);
+        else innerResolve(res);
       });
     });
   }
   return this._fullfilledPromise.then(resolve, reject);
-}
+};
 
 RequestBase.prototype.catch = function(cb) {
   return this.then(undefined, cb);
@@ -10850,7 +10987,7 @@ RequestBase.prototype.catch = function(cb) {
 RequestBase.prototype.use = function use(fn) {
   fn(this);
   return this;
-}
+};
 
 RequestBase.prototype.ok = function(cb) {
   if ('function' !== typeof cb) throw Error("Callback required");
@@ -10869,7 +11006,6 @@ RequestBase.prototype._isResponseOK = function(res) {
 
   return res.status >= 200 && res.status < 300;
 };
-
 
 /**
  * Get request header `field`.
@@ -10969,9 +11105,8 @@ RequestBase.prototype.unset = function(field){
  * @api public
  */
 RequestBase.prototype.field = function(name, val) {
-
   // name should be either a string or an object.
-  if (null === name ||  undefined === name) {
+  if (null === name || undefined === name) {
     throw new Error('.field(name, val) name can not be empty');
   }
 
@@ -11022,6 +11157,24 @@ RequestBase.prototype.abort = function(){
   return this;
 };
 
+RequestBase.prototype._auth = function(user, pass, options, base64Encoder) {
+  switch (options.type) {
+    case 'basic':
+      this.set('Authorization', 'Basic ' + base64Encoder(user + ':' + pass));
+      break;
+
+    case 'auto':
+      this.username = user;
+      this.password = pass;
+      break;
+
+    case 'bearer': // usage would be .auth(accessToken, { type: 'bearer' })
+      this.set('Authorization', 'Bearer ' + user);
+      break;
+  }
+  return this;
+};
+
 /**
  * Enable transmission of cookies with x-domain requests.
  *
@@ -11033,9 +11186,9 @@ RequestBase.prototype.abort = function(){
  * @api public
  */
 
-RequestBase.prototype.withCredentials = function(on){
+RequestBase.prototype.withCredentials = function(on) {
   // This is browser-only functionality. Node side is no-op.
-  if(on==undefined) on = true;
+  if (on == undefined) on = true;
   this._withCredentials = on;
   return this;
 };
@@ -11054,6 +11207,21 @@ RequestBase.prototype.redirects = function(n){
 };
 
 /**
+ * Maximum size of buffered response body, in bytes. Counts uncompressed size.
+ * Default 200MB.
+ *
+ * @param {Number} n
+ * @return {Request} for chaining
+ */
+RequestBase.prototype.maxResponseSize = function(n){
+  if ('number' !== typeof n) {
+    throw TypeError("Invalid argument");
+  }
+  this._maxResponseSize = n;
+  return this;
+};
+
+/**
  * Convert to a plain javascript object (not JSON string) of scalar properties.
  * Note as this method is designed to return a useful non-this value,
  * it cannot be chained.
@@ -11062,15 +11230,14 @@ RequestBase.prototype.redirects = function(n){
  * @api public
  */
 
-RequestBase.prototype.toJSON = function(){
+RequestBase.prototype.toJSON = function() {
   return {
     method: this.method,
     url: this.url,
     data: this._data,
-    headers: this._header
+    headers: this._header,
   };
 };
-
 
 /**
  * Send `data` as the request body, defaulting the `.type()` to "json" when
@@ -11158,7 +11325,6 @@ RequestBase.prototype.send = function(data){
   if (!type) this.type('json');
   return this;
 };
-
 
 /**
  * Sort `querystring` by the sort function
@@ -11257,9 +11423,10 @@ RequestBase.prototype._setTimeouts = function() {
       self._timeoutError('Response timeout of ', self._responseTimeout, 'ETIMEDOUT');
     }, this._responseTimeout);
   }
-}
+};
 
-},{"./is-object":68}],70:[function(_dereq_,module,exports){
+},{"./is-object":70}],72:[function(_dereq_,module,exports){
+'use strict';
 
 /**
  * Module dependencies.
@@ -11306,8 +11473,8 @@ function mixin(obj) {
  * @api public
  */
 
-ResponseBase.prototype.get = function(field){
-    return this.header[field.toLowerCase()];
+ResponseBase.prototype.get = function(field) {
+  return this.header[field.toLowerCase()];
 };
 
 /**
@@ -11394,32 +11561,8 @@ ResponseBase.prototype._setStatusProperties = function(status){
     this.notFound = 404 == status;
 };
 
-},{"./utils":72}],71:[function(_dereq_,module,exports){
-var ERROR_CODES = [
-  'ECONNRESET',
-  'ETIMEDOUT',
-  'EADDRINFO',
-  'ESOCKETTIMEDOUT'
-];
-
-/**
- * Determine if a request should be retried.
- * (Borrowed from segmentio/superagent-retry)
- *
- * @param {Error} err
- * @param {Response} [res]
- * @returns {Boolean}
- */
-module.exports = function shouldRetry(err, res) {
-  if (err && err.code && ~ERROR_CODES.indexOf(err.code)) return true;
-  if (res && res.status && res.status >= 500) return true;
-  // Superagent timeout
-  if (err && 'timeout' in err && err.code == 'ECONNABORTED') return true;
-  if (err && 'crossDomain' in err) return true;
-  return false;
-};
-
-},{}],72:[function(_dereq_,module,exports){
+},{"./utils":73}],73:[function(_dereq_,module,exports){
+'use strict';
 
 /**
  * Return the mime type for the given `str`.
@@ -11488,7 +11631,8 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
   return header;
 };
-},{}],73:[function(_dereq_,module,exports){
+
+},{}],74:[function(_dereq_,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -11517,7 +11661,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":7,"is-typedarray":42}],74:[function(_dereq_,module,exports){
+},{"buffer":8,"is-typedarray":43}],75:[function(_dereq_,module,exports){
 /**
  * UAParser.js v0.7.17
  * Lightweight JavaScript-based User-Agent string parser
@@ -12591,7 +12735,7 @@ module.exports = function typedarrayToBuffer (arr) {
 
 })(typeof window === 'object' ? window : this);
 
-},{}],75:[function(_dereq_,module,exports){
+},{}],76:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -12662,16 +12806,16 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],76:[function(_dereq_,module,exports){
-arguments[4][35][0].apply(exports,arguments)
-},{"dup":35}],77:[function(_dereq_,module,exports){
+},{}],77:[function(_dereq_,module,exports){
+arguments[4][36][0].apply(exports,arguments)
+},{"dup":36}],78:[function(_dereq_,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],78:[function(_dereq_,module,exports){
+},{}],79:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -13261,7 +13405,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":77,"_process":50,"inherits":76}],79:[function(_dereq_,module,exports){
+},{"./support/isBuffer":78,"_process":51,"inherits":77}],80:[function(_dereq_,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -13287,7 +13431,7 @@ function isFloat32Array( value ) {
 
 module.exports = isFloat32Array;
 
-},{}],80:[function(_dereq_,module,exports){
+},{}],81:[function(_dereq_,module,exports){
 (function (process,global){
 'use strict'
 
@@ -13303,18 +13447,15 @@ function buildProxy (options, socketWrite, socketEnd) {
     objectMode: options.objectMode
   })
 
-  proxy._destroyed = false
   proxy._write = socketWrite
   proxy._flush = socketEnd
 
-  proxy.destroy = function(err) {
-    if (this._destroyed) return
-      this._destroyed = true
-
+  proxy._destroy = function(err, cb) {
     var self = this
+    this.push(null)
+    this.end()
     process.nextTick(function() {
-      if (err)
-        self.emit('error', err)
+      cb(err);
       self.emit('close')
     })
   }
@@ -13446,7 +13587,7 @@ function WebSocketStream(target, protocols, options) {
 
   function onmessage(event) {
     var data = event.data
-    if (data instanceof ArrayBuffer) data = Buffer.from(new Uint8Array(data))
+    if (data instanceof ArrayBuffer) data = Buffer.from(data)
     else data = Buffer.from(data, 'utf8')
     proxy.push(data)
   }
@@ -13473,7 +13614,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":50,"duplexify":20,"readable-stream":61,"safe-buffer":65,"ws":81}],81:[function(_dereq_,module,exports){
+},{"_process":51,"duplexify":21,"readable-stream":61,"safe-buffer":65,"ws":82}],82:[function(_dereq_,module,exports){
 
 var ws = null
 
@@ -13487,7 +13628,7 @@ if (typeof WebSocket !== 'undefined') {
 
 module.exports = ws
 
-},{}],82:[function(_dereq_,module,exports){
+},{}],83:[function(_dereq_,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -13522,10 +13663,10 @@ function wrappy (fn, cb) {
   }
 }
 
-},{}],83:[function(_dereq_,module,exports){
+},{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.24",
+  "version": "2.1.25",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13567,11 +13708,11 @@ module.exports={
     "add-eventlistener-with-options": "1.25.0",
     "animitter": "3.0.0",
     "audio-sample": "1.0.3",
-    "canvas-to-buffer": "1.0.9",
+    "canvas-to-buffer": "1.0.11",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "2.0.0",
+    "deepmerge": "2.0.1",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
@@ -13579,7 +13720,7 @@ module.exports={
     "filesize": "3.5.11",
     "get-form-data": "1.2.5",
     "hidden": "1.1.1",
-    "humanize-duration": "3.10.1",
+    "humanize-duration": "3.11.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -13588,16 +13729,17 @@ module.exports={
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.6.3",
+    "superagent": "3.8.0",
     "ua-parser-js": "0.7.17",
-    "websocket-stream": "5.0.1"
+    "websocket-stream": "5.1.1"
   },
   "devDependencies": {
+    "babel-core": "6.26.0",
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.6.1",
-    "babelify": "7.3.0",
+    "babelify": "8.0.0",
     "body-parser": "1.18.2",
-    "browserify": "14.4.0",
+    "browserify": "14.5.0",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
     "glob": "7.1.2",
@@ -13635,7 +13777,7 @@ module.exports={
   }
 }
 
-},{}],84:[function(_dereq_,module,exports){
+},{}],85:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13879,7 +14021,7 @@ VideomailClient.events = _events2.default;
 
 exports.default = VideomailClient;
 
-},{"./constants":85,"./events":86,"./options":87,"./resource":88,"./util/browser":91,"./util/collectLogger":92,"./util/eventEmitter":93,"./wrappers/container":100,"./wrappers/optionsWrapper":103,"./wrappers/visuals/replay":112,"deepmerge":15,"readystate":62,"util":78}],85:[function(_dereq_,module,exports){
+},{"./constants":86,"./events":87,"./options":88,"./resource":89,"./util/browser":92,"./util/collectLogger":93,"./util/eventEmitter":94,"./wrappers/container":101,"./wrappers/optionsWrapper":104,"./wrappers/visuals/replay":113,"deepmerge":16,"readystate":62,"util":79}],86:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13897,7 +14039,7 @@ exports.default = {
   }
 };
 
-},{}],86:[function(_dereq_,module,exports){
+},{}],87:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13952,7 +14094,7 @@ exports.default = (0, _keymirror2.default)({
   INVISIBLE: null // document just became INvisible
 });
 
-},{"keymirror":44}],87:[function(_dereq_,module,exports){
+},{"keymirror":45}],88:[function(_dereq_,module,exports){
 (function (process){
 'use strict';
 
@@ -14109,7 +14251,7 @@ exports.default = {
 };
 
 }).call(this,_dereq_('_process'))
-},{"../package.json":83,"_process":50}],88:[function(_dereq_,module,exports){
+},{"../package.json":84,"_process":51}],89:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14298,12 +14440,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var CACHE_KEY = 'alias';
 
-},{"./constants":85,"superagent":67}],89:[function(_dereq_,module,exports){
+},{"./constants":86,"superagent":69}],90:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = '@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{width:100%;height:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
 
-},{}],90:[function(_dereq_,module,exports){
+},{}],91:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14440,7 +14582,7 @@ var CHANNELS = 1;
 
 // todo code needs rewrite
 
-},{"./videomailError":98,"audio-sample":3,"is-power-of-two":41}],91:[function(_dereq_,module,exports){
+},{"./videomailError":99,"audio-sample":4,"is-power-of-two":42}],92:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14708,7 +14850,7 @@ exports.default = Browser;
 
 module.exports = Browser;
 
-},{"./videomailError":98,"defined":16,"ua-parser-js":74}],92:[function(_dereq_,module,exports){
+},{"./videomailError":99,"defined":17,"ua-parser-js":75}],93:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14793,7 +14935,7 @@ var _browser2 = _interopRequireDefault(_browser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./browser":91,"util":78}],93:[function(_dereq_,module,exports){
+},{"./browser":92,"util":79}],94:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14877,7 +15019,7 @@ var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./../events":86,"./videomailError":98,"despot":17}],94:[function(_dereq_,module,exports){
+},{"./../events":87,"./videomailError":99,"despot":18}],95:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14908,7 +15050,7 @@ exports.default = {
   }
 };
 
-},{"filesize":24,"humanize-duration":31}],95:[function(_dereq_,module,exports){
+},{"filesize":25,"humanize-duration":32}],96:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15023,7 +15165,7 @@ exports.default = [
 // 'timeupdate'
 ];
 
-},{}],96:[function(_dereq_,module,exports){
+},{}],97:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15094,7 +15236,7 @@ function objectToString(object, options) {
   return sLines;
 }
 
-},{}],97:[function(_dereq_,module,exports){
+},{}],98:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15160,7 +15302,7 @@ var _requestFrame2 = _interopRequireDefault(_requestFrame);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"classlist.js":10,"element-closest":21,"request-frame":64}],98:[function(_dereq_,module,exports){
+},{"classlist.js":11,"element-closest":22,"request-frame":64}],99:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15233,7 +15375,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   var debug = options && options.debug || console.log;
   var audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled();
 
-  debug('VideomailError: create()');
+  debug('VideomailError: create()', err, explanation);
 
   var classList = parameters.classList || [];
 
@@ -15400,7 +15542,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message;
         } else {
           // tried toString before but nah
-          explanation = _util2.default.inspect(originalExplanation, { showHidden: true });
+          explanation = 'Inspected: ' + _util2.default.inspect(originalExplanation, { showHidden: true });
         }
       }
 
@@ -15534,7 +15676,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
 exports.default = VideomailError;
 
-},{"./../resource":88,"./browser":91,"./pretty":96,"create-error":14,"util":78}],99:[function(_dereq_,module,exports){
+},{"./../resource":89,"./browser":92,"./pretty":97,"create-error":15,"util":79}],100:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15626,10 +15768,13 @@ var Buttons = function Buttons(container, options) {
     }
 
     elements && elements.forEach(function (element) {
-      if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-        element.disabled = true;
-      } else {
-        element.classList.add('disabled');
+      // https://github.com/binarykitchen/videomail-client/issues/148
+      if (element) {
+        if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
+          element.disabled = true;
+        } else {
+          element.classList.add('disabled');
+        }
       }
     });
   }
@@ -15640,10 +15785,13 @@ var Buttons = function Buttons(container, options) {
     }
 
     elements && elements.forEach(function (element) {
-      if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-        element.disabled = false;
-      } else {
-        element.classList.remove('disabled');
+      // https://github.com/binarykitchen/videomail-client/issues/148
+      if (element) {
+        if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
+          element.disabled = false;
+        } else {
+          element.classList.remove('disabled');
+        }
       }
     });
   }
@@ -16128,7 +16276,7 @@ _util2.default.inherits(Buttons, _eventEmitter2.default);
 
 exports.default = Buttons;
 
-},{"./../events":86,"./../util/eventEmitter":93,"contains":12,"hidden":30,"hyperscript":32,"util":78}],100:[function(_dereq_,module,exports){
+},{"./../events":87,"./../util/eventEmitter":94,"contains":13,"hidden":31,"hyperscript":33,"util":79}],101:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16884,7 +17032,7 @@ _util2.default.inherits(Container, _eventEmitter2.default);
 
 exports.default = Container;
 
-},{"./../events":86,"./../resource":88,"./../styles/css/main.min.css.js":89,"./../util/eventEmitter":93,"./../util/videomailError":98,"./buttons":99,"./dimension":101,"./form":102,"./optionsWrapper":103,"./visuals":104,"document-visibility":18,"hidden":30,"insert-css":36,"util":78}],101:[function(_dereq_,module,exports){
+},{"./../events":87,"./../resource":89,"./../styles/css/main.min.css.js":90,"./../util/eventEmitter":94,"./../util/videomailError":99,"./buttons":100,"./dimension":102,"./form":103,"./optionsWrapper":104,"./visuals":105,"document-visibility":19,"hidden":31,"insert-css":37,"util":79}],102:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17017,7 +17165,7 @@ exports.default = {
   }
 };
 
-},{"./../util/videomailError":98,"number-is-integer":45}],102:[function(_dereq_,module,exports){
+},{"./../util/videomailError":99,"number-is-integer":46}],103:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17282,7 +17430,7 @@ _util2.default.inherits(Form, _eventEmitter2.default);
 
 exports.default = Form;
 
-},{"./../events":86,"./../util/eventEmitter":93,"./../util/videomailError":98,"get-form-data":25,"hidden":30,"hyperscript":32,"util":78}],103:[function(_dereq_,module,exports){
+},{"./../events":87,"./../util/eventEmitter":94,"./../util/videomailError":99,"get-form-data":26,"hidden":31,"hyperscript":33,"util":79}],104:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17365,7 +17513,7 @@ exports.default = {
   }
 }; // enhances options with useful functions we can reuse everywhere
 
-},{"deepmerge":15}],104:[function(_dereq_,module,exports){
+},{"deepmerge":16}],105:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17786,7 +17934,7 @@ _util2.default.inherits(Visuals, _eventEmitter2.default);
 
 exports.default = Visuals;
 
-},{"./../events":86,"./../util/eventEmitter":93,"./visuals/inside/recorderInsides":109,"./visuals/notifier":110,"./visuals/recorder":111,"./visuals/replay":112,"hidden":30,"hyperscript":32,"util":78}],105:[function(_dereq_,module,exports){
+},{"./../events":87,"./../util/eventEmitter":94,"./visuals/inside/recorderInsides":110,"./visuals/notifier":111,"./visuals/recorder":112,"./visuals/replay":113,"hidden":31,"hyperscript":33,"util":79}],106:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17884,7 +18032,7 @@ var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":30,"hyperscript":32}],106:[function(_dereq_,module,exports){
+},{"hidden":31,"hyperscript":33}],107:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17960,7 +18108,7 @@ var _videomailError2 = _interopRequireDefault(_videomailError);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./../../../../util/videomailError":98,"hidden":30,"hyperscript":32}],107:[function(_dereq_,module,exports){
+},{"./../../../../util/videomailError":99,"hidden":31,"hyperscript":33}],108:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18017,7 +18165,7 @@ var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":30,"hyperscript":32}],108:[function(_dereq_,module,exports){
+},{"hidden":31,"hyperscript":33}],109:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18179,7 +18327,7 @@ var _hidden2 = _interopRequireDefault(_hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"hidden":30,"hyperscript":32}],109:[function(_dereq_,module,exports){
+},{"hidden":31,"hyperscript":33}],110:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18332,7 +18480,7 @@ _util2.default.inherits(RecorderInsides, _eventEmitter2.default);
 
 exports.default = RecorderInsides;
 
-},{"./../../../events":86,"./../../../util/eventEmitter":93,"./recorder/countdown":105,"./recorder/pausedNote":106,"./recorder/recordNote":107,"./recorder/recordTimer":108,"util":78}],110:[function(_dereq_,module,exports){
+},{"./../../../events":87,"./../../../util/eventEmitter":94,"./recorder/countdown":106,"./recorder/pausedNote":107,"./recorder/recordNote":108,"./recorder/recordTimer":109,"util":79}],111:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18660,7 +18808,7 @@ _util2.default.inherits(Notifier, _eventEmitter2.default);
 
 exports.default = Notifier;
 
-},{"./../../events":86,"./../../util/eventEmitter":93,"hidden":30,"hyperscript":32,"util":78}],111:[function(_dereq_,module,exports){
+},{"./../../events":87,"./../../util/eventEmitter":94,"hidden":31,"hyperscript":33,"util":79}],112:[function(_dereq_,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -19875,7 +20023,7 @@ _util2.default.inherits(Recorder, _eventEmitter2.default);
 exports.default = Recorder;
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"./../../constants":85,"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/humanize":94,"./../../util/pretty":96,"./../../util/videomailError":98,"./userMedia":113,"animitter":2,"buffer":7,"canvas-to-buffer":8,"hidden":30,"hyperscript":32,"util":78,"websocket-stream":80}],112:[function(_dereq_,module,exports){
+},{"./../../constants":86,"./../../events":87,"./../../util/browser":92,"./../../util/eventEmitter":94,"./../../util/humanize":95,"./../../util/pretty":97,"./../../util/videomailError":99,"./userMedia":114,"animitter":2,"buffer":8,"canvas-to-buffer":9,"hidden":31,"hyperscript":33,"util":79,"websocket-stream":81}],113:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20231,7 +20379,7 @@ _util2.default.inherits(Replay, _eventEmitter2.default);
 
 exports.default = Replay;
 
-},{"./../../events":86,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/videomailError":98,"add-eventlistener-with-options":1,"hidden":30,"hyperscript":32,"iphone-inline-video":38,"util":78}],113:[function(_dereq_,module,exports){
+},{"./../../events":87,"./../../util/browser":92,"./../../util/eventEmitter":94,"./../../util/videomailError":99,"add-eventlistener-with-options":1,"hidden":31,"hyperscript":33,"iphone-inline-video":39,"util":79}],114:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20722,7 +20870,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var EVENT_ASCII = '|—O—|';
 
-},{"./../../events":86,"./../../util/audioRecorder":90,"./../../util/browser":91,"./../../util/eventEmitter":93,"./../../util/mediaEvents":95,"./../../util/pretty":96,"./../../util/videomailError":98,"hyperscript":32}],"videomail-client":[function(_dereq_,module,exports){
+},{"./../../events":87,"./../../util/audioRecorder":91,"./../../util/browser":92,"./../../util/eventEmitter":94,"./../../util/mediaEvents":96,"./../../util/pretty":97,"./../../util/videomailError":99,"hyperscript":33}],"videomail-client":[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20756,5 +20904,5 @@ exports.default = _client2.default;
 
 module.exports = _client2.default;
 
-},{"./client":84,"./util/standardize":97}]},{},["videomail-client"])("videomail-client")
+},{"./client":85,"./util/standardize":98}]},{},["videomail-client"])("videomail-client")
 });
