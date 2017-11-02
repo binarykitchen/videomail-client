@@ -65,10 +65,13 @@ const Buttons = function (container, options) {
     }
 
     elements && elements.forEach(function (element) {
-      if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-        element.disabled = true
-      } else {
-        element.classList.add('disabled')
+      // https://github.com/binarykitchen/videomail-client/issues/148
+      if (element) {
+        if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
+          element.disabled = true
+        } else {
+          element.classList.add('disabled')
+        }
       }
     })
   }
@@ -79,10 +82,13 @@ const Buttons = function (container, options) {
     }
 
     elements && elements.forEach(function (element) {
-      if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-        element.disabled = false
-      } else {
-        element.classList.remove('disabled')
+      // https://github.com/binarykitchen/videomail-client/issues/148
+      if (element) {
+        if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
+          element.disabled = false
+        } else {
+          element.classList.remove('disabled')
+        }
       }
     })
   }

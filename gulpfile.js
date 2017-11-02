@@ -1,5 +1,5 @@
 // todo write this in ES6 once i have figured out how to
-// transpile it with babelify itself without adding babel-core
+// transpile it with babelify itself
 
 const path = require('path')
 const fs = require('fs')
