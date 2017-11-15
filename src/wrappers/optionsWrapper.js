@@ -64,7 +64,9 @@ export default {
   // and over again each day. and other large sites out there have their own
   // tech debts. hope i have shattered your illusion on perfection?
   merge: function (defaultOptions, newOptions) {
-    const options = deepmerge(defaultOptions, newOptions)
+    const options = deepmerge(defaultOptions, newOptions, {
+      arrayMerge: function (destination, source) { return source }
+    })
 
     this.addFunctions(options)
 

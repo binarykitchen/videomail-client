@@ -4874,6 +4874,17 @@ function shim (element, value) {
       ms: function (c) { return c === 1 ? 'جزء من الثانية' : 'أجزاء من الثانية' },
       decimal: ','
     },
+    bg: {
+      y: function (c) { return ['години', 'година', 'години'][getSlavicForm(c)] },
+      mo: function (c) { return ['месеца', 'месец', 'месеца'][getSlavicForm(c)] },
+      w: function (c) { return ['седмици', 'седмица', 'седмици'][getSlavicForm(c)] },
+      d: function (c) { return ['дни', 'ден', 'дни'][getSlavicForm(c)] },
+      h: function (c) { return ['часа', 'час', 'часа'][getSlavicForm(c)] },
+      m: function (c) { return ['минути', 'минута', 'минути'][getSlavicForm(c)] },
+      s: function (c) { return ['секунди', 'секунда', 'секунди'][getSlavicForm(c)] },
+      ms: function (c) { return ['милисекунди', 'милисекунда', 'милисекунди'][getSlavicForm(c)] },
+      decimal: ','
+    },
     ca: {
       y: function (c) { return 'any' + (c === 1 ? '' : 's') },
       mo: function (c) { return 'mes' + (c === 1 ? '' : 'os') },
@@ -11621,12 +11632,14 @@ exports.parseLinks = function(str){
  * @api private
  */
 
-exports.cleanHeader = function(header, shouldStripCookie){
+exports.cleanHeader = function(header, changesOrigin){
   delete header['content-type'];
   delete header['content-length'];
   delete header['transfer-encoding'];
   delete header['host'];
-  if (shouldStripCookie) {
+  // secuirty
+  if (changesOrigin) {
+    delete header['authorization'];
     delete header['cookie'];
   }
   return header;
@@ -13666,7 +13679,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.25",
+  "version": "2.1.26",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13686,7 +13699,7 @@ module.exports={
   "main": "dist/videomail-client.js",
   "scripts": {
     "test": "gulp test",
-    "start": "gulp examples",
+    "start": "NODE_NO_HTTP2=1 gulp examples",
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major"
@@ -13720,7 +13733,7 @@ module.exports={
     "filesize": "3.5.11",
     "get-form-data": "1.2.5",
     "hidden": "1.1.1",
-    "humanize-duration": "3.11.0",
+    "humanize-duration": "3.12.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -13729,7 +13742,7 @@ module.exports={
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.8.0",
+    "superagent": "3.8.1",
     "ua-parser-js": "0.7.17",
     "websocket-stream": "5.1.1"
   },
@@ -13844,7 +13857,11 @@ var browser;
 function adjustOptions() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-  var localOptions = (0, _deepmerge2.default)(_options2.default, options);
+  var localOptions = (0, _deepmerge2.default)(_options2.default, options, {
+    arrayMerge: function arrayMerge(destination, source) {
+      return source;
+    }
+  });
 
   collectLogger = collectLogger || new _collectLogger2.default(localOptions);
 
@@ -17505,7 +17522,11 @@ exports.default = {
   // and over again each day. and other large sites out there have their own
   // tech debts. hope i have shattered your illusion on perfection?
   merge: function merge(defaultOptions, newOptions) {
-    var options = (0, _deepmerge2.default)(defaultOptions, newOptions);
+    var options = (0, _deepmerge2.default)(defaultOptions, newOptions, {
+      arrayMerge: function arrayMerge(destination, source) {
+        return source;
+      }
+    });
 
     this.addFunctions(options);
 
