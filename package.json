@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "2.1.25",
+  "version": "2.1.26",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20,7 +20,7 @@
   "main": "dist/videomail-client.js",
   "scripts": {
     "test": "gulp test",
-    "start": "gulp examples",
+    "start": "NODE_NO_HTTP2=1 gulp examples",
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major"
@@ -54,7 +54,7 @@
     "filesize": "3.5.11",
     "get-form-data": "1.2.5",
     "hidden": "1.1.1",
-    "humanize-duration": "3.11.0",
+    "humanize-duration": "3.12.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -63,7 +63,7 @@
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.8.0",
+    "superagent": "3.8.1",
     "ua-parser-js": "0.7.17",
     "websocket-stream": "5.1.1"
   },

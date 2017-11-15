@@ -17,7 +17,9 @@ var collectLogger
 var browser
 
 function adjustOptions (options = {}) {
-  const localOptions = deepmerge(defaultOptions, options)
+  const localOptions = deepmerge(defaultOptions, options, {
+    arrayMerge: function (destination, source) { return source }
+  })
 
   collectLogger = collectLogger || new CollectLogger(localOptions)
 
