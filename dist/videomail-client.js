@@ -13679,7 +13679,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.27",
+  "version": "2.1.28",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -15432,6 +15432,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   if (err && err.stack) {
     stack = err.stack;
+  } else {
+    stack = new Error().stack;
   }
 
   switch (errType) {
@@ -15500,8 +15502,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
 
     case VideomailError.NOT_CONNECTED:
-      message = 'Unable to transfer data';
-      explanation = 'Unable to maintain a websocket to the server. Either server or ' + 'your connection is down. Trying to reconnect every two seconds …';
+      message = 'Unable to connect';
+      explanation = 'Either the videomail server or your connection is down. ' + 'Trying to reconnect every few seconds …';
       break;
 
     case 'NO_VIDEO_FEED':
@@ -17103,8 +17105,17 @@ function figureMinHeight(height, options) {
 exports.default = {
 
   limitWidth: function limitWidth(element, width, options) {
+    var limitedWidth;
+
     var outerWidth = getOuterWidth(element);
-    var limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width;
+
+    if (width) {
+      // only when that element has a defined width, apply this logic
+      limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width;
+    } else {
+      // else apply the outer width when the element has no defined width yet
+      limitedWidth = outerWidth;
+    }
 
     if ((0, _numberIsInteger2.default)(limitedWidth) && limitedWidth < 1) {
       throw _videomailError2.default.create('Limited width cannot be less than 1!', options);
@@ -19349,6 +19360,11 @@ var Recorder = function Recorder(visuals, replay, options) {
       } else {
         if (options.hasDefinedWidth()) {
           constraints.video.width = { ideal: options.video.width };
+        } else {
+          // otherwise try to apply the same width as the element is having
+          // but there is no 100% guarantee that this will happen. not
+          // all webcam drivers behave the same way
+          constraints.video.width = { ideal: self.limitWidth() };
         }
 
         if (options.hasDefinedHeight()) {
@@ -20364,12 +20380,12 @@ var Replay = function Replay(parentElement, options) {
       } catch (exc) {
         // this in the hope to catch InvalidStateError, see
         // https://github.com/binarykitchen/videomail-client/issues/149
-        options.logger.warn('Caught pending play exception:', exc);
+        options.logger.warn('Caught replay exception:', exc);
       }
 
       if (p && typeof Promise !== 'undefined' && p instanceof Promise) {
         p.catch(function (reason) {
-          options.logger.warn('Caught pending play promise exception: %s', reason);
+          options.logger.warn('Caught pending replay promise exception: %s', reason);
         });
       }
     }
@@ -20569,7 +20585,15 @@ exports.default = function (recorder, options) {
         if (rawVisualUserMedia.paused) {
           options.debug('UserMedia: play()', 'media.readyState=' + rawVisualUserMedia.readyState, 'media.paused=' + rawVisualUserMedia.paused, 'media.ended=' + rawVisualUserMedia.ended, 'media.played=' + (0, _pretty2.default)(rawVisualUserMedia.played));
 
-          var p = rawVisualUserMedia.play();
+          var p;
+
+          try {
+            p = rawVisualUserMedia.play();
+          } catch (exc) {
+            // this in the hope to catch InvalidStateError, see
+            // https://github.com/binarykitchen/videomail-client/issues/149
+            options.logger.warn('Caught raw usermedia play exception:', exc);
+          }
 
           // using the promise here just experimental for now
           // and this to catch any weird errors early if possible
@@ -20583,7 +20607,7 @@ exports.default = function (recorder, options) {
               // promise can be interrupted, i.E. when switching tabs
               // and promise can get resumed when switching back to tab, hence
               // do not treat this like an error
-              options.debug('UserMedia:', reason.toString());
+              options.logger.warn('Caught pending usermedia promise exception: %s', reason.toString());
             });
           }
         }

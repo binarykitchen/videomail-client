@@ -90,6 +90,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   if (err && err.stack) {
     stack = err.stack
+  } else {
+    stack = new Error().stack
   }
 
   switch (errType) {
@@ -161,9 +163,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
 
     case VideomailError.NOT_CONNECTED:
-      message = 'Unable to transfer data'
-      explanation = 'Unable to maintain a websocket to the server. Either server or ' +
-                    'your connection is down. Trying to reconnect every two seconds …'
+      message = 'Unable to connect'
+      explanation = 'Either the videomail server or your connection is down. ' +
+                    'Trying to reconnect every few seconds …'
       break
 
     case 'NO_VIDEO_FEED':

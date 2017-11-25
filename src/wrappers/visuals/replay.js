@@ -289,12 +289,12 @@ const Replay = function (parentElement, options) {
       } catch (exc) {
         // this in the hope to catch InvalidStateError, see
         // https://github.com/binarykitchen/videomail-client/issues/149
-        options.logger.warn('Caught pending play exception:', exc)
+        options.logger.warn('Caught replay exception:', exc)
       }
 
       if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
         p.catch((reason) => {
-          options.logger.warn('Caught pending play promise exception: %s', reason)
+          options.logger.warn('Caught pending replay promise exception: %s', reason)
         })
       }
     }

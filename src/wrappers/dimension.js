@@ -44,8 +44,17 @@ function figureMinHeight (height, options) {
 export default {
 
   limitWidth: function (element, width, options) {
+    var limitedWidth
+
     const outerWidth = getOuterWidth(element)
-    const limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
+
+    if (width) {
+      // only when that element has a defined width, apply this logic
+      limitedWidth = outerWidth > 0 && outerWidth < width ? outerWidth : width
+    } else {
+      // else apply the outer width when the element has no defined width yet
+      limitedWidth = outerWidth
+    }
 
     if (numberIsInteger(limitedWidth) && limitedWidth < 1) {
       throw VideomailError.create('Limited width cannot be less than 1!', options)
