@@ -179,7 +179,12 @@ const Replay = function (parentElement, options) {
       // makes use of passive option automatically for better performance
       // https://www.npmjs.com/package/add-eventlistener-with-options
       addEventListenerWithOptions(replayElement, 'touchstart', function (e) {
-        e && e.preventDefault()
+        try {
+          e && e.preventDefault()
+        } catch (exc) {
+          // ignore errors like
+          // Unable to preventDefault inside passive event listener invocation.
+        }
 
         if (this.paused) {
           play()
