@@ -178,7 +178,15 @@ export default function (recorder, options) {
             'media.played=' + pretty(rawVisualUserMedia.played)
           )
 
-          const p = rawVisualUserMedia.play()
+          var p
+
+          try {
+            p = rawVisualUserMedia.play()
+          } catch (exc) {
+            // this in the hope to catch InvalidStateError, see
+            // https://github.com/binarykitchen/videomail-client/issues/149
+            options.logger.warn('Caught raw usermedia play exception:', exc)
+          }
 
           // using the promise here just experimental for now
           // and this to catch any weird errors early if possible
@@ -192,7 +200,7 @@ export default function (recorder, options) {
               // promise can be interrupted, i.E. when switching tabs
               // and promise can get resumed when switching back to tab, hence
               // do not treat this like an error
-              options.debug('UserMedia:', reason.toString())
+              options.logger.warn('Caught pending usermedia promise exception: %s', reason.toString())
             })
           }
         }
