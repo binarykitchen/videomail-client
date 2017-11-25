@@ -13679,7 +13679,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.26",
+  "version": "2.1.27",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20357,11 +20357,19 @@ var Replay = function Replay(parentElement, options) {
 
   function play() {
     if (replayElement && replayElement.play) {
-      var p = replayElement.play();
+      var p;
+
+      try {
+        p = replayElement.play();
+      } catch (exc) {
+        // this in the hope to catch InvalidStateError, see
+        // https://github.com/binarykitchen/videomail-client/issues/149
+        options.logger.warn('Caught pending play exception:', exc);
+      }
 
       if (p && typeof Promise !== 'undefined' && p instanceof Promise) {
         p.catch(function (reason) {
-          options.logger.warn('Caught pending play exception: %s', reason);
+          options.logger.warn('Caught pending play promise exception: %s', reason);
         });
       }
     }
@@ -20912,11 +20920,7 @@ if (!navigator) {
   throw new Error('Navigator is missing!');
 } else {
   // Ensures Videomail functionality is not broken on exotic browsers with shims.
-  //
-  // UMD (Universal Module Definition), inspired by https://github.com/es-shims/es5-shim
-  ;(function (navigator) {
-    (0, _standardize2.default)(window, navigator);
-  })(navigator);
+  (0, _standardize2.default)(window, navigator);
 }
 
 exports.default = _client2.default;
