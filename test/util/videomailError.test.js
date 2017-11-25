@@ -95,7 +95,7 @@ test('Videomail Error:', function (t) {
       const err = VideomailError.create(123, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: 123')
-      tt.equal(err.message, 123)
+      tt.equal(err.message, '123')
       tt.equal(err.explanation, undefined)
     })
 
@@ -159,7 +159,7 @@ test('Videomail Error:', function (t) {
       }, fakeOptions)
 
       tt.equal(err.toString(), 'Videomail Error: 1')
-      tt.equal(err.message, 1)
+      tt.equal(err.message, '1')
       tt.equal(err.explanation, undefined)
     })
 
@@ -206,9 +206,9 @@ test('Videomail Error:', function (t) {
         name: 'Not connected'
       }, fakeOptions)
 
-      tt.equal(err.toString(), 'Videomail Error: Unable to transfer data')
-      tt.equal(err.message, 'Unable to transfer data')
-      tt.equal(err.explanation, 'Unable to maintain a websocket to the server. Either server or your connection is down. Trying to reconnect every two seconds …')
+      tt.equal(err.toString(), 'Videomail Error: Unable to connect')
+      tt.equal(err.message, 'Unable to connect')
+      tt.equal(err.explanation, 'Either the videomail server or your connection is down. Trying to reconnect every few seconds …')
     })
 
     tt.test('with "Not connected" as argument', function (tt) {
@@ -216,9 +216,9 @@ test('Videomail Error:', function (t) {
 
       const err = VideomailError.create('Not connected', fakeOptions)
 
-      tt.equal(err.toString(), 'Videomail Error: Unable to transfer data')
-      tt.equal(err.message, 'Unable to transfer data')
-      tt.equal(err.explanation, 'Unable to maintain a websocket to the server. Either server or your connection is down. Trying to reconnect every two seconds …')
+      tt.equal(err.toString(), 'Videomail Error: Unable to connect')
+      tt.equal(err.message, 'Unable to connect')
+      tt.equal(err.explanation, 'Either the videomail server or your connection is down. Trying to reconnect every few seconds …')
     })
 
     tt.test('with NO_VIDEO_FEED as name in object', function (tt) {

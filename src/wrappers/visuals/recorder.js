@@ -525,6 +525,11 @@ const Recorder = function (visuals, replay, options) {
       } else {
         if (options.hasDefinedWidth()) {
           constraints.video.width = {ideal: options.video.width}
+        } else {
+          // otherwise try to apply the same width as the element is having
+          // but there is no 100% guarantee that this will happen. not
+          // all webcam drivers behave the same way
+          constraints.video.width = {ideal: self.limitWidth()}
         }
 
         if (options.hasDefinedHeight()) {
