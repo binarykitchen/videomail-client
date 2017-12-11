@@ -1026,14 +1026,14 @@ browser-resolve@^1.11.0, browser-resolve@^1.7.0:
   dependencies:
     resolve "1.1.7"
 
-browser-run@^4.0.1:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/browser-run/-/browser-run-4.0.4.tgz#ec10855f17a82c6651f3dc9df79d056832a25976"
+browser-run@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/browser-run/-/browser-run-4.1.0.tgz#39baed35e59e5dc15c93aa351cdbadad48212530"
   dependencies:
     browser-launcher "^1.0.0"
     duplexer "^0.1.1"
     ecstatic "^2.0.0"
-    electron-stream "^5.0.0"
+    electron-stream "^5.1.0"
     enstore "^1.0.1"
     html-inject-script "^1.1.0"
     optimist "^0.6.1"
@@ -2159,6 +2159,15 @@ ecstatic@^2.0.0:
     minimist "^1.1.0"
     url-join "^2.0.2"
 
+ecstatic@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/ecstatic/-/ecstatic-3.1.0.tgz#fa342eb30268d98b214caa9e9c7cd8a6c8cfc97e"
+  dependencies:
+    he "^1.1.1"
+    mime "^1.4.0"
+    minimist "^1.1.0"
+    url-join "^2.0.2"
+
 ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
@@ -2177,11 +2186,12 @@ electron-download@^3.0.1:
     semver "^5.3.0"
     sumchecker "^1.2.0"
 
-electron-stream@^5.0.0:
-  version "5.0.6"
-  resolved "https://registry.yarnpkg.com/electron-stream/-/electron-stream-5.0.6.tgz#7ba36ac812428fbb4449d14528ac689e3d90f44a"
+electron-stream@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/electron-stream/-/electron-stream-5.1.0.tgz#d8e73d610c318b02112b249b869b4a8abb121eee"
   dependencies:
     debug "^2.6.1"
+    ecstatic "^3.0.0"
     electron "^1.4.4"
     json-stringify-safe "^5.0.1"
     stream-read "^1.1.2"
@@ -4372,6 +4382,10 @@ mime@^1.2.11:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.4.0.tgz#69e9e0db51d44f2a3b56e48b7817d7d137f1a343"
 
+mime@^1.4.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
+
 mime@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.4.1.tgz#121f9ebc49e3766f311a76e1fa1c8003c4b03aa6"
@@ -6211,9 +6225,9 @@ sumchecker@^1.2.0:
     debug "^2.2.0"
     es6-promise "^4.0.5"
 
-superagent@3.8.1:
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/superagent/-/superagent-3.8.1.tgz#2571fd921f3fcdba43ac68c3b35c91951532701f"
+superagent@3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/superagent/-/superagent-3.8.2.tgz#e4a11b9d047f7d3efeb3bbe536d9ec0021d16403"
   dependencies:
     component-emitter "^1.2.0"
     cookiejar "^2.1.0"
@@ -6302,12 +6316,12 @@ tape-catch@1.0.6:
   dependencies:
     global "~4.3.0"
 
-tape-run@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/tape-run/-/tape-run-3.0.0.tgz#f7085ef4b69502bb6b3590e3ef72f94d27c998cc"
+tape-run@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/tape-run/-/tape-run-3.0.1.tgz#2570abc07abc7aa86002f59e262353342d12fdb2"
   dependencies:
     "@juliangruber/tap-finished" "0.0.2"
-    browser-run "^4.0.1"
+    browser-run "^4.1.0"
     optimist "~0.6.1"
     through "~2.3.4"
     throughout "0.0.0"
