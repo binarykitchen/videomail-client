@@ -10049,7 +10049,9 @@ function parseHeader(str) {
  */
 
 function isJSON(mime) {
-  return /[\/+]json\b/.test(mime);
+  // should match /json or +json
+  // but not /json-seq
+  return /[\/+]json($|[^-\w])/.test(mime);
 }
 
 /**
@@ -13679,7 +13681,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.28",
+  "version": "2.1.29",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13742,7 +13744,7 @@ module.exports={
     "number-is-integer": "1.0.1",
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
-    "superagent": "3.8.1",
+    "superagent": "3.8.2",
     "ua-parser-js": "0.7.17",
     "websocket-stream": "5.1.1"
   },
@@ -13783,7 +13785,7 @@ module.exports={
     "tap-summary": "4.0.0",
     "tape": "4.8.0",
     "tape-catch": "1.0.6",
-    "tape-run": "3.0.0",
+    "tape-run": "3.0.1",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
     "watchify": "3.9.0"
@@ -15450,6 +15452,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
         explanation = ' Details: ' + err.toString();
       }
       break;
+    case 'MediaDeviceFailedDueToShutdown':
+      message = 'Webcam is shutting down';
+      explanation = 'This happens your webcam is already switching off and not giving you permission to use it.';
+      break;
     case 'SourceUnavailableError':
       message = 'Source of your webcam cannot be accessed';
       explanation = 'Probably it is locked from another process or has a hardware error.';
@@ -15525,14 +15531,23 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
 
     case VideomailError.DOM_EXCEPTION:
-      if (err.code === 9) {
-        var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
-        message = 'Security upgrade needed';
-        explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' + ' and enables encrypted videomail transfers.';
-        classList.push(VideomailError.BROWSER_PROBLEM);
-      } else {
-        message = VideomailError.DOM_EXCEPTION;
-        explanation = pretty(err);
+      switch (err.code) {
+        case 9:
+          var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
+          message = 'Security upgrade needed';
+          explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' + ' and enables encrypted videomail transfers.';
+          classList.push(VideomailError.BROWSER_PROBLEM);
+          break;
+        case 11:
+          message = 'Invalid State';
+          explanation = 'The object is in an invalid, unusable state.';
+          classList.push(VideomailError.BROWSER_PROBLEM);
+          break;
+        default:
+          message = 'DOM Exception';
+          explanation = pretty(err);
+          classList.push(VideomailError.BROWSER_PROBLEM);
+          break;
       }
       break;
 
@@ -20270,7 +20285,12 @@ var Replay = function Replay(parentElement, options) {
       // makes use of passive option automatically for better performance
       // https://www.npmjs.com/package/add-eventlistener-with-options
       (0, _addEventlistenerWithOptions2.default)(replayElement, 'touchstart', function (e) {
-        e && e.preventDefault();
+        try {
+          e && e.preventDefault();
+        } catch (exc) {
+          // ignore errors like
+          // Unable to preventDefault inside passive event listener invocation.
+        }
 
         if (this.paused) {
           play();

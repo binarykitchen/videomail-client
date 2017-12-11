@@ -108,6 +108,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
         explanation = ' Details: ' + err.toString()
       }
       break
+    case 'MediaDeviceFailedDueToShutdown':
+      message = 'Webcam is shutting down'
+      explanation = 'This happens your webcam is already switching off and not giving you permission to use it.'
+      break
     case 'SourceUnavailableError':
       message = 'Source of your webcam cannot be accessed'
       explanation = 'Probably it is locked from another process or has a hardware error.'
@@ -188,15 +192,24 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
 
     case VideomailError.DOM_EXCEPTION:
-      if (err.code === 9) {
-        const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
-        message = 'Security upgrade needed'
-        explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
-                      ' and enables encrypted videomail transfers.'
-        classList.push(VideomailError.BROWSER_PROBLEM)
-      } else {
-        message = VideomailError.DOM_EXCEPTION
-        explanation = pretty(err)
+      switch (err.code) {
+        case 9:
+          const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
+          message = 'Security upgrade needed'
+          explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
+                        ' and enables encrypted videomail transfers.'
+          classList.push(VideomailError.BROWSER_PROBLEM)
+          break
+        case 11:
+          message = 'Invalid State'
+          explanation = 'The object is in an invalid, unusable state.'
+          classList.push(VideomailError.BROWSER_PROBLEM)
+          break
+        default:
+          message = 'DOM Exception'
+          explanation = pretty(err)
+          classList.push(VideomailError.BROWSER_PROBLEM)
+          break
       }
       break
 
