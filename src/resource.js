@@ -50,7 +50,7 @@ export default function (options) {
         if (err) {
           cb(err)
         } else {
-          const videomail = res.body
+          const videomail = res.body ? res.body : null
 
           if (options.cache) {
             cache[CACHE_KEY] = videomail
