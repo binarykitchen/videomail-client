@@ -137,8 +137,12 @@ var Container = function (options) {
       if (!options.playerOnly) {
         window.addEventListener('keypress', function (e) {
           const tagName = e.target.tagName
+          const isEditable = e.target.isContentEditable ||
+                             e.target.contentEditable === 'true' ||
+                             e.target.contentEditable === true
 
-          if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
+          // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
+          if (!isEditable && tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
             const code = e.keyCode ? e.keyCode : e.which
 
             if (code === 32) {
