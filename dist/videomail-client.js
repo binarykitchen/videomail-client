@@ -13681,7 +13681,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.29",
+  "version": "2.1.30",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13760,7 +13760,7 @@ module.exports={
     "glob": "7.1.2",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "4.0.0",
-    "gulp-bump": "2.8.0",
+    "gulp-bump": "2.9.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.0.0",
@@ -14319,7 +14319,7 @@ exports.default = function (options) {
       if (err) {
         cb(err);
       } else {
-        var videomail = res.body;
+        var videomail = res.body ? res.body : null;
 
         if (options.cache) {
           cache[CACHE_KEY] = videomail;
@@ -16496,8 +16496,10 @@ var Container = function Container(options) {
       if (!options.playerOnly) {
         window.addEventListener('keypress', function (e) {
           var tagName = e.target.tagName;
+          var isEditable = e.target.isContentEditable || e.target.contentEditable === 'true' || e.target.contentEditable === true;
 
-          if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
+          // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
+          if (!isEditable && tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
             var code = e.keyCode ? e.keyCode : e.which;
 
             if (code === 32) {
