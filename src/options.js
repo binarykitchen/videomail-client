@@ -46,6 +46,7 @@ export default {
     fromInputName: 'from',               // the form input name for the from email
     toInputName: 'to',                   // the form input name for the to email
     bodyInputName: 'body',               // the form input name for the message (body)
+    sendCopyInputName: 'sendCopy',       // the form checkbox name for sending myself a copy
 
     keyInputName: 'videomail_key',
     parentKeyInputName: 'videomail_parent_key',
