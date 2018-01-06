@@ -861,7 +861,7 @@ module.exports = (function split(undef) {
 /*!
  * The buffer module from node.js, for the browser.
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
 /* eslint-disable no-proto */
@@ -4587,18 +4587,17 @@ function isUndefined(arg) {
 'use strict';
 
 exports.__esModule = true;
+exports.default = getFormData;
+exports.getFieldData = getFieldData;
 var NODE_LIST_CLASSES = {
   '[object HTMLCollection]': true,
   '[object NodeList]': true,
   '[object RadioNodeList]': true
-};
 
-// .type values for elements which can appear in .elements and should be ignored
-var IGNORED_ELEMENT_TYPES = {
+  // .type values for elements which can appear in .elements and should be ignored
+};var IGNORED_ELEMENT_TYPES = {
   'button': true,
   'fieldset': true,
-  // 'keygen': true,
-  // 'output': true,
   'reset': true,
   'submit': true
 };
@@ -4620,15 +4619,16 @@ var toString = Object.prototype.toString;
  *   submittable value(s) held in the form's .elements collection, with
  *   properties named as per element names or ids.
  */
+
 function getFormData(form) {
-  var options = arguments.length <= 1 || arguments[1] === undefined ? { trim: false } : arguments[1];
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { trim: false };
 
   if (!form) {
     throw new Error('A form is required by getFormData, was given form=' + form);
   }
 
   var data = {};
-  var elementName = undefined;
+  var elementName = void 0;
   var elementNames = [];
   var elementNameLookup = {};
 
@@ -4647,9 +4647,9 @@ function getFormData(form) {
 
   // Extract element data name-by-name for consistent handling of special cases
   // around elements which contain multiple inputs.
-  for (var i = 0, l = elementNames.length; i < l; i++) {
-    elementName = elementNames[i];
-    var value = getNamedFormElementData(form, elementName, options);
+  for (var _i = 0, _l = elementNames.length; _i < _l; _i++) {
+    elementName = elementNames[_i];
+    var value = getFieldData(form, elementName, options);
     if (value != null) {
       data[elementName] = value;
     }
@@ -4660,23 +4660,23 @@ function getFormData(form) {
 
 /**
  * @param {HTMLFormElement} form
- * @param {string} elementName
+ * @param {string} fieldName
  * @param {Object} options
  * @return {(string|Array.<string>)} submittable value(s) in the form for a
  *   named element from its .elements collection, or null if there was no
  *   element with that name or the element had no submittable value(s).
  */
-function getNamedFormElementData(form, elementName) {
-  var options = arguments.length <= 2 || arguments[2] === undefined ? { trim: false } : arguments[2];
+function getFieldData(form, fieldName) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { trim: false };
 
   if (!form) {
-    throw new Error('A form is required by getNamedFormElementData, was given form=' + form);
+    throw new Error('A form is required by getFieldData, was given form=' + form);
   }
-  if (!elementName && toString.call(elementName) !== '[object String]') {
-    throw new Error('A form element name is required by getNamedFormElementData, was given elementName=' + elementName);
+  if (!fieldName && toString.call(fieldName) !== '[object String]') {
+    throw new Error('A field name is required by getFieldData, was given fieldName=' + fieldName);
   }
 
-  var element = form.elements[elementName];
+  var element = form.elements[fieldName];
   if (!element || element.disabled) {
     return null;
   }
@@ -4719,6 +4719,7 @@ function getNamedFormElementData(form, elementName) {
 function getFormElementValue(element, trim) {
   var value = null;
   var type = element.type;
+
 
   if (type === 'select-one') {
     if (element.options.length) {
@@ -4764,10 +4765,8 @@ function getFormElementValue(element, trim) {
   return value;
 }
 
-getFormData.getNamedFormElementData = getNamedFormElementData;
-
-exports['default'] = getFormData;
-module.exports = exports['default'];
+// For UMD build access to getFieldData
+getFormData.getFieldData = getFieldData;
 },{}],27:[function(_dereq_,module,exports){
 module.exports = Event
 
@@ -5118,7 +5117,7 @@ function shim (element, value) {
     },
     pt: {
       y: function (c) { return 'ano' + (c === 1 ? '' : 's') },
-      mo: function (c) { return c !== 1 ? 'meses' : 'mês' },
+      mo: function (c) { return c === 1 ? 'mês' : 'meses' },
       w: function (c) { return 'semana' + (c === 1 ? '' : 's') },
       d: function (c) { return 'dia' + (c === 1 ? '' : 's') },
       h: function (c) { return 'hora' + (c === 1 ? '' : 's') },
@@ -5141,7 +5140,7 @@ function shim (element, value) {
     uk: {
       y: function (c) { return ['років', 'рік', 'роки'][getSlavicForm(c)] },
       mo: function (c) { return ['місяців', 'місяць', 'місяці'][getSlavicForm(c)] },
-      w: function (c) { return ['неділь', 'неділя', 'неділі'][getSlavicForm(c)] },
+      w: function (c) { return ['тижнів', 'тиждень', 'тижні'][getSlavicForm(c)] },
       d: function (c) { return ['днів', 'день', 'дні'][getSlavicForm(c)] },
       h: function (c) { return ['годин', 'година', 'години'][getSlavicForm(c)] },
       m: function (c) { return ['хвилин', 'хвилина', 'хвилини'][getSlavicForm(c)] },
@@ -6194,7 +6193,7 @@ module.exports = enableInlineVideo;
 /*!
  * Determine if an object is a Buffer
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
 
@@ -6733,9 +6732,12 @@ module.exports = function(fn) {
 module.exports.cancel = function() {
   caf.apply(root, arguments)
 }
-module.exports.polyfill = function() {
-  root.requestAnimationFrame = raf
-  root.cancelAnimationFrame = caf
+module.exports.polyfill = function(object) {
+  if (!object) {
+    object = root;
+  }
+  object.requestAnimationFrame = raf
+  object.cancelAnimationFrame = caf
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
@@ -13681,7 +13683,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.1.30",
+  "version": "2.2.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13733,9 +13735,9 @@ module.exports={
     "document-visibility": "1.0.1",
     "element-closest": "2.0.2",
     "filesize": "3.5.11",
-    "get-form-data": "1.2.5",
+    "get-form-data": "2.0.0",
     "hidden": "1.1.1",
-    "humanize-duration": "3.12.0",
+    "humanize-duration": "3.12.1",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -13754,16 +13756,16 @@ module.exports={
     "babel-preset-env": "1.6.1",
     "babelify": "8.0.0",
     "body-parser": "1.18.2",
-    "browserify": "14.5.0",
+    "browserify": "15.0.0",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
     "glob": "7.1.2",
     "gulp": "3.9.1",
-    "gulp-autoprefixer": "4.0.0",
-    "gulp-bump": "2.9.0",
+    "gulp-autoprefixer": "4.1.0",
+    "gulp-bump": "3.0.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
-    "gulp-connect": "5.0.0",
+    "gulp-connect": "5.2.0",
     "gulp-cssnano": "2.1.2",
     "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
@@ -13771,9 +13773,9 @@ module.exports={
     "gulp-load-plugins": "1.5.0",
     "gulp-plumber": "1.1.0",
     "gulp-rename": "1.2.2",
-    "gulp-sourcemaps": "2.6.1",
+    "gulp-sourcemaps": "2.6.3",
     "gulp-standard": "10.1.1",
-    "gulp-stylus": "2.6.0",
+    "gulp-stylus": "2.7.0",
     "gulp-todo": "5.4.0",
     "gulp-uglify": "3.0.0",
     "gulp-util": "3.0.8",
@@ -13786,8 +13788,8 @@ module.exports={
     "tape": "4.8.0",
     "tape-catch": "1.0.6",
     "tape-run": "3.0.1",
-    "vinyl-buffer": "1.0.0",
-    "vinyl-source-stream": "1.1.0",
+    "vinyl-buffer": "1.0.1",
+    "vinyl-source-stream": "2.0.0",
     "watchify": "3.9.0"
   }
 }
@@ -14169,6 +14171,7 @@ exports.default = {
     fromInputName: 'from', // the form input name for the from email
     toInputName: 'to', // the form input name for the to email
     bodyInputName: 'body', // the form input name for the message (body)
+    sendCopyInputName: 'sendCopy', // the form checkbox name for sending myself a copy
 
     keyInputName: 'videomail_key',
     parentKeyInputName: 'videomail_parent_key',
@@ -16582,7 +16585,8 @@ var Container = function Container(options) {
       'to': options.selectors.toInputName,
       'body': options.selectors.bodyInputName,
       'key': options.selectors.keyInputName,
-      'parentKey': options.selectors.parentKeyInputName
+      'parentKey': options.selectors.parentKeyInputName,
+      'sendCopy': options.selectors.sendCopyInputName
     };
 
     var videomailFormData = {};
