@@ -213,7 +213,7 @@ var Container = function (options) {
     hidden(containerElement, true)
   }
 
-    // fixes https://github.com/binarykitchen/videomail-client/issues/71
+  // fixes https://github.com/binarykitchen/videomail-client/issues/71
   function trimEmail (email) {
     return email.replace(/(^[,\s]+)|([,\s]+$)/g, '')
   }
@@ -225,7 +225,8 @@ var Container = function (options) {
       'to': options.selectors.toInputName,
       'body': options.selectors.bodyInputName,
       'key': options.selectors.keyInputName,
-      'parentKey': options.selectors.parentKeyInputName
+      'parentKey': options.selectors.parentKeyInputName,
+      'sendCopy': options.selectors.sendCopyInputName
     }
 
     const videomailFormData = {}
