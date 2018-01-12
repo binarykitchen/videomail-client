@@ -20,6 +20,7 @@ const babelify = require('babelify')
 const tapeRun = require('tape-run')
 const tapSummarize = require('tap-summary')
 const glob = require('glob')
+const log = require('fancy-log')
 
 const packageJson = require('./package.json')
 
@@ -32,7 +33,7 @@ const defaultOptions = {
 
 const options = minimist(process.argv.slice(2), {default: defaultOptions})
 
-plugins.util.log('Options:', options)
+log.info('Options:', options)
 
 gulp.task('clean:js', (cb) => {
   return del(['dist/*.js', 'dist/*.js.map'])
@@ -92,11 +93,9 @@ function bundle (watching) {
   })
   .on('update', () => {
     pump()
-    plugins.util.log('Re-bundling ...')
+    log('Re-bundling ...')
   })
-  .on('log', (msg) => {
-    plugins.util.log(msg)
-  })
+  .on('log', log)
   .require(entry, {expose: 'videomail-client'})
   .transform(babelify)
 
@@ -176,7 +175,7 @@ gulp.task('connect', ['build'], () => {
 
       // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
       router.post('/contact', function (req, res) {
-        console.log('Videomail data received:', req.body)
+        log.info('Videomail data received:', req.body)
 
         // At this stage, a backend could store the videomail_key in req.body
         // into a database for replay functionality
@@ -229,7 +228,7 @@ gulp.task('bumpVersion', () => {
   return gulp.src(['./package.json'])
     .pipe(plugins.bump(bumpOptions))
     .pipe(plugins.if(options.write, gulp.dest('./')))
-    .on('error', plugins.util.log)
+    .on('error', log.error)
 })
 
 gulp.task('examples', ['connect', 'watch'])
