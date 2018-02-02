@@ -66,7 +66,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     // whole code is ugly because all browsers behave so differently :(
 
   if (typeof err === 'object') {
-    if (err.code === 35) {
+    if (err.code === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
       // https://github.com/binarykitchen/videomail.io/issues/411
       errType = VideomailError.NOT_ALLOWED_ERROR
     } else if (err.code === 1 && err.PERMISSION_DENIED === 1) {
