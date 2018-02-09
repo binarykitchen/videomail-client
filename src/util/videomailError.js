@@ -31,6 +31,8 @@ VideomailError.BROWSER_PROBLEM = 'browser-problem'
 VideomailError.WEBCAM_PROBLEM = 'webcam-problem'
 VideomailError.IOS_PROBLEM = 'ios-problem'
 VideomailError.OVERCONSTRAINED = 'OverconstrainedError'
+VideomailError.NOT_FOUND_ERROR = 'NotFoundError'
+VideomailError.NOT_READABLE_ERROR = 'NotReadableError'
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -66,13 +68,19 @@ VideomailError.create = function (err, explanation, options, parameters) {
     // whole code is ugly because all browsers behave so differently :(
 
   if (typeof err === 'object') {
-    if (err.code === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
+    if (err.code === 8 && err.name === VideomailError.NotFoundError) {
+      errType = VideomailError.NotFoundError
+    } else if (err.code === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
       // https://github.com/binarykitchen/videomail.io/issues/411
       errType = VideomailError.NOT_ALLOWED_ERROR
     } else if (err.code === 1 && err.PERMISSION_DENIED === 1) {
       errType = VideomailError.PERMISSION_DENIED
     } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
-      errType = VideomailError.DOM_EXCEPTION
+      if (err.name === VideomailError.NOT_READABLE_ERROR) {
+        errType = VideomailError.NOT_READABLE_ERROR
+      } else {
+        errType = VideomailError.DOM_EXCEPTION
+      }
     } else if (err.constructor && err.constructor.name === VideomailError.OVERCONSTRAINED) {
       errType = VideomailError.OVERCONSTRAINED
     } else if (err.message === VideomailError.STARTING_FAILED) {
@@ -121,7 +129,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       }
 
       break
-    case 'NotFoundError':
+    case VideomailError.NOT_FOUND_ERROR:
     case 'NO_DEVICES_FOUND':
       if (audioEnabled) {
         message = 'No webcam nor microphone found'
@@ -188,6 +196,12 @@ VideomailError.create = function (err, explanation, options, parameters) {
       message = 'No available webcam could be found'
       explanation = 'Looks like you do not have any webcam attached to your machine; or ' +
                     'the one you plugged in is already used.'
+      classList.push(VideomailError.WEBCAM_PROBLEM)
+      break
+
+    case VideomailError.NOT_READABLE_ERROR:
+      message = 'No access to webcam'
+      explanation = 'A hardware error occurred which prevented access to your webcam.'
       classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
