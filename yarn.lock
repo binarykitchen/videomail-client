@@ -6666,9 +6666,9 @@ sshpk@^1.7.0:
     jsbn "~0.1.0"
     tweetnacl "~0.14.0"
 
-ssl-root-cas@1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/ssl-root-cas/-/ssl-root-cas-1.2.4.tgz#0ded4eb359e7c4bee10e0ad58d27ae5e8b71cca5"
+ssl-root-cas@1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/ssl-root-cas/-/ssl-root-cas-1.2.5.tgz#8bf3fdfa96158d62dfad5e9089407e2982b8cf35"
   dependencies:
     bluebird "^3.4.1"
     request "^2.47.0"
@@ -6984,9 +6984,9 @@ tape-catch@1.0.6:
   dependencies:
     global "~4.3.0"
 
-tape-run@3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/tape-run/-/tape-run-3.0.3.tgz#b59ccd9f5a5f0154aa5bc64b092d7d68a5a1779d"
+tape-run@3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/tape-run/-/tape-run-3.0.4.tgz#7f68be0c494ccc8736a9c98636badb204e6590d1"
   dependencies:
     "@juliangruber/tap-finished" "0.0.2"
     browser-run "^4.1.1"
