@@ -373,7 +373,11 @@ const Recorder = function (visuals, replay, options) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted')
 
           connecting = connected = false
-          self.emit(Events.ERROR, err)
+          self.emit(Events.ERROR, VideomailError.create(
+            'Stream error',
+            'Error was: ' + pretty(err) + '; arguments were: ' + pretty(arguments),
+            options
+          ))
         })
 
         // just experimental
