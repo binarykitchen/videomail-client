@@ -29,8 +29,16 @@ function objectToString (object, options) {
         exclude = excludes.indexOf(name) >= 0
       }
 
-      if (!exclude && object[name] && object[name].toString) {
-        lines.push(object[name].toString())
+      if (!exclude) {
+        // this to cover this problem:
+        // https://github.com/binarykitchen/videomail-client/issues/157
+        try {
+          if (object[name] && object[name].toString) {
+            lines.push(object[name].toString())
+          }
+        } catch (exc) {
+          lines.push(name + ': unable to prettify it because of: ' + exc.toString())
+        }
       }
     })
   }
