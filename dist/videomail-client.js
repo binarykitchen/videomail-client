@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13979,7 +13979,7 @@ module.exports={
     "babel-preset-env": "1.6.1",
     "babelify": "8.0.0",
     "body-parser": "1.18.2",
-    "browserify": "16.0.0",
+    "browserify": "16.1.0",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
     "fancy-log": "1.3.2",
@@ -13989,7 +13989,7 @@ module.exports={
     "gulp-bump": "3.1.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
-    "gulp-connect": "5.2.0",
+    "gulp-connect": "5.4.0",
     "gulp-cssnano": "2.1.2",
     "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
@@ -15466,8 +15466,16 @@ function objectToString(object, options) {
         exclude = excludes.indexOf(name) >= 0;
       }
 
-      if (!exclude && object[name] && object[name].toString) {
-        lines.push(object[name].toString());
+      if (!exclude) {
+        // this to cover this problem:
+        // https://github.com/binarykitchen/videomail-client/issues/157
+        try {
+          if (object[name] && object[name].toString) {
+            lines.push(object[name].toString());
+          }
+        } catch (exc) {
+          lines.push(name + ': unable to prettify it because of: ' + exc.toString());
+        }
       }
     });
   }
