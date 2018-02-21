@@ -37,7 +37,11 @@ function objectToString (object, options) {
             lines.push(object[name].toString())
           }
         } catch (exc) {
-          lines.push(name + ': unable to prettify it because of: ' + exc.toString())
+          if (name === 'callee' || name === 'caller' || name === 'arguments') {
+            // skip some known we can't use on older browsers
+          } else {
+            lines.push(name + ': unable to prettify it because of: ' + exc.toString())
+          }
         }
       }
     })

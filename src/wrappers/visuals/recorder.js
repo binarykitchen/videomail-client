@@ -372,10 +372,14 @@ const Recorder = function (visuals, replay, options) {
         stream.on('error', function (err) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted')
 
+          err =
+            pretty(err) ||
+            'Something prevented from exchanging data between your browser and the server.'
+
           connecting = connected = false
           self.emit(Events.ERROR, VideomailError.create(
             'Stream error',
-            'Error was: ' + pretty(err) + '; arguments were: ' + pretty(arguments),
+            err + '; parameters were: ' + pretty(arguments),
             options
           ))
         })
