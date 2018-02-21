@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14006,9 +14006,9 @@ module.exports={
     "nib": "1.1.2",
     "router": "1.3.2",
     "ssl-root-cas": "1.2.5",
-    "standard": "10.0.3",
+    "standard": "11.0.0",
     "tap-summary": "4.0.0",
-    "tape": "4.8.0",
+    "tape": "4.9.0",
     "tape-catch": "1.0.6",
     "tape-run": "3.0.4",
     "vinyl-buffer": "1.0.1",
@@ -15474,7 +15474,11 @@ function objectToString(object, options) {
             lines.push(object[name].toString());
           }
         } catch (exc) {
-          lines.push(name + ': unable to prettify it because of: ' + exc.toString());
+          if (name === 'callee' || name === 'caller' || name === 'arguments') {
+            // skip some known we can't use on older browsers
+          } else {
+            lines.push(name + ': unable to prettify it because of: ' + exc.toString());
+          }
         }
       }
     });
@@ -15611,6 +15615,7 @@ VideomailError.IOS_PROBLEM = 'ios-problem';
 VideomailError.OVERCONSTRAINED = 'OverconstrainedError';
 VideomailError.NOT_FOUND_ERROR = 'NotFoundError';
 VideomailError.NOT_READABLE_ERROR = 'NotReadableError';
+VideomailError.SECURITY_ERROR = 'SecurityError';
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -15646,7 +15651,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
   // whole code is ugly because all browsers behave so differently :(
 
   if ((typeof err === 'undefined' ? 'undefined' : _typeof(err)) === 'object') {
-    if (err.code === 8 && err.name === VideomailError.NotFoundError) {
+    if (err.name === VideomailError.SECURITY_ERROR) {
+      errType = VideomailError.SECURITY_ERROR;
+    } else if (err.code === 8 && err.name === VideomailError.NotFoundError) {
       errType = VideomailError.NotFoundError;
     } else if (err.code === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
       // https://github.com/binarykitchen/videomail.io/issues/411
@@ -15681,6 +15688,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   switch (errType) {
+    case VideomailError.SECURITY_ERROR:
+      message = 'The operation was insecure';
+      explanation = 'Probably you have disallowed Cookies for this page?';
+      classList.push(VideomailError.BROWSER_PROBLEM);
+      break;
     case VideomailError.OVERCONSTRAINED:
       message = 'Invalid webcam constraints';
 
@@ -15780,6 +15792,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     case VideomailError.DOM_EXCEPTION:
       switch (err.code) {
+        case 8:
+          message = 'Something is missing';
+          explanation = err.toString();
+          classList.push(VideomailError.BROWSER_PROBLEM);
+          break;
         case 9:
           var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
           message = 'Security upgrade needed';
@@ -15892,6 +15909,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode = 'code=' + (err.code ? err.code : 'undefined');
     errCode += ', type=' + (err.type ? err.type : 'undefined');
     errCode += ', name=' + (err.name ? err.name : 'undefined');
+    errCode += ', message=' + (err.message ? err.message : 'undefined');
   }
 
   var videomailError = new VideomailError(message, {
@@ -15899,6 +15917,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
+    siteName: options.siteName,
     code: errCode,
     stack: stack // have to assign it manually again because it is kinda protected
   });
@@ -19491,8 +19510,10 @@ var Recorder = function Recorder(visuals, replay, options) {
         stream.on('error', function (err) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted');
 
+          err = (0, _pretty2.default)(err) || 'Something prevented from exchanging data between your browser and the server.';
+
           connecting = connected = false;
-          self.emit(_events2.default.ERROR, _videomailError2.default.create('Stream error', 'Error was: ' + (0, _pretty2.default)(err) + '; arguments were: ' + (0, _pretty2.default)(arguments), options));
+          self.emit(_events2.default.ERROR, _videomailError2.default.create('Stream error', err + '; parameters were: ' + (0, _pretty2.default)(arguments), options));
         });
 
         // just experimental

@@ -33,6 +33,7 @@ VideomailError.IOS_PROBLEM = 'ios-problem'
 VideomailError.OVERCONSTRAINED = 'OverconstrainedError'
 VideomailError.NOT_FOUND_ERROR = 'NotFoundError'
 VideomailError.NOT_READABLE_ERROR = 'NotReadableError'
+VideomailError.SECURITY_ERROR = 'SecurityError'
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -68,7 +69,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
     // whole code is ugly because all browsers behave so differently :(
 
   if (typeof err === 'object') {
-    if (err.code === 8 && err.name === VideomailError.NotFoundError) {
+    if (err.name === VideomailError.SECURITY_ERROR) {
+      errType = VideomailError.SECURITY_ERROR
+    } else if (err.code === 8 && err.name === VideomailError.NotFoundError) {
       errType = VideomailError.NotFoundError
     } else if (err.code === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
       // https://github.com/binarykitchen/videomail.io/issues/411
@@ -103,6 +106,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
 
   switch (errType) {
+    case VideomailError.SECURITY_ERROR:
+      message = 'The operation was insecure'
+      explanation = 'Probably you have disallowed Cookies for this page?'
+      classList.push(VideomailError.BROWSER_PROBLEM)
+      break
     case VideomailError.OVERCONSTRAINED:
       message = 'Invalid webcam constraints'
 
@@ -207,6 +215,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
     case VideomailError.DOM_EXCEPTION:
       switch (err.code) {
+        case 8:
+          message = 'Something is missing'
+          explanation = err.toString()
+          classList.push(VideomailError.BROWSER_PROBLEM)
+          break
         case 9:
           const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
           message = 'Security upgrade needed'
@@ -320,6 +333,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode = 'code=' + (err.code ? err.code : 'undefined')
     errCode += ', type=' + (err.type ? err.type : 'undefined')
     errCode += ', name=' + (err.name ? err.name : 'undefined')
+    errCode += ', message=' + (err.message ? err.message : 'undefined')
   }
 
   const videomailError = new VideomailError(message, {
@@ -327,6 +341,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
+    siteName: options.siteName,
     code: errCode,
     stack: stack // have to assign it manually again because it is kinda protected
   })
