@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -13989,7 +13989,7 @@ module.exports={
     "gulp-bump": "3.1.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
-    "gulp-connect": "5.4.0",
+    "gulp-connect": "5.5.0",
     "gulp-cssnano": "2.1.2",
     "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
@@ -15474,10 +15474,15 @@ function objectToString(object, options) {
             lines.push(object[name].toString());
           }
         } catch (exc) {
-          if (name === 'callee' || name === 'caller' || name === 'arguments') {
-            // skip some known we can't use on older browsers
-          } else {
-            lines.push(name + ': unable to prettify it because of: ' + exc.toString());
+          switch (name.toString().toLowerCase()) {
+            case 'callee':
+            case 'caller':
+            case 'arguments':
+              // skip some known we can't use on older browsers
+              break;
+            default:
+              lines.push(name + ': unable to prettify it because of: ' + exc.toString());
+              break;
           }
         }
       }
@@ -15793,9 +15798,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.DOM_EXCEPTION:
       switch (err.code) {
         case 8:
-          message = 'Something is missing';
-          explanation = err.toString();
-          classList.push(VideomailError.BROWSER_PROBLEM);
+          message = 'Requested webcam not found';
+          explanation = 'A webcam is needed but could not be found.';
+          classList.push(VideomailError.WEBCAM_PROBLEM);
           break;
         case 9:
           var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
@@ -19510,10 +19515,10 @@ var Recorder = function Recorder(visuals, replay, options) {
         stream.on('error', function (err) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted');
 
-          err = (0, _pretty2.default)(err) || 'Something prevented from exchanging data between your browser and the server.';
+          err = err && (0, _pretty2.default)(err) || 'Something prevented from exchanging data between your browser and the server.';
 
           connecting = connected = false;
-          self.emit(_events2.default.ERROR, _videomailError2.default.create('Stream error', err + '; parameters were: ' + (0, _pretty2.default)(arguments), options));
+          self.emit(_events2.default.ERROR, _videomailError2.default.create('Web stream error', err + '; parameters were: ' + (0, _pretty2.default)(arguments), options));
         });
 
         // just experimental

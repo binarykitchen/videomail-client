@@ -37,10 +37,15 @@ function objectToString (object, options) {
             lines.push(object[name].toString())
           }
         } catch (exc) {
-          if (name === 'callee' || name === 'caller' || name === 'arguments') {
-            // skip some known we can't use on older browsers
-          } else {
-            lines.push(name + ': unable to prettify it because of: ' + exc.toString())
+          switch (name.toString().toLowerCase()) {
+            case 'callee':
+            case 'caller':
+            case 'arguments':
+              // skip some known we can't use on older browsers
+              break
+            default:
+              lines.push(name + ': unable to prettify it because of: ' + exc.toString())
+              break
           }
         }
       }

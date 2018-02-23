@@ -216,9 +216,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.DOM_EXCEPTION:
       switch (err.code) {
         case 8:
-          message = 'Something is missing'
-          explanation = err.toString()
-          classList.push(VideomailError.BROWSER_PROBLEM)
+          message = 'Requested webcam not found'
+          explanation = 'A webcam is needed but could not be found.'
+          classList.push(VideomailError.WEBCAM_PROBLEM)
           break
         case 9:
           const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)

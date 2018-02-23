@@ -30,7 +30,6 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
 * <a href="#super-fast-cdn">Super fast global CDN</a>
-* <a href="CHANGELOG.md">Breaking changes (Changelog)</a>
 * <a href="#addons">Addons</a>
 * <a href="#notes">Notes</a>
 
@@ -261,6 +260,11 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 
 <a name="notes"></a>
 ## Notes
+
+### Changelog
+
+Too hard to maintain. Just do `git log` or look here
+https://github.com/binarykitchen/videomail-client/commits/master
 
 ### Noise
 
