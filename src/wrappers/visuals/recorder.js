@@ -379,7 +379,7 @@ const Recorder = function (visuals, replay, options) {
           if (err && err !== true) {
             betterErr = pretty(err)
           } else {
-            betterErr = 'Something prevented from exchanging data between your browser and the server.'
+            betterErr = 'Something prevented from exchanging data between your browser and the server'
           }
 
           self.emit(Events.ERROR, VideomailError.create(
