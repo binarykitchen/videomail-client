@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -15438,13 +15438,21 @@ exports.default = function (anything, options) {
 var DASH = '- ';
 var SEPARATOR = '<br/>' + DASH;
 
+var stringify = function stringify(anything) {
+  return JSON.stringify(anything, 0, SEPARATOR);
+};
+
 function arrayToString(array) {
   if (array.length > 0) {
     var lines = [];
 
     array.forEach(function (element) {
-      if (element && element.toString) {
-        lines.push(element.toString());
+      if (element) {
+        try {
+          lines.push(stringify(element));
+        } catch (exc) {
+          lines.push(element.toString() + ': unable to stringify it because of: ' + exc.toString());
+        }
       }
     });
 
@@ -15470,8 +15478,8 @@ function objectToString(object, options) {
         // this to cover this problem:
         // https://github.com/binarykitchen/videomail-client/issues/157
         try {
-          if (object[name] && object[name].toString) {
-            lines.push(object[name].toString());
+          if (object[name]) {
+            lines.push(stringify(object[name]));
           }
         } catch (exc) {
           switch (name.toString().toLowerCase()) {
@@ -15481,7 +15489,7 @@ function objectToString(object, options) {
               // skip some known we can't use on older browsers
               break;
             default:
-              lines.push(name + ': unable to prettify it because of: ' + exc.toString());
+              lines.push(name + ': unable to stringify it because of: ' + exc.toString());
               break;
           }
         }
@@ -19515,10 +19523,17 @@ var Recorder = function Recorder(visuals, replay, options) {
         stream.on('error', function (err) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted');
 
-          err = err && (0, _pretty2.default)(err) || 'Something prevented from exchanging data between your browser and the server.';
-
           connecting = connected = false;
-          self.emit(_events2.default.ERROR, _videomailError2.default.create('Web stream error', err + '; parameters were: ' + (0, _pretty2.default)(arguments), options));
+
+          var betterErr;
+
+          if (err && err !== true) {
+            betterErr = (0, _pretty2.default)(err);
+          } else {
+            betterErr = 'Something prevented from exchanging data between your browser and the server.';
+          }
+
+          self.emit(_events2.default.ERROR, _videomailError2.default.create('Web stream error', betterErr + ';\nparameters were: ' + (0, _pretty2.default)(arguments), options));
         });
 
         // just experimental

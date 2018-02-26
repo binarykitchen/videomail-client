@@ -1,13 +1,21 @@
 const DASH = '- '
 const SEPARATOR = '<br/>' + DASH
 
+const stringify = function (anything) {
+  return JSON.stringify(anything, 0, SEPARATOR)
+}
+
 function arrayToString (array) {
   if (array.length > 0) {
     const lines = []
 
     array.forEach(function (element) {
-      if (element && element.toString) {
-        lines.push(element.toString())
+      if (element) {
+        try {
+          lines.push(stringify(element))
+        } catch (exc) {
+          lines.push(element.toString() + ': unable to stringify it because of: ' + exc.toString())
+        }
       }
     })
 
@@ -33,8 +41,8 @@ function objectToString (object, options) {
         // this to cover this problem:
         // https://github.com/binarykitchen/videomail-client/issues/157
         try {
-          if (object[name] && object[name].toString) {
-            lines.push(object[name].toString())
+          if (object[name]) {
+            lines.push(stringify(object[name]))
           }
         } catch (exc) {
           switch (name.toString().toLowerCase()) {
@@ -44,7 +52,7 @@ function objectToString (object, options) {
               // skip some known we can't use on older browsers
               break
             default:
-              lines.push(name + ': unable to prettify it because of: ' + exc.toString())
+              lines.push(name + ': unable to stringify it because of: ' + exc.toString())
               break
           }
         }
