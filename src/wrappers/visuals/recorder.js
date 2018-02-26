@@ -21,7 +21,7 @@ const PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º
 const Recorder = function (visuals, replay, options) {
   EventEmitter.call(this, options, 'Recorder')
 
-    // validate some options this class needs
+  // validate some options this class needs
   if (!options || !options.video || !options.video.fps) {
     throw VideomailError.create('FPS must be defined', options)
   }
@@ -372,14 +372,19 @@ const Recorder = function (visuals, replay, options) {
         stream.on('error', function (err) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted')
 
-          err =
-            (err && pretty(err)) ||
-            'Something prevented from exchanging data between your browser and the server.'
-
           connecting = connected = false
+
+          var betterErr
+
+          if (err && err !== true) {
+            betterErr = pretty(err)
+          } else {
+            betterErr = 'Something prevented from exchanging data between your browser and the server.'
+          }
+
           self.emit(Events.ERROR, VideomailError.create(
             'Web stream error',
-            err + '; parameters were: ' + pretty(arguments),
+            betterErr + ';\nparameters were: ' + pretty(arguments),
             options
           ))
         })
@@ -783,7 +788,7 @@ const Recorder = function (visuals, replay, options) {
 
     clearUserMediaTimeout()
 
-        // important to free memory
+    // important to free memory
     userMedia && userMedia.stop()
 
     userMediaLoaded = key = canvas = ctx = null
