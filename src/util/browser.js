@@ -72,6 +72,8 @@ const Browser = function (options) {
     } else if (isIE) {
       warning = 'Instead of Internet Explorer you need to upgrade to' +
                 ' <a href="' + edgeDownload + '" target="_blank">Edge</a>.'
+    } else if (isOkSafari) {
+      warning = 'Probably you need to shut down Safari and restart it, this for correct webcam access.'
     } else if (isSafari) {
       warning = 'Safari below version 11 has no webcam support.<br/>Better upgrade Safari or pick' +
                 ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' +

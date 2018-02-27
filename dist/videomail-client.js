@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14905,6 +14905,8 @@ var Browser = function Browser(options) {
       warning = 'Probably you need to <a href="' + chromiumDownload + '" target="_blank">' + 'upgrade Chromium</a> to fix this.';
     } else if (isIE) {
       warning = 'Instead of Internet Explorer you need to upgrade to' + ' <a href="' + edgeDownload + '" target="_blank">Edge</a>.';
+    } else if (isOkSafari) {
+      warning = 'Probably you need to shut down Safari and restart it, this for correct webcam access.';
     } else if (isSafari) {
       warning = 'Safari below version 11 has no webcam support.<br/>Better upgrade Safari or pick' + ' <a href="' + chromeDownload + '" target="_blank">Chrome</a>,' + ' <a href="' + firefoxDownload + '" target="_blank">Firefox</a> or Android.';
     }
@@ -19279,7 +19281,7 @@ var Recorder = function Recorder(visuals, replay, options) {
         // prevents https://github.com/binarykitchen/videomail.io/issues/393
         stopPings();
 
-        self.emit(_events2.default.ERROR, _videomailError2.default.create('Already disconnected', 'Sorry, the connection to the server has been destroyed. Please reload. ' + 'Details of buffer: ' + buffer.toString(), options));
+        self.emit(_events2.default.ERROR, _videomailError2.default.create('Already disconnected', 'Sorry, connection to the server has been destroyed. Please reload.', options));
       } else {
         var onFlushedCallback = opts && opts.onFlushedCallback;
 
@@ -19537,8 +19539,10 @@ var Recorder = function Recorder(visuals, replay, options) {
 
           if (err) {
             betterErr = (0, _pretty2.default)(err);
-          } else {
-            betterErr = 'Data exchange between your browser and server has been interrupted.';
+          }
+
+          if (!err || err === true || err === 'true') {
+            betterErr = 'Data exchange has been interrupted. Please reload.';
           }
 
           self.emit(_events2.default.ERROR, _videomailError2.default.create('Connection error', betterErr, options));

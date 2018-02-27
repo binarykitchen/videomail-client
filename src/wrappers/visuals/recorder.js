@@ -84,8 +84,7 @@ const Recorder = function (visuals, replay, options) {
 
         self.emit(Events.ERROR, VideomailError.create(
           'Already disconnected',
-          'Sorry, the connection to the server has been destroyed. Please reload. ' +
-          'Details of buffer: ' + buffer.toString(),
+          'Sorry, connection to the server has been destroyed. Please reload.',
           options
         ))
       } else {
@@ -378,8 +377,10 @@ const Recorder = function (visuals, replay, options) {
 
           if (err) {
             betterErr = pretty(err)
-          } else {
-            betterErr = 'Data exchange between your browser and server has been interrupted.'
+          }
+
+          if (!err || err === true || err === 'true') {
+            betterErr = 'Data exchange has been interrupted. Please reload.'
           }
 
           self.emit(Events.ERROR, VideomailError.create(
