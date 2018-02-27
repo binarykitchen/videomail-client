@@ -376,15 +376,15 @@ const Recorder = function (visuals, replay, options) {
 
           var betterErr
 
-          if (err && err !== true) {
+          if (err) {
             betterErr = pretty(err)
           } else {
-            betterErr = 'Something prevented from exchanging data between your browser and the server.'
+            betterErr = 'Data exchange between your browser and server has been interrupted.'
           }
 
           self.emit(Events.ERROR, VideomailError.create(
-            'Web stream error',
-            betterErr + ';\nparameters were: ' + pretty(arguments),
+            'Connection error',
+            betterErr,
             options
           ))
         })
@@ -451,9 +451,7 @@ const Recorder = function (visuals, replay, options) {
     debug(
       'Recorder: userMediaErrorCallback()',
       ', Webcam characteristics:',
-      userMedia.getCharacteristics(),
-      ', temporary err stack:',
-      (err && err.stack) || '(undefined)'
+      userMedia.getCharacteristics()
     )
 
     const errorListeners = self.listeners(Events.ERROR)

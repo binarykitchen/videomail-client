@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -15436,10 +15436,10 @@ exports.default = function (anything, options) {
 };
 
 var DASH = '- ';
-var SEPARATOR = '<br/>' + DASH;
+var SEPARATOR = '\n' + DASH;
 
 var stringify = function stringify(anything) {
-  return JSON.stringify(anything, 0, SEPARATOR);
+  return JSON.stringify(anything, 0, '\n');
 };
 
 function arrayToString(array) {
@@ -15462,9 +15462,12 @@ function arrayToString(array) {
 
 function objectToString(object, options) {
   var propertyNames = Object.getOwnPropertyNames(object);
-  var excludes = options && options.excludes || null;
+  var excludes = options && options.excludes || [];
   var lines = [];
   var sLines;
+
+  // always ignore these
+  excludes.push('stack');
 
   if (propertyNames.length > 0) {
     var exclude = false;
@@ -15479,7 +15482,8 @@ function objectToString(object, options) {
         // https://github.com/binarykitchen/videomail-client/issues/157
         try {
           if (object[name]) {
-            lines.push(stringify(object[name]));
+            var line = stringify(object[name]);
+            lines.push(line);
           }
         } catch (exc) {
           switch (name.toString().toLowerCase()) {
@@ -15629,6 +15633,7 @@ VideomailError.OVERCONSTRAINED = 'OverconstrainedError';
 VideomailError.NOT_FOUND_ERROR = 'NotFoundError';
 VideomailError.NOT_READABLE_ERROR = 'NotReadableError';
 VideomailError.SECURITY_ERROR = 'SecurityError';
+VideomailError.TRACK_START_ERROR = 'TrackStartError';
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -15664,7 +15669,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
   // whole code is ugly because all browsers behave so differently :(
 
   if ((typeof err === 'undefined' ? 'undefined' : _typeof(err)) === 'object') {
-    if (err.name === VideomailError.SECURITY_ERROR) {
+    if (err.name === VideomailError.TRACK_START_ERROR) {
+      errType = VideomailError.TRACK_START_ERROR;
+    } else if (err.name === VideomailError.SECURITY_ERROR) {
       errType = VideomailError.SECURITY_ERROR;
     } else if (err.code === 8 && err.name === VideomailError.NotFoundError) {
       errType = VideomailError.NotFoundError;
@@ -15798,6 +15805,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
 
     case VideomailError.NOT_READABLE_ERROR:
+    case VideomailError.TRACK_START_ERROR:
       message = 'No access to webcam';
       explanation = 'A hardware error occurred which prevented access to your webcam.';
       classList.push(VideomailError.WEBCAM_PROBLEM);
@@ -19527,13 +19535,13 @@ var Recorder = function Recorder(visuals, replay, options) {
 
           var betterErr;
 
-          if (err && err !== true) {
+          if (err) {
             betterErr = (0, _pretty2.default)(err);
           } else {
-            betterErr = 'Something prevented from exchanging data between your browser and the server.';
+            betterErr = 'Data exchange between your browser and server has been interrupted.';
           }
 
-          self.emit(_events2.default.ERROR, _videomailError2.default.create('Web stream error', betterErr + ';\nparameters were: ' + (0, _pretty2.default)(arguments), options));
+          self.emit(_events2.default.ERROR, _videomailError2.default.create('Connection error', betterErr, options));
         });
 
         // just experimental
@@ -19595,7 +19603,7 @@ var Recorder = function Recorder(visuals, replay, options) {
     userMediaLoading = false;
     clearUserMediaTimeout();
 
-    debug('Recorder: userMediaErrorCallback()', ', Webcam characteristics:', userMedia.getCharacteristics(), ', temporary err stack:', err && err.stack || '(undefined)');
+    debug('Recorder: userMediaErrorCallback()', ', Webcam characteristics:', userMedia.getCharacteristics());
 
     var errorListeners = self.listeners(_events2.default.ERROR);
 
