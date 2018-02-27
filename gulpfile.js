@@ -91,13 +91,13 @@ function bundle (watching) {
     plugin: (watching) ? [watchify] : null,
     debug: !options.minify // enables inline source maps
   })
-  .on('update', () => {
-    pump()
-    log('Re-bundling ...')
-  })
-  .on('log', log)
-  .require(entry, {expose: 'videomail-client'})
-  .transform(babelify)
+    .on('update', () => {
+      pump()
+      log('Re-bundling ...')
+    })
+    .on('log', log)
+    .require(entry, {expose: 'videomail-client'})
+    .transform(babelify)
 
   function pump () {
     return bundler
@@ -133,7 +133,7 @@ gulp.task('test', () => {
   const bundler = browserify({
     entries: testFiles
   })
-  .transform(babelify)
+    .transform(babelify)
 
   return bundler
     .bundle()
