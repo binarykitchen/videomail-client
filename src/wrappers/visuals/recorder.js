@@ -379,7 +379,7 @@ const Recorder = function (visuals, replay, options) {
             betterErr = pretty(err)
           }
 
-          if (!err || err === true || err === 'true') {
+          if (!err || err.toString() === 'true') {
             betterErr = 'Data exchange has been interrupted. Please reload.'
           }
 
