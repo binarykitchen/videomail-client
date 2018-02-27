@@ -34,6 +34,7 @@ VideomailError.OVERCONSTRAINED = 'OverconstrainedError'
 VideomailError.NOT_FOUND_ERROR = 'NotFoundError'
 VideomailError.NOT_READABLE_ERROR = 'NotReadableError'
 VideomailError.SECURITY_ERROR = 'SecurityError'
+VideomailError.TRACK_START_ERROR = 'TrackStartError'
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -66,10 +67,12 @@ VideomailError.create = function (err, explanation, options, parameters) {
   var message
   var stack
 
-    // whole code is ugly because all browsers behave so differently :(
+  // whole code is ugly because all browsers behave so differently :(
 
   if (typeof err === 'object') {
-    if (err.name === VideomailError.SECURITY_ERROR) {
+    if (err.name === VideomailError.TRACK_START_ERROR) {
+      errType = VideomailError.TRACK_START_ERROR
+    } else if (err.name === VideomailError.SECURITY_ERROR) {
       errType = VideomailError.SECURITY_ERROR
     } else if (err.code === 8 && err.name === VideomailError.NotFoundError) {
       errType = VideomailError.NotFoundError
@@ -208,6 +211,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break
 
     case VideomailError.NOT_READABLE_ERROR:
+    case VideomailError.TRACK_START_ERROR:
       message = 'No access to webcam'
       explanation = 'A hardware error occurred which prevented access to your webcam.'
       classList.push(VideomailError.WEBCAM_PROBLEM)
