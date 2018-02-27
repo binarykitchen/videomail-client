@@ -1,8 +1,8 @@
 const DASH = '- '
-const SEPARATOR = '<br/>' + DASH
+const SEPARATOR = '\n' + DASH
 
 const stringify = function (anything) {
-  return JSON.stringify(anything, 0, SEPARATOR)
+  return JSON.stringify(anything, 0, '\n')
 }
 
 function arrayToString (array) {
@@ -25,9 +25,12 @@ function arrayToString (array) {
 
 function objectToString (object, options) {
   const propertyNames = Object.getOwnPropertyNames(object)
-  const excludes = (options && options.excludes) || null
+  const excludes = (options && options.excludes) || []
   const lines = []
   var sLines
+
+  // always ignore these
+  excludes.push('stack')
 
   if (propertyNames.length > 0) {
     var exclude = false
@@ -42,7 +45,8 @@ function objectToString (object, options) {
         // https://github.com/binarykitchen/videomail-client/issues/157
         try {
           if (object[name]) {
-            lines.push(stringify(object[name]))
+            const line = stringify(object[name])
+            lines.push(line)
           }
         } catch (exc) {
           switch (name.toString().toLowerCase()) {
