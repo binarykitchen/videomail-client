@@ -1,8 +1,8 @@
 const DASH = '- '
-const SEPARATOR = '\n' + DASH
+const SEPARATOR = '<br/>' + DASH
 
 const stringify = function (anything) {
-  return JSON.stringify(anything, 0, '\n')
+  return JSON.stringify(anything, 0, '<br/>')
 }
 
 function arrayToString (array) {
