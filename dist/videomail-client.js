@@ -13906,7 +13906,7 @@ function wrappy (fn, cb) {
 },{}],84:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.10",
+  "version": "2.2.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -19531,21 +19531,14 @@ var Recorder = function Recorder(visuals, replay, options) {
         });
 
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream *error* event emitted');
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted', err);
 
           connecting = connected = false;
 
-          var betterErr;
-
-          if (err) {
-            betterErr = (0, _pretty2.default)(err);
-          }
-
-          if (!err || err === true || err === 'true') {
-            betterErr = 'Data exchange has been interrupted. Please reload.';
-          }
-
-          self.emit(_events2.default.ERROR, _videomailError2.default.create('Connection error', betterErr, options));
+          // setting custom text since that err object isn't really an error
+          // on iphones when locked, and unlocked, this err is actually
+          // an event object with stuff we can't use at all (an external bug)
+          self.emit(_events2.default.ERROR, _videomailError2.default.create('Connection error', 'Data exchange has been interrupted. Please reload.', options));
         });
 
         // just experimental
