@@ -1,9 +1,7 @@
+import stringify from 'fast-safe-stringify'
+
 const DASH = '- '
 const SEPARATOR = '<br/>' + DASH
-
-const stringify = function (anything) {
-  return JSON.stringify(anything, 0, '<br/>')
-}
 
 function arrayToString (array) {
   if (array.length > 0) {
@@ -11,11 +9,7 @@ function arrayToString (array) {
 
     array.forEach(function (element) {
       if (element) {
-        try {
-          lines.push(stringify(element))
-        } catch (exc) {
-          lines.push(element.toString() + ': unable to stringify it because of: ' + exc.toString())
-        }
+        lines.push(stringify(element))
       }
     })
 
@@ -43,23 +37,7 @@ function objectToString (object, options) {
       if (!exclude) {
         // this to cover this problem:
         // https://github.com/binarykitchen/videomail-client/issues/157
-        try {
-          if (object[name]) {
-            const line = stringify(object[name])
-            lines.push(line)
-          }
-        } catch (exc) {
-          switch (name.toString().toLowerCase()) {
-            case 'callee':
-            case 'caller':
-            case 'arguments':
-              // skip some known we can't use on older browsers
-              break
-            default:
-              lines.push(name + ': unable to stringify it because of: ' + exc.toString())
-              break
-          }
-        }
+        lines.push(stringify(object[name]))
       }
     })
   }

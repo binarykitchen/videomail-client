@@ -1,4 +1,5 @@
 import h from 'hyperscript'
+import stringify from 'fast-safe-stringify'
 
 import AudioRecorder from './../../util/audioRecorder'
 import VideomailError from './../../util/videomailError'
@@ -109,7 +110,7 @@ export default function (recorder, options) {
   }
 
   function logEvent (event, params) {
-    options.debug('UserMedia: ...', EVENT_ASCII, 'event', event, JSON.stringify(params))
+    options.debug('UserMedia: ...', EVENT_ASCII, 'event', event, stringify(params))
   }
 
   function isPromise (anything) {
