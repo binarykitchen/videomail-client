@@ -369,23 +369,16 @@ const Recorder = function (visuals, replay, options) {
         })
 
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream *error* event emitted')
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted', err)
 
           connecting = connected = false
 
-          var betterErr
-
-          if (err) {
-            betterErr = pretty(err)
-          }
-
-          if (!err || err.toString() === 'true') {
-            betterErr = 'Data exchange has been interrupted. Please reload.'
-          }
-
+          // setting custom text since that err object isn't really an error
+          // on iphones when locked, and unlocked, this err is actually
+          // an event object with stuff we can't use at all (an external bug)
           self.emit(Events.ERROR, VideomailError.create(
             'Connection error',
-            betterErr,
+            'Data exchange has been interrupted. Please reload.',
             options
           ))
         })
