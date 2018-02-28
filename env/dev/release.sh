@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 
 export GIT_MERGE_AUTOEDIT=no
 
@@ -44,8 +45,13 @@ git checkout develop
 read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
 # Ensures nothing is broken
+# and the subsequent if check ensures bash exists when fails, see
+# https://gist.github.com/plmrry/5179ef132c3f39368ff092e5b1ad76ec#file-run-tests-sh
 yarn test
-# npm run test
+if [ $? -ne 0 ]
+then
+  exit 1
+fi
 
 git checkout master
 git push
@@ -59,16 +65,13 @@ git flow release start $VERSION
 gulp bumpVersion --write --version=$VERSION
 
 # Ensure dependencies are okay
-# npm prune
 yarn
-# npm install
 
 # Rebuild all assets
 gulp build --minify
 
 # Ensures again that nothing is broken with the build
 yarn test
-# npm run test
 
 git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
@@ -78,7 +81,6 @@ yarn login
 
 echo "Publishing to npm ..."
 yarn publish --new-version $VERSION
-# npm publish
 
 # Complete the previous release
 git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
