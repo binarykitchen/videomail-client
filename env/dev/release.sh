@@ -44,15 +44,6 @@ git checkout develop
 
 read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
-# Ensures nothing is broken
-# and the subsequent if check ensures bash exists when fails, see
-# https://gist.github.com/plmrry/5179ef132c3f39368ff092e5b1ad76ec#file-run-tests-sh
-yarn test
-if [ $? -ne 0 ]
-then
-  exit 1
-fi
-
 git checkout master
 git push
 git checkout develop
