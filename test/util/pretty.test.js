@@ -42,7 +42,7 @@ test('pretty:', function (t) {
       stupid: 'object',
       2: 3,
       4: null
-    }), '- 3<br/>- "am"<br/>- "another"<br/>- "object"')
+    }), '- 3<br/>- null<br/>- "am"<br/>- "another"<br/>- "object"')
   })
 
   t.test('prettifies an array fine', function (tt) {
