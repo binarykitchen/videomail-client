@@ -4,6 +4,7 @@ import util from 'util'
 import h from 'hyperscript'
 import hidden from 'hidden'
 import animitter from 'animitter'
+import stringify from 'fast-safe-stringify'
 
 import UserMedia from './userMedia'
 
@@ -603,7 +604,7 @@ const Recorder = function (visuals, replay, options) {
       debug(
         'Server commanded: %s',
         command.command,
-        command.args ? ', ' + JSON.stringify(command.args) : ''
+        command.args ? ', ' + stringify(command.args) : ''
       )
 
       switch (command.command) {
@@ -663,7 +664,7 @@ const Recorder = function (visuals, replay, options) {
         cb && cb()
       })
     } else if (stream) {
-      debug('$ %s', command, args ? JSON.stringify(args) : '')
+      debug('$ %s', command, args ? stringify(args) : '')
 
       const commandObj = {
         command: command,
@@ -681,7 +682,7 @@ const Recorder = function (visuals, replay, options) {
       //   commandObj.logLines = options.logger.getLines()
       // }
 
-      writeStream(Buffer.from(JSON.stringify(commandObj)))
+      writeStream(Buffer.from(stringify(commandObj)))
 
       if (cb) {
         // keep all callbacks async
