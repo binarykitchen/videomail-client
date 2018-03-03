@@ -177,6 +177,10 @@ const VideomailClient = function (options) {
     return container.isDirty()
   }
 
+  this.isRecording = function () {
+    return container.isRecording()
+  }
+
   this.submit = function () {
     container.submit()
   }
