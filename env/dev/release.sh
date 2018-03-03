@@ -61,9 +61,6 @@ yarn
 # Rebuild all assets
 gulp build --minify
 
-# Ensures again that nothing is broken with the build
-yarn test
-
 git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
