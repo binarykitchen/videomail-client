@@ -14008,7 +14008,7 @@ function wrappy(fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.2.13",
+  "version": "2.3.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14088,7 +14088,7 @@ module.exports={
     "fancy-log": "1.3.2",
     "glob": "7.1.2",
     "gulp": "3.9.1",
-    "gulp-autoprefixer": "4.1.0",
+    "gulp-autoprefixer": "5.0.0",
     "gulp-bump": "3.1.0",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
@@ -14342,6 +14342,10 @@ var VideomailClient = function VideomailClient(options) {
   // return true when a video has been recorded but is not sent yet
   this.isDirty = function () {
     return container.isDirty();
+  };
+
+  this.isRecording = function () {
+    return container.isRecording();
   };
 
   this.submit = function () {

@@ -106,6 +106,7 @@ Looking at the examples in the `/examples` folder should give you some ideas how
 * <a href="#unload">`videomailClient.unload()`</a>
 * <a href="#hide">`videomailClient.hide()`</a>
 * <a href="#isDirty">`videomailClient.isDirty()`</a>
+* <a href="#isRecording">`videomailClient.isRecording()`</a>
 * <a href="#submit">`videomailClient.submit()`</a>
 * <a href="#getLogLines">`videomailClient.getLogLines()`</a>
 
@@ -199,6 +200,11 @@ Hides all the visuals (but does not unload anything).
 ### videomailClient.isDirty()
 
 Returns true when a video has been recorded and a form exists. Useful when checking something before closing the window, i.E. this use case: show a window confirmation dialog to make sure the user didn't forget to submit the recorded video.
+
+<a name="isRecording"></a>
+### videomailClient.isRecording()
+
+Returns true when a video is currently being recorded.
 
 <a name="submit"></a>
 ### videomailClient.submit()
