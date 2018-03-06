@@ -41,8 +41,8 @@
   "dependencies": {
     "add-eventlistener-with-options": "1.25.0",
     "animitter": "3.0.0",
-    "audio-sample": "1.0.3",
-    "canvas-to-buffer": "1.0.11",
+    "audio-sample": "1.0.4",
+    "canvas-to-buffer": "1.0.12",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
