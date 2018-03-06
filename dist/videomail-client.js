@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.VideomailClient = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.VideomailClient = f()}})(function(){var define,module,exports;return (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(_dereq_,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -575,7 +575,7 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":24,"inherits":37,"raf":53}],3:[function(_dereq_,module,exports){
+},{"events":24,"inherits":37,"raf":52}],3:[function(_dereq_,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -622,27 +622,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 },{"buffer":8}],4:[function(_dereq_,module,exports){
 'use strict';
 
-var toBuffer = _dereq_('typedarray-to-buffer'),
-    isFloat32Array = _dereq_('validate.io-float32array');
+var toBuffer = _dereq_('typedarray-to-buffer');
+var isFloat32Array = _dereq_('validate.io-float32array');
 
 module.exports = function (float32Array) {
+  if (!float32Array) {
+    throw new Error('A Float32Array parameter is missing.');
+  }
 
-    if (!float32Array) throw new Error('A Float32Array parameter is missing.');
+  if (!isFloat32Array(float32Array)) {
+    throw new Error('The parameter is not a Float32Array.');
+  }
 
-    if (!isFloat32Array(float32Array)) throw new Error('The parameter is not a Float32Array.');
+  this.toBuffer = function () {
+    var l = float32Array.length;
+    var arr = new Int16Array(l);
+    var i;
 
-    this.toBuffer = function () {
+    for (i = 0; i < l; i++) {
+      arr[i] = Math.min(1, float32Array[i]) * 0x7FFF;
+    }
 
-        var l = float32Array.length,
-            arr = new Int16Array(l),
-            i;
-
-        for (i = 0; i < l; i++) {
-            arr[i] = Math.min(1, float32Array[i]) * 0x7FFF;
-        }
-
-        return toBuffer(arr);
-    };
+    return toBuffer(arr);
+  };
 };
 
 },{"typedarray-to-buffer":75,"validate.io-float32array":81}],5:[function(_dereq_,module,exports){
@@ -662,6 +664,8 @@ for (var i = 0, len = code.length; i < len; ++i) {
   revLookup[code.charCodeAt(i)] = i;
 }
 
+// Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
 revLookup['-'.charCodeAt(0)] = 62;
 revLookup['_'.charCodeAt(0)] = 63;
 
@@ -723,7 +727,7 @@ function encodeChunk(uint8, start, end) {
   var tmp;
   var output = [];
   for (var i = start; i < end; i += 3) {
-    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + uint8[i + 2];
+    tmp = (uint8[i] << 16 & 0xFF0000) + (uint8[i + 1] << 8 & 0xFF00) + (uint8[i + 2] & 0xFF);
     output.push(tripletToBase64(tmp));
   }
   return output.join('');
@@ -934,6 +938,24 @@ function typedArraySupport() {
   }
 }
 
+Object.defineProperty(Buffer.prototype, 'parent', {
+  get: function get() {
+    if (!(this instanceof Buffer)) {
+      return undefined;
+    }
+    return this.buffer;
+  }
+});
+
+Object.defineProperty(Buffer.prototype, 'offset', {
+  get: function get() {
+    if (!(this instanceof Buffer)) {
+      return undefined;
+    }
+    return this.byteOffset;
+  }
+});
+
 function createBuffer(length) {
   if (length > K_MAX_LENGTH) {
     throw new RangeError('Invalid typed array length');
@@ -982,7 +1004,7 @@ function from(value, encodingOrOffset, length) {
     throw new TypeError('"value" argument must not be a number');
   }
 
-  if (isArrayBuffer(value)) {
+  if (isArrayBuffer(value) || value && isArrayBuffer(value.buffer)) {
     return fromArrayBuffer(value, encodingOrOffset, length);
   }
 
@@ -1012,7 +1034,7 @@ Buffer.__proto__ = Uint8Array;
 
 function assertSize(size) {
   if (typeof size !== 'number') {
-    throw new TypeError('"size" argument must be a number');
+    throw new TypeError('"size" argument must be of type number');
   } else if (size < 0) {
     throw new RangeError('"size" argument must not be negative');
   }
@@ -1064,7 +1086,7 @@ function fromString(string, encoding) {
   }
 
   if (!Buffer.isEncoding(encoding)) {
-    throw new TypeError('"encoding" must be a valid string encoding');
+    throw new TypeError('Unknown encoding: ' + encoding);
   }
 
   var length = byteLength(string, encoding) | 0;
@@ -1093,11 +1115,11 @@ function fromArrayLike(array) {
 
 function fromArrayBuffer(array, byteOffset, length) {
   if (byteOffset < 0 || array.byteLength < byteOffset) {
-    throw new RangeError('\'offset\' is out of bounds');
+    throw new RangeError('"offset" is outside of buffer bounds');
   }
 
   if (array.byteLength < byteOffset + (length || 0)) {
-    throw new RangeError('\'length\' is out of bounds');
+    throw new RangeError('"length" is outside of buffer bounds');
   }
 
   var buf;
@@ -1128,7 +1150,7 @@ function fromObject(obj) {
   }
 
   if (obj) {
-    if (isArrayBufferView(obj) || 'length' in obj) {
+    if (ArrayBuffer.isView(obj) || 'length' in obj) {
       if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
         return createBuffer(0);
       }
@@ -1140,7 +1162,7 @@ function fromObject(obj) {
     }
   }
 
-  throw new TypeError('First argument must be a string, Buffer, ArrayBuffer, Array, or array-like object.');
+  throw new TypeError('The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object.');
 }
 
 function checked(length) {
@@ -1227,6 +1249,9 @@ Buffer.concat = function concat(list, length) {
   var pos = 0;
   for (i = 0; i < list.length; ++i) {
     var buf = list[i];
+    if (ArrayBuffer.isView(buf)) {
+      buf = Buffer.from(buf);
+    }
     if (!Buffer.isBuffer(buf)) {
       throw new TypeError('"list" argument must be an Array of Buffers');
     }
@@ -1240,7 +1265,7 @@ function byteLength(string, encoding) {
   if (Buffer.isBuffer(string)) {
     return string.length;
   }
-  if (isArrayBufferView(string) || isArrayBuffer(string)) {
+  if (ArrayBuffer.isView(string) || isArrayBuffer(string)) {
     return string.byteLength;
   }
   if (typeof string !== 'string') {
@@ -1407,6 +1432,8 @@ Buffer.prototype.toString = function toString() {
   if (arguments.length === 0) return utf8Slice(this, 0, length);
   return slowToString.apply(this, arguments);
 };
+
+Buffer.prototype.toLocaleString = Buffer.prototype.toString;
 
 Buffer.prototype.equals = function equals(b) {
   if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer');
@@ -1625,9 +1652,7 @@ function hexWrite(buf, string, offset, length) {
     }
   }
 
-  // must be an even number of digits
   var strLen = string.length;
-  if (strLen % 2 !== 0) throw new TypeError('Invalid hex string');
 
   if (length > strLen / 2) {
     length = strLen / 2;
@@ -2300,6 +2325,7 @@ Buffer.prototype.writeDoubleBE = function writeDoubleBE(value, offset, noAssert)
 
 // copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
 Buffer.prototype.copy = function copy(target, targetStart, start, end) {
+  if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer');
   if (!start) start = 0;
   if (!end && end !== 0) end = this.length;
   if (targetStart >= target.length) targetStart = target.length;
@@ -2314,7 +2340,7 @@ Buffer.prototype.copy = function copy(target, targetStart, start, end) {
   if (targetStart < 0) {
     throw new RangeError('targetStart out of bounds');
   }
-  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds');
+  if (start < 0 || start >= this.length) throw new RangeError('Index out of range');
   if (end < 0) throw new RangeError('sourceEnd out of bounds');
 
   // Are we oob?
@@ -2324,20 +2350,17 @@ Buffer.prototype.copy = function copy(target, targetStart, start, end) {
   }
 
   var len = end - start;
-  var i;
 
-  if (this === target && start < targetStart && targetStart < end) {
+  if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
+    // Use built-in when available, missing from IE11
+    this.copyWithin(targetStart, start, end);
+  } else if (this === target && start < targetStart && targetStart < end) {
     // descending copy from end
-    for (i = len - 1; i >= 0; --i) {
-      target[i + targetStart] = this[i + start];
-    }
-  } else if (len < 1000) {
-    // ascending copy from start
-    for (i = 0; i < len; ++i) {
+    for (var i = len - 1; i >= 0; --i) {
       target[i + targetStart] = this[i + start];
     }
   } else {
-    Uint8Array.prototype.set.call(target, this.subarray(start, start + len), targetStart);
+    Uint8Array.prototype.set.call(target, this.subarray(start, end), targetStart);
   }
 
   return len;
@@ -2358,17 +2381,18 @@ Buffer.prototype.fill = function fill(val, start, end, encoding) {
       encoding = end;
       end = this.length;
     }
-    if (val.length === 1) {
-      var code = val.charCodeAt(0);
-      if (code < 256) {
-        val = code;
-      }
-    }
     if (encoding !== undefined && typeof encoding !== 'string') {
       throw new TypeError('encoding must be a string');
     }
     if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
       throw new TypeError('Unknown encoding: ' + encoding);
+    }
+    if (val.length === 1) {
+      var code = val.charCodeAt(0);
+      if (encoding === 'utf8' && code < 128 || encoding === 'latin1') {
+        // Fast path: If `val` fits into a single byte, use that numeric value.
+        val = code;
+      }
     }
   } else if (typeof val === 'number') {
     val = val & 255;
@@ -2396,6 +2420,9 @@ Buffer.prototype.fill = function fill(val, start, end, encoding) {
   } else {
     var bytes = Buffer.isBuffer(val) ? val : new Buffer(val, encoding);
     var len = bytes.length;
+    if (len === 0) {
+      throw new TypeError('The value "' + val + '" is invalid for argument "value"');
+    }
     for (i = 0; i < end - start; ++i) {
       this[i + start] = bytes[i % len];
     }
@@ -2410,6 +2437,8 @@ Buffer.prototype.fill = function fill(val, start, end, encoding) {
 var INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g;
 
 function base64clean(str) {
+  // Node takes equal signs as end of the Base64 encoding
+  str = str.split('=')[0];
   // Node strips out invalid characters like \n and \t from the string, base64-js does not
   str = str.trim().replace(INVALID_BASE64_RE, '');
   // Node converts strings with length < 2 to ''
@@ -2537,11 +2566,6 @@ function isArrayBuffer(obj) {
   return obj instanceof ArrayBuffer || obj != null && obj.constructor != null && obj.constructor.name === 'ArrayBuffer' && typeof obj.byteLength === 'number';
 }
 
-// Node 0.10 supports `ArrayBuffer` but lacks `ArrayBuffer.isView`
-function isArrayBufferView(obj) {
-  return typeof ArrayBuffer.isView === 'function' && ArrayBuffer.isView(obj);
-}
-
 function numberIsNaN(obj) {
   return obj !== obj; // eslint-disable-line no-self-compare
 }
@@ -2558,7 +2582,6 @@ var verifiedImageType;
 
 module.exports = function (canvas, options) {
   var self = this;
-  var quality;
 
   options = options || {};
   options.image = options.image ? options.image : {};
@@ -2576,7 +2599,7 @@ module.exports = function (canvas, options) {
     options.image.quality = 0.5; // default
   }
 
-  quality = parseFloat(options.image.quality);
+  var quality = parseFloat(options.image.quality);
 
   function composeImageType(index) {
     var imageType;
@@ -2758,7 +2781,6 @@ module.exports = function (canvas, options) {
   this.getImageType = function (cb) {
     // only run for the first time this constructor is called and
     // cache result for the next calls
-
     if (cb) {
       if (!verifiedImageType || !isBrowser) {
         verifyImageType(function (err, newVerifiedImageType) {
@@ -3721,7 +3743,7 @@ var eos = _dereq_('end-of-stream');
 var inherits = _dereq_('inherits');
 var shift = _dereq_('stream-shift');
 
-var SIGNAL_FLUSH = new Buffer([0]);
+var SIGNAL_FLUSH = Buffer.from && Buffer.from !== Uint8Array.from ? Buffer.from([0]) : new Buffer([0]);
 
 var onuncork = function onuncork(self, fn) {
   if (self._corked) self.once('uncork', fn);else fn();
@@ -3729,7 +3751,7 @@ var onuncork = function onuncork(self, fn) {
 
 var destroyer = function destroyer(self, end) {
   return function (err) {
-    if (err) self.destroy(err.message === 'premature close' ? null : err);else if (end && !self._ended) self.end();
+    if (err) self._destroyInterval(err);else if (end && !self._ended) self.end();
   };
 };
 
@@ -3762,6 +3784,8 @@ var Duplexify = function Duplexify(writable, readable, opts) {
   this._unwrite = null;
   this._unread = null;
   this._ended = false;
+  this._error = null;
+  this._preferError = false;
 
   this.destroyed = false;
 
@@ -3883,13 +3907,22 @@ Duplexify.prototype._forward = function () {
 };
 
 Duplexify.prototype.destroy = function (err) {
+  if (this._preferError && !this._error && err) this._error = err;
+
   if (this.destroyed) return;
   this.destroyed = true;
 
   var self = this;
   process.nextTick(function () {
-    self._destroy(err);
+    self._destroy(self._preferError ? self._error : err);
   });
+};
+
+Duplexify.prototype._destroyInterval = function (err) {
+  if (this.destroyed) return;
+  if (err.message !== 'premature close') return this.destroy(err);
+  this._preferError = true;
+  this.destroy(null);
 };
 
 Duplexify.prototype._destroy = function (err) {
@@ -3941,7 +3974,7 @@ Duplexify.prototype.end = function (data, enc, cb) {
 module.exports = Duplexify;
 
 }).call(this,_dereq_('_process'),_dereq_("buffer").Buffer)
-},{"_process":52,"buffer":8,"end-of-stream":23,"inherits":37,"readable-stream":62,"stream-shift":67}],22:[function(_dereq_,module,exports){
+},{"_process":51,"buffer":8,"end-of-stream":23,"inherits":37,"readable-stream":63,"stream-shift":68}],22:[function(_dereq_,module,exports){
 'use strict';
 
 // element-closest | CC0-1.0 | github.com/jonathantneal/closest
@@ -4022,6 +4055,10 @@ var eos = function eos(stream, opts, callback) {
 		callback.call(stream, exitCode ? new Error('exited with error code: ' + exitCode) : null);
 	};
 
+	var onerror = function onerror(err) {
+		callback.call(stream, err);
+	};
+
 	var onclose = function onclose() {
 		if (readable && !(rs && rs.ended)) return callback.call(stream, new Error('premature close'));
 		if (writable && !(ws && ws.ended)) return callback.call(stream, new Error('premature close'));
@@ -4045,7 +4082,7 @@ var eos = function eos(stream, opts, callback) {
 
 	stream.on('end', onend);
 	stream.on('finish', onfinish);
-	if (opts.error !== false) stream.on('error', callback);
+	if (opts.error !== false) stream.on('error', onerror);
 	stream.on('close', onclose);
 
 	return function () {
@@ -4058,7 +4095,7 @@ var eos = function eos(stream, opts, callback) {
 		stream.removeListener('finish', onfinish);
 		stream.removeListener('exit', onexit);
 		stream.removeListener('end', onend);
-		stream.removeListener('error', callback);
+		stream.removeListener('error', onerror);
 		stream.removeListener('close', onclose);
 	};
 };
@@ -7015,52 +7052,7 @@ function onceStrict(fn) {
 
 
 }).call(this,_dereq_('_process'))
-},{"_process":52}],51:[function(_dereq_,module,exports){
-(function (process){
-'use strict';
-
-if (!process.version || process.version.indexOf('v0.') === 0 || process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
-  module.exports = nextTick;
-} else {
-  module.exports = process.nextTick;
-}
-
-function nextTick(fn, arg1, arg2, arg3) {
-  if (typeof fn !== 'function') {
-    throw new TypeError('"callback" argument must be a function');
-  }
-  var len = arguments.length;
-  var args, i;
-  switch (len) {
-    case 0:
-    case 1:
-      return process.nextTick(fn);
-    case 2:
-      return process.nextTick(function afterTickOne() {
-        fn.call(null, arg1);
-      });
-    case 3:
-      return process.nextTick(function afterTickTwo() {
-        fn.call(null, arg1, arg2);
-      });
-    case 4:
-      return process.nextTick(function afterTickThree() {
-        fn.call(null, arg1, arg2, arg3);
-      });
-    default:
-      args = new Array(len - 1);
-      i = 0;
-      while (i < args.length) {
-        args[i++] = arguments[i];
-      }
-      return process.nextTick(function afterTick() {
-        fn.apply(null, args);
-      });
-  }
-}
-
-}).call(this,_dereq_('_process'))
-},{"_process":52}],52:[function(_dereq_,module,exports){
+},{"_process":51}],51:[function(_dereq_,module,exports){
 'use strict';
 
 // shim for using process in browser
@@ -7249,7 +7241,7 @@ process.umask = function () {
     return 0;
 };
 
-},{}],53:[function(_dereq_,module,exports){
+},{}],52:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -7331,7 +7323,7 @@ module.exports.polyfill = function (object) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":50}],54:[function(_dereq_,module,exports){
+},{"performance-now":50}],53:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7362,7 +7354,7 @@ module.exports.polyfill = function (object) {
 
 /*<replacement>*/
 
-var processNextTick = _dereq_('process-nextick-args');
+var pna = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 /*<replacement>*/
@@ -7416,7 +7408,7 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  processNextTick(onEndNT, this);
+  pna.nextTick(onEndNT, this);
 }
 
 function onEndNT(self) {
@@ -7448,7 +7440,7 @@ Duplex.prototype._destroy = function (err, cb) {
   this.push(null);
   this.end();
 
-  processNextTick(cb, err);
+  pna.nextTick(cb, err);
 };
 
 function forEach(xs, f) {
@@ -7457,7 +7449,7 @@ function forEach(xs, f) {
   }
 }
 
-},{"./_stream_readable":56,"./_stream_writable":58,"core-util-is":14,"inherits":37,"process-nextick-args":51}],55:[function(_dereq_,module,exports){
+},{"./_stream_readable":55,"./_stream_writable":57,"core-util-is":14,"inherits":37,"process-nextick-args":61}],54:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7506,7 +7498,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":57,"core-util-is":14,"inherits":37}],56:[function(_dereq_,module,exports){
+},{"./_stream_transform":56,"core-util-is":14,"inherits":37}],55:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7533,7 +7525,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 
 /*<replacement>*/
 
-var processNextTick = _dereq_('process-nextick-args');
+var pna = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 module.exports = Readable;
@@ -7560,9 +7552,8 @@ var EElistenerCount = function EElistenerCount(emitter, type) {
 var Stream = _dereq_('./internal/streams/stream');
 /*</replacement>*/
 
-// TODO(bmeurer): Change this back to const once hole checks are
-// properly optimized away early in Ignition+TurboFan.
 /*<replacement>*/
+
 var Buffer = _dereq_('safe-buffer').Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
@@ -7571,6 +7562,7 @@ function _uint8ArrayToBuffer(chunk) {
 function _isUint8Array(obj) {
   return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
+
 /*</replacement>*/
 
 /*<replacement>*/
@@ -7599,15 +7591,13 @@ var kProxyEvents = ['error', 'close', 'destroy', 'pause', 'resume'];
 function prependListener(emitter, event, fn) {
   // Sadly this is not cacheable as some libraries bundle their own
   // event emitter implementation with them.
-  if (typeof emitter.prependListener === 'function') {
-    return emitter.prependListener(event, fn);
-  } else {
-    // This is a hack to make sure that our error handler is attached before any
-    // userland ones.  NEVER DO THIS. This is here only because this code needs
-    // to continue to work with older versions of Node.js that do not include
-    // the prependListener() method. The goal is to eventually remove this hack.
-    if (!emitter._events || !emitter._events[event]) emitter.on(event, fn);else if (isArray(emitter._events[event])) emitter._events[event].unshift(fn);else emitter._events[event] = [fn, emitter._events[event]];
-  }
+  if (typeof emitter.prependListener === 'function') return emitter.prependListener(event, fn);
+
+  // This is a hack to make sure that our error handler is attached before any
+  // userland ones.  NEVER DO THIS. This is here only because this code needs
+  // to continue to work with older versions of Node.js that do not include
+  // the prependListener() method. The goal is to eventually remove this hack.
+  if (!emitter._events || !emitter._events[event]) emitter.on(event, fn);else if (isArray(emitter._events[event])) emitter._events[event].unshift(fn);else emitter._events[event] = [fn, emitter._events[event]];
 }
 
 function ReadableState(options, stream) {
@@ -7615,17 +7605,26 @@ function ReadableState(options, stream) {
 
   options = options || {};
 
+  // Duplex streams are both readable and writable, but share
+  // the same options object.
+  // However, some cases require setting options to different
+  // values for the readable and the writable sides of the duplex stream.
+  // These options can be provided separately as readableXXX and writableXXX.
+  var isDuplex = stream instanceof Duplex;
+
   // object stream flag. Used to make read(n) ignore n and to
   // make all the buffer merging and length checks go away
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
+  if (isDuplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
 
   // the point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
+  var readableHwm = options.readableHighWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
+
+  if (hwm || hwm === 0) this.highWaterMark = hwm;else if (isDuplex && (readableHwm || readableHwm === 0)) this.highWaterMark = readableHwm;else this.highWaterMark = defaultHwm;
 
   // cast to ints.
   this.highWaterMark = Math.floor(this.highWaterMark);
@@ -7998,7 +7997,7 @@ function emitReadable(stream) {
   if (!state.emittedReadable) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
-    if (state.sync) processNextTick(emitReadable_, stream);else emitReadable_(stream);
+    if (state.sync) pna.nextTick(emitReadable_, stream);else emitReadable_(stream);
   }
 }
 
@@ -8017,7 +8016,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    processNextTick(maybeReadMore_, stream, state);
+    pna.nextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -8062,7 +8061,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
   var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
   var endFn = doEnd ? onend : unpipe;
-  if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
+  if (state.endEmitted) pna.nextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
   function onunpipe(readable, unpipeInfo) {
@@ -8252,7 +8251,7 @@ Readable.prototype.on = function (ev, fn) {
       state.readableListening = state.needReadable = true;
       state.emittedReadable = false;
       if (!state.reading) {
-        processNextTick(nReadingNextTick, this);
+        pna.nextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this);
       }
@@ -8283,7 +8282,7 @@ Readable.prototype.resume = function () {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    processNextTick(resume_, stream, state);
+    pna.nextTick(resume_, stream, state);
   }
 }
 
@@ -8320,18 +8319,19 @@ function flow(stream) {
 // This is *not* part of the readable stream interface.
 // It is an ugly unfortunate mess of history.
 Readable.prototype.wrap = function (stream) {
+  var _this = this;
+
   var state = this._readableState;
   var paused = false;
 
-  var self = this;
   stream.on('end', function () {
     debug('wrapped end');
     if (state.decoder && !state.ended) {
       var chunk = state.decoder.end();
-      if (chunk && chunk.length) self.push(chunk);
+      if (chunk && chunk.length) _this.push(chunk);
     }
 
-    self.push(null);
+    _this.push(null);
   });
 
   stream.on('data', function (chunk) {
@@ -8341,7 +8341,7 @@ Readable.prototype.wrap = function (stream) {
     // don't skip over falsy values in objectMode
     if (state.objectMode && (chunk === null || chunk === undefined)) return;else if (!state.objectMode && (!chunk || !chunk.length)) return;
 
-    var ret = self.push(chunk);
+    var ret = _this.push(chunk);
     if (!ret) {
       paused = true;
       stream.pause();
@@ -8362,12 +8362,12 @@ Readable.prototype.wrap = function (stream) {
 
   // proxy certain important events.
   for (var n = 0; n < kProxyEvents.length; n++) {
-    stream.on(kProxyEvents[n], self.emit.bind(self, kProxyEvents[n]));
+    stream.on(kProxyEvents[n], this.emit.bind(this, kProxyEvents[n]));
   }
 
   // when we try to consume some more bytes, simply unpause the
   // underlying stream.
-  self._read = function (n) {
+  this._read = function (n) {
     debug('wrapped _read', n);
     if (paused) {
       paused = false;
@@ -8375,7 +8375,7 @@ Readable.prototype.wrap = function (stream) {
     }
   };
 
-  return self;
+  return this;
 };
 
 // exposed for testing purposes only.
@@ -8490,7 +8490,7 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    processNextTick(endReadableNT, state, stream);
+    pna.nextTick(endReadableNT, state, stream);
   }
 }
 
@@ -8517,7 +8517,7 @@ function indexOf(xs, x) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":54,"./internal/streams/BufferList":59,"./internal/streams/destroy":60,"./internal/streams/stream":61,"_process":52,"core-util-is":14,"events":24,"inherits":37,"isarray":45,"process-nextick-args":51,"safe-buffer":66,"string_decoder/":68,"util":6}],57:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"./internal/streams/BufferList":58,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"events":24,"inherits":37,"isarray":45,"process-nextick-args":61,"safe-buffer":67,"string_decoder/":62,"util":6}],56:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8594,39 +8594,28 @@ util.inherits = _dereq_('inherits');
 
 util.inherits(Transform, Duplex);
 
-function TransformState(stream) {
-  this.afterTransform = function (er, data) {
-    return afterTransform(stream, er, data);
-  };
-
-  this.needTransform = false;
-  this.transforming = false;
-  this.writecb = null;
-  this.writechunk = null;
-  this.writeencoding = null;
-}
-
-function afterTransform(stream, er, data) {
-  var ts = stream._transformState;
+function afterTransform(er, data) {
+  var ts = this._transformState;
   ts.transforming = false;
 
   var cb = ts.writecb;
 
   if (!cb) {
-    return stream.emit('error', new Error('write callback called multiple times'));
+    return this.emit('error', new Error('write callback called multiple times'));
   }
 
   ts.writechunk = null;
   ts.writecb = null;
 
-  if (data !== null && data !== undefined) stream.push(data);
+  if (data != null) // single equals check for both `null` and `undefined`
+    this.push(data);
 
   cb(er);
 
-  var rs = stream._readableState;
+  var rs = this._readableState;
   rs.reading = false;
   if (rs.needReadable || rs.length < rs.highWaterMark) {
-    stream._read(rs.highWaterMark);
+    this._read(rs.highWaterMark);
   }
 }
 
@@ -8635,9 +8624,14 @@ function Transform(options) {
 
   Duplex.call(this, options);
 
-  this._transformState = new TransformState(this);
-
-  var stream = this;
+  this._transformState = {
+    afterTransform: afterTransform.bind(this),
+    needTransform: false,
+    transforming: false,
+    writecb: null,
+    writechunk: null,
+    writeencoding: null
+  };
 
   // start out asking for a readable event once data is transformed.
   this._readableState.needReadable = true;
@@ -8654,11 +8648,19 @@ function Transform(options) {
   }
 
   // When the writable side finishes, then flush out anything remaining.
-  this.once('prefinish', function () {
-    if (typeof this._flush === 'function') this._flush(function (er, data) {
-      done(stream, er, data);
-    });else done(stream);
-  });
+  this.on('prefinish', prefinish);
+}
+
+function prefinish() {
+  var _this = this;
+
+  if (typeof this._flush === 'function') {
+    this._flush(function (er, data) {
+      done(_this, er, data);
+    });
+  } else {
+    done(this, null, null);
+  }
 }
 
 Transform.prototype.push = function (chunk, encoding) {
@@ -8708,32 +8710,30 @@ Transform.prototype._read = function (n) {
 };
 
 Transform.prototype._destroy = function (err, cb) {
-  var _this = this;
+  var _this2 = this;
 
   Duplex.prototype._destroy.call(this, err, function (err2) {
     cb(err2);
-    _this.emit('close');
+    _this2.emit('close');
   });
 };
 
 function done(stream, er, data) {
   if (er) return stream.emit('error', er);
 
-  if (data !== null && data !== undefined) stream.push(data);
+  if (data != null) // single equals check for both `null` and `undefined`
+    stream.push(data);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
-  var ws = stream._writableState;
-  var ts = stream._transformState;
+  if (stream._writableState.length) throw new Error('Calling transform done when ws.length != 0');
 
-  if (ws.length) throw new Error('Calling transform done when ws.length != 0');
-
-  if (ts.transforming) throw new Error('Calling transform done when still transforming');
+  if (stream._transformState.transforming) throw new Error('Calling transform done when still transforming');
 
   return stream.push(null);
 }
 
-},{"./_stream_duplex":54,"core-util-is":14,"inherits":37}],58:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"core-util-is":14,"inherits":37}],57:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8764,7 +8764,7 @@ function done(stream, er, data) {
 
 /*<replacement>*/
 
-var processNextTick = _dereq_('process-nextick-args');
+var pna = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 module.exports = Writable;
@@ -8791,7 +8791,7 @@ function CorkedRequest(state) {
 /* </replacement> */
 
 /*<replacement>*/
-var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
 /*</replacement>*/
 
 /*<replacement>*/
@@ -8816,6 +8816,7 @@ var Stream = _dereq_('./internal/streams/stream');
 /*</replacement>*/
 
 /*<replacement>*/
+
 var Buffer = _dereq_('safe-buffer').Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
@@ -8824,6 +8825,7 @@ function _uint8ArrayToBuffer(chunk) {
 function _isUint8Array(obj) {
   return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
+
 /*</replacement>*/
 
 var destroyImpl = _dereq_('./internal/streams/destroy');
@@ -8837,18 +8839,27 @@ function WritableState(options, stream) {
 
   options = options || {};
 
+  // Duplex streams are both readable and writable, but share
+  // the same options object.
+  // However, some cases require setting options to different
+  // values for the readable and the writable sides of the duplex stream.
+  // These options can be provided separately as readableXXX and writableXXX.
+  var isDuplex = stream instanceof Duplex;
+
   // object stream flag to indicate whether or not this stream
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
+  if (isDuplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
 
   // the point at which write() starts returning false
   // Note: 0 is a valid value, means that we always return false if
   // the entire buffer is not flushed immediately on write()
   var hwm = options.highWaterMark;
+  var writableHwm = options.writableHighWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
+
+  if (hwm || hwm === 0) this.highWaterMark = hwm;else if (isDuplex && (writableHwm || writableHwm === 0)) this.highWaterMark = writableHwm;else this.highWaterMark = defaultHwm;
 
   // cast to ints.
   this.highWaterMark = Math.floor(this.highWaterMark);
@@ -8962,6 +8973,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
   Object.defineProperty(Writable, Symbol.hasInstance, {
     value: function value(object) {
       if (realHasInstance.call(this, object)) return true;
+      if (this !== Writable) return false;
 
       return object && object._writableState instanceof WritableState;
     }
@@ -9013,7 +9025,7 @@ function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  processNextTick(cb, er);
+  pna.nextTick(cb, er);
 }
 
 // Checks that a user-supplied chunk is valid, especially for the particular
@@ -9030,7 +9042,7 @@ function validChunk(stream, state, chunk, cb) {
   }
   if (er) {
     stream.emit('error', er);
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -9039,7 +9051,7 @@ function validChunk(stream, state, chunk, cb) {
 Writable.prototype.write = function (chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
-  var isBuf = _isUint8Array(chunk) && !state.objectMode;
+  var isBuf = !state.objectMode && _isUint8Array(chunk);
 
   if (isBuf && !Buffer.isBuffer(chunk)) {
     chunk = _uint8ArrayToBuffer(chunk);
@@ -9150,10 +9162,10 @@ function onwriteError(stream, state, sync, er, cb) {
   if (sync) {
     // defer the callback if we are being called synchronously
     // to avoid piling up things on the stack
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     // this can emit finish, and it will always happen
     // after error
-    processNextTick(finishMaybe, stream, state);
+    pna.nextTick(finishMaybe, stream, state);
     stream._writableState.errorEmitted = true;
     stream.emit('error', er);
   } else {
@@ -9251,6 +9263,7 @@ function clearBuffer(stream, state) {
     } else {
       state.corkedRequestsFree = new CorkedRequest(state);
     }
+    state.bufferedRequestCount = 0;
   } else {
     // Slow case, write chunks one-by-one
     while (entry) {
@@ -9261,6 +9274,7 @@ function clearBuffer(stream, state) {
 
       doWrite(stream, state, false, len, chunk, encoding, cb);
       entry = entry.next;
+      state.bufferedRequestCount--;
       // if we didn't call the onwrite immediately, then
       // it means that we need to wait until it does.
       // also, that means that the chunk and cb are currently
@@ -9273,7 +9287,6 @@ function clearBuffer(stream, state) {
     if (entry === null) state.lastBufferedRequest = null;
   }
 
-  state.bufferedRequestCount = 0;
   state.bufferedRequest = entry;
   state.bufferProcessing = false;
 }
@@ -9327,7 +9340,7 @@ function prefinish(stream, state) {
     if (typeof stream._final === 'function') {
       state.pendingcb++;
       state.finalCalled = true;
-      processNextTick(callFinal, stream, state);
+      pna.nextTick(callFinal, stream, state);
     } else {
       state.prefinished = true;
       stream.emit('prefinish');
@@ -9351,7 +9364,7 @@ function endWritable(stream, state, cb) {
   state.ending = true;
   finishMaybe(stream, state);
   if (cb) {
-    if (state.finished) processNextTick(cb);else stream.once('finish', cb);
+    if (state.finished) pna.nextTick(cb);else stream.once('finish', cb);
   }
   state.ended = true;
   stream.writable = false;
@@ -9401,10 +9414,8 @@ Writable.prototype._destroy = function (err, cb) {
 };
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":54,"./internal/streams/destroy":60,"./internal/streams/stream":61,"_process":52,"core-util-is":14,"inherits":37,"process-nextick-args":51,"safe-buffer":66,"util-deprecate":77}],59:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"inherits":37,"process-nextick-args":61,"safe-buffer":67,"util-deprecate":77}],58:[function(_dereq_,module,exports){
 'use strict';
-
-/*<replacement>*/
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -9413,7 +9424,7 @@ function _classCallCheck(instance, Constructor) {
 }
 
 var Buffer = _dereq_('safe-buffer').Buffer;
-/*</replacement>*/
+var util = _dereq_('util');
 
 function copyBuffer(src, target, offset) {
   src.copy(target, offset);
@@ -9481,12 +9492,19 @@ module.exports = function () {
   return BufferList;
 }();
 
-},{"safe-buffer":66}],60:[function(_dereq_,module,exports){
+if (util && util.inspect && util.inspect.custom) {
+  module.exports.prototype[util.inspect.custom] = function () {
+    var obj = util.inspect({ length: this.length });
+    return this.constructor.name + ' ' + obj;
+  };
+}
+
+},{"safe-buffer":67,"util":6}],59:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
 
-var processNextTick = _dereq_('process-nextick-args');
+var pna = _dereq_('process-nextick-args');
 /*</replacement>*/
 
 // undocumented cb() API, needed for core, not for public API
@@ -9500,9 +9518,9 @@ function destroy(err, cb) {
     if (cb) {
       cb(err);
     } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
-      processNextTick(emitErrorNT, this, err);
+      pna.nextTick(emitErrorNT, this, err);
     }
-    return;
+    return this;
   }
 
   // we set destroyed to true before firing error callbacks in order
@@ -9519,7 +9537,7 @@ function destroy(err, cb) {
 
   this._destroy(err || null, function (err) {
     if (!cb && err) {
-      processNextTick(emitErrorNT, _this, err);
+      pna.nextTick(emitErrorNT, _this, err);
       if (_this._writableState) {
         _this._writableState.errorEmitted = true;
       }
@@ -9527,6 +9545,8 @@ function destroy(err, cb) {
       cb(err);
     }
   });
+
+  return this;
 }
 
 function undestroy() {
@@ -9555,577 +9575,57 @@ module.exports = {
   undestroy: undestroy
 };
 
-},{"process-nextick-args":51}],61:[function(_dereq_,module,exports){
+},{"process-nextick-args":61}],60:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('events').EventEmitter;
 
-},{"events":24}],62:[function(_dereq_,module,exports){
+},{"events":24}],61:[function(_dereq_,module,exports){
+(function (process){
 'use strict';
 
-exports = module.exports = _dereq_('./lib/_stream_readable.js');
-exports.Stream = exports;
-exports.Readable = exports;
-exports.Writable = _dereq_('./lib/_stream_writable.js');
-exports.Duplex = _dereq_('./lib/_stream_duplex.js');
-exports.Transform = _dereq_('./lib/_stream_transform.js');
-exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
-
-},{"./lib/_stream_duplex.js":54,"./lib/_stream_passthrough.js":55,"./lib/_stream_readable.js":56,"./lib/_stream_transform.js":57,"./lib/_stream_writable.js":58}],63:[function(_dereq_,module,exports){
-'use strict';
-
-var readystate = module.exports = _dereq_('./readystate'),
-    win = new Function('return this')(),
-    complete = 'complete',
-    root = true,
-    doc = win.document,
-    html = doc.documentElement;
-
-(function wrapper() {
-  //
-  // Bail out early if the document is already fully loaded. This means that this
-  // script is loaded after the onload event.
-  //
-  if (complete === doc.readyState) {
-    return readystate.change(complete);
-  }
-
-  //
-  // Use feature detection to see what kind of browser environment we're dealing
-  // with. Old versions of Internet Explorer do not support the addEventListener
-  // interface so we can also safely assume that we need to fall back to polling.
-  //
-  var modern = !!doc.addEventListener,
-      prefix = modern ? '' : 'on',
-      on = modern ? 'addEventListener' : 'attachEvent',
-      off = modern ? 'removeEventListener' : 'detachEvent';
-
-  if (!modern && 'function' === typeof html.doScroll) {
-    try {
-      root = !win.frameElement;
-    } catch (e) {}
-
-    if (root) (function polling() {
-      try {
-        html.doScroll('left');
-      } catch (e) {
-        return setTimeout(polling, 50);
-      }
-
-      readystate.change('interactive');
-    })();
-  }
-
-  /**
-   * Handle the various of event listener calls.
-   *
-   * @param {Event} evt Simple DOM event.
-   * @api private
-   */
-  function change(evt) {
-    evt = evt || win.event;
-
-    if ('readystatechange' === evt.type) {
-      readystate.change(doc.readyState);
-      if (complete !== doc.readyState) return;
-    }
-
-    if ('load' === evt.type) readystate.change('complete');else readystate.change('interactive');
-
-    //
-    // House keeping, remove our assigned event listeners.
-    //
-    (evt.type === 'load' ? win : doc)[off](evt.type, change, false);
-  }
-
-  //
-  // Assign a shit load of event listeners so we can update our internal state.
-  //
-  doc[on](prefix + 'DOMContentLoaded', change, false);
-  doc[on](prefix + 'readystatechange', change, false);
-  win[on](prefix + 'load', change, false);
-})();
-
-},{"./readystate":64}],64:[function(_dereq_,module,exports){
-'use strict';
-
-/**
- * Generate a new prototype method which will the given function once the
- * desired state has been reached. The returned function accepts 2 arguments:
- *
- * - fn: The assigned function which needs to be called.
- * - context: Context/this value of the function we need to execute.
- *
- * @param {String} state The state we need to operate upon.
- * @returns {Function}
- * @api private
- */
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-function generate(state) {
-  return function proxy(fn, context) {
-    var rs = this;
-
-    if (rs.is(state)) {
-      setTimeout(function () {
-        fn.call(context, rs.readyState);
-      }, 0);
-    } else {
-      if (!rs._events[state]) rs._events[state] = [];
-      rs._events[state].push({ fn: fn, context: context });
-    }
-
-    return rs;
-  };
-}
-
-/**
- * RS (readyState) instance.
- *
- * @constructor
- * @api public
- */
-function RS() {
-  this.readyState = RS.UNKNOWN;
-  this._events = {};
-}
-
-/**
- * The environment can be in different states. The following states are
- * generated:
- *
- * - ALL:         The I don't really give a fuck state.
- * - UNKNOWN:     We got an unknown readyState we should start listening for events.
- * - LOADING:     Environment is currently loading.
- * - INTERACTIVE: Environment is ready for modification.
- * - COMPLETE:    All resources have been loaded.
- *
- * Please note that the order of the `states` string/array is of vital
- * importance as it's used in the readyState check.
- *
- * @type {Number}
- * @private
- */
-RS.states = 'ALL,UNKNOWN,LOADING,INTERACTIVE,COMPLETE'.split(',');
-
-for (var s = 0, state; s < RS.states.length; s++) {
-  state = RS.states[s];
-
-  RS[state] = RS.prototype[state] = s;
-  RS.prototype[state.toLowerCase()] = generate(state);
-}
-
-/**
- * A change in the environment has been detected so we need to change our
- * readyState and call assigned event listeners and those of the previous
- * states.
- *
- * @param {Number} state The new readyState that we detected.
- * @returns {RS}
- * @api private
- */
-RS.prototype.change = function change(state) {
-  state = this.clean(state, true);
-
-  var j,
-      name,
-      i = 0,
-      listener,
-      rs = this,
-      previously = rs.readyState;
-
-  if (previously >= state) return rs;
-
-  rs.readyState = state;
-
-  for (; i < RS.states.length; i++) {
-    if (i > state) break;
-    name = RS.states[i];
-
-    if (name in rs._events) {
-      for (j = 0; j < rs._events[name].length; j++) {
-        listener = rs._events[name][j];
-        listener.fn.call(listener.context || rs, previously);
-      }
-
-      delete rs._events[name];
-    }
-  }
-
-  return rs;
-};
-
-/**
- * Check if we're currently in a given readyState.
- *
- * @param {String|Number} state The required readyState.
- * @returns {Boolean} Indication if this state has been reached.
- * @api public
- */
-RS.prototype.is = function is(state) {
-  return this.readyState >= this.clean(state, true);
-};
-
-/**
- * Transform a state to a number or toUpperCase.
- *
- * @param {Mixed} state State to transform.
- * @param {Boolean} nr Change to number.
- * @returns {Mixed}
- * @api public
- */
-RS.prototype.clean = function transform(state, nr) {
-  var type = typeof state === 'undefined' ? 'undefined' : _typeof(state);
-
-  if (nr) return 'number' !== type ? +RS[state.toUpperCase()] || 0 : state;
-
-  return ('number' === type ? RS.states[state] : state).toUpperCase();
-};
-
-/**
- * Removes all event listeners. Useful when you want to unload readystatechange
- * completely so that it won't react to any events anymore. See
- * https://github.com/unshiftio/readystate/issues/8
- *
- * @returns {Function} rs so that calls can be chained.
- * @api public
- */
-RS.prototype.removeAllListeners = function removeAllListeners() {
-  this._events = {};
-  return this;
-};
-
-//
-// Expose the module.
-//
-module.exports = new RS();
-
-},{}],65:[function(_dereq_,module,exports){
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-/**
- * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
- * @version v1.5.3
- * @license MIT
- * Copyright Julien Etienne 2015 All Rights Reserved.
- */
-(function (global, factory) {
-    (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() : typeof define === 'function' && define.amd ? define(factory) : global.requestFrame = factory();
-})(undefined, function () {
-    'use strict';
-
-    /**
-     * @param  {String} type - request | cancel | native.
-     * @return {Function} Timing function.
-     */
-
-    function requestFrame(type) {
-        // The only vendor prefixes required.
-        var vendors = ['moz', 'webkit'];
-
-        // Disassembled timing function abbreviations.
-        var aF = 'AnimationFrame';
-        var rqAF = 'Request' + aF;
-
-        // Checks for firefox 4 - 10 function pair mismatch.
-        var mozRAF = window.mozRequestAnimationFrame;
-        var mozCAF = window.mozCancelAnimationFrame;
-        var hasMozMismatch = mozRAF && !mozCAF;
-
-        // Final assigned functions.
-        var assignedRequestAnimationFrame;
-        var assignedCancelAnimationFrame;
-
-        // Initial time of the timing lapse.
-        var previousTime = 0;
-
-        var requestFrameMain;
-
-        // Date.now polyfill, mainly for legacy IE versions.
-        if (!Date.now) {
-            Date.now = function () {
-                return new Date().getTime();
-            };
-        }
-
-        /**
-         * hasIOS6RequestAnimationFrameBug.
-         * @See {@Link https://gist.github.com/julienetie/86ac394ec41f1271ff0a}
-         * - for Commentary.
-         * @Copyright 2015 - Julien Etienne. 
-         * @License: MIT.
-         */
-        function hasIOS6RequestAnimationFrameBug() {
-            var webkitRAF = window.webkitRequestAnimationFrame;
-            var rAF = window.requestAnimationFrame;
-
-            // CSS/ Device with max for iOS6 Devices.
-            var hasMobileDeviceWidth = screen.width <= 768 ? true : false;
-
-            // Only supports webkit prefixed requestAnimtionFrane.
-            var requiresWebkitprefix = !(webkitRAF && rAF);
-
-            // iOS6 webkit browsers don't support performance now.
-            var hasNoNavigationTiming = window.performance ? false : true;
-
-            var iOS6Notice = 'setTimeout is being used as a substitiue for \n            requestAnimationFrame due to a bug within iOS 6 builds';
-
-            var hasIOS6Bug = requiresWebkitprefix && hasMobileDeviceWidth && hasNoNavigationTiming;
-
-            var bugCheckresults = function bugCheckresults(timingFnA, timingFnB, notice) {
-                if (timingFnA || timingFnB) {
-                    console.warn(notice);
-                    return true;
-                } else {
-                    return false;
-                }
-            };
-
-            var displayResults = function displayResults(hasBug, hasBugNotice, webkitFn, nativeFn) {
-                if (hasBug) {
-                    return bugCheckresults(webkitFn, nativeFn, hasBugNotice);
-                } else {
-                    return false;
-                }
-            };
-
-            return displayResults(hasIOS6Bug, iOS6Notice, webkitRAF, rAF);
-        }
-
-        /**
-         * Native clearTimeout function.
-         * @return {Function}
-         */
-        function clearTimeoutWithId(id) {
-            clearTimeout(id);
-        }
-
-        /**
-         * Based on a polyfill by Erik, introduced by Paul Irish & 
-         * further improved by Darius Bacon.
-         * @see  {@link http://www.paulirish.com/2011/
-         * requestanimationframe-for-smart-animating}
-         * @see  {@link https://github.com/darius/requestAnimationFrame/blob/
-         * master/requestAnimationFrame.js}
-         * @callback {Number} Timestamp.
-         * @return {Function} setTimeout Function.
-         */
-        function setTimeoutWithTimestamp(callback) {
-            var immediateTime = Date.now();
-            var lapsedTime = Math.max(previousTime + 16, immediateTime);
-            return setTimeout(function () {
-                callback(previousTime = lapsedTime);
-            }, lapsedTime - immediateTime);
-        }
-
-        /**
-         * Queries the native function, prefixed function 
-         * or use the setTimeoutWithTimestamp function.
-         * @return {Function}
-         */
-        function queryRequestAnimationFrame() {
-            if (Array.prototype.filter) {
-                assignedRequestAnimationFrame = window['request' + aF] || window[vendors.filter(function (vendor) {
-                    if (window[vendor + rqAF] !== undefined) return vendor;
-                }) + rqAF] || setTimeoutWithTimestamp;
-            } else {
-                return setTimeoutWithTimestamp;
-            }
-            if (!hasIOS6RequestAnimationFrameBug()) {
-                return assignedRequestAnimationFrame;
-            } else {
-                return setTimeoutWithTimestamp;
-            }
-        }
-
-        /**
-         * Queries the native function, prefixed function 
-         * or use the clearTimeoutWithId function.
-         * @return {Function}
-         */
-        function queryCancelAnimationFrame() {
-            var cancellationNames = [];
-            if (Array.prototype.map) {
-                vendors.map(function (vendor) {
-                    return ['Cancel', 'CancelRequest'].map(function (cancellationNamePrefix) {
-                        cancellationNames.push(vendor + cancellationNamePrefix + aF);
-                    });
-                });
-            } else {
-                return clearTimeoutWithId;
-            }
-
-            /**
-             * Checks for the prefixed cancelAnimationFrame implementation.
-             * @param  {Array} prefixedNames - An array of the prefixed names. 
-             * @param  {Number} i - Iteration start point.
-             * @return {Function} prefixed cancelAnimationFrame function.
-             */
-            function prefixedCancelAnimationFrame(prefixedNames, i) {
-                var cancellationFunction = void 0;
-                for (; i < prefixedNames.length; i++) {
-                    if (window[prefixedNames[i]]) {
-                        cancellationFunction = window[prefixedNames[i]];
-                        break;
-                    }
-                }
-                return cancellationFunction;
-            }
-
-            // Use truthly function
-            assignedCancelAnimationFrame = window['cancel' + aF] || prefixedCancelAnimationFrame(cancellationNames, 0) || clearTimeoutWithId;
-
-            // Check for iOS 6 bug
-            if (!hasIOS6RequestAnimationFrameBug()) {
-                return assignedCancelAnimationFrame;
-            } else {
-                return clearTimeoutWithId;
-            }
-        }
-
-        function getRequestFn() {
-            if (hasMozMismatch) {
-                return setTimeoutWithTimestamp;
-            } else {
-                return queryRequestAnimationFrame();
-            }
-        }
-
-        function getCancelFn() {
-            return queryCancelAnimationFrame();
-        }
-
-        function setNativeFn() {
-            if (hasMozMismatch) {
-                window.requestAnimationFrame = setTimeoutWithTimestamp;
-                window.cancelAnimationFrame = clearTimeoutWithId;
-            } else {
-                window.requestAnimationFrame = queryRequestAnimationFrame();
-                window.cancelAnimationFrame = queryCancelAnimationFrame();
-            }
-        }
-
-        /**
-         * The type value "request" singles out firefox 4 - 10 and 
-         * assigns the setTimeout function if plausible.
-         */
-
-        switch (type) {
-            case 'request':
-            case '':
-                requestFrameMain = getRequestFn();
-                break;
-
-            case 'cancel':
-                requestFrameMain = getCancelFn();
-                break;
-
-            case 'native':
-                setNativeFn();
-                break;
-            default:
-                throw new Error('RequestFrame parameter is not a type.');
-        }
-        return requestFrameMain;
-    }
-
-    return requestFrame;
-});
-
-},{}],66:[function(_dereq_,module,exports){
-'use strict';
-
-/* eslint-disable node/no-deprecated-api */
-var buffer = _dereq_('buffer');
-var Buffer = buffer.Buffer;
-
-// alternative to using Object.keys for old browsers
-function copyProps(src, dst) {
-  for (var key in src) {
-    dst[key] = src[key];
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer;
+if (!process.version || process.version.indexOf('v0.') === 0 || process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
+  module.exports = { nextTick: nextTick };
 } else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports);
-  exports.Buffer = SafeBuffer;
+  module.exports = process;
 }
 
-function SafeBuffer(arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length);
+function nextTick(fn, arg1, arg2, arg3) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('"callback" argument must be a function');
+  }
+  var len = arguments.length;
+  var args, i;
+  switch (len) {
+    case 0:
+    case 1:
+      return process.nextTick(fn);
+    case 2:
+      return process.nextTick(function afterTickOne() {
+        fn.call(null, arg1);
+      });
+    case 3:
+      return process.nextTick(function afterTickTwo() {
+        fn.call(null, arg1, arg2);
+      });
+    case 4:
+      return process.nextTick(function afterTickThree() {
+        fn.call(null, arg1, arg2, arg3);
+      });
+    default:
+      args = new Array(len - 1);
+      i = 0;
+      while (i < args.length) {
+        args[i++] = arguments[i];
+      }
+      return process.nextTick(function afterTick() {
+        fn.apply(null, args);
+      });
+  }
 }
 
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer);
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number');
-  }
-  return Buffer(arg, encodingOrOffset, length);
-};
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number');
-  }
-  var buf = Buffer(size);
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding);
-    } else {
-      buf.fill(fill);
-    }
-  } else {
-    buf.fill(0);
-  }
-  return buf;
-};
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number');
-  }
-  return Buffer(size);
-};
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number');
-  }
-  return buffer.SlowBuffer(size);
-};
-
-},{"buffer":8}],67:[function(_dereq_,module,exports){
-"use strict";
-
-module.exports = shift;
-
-function shift(stream) {
-  var rs = stream._readableState;
-  if (!rs) return null;
-  return rs.objectMode ? stream.read() : stream.read(getStateLength(rs));
-}
-
-function getStateLength(state) {
-  if (state.buffer.length) {
-    // Since node 6.3.0 state.buffer is a BufferList not an array
-    if (state.buffer.head) {
-      return state.buffer.head.data.length;
-    }
-
-    return state.buffer[0].length;
-  }
-
-  return state.length;
-}
-
-},{}],68:[function(_dereq_,module,exports){
+}).call(this,_dereq_('_process'))
+},{"_process":51}],62:[function(_dereq_,module,exports){
 'use strict';
 
 var Buffer = _dereq_('safe-buffer').Buffer;
@@ -10399,7 +9899,572 @@ function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
 
-},{"safe-buffer":66}],69:[function(_dereq_,module,exports){
+},{"safe-buffer":67}],63:[function(_dereq_,module,exports){
+'use strict';
+
+exports = module.exports = _dereq_('./lib/_stream_readable.js');
+exports.Stream = exports;
+exports.Readable = exports;
+exports.Writable = _dereq_('./lib/_stream_writable.js');
+exports.Duplex = _dereq_('./lib/_stream_duplex.js');
+exports.Transform = _dereq_('./lib/_stream_transform.js');
+exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
+
+},{"./lib/_stream_duplex.js":53,"./lib/_stream_passthrough.js":54,"./lib/_stream_readable.js":55,"./lib/_stream_transform.js":56,"./lib/_stream_writable.js":57}],64:[function(_dereq_,module,exports){
+'use strict';
+
+var readystate = module.exports = _dereq_('./readystate'),
+    win = new Function('return this')(),
+    complete = 'complete',
+    root = true,
+    doc = win.document,
+    html = doc.documentElement;
+
+(function wrapper() {
+  //
+  // Bail out early if the document is already fully loaded. This means that this
+  // script is loaded after the onload event.
+  //
+  if (complete === doc.readyState) {
+    return readystate.change(complete);
+  }
+
+  //
+  // Use feature detection to see what kind of browser environment we're dealing
+  // with. Old versions of Internet Explorer do not support the addEventListener
+  // interface so we can also safely assume that we need to fall back to polling.
+  //
+  var modern = !!doc.addEventListener,
+      prefix = modern ? '' : 'on',
+      on = modern ? 'addEventListener' : 'attachEvent',
+      off = modern ? 'removeEventListener' : 'detachEvent';
+
+  if (!modern && 'function' === typeof html.doScroll) {
+    try {
+      root = !win.frameElement;
+    } catch (e) {}
+
+    if (root) (function polling() {
+      try {
+        html.doScroll('left');
+      } catch (e) {
+        return setTimeout(polling, 50);
+      }
+
+      readystate.change('interactive');
+    })();
+  }
+
+  /**
+   * Handle the various of event listener calls.
+   *
+   * @param {Event} evt Simple DOM event.
+   * @api private
+   */
+  function change(evt) {
+    evt = evt || win.event;
+
+    if ('readystatechange' === evt.type) {
+      readystate.change(doc.readyState);
+      if (complete !== doc.readyState) return;
+    }
+
+    if ('load' === evt.type) readystate.change('complete');else readystate.change('interactive');
+
+    //
+    // House keeping, remove our assigned event listeners.
+    //
+    (evt.type === 'load' ? win : doc)[off](evt.type, change, false);
+  }
+
+  //
+  // Assign a shit load of event listeners so we can update our internal state.
+  //
+  doc[on](prefix + 'DOMContentLoaded', change, false);
+  doc[on](prefix + 'readystatechange', change, false);
+  win[on](prefix + 'load', change, false);
+})();
+
+},{"./readystate":65}],65:[function(_dereq_,module,exports){
+'use strict';
+
+/**
+ * Generate a new prototype method which will the given function once the
+ * desired state has been reached. The returned function accepts 2 arguments:
+ *
+ * - fn: The assigned function which needs to be called.
+ * - context: Context/this value of the function we need to execute.
+ *
+ * @param {String} state The state we need to operate upon.
+ * @returns {Function}
+ * @api private
+ */
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function generate(state) {
+  return function proxy(fn, context) {
+    var rs = this;
+
+    if (rs.is(state)) {
+      setTimeout(function () {
+        fn.call(context, rs.readyState);
+      }, 0);
+    } else {
+      if (!rs._events[state]) rs._events[state] = [];
+      rs._events[state].push({ fn: fn, context: context });
+    }
+
+    return rs;
+  };
+}
+
+/**
+ * RS (readyState) instance.
+ *
+ * @constructor
+ * @api public
+ */
+function RS() {
+  this.readyState = RS.UNKNOWN;
+  this._events = {};
+}
+
+/**
+ * The environment can be in different states. The following states are
+ * generated:
+ *
+ * - ALL:         The I don't really give a fuck state.
+ * - UNKNOWN:     We got an unknown readyState we should start listening for events.
+ * - LOADING:     Environment is currently loading.
+ * - INTERACTIVE: Environment is ready for modification.
+ * - COMPLETE:    All resources have been loaded.
+ *
+ * Please note that the order of the `states` string/array is of vital
+ * importance as it's used in the readyState check.
+ *
+ * @type {Number}
+ * @private
+ */
+RS.states = 'ALL,UNKNOWN,LOADING,INTERACTIVE,COMPLETE'.split(',');
+
+for (var s = 0, state; s < RS.states.length; s++) {
+  state = RS.states[s];
+
+  RS[state] = RS.prototype[state] = s;
+  RS.prototype[state.toLowerCase()] = generate(state);
+}
+
+/**
+ * A change in the environment has been detected so we need to change our
+ * readyState and call assigned event listeners and those of the previous
+ * states.
+ *
+ * @param {Number} state The new readyState that we detected.
+ * @returns {RS}
+ * @api private
+ */
+RS.prototype.change = function change(state) {
+  state = this.clean(state, true);
+
+  var j,
+      name,
+      i = 0,
+      listener,
+      rs = this,
+      previously = rs.readyState;
+
+  if (previously >= state) return rs;
+
+  rs.readyState = state;
+
+  for (; i < RS.states.length; i++) {
+    if (i > state) break;
+    name = RS.states[i];
+
+    if (name in rs._events) {
+      for (j = 0; j < rs._events[name].length; j++) {
+        listener = rs._events[name][j];
+        listener.fn.call(listener.context || rs, previously);
+      }
+
+      delete rs._events[name];
+    }
+  }
+
+  return rs;
+};
+
+/**
+ * Check if we're currently in a given readyState.
+ *
+ * @param {String|Number} state The required readyState.
+ * @returns {Boolean} Indication if this state has been reached.
+ * @api public
+ */
+RS.prototype.is = function is(state) {
+  return this.readyState >= this.clean(state, true);
+};
+
+/**
+ * Transform a state to a number or toUpperCase.
+ *
+ * @param {Mixed} state State to transform.
+ * @param {Boolean} nr Change to number.
+ * @returns {Mixed}
+ * @api public
+ */
+RS.prototype.clean = function transform(state, nr) {
+  var type = typeof state === 'undefined' ? 'undefined' : _typeof(state);
+
+  if (nr) return 'number' !== type ? +RS[state.toUpperCase()] || 0 : state;
+
+  return ('number' === type ? RS.states[state] : state).toUpperCase();
+};
+
+/**
+ * Removes all event listeners. Useful when you want to unload readystatechange
+ * completely so that it won't react to any events anymore. See
+ * https://github.com/unshiftio/readystate/issues/8
+ *
+ * @returns {Function} rs so that calls can be chained.
+ * @api public
+ */
+RS.prototype.removeAllListeners = function removeAllListeners() {
+  this._events = {};
+  return this;
+};
+
+//
+// Expose the module.
+//
+module.exports = new RS();
+
+},{}],66:[function(_dereq_,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/**
+ * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
+ * @version v1.5.3
+ * @license MIT
+ * Copyright Julien Etienne 2015 All Rights Reserved.
+ */
+(function (global, factory) {
+    (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() : typeof define === 'function' && define.amd ? define(factory) : global.requestFrame = factory();
+})(undefined, function () {
+    'use strict';
+
+    /**
+     * @param  {String} type - request | cancel | native.
+     * @return {Function} Timing function.
+     */
+
+    function requestFrame(type) {
+        // The only vendor prefixes required.
+        var vendors = ['moz', 'webkit'];
+
+        // Disassembled timing function abbreviations.
+        var aF = 'AnimationFrame';
+        var rqAF = 'Request' + aF;
+
+        // Checks for firefox 4 - 10 function pair mismatch.
+        var mozRAF = window.mozRequestAnimationFrame;
+        var mozCAF = window.mozCancelAnimationFrame;
+        var hasMozMismatch = mozRAF && !mozCAF;
+
+        // Final assigned functions.
+        var assignedRequestAnimationFrame;
+        var assignedCancelAnimationFrame;
+
+        // Initial time of the timing lapse.
+        var previousTime = 0;
+
+        var requestFrameMain;
+
+        // Date.now polyfill, mainly for legacy IE versions.
+        if (!Date.now) {
+            Date.now = function () {
+                return new Date().getTime();
+            };
+        }
+
+        /**
+         * hasIOS6RequestAnimationFrameBug.
+         * @See {@Link https://gist.github.com/julienetie/86ac394ec41f1271ff0a}
+         * - for Commentary.
+         * @Copyright 2015 - Julien Etienne. 
+         * @License: MIT.
+         */
+        function hasIOS6RequestAnimationFrameBug() {
+            var webkitRAF = window.webkitRequestAnimationFrame;
+            var rAF = window.requestAnimationFrame;
+
+            // CSS/ Device with max for iOS6 Devices.
+            var hasMobileDeviceWidth = screen.width <= 768 ? true : false;
+
+            // Only supports webkit prefixed requestAnimtionFrane.
+            var requiresWebkitprefix = !(webkitRAF && rAF);
+
+            // iOS6 webkit browsers don't support performance now.
+            var hasNoNavigationTiming = window.performance ? false : true;
+
+            var iOS6Notice = 'setTimeout is being used as a substitiue for \n            requestAnimationFrame due to a bug within iOS 6 builds';
+
+            var hasIOS6Bug = requiresWebkitprefix && hasMobileDeviceWidth && hasNoNavigationTiming;
+
+            var bugCheckresults = function bugCheckresults(timingFnA, timingFnB, notice) {
+                if (timingFnA || timingFnB) {
+                    console.warn(notice);
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+
+            var displayResults = function displayResults(hasBug, hasBugNotice, webkitFn, nativeFn) {
+                if (hasBug) {
+                    return bugCheckresults(webkitFn, nativeFn, hasBugNotice);
+                } else {
+                    return false;
+                }
+            };
+
+            return displayResults(hasIOS6Bug, iOS6Notice, webkitRAF, rAF);
+        }
+
+        /**
+         * Native clearTimeout function.
+         * @return {Function}
+         */
+        function clearTimeoutWithId(id) {
+            clearTimeout(id);
+        }
+
+        /**
+         * Based on a polyfill by Erik, introduced by Paul Irish & 
+         * further improved by Darius Bacon.
+         * @see  {@link http://www.paulirish.com/2011/
+         * requestanimationframe-for-smart-animating}
+         * @see  {@link https://github.com/darius/requestAnimationFrame/blob/
+         * master/requestAnimationFrame.js}
+         * @callback {Number} Timestamp.
+         * @return {Function} setTimeout Function.
+         */
+        function setTimeoutWithTimestamp(callback) {
+            var immediateTime = Date.now();
+            var lapsedTime = Math.max(previousTime + 16, immediateTime);
+            return setTimeout(function () {
+                callback(previousTime = lapsedTime);
+            }, lapsedTime - immediateTime);
+        }
+
+        /**
+         * Queries the native function, prefixed function 
+         * or use the setTimeoutWithTimestamp function.
+         * @return {Function}
+         */
+        function queryRequestAnimationFrame() {
+            if (Array.prototype.filter) {
+                assignedRequestAnimationFrame = window['request' + aF] || window[vendors.filter(function (vendor) {
+                    if (window[vendor + rqAF] !== undefined) return vendor;
+                }) + rqAF] || setTimeoutWithTimestamp;
+            } else {
+                return setTimeoutWithTimestamp;
+            }
+            if (!hasIOS6RequestAnimationFrameBug()) {
+                return assignedRequestAnimationFrame;
+            } else {
+                return setTimeoutWithTimestamp;
+            }
+        }
+
+        /**
+         * Queries the native function, prefixed function 
+         * or use the clearTimeoutWithId function.
+         * @return {Function}
+         */
+        function queryCancelAnimationFrame() {
+            var cancellationNames = [];
+            if (Array.prototype.map) {
+                vendors.map(function (vendor) {
+                    return ['Cancel', 'CancelRequest'].map(function (cancellationNamePrefix) {
+                        cancellationNames.push(vendor + cancellationNamePrefix + aF);
+                    });
+                });
+            } else {
+                return clearTimeoutWithId;
+            }
+
+            /**
+             * Checks for the prefixed cancelAnimationFrame implementation.
+             * @param  {Array} prefixedNames - An array of the prefixed names. 
+             * @param  {Number} i - Iteration start point.
+             * @return {Function} prefixed cancelAnimationFrame function.
+             */
+            function prefixedCancelAnimationFrame(prefixedNames, i) {
+                var cancellationFunction = void 0;
+                for (; i < prefixedNames.length; i++) {
+                    if (window[prefixedNames[i]]) {
+                        cancellationFunction = window[prefixedNames[i]];
+                        break;
+                    }
+                }
+                return cancellationFunction;
+            }
+
+            // Use truthly function
+            assignedCancelAnimationFrame = window['cancel' + aF] || prefixedCancelAnimationFrame(cancellationNames, 0) || clearTimeoutWithId;
+
+            // Check for iOS 6 bug
+            if (!hasIOS6RequestAnimationFrameBug()) {
+                return assignedCancelAnimationFrame;
+            } else {
+                return clearTimeoutWithId;
+            }
+        }
+
+        function getRequestFn() {
+            if (hasMozMismatch) {
+                return setTimeoutWithTimestamp;
+            } else {
+                return queryRequestAnimationFrame();
+            }
+        }
+
+        function getCancelFn() {
+            return queryCancelAnimationFrame();
+        }
+
+        function setNativeFn() {
+            if (hasMozMismatch) {
+                window.requestAnimationFrame = setTimeoutWithTimestamp;
+                window.cancelAnimationFrame = clearTimeoutWithId;
+            } else {
+                window.requestAnimationFrame = queryRequestAnimationFrame();
+                window.cancelAnimationFrame = queryCancelAnimationFrame();
+            }
+        }
+
+        /**
+         * The type value "request" singles out firefox 4 - 10 and 
+         * assigns the setTimeout function if plausible.
+         */
+
+        switch (type) {
+            case 'request':
+            case '':
+                requestFrameMain = getRequestFn();
+                break;
+
+            case 'cancel':
+                requestFrameMain = getCancelFn();
+                break;
+
+            case 'native':
+                setNativeFn();
+                break;
+            default:
+                throw new Error('RequestFrame parameter is not a type.');
+        }
+        return requestFrameMain;
+    }
+
+    return requestFrame;
+});
+
+},{}],67:[function(_dereq_,module,exports){
+'use strict';
+
+/* eslint-disable node/no-deprecated-api */
+var buffer = _dereq_('buffer');
+var Buffer = buffer.Buffer;
+
+// alternative to using Object.keys for old browsers
+function copyProps(src, dst) {
+  for (var key in src) {
+    dst[key] = src[key];
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer;
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports);
+  exports.Buffer = SafeBuffer;
+}
+
+function SafeBuffer(arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length);
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer);
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number');
+  }
+  return Buffer(arg, encodingOrOffset, length);
+};
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number');
+  }
+  var buf = Buffer(size);
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding);
+    } else {
+      buf.fill(fill);
+    }
+  } else {
+    buf.fill(0);
+  }
+  return buf;
+};
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number');
+  }
+  return Buffer(size);
+};
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number');
+  }
+  return buffer.SlowBuffer(size);
+};
+
+},{"buffer":8}],68:[function(_dereq_,module,exports){
+"use strict";
+
+module.exports = shift;
+
+function shift(stream) {
+  var rs = stream._readableState;
+  if (!rs) return null;
+  return rs.objectMode ? stream.read() : stream.read(getStateLength(rs));
+}
+
+function getStateLength(state) {
+  if (state.buffer.length) {
+    // Since node 6.3.0 state.buffer is a BufferList not an array
+    if (state.buffer.head) {
+      return state.buffer.head.data.length;
+    }
+
+    return state.buffer[0].length;
+  }
+
+  return state.length;
+}
+
+},{}],69:[function(_dereq_,module,exports){
 "use strict";
 
 function Agent() {
@@ -12284,7 +12349,7 @@ exports.cleanHeader = function (header, changesOrigin) {
 /**
  * Convert a typed array to a Buffer without a copy
  *
- * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * Author:   Feross Aboukhadijeh <https://feross.org>
  * License:  MIT
  *
  * `npm install typedarray-to-buffer`
@@ -12295,15 +12360,15 @@ var isTypedArray = _dereq_('is-typedarray').strict;
 module.exports = function typedarrayToBuffer(arr) {
   if (isTypedArray(arr)) {
     // To avoid a copy, use the typed array's underlying ArrayBuffer to back new Buffer
-    var buf = new Buffer(arr.buffer);
+    var buf = Buffer.from(arr.buffer);
     if (arr.byteLength !== arr.buffer.byteLength) {
       // Respect the "view", i.e. byteOffset and byteLength, without doing a copy
       buf = buf.slice(arr.byteOffset, arr.byteOffset + arr.byteLength);
     }
     return buf;
   } else {
-    // Pass through all other types to the `Buffer` constructor
-    return new Buffer(arr);
+    // Pass through all other types to `Buffer.from`
+    return Buffer.from(arr);
   }
 };
 
@@ -13745,7 +13810,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":79,"_process":52,"inherits":78}],81:[function(_dereq_,module,exports){
+},{"./support/isBuffer":79,"_process":51,"inherits":78}],81:[function(_dereq_,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -13790,16 +13855,6 @@ function buildProxy(options, socketWrite, socketEnd) {
 
   proxy._write = socketWrite;
   proxy._flush = socketEnd;
-
-  proxy._destroy = function (err, cb) {
-    var self = this;
-    this.push(null);
-    this.end();
-    process.nextTick(function () {
-      cb(err);
-      self.emit('close');
-    });
-  };
 
   return proxy;
 }
@@ -13882,7 +13937,7 @@ function WebSocketStream(target, protocols, options) {
     }
 
     if (coerceToBuffer && typeof chunk === 'string') {
-      chunk = new Buffer(chunk, 'utf8');
+      chunk = Buffer.from(chunk, 'utf8');
     }
     socket.send(chunk, next);
   }
@@ -13894,7 +13949,7 @@ function WebSocketStream(target, protocols, options) {
     }
 
     if (coerceToBuffer && typeof chunk === 'string') {
-      chunk = new Buffer(chunk, 'utf8');
+      chunk = Buffer.from(chunk, 'utf8');
     }
 
     try {
@@ -13954,7 +14009,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":52,"duplexify":21,"readable-stream":62,"safe-buffer":66,"ws":83}],83:[function(_dereq_,module,exports){
+},{"_process":51,"duplexify":21,"readable-stream":63,"safe-buffer":67,"ws":83}],83:[function(_dereq_,module,exports){
 'use strict';
 
 var ws = null;
@@ -14008,7 +14063,7 @@ function wrappy(fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14049,8 +14104,8 @@ module.exports={
   "dependencies": {
     "add-eventlistener-with-options": "1.25.0",
     "animitter": "3.0.0",
-    "audio-sample": "1.0.3",
-    "canvas-to-buffer": "1.0.11",
+    "audio-sample": "1.0.4",
+    "canvas-to-buffer": "1.0.12",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
@@ -14074,7 +14129,7 @@ module.exports={
     "request-frame": "1.5.3",
     "superagent": "3.8.2",
     "ua-parser-js": "0.7.17",
-    "websocket-stream": "5.1.1"
+    "websocket-stream": "5.1.2"
   },
   "devDependencies": {
     "babel-core": "6.26.0",
@@ -14116,7 +14171,7 @@ module.exports={
     "tape-run": "3.0.4",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
-    "watchify": "3.10.0"
+    "watchify": "3.11.0"
   }
 }
 
@@ -14372,7 +14427,7 @@ VideomailClient.events = _events2.default;
 
 exports.default = VideomailClient;
 
-},{"./constants":87,"./events":88,"./options":89,"./resource":90,"./util/browser":93,"./util/collectLogger":94,"./util/eventEmitter":95,"./wrappers/container":102,"./wrappers/optionsWrapper":105,"./wrappers/visuals/replay":114,"deepmerge":16,"readystate":63,"util":80}],87:[function(_dereq_,module,exports){
+},{"./constants":87,"./events":88,"./options":89,"./resource":90,"./util/browser":93,"./util/collectLogger":94,"./util/eventEmitter":95,"./wrappers/container":102,"./wrappers/optionsWrapper":105,"./wrappers/visuals/replay":114,"deepmerge":16,"readystate":64,"util":80}],87:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14603,7 +14658,7 @@ exports.default = {
 };
 
 }).call(this,_dereq_('_process'))
-},{"../package.json":85,"_process":52}],90:[function(_dereq_,module,exports){
+},{"../package.json":85,"_process":51}],90:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -14795,7 +14850,7 @@ var CACHE_KEY = 'alias';
 },{"./constants":87,"superagent":70}],91:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = '@-webkit-keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{width:100%;height:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:a 1s infinite;animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
+module.exports = '@keyframes a{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{width:100%;height:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:hsla(0,0%,4%,.8);padding:.4em .4em .3em;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";animation:a 1s infinite}.videomail .notifier{overflow:hidden;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
 
 },{}],92:[function(_dereq_,module,exports){
 'use strict';
@@ -15667,7 +15722,7 @@ var _requestFrame2 = _interopRequireDefault(_requestFrame);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"classlist.js":11,"element-closest":22,"request-frame":65}],100:[function(_dereq_,module,exports){
+},{"classlist.js":11,"element-closest":22,"request-frame":66}],100:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
