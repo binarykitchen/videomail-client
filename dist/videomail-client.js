@@ -3576,58 +3576,58 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		return Array.isArray(val) ? [] : {};
 	}
 
-	function cloneUnlessOtherwiseSpecified(value, optionsArgument) {
-		var clone = !optionsArgument || optionsArgument.clone !== false;
-
-		return clone && isMergeableObject(value) ? deepmerge(emptyTarget(value), value, optionsArgument) : value;
+	function cloneUnlessOtherwiseSpecified(value, options) {
+		return options.clone !== false && options.isMergeableObject(value) ? deepmerge(emptyTarget(value), value, options) : value;
 	}
 
-	function defaultArrayMerge(target, source, optionsArgument) {
+	function defaultArrayMerge(target, source, options) {
 		return target.concat(source).map(function (element) {
-			return cloneUnlessOtherwiseSpecified(element, optionsArgument);
+			return cloneUnlessOtherwiseSpecified(element, options);
 		});
 	}
 
-	function mergeObject(target, source, optionsArgument) {
+	function mergeObject(target, source, options) {
 		var destination = {};
-		if (isMergeableObject(target)) {
+		if (options.isMergeableObject(target)) {
 			Object.keys(target).forEach(function (key) {
-				destination[key] = cloneUnlessOtherwiseSpecified(target[key], optionsArgument);
+				destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
 			});
 		}
 		Object.keys(source).forEach(function (key) {
-			if (!isMergeableObject(source[key]) || !target[key]) {
-				destination[key] = cloneUnlessOtherwiseSpecified(source[key], optionsArgument);
+			if (!options.isMergeableObject(source[key]) || !target[key]) {
+				destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
 			} else {
-				destination[key] = deepmerge(target[key], source[key], optionsArgument);
+				destination[key] = deepmerge(target[key], source[key], options);
 			}
 		});
 		return destination;
 	}
 
-	function deepmerge(target, source, optionsArgument) {
+	function deepmerge(target, source, options) {
+		options = options || {};
+		options.arrayMerge = options.arrayMerge || defaultArrayMerge;
+		options.isMergeableObject = options.isMergeableObject || isMergeableObject;
+
 		var sourceIsArray = Array.isArray(source);
 		var targetIsArray = Array.isArray(target);
-		var options = optionsArgument || { arrayMerge: defaultArrayMerge };
 		var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
 
 		if (!sourceAndTargetTypesMatch) {
-			return cloneUnlessOtherwiseSpecified(source, optionsArgument);
+			return cloneUnlessOtherwiseSpecified(source, options);
 		} else if (sourceIsArray) {
-			var arrayMerge = options.arrayMerge || defaultArrayMerge;
-			return arrayMerge(target, source, optionsArgument);
+			return options.arrayMerge(target, source, options);
 		} else {
-			return mergeObject(target, source, optionsArgument);
+			return mergeObject(target, source, options);
 		}
 	}
 
-	deepmerge.all = function deepmergeAll(array, optionsArgument) {
+	deepmerge.all = function deepmergeAll(array, options) {
 		if (!Array.isArray(array)) {
 			throw new Error('first argument should be an array');
 		}
 
 		return array.reduce(function (prev, next) {
-			return deepmerge(prev, next, optionsArgument);
+			return deepmerge(prev, next, options);
 		}, {});
 	};
 
@@ -14063,7 +14063,7 @@ function wrappy(fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14109,7 +14109,7 @@ module.exports={
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "2.0.1",
+    "deepmerge": "2.1.0",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
@@ -14137,7 +14137,7 @@ module.exports={
     "babel-preset-env": "1.6.1",
     "babelify": "8.0.0",
     "body-parser": "1.18.2",
-    "browserify": "16.1.0",
+    "browserify": "16.1.1",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
     "fancy-log": "1.3.2",
