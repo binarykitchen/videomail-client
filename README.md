@@ -4,7 +4,6 @@ videomail-client ✉
 [![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
-[![gratipay][gratipay-image]][gratipay-url]
 [![browserstack][browserstack-image]][browserstack-url]
 
 [npm-image]: https://img.shields.io/npm/v/videomail-client.svg?style=flat
@@ -12,9 +11,6 @@ videomail-client ✉
 
 [downloads-image]: https://img.shields.io/npm/dm/videomail-client.svg?style=flat
 [downloads-url]: https://npmjs.org/package/videomail-client
-
-[gratipay-url]: https://gratipay.com/binarykitchen
-[gratipay-image]: https://img.shields.io/gratipay/binarykitchen.svg
 
 [browserstack-url]: https://www.browserstack.com
 [browserstack-image]: https://raw.githubusercontent.com/binarykitchen/videomail-client/develop/browserstack.png
