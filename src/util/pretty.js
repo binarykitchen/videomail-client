@@ -1,4 +1,4 @@
-import stringify from 'fast-safe-stringify'
+import stringify from 'safe-json-stringify'
 
 const DASH = '- '
 const SEPARATOR = '<br/>' + DASH

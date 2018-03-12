@@ -1,5 +1,5 @@
 import h from 'hyperscript'
-import stringify from 'fast-safe-stringify'
+import stringify from 'safe-json-stringify'
 
 import AudioRecorder from './../../util/audioRecorder'
 import VideomailError from './../../util/videomailError'

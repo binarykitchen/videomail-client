@@ -4,7 +4,7 @@ import util from 'util'
 import h from 'hyperscript'
 import hidden from 'hidden'
 import animitter from 'animitter'
-import stringify from 'fast-safe-stringify'
+import stringify from 'safe-json-stringify'
 
 import UserMedia from './userMedia'
 
