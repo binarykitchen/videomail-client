@@ -97,7 +97,9 @@ function bundle (watching) {
     })
     .on('log', log)
     .require(entry, {expose: 'videomail-client'})
-    .transform(babelify)
+    .transform(babelify, {
+      global: true
+    })
 
   function pump () {
     return bundler
