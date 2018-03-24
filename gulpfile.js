@@ -111,6 +111,7 @@ function bundle (watching) {
       .pipe(plugins.concat('videomail-client.js'))
       .pipe(plugins.derequire())
       .pipe(gulp.dest('dist'))
+      .pipe(plugins.plumber())
       .pipe(plugins.if(options.minify, plugins.sourcemaps.init()))
       .pipe(plugins.if(options.minify, plugins.bytediff.start()))
       .pipe(plugins.if(options.minify, plugins.uglify()))
