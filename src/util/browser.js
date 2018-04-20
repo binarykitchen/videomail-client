@@ -32,6 +32,7 @@ const Browser = function (options) {
   const isAndroid = /Android/.test(uaParser.os.name)
   const chromeBased = isChrome || isChromium
 
+  const isMobile = isIOS || isAndroid
   const isOkSafari = isSafari && browserVersion >= 11
   const isOkIOS = isIOS && osVersion >= 11
   const isBadIOS = isIOS && osVersion < 11
@@ -54,14 +55,14 @@ const Browser = function (options) {
 
     if (firefox) {
       if (isIOS) {
-        warning = 'Firefox on iOS is not ready for webcams yet. Hopefully in near future ...'
+        warning = 'Firefox on iOS is not ready for cameras yet. Hopefully in near future ...'
       } else {
         warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' +
                   'upgrade Firefox</a> to fix this.'
       }
     } else if (isChrome) {
       if (isIOS) {
-        warning = 'Chrome on iOS is not ready for webcams yet. Hopefully in near future ...'
+        warning = 'Chrome on iOS is not ready for cameras yet. Hopefully in near future ...'
       } else {
         warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
                   'upgrade Chrome</a> to fix this.'
@@ -87,7 +88,7 @@ const Browser = function (options) {
     var warning
 
     if (isBadIOS) {
-      warning = 'On iPads/iPhones below iOS v11 this webcam feature is missing.<br/><br/>' +
+      warning = 'On iPads/iPhones below iOS v11 this cameras feature is missing.<br/><br/>' +
                 'For now, we recommend you to upgrade iOS or to use an Android device.'
     } else {
       warning = getRecommendation()
@@ -135,7 +136,7 @@ const Browser = function (options) {
     if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       canRecord = true
     } else {
-      var getUserMediaType = hasNavigator && typeof navigator.getUserMedia_
+      const getUserMediaType = hasNavigator && typeof navigator.getUserMedia_
 
       canRecord = getUserMediaType === 'function'
     }
@@ -155,8 +156,25 @@ const Browser = function (options) {
         classList.push(VideomailError.BROWSER_PROBLEM)
       }
 
+      var message
+
+      // good to be able to distinguish between two reasons why and what sort of camera it is
+      if (!okBrowser) {
+        if (isMobile) {
+          message = 'Sorry, your browser is unable to use your mobile camera'
+        } else {
+          message = 'Sorry, your browser is unable to use webcams'
+        }
+      } else {
+        if (isMobile) {
+          message = 'Sorry, your browser cannot record from your mobile camera'
+        } else {
+          message = 'Sorry, your browser cannot record from webcams'
+        }
+      }
+
       err = VideomailError.create({
-        message: 'Sorry, your browser is unable to use webcams'
+        message: message
       }, getUserMediaWarning(), options, {
         classList: classList
       })

@@ -4677,7 +4677,7 @@ function functionBindPolyfill(context) {
  *
  * @copyright 2018 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 3.6.0
+ * @version 3.6.1
  */
 (function (global) {
 	var b = /^(b|B)$/,
@@ -14047,7 +14047,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14099,7 +14099,7 @@ module.exports={
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
     "element-closest": "2.0.2",
-    "filesize": "3.6.0",
+    "filesize": "3.6.1",
     "get-form-data": "2.0.0",
     "hidden": "1.1.1",
     "humanize-duration": "3.14.0",
@@ -14122,7 +14122,7 @@ module.exports={
     "babel-preset-env": "1.6.1",
     "babelify": "8.0.0",
     "body-parser": "1.18.2",
-    "browserify": "16.1.1",
+    "browserify": "16.2.0",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
     "fancy-log": "1.3.2",
@@ -14133,7 +14133,7 @@ module.exports={
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.5.0",
-    "gulp-cssnano": "2.1.2",
+    "gulp-cssnano": "2.1.3",
     "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
     "gulp-inject-string": "1.1.1",
@@ -14143,7 +14143,7 @@ module.exports={
     "gulp-sourcemaps": "2.6.4",
     "gulp-standard": "10.1.2",
     "gulp-stylus": "2.7.0",
-    "gulp-todo": "5.4.0",
+    "gulp-todo": "5.5.0",
     "gulp-uglify": "3.0.0",
     "minimist": "1.2.0",
     "nib": "1.1.2",
@@ -14153,7 +14153,7 @@ module.exports={
     "tap-summary": "4.0.0",
     "tape": "4.9.0",
     "tape-catch": "1.0.6",
-    "tape-run": "3.0.4",
+    "tape-run": "4.0.0",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.0"
@@ -15023,6 +15023,7 @@ var Browser = function Browser(options) {
   var isAndroid = /Android/.test(uaParser.os.name);
   var chromeBased = isChrome || isChromium;
 
+  var isMobile = isIOS || isAndroid;
   var isOkSafari = isSafari && browserVersion >= 11;
   var isOkIOS = isIOS && osVersion >= 11;
   var isBadIOS = isIOS && osVersion < 11;
@@ -15038,13 +15039,13 @@ var Browser = function Browser(options) {
 
     if (firefox) {
       if (isIOS) {
-        warning = 'Firefox on iOS is not ready for webcams yet. Hopefully in near future ...';
+        warning = 'Firefox on iOS is not ready for cameras yet. Hopefully in near future ...';
       } else {
         warning = 'Probably you need to <a href="' + firefoxDownload + '" target="_blank">' + 'upgrade Firefox</a> to fix this.';
       }
     } else if (isChrome) {
       if (isIOS) {
-        warning = 'Chrome on iOS is not ready for webcams yet. Hopefully in near future ...';
+        warning = 'Chrome on iOS is not ready for cameras yet. Hopefully in near future ...';
       } else {
         warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' + 'upgrade Chrome</a> to fix this.';
       }
@@ -15065,7 +15066,7 @@ var Browser = function Browser(options) {
     var warning;
 
     if (isBadIOS) {
-      warning = 'On iPads/iPhones below iOS v11 this webcam feature is missing.<br/><br/>' + 'For now, we recommend you to upgrade iOS or to use an Android device.';
+      warning = 'On iPads/iPhones below iOS v11 this cameras feature is missing.<br/><br/>' + 'For now, we recommend you to upgrade iOS or to use an Android device.';
     } else {
       warning = getRecommendation();
     }
@@ -15129,8 +15130,25 @@ var Browser = function Browser(options) {
         classList.push(_videomailError2.default.BROWSER_PROBLEM);
       }
 
+      var message;
+
+      // good to be able to distinguish between two reasons why and what sort of camera it is
+      if (!okBrowser) {
+        if (isMobile) {
+          message = 'Sorry, your browser is unable to use your mobile camera';
+        } else {
+          message = 'Sorry, your browser is unable to use webcams';
+        }
+      } else {
+        if (isMobile) {
+          message = 'Sorry, your browser cannot record from your mobile camera';
+        } else {
+          message = 'Sorry, your browser cannot record from webcams';
+        }
+      }
+
       err = _videomailError2.default.create({
-        message: 'Sorry, your browser is unable to use webcams'
+        message: message
       }, getUserMediaWarning(), options, {
         classList: classList
       });
