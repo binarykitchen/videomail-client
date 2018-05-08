@@ -2,6 +2,9 @@ import {version} from '../package.json'
 
 const PRODUCTION = process.env.NODE_ENV === 'production'
 
+/* eslint-disable no-multi-spaces */
+/* eslint indent: ["error", 2, { "ignoreComments": true }] */
+
 export default {
   logger: null,                         // define logging instance. leave null for default, console.
   logStackSize: 30,                     // limits the stack size of log outputs to collect

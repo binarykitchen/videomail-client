@@ -40,7 +40,7 @@ var Container = function (options) {
     insertCss(css, {prepend: true})
   }
 
-    // since https://github.com/binarykitchen/videomail-client/issues/87
+  // since https://github.com/binarykitchen/videomail-client/issues/87
   function findParentFormElement () {
     return containerElement.closest('form')
   }
@@ -245,7 +245,7 @@ var Container = function (options) {
       videomailFormData.to = trimEmail(videomailFormData.to)
     }
 
-        // when method is undefined, treat it as a post
+    // when method is undefined, treat it as a post
     if (isPost(method) || !method) {
       videomailFormData.recordingStats = visuals.getRecordingStats()
       videomailFormData.width = visuals.getRecorderWidth(true)
