@@ -39,5 +39,5 @@ export default keymirror({
   STARTING_OVER: null, // starting all over again back to its inital state
   ASKING_WEBCAM_PERMISSION: null, // when about to ask for webcam permissions
   VISIBLE: null, // document just became visible
-  INVISIBLE: null  // document just became INvisible
+  INVISIBLE: null // document just became INvisible
 })

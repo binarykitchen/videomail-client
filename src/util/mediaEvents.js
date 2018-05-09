@@ -45,9 +45,9 @@ export default [
   // paused is newly true.
   'pause',
 
-   // The user agent can render the media data at the current playback position
-   // for the first time.
-   // readyState newly increased to HAVE_CURRENT_DATA or greater for the first time.
+  // The user agent can render the media data at the current playback position
+  // for the first time.
+  // readyState newly increased to HAVE_CURRENT_DATA or greater for the first time.
   'loadeddata',
 
   // Playback has stopped because the next frame is not available, but the user

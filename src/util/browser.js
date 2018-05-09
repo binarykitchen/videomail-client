@@ -88,7 +88,7 @@ const Browser = function (options) {
     var warning
 
     if (isBadIOS) {
-      warning = 'On iPads/iPhones below iOS v11 this cameras feature is missing.<br/><br/>' +
+      warning = 'On iPads/iPhones below iOS v11 this camera feature is missing.<br/><br/>' +
                 'For now, we recommend you to upgrade iOS or to use an Android device.'
     } else {
       warning = getRecommendation()
