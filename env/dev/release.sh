@@ -76,8 +76,7 @@ git flow release finish $VERSION -m "Completing release of $VERSION" # This will
 git push
 
 git checkout master
-git push
-git push --tags
+git push --follow-tags
 
 # Prepare the develop branch for the new cycle
 git checkout develop
