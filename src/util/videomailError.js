@@ -35,6 +35,7 @@ VideomailError.NOT_FOUND_ERROR = 'NotFoundError'
 VideomailError.NOT_READABLE_ERROR = 'NotReadableError'
 VideomailError.SECURITY_ERROR = 'SecurityError'
 VideomailError.TRACK_START_ERROR = 'TrackStartError'
+VideomailError.INVALID_STATE_ERROR = 'InvalidStateError'
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
@@ -217,6 +218,12 @@ VideomailError.create = function (err, explanation, options, parameters) {
       classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
+    case VideomailError.INVALID_STATE_ERROR:
+      message = 'Invalid state'
+      explanation = 'Video recording stream from your webcam already has finished.'
+      classList.push(VideomailError.WEBCAM_PROBLEM)
+      break
+
     case VideomailError.DOM_EXCEPTION:
       switch (err.code) {
         case 8:
@@ -276,10 +283,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       if (err && typeof err === 'string') {
         message = err
       } else {
-        if (err) {
-          if (err.message) {
-            message = pretty(err.message)
-          }
+        if (err && err.message) {
+          message = pretty(err.message)
         }
 
         if (err && err.explanation) {

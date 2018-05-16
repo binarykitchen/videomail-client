@@ -34,7 +34,7 @@ function objectToString (object, options) {
         exclude = excludes.indexOf(name) >= 0
       }
 
-      if (!exclude) {
+      if (!exclude && object[name]) {
         // this to cover this problem:
         // https://github.com/binarykitchen/videomail-client/issues/157
         lines.push(stringify(object[name]))
