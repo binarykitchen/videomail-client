@@ -545,10 +545,23 @@ const Recorder = function (visuals, replay, options) {
 
       debug('Recorder: navigator.mediaDevices.getUserMedia()', constraints)
 
-      navigator.mediaDevices
-        .getUserMedia(constraints)
-        .then(getUserMediaCallback)
-        .catch(userMediaErrorCallback)
+      const genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints)
+
+      if (genuineUserMediaRequest) {
+        genuineUserMediaRequest
+          .then(getUserMediaCallback)
+          .catch(userMediaErrorCallback)
+      } else {
+        // this to trap errors like these
+        // Cannot read property 'then' of undefined
+
+        // todo retry with navigator.getUserMedia_() maybe?
+        throw VideomailError.create(
+          'Sorry, your browser is unable to use cameras.',
+          'Try a different browser with better user media functionalities.',
+          options
+        )
+      }
     } else {
       debug('Recorder: navigator.getUserMedia()')
 
