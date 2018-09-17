@@ -37,7 +37,7 @@ var Container = function (options) {
   var form
 
   function prependDefaultCss () {
-    insertCss(css, {prepend: true})
+    insertCss(css, { prepend: true })
   }
 
   // since https://github.com/binarykitchen/videomail-client/issues/87
@@ -459,7 +459,7 @@ var Container = function (options) {
         if (self.isReplayShown()) {
           self.emit(Events.PREVIEW)
         } else {
-          self.emit(Events.FORM_READY, {paused: paused})
+          self.emit(Events.FORM_READY, { paused: paused })
         }
       }
     }

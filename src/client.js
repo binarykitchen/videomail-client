@@ -125,7 +125,7 @@ const VideomailClient = function (options) {
 
       if (container.isOutsideElementOf(parentElement)) {
         // replay element must be outside of the container
-        container.hideForm({deep: true})
+        container.hideForm({ deep: true })
       } else {
         container.loadForm(videomail)
       }

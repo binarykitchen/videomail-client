@@ -286,7 +286,7 @@ const Notifier = function (visuals, options) {
 
     if (blocking) {
       notifyElement && notifyElement.classList.add('blocking')
-      this.emit(Events.BLOCKING, {hideForm: hideForm})
+      this.emit(Events.BLOCKING, { hideForm: hideForm })
     } else {
       this.emit(Events.NOTIFYING)
     }

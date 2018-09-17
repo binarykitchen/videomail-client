@@ -145,7 +145,7 @@ const Recorder = function (visuals, replay, options) {
       loop = createLoop()
 
       show()
-      self.emit(Events.USER_MEDIA_READY, {paused: self.isPaused()})
+      self.emit(Events.USER_MEDIA_READY, { paused: self.isPaused() })
     } catch (exc) {
       self.emit(Events.ERROR, exc)
     }
@@ -518,7 +518,7 @@ const Recorder = function (visuals, replay, options) {
       const constraints = {
         video: {
           facingMode: 'user',
-          frameRate: {ideal: options.video.fps}
+          frameRate: { ideal: options.video.fps }
         },
         audio: options.isAudioEnabled()
       }
@@ -530,16 +530,16 @@ const Recorder = function (visuals, replay, options) {
 
       } else {
         if (options.hasDefinedWidth()) {
-          constraints.video.width = {ideal: options.video.width}
+          constraints.video.width = { ideal: options.video.width }
         } else {
           // otherwise try to apply the same width as the element is having
           // but there is no 100% guarantee that this will happen. not
           // all webcam drivers behave the same way
-          constraints.video.width = {ideal: self.limitWidth()}
+          constraints.video.width = { ideal: self.limitWidth() }
         }
 
         if (options.hasDefinedHeight()) {
-          constraints.video.height = {ideal: options.video.height}
+          constraints.video.height = { ideal: options.video.height }
         }
       }
 
@@ -891,7 +891,7 @@ const Recorder = function (visuals, replay, options) {
   }
 
   function createLoop () {
-    const newLoop = animitter({fps: options.video.fps}, draw)
+    const newLoop = animitter({ fps: options.video.fps }, draw)
 
     // remember it first
     originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject()
@@ -939,7 +939,7 @@ const Recorder = function (visuals, replay, options) {
         //   )
         // }
 
-        visuals.checkTimer({intervalSum: elapsedTime})
+        visuals.checkTimer({ intervalSum: elapsedTime })
       }
     } catch (exc) {
       self.emit(Events.ERROR, exc)

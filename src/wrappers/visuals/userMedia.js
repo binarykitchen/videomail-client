@@ -118,7 +118,7 @@ export default function (recorder, options) {
   }
 
   function outputEvent (e) {
-    logEvent(e.type, {readyState: rawVisualUserMedia.readyState})
+    logEvent(e.type, { readyState: rawVisualUserMedia.readyState })
 
     // remove myself
     rawVisualUserMedia.removeEventListener &&

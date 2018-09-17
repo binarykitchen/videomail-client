@@ -114,7 +114,7 @@ const Buttons = function (container, options) {
       e && e.preventDefault()
 
       try {
-        clickHandler({event: e})
+        clickHandler({ event: e })
       } catch (exc) {
         self.emit(Events.ERROR, exc)
       }

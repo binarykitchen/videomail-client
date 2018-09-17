@@ -31,7 +31,7 @@ const defaultOptions = {
   version: null
 }
 
-const options = minimist(process.argv.slice(2), {default: defaultOptions})
+const options = minimist(process.argv.slice(2), { default: defaultOptions })
 
 log.info('Options:', options)
 
@@ -60,7 +60,7 @@ gulp.task('stylus', () => {
     // todo: fix this, so that it also works when not minified, this
     // for faster builds during development
     .pipe(plugins.cssnano())
-    .pipe(plugins.rename({suffix: '.min', extname: '.css.js'}))
+    .pipe(plugins.rename({ suffix: '.min', extname: '.css.js' }))
     .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
     // todo: location is bad, should be in a temp folder or so
     .pipe(gulp.dest('src/styles/css'))
@@ -70,7 +70,7 @@ gulp.task('stylus', () => {
 gulp.task('todo', () => {
   gulp.src(
     ['src/**/*.{js, styl}', 'gulpfile.js', 'examples/*.html'],
-    {base: './'}
+    { base: './' }
   )
     .pipe(plugins.todo({
       fileName: 'TODO.md'
@@ -96,7 +96,7 @@ function bundle (watching) {
       log('Re-bundling ...')
     })
     .on('log', log)
-    .require(entry, {expose: 'videomail-client'})
+    .require(entry, { expose: 'videomail-client' })
     .transform(babelify)
 
   function pump () {
@@ -115,7 +115,7 @@ function bundle (watching) {
       .pipe(plugins.if(options.minify, plugins.sourcemaps.init()))
       .pipe(plugins.if(options.minify, plugins.bytediff.start()))
       .pipe(plugins.if(options.minify, plugins.uglify()))
-      .pipe(plugins.if(options.minify, plugins.rename({suffix: '.min'})))
+      .pipe(plugins.if(options.minify, plugins.rename({ suffix: '.min' })))
       .pipe(plugins.if(options.minify, plugins.bytediff.stop()))
       .pipe(plugins.if(options.minify, plugins.sourcemaps.write('/')))
       .pipe(plugins.if(options.minify, gulp.dest('dist')))

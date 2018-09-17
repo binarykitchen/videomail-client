@@ -23,6 +23,15 @@ export default function (userMedia, options) {
     // instantiate only once
     if (!vcAudioContext) {
       const AudioContext = window.AudioContext || window.webkitAudioContext
+
+      if (!AudioContext) {
+        throw VideomailError.create(
+          'Browser has no audio support',
+          'There is no audio context for this old browser. Please upgrade.',
+          options
+        )
+      }
+
       vcAudioContext = new AudioContext()
     }
 

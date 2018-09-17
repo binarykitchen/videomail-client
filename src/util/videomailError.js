@@ -17,7 +17,7 @@ const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
 
 // shim pretty to exclude stack always
 const pretty = function (anything) {
-  return originalPretty(anything, {excludes: ['stack']})
+  return originalPretty(anything, { excludes: ['stack'] })
 }
 
 // static and public attribute of this class
@@ -276,7 +276,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message
         } else {
           // tried toString before but nah
-          explanation = 'Inspected: ' + util.inspect(originalExplanation, {showHidden: true})
+          explanation = 'Inspected: ' + util.inspect(originalExplanation, {
+            showHidden: true
+          })
         }
       }
 
@@ -313,7 +315,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
         }
 
         if (!explanation && err) {
-          explanation = pretty(err, {excludes: ['stack']})
+          explanation = pretty(err, { excludes: ['stack'] })
         }
 
         // avoid dupes
