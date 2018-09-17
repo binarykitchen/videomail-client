@@ -14149,7 +14149,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14954,19 +14954,18 @@ exports.default = function (userMedia, options) {
   var audioInput;
   var vcAudioContext;
 
+  function getAudioContextClass() {
+    return window.AudioContext || window.webkitAudioContext;
+  }
+
   function hasAudioContext() {
-    return !!getAudioContext();
+    return !!getAudioContextClass() && !!getAudioContext();
   }
 
   function getAudioContext() {
     // instantiate only once
     if (!vcAudioContext) {
-      var AudioContext = window.AudioContext || window.webkitAudioContext;
-
-      if (!AudioContext) {
-        throw _videomailError2.default.create('Browser has no audio support', 'There is no audio context for this old browser. Please upgrade.', options);
-      }
-
+      var AudioContext = getAudioContextClass();
       vcAudioContext = new AudioContext();
     }
 
