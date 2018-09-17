@@ -5130,7 +5130,9 @@ function shim (element, value) {
       w: function (c) { return c === 1 ? 'أسبوع' : 'أسابيع' },
       d: function (c) { return c === 1 ? 'يوم' : 'أيام' },
       h: function (c) { return c === 1 ? 'ساعة' : 'ساعات' },
-      m: function (c) { return c === 1 ? 'دقيقة' : 'دقائق' },
+      m: function (c) {
+        return ['دقيقة', 'دقائق'][getArabicForm(c)]
+      },
       s: function (c) { return c === 1 ? 'ثانية' : 'ثواني' },
       ms: function (c) { return c === 1 ? 'جزء من الثانية' : 'أجزاء من الثانية' },
       decimal: ','
@@ -5761,6 +5763,13 @@ function shim (element, value) {
     } else {
       return 2
     }
+  }
+
+  // Internal helper function for Arabic language.
+  function getArabicForm (c) {
+    if (c <= 2) { return 0 }
+    if (c > 2 && c < 11) { return 1 }
+    return 0
   }
 
   humanizeDuration.getSupportedLanguages = function getSupportedLanguages () {
@@ -14140,7 +14149,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.4.7",
+  "version": "2.4.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14166,7 +14175,7 @@ module.exports={
     "major": "./env/dev/release.sh --importance=major"
   },
   "engines": {
-    "node": ">=8.3.0",
+    "node": ">=8.12.0",
     "yarn": ">=1.3.0",
     "npm": ">=5.4.0"
   },
@@ -14195,7 +14204,7 @@ module.exports={
     "filesize": "3.6.1",
     "get-form-data": "2.0.0",
     "hidden": "1.1.1",
-    "humanize-duration": "3.15.1",
+    "humanize-duration": "3.15.2",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -14219,13 +14228,13 @@ module.exports={
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
     "fancy-log": "1.3.2",
-    "glob": "7.1.2",
+    "glob": "7.1.3",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "5.0.0",
     "gulp-bump": "3.1.1",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
-    "gulp-connect": "5.5.0",
+    "gulp-connect": "5.6.1",
     "gulp-cssnano": "2.1.3",
     "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
@@ -14234,7 +14243,7 @@ module.exports={
     "gulp-plumber": "1.2.0",
     "gulp-rename": "1.4.0",
     "gulp-sourcemaps": "2.6.4",
-    "gulp-standard": "11.0.0",
+    "gulp-standard": "12.0.0",
     "gulp-stylus": "2.7.0",
     "gulp-todo": "6.0.0",
     "gulp-uglify": "3.0.1",
@@ -14242,7 +14251,7 @@ module.exports={
     "nib": "1.1.2",
     "router": "1.3.3",
     "ssl-root-cas": "1.2.5",
-    "standard": "11.0.1",
+    "standard": "12.0.1",
     "tap-summary": "4.0.0",
     "tape": "4.9.1",
     "tape-catch": "1.0.6",
@@ -14953,6 +14962,11 @@ exports.default = function (userMedia, options) {
     // instantiate only once
     if (!vcAudioContext) {
       var AudioContext = window.AudioContext || window.webkitAudioContext;
+
+      if (!AudioContext) {
+        throw _videomailError2.default.create('Browser has no audio support', 'There is no audio context for this old browser. Please upgrade.', options);
+      }
+
       vcAudioContext = new AudioContext();
     }
 
@@ -16114,7 +16128,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message;
         } else {
           // tried toString before but nah
-          explanation = 'Inspected: ' + _util2.default.inspect(originalExplanation, { showHidden: true });
+          explanation = 'Inspected: ' + _util2.default.inspect(originalExplanation, {
+            showHidden: true
+          });
         }
       }
 
