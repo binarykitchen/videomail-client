@@ -80,7 +80,8 @@ export default {
     // because each webcam has a different aspect ratio
 
     width: 'auto',      // or use an integer for exact pixels
-    height: 'auto'      // or use an integer for exact pixels
+    height: 'auto',     // or use an integer for exact pixels
+    facingMode: 'user'  // can be 'user', 'environment', 'left' or 'right'. useful for mobiles.
   },
 
   image: {

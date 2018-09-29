@@ -517,7 +517,7 @@ const Recorder = function (visuals, replay, options) {
       // prefer the front camera (if one is available) over the rear one
       const constraints = {
         video: {
-          facingMode: 'user',
+          facingMode: options.video.facingMode, // default is 'user'
           frameRate: { ideal: options.video.fps }
         },
         audio: options.isAudioEnabled()
