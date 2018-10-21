@@ -5,20 +5,13 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
     </head>
     <body>
-        <h1>Dead simple with most defaults and small</h1>
+        <h1>Dead simple with most defaults</h1>
         <div id="videomail"></div>
         <script src="/videomail-client.js"></script>
         <script>
             var videomailClient = new VideomailClient({
               verbose: true,
-              disableSubmit: true,
-              enablePause: true,
-              enableAutoPause: true,
-              video: {
-                countdown: 0,
-                width: 280,
-                limitSeconds: 20
-              }
+              disableSubmit: true
             })
 
             videomailClient.show()
