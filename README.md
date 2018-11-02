@@ -23,6 +23,7 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#demo">Demo / Fully working version</a>
 * <a href="#options">Options</a>
 * <a href="#api">API</a>
+* <a href="#whatisstored">What is stored on the server?</a>
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
 * <a href="#super-fast-cdn">Super fast global CDN</a>
@@ -128,6 +129,9 @@ videomailClient.on('FORM_READY', function() {
 videomailClient.on('SUBMITTED', function(videomail, response) {
   // continue with your own app logic
   // check out /examples/contact_form.html on how to integrate into your contact form
+  // that videomail object has plenty of useful information,
+  // i.E. the url or even the average fps it was recorded with.
+  // for more info on that, see chapter "What is stored on the server?" below
 })
 ```
 
@@ -213,6 +217,44 @@ Calling this function will manually trigger a submission of the recorded videoma
 ### videomailClient.getLogLines()
 
 For advanced use only: returns you a collection of log lines that show what code has been covered recently. Useful if you want to debug something tricky.
+
+<a name="whatisstored"></a>
+## What gets stored on the server?
+Here is an example JSON showing what is recorded and you can grab yourself for further use. It's emitted in the SUBMITTED event under the videomail object:
+
+
+```json
+{
+  "subject": "some subject",
+  "from": "some@sender.com",
+  "body": "A text body",
+  "recordingStats": { "avgFps": 15.151515151515152,
+    "wantedFps": 15,
+    "avgInterval": 62.09090909090909,
+    "wantedInterval": 66.66666666666667,
+    "intervalSum": 683,
+    "framesCount": 11,
+    "videoType": "webm",
+    "waitingTime": 192
+  },
+  "width": 320,
+  "height": 240,
+  "videomailClientVersion": "2.4.11",
+  "siteName": "videomail-client-demo",
+  "alias": "some-subject-183622500964",
+  "dateCreated": 1541130589811,
+  "url": "https://videomail.io/videomail/some-subject-150322500964",
+  "key": "11e8-de52-55ac2630-b22b-71959562a989",
+  "expirationPretty": "1 hour",
+  "expiresAfter": 1541134189811,
+  "siteTitle": "Videomail Client Example",
+  "webm": "https://videomail.io/videomail/some-subject-183622500964/type/webm/",
+  "poster": "https://videomail.io/videomail/some-subject-183622500964/poster/",
+  "dateCreatedPretty": "Nov 2, 2018, 4:49 PM",
+  "expiresAfterPretty": "Nov 2, 2018, 5:49 PM",
+  "expiresAfterIso": "2018-11-02T04:49:49.811Z"
+}
+```    
 
 <a name="whitelist"></a>
 ## Whitelist

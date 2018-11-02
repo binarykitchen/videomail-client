@@ -74,6 +74,9 @@
             var body = document.getElementById('body')
 
             var onSubmitted = function (videomail, response) {
+              // this videomail object has lots of useful information you can grab from
+              // i.E. the URL to view or even the average fps of the video
+
               var statusHeader = document.querySelector('h3.status')
 
               // status has been generated on server side, see gulp task 'connect'
