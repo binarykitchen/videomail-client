@@ -260,7 +260,7 @@ Here is an example JSON showing what is recorded and you can grab yourself for f
 <a name="form"></a>
 ## Form Submissions
 
-By default the Videomail-Client interrupts the form submission by using `e.preventDefault()` and submits the Videomail itself to the Videomail server first. The Videomail server replies with useful data, such as the Videomail key and only then the real form submission is resumed.
+By default the videomail-client interrupts the form submission with `e.preventDefault()` and submits the videomail itself to the videomail server first. The videomail server replies with useful data, such as the videomail key and only then the real form submission is resumed.
 
 If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
 
@@ -272,7 +272,7 @@ selectors: {
 },
 ```
 
-When these are null (defaults), the Vidoemail-Client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
+When these are null (defaults), the vidoemail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
 
 Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/examples/contact_form.html#L55).
 
@@ -360,9 +360,9 @@ And yes, one more thing: because it is very crucial to make videomail-client wor
 
 ### Code quality
 
-I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bugfixes come first before perfection otherwise you'll loose users. Reality you know.
+I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bug fixes come first before perfection otherwise you'll loose users. Reality you know.
 
-Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io/react/) or better [re-frame](https://github.com/Day8/re-frame) because the Videomail-Client depends heaviliy on application states.
+Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io/react/) or better [re-frame](https://github.com/Day8/re-frame) because the videomail-client depends heavily on application states.
 
 ### Final philosophy
 
