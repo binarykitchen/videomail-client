@@ -23,6 +23,8 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#demo">Demo / Fully working version</a>
 * <a href="#options">Options</a>
 * <a href="#api">API</a>
+* <a href="#form">Form Submissions</a>
+* <a href="#whatisstored">What gets stored on the videomail server?</a>
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
 * <a href="#super-fast-cdn">Super fast global CDN</a>
@@ -128,6 +130,9 @@ videomailClient.on('FORM_READY', function() {
 videomailClient.on('SUBMITTED', function(videomail, response) {
   // continue with your own app logic
   // check out /examples/contact_form.html on how to integrate into your contact form
+  // that videomail object has plenty of useful information,
+  // i.E. the url or even the average fps it was recorded with.
+  // for more info on that, see chapter "What is stored on the server?" below
 })
 ```
 
@@ -169,9 +174,11 @@ Furthermore the `replay()` method also detects whether the parent element has pl
 Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
 
 <a name="get"></a>
-### videomailClient.get(key, cb)
+### videomailClient.get(alias, cb)
 
-Queries a videomail (JSON) by a given key. When submitted, you get the key from the `submitted` event and can use that for storage and future queries of videomails.
+Queries a videomail (JSON) by a given alias for further queries or processing. There are two ways to get the alias:
+1. The form submission to your own server has it under `videomail_alias` in the form body.
+2. Get the alias from the `submitted` event and use it further within your code.
 
 <a name="canRecord"></a>
 ### videomailClient.canRecord()
@@ -213,6 +220,65 @@ Calling this function will manually trigger a submission of the recorded videoma
 ### videomailClient.getLogLines()
 
 For advanced use only: returns you a collection of log lines that show what code has been covered recently. Useful if you want to debug something tricky.
+
+<a name="whatisstored"></a>
+## What gets stored on the videomail server?
+Here is an example JSON showing what is recorded and you can grab yourself for further use. It's emitted in the SUBMITTED event under the videomail object:
+
+
+```json
+{
+  "subject": "some subject",
+  "from": "some@sender.com",
+  "body": "A text body",
+  "recordingStats": { "avgFps": 15.151515151515152,
+    "wantedFps": 15,
+    "avgInterval": 62.09090909090909,
+    "wantedInterval": 66.66666666666667,
+    "intervalSum": 683,
+    "framesCount": 11,
+    "videoType": "webm",
+    "waitingTime": 192
+  },
+  "width": 320,
+  "height": 240,
+  "videomailClientVersion": "2.4.11",
+  "siteName": "videomail-client-demo",
+  "alias": "some-subject-183622500964",
+  "dateCreated": 1541130589811,
+  "url": "https://videomail.io/videomail/some-subject-150322500964",
+  "key": "11e8-de52-55ac2630-b22b-71959562a989",
+  "expirationPretty": "1 hour",
+  "expiresAfter": 1541134189811,
+  "siteTitle": "Videomail Client Example",
+  "webm": "https://videomail.io/videomail/some-subject-183622500964/type/webm/",
+  "poster": "https://videomail.io/videomail/some-subject-183622500964/poster/",
+  "dateCreatedPretty": "Nov 2, 2018, 4:49 PM",
+  "expiresAfterPretty": "Nov 2, 2018, 5:49 PM",
+  "expiresAfterIso": "2018-11-02T04:49:49.811Z"
+}
+```
+
+You also can get all the above using the `videomailClient.get()` API call.
+
+<a name="form"></a>
+## Form Submissions
+
+By default the videomail-client interrupts the form submission with `e.preventDefault()` and submits the videomail itself to the videomail server first. The videomail server replies with useful data, such as the videomail key and only then the real form submission is resumed.
+
+If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
+
+```json
+selectors: {
+  "formId": null,
+  "submitButtonId": null,
+  "submitButtonSelector": null
+},
+```
+
+When these are null (defaults), the vidoemail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
+
+Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/examples/contact_form.html#L55).
 
 <a name="whitelist"></a>
 ## Whitelist
@@ -298,9 +364,9 @@ And yes, one more thing: because it is very crucial to make videomail-client wor
 
 ### Code quality
 
-I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bugfixes come first before perfection otherwise you'll loose users. Reality you know.
+I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bug fixes come first before perfection otherwise you'll loose users. Reality you know.
 
-Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io/react/) or better [re-frame](https://github.com/Day8/re-frame) because the Videomail-Client depends heaviliy on application states.
+Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io/react/) or better [re-frame](https://github.com/Day8/re-frame) because the videomail-client depends heavily on application states.
 
 ### Final philosophy
 

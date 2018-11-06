@@ -158,8 +158,8 @@ const VideomailClient = function (options) {
     container.hide()
   }
 
-  this.get = function (key, cb) {
-    new Resource(localOptions).get(key, function (err, videomail) {
+  this.get = function (alias, cb) {
+    new Resource(localOptions).get(alias, function (err, videomail) {
       if (err) {
         cb(err)
       } else {
