@@ -24,7 +24,7 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#options">Options</a>
 * <a href="#api">API</a>
 * <a href="#form">Form Submissions</a>
-* <a href="#whatisstored">What is stored on the server?</a>
+* <a href="#whatisstored">What gets stored on the videomail server?</a>
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
 * <a href="#super-fast-cdn">Super fast global CDN</a>
@@ -174,9 +174,11 @@ Furthermore the `replay()` method also detects whether the parent element has pl
 Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
 
 <a name="get"></a>
-### videomailClient.get(key, cb)
+### videomailClient.get(alias, cb)
 
-Queries a videomail (JSON) by a given key. When submitted, you get the key from the `submitted` event and can use that for storage and future queries of videomails.
+Queries a videomail (JSON) by a given alias for further queries or processing. There are two ways to get the alias:
+1. The form submission to your own server has it under `videomail_alias` in the form body.
+2. Get the alias from the `submitted` event and use it further within your code.
 
 <a name="canRecord"></a>
 ### videomailClient.canRecord()
@@ -220,7 +222,7 @@ Calling this function will manually trigger a submission of the recorded videoma
 For advanced use only: returns you a collection of log lines that show what code has been covered recently. Useful if you want to debug something tricky.
 
 <a name="whatisstored"></a>
-## What gets stored on the server?
+## What gets stored on the videomail server?
 Here is an example JSON showing what is recorded and you can grab yourself for further use. It's emitted in the SUBMITTED event under the videomail object:
 
 
@@ -256,6 +258,8 @@ Here is an example JSON showing what is recorded and you can grab yourself for f
   "expiresAfterIso": "2018-11-02T04:49:49.811Z"
 }
 ```
+
+You also can get all the above using the `videomailClient.get()` API call.
 
 <a name="form"></a>
 ## Form Submissions
