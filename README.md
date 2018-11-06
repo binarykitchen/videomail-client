@@ -23,6 +23,7 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#demo">Demo / Fully working version</a>
 * <a href="#options">Options</a>
 * <a href="#api">API</a>
+* <a href="#form">Form Submissions</a>
 * <a href="#whatisstored">What is stored on the server?</a>
 * <a href="#whitelist">Whitelist</a>
 * <a href="#compatibility">Backward compatibility</a>
@@ -254,7 +255,26 @@ Here is an example JSON showing what is recorded and you can grab yourself for f
   "expiresAfterPretty": "Nov 2, 2018, 5:49 PM",
   "expiresAfterIso": "2018-11-02T04:49:49.811Z"
 }
-```    
+```
+
+<a name="form"></a>
+## Form Submissions
+
+By default the Videomail-Client interrupts the form submission by using `e.preventDefault()` and submits the Videomail itself to the Videomail server first. The Videomail server replies with useful data, such as the Videomail key and only then the real form submission is resumed.
+
+If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
+
+```json
+selectors: {
+  "formId": null,
+  "submitButtonId": null,
+  "submitButtonSelector": null
+},
+```
+
+When these are null (defaults), the Vidoemail-Client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
+
+Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/examples/contact_form.html#L55).
 
 <a name="whitelist"></a>
 ## Whitelist
