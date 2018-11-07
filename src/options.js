@@ -17,6 +17,8 @@ export default {
   enablePause: true,                    // enable pause/resume button
   enableAutoPause: true,                // automatically pauses when window becomes inactive
   enableSpace: true,                    // hitting space can pause recording
+  submitWithVideomail: false,           // when enabled, all videomail metadata is submitted
+                                        // under the `videomail` key inside the form data body.
   disableSubmit: false,                 // set this to true if you do not want to submit videos,
                                         // but just want to record and replay these temporarily
   enableAutoValidation: true,           // automatically validates all form inputs if any exist and

@@ -269,6 +269,12 @@ var Container = function (options) {
     // can be missing when no videomail was recorded and is not required
     if (videomailResponse) {
       formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias
+
+      // this in case if user wants all videomail metadata to be posted
+      // altogether with the remaining form
+      if (options.submitWithVideomail) {
+        formData.videomail = videomailResponse.videomail
+      }
     }
 
     resource.form(formData, url, cb)
