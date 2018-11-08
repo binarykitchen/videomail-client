@@ -14,7 +14,7 @@
     <body>
         <h1>Contact Form Integration</h1>
         <p>A JSON based contact form embracing Sign Language!</p>
-
+        <p>With the `submitWithVideomail` option, all videomail data is posted as well.</p>
         <!-- Once you set the method to POST, then two request will be made internally. -->
         <!-- The first one to the videomail server and the second one to the specified action -->
         <form action="/contact" method="post" id="someForm">
@@ -51,6 +51,7 @@
         <script>
             var videomailClient = new VideomailClient({
               verbose: true,
+              submitWithVideomail: true,
               video: {limitSeconds: 120, width: 320, countdown: false},
               selectors: {
                 submitButtonSelector: 'body input[value="Submit"]',

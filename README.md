@@ -128,11 +128,16 @@ videomailClient.on('FORM_READY', function() {
 })
 
 videomailClient.on('SUBMITTED', function(videomail, response) {
-  // continue with your own app logic
+  // continue with your own app logic in your javascript code if you want to process
+  // something else further after form submission.
+  //
   // check out /examples/contact_form.html on how to integrate into your contact form
   // that videomail object has plenty of useful information,
   // i.E. the url or even the average fps it was recorded with.
-  // for more info on that, see chapter "What is stored on the server?" below
+  // for more info on videomail meta data, see chapter "What is stored on the server?" below
+  //
+  // but if you want all that videomail meta data to be submitted in the form already,
+  // enable the `submitWithVideomail` option.
 })
 ```
 
@@ -223,7 +228,7 @@ For advanced use only: returns you a collection of log lines that show what code
 
 <a name="whatisstored"></a>
 ## What gets stored on the videomail server?
-Here is an example JSON showing what is recorded and you can grab yourself for further use. It's emitted in the SUBMITTED event under the videomail object:
+Here is an example JSON showing what videomail meta data exists, gets stored on the server and you can grab yourself for further use. It's emitted in the SUBMITTED event under the videomail object:
 
 
 ```json
@@ -264,7 +269,7 @@ You also can get all the above using the `videomailClient.get()` API call.
 <a name="form"></a>
 ## Form Submissions
 
-By default the videomail-client interrupts the form submission with `e.preventDefault()` and submits the videomail itself to the videomail server first. The videomail server replies with useful data, such as the videomail key and only then the real form submission is resumed.
+By default the videomail-client interrupts the form submission with `e.preventDefault()` and submits the videomail itself to the videomail server first. The videomail server replies with useful data, such as the videomail alias, other meta data and only then the real form submission is resumed.
 
 If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
 
@@ -276,9 +281,14 @@ selectors: {
 },
 ```
 
-When these are null (defaults), the vidoemail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
+When these are null (defaults), the videomail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
 
 Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/examples/contact_form.html#L55).
+
+### Include videomail meta data in Form Submissions
+
+If you want to include videomail meta data in the form submission to your own server, enable the `submitWithVideomail` option.
+Otherwise only the videomail alias is in the form body and will have to call `videomail.get(alias, cb)` to retrieve these later on.
 
 <a name="whitelist"></a>
 ## Whitelist

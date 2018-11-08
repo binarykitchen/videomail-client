@@ -163,7 +163,7 @@ gulp.task('connect', ['build'], () => {
     root: ['examples', 'dist'],
     port: 8080,
     debug: true,
-    livereload: true,
+    livereload: false, // disabled since it's broken unfortunately, see https://github.com/intesso/connect-livereload/issues/79
     https: {
       key: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
       cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
@@ -176,7 +176,7 @@ gulp.task('connect', ['build'], () => {
 
       // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
       router.post('/contact', function (req, res) {
-        log.info('Videomail data received:', req.body)
+        log.info('Videomail data received (with meta data):', req.body)
 
         // At this stage, a backend could store the videomail_key in req.body
         // into a database for replay functionality
