@@ -4058,40 +4058,45 @@ Duplexify.prototype.end = function(data, enc, cb) {
 module.exports = Duplexify
 
 }).call(this,_dereq_('_process'),_dereq_("buffer").Buffer)
-},{"_process":51,"buffer":8,"end-of-stream":23,"inherits":36,"readable-stream":62,"stream-shift":68}],22:[function(_dereq_,module,exports){
-// element-closest | CC0-1.0 | github.com/jonathantneal/closest
+},{"_process":51,"buffer":8,"end-of-stream":23,"inherits":36,"readable-stream":61,"stream-shift":67}],22:[function(_dereq_,module,exports){
+'use strict';
 
-(function (ElementProto) {
-	if (typeof ElementProto.matches !== 'function') {
-		ElementProto.matches = ElementProto.msMatchesSelector || ElementProto.mozMatchesSelector || ElementProto.webkitMatchesSelector || function matches(selector) {
-			var element = this;
-			var elements = (element.document || element.ownerDocument).querySelectorAll(selector);
-			var index = 0;
+function polyfill(window) {
+  const ElementPrototype = window.Element.prototype;
 
-			while (elements[index] && elements[index] !== element) {
-				++index;
-			}
+  if (typeof ElementPrototype.matches !== 'function') {
+    ElementPrototype.matches = ElementPrototype.msMatchesSelector || ElementPrototype.mozMatchesSelector || ElementPrototype.webkitMatchesSelector || function matches(selector) {
+      const elements = (element.document || element.ownerDocument).querySelectorAll(selector);
+      let element = this;
+      let index = 0;
 
-			return Boolean(elements[index]);
-		};
-	}
+      while (elements[index] && elements[index] !== element) {
+        ++index;
+      }
 
-	if (typeof ElementProto.closest !== 'function') {
-		ElementProto.closest = function closest(selector) {
-			var element = this;
+      return Boolean(elements[index]);
+    };
+  }
 
-			while (element && element.nodeType === 1) {
-				if (element.matches(selector)) {
-					return element;
-				}
+  if (typeof ElementPrototype.closest !== 'function') {
+    ElementPrototype.closest = function closest(selector) {
+      let element = this;
 
-				element = element.parentNode;
-			}
+      while (element && element.nodeType === 1) {
+        if (element.matches(selector)) {
+          return element;
+        }
 
-			return null;
-		};
-	}
-})(window.Element.prototype);
+        element = element.parentNode;
+      }
+
+      return null;
+    };
+  }
+}
+
+module.exports = polyfill;
+
 
 },{}],23:[function(_dereq_,module,exports){
 var once = _dereq_('once');
@@ -8369,7 +8374,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":53,"./internal/streams/BufferList":58,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"events":24,"inherits":36,"isarray":44,"process-nextick-args":50,"safe-buffer":66,"string_decoder/":61,"util":6}],56:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"./internal/streams/BufferList":58,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"events":24,"inherits":36,"isarray":44,"process-nextick-args":50,"safe-buffer":65,"string_decoder/":68,"util":6}],56:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9274,7 +9279,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":53,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"inherits":36,"process-nextick-args":50,"safe-buffer":66,"util-deprecate":77}],58:[function(_dereq_,module,exports){
+},{"./_stream_duplex":53,"./internal/streams/destroy":59,"./internal/streams/stream":60,"_process":51,"core-util-is":14,"inherits":36,"process-nextick-args":50,"safe-buffer":65,"util-deprecate":77}],58:[function(_dereq_,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -9354,7 +9359,7 @@ if (util && util.inspect && util.inspect.custom) {
     return this.constructor.name + ' ' + obj;
   };
 }
-},{"safe-buffer":66,"util":6}],59:[function(_dereq_,module,exports){
+},{"safe-buffer":65,"util":6}],59:[function(_dereq_,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -9433,6 +9438,626 @@ module.exports = {
 module.exports = _dereq_('events').EventEmitter;
 
 },{"events":24}],61:[function(_dereq_,module,exports){
+exports = module.exports = _dereq_('./lib/_stream_readable.js');
+exports.Stream = exports;
+exports.Readable = exports;
+exports.Writable = _dereq_('./lib/_stream_writable.js');
+exports.Duplex = _dereq_('./lib/_stream_duplex.js');
+exports.Transform = _dereq_('./lib/_stream_transform.js');
+exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
+
+},{"./lib/_stream_duplex.js":53,"./lib/_stream_passthrough.js":54,"./lib/_stream_readable.js":55,"./lib/_stream_transform.js":56,"./lib/_stream_writable.js":57}],62:[function(_dereq_,module,exports){
+'use strict';
+
+var readystate = module.exports = _dereq_('./readystate')
+  , win = (new Function('return this'))()
+  , complete = 'complete'
+  , root = true
+  , doc = win.document
+  , html = doc.documentElement;
+
+(function wrapper() {
+  //
+  // Bail out early if the document is already fully loaded. This means that this
+  // script is loaded after the onload event.
+  //
+  if (complete === doc.readyState) {
+    return readystate.change(complete);
+  }
+
+  //
+  // Use feature detection to see what kind of browser environment we're dealing
+  // with. Old versions of Internet Explorer do not support the addEventListener
+  // interface so we can also safely assume that we need to fall back to polling.
+  //
+  var modern = !!doc.addEventListener
+    , prefix = modern ? '' : 'on'
+    , on = modern ? 'addEventListener' : 'attachEvent'
+    , off = modern ? 'removeEventListener' : 'detachEvent';
+
+  if (!modern && 'function' === typeof html.doScroll) {
+    try { root = !win.frameElement; }
+    catch (e) {}
+
+    if (root) (function polling() {
+      try { html.doScroll('left'); }
+      catch (e) { return setTimeout(polling, 50); }
+
+      readystate.change('interactive');
+    }());
+  }
+
+  /**
+   * Handle the various of event listener calls.
+   *
+   * @param {Event} evt Simple DOM event.
+   * @api private
+   */
+  function change(evt) {
+    evt = evt || win.event;
+
+    if ('readystatechange' === evt.type) {
+      readystate.change(doc.readyState);
+      if (complete !== doc.readyState) return;
+    }
+
+    if ('load' === evt.type) readystate.change('complete');
+    else readystate.change('interactive');
+
+    //
+    // House keeping, remove our assigned event listeners.
+    //
+    (evt.type === 'load' ? win : doc)[off](evt.type, change, false);
+  }
+
+  //
+  // Assign a shit load of event listeners so we can update our internal state.
+  //
+  doc[on](prefix +'DOMContentLoaded', change, false);
+  doc[on](prefix +'readystatechange', change, false);
+  win[on](prefix +'load', change, false);
+} ());
+
+
+},{"./readystate":63}],63:[function(_dereq_,module,exports){
+'use strict';
+
+/**
+ * Generate a new prototype method which will the given function once the
+ * desired state has been reached. The returned function accepts 2 arguments:
+ *
+ * - fn: The assigned function which needs to be called.
+ * - context: Context/this value of the function we need to execute.
+ *
+ * @param {String} state The state we need to operate upon.
+ * @returns {Function}
+ * @api private
+ */
+function generate(state) {
+  return function proxy(fn, context) {
+    var rs = this;
+
+    if (rs.is(state)) {
+      setTimeout(function () {
+        fn.call(context, rs.readyState);
+      }, 0);
+    } else {
+      if (!rs._events[state]) rs._events[state] = [];
+      rs._events[state].push({ fn: fn, context: context });
+    }
+
+    return rs;
+  };
+}
+
+/**
+ * RS (readyState) instance.
+ *
+ * @constructor
+ * @api public
+ */
+function RS() {
+  this.readyState = RS.UNKNOWN;
+  this._events = {};
+}
+
+/**
+ * The environment can be in different states. The following states are
+ * generated:
+ *
+ * - ALL:         The I don't really give a fuck state.
+ * - UNKNOWN:     We got an unknown readyState we should start listening for events.
+ * - LOADING:     Environment is currently loading.
+ * - INTERACTIVE: Environment is ready for modification.
+ * - COMPLETE:    All resources have been loaded.
+ *
+ * Please note that the order of the `states` string/array is of vital
+ * importance as it's used in the readyState check.
+ *
+ * @type {Number}
+ * @private
+ */
+RS.states = 'ALL,UNKNOWN,LOADING,INTERACTIVE,COMPLETE'.split(',');
+
+for (var s = 0, state; s < RS.states.length; s++) {
+  state = RS.states[s];
+
+  RS[state] = RS.prototype[state] = s;
+  RS.prototype[state.toLowerCase()] = generate(state);
+}
+
+/**
+ * A change in the environment has been detected so we need to change our
+ * readyState and call assigned event listeners and those of the previous
+ * states.
+ *
+ * @param {Number} state The new readyState that we detected.
+ * @returns {RS}
+ * @api private
+ */
+RS.prototype.change = function change(state) {
+  state = this.clean(state, true);
+
+  var j
+    , name
+    , i = 0
+    , listener
+    , rs = this
+    , previously = rs.readyState;
+
+  if (previously >= state) return rs;
+
+  rs.readyState = state;
+
+  for (; i < RS.states.length; i++) {
+    if (i > state) break;
+    name = RS.states[i];
+
+    if (name in rs._events) {
+      for (j = 0; j < rs._events[name].length; j++) {
+        listener = rs._events[name][j];
+        listener.fn.call(listener.context || rs, previously);
+      }
+
+      delete rs._events[name];
+    }
+  }
+
+  return rs;
+};
+
+/**
+ * Check if we're currently in a given readyState.
+ *
+ * @param {String|Number} state The required readyState.
+ * @returns {Boolean} Indication if this state has been reached.
+ * @api public
+ */
+RS.prototype.is = function is(state) {
+  return this.readyState >= this.clean(state, true);
+};
+
+/**
+ * Transform a state to a number or toUpperCase.
+ *
+ * @param {Mixed} state State to transform.
+ * @param {Boolean} nr Change to number.
+ * @returns {Mixed}
+ * @api public
+ */
+RS.prototype.clean = function transform(state, nr) {
+  var type = typeof state;
+
+  if (nr) return 'number' !== type
+  ? +RS[state.toUpperCase()] || 0
+  : state;
+
+  return ('number' === type ? RS.states[state] : state).toUpperCase();
+};
+
+/**
+ * Removes all event listeners. Useful when you want to unload readystatechange
+ * completely so that it won't react to any events anymore. See
+ * https://github.com/unshiftio/readystate/issues/8
+ *
+ * @returns {Function} rs so that calls can be chained.
+ * @api public
+ */
+RS.prototype.removeAllListeners = function removeAllListeners() {
+  this._events = {};
+  return this;
+}
+
+//
+// Expose the module.
+//
+module.exports = new RS();
+
+},{}],64:[function(_dereq_,module,exports){
+/**
+ * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
+ * @version v1.5.3
+ * @license MIT
+ * Copyright Julien Etienne 2015 All Rights Reserved.
+ */
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global.requestFrame = factory());
+}(this, (function () { 'use strict';
+
+/**
+ * @param  {String} type - request | cancel | native.
+ * @return {Function} Timing function.
+ */
+function requestFrame(type) {
+    // The only vendor prefixes required.
+    var vendors = ['moz', 'webkit'];
+
+    // Disassembled timing function abbreviations.
+    var aF = 'AnimationFrame';
+    var rqAF = 'Request' + aF;
+
+    // Checks for firefox 4 - 10 function pair mismatch.
+    var mozRAF = window.mozRequestAnimationFrame;
+    var mozCAF = window.mozCancelAnimationFrame;
+    var hasMozMismatch = mozRAF && !mozCAF;
+
+    // Final assigned functions.
+    var assignedRequestAnimationFrame;
+    var assignedCancelAnimationFrame;
+
+    // Initial time of the timing lapse.
+    var previousTime = 0;
+
+    var requestFrameMain;
+
+    // Date.now polyfill, mainly for legacy IE versions.
+    if (!Date.now) {
+        Date.now = function () {
+            return new Date().getTime();
+        };
+    }
+
+    /**
+     * hasIOS6RequestAnimationFrameBug.
+     * @See {@Link https://gist.github.com/julienetie/86ac394ec41f1271ff0a}
+     * - for Commentary.
+     * @Copyright 2015 - Julien Etienne. 
+     * @License: MIT.
+     */
+    function hasIOS6RequestAnimationFrameBug() {
+        var webkitRAF = window.webkitRequestAnimationFrame;
+        var rAF = window.requestAnimationFrame;
+
+        // CSS/ Device with max for iOS6 Devices.
+        var hasMobileDeviceWidth = screen.width <= 768 ? true : false;
+
+        // Only supports webkit prefixed requestAnimtionFrane.
+        var requiresWebkitprefix = !(webkitRAF && rAF);
+
+        // iOS6 webkit browsers don't support performance now.
+        var hasNoNavigationTiming = window.performance ? false : true;
+
+        var iOS6Notice = 'setTimeout is being used as a substitiue for \n            requestAnimationFrame due to a bug within iOS 6 builds';
+
+        var hasIOS6Bug = requiresWebkitprefix && hasMobileDeviceWidth && hasNoNavigationTiming;
+
+        var bugCheckresults = function bugCheckresults(timingFnA, timingFnB, notice) {
+            if (timingFnA || timingFnB) {
+                console.warn(notice);
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        var displayResults = function displayResults(hasBug, hasBugNotice, webkitFn, nativeFn) {
+            if (hasBug) {
+                return bugCheckresults(webkitFn, nativeFn, hasBugNotice);
+            } else {
+                return false;
+            }
+        };
+
+        return displayResults(hasIOS6Bug, iOS6Notice, webkitRAF, rAF);
+    }
+
+    /**
+     * Native clearTimeout function.
+     * @return {Function}
+     */
+    function clearTimeoutWithId(id) {
+        clearTimeout(id);
+    }
+
+    /**
+     * Based on a polyfill by Erik, introduced by Paul Irish & 
+     * further improved by Darius Bacon.
+     * @see  {@link http://www.paulirish.com/2011/
+     * requestanimationframe-for-smart-animating}
+     * @see  {@link https://github.com/darius/requestAnimationFrame/blob/
+     * master/requestAnimationFrame.js}
+     * @callback {Number} Timestamp.
+     * @return {Function} setTimeout Function.
+     */
+    function setTimeoutWithTimestamp(callback) {
+        var immediateTime = Date.now();
+        var lapsedTime = Math.max(previousTime + 16, immediateTime);
+        return setTimeout(function () {
+            callback(previousTime = lapsedTime);
+        }, lapsedTime - immediateTime);
+    }
+
+    /**
+     * Queries the native function, prefixed function 
+     * or use the setTimeoutWithTimestamp function.
+     * @return {Function}
+     */
+    function queryRequestAnimationFrame() {
+        if (Array.prototype.filter) {
+            assignedRequestAnimationFrame = window['request' + aF] || window[vendors.filter(function (vendor) {
+                if (window[vendor + rqAF] !== undefined) return vendor;
+            }) + rqAF] || setTimeoutWithTimestamp;
+        } else {
+            return setTimeoutWithTimestamp;
+        }
+        if (!hasIOS6RequestAnimationFrameBug()) {
+            return assignedRequestAnimationFrame;
+        } else {
+            return setTimeoutWithTimestamp;
+        }
+    }
+
+    /**
+     * Queries the native function, prefixed function 
+     * or use the clearTimeoutWithId function.
+     * @return {Function}
+     */
+    function queryCancelAnimationFrame() {
+        var cancellationNames = [];
+        if (Array.prototype.map) {
+            vendors.map(function (vendor) {
+                return ['Cancel', 'CancelRequest'].map(function (cancellationNamePrefix) {
+                    cancellationNames.push(vendor + cancellationNamePrefix + aF);
+                });
+            });
+        } else {
+            return clearTimeoutWithId;
+        }
+
+        /**
+         * Checks for the prefixed cancelAnimationFrame implementation.
+         * @param  {Array} prefixedNames - An array of the prefixed names. 
+         * @param  {Number} i - Iteration start point.
+         * @return {Function} prefixed cancelAnimationFrame function.
+         */
+        function prefixedCancelAnimationFrame(prefixedNames, i) {
+            var cancellationFunction = void 0;
+            for (; i < prefixedNames.length; i++) {
+                if (window[prefixedNames[i]]) {
+                    cancellationFunction = window[prefixedNames[i]];
+                    break;
+                }
+            }
+            return cancellationFunction;
+        }
+
+        // Use truthly function
+        assignedCancelAnimationFrame = window['cancel' + aF] || prefixedCancelAnimationFrame(cancellationNames, 0) || clearTimeoutWithId;
+
+        // Check for iOS 6 bug
+        if (!hasIOS6RequestAnimationFrameBug()) {
+            return assignedCancelAnimationFrame;
+        } else {
+            return clearTimeoutWithId;
+        }
+    }
+
+    function getRequestFn() {
+        if (hasMozMismatch) {
+            return setTimeoutWithTimestamp;
+        } else {
+            return queryRequestAnimationFrame();
+        }
+    }
+
+    function getCancelFn() {
+        return queryCancelAnimationFrame();
+    }
+
+    function setNativeFn() {
+        if (hasMozMismatch) {
+            window.requestAnimationFrame = setTimeoutWithTimestamp;
+            window.cancelAnimationFrame = clearTimeoutWithId;
+        } else {
+            window.requestAnimationFrame = queryRequestAnimationFrame();
+            window.cancelAnimationFrame = queryCancelAnimationFrame();
+        }
+    }
+
+    /**
+     * The type value "request" singles out firefox 4 - 10 and 
+     * assigns the setTimeout function if plausible.
+     */
+
+    switch (type) {
+        case 'request':
+        case '':
+            requestFrameMain = getRequestFn();
+            break;
+
+        case 'cancel':
+            requestFrameMain = getCancelFn();
+            break;
+
+        case 'native':
+            setNativeFn();
+            break;
+        default:
+            throw new Error('RequestFrame parameter is not a type.');
+    }
+    return requestFrameMain;
+}
+
+return requestFrame;
+
+})));
+
+},{}],65:[function(_dereq_,module,exports){
+/* eslint-disable node/no-deprecated-api */
+var buffer = _dereq_('buffer')
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+},{"buffer":8}],66:[function(_dereq_,module,exports){
+var hasProp = Object.prototype.hasOwnProperty;
+
+function throwsMessage(err) {
+	return '[Throws: ' + (err ? err.message : '?') + ']';
+}
+
+function safeGetValueFromPropertyOnObject(obj, property) {
+	if (hasProp.call(obj, property)) {
+		try {
+			return obj[property];
+		}
+		catch (err) {
+			return throwsMessage(err);
+		}
+	}
+
+	return obj[property];
+}
+
+function ensureProperties(obj) {
+	var seen = [ ]; // store references to objects we have seen before
+
+	function visit(obj) {
+		if (obj === null || typeof obj !== 'object') {
+			return obj;
+		}
+
+		if (seen.indexOf(obj) !== -1) {
+			return '[Circular]';
+		}
+		seen.push(obj);
+
+		if (typeof obj.toJSON === 'function') {
+			try {
+				var fResult = visit(obj.toJSON());
+				seen.pop();
+				return fResult;
+			} catch(err) {
+				return throwsMessage(err);
+			}
+		}
+
+		if (Array.isArray(obj)) {
+			var aResult = obj.map(visit);
+			seen.pop();
+			return aResult;
+		}
+
+		var result = Object.keys(obj).reduce(function(result, prop) {
+			// prevent faulty defined getter properties
+			result[prop] = visit(safeGetValueFromPropertyOnObject(obj, prop));
+			return result;
+		}, {});
+		seen.pop();
+		return result;
+	};
+
+	return visit(obj);
+}
+
+module.exports = function(data, replacer, space) {
+	return JSON.stringify(ensureProperties(data), replacer, space);
+}
+
+module.exports.ensureProperties = ensureProperties;
+
+},{}],67:[function(_dereq_,module,exports){
+module.exports = shift
+
+function shift (stream) {
+  var rs = stream._readableState
+  if (!rs) return null
+  return rs.objectMode ? stream.read() : stream.read(getStateLength(rs))
+}
+
+function getStateLength (state) {
+  if (state.buffer.length) {
+    // Since node 6.3.0 state.buffer is a BufferList not an array
+    if (state.buffer.head) {
+      return state.buffer.head.data.length
+    }
+
+    return state.buffer[0].length
+  }
+
+  return state.length
+}
+
+},{}],68:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9729,643 +10354,23 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":66}],62:[function(_dereq_,module,exports){
-exports = module.exports = _dereq_('./lib/_stream_readable.js');
-exports.Stream = exports;
-exports.Readable = exports;
-exports.Writable = _dereq_('./lib/_stream_writable.js');
-exports.Duplex = _dereq_('./lib/_stream_duplex.js');
-exports.Transform = _dereq_('./lib/_stream_transform.js');
-exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
-
-},{"./lib/_stream_duplex.js":53,"./lib/_stream_passthrough.js":54,"./lib/_stream_readable.js":55,"./lib/_stream_transform.js":56,"./lib/_stream_writable.js":57}],63:[function(_dereq_,module,exports){
-'use strict';
-
-var readystate = module.exports = _dereq_('./readystate')
-  , win = (new Function('return this'))()
-  , complete = 'complete'
-  , root = true
-  , doc = win.document
-  , html = doc.documentElement;
-
-(function wrapper() {
-  //
-  // Bail out early if the document is already fully loaded. This means that this
-  // script is loaded after the onload event.
-  //
-  if (complete === doc.readyState) {
-    return readystate.change(complete);
-  }
-
-  //
-  // Use feature detection to see what kind of browser environment we're dealing
-  // with. Old versions of Internet Explorer do not support the addEventListener
-  // interface so we can also safely assume that we need to fall back to polling.
-  //
-  var modern = !!doc.addEventListener
-    , prefix = modern ? '' : 'on'
-    , on = modern ? 'addEventListener' : 'attachEvent'
-    , off = modern ? 'removeEventListener' : 'detachEvent';
-
-  if (!modern && 'function' === typeof html.doScroll) {
-    try { root = !win.frameElement; }
-    catch (e) {}
-
-    if (root) (function polling() {
-      try { html.doScroll('left'); }
-      catch (e) { return setTimeout(polling, 50); }
-
-      readystate.change('interactive');
-    }());
-  }
-
-  /**
-   * Handle the various of event listener calls.
-   *
-   * @param {Event} evt Simple DOM event.
-   * @api private
-   */
-  function change(evt) {
-    evt = evt || win.event;
-
-    if ('readystatechange' === evt.type) {
-      readystate.change(doc.readyState);
-      if (complete !== doc.readyState) return;
-    }
-
-    if ('load' === evt.type) readystate.change('complete');
-    else readystate.change('interactive');
-
-    //
-    // House keeping, remove our assigned event listeners.
-    //
-    (evt.type === 'load' ? win : doc)[off](evt.type, change, false);
-  }
-
-  //
-  // Assign a shit load of event listeners so we can update our internal state.
-  //
-  doc[on](prefix +'DOMContentLoaded', change, false);
-  doc[on](prefix +'readystatechange', change, false);
-  win[on](prefix +'load', change, false);
-} ());
-
-
-},{"./readystate":64}],64:[function(_dereq_,module,exports){
-'use strict';
-
-/**
- * Generate a new prototype method which will the given function once the
- * desired state has been reached. The returned function accepts 2 arguments:
- *
- * - fn: The assigned function which needs to be called.
- * - context: Context/this value of the function we need to execute.
- *
- * @param {String} state The state we need to operate upon.
- * @returns {Function}
- * @api private
- */
-function generate(state) {
-  return function proxy(fn, context) {
-    var rs = this;
-
-    if (rs.is(state)) {
-      setTimeout(function () {
-        fn.call(context, rs.readyState);
-      }, 0);
-    } else {
-      if (!rs._events[state]) rs._events[state] = [];
-      rs._events[state].push({ fn: fn, context: context });
-    }
-
-    return rs;
-  };
-}
-
-/**
- * RS (readyState) instance.
- *
- * @constructor
- * @api public
- */
-function RS() {
-  this.readyState = RS.UNKNOWN;
-  this._events = {};
-}
-
-/**
- * The environment can be in different states. The following states are
- * generated:
- *
- * - ALL:         The I don't really give a fuck state.
- * - UNKNOWN:     We got an unknown readyState we should start listening for events.
- * - LOADING:     Environment is currently loading.
- * - INTERACTIVE: Environment is ready for modification.
- * - COMPLETE:    All resources have been loaded.
- *
- * Please note that the order of the `states` string/array is of vital
- * importance as it's used in the readyState check.
- *
- * @type {Number}
- * @private
- */
-RS.states = 'ALL,UNKNOWN,LOADING,INTERACTIVE,COMPLETE'.split(',');
-
-for (var s = 0, state; s < RS.states.length; s++) {
-  state = RS.states[s];
-
-  RS[state] = RS.prototype[state] = s;
-  RS.prototype[state.toLowerCase()] = generate(state);
-}
-
-/**
- * A change in the environment has been detected so we need to change our
- * readyState and call assigned event listeners and those of the previous
- * states.
- *
- * @param {Number} state The new readyState that we detected.
- * @returns {RS}
- * @api private
- */
-RS.prototype.change = function change(state) {
-  state = this.clean(state, true);
-
-  var j
-    , name
-    , i = 0
-    , listener
-    , rs = this
-    , previously = rs.readyState;
-
-  if (previously >= state) return rs;
-
-  rs.readyState = state;
-
-  for (; i < RS.states.length; i++) {
-    if (i > state) break;
-    name = RS.states[i];
-
-    if (name in rs._events) {
-      for (j = 0; j < rs._events[name].length; j++) {
-        listener = rs._events[name][j];
-        listener.fn.call(listener.context || rs, previously);
-      }
-
-      delete rs._events[name];
-    }
-  }
-
-  return rs;
-};
-
-/**
- * Check if we're currently in a given readyState.
- *
- * @param {String|Number} state The required readyState.
- * @returns {Boolean} Indication if this state has been reached.
- * @api public
- */
-RS.prototype.is = function is(state) {
-  return this.readyState >= this.clean(state, true);
-};
-
-/**
- * Transform a state to a number or toUpperCase.
- *
- * @param {Mixed} state State to transform.
- * @param {Boolean} nr Change to number.
- * @returns {Mixed}
- * @api public
- */
-RS.prototype.clean = function transform(state, nr) {
-  var type = typeof state;
-
-  if (nr) return 'number' !== type
-  ? +RS[state.toUpperCase()] || 0
-  : state;
-
-  return ('number' === type ? RS.states[state] : state).toUpperCase();
-};
-
-/**
- * Removes all event listeners. Useful when you want to unload readystatechange
- * completely so that it won't react to any events anymore. See
- * https://github.com/unshiftio/readystate/issues/8
- *
- * @returns {Function} rs so that calls can be chained.
- * @api public
- */
-RS.prototype.removeAllListeners = function removeAllListeners() {
-  this._events = {};
-  return this;
-}
-
-//
-// Expose the module.
-//
-module.exports = new RS();
-
-},{}],65:[function(_dereq_,module,exports){
-/**
- * request-frame - requestAnimationFrame & cancelAnimationFrame polyfill for optimal cross-browser development.
- * @version v1.5.3
- * @license MIT
- * Copyright Julien Etienne 2015 All Rights Reserved.
- */
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global.requestFrame = factory());
-}(this, (function () { 'use strict';
-
-/**
- * @param  {String} type - request | cancel | native.
- * @return {Function} Timing function.
- */
-function requestFrame(type) {
-    // The only vendor prefixes required.
-    var vendors = ['moz', 'webkit'];
-
-    // Disassembled timing function abbreviations.
-    var aF = 'AnimationFrame';
-    var rqAF = 'Request' + aF;
-
-    // Checks for firefox 4 - 10 function pair mismatch.
-    var mozRAF = window.mozRequestAnimationFrame;
-    var mozCAF = window.mozCancelAnimationFrame;
-    var hasMozMismatch = mozRAF && !mozCAF;
-
-    // Final assigned functions.
-    var assignedRequestAnimationFrame;
-    var assignedCancelAnimationFrame;
-
-    // Initial time of the timing lapse.
-    var previousTime = 0;
-
-    var requestFrameMain;
-
-    // Date.now polyfill, mainly for legacy IE versions.
-    if (!Date.now) {
-        Date.now = function () {
-            return new Date().getTime();
-        };
-    }
-
-    /**
-     * hasIOS6RequestAnimationFrameBug.
-     * @See {@Link https://gist.github.com/julienetie/86ac394ec41f1271ff0a}
-     * - for Commentary.
-     * @Copyright 2015 - Julien Etienne. 
-     * @License: MIT.
-     */
-    function hasIOS6RequestAnimationFrameBug() {
-        var webkitRAF = window.webkitRequestAnimationFrame;
-        var rAF = window.requestAnimationFrame;
-
-        // CSS/ Device with max for iOS6 Devices.
-        var hasMobileDeviceWidth = screen.width <= 768 ? true : false;
-
-        // Only supports webkit prefixed requestAnimtionFrane.
-        var requiresWebkitprefix = !(webkitRAF && rAF);
-
-        // iOS6 webkit browsers don't support performance now.
-        var hasNoNavigationTiming = window.performance ? false : true;
-
-        var iOS6Notice = 'setTimeout is being used as a substitiue for \n            requestAnimationFrame due to a bug within iOS 6 builds';
-
-        var hasIOS6Bug = requiresWebkitprefix && hasMobileDeviceWidth && hasNoNavigationTiming;
-
-        var bugCheckresults = function bugCheckresults(timingFnA, timingFnB, notice) {
-            if (timingFnA || timingFnB) {
-                console.warn(notice);
-                return true;
-            } else {
-                return false;
-            }
-        };
-
-        var displayResults = function displayResults(hasBug, hasBugNotice, webkitFn, nativeFn) {
-            if (hasBug) {
-                return bugCheckresults(webkitFn, nativeFn, hasBugNotice);
-            } else {
-                return false;
-            }
-        };
-
-        return displayResults(hasIOS6Bug, iOS6Notice, webkitRAF, rAF);
-    }
-
-    /**
-     * Native clearTimeout function.
-     * @return {Function}
-     */
-    function clearTimeoutWithId(id) {
-        clearTimeout(id);
-    }
-
-    /**
-     * Based on a polyfill by Erik, introduced by Paul Irish & 
-     * further improved by Darius Bacon.
-     * @see  {@link http://www.paulirish.com/2011/
-     * requestanimationframe-for-smart-animating}
-     * @see  {@link https://github.com/darius/requestAnimationFrame/blob/
-     * master/requestAnimationFrame.js}
-     * @callback {Number} Timestamp.
-     * @return {Function} setTimeout Function.
-     */
-    function setTimeoutWithTimestamp(callback) {
-        var immediateTime = Date.now();
-        var lapsedTime = Math.max(previousTime + 16, immediateTime);
-        return setTimeout(function () {
-            callback(previousTime = lapsedTime);
-        }, lapsedTime - immediateTime);
-    }
-
-    /**
-     * Queries the native function, prefixed function 
-     * or use the setTimeoutWithTimestamp function.
-     * @return {Function}
-     */
-    function queryRequestAnimationFrame() {
-        if (Array.prototype.filter) {
-            assignedRequestAnimationFrame = window['request' + aF] || window[vendors.filter(function (vendor) {
-                if (window[vendor + rqAF] !== undefined) return vendor;
-            }) + rqAF] || setTimeoutWithTimestamp;
-        } else {
-            return setTimeoutWithTimestamp;
-        }
-        if (!hasIOS6RequestAnimationFrameBug()) {
-            return assignedRequestAnimationFrame;
-        } else {
-            return setTimeoutWithTimestamp;
-        }
-    }
-
-    /**
-     * Queries the native function, prefixed function 
-     * or use the clearTimeoutWithId function.
-     * @return {Function}
-     */
-    function queryCancelAnimationFrame() {
-        var cancellationNames = [];
-        if (Array.prototype.map) {
-            vendors.map(function (vendor) {
-                return ['Cancel', 'CancelRequest'].map(function (cancellationNamePrefix) {
-                    cancellationNames.push(vendor + cancellationNamePrefix + aF);
-                });
-            });
-        } else {
-            return clearTimeoutWithId;
-        }
-
-        /**
-         * Checks for the prefixed cancelAnimationFrame implementation.
-         * @param  {Array} prefixedNames - An array of the prefixed names. 
-         * @param  {Number} i - Iteration start point.
-         * @return {Function} prefixed cancelAnimationFrame function.
-         */
-        function prefixedCancelAnimationFrame(prefixedNames, i) {
-            var cancellationFunction = void 0;
-            for (; i < prefixedNames.length; i++) {
-                if (window[prefixedNames[i]]) {
-                    cancellationFunction = window[prefixedNames[i]];
-                    break;
-                }
-            }
-            return cancellationFunction;
-        }
-
-        // Use truthly function
-        assignedCancelAnimationFrame = window['cancel' + aF] || prefixedCancelAnimationFrame(cancellationNames, 0) || clearTimeoutWithId;
-
-        // Check for iOS 6 bug
-        if (!hasIOS6RequestAnimationFrameBug()) {
-            return assignedCancelAnimationFrame;
-        } else {
-            return clearTimeoutWithId;
-        }
-    }
-
-    function getRequestFn() {
-        if (hasMozMismatch) {
-            return setTimeoutWithTimestamp;
-        } else {
-            return queryRequestAnimationFrame();
-        }
-    }
-
-    function getCancelFn() {
-        return queryCancelAnimationFrame();
-    }
-
-    function setNativeFn() {
-        if (hasMozMismatch) {
-            window.requestAnimationFrame = setTimeoutWithTimestamp;
-            window.cancelAnimationFrame = clearTimeoutWithId;
-        } else {
-            window.requestAnimationFrame = queryRequestAnimationFrame();
-            window.cancelAnimationFrame = queryCancelAnimationFrame();
-        }
-    }
-
-    /**
-     * The type value "request" singles out firefox 4 - 10 and 
-     * assigns the setTimeout function if plausible.
-     */
-
-    switch (type) {
-        case 'request':
-        case '':
-            requestFrameMain = getRequestFn();
-            break;
-
-        case 'cancel':
-            requestFrameMain = getCancelFn();
-            break;
-
-        case 'native':
-            setNativeFn();
-            break;
-        default:
-            throw new Error('RequestFrame parameter is not a type.');
-    }
-    return requestFrameMain;
-}
-
-return requestFrame;
-
-})));
-
-},{}],66:[function(_dereq_,module,exports){
-/* eslint-disable node/no-deprecated-api */
-var buffer = _dereq_('buffer')
-var Buffer = buffer.Buffer
-
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-
-},{"buffer":8}],67:[function(_dereq_,module,exports){
-var hasProp = Object.prototype.hasOwnProperty;
-
-function throwsMessage(err) {
-	return '[Throws: ' + (err ? err.message : '?') + ']';
-}
-
-function safeGetValueFromPropertyOnObject(obj, property) {
-	if (hasProp.call(obj, property)) {
-		try {
-			return obj[property];
-		}
-		catch (err) {
-			return throwsMessage(err);
-		}
-	}
-
-	return obj[property];
-}
-
-function ensureProperties(obj) {
-	var seen = [ ]; // store references to objects we have seen before
-
-	function visit(obj) {
-		if (obj === null || typeof obj !== 'object') {
-			return obj;
-		}
-
-		if (seen.indexOf(obj) !== -1) {
-			return '[Circular]';
-		}
-		seen.push(obj);
-
-		if (typeof obj.toJSON === 'function') {
-			try {
-				var fResult = visit(obj.toJSON());
-				seen.pop();
-				return fResult;
-			} catch(err) {
-				return throwsMessage(err);
-			}
-		}
-
-		if (Array.isArray(obj)) {
-			var aResult = obj.map(visit);
-			seen.pop();
-			return aResult;
-		}
-
-		var result = Object.keys(obj).reduce(function(result, prop) {
-			// prevent faulty defined getter properties
-			result[prop] = visit(safeGetValueFromPropertyOnObject(obj, prop));
-			return result;
-		}, {});
-		seen.pop();
-		return result;
-	};
-
-	return visit(obj);
-}
-
-module.exports = function(data, replacer, space) {
-	return JSON.stringify(ensureProperties(data), replacer, space);
-}
-
-module.exports.ensureProperties = ensureProperties;
-
-},{}],68:[function(_dereq_,module,exports){
-module.exports = shift
-
-function shift (stream) {
-  var rs = stream._readableState
-  if (!rs) return null
-  return rs.objectMode ? stream.read() : stream.read(getStateLength(rs))
-}
-
-function getStateLength (state) {
-  if (state.buffer.length) {
-    // Since node 6.3.0 state.buffer is a BufferList not an array
-    if (state.buffer.head) {
-      return state.buffer.head.data.length
-    }
-
-    return state.buffer[0].length
-  }
-
-  return state.length
-}
-
-},{}],69:[function(_dereq_,module,exports){
+},{"safe-buffer":65}],69:[function(_dereq_,module,exports){
 function Agent() {
   this._defaults = [];
 }
 
 ["use", "on", "once", "set", "query", "type", "accept", "auth", "withCredentials", "sortQuery", "retry", "ok", "redirects",
- "timeout", "buffer", "serialize", "parse", "ca", "key", "pfx", "cert"].forEach(function(fn) {
+ "timeout", "buffer", "serialize", "parse", "ca", "key", "pfx", "cert"].forEach(fn => {
   /** Default setting for all requests from this agent */
-  Agent.prototype[fn] = function(/*varargs*/) {
-    this._defaults.push({fn:fn, arguments:arguments});
+  Agent.prototype[fn] = function(...args) {
+    this._defaults.push({fn, args});
     return this;
   }
 });
 
 Agent.prototype._setDefaults = function(req) {
-    this._defaults.forEach(function(def) {
-      req[def.fn].apply(req, def.arguments);
+    this._defaults.forEach(def => {
+      req[def.fn].apply(req, def.args);
     });
 };
 
@@ -10376,7 +10381,7 @@ module.exports = Agent;
  * Root reference for iframes.
  */
 
-var root;
+let root;
 if (typeof window !== 'undefined') { // Browser window
   root = window;
 } else if (typeof self !== 'undefined') { // Web Worker
@@ -10386,11 +10391,11 @@ if (typeof window !== 'undefined') { // Browser window
   root = this;
 }
 
-var Emitter = _dereq_('component-emitter');
-var RequestBase = _dereq_('./request-base');
-var isObject = _dereq_('./is-object');
-var ResponseBase = _dereq_('./response-base');
-var Agent = _dereq_('./agent-base');
+const Emitter = _dereq_('component-emitter');
+const RequestBase = _dereq_('./request-base');
+const isObject = _dereq_('./is-object');
+const ResponseBase = _dereq_('./response-base');
+const Agent = _dereq_('./agent-base');
 
 /**
  * Noop.
@@ -10402,7 +10407,7 @@ function noop(){};
  * Expose `request`.
  */
 
-var request = exports = module.exports = function(method, url) {
+const request = exports = module.exports = function(method, url) {
   // callback
   if ('function' == typeof url) {
     return new exports.Request('GET', method).end(url);
@@ -10414,7 +10419,7 @@ var request = exports = module.exports = function(method, url) {
   }
 
   return new exports.Request(method, url);
-}
+};
 
 exports.Request = Request;
 
@@ -10422,7 +10427,7 @@ exports.Request = Request;
  * Determine XHR.
  */
 
-request.getXHR = function () {
+request.getXHR = () => {
   if (root.XMLHttpRequest
       && (!root.location || 'file:' != root.location.protocol
           || !root.ActiveXObject)) {
@@ -10444,9 +10449,9 @@ request.getXHR = function () {
  * @api private
  */
 
-var trim = ''.trim
-  ? function(s) { return s.trim(); }
-  : function(s) { return s.replace(/(^\s*|\s*$)/g, ''); };
+const trim = ''.trim
+  ? s => s.trim()
+  : s => s.replace(/(^\s*|\s*$)/g, '');
 
 /**
  * Serialize the given `obj`.
@@ -10458,8 +10463,8 @@ var trim = ''.trim
 
 function serialize(obj) {
   if (!isObject(obj)) return obj;
-  var pairs = [];
-  for (var key in obj) {
+  const pairs = [];
+  for (const key in obj) {
     pushEncodedKeyValuePair(pairs, key, obj[key]);
   }
   return pairs.join('&');
@@ -10477,12 +10482,12 @@ function serialize(obj) {
 function pushEncodedKeyValuePair(pairs, key, val) {
   if (val != null) {
     if (Array.isArray(val)) {
-      val.forEach(function(v) {
+      val.forEach(v => {
         pushEncodedKeyValuePair(pairs, key, v);
       });
     } else if (isObject(val)) {
-      for(var subkey in val) {
-        pushEncodedKeyValuePair(pairs, key + '[' + subkey + ']', val[subkey]);
+      for(const subkey in val) {
+        pushEncodedKeyValuePair(pairs, `${key}[${subkey}]`, val[subkey]);
       }
     } else {
       pairs.push(encodeURIComponent(key)
@@ -10508,12 +10513,12 @@ request.serializeObject = serialize;
   */
 
 function parseString(str) {
-  var obj = {};
-  var pairs = str.split('&');
-  var pair;
-  var pos;
+  const obj = {};
+  const pairs = str.split('&');
+  let pair;
+  let pos;
 
-  for (var i = 0, len = pairs.length; i < len; ++i) {
+  for (let i = 0, len = pairs.length; i < len; ++i) {
     pair = pairs[i];
     pos = pair.indexOf('=');
     if (pos == -1) {
@@ -10587,14 +10592,14 @@ request.parse = {
  */
 
 function parseHeader(str) {
-  var lines = str.split(/\r?\n/);
-  var fields = {};
-  var index;
-  var line;
-  var field;
-  var val;
+  const lines = str.split(/\r?\n/);
+  const fields = {};
+  let index;
+  let line;
+  let field;
+  let val;
 
-  for (var i = 0, len = lines.length; i < len; ++i) {
+  for (let i = 0, len = lines.length; i < len; ++i) {
     line = lines[i];
     index = line.indexOf(':');
     if (index === -1) { // could be empty line, just skip it
@@ -10676,7 +10681,7 @@ function Response(req) {
      ? this.xhr.responseText
      : null;
   this.statusText = this.req.xhr.statusText;
-  var status = this.xhr.status;
+  let status = this.xhr.status;
   // handle IE9 bug: http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
   if (status === 1223) {
     status = 204;
@@ -10712,7 +10717,7 @@ ResponseBase(Response.prototype);
  */
 
 Response.prototype._parseBody = function(str) {
-  var parse = request.parse[this.type];
+  let parse = request.parse[this.type];
   if (this.req._parser) {
     return this.req._parser(this, str);
   }
@@ -10732,12 +10737,12 @@ Response.prototype._parseBody = function(str) {
  */
 
 Response.prototype.toError = function(){
-  var req = this.req;
-  var method = req.method;
-  var url = req.url;
+  const req = this.req;
+  const method = req.method;
+  const url = req.url;
 
-  var msg = 'cannot ' + method + ' ' + url + ' (' + this.status + ')';
-  var err = new Error(msg);
+  const msg = `cannot ${method} ${url} (${this.status})`;
+  const err = new Error(msg);
   err.status = this.status;
   err.method = method;
   err.url = url;
@@ -10760,15 +10765,15 @@ request.Response = Response;
  */
 
 function Request(method, url) {
-  var self = this;
+  const self = this;
   this._query = this._query || [];
   this.method = method;
   this.url = url;
   this.header = {}; // preserves header name case
   this._header = {}; // coerces header names to lowercase
-  this.on('end', function(){
-    var err = null;
-    var res = null;
+  this.on('end', () => {
+    let err = null;
+    let res = null;
 
     try {
       res = new Response(self);
@@ -10793,7 +10798,7 @@ function Request(method, url) {
 
     self.emit('response', res);
 
-    var new_err;
+    let new_err;
     try {
       if (!self._isResponseOK(res)) {
         new_err = new Error(res.statusText || 'Unsuccessful HTTP response');
@@ -10895,7 +10900,7 @@ Request.prototype.auth = function(user, pass, options){
     };
   }
 
-  var encoder = function(string) {
+  const encoder = string => {
     if ('function' === typeof btoa) {
       return btoa(string);
     }
@@ -10974,7 +10979,7 @@ Request.prototype.callback = function(err, res){
     return this._retry();
   }
 
-  var fn = this._callback;
+  const fn = this._callback;
   this.clearTimeout();
 
   if (err) {
@@ -10992,7 +10997,7 @@ Request.prototype.callback = function(err, res){
  */
 
 Request.prototype.crossDomainError = function(){
-  var err = new Error('Request has been terminated\nPossible causes: the network is offline, Origin is not allowed by Access-Control-Allow-Origin, the page is being unloaded, etc.');
+  const err = new Error('Request has been terminated\nPossible causes: the network is offline, Origin is not allowed by Access-Control-Allow-Origin, the page is being unloaded, etc.');
   err.crossDomain = true;
 
   err.status = this.status;
@@ -11009,7 +11014,7 @@ Request.prototype.buffer = Request.prototype.ca = Request.prototype.agent = func
 };
 
 // This throws, because it can't send/receive data as expected
-Request.prototype.pipe = Request.prototype.write = function(){
+Request.prototype.pipe = Request.prototype.write = () => {
   throw Error("Streaming is not supported in browser version of superagent");
 };
 
@@ -11047,19 +11052,21 @@ Request.prototype.end = function(fn){
   // querystring
   this._finalizeQueryString();
 
-  return this._end();
+  this._end();
 };
 
 Request.prototype._end = function() {
-  var self = this;
-  var xhr = (this.xhr = request.getXHR());
-  var data = this._formData || this._data;
+  if (this._aborted) return this.callback(Error("The request has been aborted even before .end() was called"));
+
+  const self = this;
+  const xhr = (this.xhr = request.getXHR());
+  let data = this._formData || this._data;
 
   this._setTimeouts();
 
   // state change
-  xhr.onreadystatechange = function(){
-    var readyState = xhr.readyState;
+  xhr.onreadystatechange = () => {
+    const readyState = xhr.readyState;
     if (readyState >= 2 && self._responseTimeoutTimer) {
       clearTimeout(self._responseTimeoutTimer);
     }
@@ -11069,7 +11076,7 @@ Request.prototype._end = function() {
 
     // In IE9, reads to any property (e.g. status) off of an aborted XHR will
     // result in the error "Could not complete the operation due to error c00c023f"
-    var status;
+    let status;
     try { status = xhr.status } catch(e) { status = 0; }
 
     if (!status) {
@@ -11080,7 +11087,7 @@ Request.prototype._end = function() {
   };
 
   // progress
-  var handleProgress = function(direction, e) {
+  const handleProgress = (direction, e) => {
     if (e.total > 0) {
       e.percent = e.loaded / e.total * 100;
     }
@@ -11118,8 +11125,8 @@ Request.prototype._end = function() {
   // body
   if (!this._formData && 'GET' != this.method && 'HEAD' != this.method && 'string' != typeof data && !this._isHost(data)) {
     // serialize stuff
-    var contentType = this._header['content-type'];
-    var serialize = this._serializer || request.serialize[contentType ? contentType.split(';')[0] : ''];
+    const contentType = this._header['content-type'];
+    let serialize = this._serializer || request.serialize[contentType ? contentType.split(';')[0] : ''];
     if (!serialize && isJSON(contentType)) {
       serialize = request.serialize['application/json'];
     }
@@ -11127,7 +11134,7 @@ Request.prototype._end = function() {
   }
 
   // set header fields
-  for (var field in this.header) {
+  for (const field in this.header) {
     if (null == this.header[field]) continue;
 
     if (this.header.hasOwnProperty(field))
@@ -11144,16 +11151,13 @@ Request.prototype._end = function() {
   // IE11 xhr.send(undefined) sends 'undefined' string as POST payload (instead of nothing)
   // We need null here if data is undefined
   xhr.send(typeof data !== 'undefined' ? data : null);
-  return this;
 };
 
-request.agent = function() {
-  return new Agent();
-};
+request.agent = () => new Agent();
 
-["GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"].forEach(function(method) {
+["GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"].forEach(method => {
   Agent.prototype[method.toLowerCase()] = function(url, fn) {
-    var req = new request.Request(method, url);
+    const req = new request.Request(method, url);
     this._setDefaults(req);
     if (fn) {
       req.end(fn);
@@ -11174,8 +11178,8 @@ Agent.prototype.del = Agent.prototype['delete'];
  * @api public
  */
 
-request.get = function(url, data, fn) {
-  var req = request('GET', url);
+request.get = (url, data, fn) => {
+  const req = request('GET', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.query(data);
   if (fn) req.end(fn);
@@ -11192,8 +11196,8 @@ request.get = function(url, data, fn) {
  * @api public
  */
 
-request.head = function(url, data, fn) {
-  var req = request('HEAD', url);
+request.head = (url, data, fn) => {
+  const req = request('HEAD', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.query(data);
   if (fn) req.end(fn);
@@ -11210,8 +11214,8 @@ request.head = function(url, data, fn) {
  * @api public
  */
 
-request.options = function(url, data, fn) {
-  var req = request('OPTIONS', url);
+request.options = (url, data, fn) => {
+  const req = request('OPTIONS', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
@@ -11229,7 +11233,7 @@ request.options = function(url, data, fn) {
  */
 
 function del(url, data, fn) {
-  var req = request('DELETE', url);
+  const req = request('DELETE', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
@@ -11249,8 +11253,8 @@ request['delete'] = del;
  * @api public
  */
 
-request.patch = function(url, data, fn) {
-  var req = request('PATCH', url);
+request.patch = (url, data, fn) => {
+  const req = request('PATCH', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
@@ -11267,8 +11271,8 @@ request.patch = function(url, data, fn) {
  * @api public
  */
 
-request.post = function(url, data, fn) {
-  var req = request('POST', url);
+request.post = (url, data, fn) => {
+  const req = request('POST', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
@@ -11285,8 +11289,8 @@ request.post = function(url, data, fn) {
  * @api public
  */
 
-request.put = function(url, data, fn) {
-  var req = request('PUT', url);
+request.put = (url, data, fn) => {
+  const req = request('PUT', url);
   if ('function' == typeof data) (fn = data), (data = null);
   if (data) req.send(data);
   if (fn) req.end(fn);
@@ -11316,7 +11320,7 @@ module.exports = isObject;
 /**
  * Module of mixed-in functions shared between node and client code
  */
-var isObject = _dereq_('./is-object');
+const isObject = _dereq_('./is-object');
 
 /**
  * Expose `RequestBase`.
@@ -11343,7 +11347,7 @@ function RequestBase(obj) {
  */
 
 function mixin(obj) {
-  for (var key in RequestBase.prototype) {
+  for (const key in RequestBase.prototype) {
     obj[key] = RequestBase.prototype[key];
   }
   return obj;
@@ -11435,7 +11439,7 @@ RequestBase.prototype.timeout = function timeout(options){
     return this;
   }
 
-  for(var option in options) {
+  for(const option in options) {
     switch(option) {
       case 'deadline':
         this._timeout = options.deadline;
@@ -11471,7 +11475,7 @@ RequestBase.prototype.retry = function retry(count, fn){
   return this;
 };
 
-var ERROR_CODES = [
+const ERROR_CODES = [
   'ECONNRESET',
   'ETIMEDOUT',
   'EADDRINFO',
@@ -11492,7 +11496,7 @@ RequestBase.prototype._shouldRetry = function(err, res) {
   }
   if (this._retryCallback) {
     try {
-      var override = this._retryCallback(err, res);
+      const override = this._retryCallback(err, res);
       if (override === true) return true;
       if (override === false) return false;
       // undefined falls back to defaults
@@ -11543,12 +11547,21 @@ RequestBase.prototype._retry = function() {
 
 RequestBase.prototype.then = function then(resolve, reject) {
   if (!this._fullfilledPromise) {
-    var self = this;
+    const self = this;
     if (this._endCalled) {
       console.warn("Warning: superagent request was sent twice, because both .end() and .then() were called. Never call .end() if you use promises");
     }
-    this._fullfilledPromise = new Promise(function(innerResolve, innerReject) {
-      self.end(function(err, res) {
+    this._fullfilledPromise = new Promise((innerResolve, innerReject) => {
+      self.on('error', innerReject);
+      self.on('abort', () => {
+        const err = new Error('Aborted');
+        err.code = "ABORTED";
+        err.status = this.status;
+        err.method = this.method;
+        err.url = this.url;
+        innerReject(err);
+      });
+      self.end((err, res) => {
         if (err) innerReject(err);
         else innerResolve(res);
       });
@@ -11638,7 +11651,7 @@ RequestBase.prototype.getHeader = RequestBase.prototype.get;
 
 RequestBase.prototype.set = function(field, val){
   if (isObject(field)) {
-    for (var key in field) {
+    for (const key in field) {
       this.set(key, field[key]);
     }
     return this;
@@ -11692,18 +11705,18 @@ RequestBase.prototype.field = function(name, val) {
   }
 
   if (this._data) {
-    console.error(".field() can't be used if .send() is used. Please use only .send() or only .field() & .attach()");
+    throw new Error(".field() can't be used if .send() is used. Please use only .send() or only .field() & .attach()");
   }
 
   if (isObject(name)) {
-    for (var key in name) {
+    for (const key in name) {
       this.field(key, name[key]);
     }
     return this;
   }
 
   if (Array.isArray(val)) {
-    for (var i in val) {
+    for (const i in val) {
       this.field(name, val[i]);
     }
     return this;
@@ -11741,7 +11754,7 @@ RequestBase.prototype.abort = function(){
 RequestBase.prototype._auth = function(user, pass, options, base64Encoder) {
   switch (options.type) {
     case 'basic':
-      this.set('Authorization', 'Basic ' + base64Encoder(user + ':' + pass));
+      this.set('Authorization', `Basic ${base64Encoder(`${user}:${pass}`)}`);
       break;
 
     case 'auto':
@@ -11750,7 +11763,7 @@ RequestBase.prototype._auth = function(user, pass, options, base64Encoder) {
       break;
 
     case 'bearer': // usage would be .auth(accessToken, { type: 'bearer' })
-      this.set('Authorization', 'Bearer ' + user);
+      this.set('Authorization', `Bearer ${user}`);
       break;
   }
   return this;
@@ -11861,11 +11874,11 @@ RequestBase.prototype.toJSON = function() {
  */
 
 RequestBase.prototype.send = function(data){
-  var isObj = isObject(data);
-  var type = this._header['content-type'];
+  const isObj = isObject(data);
+  let type = this._header['content-type'];
 
   if (this._formData) {
-    console.error(".send() can't be used if .attach() or .field() is used. Please use only .send() or only .field() & .attach()");
+    throw new Error(".send() can't be used if .attach() or .field() is used. Please use only .send() or only .field() & .attach()");
   }
 
   if (isObj && !this._data) {
@@ -11880,7 +11893,7 @@ RequestBase.prototype.send = function(data){
 
   // merge
   if (isObj && isObject(this._data)) {
-    for (var key in data) {
+    for (const key in data) {
       this._data[key] = data[key];
     }
   } else if ('string' == typeof data) {
@@ -11889,7 +11902,7 @@ RequestBase.prototype.send = function(data){
     type = this._header['content-type'];
     if ('application/x-www-form-urlencoded' == type) {
       this._data = this._data
-        ? this._data + '&' + data
+        ? `${this._data}&${data}`
         : data;
     } else {
       this._data = (this._data || '') + data;
@@ -11947,16 +11960,16 @@ RequestBase.prototype.sortQuery = function(sort) {
  * @api private
  */
 RequestBase.prototype._finalizeQueryString = function(){
-  var query = this._query.join('&');
+  const query = this._query.join('&');
   if (query) {
     this.url += (this.url.indexOf('?') >= 0 ? '&' : '?') + query;
   }
   this._query.length = 0; // Makes the call idempotent
 
   if (this._sort) {
-    var index = this.url.indexOf('?');
+    const index = this.url.indexOf('?');
     if (index >= 0) {
-      var queryArr = this.url.substring(index + 1).split('&');
+      const queryArr = this.url.substring(index + 1).split('&');
       if ('function' === typeof this._sort) {
         queryArr.sort(this._sort);
       } else {
@@ -11968,7 +11981,7 @@ RequestBase.prototype._finalizeQueryString = function(){
 };
 
 // For backwards compat only
-RequestBase.prototype._appendQueryString = function() {console.trace("Unsupported");}
+RequestBase.prototype._appendQueryString = () => {console.trace("Unsupported");}
 
 /**
  * Invoke callback with timeout error.
@@ -11980,7 +11993,7 @@ RequestBase.prototype._timeoutError = function(reason, timeout, errno){
   if (this._aborted) {
     return;
   }
-  var err = new Error(reason + timeout + 'ms exceeded');
+  const err = new Error(`${reason + timeout}ms exceeded`);
   err.timeout = timeout;
   err.code = 'ECONNABORTED';
   err.errno = errno;
@@ -11990,17 +12003,17 @@ RequestBase.prototype._timeoutError = function(reason, timeout, errno){
 };
 
 RequestBase.prototype._setTimeouts = function() {
-  var self = this;
+  const self = this;
 
   // deadline
   if (this._timeout && !this._timer) {
-    this._timer = setTimeout(function(){
+    this._timer = setTimeout(() => {
       self._timeoutError('Timeout of ', self._timeout, 'ETIME');
     }, this._timeout);
   }
   // response timeout
   if (this._responseTimeout && !this._responseTimeoutTimer) {
-    this._responseTimeoutTimer = setTimeout(function(){
+    this._responseTimeoutTimer = setTimeout(() => {
       self._timeoutError('Response timeout of ', self._responseTimeout, 'ETIMEDOUT');
     }, this._responseTimeout);
   }
@@ -12013,7 +12026,7 @@ RequestBase.prototype._setTimeouts = function() {
  * Module dependencies.
  */
 
-var utils = _dereq_('./utils');
+const utils = _dereq_('./utils');
 
 /**
  * Expose `ResponseBase`.
@@ -12040,7 +12053,7 @@ function ResponseBase(obj) {
  */
 
 function mixin(obj) {
-  for (var key in ResponseBase.prototype) {
+  for (const key in ResponseBase.prototype) {
     obj[key] = ResponseBase.prototype[key];
   }
   return obj;
@@ -12075,12 +12088,12 @@ ResponseBase.prototype._setHeaderProperties = function(header){
     // TODO: make this a util
 
     // content-type
-    var ct = header['content-type'] || '';
+    const ct = header['content-type'] || '';
     this.type = utils.type(ct);
 
     // params
-    var params = utils.params(ct);
-    for (var key in params) this[key] = params[key];
+    const params = utils.params(ct);
+    for (const key in params) this[key] = params[key];
 
     this.links = {};
 
@@ -12116,7 +12129,7 @@ ResponseBase.prototype._setHeaderProperties = function(header){
  */
 
 ResponseBase.prototype._setStatusProperties = function(status){
-    var type = status / 100 | 0;
+    const type = status / 100 | 0;
 
     // status / class
     this.status = this.statusCode = status;
@@ -12155,9 +12168,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
  * @api private
  */
 
-exports.type = function(str){
-  return str.split(/ *; */).shift();
-};
+exports.type = str => str.split(/ *; */).shift();
 
 /**
  * Return header field parameters.
@@ -12167,16 +12178,14 @@ exports.type = function(str){
  * @api private
  */
 
-exports.params = function(str){
-  return str.split(/ *; */).reduce(function(obj, str){
-    var parts = str.split(/ *= */);
-    var key = parts.shift();
-    var val = parts.shift();
+exports.params = str => str.split(/ *; */).reduce((obj, str) => {
+  const parts = str.split(/ *= */);
+  const key = parts.shift();
+  const val = parts.shift();
 
-    if (key && val) obj[key] = val;
-    return obj;
-  }, {});
-};
+  if (key && val) obj[key] = val;
+  return obj;
+}, {});
 
 /**
  * Parse Link header fields.
@@ -12186,15 +12195,13 @@ exports.params = function(str){
  * @api private
  */
 
-exports.parseLinks = function(str){
-  return str.split(/ *, */).reduce(function(obj, str){
-    var parts = str.split(/ *; */);
-    var url = parts[0].slice(1, -1);
-    var rel = parts[1].split(/ *= */)[1].slice(1, -1);
-    obj[rel] = url;
-    return obj;
-  }, {});
-};
+exports.parseLinks = str => str.split(/ *, */).reduce((obj, str) => {
+  const parts = str.split(/ *; */);
+  const url = parts[0].slice(1, -1);
+  const rel = parts[1].split(/ *= */)[1].slice(1, -1);
+  obj[rel] = url;
+  return obj;
+}, {});
 
 /**
  * Strip content related fields from `header`.
@@ -12204,7 +12211,7 @@ exports.parseLinks = function(str){
  * @api private
  */
 
-exports.cleanHeader = function(header, changesOrigin){
+exports.cleanHeader = (header, changesOrigin) => {
   delete header['content-type'];
   delete header['content-length'];
   delete header['transfer-encoding'];
@@ -14225,7 +14232,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":51,"duplexify":21,"readable-stream":62,"safe-buffer":66,"ws":83}],83:[function(_dereq_,module,exports){
+},{"_process":51,"duplexify":21,"readable-stream":61,"safe-buffer":65,"ws":83}],83:[function(_dereq_,module,exports){
 
 var ws = null
 
@@ -14277,7 +14284,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14324,11 +14331,11 @@ module.exports={
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "2.2.1",
+    "deepmerge": "3.0.0",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
-    "element-closest": "2.0.2",
+    "element-closest": "3.0.0",
     "filesize": "3.6.1",
     "get-form-data": "2.0.0",
     "hidden": "1.1.1",
@@ -14342,21 +14349,21 @@ module.exports={
     "readystate": "0.3.0",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
-    "superagent": "3.8.3",
+    "superagent": "4.1.0",
     "ua-parser-js": "0.7.19",
     "websocket-stream": "5.1.2"
   },
   "devDependencies": {
-    "@babel/core": "7.2.0",
-    "@babel/polyfill": "7.0.0",
-    "@babel/preset-env": "7.2.0",
+    "@babel/core": "7.2.2",
+    "@babel/polyfill": "7.2.5",
+    "@babel/preset-env": "7.2.3",
     "babel-eslint": "10.0.1",
     "babelify": "10.0.0",
     "body-parser": "1.18.3",
     "browserify": "16.2.3",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
-    "eslint": "5.10.0",
+    "eslint": "5.11.1",
     "fancy-log": "1.3.3",
     "glob": "7.1.3",
     "gulp": "3.9.1",
@@ -14383,9 +14390,9 @@ module.exports={
     "ssl-root-cas": "1.2.5",
     "standard": "12.0.1",
     "tap-summary": "4.0.0",
-    "tape": "4.9.1",
+    "tape": "4.9.2",
     "tape-catch": "1.0.6",
-    "tape-run": "4.0.0",
+    "tape-run": "5.0.0",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.0"
@@ -14618,7 +14625,7 @@ VideomailClient.events = _events.default;
 var _default = VideomailClient;
 exports.default = _default;
 
-},{"./constants":87,"./events":88,"./options":89,"./resource":90,"./util/browser":93,"./util/collectLogger":94,"./util/eventEmitter":95,"./wrappers/container":102,"./wrappers/optionsWrapper":105,"./wrappers/visuals/replay":114,"deepmerge":16,"readystate":63,"util":80}],87:[function(_dereq_,module,exports){
+},{"./constants":87,"./events":88,"./options":89,"./resource":90,"./util/browser":93,"./util/collectLogger":94,"./util/eventEmitter":95,"./wrappers/container":102,"./wrappers/optionsWrapper":105,"./wrappers/visuals/replay":114,"deepmerge":16,"readystate":62,"util":80}],87:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15840,7 +15847,7 @@ function _default(anything, options) {
   }
 }
 
-},{"safe-json-stringify":67}],99:[function(_dereq_,module,exports){
+},{"safe-json-stringify":66}],99:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15905,7 +15912,7 @@ function _default() {
   }
 }
 
-},{"classlist.js":11,"element-closest":22,"request-frame":65}],100:[function(_dereq_,module,exports){
+},{"classlist.js":11,"element-closest":22,"request-frame":64}],100:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20343,7 +20350,7 @@ var _default = Recorder;
 exports.default = _default;
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"./../../constants":87,"./../../events":88,"./../../util/browser":93,"./../../util/eventEmitter":95,"./../../util/humanize":96,"./../../util/pretty":98,"./../../util/videomailError":100,"./userMedia":115,"animitter":2,"buffer":8,"canvas-to-buffer":9,"hidden":31,"hyperscript":33,"safe-json-stringify":67,"util":80,"websocket-stream":82}],114:[function(_dereq_,module,exports){
+},{"./../../constants":87,"./../../events":88,"./../../util/browser":93,"./../../util/eventEmitter":95,"./../../util/humanize":96,"./../../util/pretty":98,"./../../util/videomailError":100,"./userMedia":115,"animitter":2,"buffer":8,"canvas-to-buffer":9,"hidden":31,"hyperscript":33,"safe-json-stringify":66,"util":80,"websocket-stream":82}],114:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21150,7 +21157,7 @@ function _default(recorder, options) {
   };
 }
 
-},{"./../../events":88,"./../../util/audioRecorder":92,"./../../util/browser":93,"./../../util/eventEmitter":95,"./../../util/mediaEvents":97,"./../../util/pretty":98,"./../../util/videomailError":100,"hyperscript":33,"safe-json-stringify":67}],"videomail-client":[function(_dereq_,module,exports){
+},{"./../../events":88,"./../../util/audioRecorder":92,"./../../util/browser":93,"./../../util/eventEmitter":95,"./../../util/mediaEvents":97,"./../../util/pretty":98,"./../../util/videomailError":100,"hyperscript":33,"safe-json-stringify":66}],"videomail-client":[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
