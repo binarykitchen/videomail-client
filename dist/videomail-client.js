@@ -4715,9 +4715,9 @@ function functionBindPolyfill(context) {
 /**
  * filesize
  *
- * @copyright 2018 Jason Mulligan <jason.mulligan@avoidwork.com>
+ * @copyright 2019 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 3.6.1
+ * @version 4.0.0
  */
 (function (global) {
 	var b = /^(b|B)$/,
@@ -4775,7 +4775,7 @@ function functionBindPolyfill(context) {
 		round = descriptor.round !== void 0 ? descriptor.round : unix ? 1 : 2;
 		separator = descriptor.separator !== void 0 ? descriptor.separator || "" : "";
 		spacer = descriptor.spacer !== void 0 ? descriptor.spacer : unix ? "" : " ";
-		symbols = descriptor.symbols || descriptor.suffixes || {};
+		symbols = descriptor.symbols || {};
 		standard = base === 2 ? descriptor.standard || "jedec" : "jedec";
 		output = descriptor.output || "string";
 		full = descriptor.fullform === true;
@@ -4851,7 +4851,7 @@ function functionBindPolyfill(context) {
 		}
 
 		if (output === "object") {
-			return { value: result[0], suffix: result[1], symbol: result[1] };
+			return { value: result[0], symbol: result[1] };
 		}
 
 		if (full) {
@@ -4875,7 +4875,7 @@ function functionBindPolyfill(context) {
 	// CommonJS, AMD, script tag
 	if (typeof exports !== "undefined") {
 		module.exports = filesize;
-	} else if (typeof define === "function" && define.amd) {
+	} else if (typeof define === "function" && define.amd !== void 0) {
 		define(function () {
 			return filesize;
 		});
@@ -5661,6 +5661,30 @@ function shim (element, value) {
   // The main function is just a wrapper around a default humanizer.
   var humanizeDuration = humanizer({})
 
+  // Build dictionary from options
+  function getDictionary (options) {
+    var languagesFromOptions = [options.language]
+
+    if (options.hasOwnProperty('fallbacks')) {
+      if (isArray(options.fallbacks) && options.fallbacks.length) {
+        languagesFromOptions = languagesFromOptions.concat(options.fallbacks)
+      } else {
+        throw new Error('fallbacks must be an array with at least one element')
+      }
+    }
+
+    for (var i = 0; i < languagesFromOptions.length; i++) {
+      var languageToTry = languagesFromOptions[i]
+      if (options.languages.hasOwnProperty(languageToTry)) {
+        return options.languages[languageToTry]
+      } else if (languages.hasOwnProperty(languageToTry)) {
+        return languages[languageToTry]
+      }
+    }
+
+    throw new Error('No language found.')
+  }
+
   // doHumanization does the bulk of the work.
   function doHumanization (ms, options) {
     var i, len, piece
@@ -5669,11 +5693,7 @@ function shim (element, value) {
     // Has the nice sideffect of turning Number objects into primitives.
     ms = Math.abs(ms)
 
-    var dictionary = options.languages[options.language] || languages[options.language]
-    if (!dictionary) {
-      throw new Error('No language ' + dictionary + '.')
-    }
-
+    var dictionary = getDictionary(options)
     var pieces = []
 
     // Start at the top and keep removing units, bit by bit.
@@ -5839,6 +5859,12 @@ function shim (element, value) {
     if (c <= 2) { return 0 }
     if (c > 2 && c < 11) { return 1 }
     return 0
+  }
+
+  // We need to make sure we support browsers that don't have
+  // `Array.isArray`, so we define a fallback here.
+  var isArray = Array.isArray || function (arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]'
   }
 
   humanizeDuration.getSupportedLanguages = function getSupportedLanguages () {
@@ -14284,7 +14310,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14331,15 +14357,15 @@ module.exports={
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "3.0.0",
+    "deepmerge": "3.1.0",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.0",
-    "filesize": "3.6.1",
+    "filesize": "4.0.0",
     "get-form-data": "2.0.0",
     "hidden": "1.1.1",
-    "humanize-duration": "3.16.0",
+    "humanize-duration": "3.17.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -14356,19 +14382,19 @@ module.exports={
   "devDependencies": {
     "@babel/core": "7.2.2",
     "@babel/polyfill": "7.2.5",
-    "@babel/preset-env": "7.2.3",
+    "@babel/preset-env": "7.3.1",
     "babel-eslint": "10.0.1",
     "babelify": "10.0.0",
     "body-parser": "1.18.3",
     "browserify": "16.2.3",
     "connect-send-json": "1.0.0",
     "del": "3.0.0",
-    "eslint": "5.11.1",
+    "eslint": "5.12.1",
     "fancy-log": "1.3.3",
     "glob": "7.1.3",
     "gulp": "3.9.1",
     "gulp-autoprefixer": "6.0.0",
-    "gulp-bump": "3.1.1",
+    "gulp-bump": "3.1.3",
     "gulp-bytediff": "1.0.0",
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.7.0",
@@ -14387,7 +14413,7 @@ module.exports={
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.3.3",
-    "ssl-root-cas": "1.2.5",
+    "ssl-root-cas": "1.3.1",
     "standard": "12.0.1",
     "tap-summary": "4.0.0",
     "tape": "4.9.2",
