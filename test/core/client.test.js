@@ -12,7 +12,7 @@ function addDivForVideomail () {
   body.appendChild(div)
 }
 
-test('VideomailClient:', {timeout: 2000}, function (t) {
+test('VideomailClient:', { timeout: 2000 }, function (t) {
   var client
 
   addDivForVideomail()
