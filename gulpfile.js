@@ -115,7 +115,7 @@ function bundle (watching) {
       .pipe(plugins.if(options.minify, plugins.rename({ suffix: '.min' })))
       .pipe(plugins.if(options.minify, plugins.sourcemaps.init()))
       .pipe(plugins.if(options.minify, plugins.bytediff.start()))
-      .pipe(plugins.if(options.minify, plugins.uglifyEs.default()))
+      .pipe(plugins.if(options.minify, plugins.terser()))
       .pipe(plugins.if(options.minify, plugins.bytediff.stop()))
       .pipe(plugins.if(options.minify, plugins.sourcemaps.write('/')))
       .pipe(plugins.if(options.minify, gulp.dest('dist')))

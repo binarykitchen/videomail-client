@@ -14449,7 +14449,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.5.6",
+  "version": "2.5.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14548,7 +14548,7 @@ module.exports={
     "gulp-standard": "12.0.0",
     "gulp-stylus": "2.7.0",
     "gulp-todo": "7.1.1",
-    "gulp-uglify-es": "1.0.4",
+    "gulp-terser": "1.1.7",
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.3.3",
