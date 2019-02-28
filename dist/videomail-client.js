@@ -14548,7 +14548,7 @@ module.exports={
     "gulp-standard": "12.0.0",
     "gulp-stylus": "2.7.0",
     "gulp-todo": "7.1.1",
-    "gulp-uglify": "3.0.1",
+    "gulp-uglify-es": "1.0.4",
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.3.3",
