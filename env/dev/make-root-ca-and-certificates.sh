@@ -9,7 +9,7 @@
 FQDN="local.videomail-client.io"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SSL_DIR="$DIR/../etc/ssl-certs"
+SSL_DIR="$DIR/ssl-certs"
 
 # make directories to work from
 mkdir -p $SSL_DIR/{server,client,ca,tmp}
