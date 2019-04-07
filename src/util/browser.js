@@ -62,7 +62,7 @@ const Browser = function (options) {
       }
     } else if (isChrome) {
       if (isIOS) {
-        warning = 'Chrome on iOS is not ready for cameras yet. Hopefully in near future ...'
+        warning = 'Use Safari instead. Apple doesn\'t give Chrome access to iPhone cameras (booo).'
       } else {
         warning = 'Probably you need to <a href="' + chromeDownload + '" target="_blank">' +
                   'upgrade Chrome</a> to fix this.'
