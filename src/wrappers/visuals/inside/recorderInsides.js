@@ -7,6 +7,7 @@ import Countdown from './recorder/countdown'
 import PausedNote from './recorder/pausedNote'
 import RecordNote from './recorder/recordNote'
 import RecordTimer from './recorder/recordTimer'
+import FacingMode from './recorder/facingMode'
 
 const RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, 'RecorderInsides')
@@ -20,9 +21,14 @@ const RecorderInsides = function (visuals, options) {
   var countdown
   var pausedNote
   var built
+  var facingMode
 
   if (options.video.countdown) {
     countdown = new Countdown(visuals, options)
+  }
+
+  if (options.video.facingModeButton) {
+    facingMode = new FacingMode(visuals, options)
   }
 
   if (options.enablePause) {
@@ -53,12 +59,16 @@ const RecorderInsides = function (visuals, options) {
     self.hidePause()
     self.hideCountdown()
     recordTimer.stop()
+    facingMode && facingMode.hide()
   }
 
   function initEvents () {
     debug('RecorderInsides: initEvents()')
 
     self
+      .on(Events.USER_MEDIA_READY, function () {
+        facingMode && facingMode.show()
+      })
       .on(Events.RECORDING, function () {
         startRecording()
       })
@@ -82,6 +92,7 @@ const RecorderInsides = function (visuals, options) {
 
     countdown && countdown.build()
     pausedNote && pausedNote.build()
+    facingMode && facingMode.build()
 
     recordNote.build()
     recordTimer.build()
