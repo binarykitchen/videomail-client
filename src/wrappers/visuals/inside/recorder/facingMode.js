@@ -10,6 +10,12 @@ export default function (visuals, options) {
   const self = this
   var facingModeElement
 
+  function initEvents () {
+    self.on(Events.ERROR, function () {
+      self.hide()
+    })
+  }
+
   this.build = function () {
     facingModeElement = visuals.querySelector('.facingMode')
 
@@ -21,8 +27,6 @@ export default function (visuals, options) {
         e && e.preventDefault()
 
         try {
-          // continue from here, implement event listener
-          // for this event in recorder.js
           self.emit(Events.SWITCH_FACING_MODE)
         } catch (exc) {
           self.emit(Events.ERROR, exc)
@@ -35,6 +39,8 @@ export default function (visuals, options) {
     } else {
       this.hide()
     }
+
+    initEvents()
   }
 
   this.hide = function () {
