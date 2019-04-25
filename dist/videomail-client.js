@@ -14439,10 +14439,7 @@ function WebSocketStream(target, protocols, options) {
   if (socket.readyState === socket.OPEN) {
     stream = proxy
   } else {
-    stream = stream = duplexify(undefined, undefined, options)
-    if (!options.objectMode) {
-      stream._writev = writev
-    }
+    stream = duplexify.obj()
     socket.onopen = onopen
   }
 
@@ -14590,7 +14587,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14657,7 +14654,7 @@ module.exports={
     "safe-json-stringify": "1.2.0",
     "superagent": "5.0.2",
     "ua-parser-js": "0.7.19",
-    "websocket-stream": "5.5.0"
+    "websocket-stream": "5.1.2"
   },
   "devDependencies": {
     "@babel/core": "7.4.3",
