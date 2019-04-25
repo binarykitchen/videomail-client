@@ -32,6 +32,7 @@ green-color         = #00d814
     .recordTimer
     .recordNote
     .paused
+    .facingMode
     noscript
         position absolute
 
@@ -63,6 +64,24 @@ green-color         = #00d814
 
     .pausedHint
         font-size 150%
+
+    .facingMode
+        right .7em
+        bottom .6em
+        background rgba(10, 10, 10, .3)
+        color rgba(245, 245, 245, .9)
+        font-family monospace
+        border none
+        padding .1em .3em
+        font-size 1.2em
+        z-index 10
+        outline none
+        transition all .2s ease
+
+        &:hover
+          background rgba(50, 50, 50, .7)
+          cursor pointer
+
 
     .recordTimer
     .recordNote

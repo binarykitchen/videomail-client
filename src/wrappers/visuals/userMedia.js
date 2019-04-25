@@ -133,8 +133,16 @@ export default function (recorder, options) {
     })
   }
 
-  this.init = function (localMediaStream, videoCallback, audioCallback, endedEarlyCallback) {
-    this.stop(localMediaStream, true)
+  this.init = function (
+    localMediaStream,
+    videoCallback,
+    audioCallback,
+    endedEarlyCallback,
+    params = {}) {
+    this.stop(localMediaStream, {
+      aboutToInitialize: true,
+      switchingFacingMode: params.switchingFacingMode
+    })
 
     var onPlayReached = false
     var onLoadedMetaDataReached = false
@@ -362,9 +370,12 @@ export default function (recorder, options) {
     return !!rawVisualUserMedia.src
   }
 
-  this.stop = function (visualStream, aboutToInitialize) {
+  this.stop = function (visualStream, params = {}) {
     try {
       // do not stop "too much" when going to initialize anyway
+      const aboutToInitialize = params.aboutToInitialize
+      const switchingFacingMode = params.switchingFacingMode
+
       if (!aboutToInitialize) {
         if (!visualStream) {
           visualStream = getVisualStream()
@@ -392,7 +403,11 @@ export default function (recorder, options) {
         audioRecorder = null
       }
 
-      paused = record = false
+      // dont have to reset these states when just switching camera
+      // while still recording or pausing
+      if (!switchingFacingMode) {
+        paused = record = false
+      }
     } catch (exc) {
       self.emit(Events.ERROR, exc)
     }

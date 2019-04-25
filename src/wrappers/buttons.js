@@ -316,8 +316,8 @@ const Buttons = function (container, options) {
     self.hide()
   }
 
-  function onUserMediaReady (options) {
-    onFormReady(options)
+  function onUserMediaReady (params) {
+    onFormReady(params)
 
     if (isShown(recordButton)) {
       enable(recordButton)
@@ -484,8 +484,10 @@ const Buttons = function (container, options) {
   function initEvents () {
     debug('Buttons: initEvents()')
 
-    self.on(Events.USER_MEDIA_READY, function (options) {
-      onUserMediaReady(options)
+    self.on(Events.USER_MEDIA_READY, function (params) {
+      if (!params.switchingFacingMode) {
+        onUserMediaReady(params)
+      }
     }).on(Events.PREVIEW, function () {
       onPreview()
     }).on(Events.PAUSED, function () {
@@ -512,8 +514,8 @@ const Buttons = function (container, options) {
       onSubmitted()
     }).on(Events.HIDE, function () {
       onHidden()
-    }).on(Events.FORM_READY, function (options) {
-      onFormReady(options)
+    }).on(Events.FORM_READY, function (params) {
+      onFormReady(params)
     }).on(Events.REPLAY_SHOWN, function () {
       onReplayShown()
     }).on(Events.GOING_BACK, function () {

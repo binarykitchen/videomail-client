@@ -55,7 +55,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   const debug = (options && options.debug) || console.log
   const audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled()
 
-  debug('VideomailError: create()', err, explanation)
+  debug('VideomailError: create()', err, explanation || '(no explanation set)')
 
   const classList = parameters.classList || []
 

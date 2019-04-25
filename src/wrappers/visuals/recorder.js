@@ -37,6 +37,7 @@ const Recorder = function (visuals, replay, options) {
 
   var samplesCount = 0
   var framesCount = 0
+  var facingMode = options.video.facingMode // default is 'user'
 
   var recordingStats = {}
 
@@ -135,17 +136,24 @@ const Recorder = function (visuals, replay, options) {
     recorderElement && hidden(recorderElement, false)
   }
 
-  function onUserMediaReady () {
+  function onUserMediaReady (params = {}) {
     try {
-      debug('Recorder: onUserMediaReady()')
+      debug('Recorder: onUserMediaReady()', params)
+
+      const switchingFacingMode = params.switchingFacingMode
 
       userMediaLoading = blocking = unloaded = submitting = false
       userMediaLoaded = true
 
-      loop = createLoop()
+      if (!switchingFacingMode) {
+        loop = createLoop()
+      }
 
       show()
-      self.emit(Events.USER_MEDIA_READY, { paused: self.isPaused() })
+      self.emit(Events.USER_MEDIA_READY, {
+        switchingFacingMode: params.switchingFacingMode,
+        paused: self.isPaused()
+      })
     } catch (exc) {
       self.emit(Events.ERROR, exc)
     }
@@ -482,8 +490,8 @@ const Recorder = function (visuals, replay, options) {
     }
   }
 
-  function getUserMediaCallback (localStream) {
-    debug('Recorder: getUserMediaCallback()')
+  function getUserMediaCallback (localStream, params) {
+    debug('Recorder: getUserMediaCallback()', params)
 
     if (showUserMedia()) {
       try {
@@ -491,11 +499,14 @@ const Recorder = function (visuals, replay, options) {
 
         userMedia.init(
           localStream,
-          onUserMediaReady.bind(self),
+          function () {
+            onUserMediaReady(params)
+          },
           onAudioSample.bind(self),
           function (err) {
             self.emit(Events.ERROR, err)
-          }
+          },
+          params
         )
       } catch (exc) {
         self.emit(Events.ERROR, exc)
@@ -503,7 +514,7 @@ const Recorder = function (visuals, replay, options) {
     }
   }
 
-  function loadGenuineUserMedia () {
+  function loadGenuineUserMedia (params) {
     if (!navigator) {
       throw new Error('Navigator is missing!')
     }
@@ -517,7 +528,7 @@ const Recorder = function (visuals, replay, options) {
       // prefer the front camera (if one is available) over the rear one
       const constraints = {
         video: {
-          facingMode: options.video.facingMode, // default is 'user'
+          facingMode: facingMode,
           frameRate: { ideal: options.video.fps }
         },
         audio: options.isAudioEnabled()
@@ -549,7 +560,9 @@ const Recorder = function (visuals, replay, options) {
 
       if (genuineUserMediaRequest) {
         genuineUserMediaRequest
-          .then(getUserMediaCallback)
+          .then(function (localStream) {
+            getUserMediaCallback(localStream, params)
+          })
           .catch(userMediaErrorCallback)
       } else {
         // this to trap errors like these
@@ -967,7 +980,7 @@ const Recorder = function (visuals, replay, options) {
     } catch (exc) {
       self.emit(
         Events.ERROR,
-        VideomailError.create('Failed to create canvas.', exc, options)
+        VideomailError.create(exc, options)
       )
 
       return false
@@ -1073,6 +1086,18 @@ const Recorder = function (visuals, replay, options) {
     }
   }
 
+  function switchFacingMode () {
+    if (facingMode === 'user') {
+      facingMode = 'environment'
+    } else if (facingMode === 'environment') {
+      facingMode = 'user'
+    } else {
+      debug('Recorder: unspported facing mode', facingMode)
+    }
+
+    loadGenuineUserMedia({ switchingFacingMode: true })
+  }
+
   function initEvents () {
     debug('Recorder: initEvents()')
 
@@ -1105,6 +1130,9 @@ const Recorder = function (visuals, replay, options) {
       })
       .on(Events.VISIBLE, function () {
         restoreAnimationFrameObject()
+      })
+      .on(Events.SWITCH_FACING_MODE, function () {
+        switchFacingMode()
       })
   }
 
