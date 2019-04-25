@@ -14590,7 +14590,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -19209,6 +19209,8 @@ var _events = _interopRequireDefault(_dereq_("./../../../events"));
 
 var _eventEmitter = _interopRequireDefault(_dereq_("./../../../util/eventEmitter"));
 
+var _browser = _interopRequireDefault(_dereq_("./../../../util/browser"));
+
 var _countdown = _interopRequireDefault(_dereq_("./recorder/countdown"));
 
 var _pausedNote = _interopRequireDefault(_dereq_("./recorder/pausedNote"));
@@ -19228,6 +19230,7 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
   var debug = options.debug;
   var recordNote = new _recordNote.default(visuals);
   var recordTimer = new _recordTimer.default(visuals, recordNote, options);
+  var browser = new _browser.default(options);
   var countdown;
   var pausedNote;
   var built;
@@ -19237,7 +19240,7 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
     countdown = new _countdown.default(visuals, options);
   }
 
-  if (options.video.facingModeButton) {
+  if (options.video.facingModeButton && browser.isMobile()) {
     facingMode = new _facingMode.default(visuals, options);
   }
 
@@ -19339,7 +19342,7 @@ _util.default.inherits(RecorderInsides, _eventEmitter.default);
 var _default = RecorderInsides;
 exports.default = _default;
 
-},{"./../../../events":88,"./../../../util/eventEmitter":95,"./recorder/countdown":107,"./recorder/facingMode":108,"./recorder/pausedNote":109,"./recorder/recordNote":110,"./recorder/recordTimer":111,"util":80}],113:[function(_dereq_,module,exports){
+},{"./../../../events":88,"./../../../util/browser":93,"./../../../util/eventEmitter":95,"./recorder/countdown":107,"./recorder/facingMode":108,"./recorder/pausedNote":109,"./recorder/recordNote":110,"./recorder/recordTimer":111,"util":80}],113:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20558,6 +20561,10 @@ var Recorder = function Recorder(visuals, replay, options) {
   }
 
   function switchFacingMode() {
+    if (!browser.isMobile()) {
+      return false;
+    }
+
     if (facingMode === 'user') {
       facingMode = 'environment';
     } else if (facingMode === 'environment') {

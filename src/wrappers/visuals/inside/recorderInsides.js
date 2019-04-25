@@ -2,6 +2,7 @@ import util from 'util'
 
 import Events from './../../../events'
 import EventEmitter from './../../../util/eventEmitter'
+import Browser from './../../../util/browser'
 
 import Countdown from './recorder/countdown'
 import PausedNote from './recorder/pausedNote'
@@ -17,6 +18,7 @@ const RecorderInsides = function (visuals, options) {
 
   const recordNote = new RecordNote(visuals)
   const recordTimer = new RecordTimer(visuals, recordNote, options)
+  const browser = new Browser(options)
 
   var countdown
   var pausedNote
@@ -27,7 +29,7 @@ const RecorderInsides = function (visuals, options) {
     countdown = new Countdown(visuals, options)
   }
 
-  if (options.video.facingModeButton) {
+  if (options.video.facingModeButton && browser.isMobile()) {
     facingMode = new FacingMode(visuals, options)
   }
 

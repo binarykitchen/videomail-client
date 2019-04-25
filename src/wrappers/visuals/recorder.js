@@ -1087,6 +1087,10 @@ const Recorder = function (visuals, replay, options) {
   }
 
   function switchFacingMode () {
+    if (!browser.isMobile()) {
+      return false
+    }
+
     if (facingMode === 'user') {
       facingMode = 'environment'
     } else if (facingMode === 'environment') {
