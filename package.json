@@ -67,7 +67,7 @@
     "safe-json-stringify": "1.2.0",
     "superagent": "5.0.2",
     "ua-parser-js": "0.7.19",
-    "websocket-stream": "5.5.0"
+    "websocket-stream": "5.1.2"
   },
   "devDependencies": {
     "@babel/core": "7.4.3",
