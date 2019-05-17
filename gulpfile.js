@@ -21,6 +21,8 @@ const tapeRun = require('tape-run')
 const tapDiff = require('tap-diff')
 const glob = require('glob')
 const log = require('fancy-log')
+const autoprefixer = require('autoprefixer')
+const cssnano = require('cssnano')
 
 const packageJson = require('./package.json')
 
@@ -40,26 +42,22 @@ gulp.task('clean:js', (cb) => {
 })
 
 gulp.task('stylus', () => {
+  const postCssPlugins = [
+    autoprefixer({ browsers: packageJson.browserslist }),
+    cssnano()
+  ]
+
   gulp.src('src/styles/styl/main.styl')
     .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
     .pipe(plugins.stylus({
       use: [nib()],
       errors: true
     }))
-    // https://github.com/ai/autoprefixer#browsers
-    .pipe(plugins.autoprefixer(
-      'last 5 versions',
-      '> 1%',
-      'Explorer >= 11',
-      'Firefox ESR',
-      'iOS >= 9',
-      'android >= 4'
-    ))
     // always minify otherwise it gets broken with line-breaks
     // when surrounded with `'s when injected
     // todo: fix this, so that it also works when not minified, this
     // for faster builds during development
-    .pipe(plugins.cssnano())
+    .pipe(plugins.postcss(postCssPlugins))
     .pipe(plugins.rename({ suffix: '.min', extname: '.css.js' }))
     .pipe(plugins.injectString.wrap('module.exports=\'', '\''))
     // todo: location is bad, should be in a temp folder or so

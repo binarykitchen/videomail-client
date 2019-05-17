@@ -14,5 +14,5 @@
 | src/wrappers/visuals/recorder.js | 705 | consider removing this later or have it for debug=1 only?
 | src/wrappers/visuals/userMedia.js | 298 | consider removing that if it's not the case anymore (for better performance)
 | gulpfile.js | 1 | write this in ES6 once i have figured out how to
-| gulpfile.js | 60 | fix this, so that it also works when not minified, this
-| gulpfile.js | 65 | location is bad, should be in a temp folder or so
+| gulpfile.js | 58 | fix this, so that it also works when not minified, this
+| gulpfile.js | 63 | location is bad, should be in a temp folder or so
