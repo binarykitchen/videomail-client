@@ -10,6 +10,13 @@ die() {
     exit 1
 }
 
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+printf "${GREEN}Checking for vulnerabilities...\n${NC}"
+# thanks to set -e it will exit here if audit fails
+yarn run audit-ci --config audit-ci.json
+
 # todo: figure out an elegant solution to avoid duplicate code
 # when having three bash scripts for patches, features and releases
 # maybe with command line args?
@@ -64,10 +71,10 @@ gulp build --minify
 git add -A
 git commit -am "Final commit of version $VERSION" --no-edit
 
-echo "Logging to npm ..."
+printf "${GREEN}Logging to npm ...\n${NC}"
 yarn login
 
-echo "Publishing to npm ..."
+printf "${GREEN}Publishing to npm ...\n${NC}"
 yarn publish --new-version $VERSION
 
 # Complete the previous release
@@ -83,4 +90,4 @@ git checkout develop
 
 unset GIT_MERGE_AUTOEDIT
 
-echo "All good. Ready for the next cycle!"
+printf "${GREEN}All good. Ready for the next cycle!${NC}"

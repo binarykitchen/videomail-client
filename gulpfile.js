@@ -18,7 +18,6 @@ const sslRootCas = require('ssl-root-cas')
 const watchify = require('watchify')
 const babelify = require('babelify')
 const tapeRun = require('tape-run')
-const tapDiff = require('tap-diff')
 const glob = require('glob')
 const log = require('fancy-log')
 const autoprefixer = require('autoprefixer')
@@ -143,7 +142,6 @@ gulp.task('test', () => {
     .pipe(tapeRun({
       wait: 4e3
     }))
-    .pipe(tapDiff())
     .pipe(process.stdout)
 })
 
