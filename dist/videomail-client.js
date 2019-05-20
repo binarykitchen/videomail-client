@@ -14620,7 +14620,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.6.4",
+  "version": "2.6.5",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14668,7 +14668,7 @@ module.exports={
     "android >= 4"
   ],
   "dependencies": {
-    "add-eventlistener-with-options": "1.25.0",
+    "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.0.5",
     "canvas-to-buffer": "1.0.14",
@@ -14701,6 +14701,7 @@ module.exports={
     "@babel/core": "7.4.4",
     "@babel/polyfill": "7.4.4",
     "@babel/preset-env": "7.4.4",
+    "audit-ci": "1.7.0",
     "autoprefixer": "9.5.1",
     "babel-eslint": "10.0.1",
     "babelify": "10.0.0",
@@ -14727,14 +14728,13 @@ module.exports={
     "gulp-sourcemaps": "2.6.5",
     "gulp-standard": "12.0.0",
     "gulp-stylus": "2.7.0",
-    "gulp-terser": "1.1.7",
+    "gulp-terser": "1.2.0",
     "gulp-todo": "7.1.1",
     "minimist": "1.2.0",
     "nib": "1.1.2",
     "router": "1.3.3",
     "ssl-root-cas": "1.3.1",
     "standard": "12.0.1",
-    "tap-diff": "0.1.1",
     "tape": "4.10.1",
     "tape-catch": "1.0.6",
     "tape-run": "6.0.0",

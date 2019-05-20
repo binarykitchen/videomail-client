@@ -1,0 +1,6 @@
+{
+  "high": true,
+  "package-manager": "yarn",
+  "advisories": ["813", "118"],
+  "whitelist": []
+}
