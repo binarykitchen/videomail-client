@@ -556,6 +556,13 @@ const Recorder = function (visuals, replay, options) {
 
       debug('Recorder: navigator.mediaDevices.getUserMedia()', constraints)
 
+      if (navigator.mediaDevices.getSupportedConstraints) {
+        debug(
+          'Recorder: navigator.mediaDevices.getSupportedConstraints()',
+          navigator.mediaDevices.getSupportedConstraints()
+        )
+      }
+
       const genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints)
 
       if (genuineUserMediaRequest) {

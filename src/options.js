@@ -68,7 +68,7 @@ export default {
     'switch': false,                  // enables a switcher for audio recording (on/off)
     volume: 0.2,                      // must be between 0 .. 1 but 0.20 is recommeded to avoid
                                       // distorting at the higher volume peaks
-    bufferSize: 1024                  // decides how often the audio is being sampled, must be a power of two.
+    bufferSize: 2048                  // decides how often the audio is being sampled, must be a power of two.
                                       // the higher the less traffic, but harder to adjust with rubberband
                                       // to match with the video length on server side during encoding
   },

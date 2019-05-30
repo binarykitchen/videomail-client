@@ -14620,7 +14620,7 @@ function wrappy (fn, cb) {
 },{}],85:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14698,9 +14698,9 @@ module.exports={
     "websocket-stream": "5.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.4.4",
+    "@babel/core": "7.4.5",
     "@babel/polyfill": "7.4.4",
-    "@babel/preset-env": "7.4.4",
+    "@babel/preset-env": "7.4.5",
     "audit-ci": "1.7.0",
     "autoprefixer": "9.5.1",
     "babel-eslint": "10.0.1",
@@ -14735,7 +14735,7 @@ module.exports={
     "router": "1.3.3",
     "ssl-root-cas": "1.3.1",
     "standard": "12.0.1",
-    "tape": "4.10.1",
+    "tape": "4.10.2",
     "tape-catch": "1.0.6",
     "tape-run": "6.0.0",
     "vinyl-buffer": "1.0.1",
@@ -15185,7 +15185,7 @@ var _default = {
     volume: 0.2,
     // must be between 0 .. 1 but 0.20 is recommeded to avoid
     // distorting at the higher volume peaks
-    bufferSize: 1024 // decides how often the audio is being sampled, must be a power of two.
+    bufferSize: 2048 // decides how often the audio is being sampled, must be a power of two.
     // the higher the less traffic, but harder to adjust with rubberband
     // to match with the video length on server side during encoding
 
@@ -20147,6 +20147,11 @@ var Recorder = function Recorder(visuals, replay, options) {
       }
 
       debug('Recorder: navigator.mediaDevices.getUserMedia()', constraints);
+
+      if (navigator.mediaDevices.getSupportedConstraints) {
+        debug('Recorder: navigator.mediaDevices.getSupportedConstraints()', navigator.mediaDevices.getSupportedConstraints());
+      }
+
       var genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints);
 
       if (genuineUserMediaRequest) {
