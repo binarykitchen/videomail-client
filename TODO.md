@@ -1,13 +1,13 @@
 ### TODOs
 | Filename | line # | TODO
 |:------|:------:|:------
+| src/wrappers/container.js | 308 | figure out how to fire dom's onload event again
+| src/wrappers/container.js | 309 | or how to run all the scripts over again
+| src/wrappers/optionsWrapper.js | 27 | fix this, it's not really an option
 | src/util/audioRecorder.js | 11 | code needs rewrite
 | src/util/eventEmitter.js | 6 | MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 | src/util/eventEmitter.js | 43 | have this emitted through a configuration because it is pretty noisy
 | src/util/humanize.js | 4 | get rid of this class and use those imports directly
-| src/wrappers/container.js | 308 | figure out how to fire dom's onload event again
-| src/wrappers/container.js | 309 | or how to run all the scripts over again
-| src/wrappers/optionsWrapper.js | 27 | fix this, it's not really an option
 | src/wrappers/visuals/recorder.js | 540 | in https://github.com/binarykitchen/videomail-client/issues/142
 | src/wrappers/visuals/recorder.js | 578 | retry with navigator.getUserMedia_() maybe?
 | src/wrappers/visuals/recorder.js | 707 | commented out because for some reasons server does not accept such a long

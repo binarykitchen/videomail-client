@@ -21,6 +21,7 @@
   "scripts": {
     "test": "gulp test",
     "start": "NODE_NO_HTTP2=1 gulp examples",
+    "audit": "yarn run audit-ci --config audit-ci.json",
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major"
@@ -73,16 +74,16 @@
     "readystate": "0.4.1",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
-    "superagent": "5.0.5",
-    "ua-parser-js": "0.7.19",
+    "superagent": "5.0.8",
+    "ua-parser-js": "0.7.20",
     "websocket-stream": "5.5.0"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/polyfill": "7.4.4",
     "@babel/preset-env": "7.4.5",
-    "audit-ci": "1.7.0",
-    "autoprefixer": "9.5.1",
+    "audit-ci": "2.0.1",
+    "autoprefixer": "9.6.0",
     "babel-eslint": "10.0.1",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
@@ -101,7 +102,7 @@
     "gulp-derequire": "2.1.0",
     "gulp-if": "2.0.2",
     "gulp-inject-string": "1.1.2",
-    "gulp-load-plugins": "1.5.0",
+    "gulp-load-plugins": "1.6.0",
     "gulp-plumber": "1.2.1",
     "gulp-postcss": "8.0.0",
     "gulp-rename": "1.4.0",

@@ -31,6 +31,7 @@ const Browser = function (options) {
   const isOpera = /Opera/.test(uaParser.browser.name)
   const isAndroid = /Android/.test(uaParser.os.name)
   const chromeBased = isChrome || isChromium
+  const isFacebook = uaParser.browser.name === 'Facebook' // Facebook App for iOS & Android
 
   const isMobile = isIOS || isAndroid
   const isOkSafari = isSafari && browserVersion >= 11
@@ -98,10 +99,17 @@ const Browser = function (options) {
       if (self.isChromeBased() || self.isFirefox() || isSafari) {
         warning = 'For the webcam feature, your browser needs an upgrade.'
       } else {
-        warning = 'Hence we recommend you to use either ' +
-                  '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
-                  '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
-                  '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
+        if (isFacebook) {
+          warning = 'Hence we recommend you to use a real browser like ' +
+                    '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
+                    '<a href="' + firefoxDownload + '" target="_blank">Firefox</a> or ' +
+                    '<a href="' + edgeDownload + '" target="_blank">Edge</a>.'
+        } else {
+          warning = 'Hence we recommend you to use either ' +
+                    '<a href="' + chromeDownload + '" target="_blank">Chrome</a>, ' +
+                    '<a href="' + firefoxDownload + '" target="_blank">Firefox</a>, ' +
+                    '<a href="' + edgeDownload + '" target="_blank">Edge</a> or Android.'
+        }
       }
     }
 
@@ -167,7 +175,11 @@ const Browser = function (options) {
         }
       } else {
         if (isMobile) {
-          message = 'Sorry, your browser cannot record from your mobile camera'
+          if (isFacebook) {
+            message = 'Sorry, the Facebook app cannot record from your mobile camera'
+          } else {
+            message = 'Sorry, your browser cannot record from your mobile camera'
+          }
         } else {
           message = 'Sorry, your browser cannot record from webcams'
         }

@@ -42,7 +42,7 @@ gulp.task('clean:js', (cb) => {
 
 gulp.task('stylus', () => {
   const postCssPlugins = [
-    autoprefixer({ browsers: packageJson.browserslist }),
+    autoprefixer(),
     cssnano()
   ]
 

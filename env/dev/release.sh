@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 printf "${GREEN}Checking for vulnerabilities...\n${NC}"
 # thanks to set -e it will exit here if audit fails
-yarn run audit-ci --config audit-ci.json
+yarn run audit
 
 # todo: figure out an elegant solution to avoid duplicate code
 # when having three bash scripts for patches, features and releases
