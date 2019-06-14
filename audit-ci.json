@@ -1,6 +1,8 @@
 {
   "high": true,
   "package-manager": "yarn",
+  "report-type": "summary",
+  "show-not-found": false,
   "advisories": ["813", "118"],
   "whitelist": []
 }
