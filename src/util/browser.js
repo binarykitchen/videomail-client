@@ -89,7 +89,7 @@ const Browser = function (options) {
     var warning
 
     if (isBadIOS) {
-      warning = 'On iPads/iPhones below iOS v11 this camera feature is missing.<br/><br/>' +
+      warning = 'On iPads or iPhones below iOS v11 this camera feature is missing.<br/><br/>' +
                 'For now, we recommend you to upgrade iOS or to use an Android device.'
     } else {
       warning = getRecommendation()
@@ -183,6 +183,12 @@ const Browser = function (options) {
         } else {
           message = 'Sorry, your browser cannot record from webcams'
         }
+      }
+
+      if (isBadIOS) {
+        // on older iphones length of JSON is limited and breaking
+        // so just dont report and ignore
+        options.reportErrors = false
       }
 
       err = VideomailError.create({
