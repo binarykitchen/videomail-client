@@ -36,17 +36,17 @@ const options = minimist(process.argv.slice(2), { default: defaultOptions })
 
 log.info('Options:', options)
 
-gulp.task('clean:js', (cb) => {
+function cleanJs (cb) {
   return del(['dist/*.js', 'dist/*.js.map'])
-})
+}
 
-gulp.task('stylus', () => {
+function stylus () {
   const postCssPlugins = [
     autoprefixer(),
     cssnano()
   ]
 
-  gulp.src('src/styles/styl/main.styl')
+  return gulp.src('src/styles/styl/main.styl')
     .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
     .pipe(plugins.stylus({
       use: [nib()],
@@ -62,10 +62,10 @@ gulp.task('stylus', () => {
     // todo: location is bad, should be in a temp folder or so
     .pipe(gulp.dest('src/styles/css'))
     .pipe(plugins.connect.reload())
-})
+}
 
-gulp.task('todo', () => {
-  gulp.src(
+function todo () {
+  return gulp.src(
     ['src/**/*.{js, styl}', 'gulpfile.js', 'examples/*.html'],
     { base: './' }
   )
@@ -73,12 +73,12 @@ gulp.task('todo', () => {
       fileName: 'TODO.md'
     }))
     .pipe(gulp.dest('./'))
-})
+}
 
 let cache = {}
 let packageCache = {}
 
-function bundle (watching) {
+function bundle (done, watching) {
   const entry = path.join(__dirname, packageJson.module)
   const bundler = browserify({
     entries: [entry],
@@ -103,6 +103,7 @@ function bundle (watching) {
         console.error(err.toString())
         this.emit('end')
       })
+      .on('end', done)
       .pipe(source('./src/')) // gives streaming vinyl file object
       .pipe(buffer()) // required because the next steps do not support streams
       .pipe(plugins.concat('videomail-client.js'))
@@ -122,30 +123,20 @@ function bundle (watching) {
   return pump()
 }
 
-gulp.task('scripts', ['clean:js'], () => {
-  return bundle()
-})
+function bundleWithWatchify (done) {
+  bundle(done, true)
+}
 
-gulp.task('test', () => {
-  const testFiles = glob.sync('test/**/*.test.js')
-  const bundler = browserify({
-    entries: testFiles
-  })
-    .transform(babelify)
-
-  return bundler
-    .bundle()
-    .on('error', function (err) {
-      console.error(err.toString())
-      this.emit('end')
-    })
-    .pipe(tapeRun({
-      wait: 4e3
+function lint () {
+  return gulp.src(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'])
+    .pipe(plugins.standard())
+    .pipe(plugins.standard.reporter('default', {
+      breakOnError: true,
+      quiet: true
     }))
-    .pipe(process.stdout)
-})
+}
 
-gulp.task('connect', ['build'], () => {
+function connect (done) {
   const SSL_CERTS_PATH = path.join(__dirname, '/env/dev/ssl-certs/')
 
   sslRootCas
@@ -183,34 +174,51 @@ gulp.task('connect', ['build'], () => {
       return [router]
     }
   })
-})
 
-gulp.task('reload', () => {
+  done()
+}
+
+function reload (done) {
   plugins.connect.reload()
-})
+  done()
+}
 
-gulp.task('lint', () => {
-  return gulp.src(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'])
-    .pipe(plugins.standard())
-    .pipe(plugins.standard.reporter('default', {
-      breakOnError: true,
-      quiet: true
-    }))
-})
-
-gulp.task('watch', ['connect'], () => {
-  bundle(true)
-
-  gulp.watch(['src/styles/styl/**/*.styl'], ['stylus'])
+function watch (done) {
+  gulp.watch(['src/styles/styl/**/*.styl'], stylus)
   // commented out so that it reloads faster
   // gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
-  gulp.watch(['examples/*.html'], ['reload'])
-})
+  gulp.watch(['examples/*.html'], reload)
+
+  done()
+}
+
+exports.test = function (done) {
+  const testFiles = glob.sync('test/**/*.test.js')
+  const bundler = browserify({
+    entries: testFiles
+  })
+    .transform(babelify)
+
+  bundler
+    .bundle()
+    .on('error', function (err) {
+      console.error(err.toString())
+      this.emit('end')
+      done()
+    })
+    .pipe(tapeRun({
+      wait: 4e3
+    }))
+    .on('results', function () {
+      done()
+    })
+    .pipe(process.stdout)
+}
 
 // get inspired by
 // https://www.npmjs.com/package/gulp-tag-version and
 // https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
-gulp.task('bumpVersion', () => {
+exports.bumpVersion = function () {
   const bumpOptions = {}
 
   if (options.version) {
@@ -223,8 +231,23 @@ gulp.task('bumpVersion', () => {
     .pipe(plugins.bump(bumpOptions))
     .pipe(plugins.if(options.write, gulp.dest('./')))
     .on('error', log.error)
-})
+}
 
-gulp.task('examples', ['connect', 'watch'])
-gulp.task('build', ['lint', 'stylus', 'scripts', 'todo'])
-gulp.task('default', ['build'])
+const build = gulp.series(lint,
+  gulp.parallel(
+    gulp.series(stylus, cleanJs, bundle),
+    todo
+  )
+)
+
+exports.examples = gulp.series(lint,
+  gulp.parallel(
+    gulp.series(stylus, cleanJs, bundleWithWatchify),
+    todo
+  ),
+  connect,
+  watch
+)
+
+exports.build = build
+exports.default = build
