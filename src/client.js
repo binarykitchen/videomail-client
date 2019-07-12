@@ -66,13 +66,8 @@ const VideomailClient = function (options) {
       // in the middle of the build() fn
       if (!building && !container.isBuilt()) {
         building = true
-        try {
-          container.build()
-        } catch (exc) {
-          throw exc
-        } finally {
-          building = false
-        }
+        container.build()
+        building = false
       }
     })
   }

@@ -2,11 +2,11 @@ import test from 'tape-catch'
 
 import Browser from './../../src/util/browser'
 
-test('Browser:', {timeout: 2000}, function (t) {
+test('Browser:', { timeout: 2000 }, function (t) {
   t.test('without arguments', function (tt) {
     tt.plan(9)
 
-    const browser = new Browser({debug: function () {}})
+    const browser = new Browser({ debug: function () {} })
 
     var err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')

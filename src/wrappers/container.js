@@ -220,13 +220,13 @@ var Container = function (options) {
 
   function submitVideomail (formData, method, cb) {
     const FORM_FIELDS = {
-      'subject': options.selectors.subjectInputName,
-      'from': options.selectors.fromInputName,
-      'to': options.selectors.toInputName,
-      'body': options.selectors.bodyInputName,
-      'key': options.selectors.keyInputName,
-      'parentKey': options.selectors.parentKeyInputName,
-      'sendCopy': options.selectors.sendCopyInputName
+      subject: options.selectors.subjectInputName,
+      from: options.selectors.fromInputName,
+      to: options.selectors.toInputName,
+      body: options.selectors.bodyInputName,
+      key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
+      sendCopy: options.selectors.sendCopyInputName
     }
 
     const videomailFormData = {}
