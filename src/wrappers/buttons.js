@@ -140,7 +140,7 @@ const Buttons = function (container, options) {
       })
 
       radioButtonGroup = h('span.radioGroup', radioButtonElement, h('label', {
-        'htmlFor': options.id
+        htmlFor: options.id
       }, options.label))
 
       // double check that submit button is already in the buttonsElement container as a child?

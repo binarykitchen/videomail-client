@@ -65,7 +65,7 @@ export default {
 
   audio: {
     enabled: false,                   // set to true for experimential audio recording
-    'switch': false,                  // enables a switcher for audio recording (on/off)
+    switch: false,                    // enables a switcher for audio recording (on/off)
     volume: 0.2,                      // must be between 0 .. 1 but 0.20 is recommeded to avoid
                                       // distorting at the higher volume peaks
     bufferSize: 2048                  // decides how often the audio is being sampled, must be a power of two.
@@ -100,11 +100,11 @@ export default {
     encoding: 'Encoding',
     limitReached: 'Limit reached',
     buttons: {
-      'record': 'Record video',
-      'recordAgain': 'Record again',
-      'resume': 'Resume',
-      'pause': 'Pause',
-      'preview': 'Preview'
+      record: 'Record video',
+      recordAgain: 'Record again',
+      resume: 'Resume',
+      pause: 'Pause',
+      preview: 'Preview'
     }
   },
 

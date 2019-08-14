@@ -75,8 +75,8 @@ function todo () {
     .pipe(gulp.dest('./'))
 }
 
-let cache = {}
-let packageCache = {}
+const cache = {}
+const packageCache = {}
 
 function bundle (done, watching) {
   const entry = path.join(__dirname, packageJson.module)

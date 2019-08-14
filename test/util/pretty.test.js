@@ -57,9 +57,28 @@ test('pretty:', function (t) {
   t.test('prettifies can exclude object keys', function (tt) {
     tt.plan(4)
 
-    tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: null}), '- "ignore me"<br/>- "keep me"')
-    tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: []}), '- "ignore me"<br/>- "keep me"')
-    tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: ['something else']}), '- "ignore me"<br/>- "keep me"')
-    tt.equal(pretty({ignoreMe: 'ignore me', includeMe: 'keep me'}, {excludes: ['ignoreMe']}), '"keep me"')
+    tt.equal(pretty({
+      ignoreMe: 'ignore me', includeMe: 'keep me'
+    }, {
+      excludes: null
+    }), '- "ignore me"<br/>- "keep me"')
+
+    tt.equal(pretty({
+      ignoreMe: 'ignore me', includeMe: 'keep me'
+    }, {
+      excludes: []
+    }), '- "ignore me"<br/>- "keep me"')
+
+    tt.equal(pretty({
+      ignoreMe: 'ignore me', includeMe: 'keep me'
+    }, {
+      excludes: ['something else']
+    }), '- "ignore me"<br/>- "keep me"')
+
+    tt.equal(pretty({
+      ignoreMe: 'ignore me', includeMe: 'keep me'
+    }, {
+      excludes: ['ignoreMe']
+    }), '"keep me"')
   })
 })

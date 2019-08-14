@@ -3505,123 +3505,117 @@ function clone(target) {
 });
 
 },{}],15:[function(_dereq_,module,exports){
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global = global || self, global.deepmerge = factory());
-}(this, function () { 'use strict';
+'use strict';
 
-	var isMergeableObject = function isMergeableObject(value) {
-		return isNonNullObject(value)
-			&& !isSpecial(value)
-	};
+var isMergeableObject = function isMergeableObject(value) {
+	return isNonNullObject(value)
+		&& !isSpecial(value)
+};
 
-	function isNonNullObject(value) {
-		return !!value && typeof value === 'object'
+function isNonNullObject(value) {
+	return !!value && typeof value === 'object'
+}
+
+function isSpecial(value) {
+	var stringValue = Object.prototype.toString.call(value);
+
+	return stringValue === '[object RegExp]'
+		|| stringValue === '[object Date]'
+		|| isReactElement(value)
+}
+
+// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
+var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
+
+function isReactElement(value) {
+	return value.$$typeof === REACT_ELEMENT_TYPE
+}
+
+function emptyTarget(val) {
+	return Array.isArray(val) ? [] : {}
+}
+
+function cloneUnlessOtherwiseSpecified(value, options) {
+	return (options.clone !== false && options.isMergeableObject(value))
+		? deepmerge(emptyTarget(value), value, options)
+		: value
+}
+
+function defaultArrayMerge(target, source, options) {
+	return target.concat(source).map(function(element) {
+		return cloneUnlessOtherwiseSpecified(element, options)
+	})
+}
+
+function getMergeFunction(key, options) {
+	if (!options.customMerge) {
+		return deepmerge
 	}
+	var customMerge = options.customMerge(key);
+	return typeof customMerge === 'function' ? customMerge : deepmerge
+}
 
-	function isSpecial(value) {
-		var stringValue = Object.prototype.toString.call(value);
-
-		return stringValue === '[object RegExp]'
-			|| stringValue === '[object Date]'
-			|| isReactElement(value)
-	}
-
-	// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
-	var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
-	var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
-
-	function isReactElement(value) {
-		return value.$$typeof === REACT_ELEMENT_TYPE
-	}
-
-	function emptyTarget(val) {
-		return Array.isArray(val) ? [] : {}
-	}
-
-	function cloneUnlessOtherwiseSpecified(value, options) {
-		return (options.clone !== false && options.isMergeableObject(value))
-			? deepmerge(emptyTarget(value), value, options)
-			: value
-	}
-
-	function defaultArrayMerge(target, source, options) {
-		return target.concat(source).map(function(element) {
-			return cloneUnlessOtherwiseSpecified(element, options)
+function getEnumerableOwnPropertySymbols(target) {
+	return Object.getOwnPropertySymbols
+		? Object.getOwnPropertySymbols(target).filter(function(symbol) {
+			return target.propertyIsEnumerable(symbol)
 		})
-	}
+		: []
+}
 
-	function getMergeFunction(key, options) {
-		if (!options.customMerge) {
-			return deepmerge
-		}
-		var customMerge = options.customMerge(key);
-		return typeof customMerge === 'function' ? customMerge : deepmerge
-	}
+function getKeys(target) {
+	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+}
 
-	function getEnumerableOwnPropertySymbols(target) {
-		return Object.getOwnPropertySymbols
-			? Object.getOwnPropertySymbols(target).filter(function(symbol) {
-				return target.propertyIsEnumerable(symbol)
-			})
-			: []
-	}
-
-	function getKeys(target) {
-		return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
-	}
-
-	function mergeObject(target, source, options) {
-		var destination = {};
-		if (options.isMergeableObject(target)) {
-			getKeys(target).forEach(function(key) {
-				destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
-			});
-		}
-		getKeys(source).forEach(function(key) {
-			if (!options.isMergeableObject(source[key]) || !target[key]) {
-				destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
-			} else {
-				destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
-			}
+function mergeObject(target, source, options) {
+	var destination = {};
+	if (options.isMergeableObject(target)) {
+		getKeys(target).forEach(function(key) {
+			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
 		});
-		return destination
 	}
-
-	function deepmerge(target, source, options) {
-		options = options || {};
-		options.arrayMerge = options.arrayMerge || defaultArrayMerge;
-		options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-
-		var sourceIsArray = Array.isArray(source);
-		var targetIsArray = Array.isArray(target);
-		var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
-
-		if (!sourceAndTargetTypesMatch) {
-			return cloneUnlessOtherwiseSpecified(source, options)
-		} else if (sourceIsArray) {
-			return options.arrayMerge(target, source, options)
+	getKeys(source).forEach(function(key) {
+		if (!options.isMergeableObject(source[key]) || !target[key]) {
+			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
 		} else {
-			return mergeObject(target, source, options)
+			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
 		}
+	});
+	return destination
+}
+
+function deepmerge(target, source, options) {
+	options = options || {};
+	options.arrayMerge = options.arrayMerge || defaultArrayMerge;
+	options.isMergeableObject = options.isMergeableObject || isMergeableObject;
+
+	var sourceIsArray = Array.isArray(source);
+	var targetIsArray = Array.isArray(target);
+	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
+
+	if (!sourceAndTargetTypesMatch) {
+		return cloneUnlessOtherwiseSpecified(source, options)
+	} else if (sourceIsArray) {
+		return options.arrayMerge(target, source, options)
+	} else {
+		return mergeObject(target, source, options)
+	}
+}
+
+deepmerge.all = function deepmergeAll(array, options) {
+	if (!Array.isArray(array)) {
+		throw new Error('first argument should be an array')
 	}
 
-	deepmerge.all = function deepmergeAll(array, options) {
-		if (!Array.isArray(array)) {
-			throw new Error('first argument should be an array')
-		}
+	return array.reduce(function(prev, next) {
+		return deepmerge(prev, next, options)
+	}, {})
+};
 
-		return array.reduce(function(prev, next) {
-			return deepmerge(prev, next, options)
-		}, {})
-	};
+var deepmerge_1 = deepmerge;
 
-	var deepmerge_1 = deepmerge;
-
-	return deepmerge_1;
-
-}));
+module.exports = deepmerge_1;
 
 },{}],16:[function(_dereq_,module,exports){
 module.exports = function () {
@@ -5283,6 +5277,17 @@ function shim (element, value) {
       ms: function (c) { return 'milisegundo' + (c === 1 ? '' : 's') },
       decimal: ','
     },
+    et: {
+      y: function (c) { return 'aasta' + (c === 1 ? '' : 't') },
+      mo: function (c) { return 'kuu' + (c === 1 ? '' : 'd') },
+      w: function (c) { return 'nädal' + (c === 1 ? '' : 'at') },
+      d: function (c) { return 'päev' + (c === 1 ? '' : 'a') },
+      h: function (c) { return 'tund' + (c === 1 ? '' : 'i') },
+      m: function (c) { return 'minut' + (c === 1 ? '' : 'it') },
+      s: function (c) { return 'sekund' + (c === 1 ? '' : 'it') },
+      ms: function (c) { return 'millisekund' + (c === 1 ? '' : 'it') },
+      decimal: ','
+    },
     fa: {
       y: 'سال',
       mo: 'ماه',
@@ -5460,6 +5465,17 @@ function shim (element, value) {
       m: function (c) { return ['minutė', 'minutės', 'minučių'][getLithuanianForm(c)] },
       s: function (c) { return ['sekundė', 'sekundės', 'sekundžių'][getLithuanianForm(c)] },
       ms: function (c) { return ['milisekundė', 'milisekundės', 'milisekundžių'][getLithuanianForm(c)] },
+      decimal: ','
+    },
+    lv: {
+      y: function (c) { return ['gads', 'gadi'][getLatvianForm(c)] },
+      mo: function (c) { return ['mēnesis', 'mēneši'][getLatvianForm(c)] },
+      w: function (c) { return ['nedēļa', 'nedēļas'][getLatvianForm(c)] },
+      d: function (c) { return ['diena', 'dienas'][getLatvianForm(c)] },
+      h: function (c) { return ['stunda', 'stundas'][getLatvianForm(c)] },
+      m: function (c) { return ['minūte', 'minūtes'][getLatvianForm(c)] },
+      s: function (c) { return ['sekunde', 'sekundes'][getLatvianForm(c)] },
+      ms: function (c) { return ['milisekunde', 'milisekundes'][getLatvianForm(c)] },
       decimal: ','
     },
     ms: {
@@ -5677,7 +5693,7 @@ function shim (element, value) {
   function getDictionary (options) {
     var languagesFromOptions = [options.language]
 
-    if (options.hasOwnProperty('fallbacks')) {
+    if (has(options, 'fallbacks')) {
       if (isArray(options.fallbacks) && options.fallbacks.length) {
         languagesFromOptions = languagesFromOptions.concat(options.fallbacks)
       } else {
@@ -5687,9 +5703,9 @@ function shim (element, value) {
 
     for (var i = 0; i < languagesFromOptions.length; i++) {
       var languageToTry = languagesFromOptions[i]
-      if (options.languages.hasOwnProperty(languageToTry)) {
+      if (has(options.languages, languageToTry)) {
         return options.languages[languageToTry]
-      } else if (languages.hasOwnProperty(languageToTry)) {
+      } else if (has(languages, languageToTry)) {
         return languages[languageToTry]
       }
     }
@@ -5716,7 +5732,7 @@ function shim (element, value) {
 
       // What's the number of full units we can fit?
       if (i + 1 === len) {
-        if (options.hasOwnProperty('maxDecimalPoints')) {
+        if (has(options, 'maxDecimalPoints')) {
           // We need to use this expValue to avoid rounding functionality of toFixed call
           var expValue = Math.pow(10, options.maxDecimalPoints)
           var unitCountFloat = (ms / unitMS)
@@ -5789,10 +5805,12 @@ function shim (element, value) {
 
   function render (count, type, dictionary, options) {
     var decimal
-    if (options.decimal === void 0) {
+    if (has(options, 'decimal')) {
+      decimal = options.decimal
+    } else if (has(dictionary, 'decimal')) {
       decimal = dictionary.decimal
     } else {
-      decimal = options.decimal
+      decimal = '.'
     }
 
     var countStr = count.toString().replace('.', decimal)
@@ -5813,7 +5831,7 @@ function shim (element, value) {
     for (var i = 1; i < arguments.length; i++) {
       source = arguments[i]
       for (var prop in source) {
-        if (source.hasOwnProperty(prop)) {
+        if (has(source, prop)) {
           destination[prop] = source[prop]
         }
       }
@@ -5873,6 +5891,15 @@ function shim (element, value) {
     }
   }
 
+  // Internal helper function for Latvian language.
+  function getLatvianForm (c) {
+    if (c === 1 || (c % 10 === 1 && c % 100 !== 11)) {
+      return 0
+    } else {
+      return 1
+    }
+  }
+
   // Internal helper function for Arabic language.
   function getArabicForm (c) {
     if (c <= 2) { return 0 }
@@ -5886,10 +5913,14 @@ function shim (element, value) {
     return Object.prototype.toString.call(arg) === '[object Array]'
   }
 
+  function has (obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key)
+  }
+
   humanizeDuration.getSupportedLanguages = function getSupportedLanguages () {
     var result = []
     for (var language in languages) {
-      if (languages.hasOwnProperty(language) && language !== 'gr') {
+      if (has(languages, language) && language !== 'gr') {
         result.push(language)
       }
     }
@@ -14530,7 +14561,7 @@ function wrappy (fn, cb) {
 },{}],86:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14586,7 +14617,7 @@ module.exports={
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
-    "deepmerge": "3.3.0",
+    "deepmerge": "4.0.0",
     "defined": "1.0.0",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
@@ -14594,7 +14625,7 @@ module.exports={
     "filesize": "4.1.2",
     "get-form-data": "2.0.0",
     "hidden": "1.1.1",
-    "humanize-duration": "3.18.0",
+    "humanize-duration": "3.20.1",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -14609,19 +14640,19 @@ module.exports={
     "websocket-stream": "5.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.4.5",
+    "@babel/core": "7.5.5",
     "@babel/polyfill": "7.4.4",
-    "@babel/preset-env": "7.4.5",
-    "audit-ci": "2.0.1",
-    "autoprefixer": "9.6.0",
+    "@babel/preset-env": "7.5.5",
+    "audit-ci": "2.3.0",
+    "autoprefixer": "9.6.1",
     "babel-eslint": "10.0.2",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
-    "browserify": "16.2.3",
+    "browserify": "16.5.0",
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
-    "del": "4.1.1",
-    "eslint": "5.16.0",
+    "del": "5.0.0",
+    "eslint": "6.1.0",
     "fancy-log": "1.3.3",
     "glob": "7.1.4",
     "gulp": "4.0.2",
@@ -14630,14 +14661,14 @@ module.exports={
     "gulp-concat": "2.6.1",
     "gulp-connect": "5.7.0",
     "gulp-derequire": "2.1.0",
-    "gulp-if": "2.0.2",
+    "gulp-if": "3.0.0",
     "gulp-inject-string": "1.1.2",
-    "gulp-load-plugins": "1.6.0",
+    "gulp-load-plugins": "2.0.1",
     "gulp-plumber": "1.2.1",
     "gulp-postcss": "8.0.0",
     "gulp-rename": "1.4.0",
     "gulp-sourcemaps": "2.6.5",
-    "gulp-standard": "12.0.0",
+    "gulp-standard": "13.1.0",
     "gulp-stylus": "2.7.0",
     "gulp-terser": "1.2.0",
     "gulp-todo": "7.1.1",
@@ -14645,8 +14676,7 @@ module.exports={
     "nib": "1.1.2",
     "router": "1.3.3",
     "ssl-root-cas": "1.3.1",
-    "standard": "12.0.1",
-    "tape": "4.10.2",
+    "tape": "4.11.0",
     "tape-catch": "1.0.6",
     "tape-run": "6.0.0",
     "vinyl-buffer": "1.0.1",
@@ -14738,14 +14768,8 @@ var VideomailClient = function VideomailClient(options) {
 
       if (!building && !container.isBuilt()) {
         building = true;
-
-        try {
-          container.build();
-        } catch (exc) {
-          throw exc;
-        } finally {
-          building = false;
-        }
+        container.build();
+        building = false;
       }
     });
   }
@@ -15091,7 +15115,7 @@ var _default = {
   audio: {
     enabled: false,
     // set to true for experimential audio recording
-    'switch': false,
+    switch: false,
     // enables a switcher for audio recording (on/off)
     volume: 0.2,
     // must be between 0 .. 1 but 0.20 is recommeded to avoid
@@ -15131,11 +15155,11 @@ var _default = {
     encoding: 'Encoding',
     limitReached: 'Limit reached',
     buttons: {
-      'record': 'Record video',
-      'recordAgain': 'Record again',
-      'resume': 'Resume',
-      'pause': 'Pause',
-      'preview': 'Preview'
+      record: 'Record video',
+      recordAgain: 'Record again',
+      resume: 'Resume',
+      pause: 'Pause',
+      preview: 'Preview'
     }
   },
   notifier: {
@@ -16209,11 +16233,11 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 var VIDEOMAIL_ERR_NAME = 'Videomail Error';
 var VideomailError = (0, _createError.default)(Error, VIDEOMAIL_ERR_NAME, {
-  'explanation': undefined,
-  'logLines': undefined,
-  'useragent': undefined,
-  'url': undefined,
-  'stack': undefined
+  explanation: undefined,
+  logLines: undefined,
+  useragent: undefined,
+  url: undefined,
+  stack: undefined
 }); // shim pretty to exclude stack always
 
 var pretty = function pretty(anything) {
@@ -16760,7 +16784,7 @@ var Buttons = function Buttons(container, options) {
         checked: options.checked
       });
       radioButtonGroup = (0, _hyperscript.default)('span.radioGroup', radioButtonElement, (0, _hyperscript.default)('label', {
-        'htmlFor': options.id
+        htmlFor: options.id
       }, options.label)); // double check that submit button is already in the buttonsElement container as a child?
 
       if (submitButton && (0, _contains.default)(buttonsElement, submitButton)) {
@@ -17417,18 +17441,20 @@ var Container = function Container(options) {
 
   function submitVideomail(formData, method, cb) {
     var FORM_FIELDS = {
-      'subject': options.selectors.subjectInputName,
-      'from': options.selectors.fromInputName,
-      'to': options.selectors.toInputName,
-      'body': options.selectors.bodyInputName,
-      'key': options.selectors.keyInputName,
-      'parentKey': options.selectors.parentKeyInputName,
-      'sendCopy': options.selectors.sendCopyInputName
+      subject: options.selectors.subjectInputName,
+      from: options.selectors.fromInputName,
+      to: options.selectors.toInputName,
+      body: options.selectors.bodyInputName,
+      key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
+      sendCopy: options.selectors.sendCopyInputName
     };
     var videomailFormData = {};
     Object.keys(FORM_FIELDS).forEach(function (key) {
-      if (formData.hasOwnProperty(FORM_FIELDS[key])) {
-        videomailFormData[key] = formData[FORM_FIELDS[key]];
+      var formFieldValue = FORM_FIELDS[key];
+
+      if (formFieldValue in formData) {
+        videomailFormData[key] = formData[formFieldValue];
       }
     });
 

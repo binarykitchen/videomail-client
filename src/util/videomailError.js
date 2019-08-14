@@ -8,11 +8,11 @@ import Resource from './../resource'
 const VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
 const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
-  'explanation': undefined,
-  'logLines': undefined,
-  'useragent': undefined,
-  'url': undefined,
-  'stack': undefined
+  explanation: undefined,
+  logLines: undefined,
+  useragent: undefined,
+  url: undefined,
+  stack: undefined
 })
 
 // shim pretty to exclude stack always

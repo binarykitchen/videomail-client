@@ -220,20 +220,22 @@ var Container = function (options) {
 
   function submitVideomail (formData, method, cb) {
     const FORM_FIELDS = {
-      'subject': options.selectors.subjectInputName,
-      'from': options.selectors.fromInputName,
-      'to': options.selectors.toInputName,
-      'body': options.selectors.bodyInputName,
-      'key': options.selectors.keyInputName,
-      'parentKey': options.selectors.parentKeyInputName,
-      'sendCopy': options.selectors.sendCopyInputName
+      subject: options.selectors.subjectInputName,
+      from: options.selectors.fromInputName,
+      to: options.selectors.toInputName,
+      body: options.selectors.bodyInputName,
+      key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
+      sendCopy: options.selectors.sendCopyInputName
     }
 
     const videomailFormData = {}
 
     Object.keys(FORM_FIELDS).forEach(function (key) {
-      if (formData.hasOwnProperty(FORM_FIELDS[key])) {
-        videomailFormData[key] = formData[FORM_FIELDS[key]]
+      const formFieldValue = FORM_FIELDS[key]
+
+      if (formFieldValue in formData) {
+        videomailFormData[key] = formData[formFieldValue]
       }
     })
 
