@@ -251,3 +251,4 @@ exports.examples = gulp.series(lint,
 
 exports.build = build
 exports.default = build
+exports.lint = lint

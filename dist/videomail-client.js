@@ -614,30 +614,8 @@ Date.now = Date.now || function now() {
 
 }).call(this,_dereq_("buffer").Buffer)
 },{"buffer":8}],4:[function(_dereq_,module,exports){
-var toBuffer = _dereq_('typedarray-to-buffer')
-var isFloat32Array = _dereq_('validate.io-float32array')
+var r=_dereq_("typedarray-to-buffer"),a=_dereq_("validate.io-float32array");module.exports=function(e){if(!e)throw new Error("A Float32Array parameter is missing.");if(!a(e))throw new Error("The parameter is not a Float32Array.");this.toBuffer=function(){var a,t=e.length,o=new Int16Array(t);for(a=0;a<t;a++)o[a]=32767*Math.min(1,e[a]);return r(o)}};
 
-module.exports = function (float32Array) {
-  if (!float32Array) {
-    throw new Error('A Float32Array parameter is missing.')
-  }
-
-  if (!isFloat32Array(float32Array)) {
-    throw new Error('The parameter is not a Float32Array.')
-  }
-
-  this.toBuffer = function () {
-    var l = float32Array.length
-    var arr = new Int16Array(l)
-    var i
-
-    for (i = 0; i < l; i++) {
-      arr[i] = Math.min(1, float32Array[i]) * 0x7FFF
-    }
-
-    return toBuffer(arr)
-  }
-}
 
 },{"typedarray-to-buffer":77,"validate.io-float32array":82}],5:[function(_dereq_,module,exports){
 'use strict'
@@ -2682,238 +2660,8 @@ function numberIsNaN (obj) {
 }
 
 },{"base64-js":5,"ieee754":34}],9:[function(_dereq_,module,exports){
-var toBuffer = _dereq_('typedarray-to-buffer')
-var atob = _dereq_('atob')
-var isBrowser = typeof document !== 'undefined' && typeof document.createElement === 'function'
+var t,e=_dereq_("typedarray-to-buffer"),n=_dereq_("atob"),a="undefined"!=typeof document&&"function"==typeof document.createElement;module.exports=function(i,r){var o=this;if((r=r||{}).image=r.image?r.image:{},r.image.types=r.image.types?r.image.types:[],r.image.types.length>2)throw new Error("Too many image types are specified!");r.image.types.length<1&&(r.image.types=a?["webp","jpeg"]:["png"]),r.image.quality||(r.image.quality=.5);var u=parseFloat(r.image.quality);function g(t){var e;return r.image.types[t]&&(e="image/"+r.image.types[t]),e}function f(t,e){var n=t&&t.match(e);return n&&r.debug&&r.debug("Image type %s verified",e),n}function c(){var t;return a?(t=document.createElement("canvas")).width=t.height=1:t=i,t}function l(t,e){try{c().toDataURL(t,function(n,a){n?e(n):e(null,f(a,t))})}catch(t){e(null,!1)}}function m(t){var e;try{var n=c();e=f(n.toDataURL&&n.toDataURL(t),t)}catch(e){r.debug&&r.logger.debug("Failed to call toDataURL() on canvas for image type %s",t)}return e}function y(t){var e=g(0);if(!t)return function(t){return m(t)||r.image.types[1]&&m(t=g(1))||(t=null),!t&&r.debug&&r.logger.debug("Unable to verify image type"),t}(e);!function(t,e){l(t,function(n,a){n?e(n):a?e(null,t):l(t=g(1),function(n,a){n?e(n):e(null,a?t:null)})})}(e,t)}function p(t){var a,i=t.split(",")[1];if("function"==typeof n)a=n(i);else{if("function"!=typeof o.constructor.atob)throw new Error("atob function is missing");a=o.constructor.atob(i)}for(var r=new Uint8Array(a.length),u=0,g=a.length;u<g;u++)r[u]=a.charCodeAt(u);return e(r)}this.toBuffer=function(t){if(!t)return(n=o.getImageType())&&(e=p(i.toDataURL(n,u))),e;var e,n;!function(t){o.getImageType(function(e,n){e?t(e):n?i.toDataURL(n,function(e,n){e?t(e):t(null,p(n))}):t()})}(t)},this.getImageType=function(e){if(!e)return t&&a||(t=y()),t;t&&a?e(null,t):y(function(n,a){n?e(n):e(null,t=a)})}};
 
-// cached, used only once for browser environments
-var verifiedImageType
-
-module.exports = function (canvas, options) {
-  var self = this
-
-  options = options || {}
-  options.image = options.image ? options.image : {}
-  options.image.types = options.image.types ? options.image.types : []
-
-  // validate some options this class needs
-  if (options.image.types.length > 2) {
-    throw new Error('Too many image types are specified!')
-  } else if (options.image.types.length < 1) {
-    // Set a default image type, just to be robust
-    options.image.types = isBrowser ? ['webp', 'jpeg'] : ['png']
-  }
-
-  if (!options.image.quality) {
-    options.image.quality = 0.5 // default
-  }
-
-  var quality = parseFloat(options.image.quality)
-
-  function composeImageType (index) {
-    var imageType
-
-    if (options.image.types[index]) {
-      imageType = 'image/' + options.image.types[index]
-    }
-
-    return imageType
-  }
-
-  function isMatch (uri, imageType) {
-    var match = uri && uri.match(imageType)
-
-    match && options.debug && options.debug('Image type %s verified', imageType)
-
-    return match
-  }
-
-  // Performance tweak, we do not need a big canvas for finding out the supported image type
-  function getTestCanvas () {
-    var testCanvas
-
-    if (isBrowser) {
-      testCanvas = document.createElement('canvas')
-      testCanvas.width = testCanvas.height = 1
-    } else {
-      testCanvas = canvas
-    }
-
-    return testCanvas
-  }
-
-  function canvasSupportsImageTypeAsync (imageType, cb) {
-    try {
-      getTestCanvas().toDataURL(imageType, function (err, uri) {
-        if (err) {
-          cb(err)
-        } else {
-          cb(null, isMatch(uri, imageType))
-        }
-      })
-    } catch (exc) {
-      cb(null, false)
-    }
-  }
-
-  function canvasSupportsImageTypeSync (imageType) {
-    var match
-
-    try {
-      var testCanvas = getTestCanvas()
-      var uri = testCanvas.toDataURL && testCanvas.toDataURL(imageType)
-
-      match = isMatch(uri, imageType)
-    } catch (exc) {
-      // Can happen when i.E. a spider is coming. Just be robust here and continue.
-      options.debug &&
-      options.logger.debug('Failed to call toDataURL() on canvas for image type %s', imageType)
-    }
-
-    return match
-  }
-
-  function verifyImageTypeAsync (imageType, cb) {
-    canvasSupportsImageTypeAsync(imageType, function (err, match) {
-      if (err) {
-        cb(err)
-      } else {
-        if (match) {
-          cb(null, imageType)
-        } else {
-          imageType = composeImageType(1)
-
-          canvasSupportsImageTypeAsync(imageType, function (err, match) {
-            if (err) {
-              cb(err)
-            } else {
-              cb(null, match ? imageType : null)
-            }
-          })
-        }
-      }
-    })
-  }
-
-  function verifyImageTypeSync (imageType) {
-    if (!canvasSupportsImageTypeSync(imageType)) {
-      if (options.image.types[1]) {
-        imageType = composeImageType(1)
-
-        if (!canvasSupportsImageTypeSync(imageType)) {
-          imageType = null
-        }
-      } else {
-        imageType = null
-      }
-    }
-
-    !imageType && options.debug && options.logger.debug('Unable to verify image type')
-
-    return imageType
-  }
-
-  // callbacks are needed for server side tests
-  function verifyImageType (cb) {
-    var imageType = composeImageType(0)
-
-    if (cb) {
-      verifyImageTypeAsync(imageType, cb)
-    } else {
-      return verifyImageTypeSync(imageType)
-    }
-  }
-
-  // this method is proven to be fast, see
-  // http://jsperf.com/data-uri-to-buffer-performance/3
-  function uriToBuffer (uri) {
-    var uriSplitted = uri.split(',')[1]
-    var bytes
-
-    // Beware that the atob function might be a static one for server side tests
-    if (typeof (atob) === 'function') {
-      bytes = atob(uriSplitted)
-    } else if (typeof (self.constructor.atob) === 'function') {
-      bytes = self.constructor.atob(uriSplitted)
-    } else {
-      throw new Error('atob function is missing')
-    }
-
-    var arr = new Uint8Array(bytes.length)
-
-    // http://mrale.ph/blog/2014/12/24/array-length-caching.html
-    for (var i = 0, l = bytes.length; i < l; i++) {
-      arr[i] = bytes.charCodeAt(i)
-    }
-
-    return toBuffer(arr)
-  }
-
-  function toBufferSync () {
-    var imageType = self.getImageType()
-    var buffer
-
-    if (imageType) {
-      var uri = canvas.toDataURL(imageType, quality)
-      buffer = uriToBuffer(uri)
-    }
-
-    return buffer
-  }
-
-  function toBufferAsync (cb) {
-    self.getImageType(function (err, imageType) {
-      if (err) {
-        cb(err)
-      } else if (!imageType) {
-        cb()
-      } else {
-        canvas.toDataURL(imageType, function (err, uri) {
-          if (err) {
-            cb(err)
-          } else {
-            cb(null, uriToBuffer(uri))
-          }
-        })
-      }
-    })
-  }
-
-  this.toBuffer = function (cb) {
-    if (cb) {
-      toBufferAsync(cb)
-    } else {
-      return toBufferSync()
-    }
-  }
-
-  // browsers do not need a callback, but tests do
-  this.getImageType = function (cb) {
-    // only run for the first time this constructor is called and
-    // cache result for the next calls
-    if (cb) {
-      if (!verifiedImageType || !isBrowser) {
-        verifyImageType(function (err, newVerifiedImageType) {
-          if (err) {
-            cb(err)
-          } else {
-            verifiedImageType = newVerifiedImageType
-            cb(null, verifiedImageType)
-          }
-        })
-      } else {
-        cb(null, verifiedImageType)
-      }
-    } else {
-      // on the browser side we do cache it for speed
-      if (!verifiedImageType || !isBrowser) {
-        verifiedImageType = verifyImageType()
-      }
-
-      return verifiedImageType
-    }
-  }
-}
 
 },{"atob":3,"typedarray-to-buffer":77}],10:[function(_dereq_,module,exports){
 // contains, add, remove, toggle
@@ -14561,7 +14309,7 @@ function wrappy (fn, cb) {
 },{}],86:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14612,8 +14360,8 @@ module.exports={
   "dependencies": {
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
-    "audio-sample": "1.0.5",
-    "canvas-to-buffer": "1.0.14",
+    "audio-sample": "1.1.0",
+    "canvas-to-buffer": "1.1.0",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "create-error": "0.3.1",
@@ -14652,7 +14400,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
     "del": "5.0.0",
-    "eslint": "6.1.0",
+    "eslint": "6.2.1",
     "fancy-log": "1.3.3",
     "glob": "7.1.4",
     "gulp": "4.0.2",
@@ -14678,7 +14426,7 @@ module.exports={
     "ssl-root-cas": "1.3.1",
     "tape": "4.11.0",
     "tape-catch": "1.0.6",
-    "tape-run": "6.0.0",
+    "tape-run": "6.0.1",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.1"
@@ -15395,7 +15143,7 @@ function _default(options) {
 },{"./constants":88,"superagent":70}],92:[function(_dereq_,module,exports){
 "use strict";
 
-module.exports = '@-webkit-keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{width:100%;height:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .facingMode,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .facingMode{right:.7em;bottom:.6em;background:rgba(10,10,10,.3);color:hsla(0,0%,96.1%,.9);font-family:monospace;border:none;padding:.1em .3em;font-size:1.2em;z-index:10;outline:none;-webkit-transition:all .2s ease;-o-transition:all .2s ease;transition:all .2s ease}.videomail .facingMode:hover{background:rgba(50,50,50,.7);cursor:pointer}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:rgba(10,10,10,.8);padding:.4em .4em .3em;-webkit-transition:all 1s ease;-o-transition:all 1s ease;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:blink 1s infinite;animation:blink 1s infinite}.videomail .notifier{overflow:hidden;-webkit-box-sizing:border-box;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
+module.exports = '@-webkit-keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{width:100%;height:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{margin:0;height:auto}.videomail .countdown,.videomail .facingMode,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{width:100%;top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%)}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{text-align:center;text-shadow:0 0 2px #fff}.videomail .countdown,.videomail .pausedHeader{opacity:.85;font-size:440%}.videomail .pausedHint{font-size:150%}.videomail .facingMode{right:.7em;bottom:.6em;background:rgba(10,10,10,.3);color:hsla(0,0%,96.1%,.9);font-family:monospace;border:none;padding:.1em .3em;font-size:1.2em;z-index:10;outline:none;-webkit-transition:all .2s ease;-o-transition:all .2s ease;transition:all .2s ease}.videomail .facingMode:hover{background:rgba(50,50,50,.7);cursor:pointer}.videomail .recordNote,.videomail .recordTimer{right:.7em;background:rgba(10,10,10,.8);padding:.3em .4em;-webkit-transition:all 1s ease;-o-transition:all 1s ease;transition:all 1s ease;color:#00d814;font-family:monospace;opacity:.9}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{content:"REC";-webkit-animation:blink 1s infinite;animation:blink 1s infinite}.videomail .notifier{overflow:hidden;-webkit-box-sizing:border-box;box-sizing:border-box;height:100%}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}';
 
 },{}],93:[function(_dereq_,module,exports){
 "use strict";
