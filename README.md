@@ -38,7 +38,7 @@ To run the examples in your browser with Gulp, just do:
 
 1. `npm install`
 2. `gulp examples` to ignite a static server and
-3. open `https://localhost:8080` in your browser
+3. open `https://localhost:8443` in your browser
 
 (just ignore the invalid certificate warning, this will be fixed soon)
 
@@ -293,7 +293,7 @@ Otherwise only the videomail alias is in the form body and will have to call `vi
 <a name="whitelist"></a>
 ## Whitelist
 
-Examples will work right away on [https://localhost:8080](https://localhost:8080). This is because localhost is whitelisted on the remote Videomail server. `https://localhost` and `https://localhost:443` are whitelisted too for local development. Other IP addresses won't work. If this is a problem, contact me and I can whitelist more.
+Examples will work right away on [https://localhost:8443](https://localhost:8443). This is because localhost is whitelisted on the remote Videomail server. `https://localhost` and `https://localhost:443` are whitelisted too for local development. Other IP addresses won't work. If this is a problem, contact me and I can whitelist more.
 
 In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, just lodge a whitelist request at [https://videomail.io/whitelist](https://videomail.io/whitelist). Then you should get a new site name and a list of whitelisted URLs for your own usage pretty fast (within less than 48 hours).
 

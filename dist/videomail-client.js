@@ -14309,7 +14309,7 @@ function wrappy (fn, cb) {
 },{}],86:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14393,14 +14393,14 @@ module.exports={
     "@babel/preset-env": "7.5.5",
     "audit-ci": "2.3.0",
     "autoprefixer": "9.6.1",
-    "babel-eslint": "10.0.2",
+    "babel-eslint": "10.0.3",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
     "browserify": "16.5.0",
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
-    "del": "5.0.0",
-    "eslint": "6.2.1",
+    "del": "5.1.0",
+    "eslint": "6.2.2",
     "fancy-log": "1.3.3",
     "glob": "7.1.4",
     "gulp": "4.0.2",
@@ -14416,7 +14416,7 @@ module.exports={
     "gulp-postcss": "8.0.0",
     "gulp-rename": "1.4.0",
     "gulp-sourcemaps": "2.6.5",
-    "gulp-standard": "13.1.0",
+    "gulp-standard": "14.0.0",
     "gulp-stylus": "2.7.0",
     "gulp-terser": "1.2.0",
     "gulp-todo": "7.1.1",
@@ -15318,6 +15318,7 @@ var Browser = function Browser(options) {
   var isOkSafari = isSafari && browserVersion >= 11;
   var isOkIOS = isIOS && osVersion >= 11;
   var isBadIOS = isIOS && osVersion < 11;
+  var isHTTPS = window.location.protocol === 'https:';
   var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS;
   var self = this;
   var videoType;
@@ -15413,7 +15414,13 @@ var Browser = function Browser(options) {
   this.checkRecordingCapabilities = function () {
     var err;
 
-    if (!okBrowser || !this.canRecord()) {
+    if (!isHTTPS) {
+      err = _videomailError.default.create({
+        message: 'Sorry, your page is insecure'
+      }, 'Please switch to HTTPS to ensure all is encrypted.', options, {
+        classList: [_videomailError.default.BROWSER_PROBLEM]
+      });
+    } else if (!okBrowser || !this.canRecord()) {
       var classList = [];
 
       if (isBadIOS) {
@@ -16196,11 +16203,13 @@ VideomailError.create = function (err, explanation, options, parameters) {
           break;
 
         case 9:
-          var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
-          message = 'Security upgrade needed';
-          explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' + ' and enables encrypted videomail transfers.';
-          classList.push(VideomailError.BROWSER_PROBLEM);
-          break;
+          {
+            var newUrl = 'https:' + window.location.href.substring(window.location.protocol.length);
+            message = 'Security upgrade needed';
+            explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' + ' and enables encrypted videomail transfers.';
+            classList.push(VideomailError.BROWSER_PROBLEM);
+            break;
+          }
 
         case 11:
           message = 'Invalid State';
@@ -16229,70 +16238,74 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
 
     default:
-      var originalExplanation = explanation;
+      {
+        var originalExplanation = explanation;
 
-      if (explanation && _typeof(explanation) === 'object') {
-        explanation = pretty(explanation);
-      } // it can be that explanation itself is an error object
-      // error objects can be prettified to undefined sometimes
+        if (explanation && _typeof(explanation) === 'object') {
+          explanation = pretty(explanation);
+        } // it can be that explanation itself is an error object
+        // error objects can be prettified to undefined sometimes
 
 
-      if (!explanation && originalExplanation) {
-        if (originalExplanation.message) {
-          explanation = originalExplanation.message;
-        } else {
-          // tried toString before but nah
-          explanation = 'Inspected: ' + _util.default.inspect(originalExplanation, {
-            showHidden: true
-          });
-        }
-      }
-
-      if (err && typeof err === 'string') {
-        message = err;
-      } else {
-        if (err && err.message) {
-          message = pretty(err.message);
-        }
-
-        if (err && err.explanation) {
-          if (!explanation) {
-            explanation = pretty(err.explanation);
+        if (!explanation && originalExplanation) {
+          if (originalExplanation.message) {
+            explanation = originalExplanation.message;
           } else {
-            explanation += ';<br/>' + pretty(err.explanation);
+            // tried toString before but nah
+            explanation = 'Inspected: ' + _util.default.inspect(originalExplanation, {
+              showHidden: true
+            });
           }
         }
 
-        if (err && err.details) {
-          var details = pretty(err.details);
-
-          if (!explanation) {
-            explanation = details;
+        if (err) {
+          if (typeof err === 'string') {
+            message = err;
           } else {
-            explanation += ';<br/>' + details;
+            if (err.message) {
+              message = pretty(err.message);
+            }
+
+            if (err.explanation) {
+              if (!explanation) {
+                explanation = pretty(err.explanation);
+              } else {
+                explanation += ';<br/>' + pretty(err.explanation);
+              }
+            }
+
+            if (err.details) {
+              var details = pretty(err.details);
+
+              if (!explanation) {
+                explanation = details;
+              } else {
+                explanation += ';<br/>' + details;
+              }
+            }
+          }
+        } // for weird, undefined cases
+
+
+        if (!message) {
+          if (errType) {
+            message = errType;
+          }
+
+          if (!explanation && err) {
+            explanation = pretty(err, {
+              excludes: ['stack']
+            });
+          } // avoid dupes
+
+
+          if (pretty(message) === explanation) {
+            explanation = undefined;
           }
         }
-      } // for weird, undefined cases
 
-
-      if (!message) {
-        if (errType) {
-          message = errType;
-        }
-
-        if (!explanation && err) {
-          explanation = pretty(err, {
-            excludes: ['stack']
-          });
-        } // avoid dupes
-
-
-        if (pretty(message) === explanation) {
-          explanation = undefined;
-        }
+        break;
       }
-
-      break;
   }
 
   var logLines = null;

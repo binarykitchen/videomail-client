@@ -37,6 +37,7 @@ const Browser = function (options) {
   const isOkSafari = isSafari && browserVersion >= 11
   const isOkIOS = isIOS && osVersion >= 11
   const isBadIOS = isIOS && osVersion < 11
+  const isHTTPS = window.location.protocol === 'https:'
 
   const okBrowser =
     chromeBased ||
@@ -155,7 +156,13 @@ const Browser = function (options) {
   this.checkRecordingCapabilities = function () {
     var err
 
-    if (!okBrowser || !this.canRecord()) {
+    if (!isHTTPS) {
+      err = VideomailError.create({
+        message: 'Sorry, your page is insecure'
+      }, 'Please switch to HTTPS to ensure all is encrypted.', options, {
+        classList: [VideomailError.BROWSER_PROBLEM]
+      })
+    } else if (!okBrowser || !this.canRecord()) {
       const classList = []
 
       if (isBadIOS) {
