@@ -3,6 +3,6 @@
   "package-manager": "yarn",
   "report-type": "summary",
   "show-not-found": false,
-  "advisories": [],
+  "advisories": [1118],
   "whitelist": []
 }
