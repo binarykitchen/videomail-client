@@ -136,44 +136,55 @@ function lint () {
     }))
 }
 
-function connect (done) {
+function middleware () {
+  const router = new Router()
+
+  router.use(bodyParser.json())
+  router.use(send.json())
+
+  // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
+  router.post('/contact', function (req, res) {
+    log.info('Videomail data received (with meta data):', req.body)
+
+    // At this stage, a backend could store the videomail_key in req.body
+    // into a database for replay functionality
+
+    // Just an example to see that the backend can do anything with the data
+    res.json({
+      status: 'Inserted on ' + new Date().toISOString()
+    })
+  })
+
+  return [router]
+}
+
+const connectOptions = {
+  root: ['examples', 'dist'],
+  port: 8080,
+  debug: true,
+  livereload: false, // disabled since it's broken unfortunately, see https://github.com/intesso/connect-livereload/issues/79
+  middleware: middleware
+}
+
+function connectHttp (done) {
+  plugins.connect.server(connectOptions)
+  done()
+}
+
+function connectHttps (done) {
   const SSL_CERTS_PATH = path.join(__dirname, '/env/dev/ssl-certs/')
 
   sslRootCas
     .inject()
     .addFile(path.join(SSL_CERTS_PATH, 'server', 'my-root-ca.crt.pem'))
 
-  plugins.connect.server({
-    root: ['examples', 'dist'],
-    port: 8080,
-    debug: true,
-    livereload: false, // disabled since it's broken unfortunately, see https://github.com/intesso/connect-livereload/issues/79
+  plugins.connect.server(Object.assign({}, connectOptions, {
+    port: 8443,
     https: {
       key: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
       cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
-    },
-    middleware: function () {
-      const router = new Router()
-
-      router.use(bodyParser.json())
-      router.use(send.json())
-
-      // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
-      router.post('/contact', function (req, res) {
-        log.info('Videomail data received (with meta data):', req.body)
-
-        // At this stage, a backend could store the videomail_key in req.body
-        // into a database for replay functionality
-
-        // Just an example to see that the backend can do anything with the data
-        res.json({
-          status: 'Inserted on ' + new Date().toISOString()
-        })
-      })
-
-      return [router]
     }
-  })
+  }))
 
   done()
 }
@@ -245,7 +256,7 @@ exports.examples = gulp.series(lint,
     gulp.series(stylus, cleanJs, bundleWithWatchify),
     todo
   ),
-  connect,
+  gulp.parallel(connectHttp, connectHttps),
   watch
 )
 

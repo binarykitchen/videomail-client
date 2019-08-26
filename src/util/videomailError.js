@@ -231,13 +231,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = 'A webcam is needed but could not be found.'
           classList.push(VideomailError.WEBCAM_PROBLEM)
           break
-        case 9:
+        case 9: {
           const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
           message = 'Security upgrade needed'
           explanation = 'Click <a href="' + newUrl + '">here</a> to switch to HTTPs which is more safe ' +
                         ' and enables encrypted videomail transfers.'
           classList.push(VideomailError.BROWSER_PROBLEM)
           break
+        }
         case 11:
           message = 'Invalid State'
           explanation = 'The object is in an invalid, unusable state.'
@@ -262,7 +263,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       explanation = pretty(err)
       break
 
-    default:
+    default: {
       const originalExplanation = explanation
 
       if (explanation && typeof explanation === 'object') {
@@ -282,28 +283,30 @@ VideomailError.create = function (err, explanation, options, parameters) {
         }
       }
 
-      if (err && typeof err === 'string') {
-        message = err
-      } else {
-        if (err && err.message) {
-          message = pretty(err.message)
-        }
-
-        if (err && err.explanation) {
-          if (!explanation) {
-            explanation = pretty(err.explanation)
-          } else {
-            explanation += ';<br/>' + pretty(err.explanation)
+      if (err) {
+        if (typeof err === 'string') {
+          message = err
+        } else {
+          if (err.message) {
+            message = pretty(err.message)
           }
-        }
 
-        if (err && err.details) {
-          var details = pretty(err.details)
+          if (err.explanation) {
+            if (!explanation) {
+              explanation = pretty(err.explanation)
+            } else {
+              explanation += ';<br/>' + pretty(err.explanation)
+            }
+          }
 
-          if (!explanation) {
-            explanation = details
-          } else {
-            explanation += ';<br/>' + details
+          if (err.details) {
+            const details = pretty(err.details)
+
+            if (!explanation) {
+              explanation = details
+            } else {
+              explanation += ';<br/>' + details
+            }
           }
         }
       }
@@ -325,6 +328,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       }
 
       break
+    }
   }
 
   var logLines = null
