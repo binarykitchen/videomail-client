@@ -332,7 +332,7 @@ https://cdnjs.com/libraries/videomail-client
 ## Addons
 
 There is a Videomail WordPress addon, wicked!
-https://ninjaforms.com/extensions/videomail/
+https://wordpress.org/plugins/videomail-for-ninja-forms/
 
 It's an extension of the popular form builder called Ninja Forms. When the videomail addon is installed, then you can just drag and drop a live webcam input into the form! And tell what should happen upon submission. So easy.
 
@@ -380,4 +380,4 @@ Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io
 
 ### Final philosophy
 
-This planet is completely sold. And talk is overrated. That's why my primary goal is not to turn this into a commercial product but to promote a cool but underestimated language: Sign Language.
+This planet is completely sold. And talk is overrated. That's why my primary goal is not to turn this into a commercial product, yet to promote a cool but underestimated language: Sign Language.
