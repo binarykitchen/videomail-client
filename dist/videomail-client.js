@@ -4465,177 +4465,180 @@ function deterministicDecirc (val, k, stack, parent) {
  *
  * @copyright 2019 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 4.1.2
+ * @version 4.2.0
  */
 (function (global) {
-	var b = /^(b|B)$/,
-	    symbol = {
-		iec: {
-			bits: ["b", "Kib", "Mib", "Gib", "Tib", "Pib", "Eib", "Zib", "Yib"],
-			bytes: ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
-		},
-		jedec: {
-			bits: ["b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb"],
-			bytes: ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-		}
-	},
-	    fullform = {
-		iec: ["", "kibi", "mebi", "gibi", "tebi", "pebi", "exbi", "zebi", "yobi"],
-		jedec: ["", "kilo", "mega", "giga", "tera", "peta", "exa", "zetta", "yotta"]
-	};
+  var b = /^(b|B)$/,
+      symbol = {
+    iec: {
+      bits: ["b", "Kib", "Mib", "Gib", "Tib", "Pib", "Eib", "Zib", "Yib"],
+      bytes: ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
+    },
+    jedec: {
+      bits: ["b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb"],
+      bytes: ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    }
+  },
+      fullform = {
+    iec: ["", "kibi", "mebi", "gibi", "tebi", "pebi", "exbi", "zebi", "yobi"],
+    jedec: ["", "kilo", "mega", "giga", "tera", "peta", "exa", "zetta", "yotta"]
+  };
+  /**
+   * filesize
+   *
+   * @method filesize
+   * @param  {Mixed}   arg        String, Int or Float to transform
+   * @param  {Object}  descriptor [Optional] Flags
+   * @return {String}             Readable file size String
+   */
 
-	/**
-  * filesize
-  *
-  * @method filesize
-  * @param  {Mixed}   arg        String, Int or Float to transform
-  * @param  {Object}  descriptor [Optional] Flags
-  * @return {String}             Readable file size String
-  */
-	function filesize(arg) {
-		var descriptor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  function filesize(arg) {
+    var descriptor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var result = [],
+        val = 0,
+        e = void 0,
+        base = void 0,
+        bits = void 0,
+        ceil = void 0,
+        full = void 0,
+        fullforms = void 0,
+        locale = void 0,
+        localeOptions = void 0,
+        neg = void 0,
+        num = void 0,
+        output = void 0,
+        round = void 0,
+        unix = void 0,
+        separator = void 0,
+        spacer = void 0,
+        standard = void 0,
+        symbols = void 0;
 
-		var result = [],
-		    val = 0,
-		    e = void 0,
-		    base = void 0,
-		    bits = void 0,
-		    ceil = void 0,
-		    full = void 0,
-		    fullforms = void 0,
-		    locale = void 0,
-		    neg = void 0,
-		    num = void 0,
-		    output = void 0,
-		    round = void 0,
-		    unix = void 0,
-		    separator = void 0,
-		    spacer = void 0,
-		    standard = void 0,
-		    symbols = void 0;
+    if (isNaN(arg)) {
+      throw new TypeError("Invalid number");
+    }
 
-		if (isNaN(arg)) {
-			throw new TypeError("Invalid number");
-		}
+    bits = descriptor.bits === true;
+    unix = descriptor.unix === true;
+    base = descriptor.base || 2;
+    round = descriptor.round !== void 0 ? descriptor.round : unix ? 1 : 2;
+    locale = descriptor.locale !== void 0 ? descriptor.locale : "";
+    localeOptions = descriptor.localeOptions || {};
+    separator = descriptor.separator !== void 0 ? descriptor.separator : "";
+    spacer = descriptor.spacer !== void 0 ? descriptor.spacer : unix ? "" : " ";
+    symbols = descriptor.symbols || {};
+    standard = base === 2 ? descriptor.standard || "jedec" : "jedec";
+    output = descriptor.output || "string";
+    full = descriptor.fullform === true;
+    fullforms = descriptor.fullforms instanceof Array ? descriptor.fullforms : [];
+    e = descriptor.exponent !== void 0 ? descriptor.exponent : -1;
+    num = Number(arg);
+    neg = num < 0;
+    ceil = base > 2 ? 1000 : 1024; // Flipping a negative number to determine the size
 
-		bits = descriptor.bits === true;
-		unix = descriptor.unix === true;
-		base = descriptor.base || 2;
-		round = descriptor.round !== void 0 ? descriptor.round : unix ? 1 : 2;
-		locale = descriptor.locale !== void 0 ? descriptor.locale : "";
-		separator = descriptor.separator !== void 0 ? descriptor.separator : "";
-		spacer = descriptor.spacer !== void 0 ? descriptor.spacer : unix ? "" : " ";
-		symbols = descriptor.symbols || {};
-		standard = base === 2 ? descriptor.standard || "jedec" : "jedec";
-		output = descriptor.output || "string";
-		full = descriptor.fullform === true;
-		fullforms = descriptor.fullforms instanceof Array ? descriptor.fullforms : [];
-		e = descriptor.exponent !== void 0 ? descriptor.exponent : -1;
-		num = Number(arg);
-		neg = num < 0;
-		ceil = base > 2 ? 1000 : 1024;
+    if (neg) {
+      num = -num;
+    } // Determining the exponent
 
-		// Flipping a negative number to determine the size
-		if (neg) {
-			num = -num;
-		}
 
-		// Determining the exponent
-		if (e === -1 || isNaN(e)) {
-			e = Math.floor(Math.log(num) / Math.log(ceil));
+    if (e === -1 || isNaN(e)) {
+      e = Math.floor(Math.log(num) / Math.log(ceil));
 
-			if (e < 0) {
-				e = 0;
-			}
-		}
+      if (e < 0) {
+        e = 0;
+      }
+    } // Exceeding supported length, time to reduce & multiply
 
-		// Exceeding supported length, time to reduce & multiply
-		if (e > 8) {
-			e = 8;
-		}
 
-		if (output === "exponent") {
-			return e;
-		}
+    if (e > 8) {
+      e = 8;
+    }
 
-		// Zero is now a special case because bytes divide by 1
-		if (num === 0) {
-			result[0] = 0;
-			result[1] = unix ? "" : symbol[standard][bits ? "bits" : "bytes"][e];
-		} else {
-			val = num / (base === 2 ? Math.pow(2, e * 10) : Math.pow(1000, e));
+    if (output === "exponent") {
+      return e;
+    } // Zero is now a special case because bytes divide by 1
 
-			if (bits) {
-				val = val * 8;
 
-				if (val >= ceil && e < 8) {
-					val = val / ceil;
-					e++;
-				}
-			}
+    if (num === 0) {
+      result[0] = 0;
+      result[1] = unix ? "" : symbol[standard][bits ? "bits" : "bytes"][e];
+    } else {
+      val = num / (base === 2 ? Math.pow(2, e * 10) : Math.pow(1000, e));
 
-			result[0] = Number(val.toFixed(e > 0 ? round : 0));
-			result[1] = base === 10 && e === 1 ? bits ? "kb" : "kB" : symbol[standard][bits ? "bits" : "bytes"][e];
+      if (bits) {
+        val = val * 8;
 
-			if (unix) {
-				result[1] = standard === "jedec" ? result[1].charAt(0) : e > 0 ? result[1].replace(/B$/, "") : result[1];
+        if (val >= ceil && e < 8) {
+          val = val / ceil;
+          e++;
+        }
+      }
 
-				if (b.test(result[1])) {
-					result[0] = Math.floor(result[0]);
-					result[1] = "";
-				}
-			}
-		}
+      result[0] = Number(val.toFixed(e > 0 ? round : 0));
+      result[1] = base === 10 && e === 1 ? bits ? "kb" : "kB" : symbol[standard][bits ? "bits" : "bytes"][e];
 
-		// Decorating a 'diff'
-		if (neg) {
-			result[0] = -result[0];
-		}
+      if (unix) {
+        result[1] = standard === "jedec" ? result[1].charAt(0) : e > 0 ? result[1].replace(/B$/, "") : result[1];
 
-		// Applying custom symbol
-		result[1] = symbols[result[1]] || result[1];
+        if (b.test(result[1])) {
+          result[0] = Math.floor(result[0]);
+          result[1] = "";
+        }
+      }
+    } // Decorating a 'diff'
 
-		if (locale === true) {
-			result[0] = result[0].toLocaleString();
-		} else if (locale.length > 0) {
-			result[0] = result[0].toLocaleString(locale);
-		} else if (separator.length > 0) {
-			result[0] = result[0].toString().replace(".", separator);
-		}
 
-		// Returning Array, Object, or String (default)
-		if (output === "array") {
-			return result;
-		}
+    if (neg) {
+      result[0] = -result[0];
+    } // Applying custom symbol
 
-		if (full) {
-			result[1] = fullforms[e] ? fullforms[e] : fullform[standard][e] + (bits ? "bit" : "byte") + (result[0] === 1 ? "" : "s");
-		}
 
-		if (output === "object") {
-			return { value: result[0], symbol: result[1] };
-		}
+    result[1] = symbols[result[1]] || result[1];
 
-		return result.join(spacer);
-	}
+    if (locale === true) {
+      result[0] = result[0].toLocaleString();
+    } else if (locale.length > 0) {
+      result[0] = result[0].toLocaleString(locale, localeOptions);
+    } else if (separator.length > 0) {
+      result[0] = result[0].toString().replace(".", separator);
+    } // Returning Array, Object, or String (default)
 
-	// Partial application for functional programming
-	filesize.partial = function (opt) {
-		return function (arg) {
-			return filesize(arg, opt);
-		};
-	};
 
-	// CommonJS, AMD, script tag
-	if (typeof exports !== "undefined") {
-		module.exports = filesize;
-	} else if (typeof define === "function" && define.amd !== void 0) {
-		define(function () {
-			return filesize;
-		});
-	} else {
-		global.filesize = filesize;
-	}
+    if (output === "array") {
+      return result;
+    }
+
+    if (full) {
+      result[1] = fullforms[e] ? fullforms[e] : fullform[standard][e] + (bits ? "bit" : "byte") + (result[0] === 1 ? "" : "s");
+    }
+
+    if (output === "object") {
+      return {
+        value: result[0],
+        symbol: result[1]
+      };
+    }
+
+    return result.join(spacer);
+  } // Partial application for functional programming
+
+
+  filesize.partial = function (opt) {
+    return function (arg) {
+      return filesize(arg, opt);
+    };
+  }; // CommonJS, AMD, script tag
+
+
+  if (typeof exports !== "undefined") {
+    module.exports = filesize;
+  } else if (typeof define === "function" && define.amd !== void 0) {
+    define(function () {
+      return filesize;
+    });
+  } else {
+    global.filesize = filesize;
+  }
 })(typeof window !== "undefined" ? window : global);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
@@ -14309,7 +14312,7 @@ function wrappy (fn, cb) {
 },{}],86:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.7.3",
+  "version": "2.8.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -14336,9 +14339,9 @@ module.exports={
     "major": "./env/dev/release.sh --importance=major"
   },
   "engines": {
-    "node": ">=8.12.0",
-    "yarn": ">=1.3.0",
-    "npm": ">=5.4.0"
+    "node": "^10.16.3",
+    "yarn": "^1.17.3",
+    "npm": "^6.9.0"
   },
   "keywords": [
     "webcam",
@@ -14370,7 +14373,7 @@ module.exports={
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.1",
-    "filesize": "4.1.2",
+    "filesize": "4.2.0",
     "get-form-data": "2.0.0",
     "hidden": "1.1.1",
     "humanize-duration": "3.20.1",
@@ -14388,9 +14391,9 @@ module.exports={
     "websocket-stream": "5.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.5.5",
-    "@babel/polyfill": "7.4.4",
-    "@babel/preset-env": "7.5.5",
+    "@babel/core": "7.6.0",
+    "@babel/polyfill": "7.6.0",
+    "@babel/preset-env": "7.6.0",
     "audit-ci": "2.3.0",
     "autoprefixer": "9.6.1",
     "babel-eslint": "10.0.3",
@@ -14400,7 +14403,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
     "del": "5.1.0",
-    "eslint": "6.2.2",
+    "eslint": "6.3.0",
     "fancy-log": "1.3.3",
     "glob": "7.1.4",
     "gulp": "4.0.2",
@@ -19424,6 +19427,8 @@ var _animitter = _interopRequireDefault(_dereq_("animitter"));
 
 var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 
+var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
+
 var _userMedia = _interopRequireDefault(_dereq_("./userMedia"));
 
 var _events = _interopRequireDefault(_dereq_("./../../events"));
@@ -19445,16 +19450,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // credits http://1lineart.kulaone.com/#/
 var PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ';
 
-var Recorder = function Recorder(visuals, replay, options) {
-  _eventEmitter.default.call(this, options, 'Recorder'); // validate some options this class needs
+var Recorder = function Recorder(visuals, replay) {
+  var defaultOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+  _eventEmitter.default.call(this, defaultOptions, 'Recorder');
 
-  if (!options || !options.video || !options.video.fps) {
+  var browser = new _browser.default(defaultOptions);
+  var options = (0, _deepmerge.default)(defaultOptions, {
+    image: {
+      // automatically lower quality when on mobile
+      quality: browser.isMobile() ? defaultOptions.image.quality - 0.05 : defaultOptions.image.quality
+    }
+  }); // validate some options this class needs
+
+  if (!options.video || !options.video.fps) {
     throw _videomailError.default.create('FPS must be defined', options);
   }
 
   var self = this;
-  var browser = new _browser.default(options);
   var debug = options.debug;
   var loop = null;
   var originalAnimationFrameObject;
@@ -19991,18 +20004,18 @@ var Recorder = function Recorder(visuals, replay, options) {
       debug('$ %s', command, args ? (0, _safeJsonStringify.default)(args) : '');
       var commandObj = {
         command: command,
-        args: args // todo commented out because for some reasons server does not accept such a long
-        // array of many log lines. to examine later.
-        //
-        // add some useful debug info to examine weird stuff like this one
-        // UnprocessableError: Unable to encode a video with FPS near zero.
-        // todo consider removing this later or have it for debug=1 only?
-        //
-        // if (options.logger && options.logger.getLines) {
-        //   commandObj.logLines = options.logger.getLines()
-        // }
+        args: args
+      }; // todo commented out because for some reasons server does not accept such a long
+      // array of many log lines. to examine later.
+      //
+      // add some useful debug info to examine weird stuff like this one
+      // UnprocessableError: Unable to encode a video with FPS near zero.
+      // todo consider removing this later or have it for debug=1 only?
+      //
+      // if (options.logger && options.logger.getLines) {
+      //   commandObj.logLines = options.logger.getLines()
+      // }
 
-      };
       writeStream(Buffer.from((0, _safeJsonStringify.default)(commandObj)));
 
       if (cb) {
@@ -20531,7 +20544,7 @@ var _default = Recorder;
 exports.default = _default;
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"./../../constants":88,"./../../events":89,"./../../util/browser":94,"./../../util/eventEmitter":96,"./../../util/humanize":97,"./../../util/pretty":99,"./../../util/videomailError":101,"./userMedia":117,"animitter":2,"buffer":8,"canvas-to-buffer":9,"hidden":31,"hyperscript":33,"safe-json-stringify":67,"util":81,"websocket-stream":83}],116:[function(_dereq_,module,exports){
+},{"./../../constants":88,"./../../events":89,"./../../util/browser":94,"./../../util/eventEmitter":96,"./../../util/humanize":97,"./../../util/pretty":99,"./../../util/videomailError":101,"./userMedia":117,"animitter":2,"buffer":8,"canvas-to-buffer":9,"deepmerge":15,"hidden":31,"hyperscript":33,"safe-json-stringify":67,"util":81,"websocket-stream":83}],116:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

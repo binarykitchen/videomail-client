@@ -5,6 +5,7 @@ import h from 'hyperscript'
 import hidden from 'hidden'
 import animitter from 'animitter'
 import stringify from 'safe-json-stringify'
+import deepmerge from 'deepmerge'
 
 import UserMedia from './userMedia'
 
@@ -19,16 +20,24 @@ import VideomailError from './../../util/videomailError'
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
 
-const Recorder = function (visuals, replay, options) {
-  EventEmitter.call(this, options, 'Recorder')
+const Recorder = function (visuals, replay, defaultOptions = {}) {
+  EventEmitter.call(this, defaultOptions, 'Recorder')
+
+  const browser = new Browser(defaultOptions)
+
+  const options = deepmerge(defaultOptions, {
+    image: {
+      // automatically lower quality when on mobile
+      quality: browser.isMobile() ? defaultOptions.image.quality - 0.05 : defaultOptions.image.quality
+    }
+  })
 
   // validate some options this class needs
-  if (!options || !options.video || !options.video.fps) {
+  if (!options.video || !options.video.fps) {
     throw VideomailError.create('FPS must be defined', options)
   }
 
   const self = this
-  const browser = new Browser(options)
   const debug = options.debug
 
   var loop = null
