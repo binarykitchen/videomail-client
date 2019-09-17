@@ -10,6 +10,9 @@ test('Container:', function (t) {
       return new Container({
         video: {
           fps: 15
+        },
+        image: {
+
         }
       })
     })

@@ -1,21 +1,39 @@
 #!/bin/bash
-set -e
-set -o pipefail
-
-export GIT_MERGE_AUTOEDIT=no
-
-die() {
-    unset GIT_MERGE_AUTOEDIT
-    echo >&2 "☠ ☠ ☠ ☠ ☠ ☠ ☠  $@  ☠ ☠ ☠ ☠ ☠ ☠ ☠"
-    exit 1
-}
+set -eEuo pipefail
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
+DRY=false # $ DRY_RUN=1 env/dev/release.sh
 
-printf "${GREEN}Checking for vulnerabilities...\n${NC}"
+if [[ ! -z ${DRY_RUN+x} ]]; then
+  DRY=true
+fi
+
+safe_run() {
+    if $DRY; then
+        echo dry: $@
+    else
+        echo executing: $@
+        $@
+    fi
+}
+
+info() {
+    printf "${GREEN}$@${NC}"
+}
+
+safe_run export GIT_MERGE_AUTOEDIT=no
+
+die() {
+    unset GIT_MERGE_AUTOEDIT
+    echo >&2 "☠  ☠  ☠  ☠  ☠  ☠  ☠  $@ ☠  ☠  ☠  ☠  ☠  ☠  ☠"
+    exit 1
+}
+
+info "Checking for vulnerabilities...\n"
+
 # thanks to set -e it will exit here if audit fails
-yarn run audit
+safe_run yarn run audit
 
 # todo: figure out an elegant solution to avoid duplicate code
 # when having three bash scripts for patches, features and releases
@@ -35,59 +53,59 @@ case $i in
 esac
 done
 
-if [[ -z "$IMPORTANCE" ]]; then
-    die "Aborting the bump! Argument --importance is missing."
+if [[ -z ${IMPORTANCE:-} ]]; then
+    die "Aborting the bump! Argument --importance is missing"
 fi
 
 # ensures all is commited
 if [[ `git status --porcelain` ]]; then
-    die "Aborting the bump! You have uncommitted changes."
+    die "Aborting the bump! You have uncommitted changes"
 fi
 
 # Ensures master is up to date
-git checkout master
-git pull
-git checkout develop
+safe_run git checkout master
+safe_run git pull
+safe_run git checkout develop
 
-read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
+read VERSION <<< $(safe_run gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
-git checkout master
-git push
-git checkout develop
-git push
+safe_run git checkout master
+safe_run git push
+safe_run git checkout develop
+safe_run git push
 
 # Start a new release
-git flow release start $VERSION
+safe_run git flow release start $VERSION
 
 # This will increment version in package.json
-gulp bumpVersion --write --version=$VERSION
+safe_run gulp bumpVersion --write --version=$VERSION
 
 # Ensure dependencies are okay
-yarn
+safe_run yarn
 
 # Rebuild all assets
-gulp build --minify
+safe_run gulp build --minify
 
-git add -A
-git commit -am "Final commit of version $VERSION" --no-edit
+safe_run git add -A
+safe_run git commit -am "Final commit of version $VERSION" --no-edit
 
-printf "${GREEN}Logging to npm ...\n${NC}"
-yarn login
+info "Logging to npm ...\n"
+safe_run yarn login
 
-printf "${GREEN}Publishing to npm ...\n${NC}"
-yarn publish --new-version $VERSION
+info "Publishing to npm ...\n"
+safe_run yarn publish --new-version $VERSION
 
 # Complete the previous release
-git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
+safe_run git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
 
-git push
+safe_run git push
 
-git checkout master
-git push --follow-tags
+safe_run git checkout master
+safe_run git push --follow-tags
 
 # Prepare the develop branch for the new cycle
-git checkout develop
+safe_run git checkout develop
 
-unset GIT_MERGE_AUTOEDIT
+safe_run unset GIT_MERGE_AUTOEDIT
 
-printf "${GREEN}All good. Ready for the next cycle!${NC}"
+info "\nAll good. Ready for the next cycle!\n"

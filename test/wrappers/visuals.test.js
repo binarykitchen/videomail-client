@@ -10,6 +10,8 @@ test('Visuals:', function (t) {
       return new Visuals(null, {
         video: {
           fps: 15
+        },
+        image: {
         }
       })
     })

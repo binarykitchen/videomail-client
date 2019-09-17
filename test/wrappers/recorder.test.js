@@ -10,6 +10,9 @@ test('Recorder:', function (t) {
       return new Recorder(null, null, {
         video: {
           fps: 15
+        },
+        image: {
+
         }
       })
     })
