@@ -5,6 +5,7 @@ videomail-client ✉
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
 [![browserstack][browserstack-image]][browserstack-url]
+[![Netlify Status](https://api.netlify.com/api/v1/badges/3c9df5b4-8b85-4081-950a-d5df2dbd9926/deploy-status)](https://app.netlify.com/sites/videomail-client/deploys)
 
 [npm-image]: https://img.shields.io/npm/v/videomail-client.svg?style=flat
 [npm-url]: https://npmjs.org/package/videomail-client
@@ -19,7 +20,7 @@ Record videos in contact forms!
 
 Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript written in ES6.
 
-* <a href="#examples">Examples</a>
+* <a href="#prototype">Prototype (examples)</a>
 * <a href="#demo">Demo / Fully working version</a>
 * <a href="#options">Options</a>
 * <a href="#api">API</a>
@@ -31,18 +32,18 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 * <a href="#addons">Addons</a>
 * <a href="#notes">Notes</a>
 
-<a name="examples"></a>
-## Examples
+<a name="prototype"></a>
+## Prototype (examples)
 
-To run the examples in your browser with Gulp, just do:
+To run the prototype full of examples in your browser with Gulp, just do:
 
 1. `npm install`
-2. `gulp examples` to ignite a static server and
+2. `gulp watch` to ignite a static server and
 3. open `https://localhost:8443` in your browser
 
 (just ignore the invalid certificate warning, this will be fixed soon)
 
-Best is to study `/examples/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
+Best is to study `/prototype/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
 Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won't allow the use of `getUserMedia()` on insecure origins.
 
@@ -52,7 +53,7 @@ Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won
 <html>
   <body>
     <div id="videomail"></div>
-    <script src="/dist/videomail-client.js"></script>
+    <script src="/js/videomail-client.js"></script>
     <script>
       var VideomailClient = require('videomail-client'), // load videomail client package
           videomailClient = new VideomailClient({        // instantiate with some options
@@ -68,12 +69,16 @@ Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won
 </html>
 ```
 
-The included JS file `/dist/videomail-client.js` is already browserified and lies in the `dist` folder.
+The included JS file `/prototype/js/videomail-client.js` is already browserified and lies in the `js` folder.
 
-If you remove `disableSubmit`, then you will see a submit button to post the video and make it persistent. This requires a bit more code, see examples directory.
+If you remove `disableSubmit`, then you will see a submit button to post the video and make it persistent. This requires a bit more code, see prototype directory.
 
 <a name="demo"></a>
-## Demo / Fully working version
+## Demo
+
+A mirror of latest videomail-client can be seen on [videomail-client.netlify.com](https://videomail-client.netlify.com/)
+
+### Real world usages
 
 Check out the full version with all its features on [videomail.io](https://videomail.io) itself. Aim is to turn this into a stable product in the near future with some external assistance.
 
@@ -88,7 +93,7 @@ There are many options you can pass onto the VideomailClient constructor. Check 
 
 In most cases, these defaults are good enough. But `siteName` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
-Looking at the examples in the `/examples` folder should give you some ideas how to use these options.
+Looking at the examples in the `/prototype` folder should give you some ideas how to use these options.
 
 <a name="api"></a>
 ## API
@@ -131,7 +136,7 @@ videomailClient.on('SUBMITTED', function(videomail, response) {
   // continue with your own app logic in your javascript code if you want to process
   // something else further after form submission.
   //
-  // check out /examples/contact_form.html on how to integrate into your contact form
+  // check out /prototype/contact_form.html on how to integrate into your contact form
   // that videomail object has plenty of useful information,
   // i.E. the url or even the average fps it was recorded with.
   // for more info on videomail meta data, see chapter "What is stored on the server?" below
@@ -159,7 +164,7 @@ Automatically fills the DOM with a form for video recording. By default the HTML
 <a name="replay"></a>
 ### videomailClient.replay(videomail[, parentElement])
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successful submission. See `/examples/direct_submit.html` or `/examples/contact_form.html` for some inspiration.
+Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successful submission. See `/prototype/direct_submit.html` or `/prototype/contact_form.html` for some inspiration.
 
 If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally. If no parent element is given, then a replay container within the containerId is automatically generated.
 
@@ -171,7 +176,7 @@ Also note that, when the parent element already contains a video container like 
 
 then this will be used instead of adding a new dom element.
 
-Furthermore the `replay()` method also detects whether the parent element has placeholders to fill with form data. To understand this better, check out how the subject in the `/examples/direct_submit.html` example is being displayed upon replay.
+Furthermore the `replay()` method also detects whether the parent element has placeholders to fill with form data. To understand this better, check out how the subject in the `/prototype/direct_submit.html` example is being displayed upon replay.
 
 <a name="startOver"></a>
 ### videomailClient.startOver()
@@ -283,7 +288,7 @@ selectors: {
 
 When these are null (defaults), the videomail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
 
-Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/examples/contact_form.html#L55).
+Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/prototype/contact_form.html#L55).
 
 ### Include videomail meta data in Form Submissions
 
@@ -320,10 +325,10 @@ PS: On Safari and iPhones/iPads you can play the videomails fine without any iss
 
 You can grab the already browserified videomail-client JS file through GitHub's rawgit server which is proxied by [MaxCDN's](http://www.maxcdn.com/) super fast global CDN:
 ```
-https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/dist/videomail-client.js
+https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/prototype/js/videomail-client.js
 ```
 For example for version x.y.z, use this in your production site:
-https://cdn.rawgit.com/binarykitchen/videomail-client/x.y.z/dist/videomail-client.min.js
+https://cdn.rawgit.com/binarykitchen/videomail-client/x.y.z/prototype/js/videomail-client.min.js
 
 If for whatever reason that GitHub CDN doesn't meet your standard, here's another CDN to try:
 https://cdnjs.com/libraries/videomail-client

@@ -37,7 +37,8 @@ const Browser = function (options) {
   const isOkSafari = isSafari && browserVersion >= 11
   const isOkIOS = isIOS && osVersion >= 11
   const isBadIOS = isIOS && osVersion < 11
-  const isHTTPS = window.location.protocol === 'https:'
+  // unfortunately need to be able to fake https because tape-run can't run on https
+  const isHTTPS = options.fakeHttps || window.location.protocol === 'https:'
 
   const okBrowser =
     chromeBased ||

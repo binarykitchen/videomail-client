@@ -37,7 +37,7 @@ const options = minimist(process.argv.slice(2), { default: defaultOptions })
 log.info('Options:', options)
 
 function cleanJs (cb) {
-  return del(['dist/*.js', 'dist/*.js.map'])
+  return del(['prototype/js/*.js', 'prototype/js/*.js.map'])
 }
 
 function stylus () {
@@ -66,7 +66,7 @@ function stylus () {
 
 function todo () {
   return gulp.src(
-    ['src/**/*.{js, styl}', 'gulpfile.js', 'examples/*.html'],
+    ['src/**/*.{js, styl}', 'gulpfile.js', 'prototype/*.html'],
     { base: './' }
   )
     .pipe(plugins.todo({
@@ -108,7 +108,7 @@ function bundle (done, watching) {
       .pipe(buffer()) // required because the next steps do not support streams
       .pipe(plugins.concat('videomail-client.js'))
       .pipe(plugins.derequire())
-      .pipe(gulp.dest('dist'))
+      .pipe(gulp.dest('prototype/js'))
       .pipe(plugins.plumber())
       .pipe(plugins.if(options.minify, plugins.rename({ suffix: '.min' })))
       .pipe(plugins.if(options.minify, plugins.sourcemaps.init()))
@@ -116,7 +116,7 @@ function bundle (done, watching) {
       .pipe(plugins.if(options.minify, plugins.terser()))
       .pipe(plugins.if(options.minify, plugins.bytediff.stop()))
       .pipe(plugins.if(options.minify, plugins.sourcemaps.write('/')))
-      .pipe(plugins.if(options.minify, gulp.dest('dist')))
+      .pipe(plugins.if(options.minify, gulp.dest('prototype/js')))
       .pipe(plugins.connect.reload())
   }
 
@@ -159,7 +159,7 @@ function middleware () {
 }
 
 const connectOptions = {
-  root: ['examples', 'dist'],
+  root: ['prototype'],
   port: 8080,
   debug: true,
   livereload: false, // disabled since it's broken unfortunately, see https://github.com/intesso/connect-livereload/issues/79
@@ -198,7 +198,7 @@ function watch (done) {
   gulp.watch(['src/styles/styl/**/*.styl'], stylus)
   // commented out so that it reloads faster
   // gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
-  gulp.watch(['examples/*.html'], reload)
+  gulp.watch(['prototype/*.html'], reload)
 
   done()
 }
@@ -251,7 +251,7 @@ const build = gulp.series(lint,
   )
 )
 
-exports.examples = gulp.series(lint,
+exports.watch = gulp.series(lint,
   gulp.parallel(
     gulp.series(stylus, cleanJs, bundleWithWatchify),
     todo

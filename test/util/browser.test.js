@@ -90,6 +90,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
 
     const options = {
       fakeUaString: 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; Media Center PC 4.0; SLCC1; .NET CLR 3.0.04320)',
+      fakeHttps: true,
       debug: function () {}
     }
 
@@ -123,6 +124,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
 
     const options = {
       fakeUaString: 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_8; en-us) AppleWebKit/532.0+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9',
+      fakeHttps: true,
       debug: function () {}
     }
 
