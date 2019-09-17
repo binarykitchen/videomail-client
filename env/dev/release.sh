@@ -1,28 +1,14 @@
 #!/bin/bash
-set -eEuo pipefail
+set -eo pipefail
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-DRY=false # $ DRY_RUN=1 env/dev/release.sh
-
-if [[ ! -z ${DRY_RUN+x} ]]; then
-  DRY=true
-fi
-
-safe_run() {
-    if $DRY; then
-        echo dry: $@
-    else
-        echo executing: $@
-        $@
-    fi
-}
 
 info() {
     printf "${GREEN}$@${NC}"
 }
 
-safe_run export GIT_MERGE_AUTOEDIT=no
+export GIT_MERGE_AUTOEDIT=no
 
 die() {
     unset GIT_MERGE_AUTOEDIT
@@ -33,7 +19,7 @@ die() {
 info "Checking for vulnerabilities...\n"
 
 # thanks to set -e it will exit here if audit fails
-safe_run yarn run audit
+yarn run audit
 
 # todo: figure out an elegant solution to avoid duplicate code
 # when having three bash scripts for patches, features and releases
@@ -63,49 +49,49 @@ if [[ `git status --porcelain` ]]; then
 fi
 
 # Ensures master is up to date
-safe_run git checkout master
-safe_run git pull
-safe_run git checkout develop
+git checkout master
+git pull
+git checkout develop
 
-read VERSION <<< $(safe_run gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
+read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
-safe_run git checkout master
-safe_run git push
-safe_run git checkout develop
-safe_run git push
+git checkout master
+git push
+git checkout develop
+git push
 
 # Start a new release
-safe_run git flow release start $VERSION
+git flow release start $VERSION
 
 # This will increment version in package.json
-safe_run gulp bumpVersion --write --version=$VERSION
+gulp bumpVersion --write --version=$VERSION
 
 # Ensure dependencies are okay
-safe_run yarn
+yarn
 
 # Rebuild all assets
-safe_run gulp build --minify
+gulp build --minify
 
-safe_run git add -A
-safe_run git commit -am "Final commit of version $VERSION" --no-edit
+git add -A
+git commit -m "Final commit of version $VERSION" --no-edit
 
 info "Logging to npm ...\n"
-safe_run yarn login
+yarn login
 
 info "Publishing to npm ...\n"
-safe_run yarn publish --new-version $VERSION
+yarn publish --new-version $VERSION
 
 # Complete the previous release
-safe_run git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
+git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
 
-safe_run git push
+git push
 
-safe_run git checkout master
-safe_run git push --follow-tags
+git checkout master
+git push --follow-tags
 
 # Prepare the develop branch for the new cycle
-safe_run git checkout develop
+git checkout develop
 
-safe_run unset GIT_MERGE_AUTOEDIT
+unset GIT_MERGE_AUTOEDIT
 
 info "\nAll good. Ready for the next cycle!\n"
