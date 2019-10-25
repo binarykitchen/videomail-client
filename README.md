@@ -38,14 +38,19 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 To run the prototype full of examples in your browser with Gulp, just do:
 
 1. `npm install`
-2. `gulp watch` to ignite a static server and
+2. `yarn run watch` to ignite a static server and
 3. open `https://localhost:8443` in your browser
-
-(just ignore the invalid certificate warning, this will be fixed soon)
 
 Best is to study `/prototype/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
 
 Beware that all *must run over HTTPs*. Google Chrome and soon other browsers won't allow the use of `getUserMedia()` on insecure origins.
+
+If you haven't installed the local CA in your system trust store yet, you will have to run those commands only once before starting the prototype:
+
+1. Install mkcert, see https://github.com/FiloSottile/mkcert#installation
+2. Run command `mkcert -install`
+
+That's it. Easy as apple pie.
 
 ## Dead simple example (just record and replay)
 
@@ -348,6 +353,16 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 
 Too hard to maintain. Just do `git log` or look here
 https://github.com/binarykitchen/videomail-client/commits/master
+
+## Regenerate certificates
+
+Should be already included, but if they have expired, can regenerate with this bash command:
+
+```bash
+$ mkcert --cert-file ./env/dev/cert.pem --key-file ./env/dev/key.pem local.videomail-client.io localhost 127.0.0.1
+```
+
+This will require the native mkcert program you can get from https://github.com/FiloSottile/mkcert
 
 ### Noise
 

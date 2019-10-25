@@ -14,7 +14,6 @@ const bodyParser = require('body-parser')
 const send = require('connect-send-json')
 const del = require('del')
 const minimist = require('minimist')
-const sslRootCas = require('ssl-root-cas')
 const watchify = require('watchify')
 const babelify = require('babelify')
 const tapeRun = require('tape-run')
@@ -26,7 +25,7 @@ const cssnano = require('cssnano')
 const packageJson = require('./package.json')
 
 const defaultOptions = {
-  minify: false,
+  minify: true,
   importance: null,
   write: false,
   version: null
@@ -172,17 +171,13 @@ function connectHttp (done) {
 }
 
 function connectHttps (done) {
-  const SSL_CERTS_PATH = path.join(__dirname, '/env/dev/ssl-certs/')
-
-  sslRootCas
-    .inject()
-    .addFile(path.join(SSL_CERTS_PATH, 'server', 'my-root-ca.crt.pem'))
+  const SSL_CERTS_PATH = path.join(__dirname, 'env', 'dev')
 
   plugins.connect.server(Object.assign({}, connectOptions, {
     port: 8443,
     https: {
-      key: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
-      cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
+      key: fs.readFileSync(path.join(SSL_CERTS_PATH, 'key.pem')),
+      cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'cert.pem'))
     }
   }))
 

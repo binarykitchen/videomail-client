@@ -99,6 +99,8 @@ export default {
     sending: 'Teleporting',
     encoding: 'Encoding',
     limitReached: 'Limit reached',
+    audioOff: 'Audio off',
+    audioOn: 'Audio on',
     buttons: {
       record: 'Record video',
       recordAgain: 'Record again',

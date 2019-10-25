@@ -1,8 +1,5 @@
 import 'classlist.js'
 
-// needed for IE 11
-import 'element-closest'
-
 // https://github.com/julienetie/request-frame
 import requestFrame from 'request-frame'
 
