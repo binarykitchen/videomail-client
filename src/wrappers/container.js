@@ -3,6 +3,9 @@ import hidden from 'hidden'
 import util from 'util'
 import Visibility from 'document-visibility'
 
+// needed for IE 11
+import elementClosest from 'element-closest'
+
 import Dimension from './dimension'
 import Visuals from './visuals'
 import Buttons from './buttons'
@@ -16,7 +19,9 @@ import EventEmitter from './../util/eventEmitter'
 import VideomailError from './../util/videomailError'
 import css from './../styles/css/main.min.css.js'
 
-var Container = function (options) {
+elementClosest(window)
+
+const Container = function (options) {
   EventEmitter.call(this, options, 'Container')
 
   const self = this

@@ -268,7 +268,7 @@ const Buttons = function (container, options) {
         id: 'audioOffOption',
         name: 'audio',
         value: 'off',
-        label: 'Audio Off',
+        label: options.text.audioOff,
         checked: !options.isAudioEnabled(),
         changeHandler: function () {
           container.disableAudio()
@@ -279,7 +279,7 @@ const Buttons = function (container, options) {
         id: 'audioOnOption',
         name: 'audio',
         value: 'on',
-        label: 'Audio On (Beta)',
+        label: options.text.audioOn,
         checked: options.isAudioEnabled(),
         changeHandler: function () {
           container.enableAudio()
