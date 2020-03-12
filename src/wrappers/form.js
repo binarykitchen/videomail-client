@@ -16,7 +16,7 @@ const Form = function (container, formElement, options) {
   var keyInput
 
   function getData () {
-    return getFormData(formElement)
+    return getFormData(formElement, { includeDisabled: true })
   }
 
   this.loadVideomail = function (videomail) {

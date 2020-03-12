@@ -10926,79 +10926,83 @@ function replaceGetterValues (replacer) {
 },{}],202:[function(_dereq_,module,exports){
 (function (global){
 /*
- 2019 Jason Mulligan <jason.mulligan@avoidwork.com>
- @version 6.0.1
+ 2020 Jason Mulligan <jason.mulligan@avoidwork.com>
+ @version 6.1.0
 */
-"use strict";!function(e){var x=/^(b|B)$/,M={iec:{bits:["b","Kib","Mib","Gib","Tib","Pib","Eib","Zib","Yib"],bytes:["B","KiB","MiB","GiB","TiB","PiB","EiB","ZiB","YiB"]},jedec:{bits:["b","Kb","Mb","Gb","Tb","Pb","Eb","Zb","Yb"],bytes:["B","KB","MB","GB","TB","PB","EB","ZB","YB"]}},w={iec:["","kibi","mebi","gibi","tebi","pebi","exbi","zebi","yobi"],jedec:["","kilo","mega","giga","tera","peta","exa","zetta","yotta"]};function t(e){var i,t,o,n,b,r,a,l,s,d,u,c,f,p,B,y=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{},g=[],v=0,m=void 0,h=void 0;if(isNaN(e))throw new TypeError("Invalid number");return t=!0===y.bits,u=!0===y.unix,i=y.base||2,d=void 0!==y.round?y.round:u?1:2,r=void 0!==y.locale?y.locale:"",a=y.localeOptions||{},c=void 0!==y.separator?y.separator:"",f=void 0!==y.spacer?y.spacer:u?"":" ",B=y.symbols||{},p=2===i&&y.standard||"jedec",s=y.output||"string",n=!0===y.fullform,b=y.fullforms instanceof Array?y.fullforms:[],m=void 0!==y.exponent?y.exponent:-1,o=2<i?1e3:1024,(l=(h=Number(e))<0)&&(h=-h),(-1===m||isNaN(m))&&(m=Math.floor(Math.log(h)/Math.log(o)))<0&&(m=0),8<m&&(m=8),"exponent"===s?m:(0===h?(g[0]=0,g[1]=u?"":M[p][t?"bits":"bytes"][m]):(v=h/(2===i?Math.pow(2,10*m):Math.pow(1e3,m)),t&&o<=(v*=8)&&m<8&&(v/=o,m++),g[0]=Number(v.toFixed(0<m?d:0)),g[0]===o&&m<8&&void 0===y.exponent&&(g[0]=1,m++),g[1]=10===i&&1===m?t?"kb":"kB":M[p][t?"bits":"bytes"][m],u&&(g[1]="jedec"===p?g[1].charAt(0):0<m?g[1].replace(/B$/,""):g[1],x.test(g[1])&&(g[0]=Math.floor(g[0]),g[1]=""))),l&&(g[0]=-g[0]),g[1]=B[g[1]]||g[1],!0===r?g[0]=g[0].toLocaleString():0<r.length?g[0]=g[0].toLocaleString(r,a):0<c.length&&(g[0]=g[0].toString().replace(".",c)),"array"===s?g:(n&&(g[1]=b[m]?b[m]:w[p][m]+(t?"bit":"byte")+(1===g[0]?"":"s")),"object"===s?{value:g[0],symbol:g[1]}:g.join(f)))}t.partial=function(i){return function(e){return t(e,i)}},"undefined"!=typeof exports?module.exports=t:"function"==typeof define&&void 0!==define.amd?define(function(){return t}):e.filesize=t}("undefined"!=typeof window?window:global);
+"use strict";!function(e){var x=/^(b|B)$/,M={iec:{bits:["b","Kib","Mib","Gib","Tib","Pib","Eib","Zib","Yib"],bytes:["B","KiB","MiB","GiB","TiB","PiB","EiB","ZiB","YiB"]},jedec:{bits:["b","Kb","Mb","Gb","Tb","Pb","Eb","Zb","Yb"],bytes:["B","KB","MB","GB","TB","PB","EB","ZB","YB"]}},w={iec:["","kibi","mebi","gibi","tebi","pebi","exbi","zebi","yobi"],jedec:["","kilo","mega","giga","tera","peta","exa","zetta","yotta"]};function t(e){var i,t,o,n,b,r,a,l,s,d,u,c,f,p,B,y=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{},g=[],v=0,m=void 0,h=void 0;if(isNaN(e))throw new TypeError("Invalid number");return t=!0===y.bits,u=!0===y.unix,i=y.base||2,d=void 0!==y.round?y.round:u?1:2,r=void 0!==y.locale?y.locale:"",a=y.localeOptions||{},c=void 0!==y.separator?y.separator:"",f=void 0!==y.spacer?y.spacer:u?"":" ",B=y.symbols||{},p=2===i&&y.standard||"jedec",s=y.output||"string",n=!0===y.fullform,b=y.fullforms instanceof Array?y.fullforms:[],m=void 0!==y.exponent?y.exponent:-1,o=2<i?1e3:1024,(l=(h=Number(e))<0)&&(h=-h),(-1===m||isNaN(m))&&(m=Math.floor(Math.log(h)/Math.log(o)))<0&&(m=0),8<m&&(m=8),"exponent"===s?m:(0===h?(g[0]=0,g[1]=u?"":M[p][t?"bits":"bytes"][m]):(v=h/(2===i?Math.pow(2,10*m):Math.pow(1e3,m)),t&&o<=(v*=8)&&m<8&&(v/=o,m++),g[0]=Number(v.toFixed(0<m?d:0)),g[0]===o&&m<8&&void 0===y.exponent&&(g[0]=1,m++),g[1]=10===i&&1===m?t?"kb":"kB":M[p][t?"bits":"bytes"][m],u&&(g[1]="jedec"===p?g[1].charAt(0):0<m?g[1].replace(/B$/,""):g[1],x.test(g[1])&&(g[0]=Math.floor(g[0]),g[1]=""))),l&&(g[0]=-g[0]),g[1]=B[g[1]]||g[1],!0===r?g[0]=g[0].toLocaleString():0<r.length?g[0]=g[0].toLocaleString(r,a):0<c.length&&(g[0]=g[0].toString().replace(".",c)),"array"===s?g:(n&&(g[1]=b[m]?b[m]:w[p][m]+(t?"bit":"byte")+(1===g[0]?"":"s")),"object"===s?{value:g[0],symbol:g[1],exponent:m}:g.join(f)))}t.partial=function(i){return function(e){return t(e,i)}},"undefined"!=typeof exports?module.exports=t:"function"==typeof define&&void 0!==define.amd?define(function(){return t}):e.filesize=t}("undefined"!=typeof window?window:global);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],203:[function(_dereq_,module,exports){
-'use strict';
+"use strict";
 
 exports.__esModule = true;
-exports.default = getFormData;
+exports["default"] = getFormData;
 exports.getFieldData = getFieldData;
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
 var NODE_LIST_CLASSES = {
   '[object HTMLCollection]': true,
   '[object NodeList]': true,
   '[object RadioNodeList]': true
+}; // .type values for elements which can appear in .elements and should be ignored
 
-  // .type values for elements which can appear in .elements and should be ignored
-};var IGNORED_ELEMENT_TYPES = {
+var IGNORED_ELEMENT_TYPES = {
   'button': true,
   'fieldset': true,
   'reset': true,
   'submit': true
 };
-
 var CHECKED_INPUT_TYPES = {
   'checkbox': true,
   'radio': true
 };
-
 var TRIM_RE = /^\s+|\s+$/g;
-
 var slice = Array.prototype.slice;
 var toString = Object.prototype.toString;
-
 /**
  * @param {HTMLFormElement} form
- * @param {Object} options
- * @return {Object.<string,(string|Array.<string>)>} an object containing
+ * @param {Object} [options]
+ * @return {Object.<string,boolean|string|string[]>} an object containing
  *   submittable value(s) held in the form's .elements collection, with
  *   properties named as per element names or ids.
  */
 
-function getFormData(form) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { trim: false };
-
+function getFormData(form, options) {
   if (!form) {
-    throw new Error('A form is required by getFormData, was given form=' + form);
+    throw new Error("A form is required by getFormData, was given form=" + form);
   }
 
+  options = _extends({
+    includeDisabled: false,
+    trim: false
+  }, options);
   var data = {};
-  var elementName = void 0;
+  var elementName;
   var elementNames = [];
-  var elementNameLookup = {};
+  var elementNameLookup = {}; // Get unique submittable element names for the form
 
-  // Get unique submittable element names for the form
   for (var i = 0, l = form.elements.length; i < l; i++) {
     var element = form.elements[i];
-    if (IGNORED_ELEMENT_TYPES[element.type] || element.disabled) {
+
+    if (IGNORED_ELEMENT_TYPES[element.type] || element.disabled && !options.includeDisabled) {
       continue;
     }
+
     elementName = element.name || element.id;
+
     if (elementName && !elementNameLookup[elementName]) {
       elementNames.push(elementName);
       elementNameLookup[elementName] = true;
     }
-  }
-
-  // Extract element data name-by-name for consistent handling of special cases
+  } // Extract element data name-by-name for consistent handling of special cases
   // around elements which contain multiple inputs.
+
+
   for (var _i = 0, _l = elementNames.length; _i < _l; _i++) {
     elementName = elementNames[_i];
     var value = getFieldData(form, elementName, options);
+
     if (value != null) {
       data[elementName] = value;
     }
@@ -11006,95 +11010,109 @@ function getFormData(form) {
 
   return data;
 }
-
 /**
  * @param {HTMLFormElement} form
  * @param {string} fieldName
- * @param {Object} options
- * @return {(string|Array.<string>)} submittable value(s) in the form for a
- *   named element from its .elements collection, or null if there was no
- *   element with that name or the element had no submittable value(s).
+ * @param {Object} [options]
+ * @return {?(boolean|string|string[]|File|File[])} submittable value(s) in the
+ *   form for a  named element from its .elements collection, or null if there
+ *   was no element with that name, or the element had no submittable value(s).
  */
-function getFieldData(form, fieldName) {
-  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { trim: false };
 
+
+function getFieldData(form, fieldName, options) {
   if (!form) {
-    throw new Error('A form is required by getFieldData, was given form=' + form);
-  }
-  if (!fieldName && toString.call(fieldName) !== '[object String]') {
-    throw new Error('A field name is required by getFieldData, was given fieldName=' + fieldName);
+    throw new Error("A form is required by getFieldData, was given form=" + form);
   }
 
+  if (!fieldName && toString.call(fieldName) !== '[object String]') {
+    throw new Error("A field name is required by getFieldData, was given fieldName=" + fieldName);
+  }
+
+  options = _extends({
+    includeDisabled: false,
+    trim: false
+  }, options);
   var element = form.elements[fieldName];
-  if (!element || element.disabled) {
+
+  if (!element || element.disabled && !options.includeDisabled) {
     return null;
   }
 
   if (!NODE_LIST_CLASSES[toString.call(element)]) {
     return getFormElementValue(element, options.trim);
-  }
+  } // Deal with multiple form controls which have the same name
 
-  // Deal with multiple form controls which have the same name
+
   var data = [];
   var allRadios = true;
+
   for (var i = 0, l = element.length; i < l; i++) {
-    if (element[i].disabled) {
+    if (element[i].disabled && !options.includeDisabled) {
       continue;
     }
+
     if (allRadios && element[i].type !== 'radio') {
       allRadios = false;
     }
+
     var value = getFormElementValue(element[i], options.trim);
+
     if (value != null) {
       data = data.concat(value);
     }
-  }
-
-  // Special case for an element with multiple same-named inputs which were all
+  } // Special case for an element with multiple same-named inputs which were all
   // radio buttons: if there was a selected value, only return the value.
+
+
   if (allRadios && data.length === 1) {
     return data[0];
   }
 
   return data.length > 0 ? data : null;
 }
-
 /**
  * @param {HTMLElement} element a form element.
- * @param {booleam} trim should values for text entry inputs be trimmed?
- * @return {(string|Array.<string>|File|Array.<File>)} the element's submittable
+ * @param {boolean} [trim] should values for text entry inputs be trimmed?
+ * @return {?(boolean|string|string[]|File|File[])} the element's submittable
  *   value(s), or null if it had none.
  */
+
+
 function getFormElementValue(element, trim) {
   var value = null;
   var type = element.type;
-
 
   if (type === 'select-one') {
     if (element.options.length) {
       value = element.options[element.selectedIndex].value;
     }
+
     return value;
   }
 
   if (type === 'select-multiple') {
     value = [];
+
     for (var i = 0, l = element.options.length; i < l; i++) {
       if (element.options[i].selected) {
         value.push(element.options[i].value);
       }
     }
+
     if (value.length === 0) {
       value = null;
     }
-    return value;
-  }
 
-  // If a file input doesn't have a files attribute, fall through to using its
+    return value;
+  } // If a file input doesn't have a files attribute, fall through to using its
   // value attribute.
+
+
   if (type === 'file' && 'files' in element) {
     if (element.multiple) {
       value = slice.call(element.files);
+
       if (value.length === 0) {
         value = null;
       }
@@ -11102,19 +11120,24 @@ function getFormElementValue(element, trim) {
       // Should be null if not present, according to the spec
       value = element.files[0];
     }
+
     return value;
   }
 
   if (!CHECKED_INPUT_TYPES[type]) {
     value = trim ? element.value.replace(TRIM_RE, '') : element.value;
   } else if (element.checked) {
-    value = element.value;
+    if (type === 'checkbox' && !element.hasAttribute('value')) {
+      value = true;
+    } else {
+      value = element.value;
+    }
   }
 
   return value;
-}
+} // For UMD build access to getFieldData
 
-// For UMD build access to getFieldData
+
 getFormData.getFieldData = getFieldData;
 },{}],204:[function(_dereq_,module,exports){
 module.exports = Event
@@ -11374,6 +11397,17 @@ function shim (element, value) {
       decimal: ','
     },
     gr: greek,
+    he: {
+      y: function (c) { return c === 1 ? 'שנה' : 'שנים' },
+      mo: function (c) { return c === 1 ? 'חודש' : 'חודשים' },
+      w: function (c) { return c === 1 ? 'שבוע' : 'שבועות' },
+      d: function (c) { return c === 1 ? 'יום' : 'ימים' },
+      h: function (c) { return c === 1 ? 'שעה' : 'שעות' },
+      m: function (c) { return c === 1 ? 'דקה' : 'דקות' },
+      s: function (c) { return c === 1 ? 'שניה' : 'שניות' },
+      ms: function (c) { return c === 1 ? 'מילישנייה' : 'מילישניות' },
+      decimal: '.'
+    },
     hr: {
       y: function (c) {
         if (c % 10 === 2 || c % 10 === 3 || c % 10 === 4) {
@@ -16657,7 +16691,7 @@ function pushEncodedKeyValuePair(pairs, key, val) {
   if (val === undefined) return;
 
   if (val === null) {
-    pairs.push(encodeURIComponent(key));
+    pairs.push(encodeURI(key));
     return;
   }
 
@@ -16670,7 +16704,7 @@ function pushEncodedKeyValuePair(pairs, key, val) {
       if (Object.prototype.hasOwnProperty.call(val, subkey)) pushEncodedKeyValuePair(pairs, "".concat(key, "[").concat(subkey, "]"), val[subkey]);
     }
   } else {
-    pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+    pairs.push(encodeURI(key) + '=' + encodeURIComponent(val));
   }
 }
 /**
@@ -20481,6 +20515,12 @@ function WebSocketStream(target, protocols, options) {
 
     socket.binaryType = 'arraybuffer'
   }
+  
+  // according to https://github.com/baygeldin/ws-streamify/issues/1
+  // Nodejs WebSocketServer cause memory leak
+  // Handlers like onerror, onclose, onmessage and onopen are accessible via setter/getter
+  // And setter first of all fires removeAllListeners, that doesnt make inner array of clients on WebSocketServer cleared ever
+  var eventListenerSupport = ('undefined' === typeof socket.addEventListener)
 
   // was already open when passed in
   if (socket.readyState === socket.OPEN) {
@@ -20490,14 +20530,25 @@ function WebSocketStream(target, protocols, options) {
     if (!options.objectMode) {
       stream._writev = writev
     }
-    socket.onopen = onopen
+    
+    if (eventListenerSupport) {
+       socket.addEventListener('open', onopen)
+    } else {
+       socket.onopen = onopen
+    }
   }
 
   stream.socket = socket
 
-  socket.onclose = onclose
-  socket.onerror = onerror
-  socket.onmessage = onmessage
+  if (eventListenerSupport) {
+     socket.addEventListener('close', onclose)
+     socket.addEventListener('error', onerror)
+     socket.addEventListener('message', onmessage)
+  } else {
+     socket.onclose = onclose
+     socket.onerror = onerror
+     socket.onmessage = onmessage
+  }
 
   proxy.on('close', destroy)
 
@@ -20637,7 +20688,7 @@ function wrappy (fn, cb) {
 },{}],263:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.10.3",
+  "version": "2.10.4",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20700,7 +20751,7 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.8.4",
+    "@babel/runtime": "7.8.7",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.0",
@@ -20714,10 +20765,10 @@ module.exports={
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.2",
-    "filesize": "6.0.1",
-    "get-form-data": "2.0.0",
+    "filesize": "6.1.0",
+    "get-form-data": "3.0.0",
     "hidden": "1.1.1",
-    "humanize-duration": "3.21.0",
+    "humanize-duration": "3.22.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -20727,17 +20778,17 @@ module.exports={
     "readystate": "0.4.1",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
-    "superagent": "5.2.1",
+    "superagent": "5.2.2",
     "ua-parser-js": "0.7.21",
-    "websocket-stream": "5.5.0"
+    "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.8.4",
+    "@babel/core": "7.8.7",
     "@babel/plugin-transform-runtime": "7.8.3",
-    "@babel/preset-env": "7.8.4",
-    "audit-ci": "2.4.2",
+    "@babel/preset-env": "7.8.7",
+    "audit-ci": "2.5.1",
     "autoprefixer": "9.7.4",
-    "babel-eslint": "10.0.3",
+    "babel-eslint": "10.1.0",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
     "browserify": "16.5.0",
@@ -20764,10 +20815,10 @@ module.exports={
     "gulp-stylus": "2.7.0",
     "gulp-terser": "1.2.0",
     "gulp-todo": "7.1.1",
-    "minimist": "1.2.0",
+    "minimist": "1.2.4",
     "nib": "1.1.2",
     "router": "1.3.4",
-    "tape": "4.13.0",
+    "tape": "4.13.2",
     "tape-catch": "1.0.6",
     "tape-run": "6.0.1",
     "vinyl-buffer": "1.0.1",
@@ -24322,7 +24373,9 @@ var Form = function Form(container, formElement, options) {
   var keyInput;
 
   function getData() {
-    return (0, _getFormData.default)(formElement);
+    return (0, _getFormData.default)(formElement, {
+      includeDisabled: true
+    });
   }
 
   this.loadVideomail = function (videomail) {
