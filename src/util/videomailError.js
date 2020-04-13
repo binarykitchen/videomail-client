@@ -125,7 +125,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = 'Unmet constraint: ' + err.constraint
         }
       } else {
-        explanation = ' Details: ' + err.toString()
+        explanation = err.toString()
       }
       break
     case 'MediaDeviceFailedDueToShutdown':
