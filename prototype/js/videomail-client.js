@@ -5718,7 +5718,7 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.6.4',
+  version: '3.6.5',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
 });
@@ -6062,7 +6062,13 @@ if (!set || !clear) {
     defer = bind(port.postMessage, port, 1);
   // Browsers with postMessage, skip WebWorkers
   // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
-  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts && !fails(post)) {
+  } else if (
+    global.addEventListener &&
+    typeof postMessage == 'function' &&
+    !global.importScripts &&
+    !fails(post) &&
+    location.protocol !== 'file:'
+  ) {
     defer = post;
     global.addEventListener('message', listener, false);
   // IE8-
@@ -8435,7 +8441,7 @@ var INVALID_HOST = 'Invalid host';
 var INVALID_PORT = 'Invalid port';
 
 var ALPHA = /[A-Za-z]/;
-var ALPHANUMERIC = /[\d+\-.A-Za-z]/;
+var ALPHANUMERIC = /[\d+-.A-Za-z]/;
 var DIGIT = /\d/;
 var HEX_START = /^(0x|0X)/;
 var OCT = /^[0-7]+$/;
@@ -20688,7 +20694,7 @@ function wrappy (fn, cb) {
 },{}],263:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.10.5",
+  "version": "2.10.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20751,14 +20757,14 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.8.7",
+    "@babel/runtime": "7.9.2",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.0",
     "canvas-to-buffer": "1.1.0",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.6.4",
+    "core-js": "3.6.5",
     "create-error": "0.3.1",
     "deepmerge": "4.2.2",
     "defined": "1.0.0",
@@ -20783,15 +20789,15 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.8.7",
-    "@babel/plugin-transform-runtime": "7.8.3",
-    "@babel/preset-env": "7.8.7",
+    "@babel/core": "7.9.0",
+    "@babel/plugin-transform-runtime": "7.9.0",
+    "@babel/preset-env": "7.9.5",
     "audit-ci": "2.5.1",
-    "autoprefixer": "9.7.4",
+    "autoprefixer": "9.7.6",
     "babel-eslint": "10.1.0",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
-    "browserify": "16.5.0",
+    "browserify": "16.5.1",
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
     "del": "5.1.0",
@@ -20806,7 +20812,7 @@ module.exports={
     "gulp-derequire": "2.1.0",
     "gulp-if": "3.0.0",
     "gulp-inject-string": "1.1.2",
-    "gulp-load-plugins": "2.0.2",
+    "gulp-load-plugins": "2.0.3",
     "gulp-plumber": "1.2.1",
     "gulp-postcss": "8.0.0",
     "gulp-rename": "2.0.0",
@@ -20815,12 +20821,12 @@ module.exports={
     "gulp-stylus": "2.7.0",
     "gulp-terser": "1.2.0",
     "gulp-todo": "7.1.1",
-    "minimist": "1.2.4",
+    "minimist": "1.2.5",
     "nib": "1.1.2",
-    "router": "1.3.4",
+    "router": "1.3.5",
     "tape": "4.13.2",
     "tape-catch": "1.0.6",
-    "tape-run": "6.0.1",
+    "tape-run": "7.0.0",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.1"
@@ -22600,7 +22606,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = 'Unmet constraint: ' + err.constraint;
         }
       } else {
-        explanation = ' Details: ' + err.toString();
+        explanation = err.toString();
       }
 
       break;
