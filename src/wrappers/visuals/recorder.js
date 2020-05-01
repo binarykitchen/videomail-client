@@ -468,7 +468,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     const errorListeners = self.listeners(Events.ERROR)
 
-    if (errorListeners.length) {
+    if (errorListeners && errorListeners.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
         self.emit(Events.ERROR, VideomailError.create(
           err,
