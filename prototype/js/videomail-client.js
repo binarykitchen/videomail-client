@@ -20694,7 +20694,7 @@ function wrappy (fn, cb) {
 },{}],263:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.10.6",
+  "version": "2.10.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20757,7 +20757,7 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.9.2",
+    "@babel/runtime": "7.9.6",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.0",
@@ -20789,9 +20789,9 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.9.0",
-    "@babel/plugin-transform-runtime": "7.9.0",
-    "@babel/preset-env": "7.9.5",
+    "@babel/core": "7.9.6",
+    "@babel/plugin-transform-runtime": "7.9.6",
+    "@babel/preset-env": "7.9.6",
     "audit-ci": "2.5.1",
     "autoprefixer": "9.7.6",
     "babel-eslint": "10.1.0",
@@ -20824,7 +20824,7 @@ module.exports={
     "minimist": "1.2.5",
     "nib": "1.1.2",
     "router": "1.3.5",
-    "tape": "4.13.2",
+    "tape": "5.0.0",
     "tape-catch": "1.0.6",
     "tape-run": "7.0.0",
     "vinyl-buffer": "1.0.1",
@@ -22332,7 +22332,7 @@ var DASH = '- ';
 var SEPARATOR = '<br/>' + DASH;
 
 function arrayToString(array) {
-  if (array.length > 0) {
+  if (array & array.length > 0) {
     var lines = [];
     array.forEach(function (element) {
       if (element) {
@@ -22351,7 +22351,7 @@ function objectToString(object, options) {
 
   excludes.push('stack');
 
-  if (propertyNames.length > 0) {
+  if (propertyNames && propertyNames.length > 0) {
     var exclude = false;
     propertyNames.forEach(function (name) {
       if (excludes) {
@@ -26339,7 +26339,7 @@ var Recorder = function Recorder(visuals, replay) {
     debug('Recorder: userMediaErrorCallback()', ', Webcam characteristics:', userMedia.getCharacteristics());
     var errorListeners = self.listeners(_events.default.ERROR);
 
-    if (errorListeners.length) {
+    if (errorListeners && errorListeners.length) {
       if (err.name !== _videomailError.default.MEDIA_DEVICE_NOT_SUPPORTED) {
         self.emit(_events.default.ERROR, _videomailError.default.create(err, options));
       } else {
@@ -27325,7 +27325,7 @@ var Replay = function Replay(parentElement, options) {
 
   this.getVideoSource = function (type) {
     var sources = replayElement.getElementsByTagName('source');
-    var l = sources.length;
+    var l = sources && sources.length;
     var videoType = 'video/' + type;
     var source;
 
