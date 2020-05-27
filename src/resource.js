@@ -90,11 +90,13 @@ export default function (options) {
         if (err) {
           cb(err)
         } else {
+          const returnedVideomail = res.body && res.body.videomail ? res.body.videomail : null
+
           if (options.cache && videomail[CACHE_KEY]) {
-            cache[videomail[CACHE_KEY]] = res.body.videomail
+            cache[videomail[CACHE_KEY]] = returnedVideomail
           }
 
-          cb(null, res.body.videomail, res.body)
+          cb(null, returnedVideomail, res.body)
         }
       })
   }
