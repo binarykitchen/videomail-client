@@ -11691,6 +11691,17 @@ function shim (element, value) {
       ms: function (c) { return 'millisekund' + (c === 1 ? '' : 'er') },
       decimal: ','
     },
+    sw: {
+      y: function (c) { return c === 1 ? 'mwaka' : 'miaka' },
+      mo: function (c) { return c === 1 ? 'mwezi' : 'miezi' },
+      w: 'wiki',
+      d: function (c) { return c === 1 ? 'siku' : 'masiku' },
+      h: function (c) { return c === 1 ? 'saa' : 'masaa' },
+      m: 'dakika',
+      s: 'sekunde',
+      ms: 'milisekunde',
+      decimal: '.'
+    },
     tr: {
       y: 'yıl',
       mo: 'ay',
@@ -20694,7 +20705,7 @@ function wrappy (fn, cb) {
 },{}],263:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.10.7",
+  "version": "2.10.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20757,7 +20768,7 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.9.6",
+    "@babel/runtime": "7.10.0",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.0",
@@ -20774,7 +20785,7 @@ module.exports={
     "filesize": "6.1.0",
     "get-form-data": "3.0.0",
     "hidden": "1.1.1",
-    "humanize-duration": "3.22.0",
+    "humanize-duration": "3.23.0",
     "hyperscript": "2.0.2",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
@@ -20789,11 +20800,11 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.9.6",
-    "@babel/plugin-transform-runtime": "7.9.6",
-    "@babel/preset-env": "7.9.6",
-    "audit-ci": "3.0.0",
-    "autoprefixer": "9.7.6",
+    "@babel/core": "7.10.0",
+    "@babel/plugin-transform-runtime": "7.10.0",
+    "@babel/preset-env": "7.10.0",
+    "audit-ci": "3.0.1",
+    "autoprefixer": "9.8.0",
     "babel-eslint": "10.1.0",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
@@ -20801,7 +20812,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
     "del": "5.1.0",
-    "eslint": "7.0.0",
+    "eslint": "7.1.0",
     "fancy-log": "1.3.3",
     "glob": "7.1.6",
     "gulp": "4.0.2",
@@ -20824,7 +20835,7 @@ module.exports={
     "minimist": "1.2.5",
     "nib": "1.1.2",
     "router": "1.3.5",
-    "tape": "5.0.0",
+    "tape": "5.0.1",
     "tape-catch": "1.0.6",
     "tape-run": "7.0.0",
     "vinyl-buffer": "1.0.1",
@@ -21456,11 +21467,13 @@ function _default(options) {
       if (err) {
         cb(err);
       } else {
+        var returnedVideomail = res.body && res.body.videomail ? res.body.videomail : null;
+
         if (options.cache && videomail[CACHE_KEY]) {
-          cache[videomail[CACHE_KEY]] = res.body.videomail;
+          cache[videomail[CACHE_KEY]] = returnedVideomail;
         }
 
-        cb(null, res.body.videomail, res.body);
+        cb(null, returnedVideomail, res.body);
       }
     });
   }
@@ -22332,7 +22345,7 @@ var DASH = '- ';
 var SEPARATOR = '<br/>' + DASH;
 
 function arrayToString(array) {
-  if (array & array.length > 0) {
+  if (array && array.length > 0) {
     var lines = [];
     array.forEach(function (element) {
       if (element) {
