@@ -4,7 +4,7 @@ const DASH = '- '
 const SEPARATOR = '<br/>' + DASH
 
 function arrayToString (array) {
-  if (array & array.length > 0) {
+  if (array && array.length > 0) {
     const lines = []
 
     array.forEach(function (element) {
