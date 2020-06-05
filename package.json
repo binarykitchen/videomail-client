@@ -63,7 +63,7 @@
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.10.0",
+    "@babel/runtime": "7.10.2",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.0",
@@ -95,9 +95,9 @@
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.10.0",
-    "@babel/plugin-transform-runtime": "7.10.0",
-    "@babel/preset-env": "7.10.0",
+    "@babel/core": "7.10.2",
+    "@babel/plugin-transform-runtime": "7.10.1",
+    "@babel/preset-env": "7.10.2",
     "audit-ci": "3.0.1",
     "autoprefixer": "9.8.0",
     "babel-eslint": "10.1.0",
