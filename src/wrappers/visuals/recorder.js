@@ -1089,6 +1089,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   function buildElement () {
     recorderElement = h('video.' + options.selectors.userMediaClass)
+
     visuals.appendChild(recorderElement)
   }
 
@@ -1181,6 +1182,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       // for iphones, see https://github.com/webrtc/samples/issues/929
       recorderElement.setAttribute('playsinline', true)
       recorderElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
+
+      // add these here, not in CSS because users can configure custom
+      // class names
+      recorderElement.style.transform = 'rotateY(180deg)'
+      recorderElement.style['-webkit-transform'] = 'rotateY(180deg)'
+      recorderElement.style['-moz-transform'] = 'rotateY(180deg)'
 
       if (!userMedia) {
         userMedia = new UserMedia(this, options)
