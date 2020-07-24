@@ -1,12 +1,12 @@
 import test from 'tape-catch'
 
-import CollectLogger from './../../src/util/collectLogger'
+import CollectLogger from './../../src/js/util/collectLogger'
 
-test('CollectLogger:', function (t) {
-  t.test('can be instantiated', function (tt) {
+test('CollectLogger:', function(t) {
+  t.test('can be instantiated', function(tt) {
     tt.plan(1)
 
-    tt.doesNotThrow(function () {
+    tt.doesNotThrow(function() {
       return new CollectLogger()
     })
   })

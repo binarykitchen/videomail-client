@@ -1,0 +1,13 @@
+{
+  "parser": "babel-eslint",
+  "plugins": [],
+  "extends": ["standard"],
+  "env": {
+  },
+  "rules": {
+    "no-else-return": 1,
+    "space-before-function-paren": 0
+  },
+  "globals": {
+  }
+}

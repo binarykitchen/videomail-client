@@ -1,11 +1,11 @@
 import test from 'tape-catch'
-import Resource from './../../src/resource'
+import Resource from './../../src/js/resource'
 
-test('Resource:', function (t) {
-  t.test('can be instantiated', function (tt) {
+test('Resource:', function(t) {
+  t.test('can be instantiated', function(tt) {
     tt.plan(1)
 
-    tt.doesNotThrow(function () {
+    tt.doesNotThrow(function() {
       return new Resource()
     })
   })
