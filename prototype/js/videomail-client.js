@@ -21204,7 +21204,7 @@ function wrappy (fn, cb) {
 },{}],263:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.11.1",
+  "version": "2.12.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21223,13 +21223,14 @@ module.exports={
   "module": "src/js/index.js",
   "main": "prototype/js/videomail-client.js",
   "scripts": {
+    "build": "gulp build",
     "test": "gulp test",
     "watch": "NODE_NO_HTTP2=1 gulp watch",
     "audit": "yarn run audit-ci --config audit-ci.json",
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major",
-    "lint": "eslint ./src/js ./test"
+    "lint": "eslint ./src/js ./test gulpfile.js"
   },
   "engines": {
     "node": "^14.4.0",
@@ -21324,7 +21325,6 @@ module.exports={
     "gulp-postcss": "8.0.0",
     "gulp-rename": "2.0.0",
     "gulp-sourcemaps": "2.6.5",
-    "gulp-standard": "14.0.0",
     "gulp-stylus": "2.7.0",
     "gulp-terser": "1.2.1",
     "gulp-todo": "7.1.1",
