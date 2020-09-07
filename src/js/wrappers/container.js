@@ -1,27 +1,23 @@
-import insertCss from 'insert-css'
-import hidden from 'hidden'
-import util from 'util'
-import Visibility from 'document-visibility'
-
-// needed for IE 11
-import elementClosest from 'element-closest'
-
-import Dimension from './dimension'
-import Visuals from './visuals'
 import Buttons from './buttons'
+import Dimension from './dimension'
+import EventEmitter from './../util/eventEmitter'
+import Events from './../events'
 import Form from './form'
 import OptionsWrapper from './optionsWrapper'
-
 import Resource from './../resource'
-import Events from './../events'
-
-import EventEmitter from './../util/eventEmitter'
 import VideomailError from './../util/videomailError'
+import Visibility from 'document-visibility'
+import Visuals from './visuals'
 import css from './../../styles/css/main.min.css.js'
+// needed for IE 11
+import elementClosest from 'element-closest'
+import hidden from 'hidden'
+import insertCss from 'insert-css'
+import util from 'util'
 
 elementClosest(window)
 
-const Container = function(options) {
+const Container = function (options) {
   EventEmitter.call(this, options, 'Container')
 
   const self = this
@@ -82,7 +78,10 @@ const Container = function(options) {
     debug('Container: buildChildren()')
 
     if (!containerElement.classList) {
-      self.emit(Events.ERROR, VideomailError.create('Sorry, your browser is too old!', options))
+      self.emit(
+        Events.ERROR,
+        VideomailError.create('Sorry, your browser is too old!', options)
+      )
     } else {
       containerElement.classList.add('videomail')
 
@@ -118,7 +117,7 @@ const Container = function(options) {
     })
 
     if (!options.playerOnly) {
-      visibility.onChange(function(visible) {
+      visibility.onChange(function (visible) {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (built) {
           if (visible) {
@@ -128,7 +127,10 @@ const Container = function(options) {
 
             self.emit(Events.VISIBLE)
           } else {
-            if (options.isAutoPauseEnabled() && (self.isCountingDown() || self.isRecording())) {
+            if (
+              options.isAutoPauseEnabled() &&
+              (self.isCountingDown() || self.isRecording())
+            ) {
               self.pause('document invisible')
             }
 
@@ -140,7 +142,7 @@ const Container = function(options) {
 
     if (options.enableSpace) {
       if (!options.playerOnly) {
-        window.addEventListener('keypress', function(e) {
+        window.addEventListener('keypress', function (e) {
           const tagName = e.target.tagName
           const isEditable =
             e.target.isContentEditable ||
@@ -167,7 +169,7 @@ const Container = function(options) {
 
     // better to keep the one and only error listeners
     // at one spot, here, because unload() will do a removeAllListeners()
-    self.on(Events.ERROR, function(err) {
+    self.on(Events.ERROR, function (err) {
       processError(err)
       unloadChildren(err)
 
@@ -177,7 +179,7 @@ const Container = function(options) {
     })
 
     if (!options.playerOnly) {
-      self.on(Events.LOADED_META_DATA, function() {
+      self.on(Events.LOADED_META_DATA, function () {
         correctDimensions()
       })
     }
@@ -237,7 +239,7 @@ const Container = function(options) {
 
     const videomailFormData = {}
 
-    Object.keys(FORM_FIELDS).forEach(function(key) {
+    Object.keys(FORM_FIELDS).forEach(function (key) {
       const formFieldValue = FORM_FIELDS[key]
 
       if (formFieldValue in formData) {
@@ -258,6 +260,15 @@ const Container = function(options) {
       videomailFormData.recordingStats = visuals.getRecordingStats()
       videomailFormData.width = visuals.getRecorderWidth(true)
       videomailFormData.height = visuals.getRecorderHeight(true)
+
+      if (navigator.connection) {
+        videomailFormData.connection = {
+          downlink: navigator.connection.downlink + ' Mbit/s',
+          effectiveType: navigator.connection.effectiveType,
+          rtt: navigator.connection.rtt,
+          type: navigator.connection.type
+        }
+      }
 
       resource.post(videomailFormData, cb)
     } else if (isPut(method)) {
@@ -298,7 +309,7 @@ const Container = function(options) {
 
       // merge two json response bodies to fake as if it were only one request
       if (response && formResponse && formResponse.body) {
-        Object.keys(formResponse.body).forEach(function(key) {
+        Object.keys(formResponse.body).forEach(function (key) {
           response[key] = formResponse.body[key]
         })
       }
@@ -315,7 +326,7 @@ const Container = function(options) {
     }
   }
 
-  this.addPlayerDimensions = function(videomail, element) {
+  this.addPlayerDimensions = function (videomail, element) {
     try {
       videomail.playerHeight = this.calculateHeight(
         {
@@ -338,19 +349,19 @@ const Container = function(options) {
     }
   }
 
-  this.limitWidth = function(width) {
+  this.limitWidth = function (width) {
     return Dimension.limitWidth(containerElement, width, options)
   }
 
-  this.limitHeight = function(height) {
+  this.limitHeight = function (height) {
     return Dimension.limitHeight(height, options)
   }
 
-  this.calculateWidth = function(fnOptions) {
+  this.calculateWidth = function (fnOptions) {
     return Dimension.calculateWidth(OptionsWrapper.merge(options, fnOptions, true))
   }
 
-  this.calculateHeight = function(fnOptions, element) {
+  this.calculateHeight = function (fnOptions, element) {
     if (!element) {
       if (containerElement) {
         element = containerElement
@@ -360,18 +371,21 @@ const Container = function(options) {
       }
     }
 
-    return Dimension.calculateHeight(element, OptionsWrapper.merge(options, fnOptions, true))
+    return Dimension.calculateHeight(
+      element,
+      OptionsWrapper.merge(options, fnOptions, true)
+    )
   }
 
-  this.areVisualsHidden = function() {
+  this.areVisualsHidden = function () {
     return visuals.isHidden()
   }
 
-  this.hasElement = function() {
+  this.hasElement = function () {
     return !!containerElement
   }
 
-  this.build = function() {
+  this.build = function () {
     try {
       containerElement = document.getElementById(options.selectors.containerId)
 
@@ -410,31 +424,31 @@ const Container = function(options) {
     }
   }
 
-  this.getSubmitButton = function() {
+  this.getSubmitButton = function () {
     return buttons.getSubmitButton()
   }
 
-  this.querySelector = function(selector) {
+  this.querySelector = function (selector) {
     return containerElement.querySelector(selector)
   }
 
-  this.beginWaiting = function() {
+  this.beginWaiting = function () {
     htmlElement.classList && htmlElement.classList.add('wait')
   }
 
-  this.endWaiting = function() {
+  this.endWaiting = function () {
     htmlElement.classList && htmlElement.classList.remove('wait')
   }
 
-  this.appendChild = function(child) {
+  this.appendChild = function (child) {
     containerElement.appendChild(child)
   }
 
-  this.insertBefore = function(child, reference) {
+  this.insertBefore = function (child, reference) {
     containerElement.insertBefore(child, reference)
   }
 
-  this.unload = function(e) {
+  this.unload = function (e) {
     debug('Container: unload()', e)
 
     try {
@@ -447,7 +461,7 @@ const Container = function(options) {
     }
   }
 
-  this.show = function() {
+  this.show = function () {
     if (containerElement) {
       hidden(containerElement, false)
 
@@ -473,7 +487,7 @@ const Container = function(options) {
     }
   }
 
-  this.hide = function() {
+  this.hide = function () {
     debug('Container: hide()')
 
     hasError = false
@@ -488,13 +502,13 @@ const Container = function(options) {
     }
   }
 
-  this.startOver = function(params) {
+  this.startOver = function (params) {
     try {
       self.emit(Events.STARTING_OVER)
 
       submitted = false
       form.show()
-      visuals.back(params, function() {
+      visuals.back(params, function () {
         if (params.keepHidden) {
           // just enable form, do nothing else.
           // see example contact_form.html when you submit without videomil
@@ -509,7 +523,7 @@ const Container = function(options) {
     }
   }
 
-  this.showReplayOnly = function() {
+  this.showReplayOnly = function () {
     hasError = false
 
     this.isRecording() && this.pause()
@@ -519,20 +533,20 @@ const Container = function(options) {
     submitted && buttons.hide()
   }
 
-  this.isNotifying = function() {
+  this.isNotifying = function () {
     return visuals.isNotifying()
   }
 
-  this.isPaused = function() {
+  this.isPaused = function () {
     return visuals.isPaused()
   }
 
-  this.pause = function(params) {
+  this.pause = function (params) {
     visuals.pause(params)
   }
 
   // this code needs a good rewrite :(
-  this.validate = function(force) {
+  this.validate = function (force) {
     var runValidation = true
     var valid
 
@@ -599,19 +613,19 @@ const Container = function(options) {
     return valid
   }
 
-  this.disableForm = function(buttonsToo) {
+  this.disableForm = function (buttonsToo) {
     form && form.disable(buttonsToo)
   }
 
-  this.enableForm = function(buttonsToo) {
+  this.enableForm = function (buttonsToo) {
     form && form.enable(buttonsToo)
   }
 
-  this.hasForm = function() {
+  this.hasForm = function () {
     return !!form
   }
 
-  this.isReady = function() {
+  this.isReady = function () {
     return buttons.isRecordButtonEnabled()
   }
 
@@ -623,7 +637,7 @@ const Container = function(options) {
     return method && method.toUpperCase() === 'PUT'
   }
 
-  this.submitAll = function(formData, method, url) {
+  this.submitAll = function (formData, method, url) {
     const post = isPost(method)
     const hasVideomailKey = !!formData[options.selectors.keyInputName]
 
@@ -634,11 +648,11 @@ const Container = function(options) {
     }
 
     // a closure so that we can access method
-    var submitVideomailCallback = function(err1, videomail, videomailResponse) {
+    var submitVideomailCallback = function (err1, videomail, videomailResponse) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse)
       } else if (post) {
-        submitForm(formData, videomailResponse, url, function(err2, formResponse) {
+        submitForm(formData, videomailResponse, url, function (err2, formResponse) {
           finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse)
         })
       } else {
@@ -652,7 +666,7 @@ const Container = function(options) {
     if (!hasVideomailKey) {
       if (options.enableAutoSubmission) {
         startSubmission()
-        submitForm(formData, null, url, function(err2, formResponse) {
+        submitForm(formData, null, url, function (err2, formResponse) {
           finalizeSubmissions(err2, method, null, null, formResponse)
         })
       }
@@ -666,15 +680,15 @@ const Container = function(options) {
     }
   }
 
-  this.isBuilt = function() {
+  this.isBuilt = function () {
     return built
   }
 
-  this.isReplayShown = function() {
+  this.isReplayShown = function () {
     return visuals.isReplayShown()
   }
 
-  this.isDirty = function() {
+  this.isDirty = function () {
     var isDirty = false
 
     if (form) {
@@ -688,38 +702,38 @@ const Container = function(options) {
     return isDirty
   }
 
-  this.getReplay = function() {
+  this.getReplay = function () {
     return visuals.getReplay()
   }
 
-  this.isOutsideElementOf = function(element) {
+  this.isOutsideElementOf = function (element) {
     return element.parentNode !== containerElement && element !== containerElement
   }
 
-  this.hideForm = function(params) {
+  this.hideForm = function (params) {
     // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
     form && form.hide()
     buttons && buttons.hide(params)
   }
 
-  this.loadForm = function(videomail) {
+  this.loadForm = function (videomail) {
     if (form) {
       form.loadVideomail(videomail)
       this.validate()
     }
   }
 
-  this.enableAudio = function() {
+  this.enableAudio = function () {
     options.setAudioEnabled(true)
     this.emit(Events.ENABLING_AUDIO)
   }
 
-  this.disableAudio = function() {
+  this.disableAudio = function () {
     options.setAudioEnabled(false)
     this.emit(Events.DISABLING_AUDIO)
   }
 
-  this.submit = function() {
+  this.submit = function () {
     lastValidation && form && form.doTheSubmit()
   }
 

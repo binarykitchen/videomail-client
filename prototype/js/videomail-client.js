@@ -22279,7 +22279,7 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.11.5",
+    "@babel/core": "7.11.6",
     "@babel/plugin-transform-runtime": "7.11.5",
     "@babel/preset-env": "7.11.5",
     "audit-ci": "3.1.1",
@@ -23933,6 +23933,10 @@ function _default() {
     window.URL = window.webkitURL || window.mozURL || window.msURL;
   }
 
+  if (!navigator.connection) {
+    navigator.connection = navigator.mozConnection || navigator.webkitConnection;
+  }
+
   var methods = ['debug', 'groupCollapsed', 'groupEnd', 'error', 'exception', 'info', 'log', 'trace', 'warn'];
   var console = {};
 
@@ -24992,21 +24996,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _insertCss = _interopRequireDefault(_dereq_("insert-css"));
-
-var _hidden = _interopRequireDefault(_dereq_("hidden"));
-
-var _util = _interopRequireDefault(_dereq_("util"));
-
-var _documentVisibility = _interopRequireDefault(_dereq_("document-visibility"));
-
-var _elementClosest = _interopRequireDefault(_dereq_("element-closest"));
+var _buttons = _interopRequireDefault(_dereq_("./buttons"));
 
 var _dimension = _interopRequireDefault(_dereq_("./dimension"));
 
-var _visuals = _interopRequireDefault(_dereq_("./visuals"));
+var _eventEmitter = _interopRequireDefault(_dereq_("./../util/eventEmitter"));
 
-var _buttons = _interopRequireDefault(_dereq_("./buttons"));
+var _events = _interopRequireDefault(_dereq_("./../events"));
 
 var _form = _interopRequireDefault(_dereq_("./form"));
 
@@ -25014,13 +25010,21 @@ var _optionsWrapper = _interopRequireDefault(_dereq_("./optionsWrapper"));
 
 var _resource = _interopRequireDefault(_dereq_("./../resource"));
 
-var _events = _interopRequireDefault(_dereq_("./../events"));
-
-var _eventEmitter = _interopRequireDefault(_dereq_("./../util/eventEmitter"));
-
 var _videomailError = _interopRequireDefault(_dereq_("./../util/videomailError"));
 
+var _documentVisibility = _interopRequireDefault(_dereq_("document-visibility"));
+
+var _visuals = _interopRequireDefault(_dereq_("./visuals"));
+
 var _mainMinCss = _interopRequireDefault(_dereq_("./../../styles/css/main.min.css.js"));
+
+var _elementClosest = _interopRequireDefault(_dereq_("element-closest"));
+
+var _hidden = _interopRequireDefault(_dereq_("hidden"));
+
+var _insertCss = _interopRequireDefault(_dereq_("insert-css"));
+
+var _util = _interopRequireDefault(_dereq_("util"));
 
 // needed for IE 11
 (0, _elementClosest.default)(window);
@@ -25252,6 +25256,16 @@ var Container = function Container(options) {
       videomailFormData.recordingStats = visuals.getRecordingStats();
       videomailFormData.width = visuals.getRecorderWidth(true);
       videomailFormData.height = visuals.getRecorderHeight(true);
+
+      if (navigator.connection) {
+        videomailFormData.connection = {
+          downlink: navigator.connection.downlink + ' Mbit/s',
+          effectiveType: navigator.connection.effectiveType,
+          rtt: navigator.connection.rtt,
+          type: navigator.connection.type
+        };
+      }
+
       resource.post(videomailFormData, cb);
     } else if (isPut(method)) {
       resource.put(videomailFormData, cb);
