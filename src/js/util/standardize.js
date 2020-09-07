@@ -4,7 +4,7 @@ import 'classlist.js'
 import requestFrame from 'request-frame'
 
 // use those default params for unit tests
-export default function(window = {}, navigator = {}) {
+export default function (window = {}, navigator = {}) {
   // https://github.com/julienetie/request-frame/issues/6
   if (!window.screen) {
     window.screen = {}
@@ -32,6 +32,10 @@ export default function(window = {}, navigator = {}) {
     window.URL = window.webkitURL || window.mozURL || window.msURL
   }
 
+  if (!navigator.connection) {
+    navigator.connection = navigator.mozConnection || navigator.webkitConnection
+  }
+
   const methods = [
     'debug',
     'groupCollapsed',
@@ -49,7 +53,7 @@ export default function(window = {}, navigator = {}) {
   if (window.console) {
     console = window.console
   } else {
-    window.console = function() {}
+    window.console = function () {}
   }
 
   var method
@@ -59,7 +63,7 @@ export default function(window = {}, navigator = {}) {
     method = methods[length]
 
     if (!console[method]) {
-      console[method] = function() {}
+      console[method] = function () {}
     }
   }
 }
