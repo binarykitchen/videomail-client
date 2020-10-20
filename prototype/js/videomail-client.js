@@ -23322,7 +23322,7 @@ module.exports={
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.0",
-    "canvas-to-buffer": "1.1.0",
+    "canvas-to-buffer": "1.1.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "core-js": "3.6.5",
@@ -29336,6 +29336,7 @@ var Recorder = function Recorder(visuals, replay) {
         framesCount++;
         ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height);
         recordingBuffer = frame.toBuffer();
+        console.log('recordingBuffer', recordingBuffer);
         recordingBufferLength = recordingBuffer.length;
 
         if (recordingBufferLength < 1) {
