@@ -1,17 +1,16 @@
-import h from 'hyperscript'
-import stringify from 'safe-json-stringify'
-
 import AudioRecorder from './../../util/audioRecorder'
-import VideomailError from './../../util/videomailError'
-import EventEmitter from './../../util/eventEmitter'
-import MEDIA_EVENTS from './../../util/mediaEvents'
-import pretty from './../../util/pretty'
 import Browser from './../../util/browser'
+import EventEmitter from './../../util/eventEmitter'
 import Events from './../../events'
+import MEDIA_EVENTS from './../../util/mediaEvents'
+import VideomailError from './../../util/videomailError'
+import h from 'hyperscript'
+import pretty from './../../util/pretty'
+import stringify from 'safe-json-stringify'
 
 const EVENT_ASCII = '|—O—|'
 
-export default function(recorder, options) {
+export default function (recorder, options) {
   EventEmitter.call(this, options, 'UserMedia')
 
   const rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia()
@@ -127,15 +126,15 @@ export default function(recorder, options) {
       rawVisualUserMedia.removeEventListener(e.type, outputEvent)
   }
 
-  this.unloadRemainingEventListeners = function() {
+  this.unloadRemainingEventListeners = function () {
     options.debug('UserMedia: unloadRemainingEventListeners()')
 
-    MEDIA_EVENTS.forEach(function(eventName) {
+    MEDIA_EVENTS.forEach(function (eventName) {
       rawVisualUserMedia.removeEventListener(eventName, outputEvent)
     })
   }
 
-  this.init = function(
+  this.init = function (
     localMediaStream,
     videoCallback,
     audioCallback,
@@ -203,12 +202,12 @@ export default function(recorder, options) {
           // using the promise here just experimental for now
           // and this to catch any weird errors early if possible
           if (isPromise(p)) {
-            p.then(function() {
+            p.then(function () {
               if (!playingPromiseReached) {
                 options.debug('UserMedia: play promise successful. Playing now.')
                 playingPromiseReached = true
               }
-            }).catch(function(reason) {
+            }).catch(function (reason) {
               // promise can be interrupted, i.E. when switching tabs
               // and promise can get resumed when switching back to tab, hence
               // do not treat this like an error
@@ -348,7 +347,7 @@ export default function(recorder, options) {
       const heavyDebugging = true
 
       if (heavyDebugging) {
-        MEDIA_EVENTS.forEach(function(eventName) {
+        MEDIA_EVENTS.forEach(function (eventName) {
           rawVisualUserMedia.addEventListener(eventName, outputEvent, false)
         })
       }
@@ -360,7 +359,7 @@ export default function(recorder, options) {
       // An error occurs while fetching the media data.
       // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
       // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
-      rawVisualUserMedia.addEventListener('error', function(err) {
+      rawVisualUserMedia.addEventListener('error', function (err) {
         options.logger.warn('Caught video element error event: %s', pretty(err))
       })
 
@@ -372,11 +371,11 @@ export default function(recorder, options) {
     }
   }
 
-  this.isReady = function() {
+  this.isReady = function () {
     return !!rawVisualUserMedia.src
   }
 
-  this.stop = function(visualStream, params = {}) {
+  this.stop = function (visualStream, params = {}) {
     try {
       // do not stop "too much" when going to initialize anyway
       const aboutToInitialize = params.aboutToInitialize
@@ -391,7 +390,7 @@ export default function(recorder, options) {
         var newStopApiFound = false
 
         if (tracks) {
-          tracks.forEach(function(track) {
+          tracks.forEach(function (track) {
             if (track.stop) {
               newStopApiFound = true
               track.stop()
@@ -409,7 +408,7 @@ export default function(recorder, options) {
         audioRecorder = null
       }
 
-      // dont have to reset these states when just switching camera
+      // don't have to reset these states when just switching camera
       // while still recording or pausing
       if (!switchingFacingMode) {
         paused = record = false
@@ -419,26 +418,26 @@ export default function(recorder, options) {
     }
   }
 
-  this.createCanvas = function() {
+  this.createCanvas = function () {
     return h('canvas', {
       width: this.getRawWidth(true),
       height: this.getRawHeight(true)
     })
   }
 
-  this.getVideoHeight = function() {
+  this.getVideoHeight = function () {
     return rawVisualUserMedia.videoHeight
   }
 
-  this.getVideoWidth = function() {
+  this.getVideoWidth = function () {
     return rawVisualUserMedia.videoWidth
   }
 
-  this.hasVideoWidth = function() {
+  this.hasVideoWidth = function () {
     return this.getVideoWidth() > 0
   }
 
-  this.getRawWidth = function(responsive) {
+  this.getRawWidth = function (responsive) {
     var rawWidth = this.getVideoWidth()
     const widthDefined = options.hasDefinedWidth()
 
@@ -457,7 +456,7 @@ export default function(recorder, options) {
     return rawWidth
   }
 
-  this.getRawHeight = function(responsive) {
+  this.getRawHeight = function (responsive) {
     var rawHeight
 
     if (options.hasDefinedDimension()) {
@@ -489,31 +488,31 @@ export default function(recorder, options) {
     return rawHeight
   }
 
-  this.getRawVisuals = function() {
+  this.getRawVisuals = function () {
     return rawVisualUserMedia
   }
 
-  this.pause = function() {
+  this.pause = function () {
     paused = true
   }
 
-  this.isPaused = function() {
+  this.isPaused = function () {
     return paused
   }
 
-  this.resume = function() {
+  this.resume = function () {
     paused = false
   }
 
-  this.record = function() {
+  this.record = function () {
     record = true
   }
 
-  this.isRecording = function() {
+  this.isRecording = function () {
     return record
   }
 
-  this.getAudioSampleRate = function() {
+  this.getAudioSampleRate = function () {
     if (audioRecorder) {
       return audioRecorder.getSampleRate()
     }
@@ -521,7 +520,7 @@ export default function(recorder, options) {
     return -1
   }
 
-  this.getCharacteristics = function() {
+  this.getCharacteristics = function () {
     return {
       audioSampleRate: this.getAudioSampleRate(),
       muted: rawVisualUserMedia && rawVisualUserMedia.muted,

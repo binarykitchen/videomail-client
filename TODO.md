@@ -12,7 +12,7 @@
 | src/js/wrappers/visuals/recorder.js | 597 | retry with navigator.getUserMedia_() maybe?
 | src/js/wrappers/visuals/recorder.js | 737 | commented out because for some reasons server does not accept such a long
 | src/js/wrappers/visuals/recorder.js | 742 | consider removing this later or have it for debug=1 only?
-| src/js/wrappers/visuals/userMedia.js | 310 | consider removing that if it's not the case anymore (for better performance)
+| src/js/wrappers/visuals/userMedia.js | 309 | consider removing that if it's not the case anymore (for better performance)
 | gulpfile.js | 1 | write this in ES6 once i have figured out how to
 | gulpfile.js | 57 | fix this, so that it also works when not minified, this
 | gulpfile.js | 62 | location is bad, should be in a temp folder or so
