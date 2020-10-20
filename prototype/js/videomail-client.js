@@ -29475,7 +29475,7 @@ var Recorder = function Recorder(visuals, replay) {
     } else if (facingMode === 'environment') {
       facingMode = 'user';
     } else {
-      debug('Recorder: unspported facing mode', facingMode);
+      debug('Recorder: unsupported facing mode', facingMode);
     }
 
     loadGenuineUserMedia({
@@ -30064,23 +30064,23 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-
-var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
-
 var _audioRecorder = _interopRequireDefault(_dereq_("./../../util/audioRecorder"));
-
-var _videomailError = _interopRequireDefault(_dereq_("./../../util/videomailError"));
-
-var _eventEmitter = _interopRequireDefault(_dereq_("./../../util/eventEmitter"));
-
-var _mediaEvents = _interopRequireDefault(_dereq_("./../../util/mediaEvents"));
-
-var _pretty = _interopRequireDefault(_dereq_("./../../util/pretty"));
 
 var _browser = _interopRequireDefault(_dereq_("./../../util/browser"));
 
+var _eventEmitter = _interopRequireDefault(_dereq_("./../../util/eventEmitter"));
+
 var _events = _interopRequireDefault(_dereq_("./../../events"));
+
+var _mediaEvents = _interopRequireDefault(_dereq_("./../../util/mediaEvents"));
+
+var _videomailError = _interopRequireDefault(_dereq_("./../../util/videomailError"));
+
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
+
+var _pretty = _interopRequireDefault(_dereq_("./../../util/pretty"));
+
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 
 var EVENT_ASCII = '|—O—|';
 
@@ -30415,7 +30415,7 @@ function _default(recorder, options) {
         setVisualStream(null);
         audioRecorder && audioRecorder.stop();
         audioRecorder = null;
-      } // dont have to reset these states when just switching camera
+      } // don't have to reset these states when just switching camera
       // while still recording or pausing
 
 

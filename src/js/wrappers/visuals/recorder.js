@@ -1132,7 +1132,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     } else if (facingMode === 'environment') {
       facingMode = 'user'
     } else {
-      debug('Recorder: unspported facing mode', facingMode)
+      debug('Recorder: unsupported facing mode', facingMode)
     }
 
     loadGenuineUserMedia({ switchingFacingMode: true })
