@@ -1,26 +1,24 @@
-import websocket from 'websocket-stream'
-import Frame from 'canvas-to-buffer'
-import util from 'util'
-import h from 'hyperscript'
-import hidden from 'hidden'
-import animitter from 'animitter'
-import stringify from 'safe-json-stringify'
-import deepmerge from 'deepmerge'
-
-import UserMedia from './userMedia'
-
-import Events from './../../events'
+import Browser from './../../util/browser'
 import Constants from './../../constants'
 import EventEmitter from './../../util/eventEmitter'
-import Browser from './../../util/browser'
+import Events from './../../events'
+import Frame from 'canvas-to-buffer'
 import Humanize from './../../util/humanize'
-import pretty from './../../util/pretty'
+import UserMedia from './userMedia'
 import VideomailError from './../../util/videomailError'
+import animitter from 'animitter'
+import deepmerge from 'deepmerge'
+import h from 'hyperscript'
+import hidden from 'hidden'
+import pretty from './../../util/pretty'
+import stringify from 'safe-json-stringify'
+import util from 'util'
+import websocket from 'websocket-stream'
 
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
 
-const Recorder = function(visuals, replay, defaultOptions = {}) {
+const Recorder = function (visuals, replay, defaultOptions = {}) {
   EventEmitter.call(this, defaultOptions, 'Recorder')
 
   const browser = new Browser(defaultOptions)
@@ -107,7 +105,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
         const onFlushedCallback = opts && opts.onFlushedCallback
 
         try {
-          stream.write(buffer, function() {
+          stream.write(buffer, function () {
             onFlushedCallback && onFlushedCallback(opts)
           })
         } catch (exc) {
@@ -125,7 +123,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
   }
 
   function sendPings() {
-    pingInterval = window.setInterval(function() {
+    pingInterval = window.setInterval(function () {
       debug('Recorder: pinging...')
       writeStream(Buffer.from(''))
     }, options.timeouts.pingInterval)
@@ -247,7 +245,11 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
 
     if (args.webm) {
       replay.setWebMSource(
-        args.webm + Constants.SITE_NAME_LABEL + '/' + options.siteName + '/videomail.webm',
+        args.webm +
+          Constants.SITE_NAME_LABEL +
+          '/' +
+          options.siteName +
+          '/videomail.webm',
         true
       )
     }
@@ -307,7 +309,11 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
         var err
 
         if (typeof websocket === 'undefined') {
-          err = VideomailError.create('There is no websocket', 'Cause: ' + pretty(exc), options)
+          err = VideomailError.create(
+            'There is no websocket',
+            'Cause: ' + pretty(exc),
+            options
+          )
         } else {
           err = VideomailError.create(
             'Failed to connect to server',
@@ -337,7 +343,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
         //   }
         // }
 
-        stream.on('close', function(err) {
+        stream.on('close', function (err) {
           debug(PIPE_SYMBOL + 'Stream has closed')
 
           connecting = connected = false
@@ -352,7 +358,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
           }
         })
 
-        stream.on('connect', function() {
+        stream.on('connect', function () {
           debug(PIPE_SYMBOL + 'Stream *connect* event emitted')
 
           if (!connected) {
@@ -367,7 +373,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
           }
         })
 
-        stream.on('data', function(data) {
+        stream.on('data', function (data) {
           debug(PIPE_SYMBOL + 'Stream *data* event emitted')
 
           var command
@@ -391,7 +397,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
           }
         })
 
-        stream.on('error', function(err) {
+        stream.on('error', function (err) {
           debug(PIPE_SYMBOL + 'Stream *error* event emitted', err)
 
           connecting = connected = false
@@ -411,47 +417,47 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
 
         // just experimental
 
-        stream.on('drain', function() {
+        stream.on('drain', function () {
           debug(PIPE_SYMBOL + 'Stream *drain* event emitted (should not happen!)')
         })
 
-        stream.on('preend', function() {
+        stream.on('preend', function () {
           debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
         })
 
-        stream.on('end', function() {
+        stream.on('end', function () {
           debug(PIPE_SYMBOL + 'Stream *end* event emitted')
         })
 
-        stream.on('drain', function() {
+        stream.on('drain', function () {
           debug(PIPE_SYMBOL + 'Stream *drain* event emitted')
         })
 
-        stream.on('pipe', function() {
+        stream.on('pipe', function () {
           debug(PIPE_SYMBOL + 'Stream *pipe* event emitted')
         })
 
-        stream.on('unpipe', function() {
+        stream.on('unpipe', function () {
           debug(PIPE_SYMBOL + 'Stream *unpipe* event emitted')
         })
 
-        stream.on('resume', function() {
+        stream.on('resume', function () {
           debug(PIPE_SYMBOL + 'Stream *resume* event emitted')
         })
 
-        stream.on('uncork', function() {
+        stream.on('uncork', function () {
           debug(PIPE_SYMBOL + 'Stream *uncork* event emitted')
         })
 
-        stream.on('readable', function() {
+        stream.on('readable', function () {
           debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
         })
 
-        stream.on('prefinish', function() {
+        stream.on('prefinish', function () {
           debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
         })
 
-        stream.on('finish', function() {
+        stream.on('finish', function () {
           debug(PIPE_SYMBOL + 'Stream *preend* event emitted')
         })
       }
@@ -513,11 +519,11 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
 
         userMedia.init(
           localStream,
-          function() {
+          function () {
             onUserMediaReady(params)
           },
           onAudioSample.bind(self),
-          function(err) {
+          function (err) {
             self.emit(Events.ERROR, err)
           },
           params
@@ -580,7 +586,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
 
       if (genuineUserMediaRequest) {
         genuineUserMediaRequest
-          .then(function(localStream) {
+          .then(function (localStream) {
             getUserMediaCallback(localStream, params)
           })
           .catch(userMediaErrorCallback)
@@ -615,7 +621,9 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
       onUserMediaReady()
       return false
     } else if (userMediaLoading) {
-      debug('Recorder: skipping loadUserMedia() because it is already asking for permission')
+      debug(
+        'Recorder: skipping loadUserMedia() because it is already asking for permission'
+      )
       return false
     }
 
@@ -624,7 +632,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     self.emit(Events.LOADING_USER_MEDIA)
 
     try {
-      userMediaTimeout = setTimeout(function() {
+      userMediaTimeout = setTimeout(function () {
         if (!self.isReady()) {
           self.emit(Events.ERROR, browser.getNoAccessIssue())
         }
@@ -714,7 +722,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     if (!connected) {
       debug('Reconnecting for the command', command, '…')
 
-      initSocket(function() {
+      initSocket(function () {
         writeCommand(command, args)
         cb && cb()
       })
@@ -741,7 +749,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
 
       if (cb) {
         // keep all callbacks async
-        setTimeout(function() {
+        setTimeout(function () {
           cb()
         }, 0)
       }
@@ -781,15 +789,20 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     return getIntervalSum() / framesCount
   }
 
-  this.getRecordingStats = function() {
+  function getAvgFps() {
+    // see https://github.com/hapticdata/animitter/issues/3
+    return (loop.getFrameCount() / loop.getElapsedTime()) * 1000
+  }
+
+  this.getRecordingStats = function () {
     return recordingStats
   }
 
-  this.getAudioSampleRate = function() {
+  this.getAudioSampleRate = function () {
     return userMedia.getAudioSampleRate()
   }
 
-  this.stop = function(params) {
+  this.stop = function (params) {
     debug('stop()', params)
 
     const limitReached = params.limitReached
@@ -801,7 +814,9 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     stopTime = Date.now()
 
     recordingStats = {
-      avgFps: loop.getFPS(),
+      // do not use loop.getFPS() as this will only return the fps from the last delta,
+      // not the average. see https://github.com/hapticdata/animitter/issues/3
+      avgFps: getAvgFps(),
       wantedFps: options.video.fps,
       avgInterval: getAvgInterval(),
       wantedInterval: 1e3 / options.video.fps,
@@ -822,7 +837,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     this.reset()
   }
 
-  this.back = function(cb) {
+  this.back = function (cb) {
     this.emit(Events.GOING_BACK)
 
     show()
@@ -844,7 +859,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     loadUserMedia()
   }
 
-  this.unload = function(e) {
+  this.unload = function (e) {
     if (!unloaded) {
       var cause
 
@@ -866,7 +881,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.reset = function() {
+  this.reset = function () {
     // no need to reset when already unloaded
     if (!unloaded) {
       debug('Recorder: reset()')
@@ -884,15 +899,15 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.validate = function() {
+  this.validate = function () {
     return connected && framesCount > 0 && canvas === null
   }
 
-  this.isReady = function() {
+  this.isReady = function () {
     return userMedia.isReady()
   }
 
-  this.pause = function(params) {
+  this.pause = function (params) {
     const e = params && params.event
 
     if (e instanceof window.Event) {
@@ -909,11 +924,11 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     sendPings()
   }
 
-  this.isPaused = function() {
+  this.isPaused = function () {
     return userMedia && userMedia.isPaused()
   }
 
-  this.resume = function() {
+  this.resume = function () {
     debug('Recorder: resume()')
 
     stopPings()
@@ -982,7 +997,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.record = function() {
+  this.record = function () {
     if (unloaded) {
       return false
     }
@@ -991,7 +1006,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     if (!connected) {
       debug('Recorder: reconnecting before recording ...')
 
-      initSocket(function() {
+      initSocket(function () {
         self.once(Events.USER_MEDIA_READY, self.record)
       })
 
@@ -1009,13 +1024,19 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     ctx = canvas.getContext('2d')
 
     if (!canvas.width) {
-      self.emit(Events.ERROR, VideomailError.create('Canvas has an invalid width.', options))
+      self.emit(
+        Events.ERROR,
+        VideomailError.create('Canvas has an invalid width.', options)
+      )
 
       return false
     }
 
     if (!canvas.height) {
-      self.emit(Events.ERROR, VideomailError.create('Canvas has an invalid height.', options))
+      self.emit(
+        Events.ERROR,
+        VideomailError.create('Canvas has an invalid height.', options)
+      )
 
       return false
     }
@@ -1063,7 +1084,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
 
     function raf(fn) {
       return setTimeout(
-        function() {
+        function () {
           start = Date.now()
           fn()
           processingTime = Date.now() - start
@@ -1121,41 +1142,41 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     debug('Recorder: initEvents()')
 
     self
-      .on(Events.SUBMITTING, function() {
+      .on(Events.SUBMITTING, function () {
         submitting = true
       })
-      .on(Events.SUBMITTED, function() {
+      .on(Events.SUBMITTED, function () {
         submitting = false
         self.unload()
       })
-      .on(Events.BLOCKING, function() {
+      .on(Events.BLOCKING, function () {
         blocking = true
         clearUserMediaTimeout()
       })
-      .on(Events.HIDE, function() {
+      .on(Events.HIDE, function () {
         self.hide()
       })
-      .on(Events.LOADED_META_DATA, function() {
+      .on(Events.LOADED_META_DATA, function () {
         correctDimensions()
       })
-      .on(Events.DISABLING_AUDIO, function() {
+      .on(Events.DISABLING_AUDIO, function () {
         reInitialiseAudio()
       })
-      .on(Events.ENABLING_AUDIO, function() {
+      .on(Events.ENABLING_AUDIO, function () {
         reInitialiseAudio()
       })
-      .on(Events.INVISIBLE, function() {
+      .on(Events.INVISIBLE, function () {
         loopWithTimeouts()
       })
-      .on(Events.VISIBLE, function() {
+      .on(Events.VISIBLE, function () {
         restoreAnimationFrameObject()
       })
-      .on(Events.SWITCH_FACING_MODE, function() {
+      .on(Events.SWITCH_FACING_MODE, function () {
         switchFacingMode()
       })
   }
 
-  this.build = function() {
+  this.build = function () {
     var err = browser.checkRecordingCapabilities()
 
     if (!err) {
@@ -1209,19 +1230,24 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.isPaused = function() {
+  this.isPaused = function () {
     return userMedia && userMedia.isPaused() && !loop.isRunning()
   }
 
-  this.isRecording = function() {
+  this.isRecording = function () {
     // checking for stream.destroyed needed since
     // https://github.com/binarykitchen/videomail.io/issues/296
     return (
-      loop && loop.isRunning() && !this.isPaused() && !isNotifying() && stream && !stream.destroyed
+      loop &&
+      loop.isRunning() &&
+      !this.isPaused() &&
+      !isNotifying() &&
+      stream &&
+      !stream.destroyed
     )
   }
 
-  this.hide = function() {
+  this.hide = function () {
     if (!isHidden()) {
       recorderElement && hidden(recorderElement, true)
 
@@ -1230,14 +1256,14 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.isUnloaded = function() {
+  this.isUnloaded = function () {
     return unloaded
   }
 
   // these two return the true dimensions of the webcam area.
   // needed because on mobiles they might be different.
 
-  this.getRecorderWidth = function(responsive) {
+  this.getRecorderWidth = function (responsive) {
     if (userMedia && userMedia.hasVideoWidth()) {
       return userMedia.getRawWidth(responsive)
     } else if (responsive && options.hasDefinedWidth()) {
@@ -1245,7 +1271,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.getRecorderHeight = function(responsive) {
+  this.getRecorderHeight = function (responsive) {
     if (userMedia) {
       return userMedia.getRawHeight(responsive)
     } else if (responsive && options.hasDefinedHeight()) {
@@ -1273,7 +1299,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     return ratio
   }
 
-  this.calculateWidth = function(responsive) {
+  this.calculateWidth = function (responsive) {
     var videoHeight
 
     if (userMedia) {
@@ -1289,7 +1315,7 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     })
   }
 
-  this.calculateHeight = function(responsive) {
+  this.calculateHeight = function (responsive) {
     var videoWidth
 
     if (userMedia) {
@@ -1305,27 +1331,27 @@ const Recorder = function(visuals, replay, defaultOptions = {}) {
     })
   }
 
-  this.getRawVisualUserMedia = function() {
+  this.getRawVisualUserMedia = function () {
     return recorderElement
   }
 
-  this.isConnected = function() {
+  this.isConnected = function () {
     return connected
   }
 
-  this.isConnecting = function() {
+  this.isConnecting = function () {
     return connecting
   }
 
-  this.limitWidth = function(width) {
+  this.limitWidth = function (width) {
     return visuals.limitWidth(width)
   }
 
-  this.limitHeight = function(height) {
+  this.limitHeight = function (height) {
     return visuals.limitHeight(height)
   }
 
-  this.isUserMediaLoaded = function() {
+  this.isUserMediaLoaded = function () {
     return userMediaLoaded
   }
 }
