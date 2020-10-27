@@ -1,8 +1,8 @@
 import UAParser from 'ua-parser-js'
-import defined from 'defined'
 import VideomailError from './videomailError'
+import defined from 'defined'
 
-const Browser = function(options) {
+const Browser = function (options) {
   options = options || {}
 
   const firefoxDownload = 'http://www.mozilla.org/firefox/update/'
@@ -52,7 +52,8 @@ const Browser = function(options) {
 
     if (firefox) {
       if (isIOS) {
-        warning = 'Firefox on iOS is not ready for cameras yet. Hopefully in near future ...'
+        warning =
+          'Firefox on iOS is not ready for cameras yet. Hopefully in near future ...'
       } else {
         warning =
           'Probably you need to <a href="' +
@@ -62,7 +63,8 @@ const Browser = function(options) {
       }
     } else if (isChrome) {
       if (isIOS) {
-        warning = "Use Safari instead. Apple doesn't give Chrome access to iPhone cameras (booo)."
+        warning =
+          "Use Safari instead. Apple doesn't give Chrome access to iPhone cameras (booo)."
       } else {
         warning =
           'Probably you need to <a href="' +
@@ -150,7 +152,9 @@ const Browser = function(options) {
 
     if (!warning) {
       warning =
-        '<a href="' + browseHappyLink + '" target="_blank">Upgrading your browser</a> might help.'
+        '<a href="' +
+        browseHappyLink +
+        '" target="_blank">Upgrading your browser</a> might help.'
     }
 
     return warning
@@ -167,7 +171,7 @@ const Browser = function(options) {
   }
 
   // just temporary
-  this.canRecord = function() {
+  this.canRecord = function () {
     const hasNavigator = typeof navigator !== 'undefined'
     var canRecord = false
 
@@ -182,7 +186,7 @@ const Browser = function(options) {
     return canRecord
   }
 
-  this.checkRecordingCapabilities = function() {
+  this.checkRecordingCapabilities = function () {
     var err
 
     if (!isHTTPS) {
@@ -247,7 +251,7 @@ const Browser = function(options) {
     return err
   }
 
-  this.checkPlaybackCapabilities = function(video) {
+  this.checkPlaybackCapabilities = function (video) {
     options.debug('Browser: checkPlaybackCapabilities()')
 
     var err
@@ -269,7 +273,7 @@ const Browser = function(options) {
     return err
   }
 
-  this.checkBufferTypes = function() {
+  this.checkBufferTypes = function () {
     var err
 
     if (typeof window === 'undefined' || typeof window.atob === 'undefined') {
@@ -283,7 +287,7 @@ const Browser = function(options) {
     return err
   }
 
-  this.getVideoType = function(video) {
+  this.getVideoType = function (video) {
     if (!videoType) {
       // there is a bug in canPlayType within chrome for mp4
       if (canPlayType(video, 'mp4') && !chromeBased) {
@@ -296,7 +300,7 @@ const Browser = function(options) {
     return videoType
   }
 
-  this.getNoAccessIssue = function() {
+  this.getNoAccessIssue = function () {
     const message = 'Unable to access webcam'
     var explanation
 
@@ -311,31 +315,31 @@ const Browser = function(options) {
     return VideomailError.create(message, explanation, options)
   }
 
-  this.isChromeBased = function() {
+  this.isChromeBased = function () {
     return chromeBased
   }
 
-  this.isFirefox = function() {
+  this.isFirefox = function () {
     return firefox
   }
 
-  this.isEdge = function() {
+  this.isEdge = function () {
     return isEdge
   }
 
-  this.isAndroid = function() {
+  this.isAndroid = function () {
     return isAndroid
   }
 
-  this.isMobile = function() {
+  this.isMobile = function () {
     return uaParser.device.type === 'mobile'
   }
 
-  this.isOkSafari = function() {
+  this.isOkSafari = function () {
     return isOkSafari
   }
 
-  this.getUsefulData = function() {
+  this.getUsefulData = function () {
     return {
       browser: uaParser.browser,
       device: uaParser.device,
@@ -347,6 +351,3 @@ const Browser = function(options) {
 }
 
 export default Browser
-
-// so that we also can require() it from videomailError.js within
-module.exports = Browser

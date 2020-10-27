@@ -1,9 +1,8 @@
+import Resource from './../resource'
 // https://github.com/tgriesser/create-error
 import createError from 'create-error'
-import util from 'util'
-
 import originalPretty from './pretty'
-import Resource from './../resource'
+import util from 'util'
 
 const VIDEOMAIL_ERR_NAME = 'Videomail Error'
 
@@ -16,7 +15,7 @@ const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
 })
 
 // shim pretty to exclude stack always
-const pretty = function(anything) {
+const pretty = function (anything) {
   return originalPretty(anything, { excludes: ['stack'] })
 }
 
@@ -38,7 +37,7 @@ VideomailError.TRACK_START_ERROR = 'TrackStartError'
 VideomailError.INVALID_STATE_ERROR = 'InvalidStateError'
 
 // static function to convert an error into a videomail error
-VideomailError.create = function(err, explanation, options, parameters) {
+VideomailError.create = function (err, explanation, options, parameters) {
   if (err && err.name === VIDEOMAIL_ERR_NAME) {
     return err
   }
@@ -61,7 +60,7 @@ VideomailError.create = function(err, explanation, options, parameters) {
 
   // Require Browser here, not at the top of the file to avoid
   // recursion. Because the Browser class is requiring this file as well.
-  const Browser = require('./browser')
+  const Browser = require('./browser').default
   const browser = new Browser(options)
 
   var errType
@@ -88,7 +87,10 @@ VideomailError.create = function(err, explanation, options, parameters) {
       } else {
         errType = VideomailError.DOM_EXCEPTION
       }
-    } else if (err.constructor && err.constructor.name === VideomailError.OVERCONSTRAINED) {
+    } else if (
+      err.constructor &&
+      err.constructor.name === VideomailError.OVERCONSTRAINED
+    ) {
       errType = VideomailError.OVERCONSTRAINED
     } else if (err.message === VideomailError.STARTING_FAILED) {
       errType = err.message
@@ -146,7 +148,8 @@ VideomailError.create = function(err, explanation, options, parameters) {
     case 'NO_DEVICES_FOUND':
       if (audioEnabled) {
         message = 'No webcam nor microphone found'
-        explanation = 'Your browser cannot find a webcam with microphone attached to your machine.'
+        explanation =
+          'Your browser cannot find a webcam with microphone attached to your machine.'
       } else {
         message = 'No webcam found'
         explanation = 'Your browser cannot find a webcam attached to your machine.'
@@ -204,7 +207,8 @@ VideomailError.create = function(err, explanation, options, parameters) {
 
     case VideomailError.STARTING_FAILED:
       message = 'Starting video failed'
-      explanation = 'Most likely this happens when the webam is already active in another browser.'
+      explanation =
+        'Most likely this happens when the webam is already active in another browser.'
       classList.push(VideomailError.WEBCAM_PROBLEM)
       break
 
@@ -237,7 +241,8 @@ VideomailError.create = function(err, explanation, options, parameters) {
           classList.push(VideomailError.WEBCAM_PROBLEM)
           break
         case 9: {
-          const newUrl = 'https:' + window.location.href.substring(window.location.protocol.length)
+          const newUrl =
+            'https:' + window.location.href.substring(window.location.protocol.length)
           message = 'Security upgrade needed'
           explanation =
             'Click <a href="' +
@@ -387,7 +392,7 @@ VideomailError.create = function(err, explanation, options, parameters) {
   }
 
   if (resource) {
-    resource.reportError(videomailError, function(err2) {
+    resource.reportError(videomailError, function (err2) {
       if (err2) {
         console.error('Unable to report error', err2)
       }
@@ -405,19 +410,19 @@ VideomailError.create = function(err, explanation, options, parameters) {
   // add some public functions
 
   // this one is useful so that the notifier can have different css classes
-  videomailError.getClassList = function() {
+  videomailError.getClassList = function () {
     return classList
   }
 
-  videomailError.removeDimensions = function() {
+  videomailError.removeDimensions = function () {
     return hasClass(VideomailError.IOS_PROBLEM) || browser.isMobile()
   }
 
-  videomailError.hideButtons = function() {
+  videomailError.hideButtons = function () {
     return isBrowserProblem() || hasClass(VideomailError.IOS_PROBLEM)
   }
 
-  videomailError.hideForm = function() {
+  videomailError.hideForm = function () {
     return hasClass(VideomailError.IOS_PROBLEM)
   }
 
