@@ -23286,7 +23286,7 @@ function wrappy (fn, cb) {
 },{}],284:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.14.1",
+  "version": "2.14.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
