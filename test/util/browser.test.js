@@ -8,7 +8,7 @@ test('Browser:', { timeout: 2000 }, function(t) {
 
     const browser = new Browser({ debug: function() {} })
 
-    var err = browser.checkPlaybackCapabilities()
+    let err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
     tt.ok(err.explanation.indexOf('Probably you need to') >= 0)
 
@@ -36,7 +36,7 @@ test('Browser:', { timeout: 2000 }, function(t) {
     }
 
     const browser = new Browser(options)
-    var err
+    let err
 
     err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
@@ -66,7 +66,7 @@ test('Browser:', { timeout: 2000 }, function(t) {
     }
 
     const browser = new Browser(options)
-    var err
+    let err
 
     err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
@@ -97,7 +97,7 @@ test('Browser:', { timeout: 2000 }, function(t) {
     }
 
     const browser = new Browser(options)
-    var err
+    let err
 
     err = browser.checkRecordingCapabilities()
     tt.equal(err.message, 'Sorry, your browser is unable to use webcams')
@@ -132,7 +132,7 @@ test('Browser:', { timeout: 2000 }, function(t) {
     }
 
     const browser = new Browser(options)
-    var err
+    let err
 
     err = browser.checkRecordingCapabilities()
     tt.equal(err.message, 'Sorry, your browser is unable to use webcams')

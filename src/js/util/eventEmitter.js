@@ -15,7 +15,7 @@ export default function(options, name) {
 
     // Automatically convert errors to videomail errors
     if (event === Events.ERROR) {
-      var err = args[1]
+      let err = args[1]
 
       err = VideomailError.create(err, options)
 
@@ -24,7 +24,7 @@ export default function(options, name) {
 
     if (options.debug) {
       if (event !== 'removeListener' && event !== 'newListener') {
-        var moreArguments
+        let moreArguments
 
         if (args[1]) {
           moreArguments = args.slice(1)

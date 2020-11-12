@@ -29,13 +29,13 @@ const Container = function (options) {
   const htmlElement = document && document.querySelector && document.querySelector('html')
   const debug = options.debug
 
-  var hasError = false
-  var submitted = false
-  var lastValidation = false
+  let hasError = false
+  let submitted = false
+  let lastValidation = false
 
-  var containerElement
-  var built
-  var form
+  let containerElement
+  let built
+  let form
 
   function prependDefaultCss() {
     insertCss(css, { prepend: true })
@@ -47,7 +47,7 @@ const Container = function (options) {
   }
 
   function getFormElement() {
-    var formElement
+    let formElement
 
     if (containerElement.tagName === 'FORM') {
       formElement = containerElement
@@ -547,8 +547,8 @@ const Container = function (options) {
 
   // this code needs a good rewrite :(
   this.validate = function (force) {
-    var runValidation = true
-    var valid
+    let runValidation = true
+    let valid
 
     if (!options.enableAutoValidation) {
       runValidation = false
@@ -567,7 +567,7 @@ const Container = function (options) {
       this.emit(Events.VALIDATING)
 
       const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled()
-      var whyInvalid
+      let whyInvalid
 
       if (form) {
         valid = form.validate()
@@ -648,7 +648,7 @@ const Container = function (options) {
     }
 
     // a closure so that we can access method
-    var submitVideomailCallback = function (err1, videomail, videomailResponse) {
+    const submitVideomailCallback = function (err1, videomail, videomailResponse) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse)
       } else if (post) {
@@ -689,7 +689,7 @@ const Container = function (options) {
   }
 
   this.isDirty = function () {
-    var isDirty = false
+    let isDirty = false
 
     if (form) {
       if (visuals.isRecorderUnloaded()) {

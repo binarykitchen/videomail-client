@@ -17,11 +17,11 @@ export default function (recorder, options) {
   const browser = new Browser(options)
   const self = this
 
-  var paused = false
-  var record = false
+  let paused = false
+  let record = false
 
-  var audioRecorder
-  var currentVisualStream
+  let audioRecorder
+  let currentVisualStream
 
   function attachMediaStream(stream) {
     currentVisualStream = stream
@@ -80,7 +80,7 @@ export default function (recorder, options) {
   }
 
   function getTracks(localMediaStream) {
-    var tracks
+    let tracks
 
     if (localMediaStream && localMediaStream.getTracks) {
       tracks = localMediaStream.getTracks()
@@ -90,7 +90,7 @@ export default function (recorder, options) {
   }
 
   function getVideoTracks(localMediaStream) {
-    var videoTracks
+    let videoTracks
 
     if (localMediaStream && localMediaStream.getVideoTracks) {
       videoTracks = localMediaStream.getVideoTracks()
@@ -101,7 +101,7 @@ export default function (recorder, options) {
 
   function getFirstVideoTrack(localMediaStream) {
     const videoTracks = getVideoTracks(localMediaStream)
-    var videoTrack
+    let videoTrack
 
     if (videoTracks && videoTracks[0]) {
       videoTrack = videoTracks[0]
@@ -146,9 +146,9 @@ export default function (recorder, options) {
       switchingFacingMode: params.switchingFacingMode
     })
 
-    var onPlayReached = false
-    var onLoadedMetaDataReached = false
-    var playingPromiseReached = false
+    let onPlayReached = false
+    let onLoadedMetaDataReached = false
+    let playingPromiseReached = false
 
     if (options && options.isAudioEnabled()) {
       audioRecorder = audioRecorder || new AudioRecorder(this, options)
@@ -189,7 +189,7 @@ export default function (recorder, options) {
             'media.played=' + pretty(rawVisualUserMedia.played)
           )
 
-          var p
+          let p
 
           try {
             p = rawVisualUserMedia.play()
@@ -328,7 +328,7 @@ export default function (recorder, options) {
           options
         )
       } else {
-        var description
+        let description
 
         if (videoTrack.label && videoTrack.label.length > 0) {
           description = videoTrack.label
@@ -387,7 +387,7 @@ export default function (recorder, options) {
         }
 
         const tracks = getTracks(visualStream)
-        var newStopApiFound = false
+        let newStopApiFound = false
 
         if (tracks) {
           tracks.forEach(function (track) {
@@ -438,7 +438,7 @@ export default function (recorder, options) {
   }
 
   this.getRawWidth = function (responsive) {
-    var rawWidth = this.getVideoWidth()
+    let rawWidth = this.getVideoWidth()
     const widthDefined = options.hasDefinedWidth()
 
     if (widthDefined || options.hasDefinedHeight()) {
@@ -457,7 +457,7 @@ export default function (recorder, options) {
   }
 
   this.getRawHeight = function (responsive) {
-    var rawHeight
+    let rawHeight
 
     if (options.hasDefinedDimension()) {
       rawHeight = recorder.calculateHeight(responsive)

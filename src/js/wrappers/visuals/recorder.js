@@ -40,52 +40,52 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   const self = this
   const debug = options.debug
 
-  var loop = null
+  let loop = null
 
-  var originalAnimationFrameObject
+  let originalAnimationFrameObject
 
-  var samplesCount = 0
-  var framesCount = 0
-  var facingMode = options.video.facingMode // default is 'user'
+  let samplesCount = 0
+  let framesCount = 0
+  let facingMode = options.video.facingMode // default is 'user'
 
-  var recordingStats = {}
+  let recordingStats = {}
 
-  var confirmedFrameNumber = 0
-  var confirmedSampleNumber = 0
+  let confirmedFrameNumber = 0
+  let confirmedSampleNumber = 0
 
-  var recorderElement
-  var userMedia
+  let recorderElement
+  let userMedia
 
-  var userMediaTimeout
-  var retryTimeout
+  let userMediaTimeout
+  let retryTimeout
 
-  var bytesSum
+  let bytesSum
 
-  var frameProgress
-  var sampleProgress
+  let frameProgress
+  let sampleProgress
 
-  var canvas
-  var ctx
+  let canvas
+  let ctx
 
-  var userMediaLoaded
-  var userMediaLoading
-  var submitting
-  var unloaded
-  var stopTime
-  var stream
-  var connecting
-  var connected
-  var blocking
-  var built
-  var key
-  var waitingTime
+  let userMediaLoaded
+  let userMediaLoading
+  let submitting
+  let unloaded
+  let stopTime
+  let stream
+  let connecting
+  let connected
+  let blocking
+  let built
+  let key
+  let waitingTime
 
-  var pingInterval
+  let pingInterval
 
-  var frame
+  let frame
 
-  var recordingBufferLength
-  var recordingBuffer
+  let recordingBufferLength
+  let recordingBuffer
 
   function writeStream(buffer, opts) {
     if (stream) {
@@ -306,7 +306,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       } catch (exc) {
         connecting = connected = false
 
-        var err
+        let err
 
         if (typeof websocket === 'undefined') {
           err = VideomailError.create(
@@ -376,7 +376,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         stream.on('data', function (data) {
           debug(PIPE_SYMBOL + 'Stream *data* event emitted')
 
-          var command
+          let command
 
           try {
             command = JSON.parse(data.toString())
@@ -861,7 +861,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   this.unload = function (e) {
     if (!unloaded) {
-      var cause
+      let cause
 
       if (e) {
         cause = e.name || e.statusText || e.toString()
@@ -1079,8 +1079,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     const wantedInterval = 1e3 / options.video.fps
 
-    var processingTime = 0
-    var start
+    let processingTime = 0
+    let start
 
     function raf(fn) {
       return setTimeout(
@@ -1177,7 +1177,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.build = function () {
-    var err = browser.checkRecordingCapabilities()
+    let err = browser.checkRecordingCapabilities()
 
     if (!err) {
       err = browser.checkBufferTypes()
@@ -1280,7 +1280,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function getRatio() {
-    var ratio
+    let ratio
 
     if (userMedia) {
       const userMediaVideoWidth = userMedia.getVideoWidth()
@@ -1300,7 +1300,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.calculateWidth = function (responsive) {
-    var videoHeight
+    let videoHeight
 
     if (userMedia) {
       videoHeight = userMedia.getVideoHeight()
@@ -1316,7 +1316,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.calculateHeight = function (responsive) {
-    var videoWidth
+    let videoWidth
 
     if (userMedia) {
       videoWidth = userMedia.getVideoWidth()

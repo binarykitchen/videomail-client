@@ -1,9 +1,9 @@
-import superagent from 'superagent'
 import Constants from './constants'
+import superagent from 'superagent'
 
 const CACHE_KEY = 'alias'
 
-export default function(options) {
+export default function (options) {
   const cache = {}
 
   function applyDefaultValue(videomail, name) {
@@ -44,7 +44,7 @@ export default function(options) {
       .set('Accept', 'application/json')
       .set(Constants.SITE_NAME_LABEL, options.siteName)
       .timeout(options.timeouts.connection)
-      .end(function(err, res) {
+      .end(function (err, res) {
         err = packError(err, res)
 
         if (err) {
@@ -69,14 +69,13 @@ export default function(options) {
 
     const queryParams = {}
 
-    var url = options.baseUrl + '/videomail/'
-    var request
+    let url = options.baseUrl + '/videomail/'
 
     if (identifier) {
       url += identifier
     }
 
-    request = superagent(method, url)
+    const request = superagent(method, url)
 
     queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
@@ -84,13 +83,14 @@ export default function(options) {
       .query(queryParams)
       .send(videomail)
       .timeout(options.timeout)
-      .end(function(err, res) {
+      .end(function (err, res) {
         err = packError(err, res)
 
         if (err) {
           cb(err)
         } else {
-          const returnedVideomail = res.body && res.body.videomail ? res.body.videomail : null
+          const returnedVideomail =
+            res.body && res.body.videomail ? res.body.videomail : null
 
           if (options.cache && videomail[CACHE_KEY]) {
             cache[videomail[CACHE_KEY]] = returnedVideomail
@@ -101,7 +101,7 @@ export default function(options) {
       })
   }
 
-  this.get = function(alias, cb) {
+  this.get = function (alias, cb) {
     if (options.cache && cache[alias]) {
       // keep all callbacks async
       setTimeout(() => {
@@ -112,7 +112,7 @@ export default function(options) {
     }
   }
 
-  this.reportError = function(err, cb) {
+  this.reportError = function (err, cb) {
     const queryParams = {}
     const url = options.baseUrl + '/client-error/'
     const request = superagent('post', url)
@@ -123,7 +123,7 @@ export default function(options) {
       .query(queryParams)
       .send(err)
       .timeout(options.timeout)
-      .end(function(err, res) {
+      .end(function (err, res) {
         err = packError(err, res)
         if (err) {
           cb && cb(err)
@@ -133,7 +133,7 @@ export default function(options) {
       })
   }
 
-  this.post = function(videomail, cb) {
+  this.post = function (videomail, cb) {
     videomail = applyDefaultValues(videomail)
 
     // always good to know the version of the client
@@ -141,7 +141,10 @@ export default function(options) {
     videomail[Constants.VERSION_LABEL] = options.version
 
     if (options.callbacks.adjustFormDataBeforePosting) {
-      options.callbacks.adjustFormDataBeforePosting(videomail, function(err, adjustedVideomail) {
+      options.callbacks.adjustFormDataBeforePosting(videomail, function (
+        err,
+        adjustedVideomail
+      ) {
         if (err) {
           cb(err)
         } else {
@@ -153,12 +156,12 @@ export default function(options) {
     }
   }
 
-  this.put = function(videomail, cb) {
+  this.put = function (videomail, cb) {
     write('put', videomail, videomail.key, cb)
   }
 
-  this.form = function(formData, url, cb) {
-    var formType
+  this.form = function (formData, url, cb) {
+    let formType
 
     switch (options.enctype) {
       case Constants.public.ENC_TYPE_APP_JSON:
@@ -180,7 +183,7 @@ export default function(options) {
         .type(formType)
         .send(formData)
         .timeout(options.timeout)
-        .end(function(err, res) {
+        .end(function (err, res) {
           err = packError(err, res)
 
           if (err) {

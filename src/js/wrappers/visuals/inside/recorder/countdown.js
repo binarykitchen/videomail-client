@@ -4,10 +4,10 @@ import hidden from 'hidden'
 export default function(visuals, options) {
   const self = this
 
-  var countdownElement
-  var intervalId
-  var countdown
-  var paused
+  let countdownElement
+  let intervalId
+  let countdown
+  let paused
 
   function fire(cb) {
     self.unload()

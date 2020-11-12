@@ -2,7 +2,7 @@ import h from 'hyperscript'
 import hidden from 'hidden'
 
 export default function(visuals) {
-  var recordNoteElement
+  let recordNoteElement
 
   this.build = function() {
     recordNoteElement = visuals.querySelector('.recordNote')

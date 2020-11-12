@@ -12,18 +12,18 @@ const Buttons = function(container, options) {
   const self = this
   const debug = options.debug
 
-  var buttonsElement
-  var recordButton
-  var pauseButton
-  var resumeButton
-  var previewButton
-  var recordAgainButton
-  var submitButton
+  let buttonsElement
+  let recordButton
+  let pauseButton
+  let resumeButton
+  let previewButton
+  let recordAgainButton
+  let submitButton
 
-  var audioOnRadioPair
-  var audioOffRadioPair
+  let audioOnRadioPair
+  let audioOffRadioPair
 
-  var built
+  let built
 
   function hide(elements) {
     if (elements && !Array.isArray(elements)) {
@@ -48,7 +48,7 @@ const Buttons = function(container, options) {
   }
 
   function isShown(elements) {
-    var isShown = elements && true
+    let isShown = elements && true
 
     if (elements && !Array.isArray(elements)) {
       elements = [elements]
@@ -129,8 +129,8 @@ const Buttons = function(container, options) {
   }
 
   function makeRadioButtonPair(options) {
-    var radioButtonElement
-    var radioButtonGroup
+    let radioButtonElement
+    let radioButtonGroup
 
     if (options.id) {
       radioButtonElement = document.getElementById(options.id)
@@ -174,7 +174,7 @@ const Buttons = function(container, options) {
   }
 
   function makeButton(buttonClass, text, clickHandler, show, id, type, selector, disabled = true) {
-    var buttonElement
+    let buttonElement
 
     if (id) {
       buttonElement = document.getElementById(id)

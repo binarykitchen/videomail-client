@@ -20,10 +20,10 @@ const RecorderInsides = function(visuals, options) {
   const recordTimer = new RecordTimer(visuals, recordNote, options)
   const browser = new Browser(options)
 
-  var countdown
-  var pausedNote
-  var built
-  var facingMode
+  let countdown
+  let pausedNote
+  let built
+  let facingMode
 
   if (options.video.countdown) {
     countdown = new Countdown(visuals, options)

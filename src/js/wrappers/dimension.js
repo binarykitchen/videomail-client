@@ -3,8 +3,8 @@ import numberIsInteger from 'number-is-integer'
 import VideomailError from './../util/videomailError'
 
 function getOuterWidth(element) {
-  var outerWidth = 0
-  var rect = element.getBoundingClientRect()
+  let outerWidth = 0
+  let rect = element.getBoundingClientRect()
 
   if (rect) {
     outerWidth = rect.right - rect.left
@@ -41,7 +41,7 @@ function figureMinHeight(height, options) {
 
 export default {
   limitWidth: function(element, width, options) {
-    var limitedWidth
+    let limitedWidth
 
     const outerWidth = getOuterWidth(element)
 
@@ -81,7 +81,7 @@ export default {
   },
 
   calculateWidth: function(options) {
-    var height = options.videoHeight || null
+    let height = options.videoHeight || null
     const ratio = options.ratio || options.getRatio()
 
     height = figureMinHeight(height, options)
@@ -107,8 +107,8 @@ export default {
   },
 
   calculateHeight: function(element, options) {
-    var width = options.videoWidth || null
-    var height
+    let width = options.videoWidth || null
+    let height
 
     const ratio = options.ratio || options.getRatio()
 

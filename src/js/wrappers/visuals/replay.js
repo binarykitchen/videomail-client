@@ -17,9 +17,9 @@ const Replay = function(parentElement, options) {
   const browser = new Browser(options)
   const debug = options.debug
 
-  var built
-  var replayElement
-  var videomail
+  let built
+  let replayElement
+  let videomail
 
   function buildElement() {
     debug('Replay: buildElement()')
@@ -38,7 +38,7 @@ const Replay = function(parentElement, options) {
   }
 
   function copyAttributes(newVideomail) {
-    var attributeContainer
+    let attributeContainer
 
     Object.keys(newVideomail).forEach(function(attribute) {
       attributeContainer = parentElement.querySelector('.' + attribute)
@@ -50,7 +50,7 @@ const Replay = function(parentElement, options) {
   }
 
   function correctDimensions(options) {
-    var width, height
+    let width, height
 
     if (videomail && videomail.playerWidth) {
       width = videomail.playerWidth
@@ -216,10 +216,10 @@ const Replay = function(parentElement, options) {
     const l = sources && sources.length
     const videoType = 'video/' + type
 
-    var source
+    let source
 
     if (l) {
-      var i
+      let i
 
       for (i = 0; i < l && !source; i++) {
         if (sources[i].getAttribute('type') === videoType) {
@@ -232,7 +232,7 @@ const Replay = function(parentElement, options) {
   }
 
   function setVideoSource(type, src, bustCache) {
-    var source = self.getVideoSource(type)
+    let source = self.getVideoSource(type)
 
     if (src && bustCache) {
       src += '?' + Date.now()
@@ -285,7 +285,7 @@ const Replay = function(parentElement, options) {
 
   function play() {
     if (replayElement && replayElement.play) {
-      var p
+      let p
 
       try {
         p = replayElement.play()

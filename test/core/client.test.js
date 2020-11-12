@@ -13,7 +13,7 @@ function addDivForVideomail() {
 }
 
 test('VideomailClient:', { timeout: 2000 }, function(t) {
-  var client
+  let client
 
   addDivForVideomail()
 

@@ -11,9 +11,9 @@ const CHANNELS = 1
 // todo code needs rewrite
 
 export default function(userMedia, options) {
-  var scriptProcessor
-  var audioInput
-  var vcAudioContext
+  let scriptProcessor
+  let audioInput
+  let vcAudioContext
 
   function getAudioContextClass() {
     return window.AudioContext || window.webkitAudioContext

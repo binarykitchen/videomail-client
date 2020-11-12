@@ -48,7 +48,7 @@ export default function (window = {}, navigator = {}) {
     'warn'
   ]
 
-  var console = {}
+  let console = {}
 
   if (window.console) {
     console = window.console
@@ -56,8 +56,8 @@ export default function (window = {}, navigator = {}) {
     window.console = function () {}
   }
 
-  var method
-  var length = methods.length
+  let method
+  let length = methods.length
 
   while (length--) {
     method = methods[length]
