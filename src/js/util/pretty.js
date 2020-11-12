@@ -21,13 +21,13 @@ function objectToString(object, options) {
   const propertyNames = Object.getOwnPropertyNames(object)
   const excludes = (options && options.excludes) || []
   const lines = []
-  var sLines
+  let sLines
 
   // always ignore these
   excludes.push('stack')
 
   if (propertyNames && propertyNames.length > 0) {
-    var exclude = false
+    let exclude = false
 
     propertyNames.forEach(function(name) {
       if (excludes) {

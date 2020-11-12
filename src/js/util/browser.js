@@ -45,10 +45,10 @@ const Browser = function (options) {
 
   const self = this
 
-  var videoType
+  let videoType
 
   function getRecommendation() {
-    var warning
+    let warning
 
     if (firefox) {
       if (isIOS) {
@@ -102,7 +102,7 @@ const Browser = function (options) {
   }
 
   function getUserMediaWarning() {
-    var warning
+    let warning
 
     if (isBadIOS) {
       warning =
@@ -148,7 +148,7 @@ const Browser = function (options) {
   }
 
   function getPlaybackWarning() {
-    var warning = getRecommendation()
+    let warning = getRecommendation()
 
     if (!warning) {
       warning =
@@ -161,7 +161,7 @@ const Browser = function (options) {
   }
 
   function canPlayType(video, type) {
-    var canPlayType
+    let canPlayType
 
     if (video && video.canPlayType) {
       canPlayType = video.canPlayType('video/' + type)
@@ -173,7 +173,7 @@ const Browser = function (options) {
   // just temporary
   this.canRecord = function () {
     const hasNavigator = typeof navigator !== 'undefined'
-    var canRecord = false
+    let canRecord = false
 
     if (hasNavigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       canRecord = true
@@ -187,7 +187,7 @@ const Browser = function (options) {
   }
 
   this.checkRecordingCapabilities = function () {
-    var err
+    let err
 
     if (!isHTTPS) {
       err = VideomailError.create(
@@ -209,7 +209,7 @@ const Browser = function (options) {
         classList.push(VideomailError.BROWSER_PROBLEM)
       }
 
-      var message
+      let message
 
       // good to be able to distinguish between two reasons why and what sort of camera it is
       if (!okBrowser) {
@@ -254,8 +254,8 @@ const Browser = function (options) {
   this.checkPlaybackCapabilities = function (video) {
     options.debug('Browser: checkPlaybackCapabilities()')
 
-    var err
-    var message
+    let err
+    let message
 
     if (!video) {
       message = 'No HTML5 support for video tag!'
@@ -274,7 +274,7 @@ const Browser = function (options) {
   }
 
   this.checkBufferTypes = function () {
-    var err
+    let err
 
     if (typeof window === 'undefined' || typeof window.atob === 'undefined') {
       err = VideomailError.create('atob is not supported', options)
@@ -302,7 +302,7 @@ const Browser = function (options) {
 
   this.getNoAccessIssue = function () {
     const message = 'Unable to access webcam'
-    var explanation
+    let explanation
 
     if (this.isChromeBased()) {
       explanation = 'Click on the allow button to grant access to your webcam.'

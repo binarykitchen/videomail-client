@@ -2,13 +2,13 @@ import h from 'hyperscript'
 import hidden from 'hidden'
 
 export default function(visuals, recordNote, options) {
-  var recordTimerElement
+  let recordTimerElement
 
-  var nearComputed = false
-  var endNighComputed = false
+  let nearComputed = false
+  let endNighComputed = false
 
-  var started
-  var countdown
+  let started
+  let countdown
 
   function pad(n) {
     return n < 10 ? '0' + n : n

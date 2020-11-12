@@ -16,7 +16,7 @@ const Visuals = function(container, options) {
   const self = this
 
   // can be overwritten with setter fn
-  var replay = new Replay(this, options)
+  const replay = new Replay(this, options)
 
   const recorder = new Recorder(this, replay, options)
   const recorderInsides = new RecorderInsides(this, options)
@@ -25,11 +25,11 @@ const Visuals = function(container, options) {
 
   const debug = options.debug
 
-  var visualsElement
-  var built
+  let visualsElement
+  let built
 
   function buildNoScriptTag() {
-    var noScriptElement = container.querySelector('noscript')
+    let noScriptElement = container.querySelector('noscript')
 
     if (!noScriptElement) {
       noScriptElement = h('noscript')

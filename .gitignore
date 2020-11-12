@@ -5,3 +5,4 @@ yarn.lock
 .source.*.html
 .DS_Store
 .vscode
+*.code-workspace

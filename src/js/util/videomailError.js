@@ -63,9 +63,9 @@ VideomailError.create = function (err, explanation, options, parameters) {
   const Browser = require('./browser').default
   const browser = new Browser(options)
 
-  var errType
-  var message
-  var stack
+  let errType
+  let message
+  let stack
 
   // whole code is ugly because all browsers behave so differently :(
 
@@ -346,7 +346,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     }
   }
 
-  var logLines = null
+  let logLines = null
 
   if (options.logger && options.logger.getLines) {
     logLines = options.logger.getLines()
@@ -357,7 +357,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     message.stack = stack
   }
 
-  var errCode = 'none'
+  let errCode = 'none'
 
   if (err) {
     errCode = 'code=' + (err.code ? err.code : 'undefined')
@@ -376,8 +376,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
-  var resource
-  var reportErrors = false
+  let resource
+  let reportErrors = false
 
   if (options.reportErrors) {
     if (typeof options.reportErrors === 'function') {

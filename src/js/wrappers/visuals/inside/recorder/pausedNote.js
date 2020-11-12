@@ -8,9 +8,9 @@ export default function(visuals, options) {
     throw VideomailError.create('Paused header cannot be empty', options)
   }
 
-  var pausedBlockElement
-  var pausedHeaderElement
-  var pausedHintElement
+  let pausedBlockElement
+  let pausedHeaderElement
+  let pausedHintElement
 
   function hasPausedHint() {
     return options.text.pausedHint

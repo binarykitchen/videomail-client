@@ -8,7 +8,7 @@ export default function(visuals, options) {
   EventEmitter.call(this, options, 'Facing Mode')
 
   const self = this
-  var facingModeElement
+  let facingModeElement
 
   function initEvents() {
     self.on(Events.ERROR, function() {

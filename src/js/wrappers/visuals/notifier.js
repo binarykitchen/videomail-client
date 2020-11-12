@@ -11,15 +11,15 @@ const Notifier = function(visuals, options) {
   const self = this
   const debug = options && options.debug
 
-  var notifyElement
-  var messageElement
-  var explanationElement
-  var entertainTimeoutId
-  var entertaining
-  var built
+  let notifyElement
+  let messageElement
+  let explanationElement
+  let entertainTimeoutId
+  let entertaining
+  let built
 
   function onStopping(limitReached) {
-    var lead = ''
+    let lead = ''
 
     visuals.beginWaiting()
 
@@ -45,7 +45,7 @@ const Notifier = function(visuals, options) {
   }
 
   function onProgress(frameProgress, sampleProgress) {
-    var overallProgress
+    let overallProgress
 
     if (options.isAudioEnabled()) {
       overallProgress = 'Video: ' + frameProgress

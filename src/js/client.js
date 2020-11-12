@@ -13,8 +13,8 @@ import OptionsWrapper from './wrappers/optionsWrapper'
 import Browser from './util/browser'
 import Resource from './resource'
 
-var collectLogger
-var browser
+let collectLogger
+let browser
 
 function adjustOptions(options = {}) {
   const localOptions = deepmerge(defaultOptions, options, {
@@ -46,7 +46,7 @@ const VideomailClient = function(options) {
   const container = new Container(localOptions)
   const debug = localOptions.debug
 
-  var replay
+  let replay
 
   EventEmitter.call(this, localOptions, 'VideomailClient')
 
@@ -54,7 +54,7 @@ const VideomailClient = function(options) {
   this.events = Events
 
   function build() {
-    var building = false
+    let building = false
 
     readystate.interactive(function(previousState) {
       debug(

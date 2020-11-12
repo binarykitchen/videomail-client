@@ -3,7 +3,7 @@ import deepmerge from 'deepmerge'
 
 export default {
   addFunctions: function(options) {
-    var audioEnabled = options.audio && options.audio.enabled
+    let audioEnabled = options.audio && options.audio.enabled
 
     options.hasDefinedHeight = function() {
       return this.video.height && this.video.height !== 'auto'
@@ -22,7 +22,7 @@ export default {
     }
 
     options.getRatio = function() {
-      var ratio = 1 // just a default one when no computations are possible
+      let ratio = 1 // just a default one when no computations are possible
 
       // todo fix this, it's not really an option
       const hasVideoDimensions = this.videoHeight && this.videoWidth
