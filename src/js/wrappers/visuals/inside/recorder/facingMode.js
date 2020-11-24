@@ -4,19 +4,19 @@ import hidden from 'hidden'
 import Events from './../../../../events'
 import EventEmitter from './../../../../util/eventEmitter'
 
-export default function(visuals, options) {
+export default function (visuals, options) {
   EventEmitter.call(this, options, 'Facing Mode')
 
   const self = this
   let facingModeElement
 
   function initEvents() {
-    self.on(Events.ERROR, function() {
+    self.on(Events.ERROR, function () {
       self.hide()
     })
   }
 
-  this.build = function() {
+  this.build = function () {
     facingModeElement = visuals.querySelector('.facingMode')
 
     if (!facingModeElement) {
@@ -43,11 +43,11 @@ export default function(visuals, options) {
     initEvents()
   }
 
-  this.hide = function() {
+  this.hide = function () {
     hidden(facingModeElement, true)
   }
 
-  this.show = function() {
+  this.show = function () {
     hidden(facingModeElement, false)
   }
 }

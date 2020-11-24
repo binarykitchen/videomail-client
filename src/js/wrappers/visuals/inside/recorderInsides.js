@@ -10,7 +10,7 @@ import RecordNote from './recorder/recordNote'
 import RecordTimer from './recorder/recordTimer'
 import FacingMode from './recorder/facingMode'
 
-const RecorderInsides = function(visuals, options) {
+const RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, 'RecorderInsides')
 
   const self = this
@@ -68,28 +68,28 @@ const RecorderInsides = function(visuals, options) {
     debug('RecorderInsides: initEvents()')
 
     self
-      .on(Events.USER_MEDIA_READY, function() {
+      .on(Events.USER_MEDIA_READY, function () {
         facingMode && facingMode.show()
       })
-      .on(Events.RECORDING, function() {
+      .on(Events.RECORDING, function () {
         startRecording()
       })
-      .on(Events.RESUMING, function() {
+      .on(Events.RESUMING, function () {
         resumeRecording()
       })
-      .on(Events.STOPPING, function() {
+      .on(Events.STOPPING, function () {
         stopRecording()
       })
-      .on(Events.PAUSED, function() {
+      .on(Events.PAUSED, function () {
         pauseRecording()
       })
       .on(Events.RESETTING, onResetting)
-      .on(Events.HIDE, function() {
+      .on(Events.HIDE, function () {
         self.hideCountdown()
       })
   }
 
-  this.build = function() {
+  this.build = function () {
     debug('RecorderInsides: build()')
 
     countdown && countdown.build()
@@ -104,37 +104,37 @@ const RecorderInsides = function(visuals, options) {
     built = true
   }
 
-  this.unload = function() {
+  this.unload = function () {
     countdown && countdown.unload()
 
     built = false
   }
 
-  this.showPause = function() {
+  this.showPause = function () {
     pausedNote && pausedNote.show()
   }
 
-  this.hidePause = function() {
+  this.hidePause = function () {
     pausedNote && pausedNote.hide()
   }
 
-  this.hideCountdown = function() {
+  this.hideCountdown = function () {
     countdown && countdown.hide()
   }
 
-  this.startCountdown = function(cb) {
+  this.startCountdown = function (cb) {
     countdown && countdown.start(cb)
   }
 
-  this.resumeCountdown = function() {
+  this.resumeCountdown = function () {
     countdown && countdown.resume()
   }
 
-  this.isCountingDown = function() {
+  this.isCountingDown = function () {
     return countdown && countdown.isCountingDown()
   }
 
-  this.checkTimer = function(intervalSum) {
+  this.checkTimer = function (intervalSum) {
     recordTimer.check(intervalSum)
   }
 }

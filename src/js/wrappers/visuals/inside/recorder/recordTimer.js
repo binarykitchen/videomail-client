@@ -1,7 +1,7 @@
 import h from 'hyperscript'
 import hidden from 'hidden'
 
-export default function(visuals, recordNote, options) {
+export default function (visuals, recordNote, options) {
   let recordTimerElement
 
   let nearComputed = false
@@ -44,7 +44,7 @@ export default function(visuals, recordNote, options) {
     recordTimerElement.classList.add('nigh')
   }
 
-  this.check = function(opts) {
+  this.check = function (opts) {
     const newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
 
     // performance optimisation (another reason we need react here!)
@@ -97,7 +97,7 @@ export default function(visuals, recordNote, options) {
     return options.video.limitSeconds
   }
 
-  this.start = function() {
+  this.start = function () {
     countdown = getStartSeconds()
     nearComputed = endNighComputed = false
     started = true
@@ -107,11 +107,11 @@ export default function(visuals, recordNote, options) {
     show()
   }
 
-  this.pause = function() {
+  this.pause = function () {
     recordNote.hide()
   }
 
-  this.resume = function() {
+  this.resume = function () {
     recordNote.show()
   }
 
@@ -119,10 +119,12 @@ export default function(visuals, recordNote, options) {
     return countdown === null
   }
 
-  this.stop = function() {
+  this.stop = function () {
     if (!isStopped() && started) {
       options.debug(
-        'Stopping record timer. Was recording for about ~' + getSecondsRecorded() + ' seconds.'
+        'Stopping record timer. Was recording for about ~' +
+          getSecondsRecorded() +
+          ' seconds.'
       )
 
       hide()
@@ -133,7 +135,7 @@ export default function(visuals, recordNote, options) {
     }
   }
 
-  this.build = function() {
+  this.build = function () {
     recordTimerElement = visuals.querySelector('.recordTimer')
 
     if (!recordTimerElement) {

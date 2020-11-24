@@ -40,7 +40,7 @@ function figureMinHeight(height, options) {
 }
 
 export default {
-  limitWidth: function(element, width, options) {
+  limitWidth: function (element, width, options) {
     let limitedWidth
 
     const outerWidth = getOuterWidth(element)
@@ -62,9 +62,12 @@ export default {
 
   // this is difficult to compute and is not entirely correct.
   // but good enough for now to ensure some stability.
-  limitHeight: function(height, options) {
+  limitHeight: function (height, options) {
     if (numberIsInteger(height) && height < 1) {
-      throw VideomailError.create('Passed limit-height argument cannot be less than 1!', options)
+      throw VideomailError.create(
+        'Passed limit-height argument cannot be less than 1!',
+        options
+      )
     } else {
       const limitedHeight = Math.min(
         height,
@@ -80,7 +83,7 @@ export default {
     }
   },
 
-  calculateWidth: function(options) {
+  calculateWidth: function (options) {
     let height = options.videoHeight || null
     const ratio = options.ratio || options.getRatio()
 
@@ -106,7 +109,7 @@ export default {
     }
   },
 
-  calculateHeight: function(element, options) {
+  calculateHeight: function (element, options) {
     let width = options.videoWidth || null
     let height
 
@@ -117,7 +120,10 @@ export default {
     }
 
     if (numberIsInteger(width) && width < 1) {
-      throw VideomailError.create('Unable to calculate height when width is less than 1.', options)
+      throw VideomailError.create(
+        'Unable to calculate height when width is less than 1.',
+        options
+      )
     } else if (options.responsive) {
       width = this.limitWidth(element, width, options)
     }
@@ -127,7 +133,10 @@ export default {
     }
 
     if (numberIsInteger(height) && height < 1) {
-      throw VideomailError.create('Just calculated a height less than 1 which is wrong.', options)
+      throw VideomailError.create(
+        'Just calculated a height less than 1 which is wrong.',
+        options
+      )
     } else {
       return figureMinHeight(height, options)
     }

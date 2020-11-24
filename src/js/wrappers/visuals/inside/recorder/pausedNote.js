@@ -3,7 +3,7 @@ import hidden from 'hidden'
 
 import VideomailError from './../../../../util/videomailError'
 
-export default function(visuals, options) {
+export default function (visuals, options) {
   if (!options.text.pausedHeader) {
     throw VideomailError.create('Paused header cannot be empty', options)
   }
@@ -16,7 +16,7 @@ export default function(visuals, options) {
     return options.text.pausedHint
   }
 
-  this.build = function() {
+  this.build = function () {
     pausedBlockElement = visuals.querySelector('.paused')
     pausedHeaderElement = visuals.querySelector('.pausedHeader')
 
@@ -49,11 +49,11 @@ export default function(visuals, options) {
     }
   }
 
-  this.hide = function() {
+  this.hide = function () {
     hidden(pausedBlockElement, true)
   }
 
-  this.show = function() {
+  this.show = function () {
     hidden(pausedBlockElement, false)
   }
 }

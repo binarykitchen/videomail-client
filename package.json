@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "2.14.3",
+  "version": "2.14.4",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26,7 +26,10 @@
     "patch": "./env/dev/release.sh --importance=patch",
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major",
-    "lint": "eslint ./src/js ./test gulpfile.js"
+    "lint": "eslint ./src ./test gulpfile.js",
+    "lint-fix": "yarn --silent lint --fix; exit 0",
+    "prettier": "prettier --check ./src ./test gulpfile.js",
+    "prettier-fix": "prettier --write ./src ./test gulpfile.js"
   },
   "engines": {
     "node": "^14.4.0",
@@ -88,9 +91,9 @@
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.12.3",
+    "@babel/core": "7.12.8",
     "@babel/plugin-transform-runtime": "7.12.1",
-    "@babel/preset-env": "7.12.1",
+    "@babel/preset-env": "7.12.7",
     "audit-ci": "3.1.1",
     "autoprefixer": "10.0.2",
     "babel-eslint": "10.1.0",
@@ -100,12 +103,11 @@
     "connect-send-json": "1.0.0",
     "cssnano": "4.1.10",
     "del": "6.0.0",
-    "eslint": "7.13.0",
-    "eslint-config-standard": "16.0.1",
+    "eslint": "7.14.0",
+    "eslint-config-standard": "16.0.2",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.1.0",
     "fancy-log": "1.3.3",
     "glob": "7.1.6",
     "gulp": "4.0.2",
@@ -126,7 +128,8 @@
     "gulp-todo": "7.1.1",
     "minimist": "1.2.5",
     "nib": "1.1.2",
-    "postcss": "8.1.7",
+    "postcss": "8.1.10",
+    "prettier": "2.2.0",
     "router": "1.3.5",
     "tape": "5.0.1",
     "tape-catch": "1.0.6",

@@ -1,10 +1,10 @@
 import h from 'hyperscript'
 import hidden from 'hidden'
 
-export default function(visuals) {
+export default function (visuals) {
   let recordNoteElement
 
-  this.build = function() {
+  this.build = function () {
     recordNoteElement = visuals.querySelector('.recordNote')
 
     if (!recordNoteElement) {
@@ -18,25 +18,25 @@ export default function(visuals) {
     }
   }
 
-  this.stop = function() {
+  this.stop = function () {
     this.hide()
     recordNoteElement.classList.remove('near')
     recordNoteElement.classList.remove('nigh')
   }
 
-  this.setNear = function() {
+  this.setNear = function () {
     recordNoteElement.classList.add('near')
   }
 
-  this.setNigh = function() {
+  this.setNigh = function () {
     recordNoteElement.classList.add('nigh')
   }
 
-  this.hide = function() {
+  this.hide = function () {
     hidden(recordNoteElement, true)
   }
 
-  this.show = function() {
+  this.show = function () {
     hidden(recordNoteElement, false)
   }
 }

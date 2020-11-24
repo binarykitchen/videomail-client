@@ -141,16 +141,16 @@ export default function (options) {
     videomail[Constants.VERSION_LABEL] = options.version
 
     if (options.callbacks.adjustFormDataBeforePosting) {
-      options.callbacks.adjustFormDataBeforePosting(videomail, function (
-        err,
-        adjustedVideomail
-      ) {
-        if (err) {
-          cb(err)
-        } else {
-          write('post', adjustedVideomail, cb)
+      options.callbacks.adjustFormDataBeforePosting(
+        videomail,
+        function (err, adjustedVideomail) {
+          if (err) {
+            cb(err)
+          } else {
+            write('post', adjustedVideomail, cb)
+          }
         }
-      })
+      )
     } else {
       write('post', videomail, cb)
     }

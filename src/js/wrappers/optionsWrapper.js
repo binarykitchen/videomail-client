@@ -2,26 +2,26 @@
 import deepmerge from 'deepmerge'
 
 export default {
-  addFunctions: function(options) {
+  addFunctions: function (options) {
     let audioEnabled = options.audio && options.audio.enabled
 
-    options.hasDefinedHeight = function() {
+    options.hasDefinedHeight = function () {
       return this.video.height && this.video.height !== 'auto'
     }
 
-    options.hasDefinedWidth = function() {
+    options.hasDefinedWidth = function () {
       return this.video.width && this.video.width !== 'auto'
     }
 
-    options.hasDefinedDimension = function() {
+    options.hasDefinedDimension = function () {
       return this.hasDefinedWidth() || this.hasDefinedHeight()
     }
 
-    options.hasDefinedDimensions = function() {
+    options.hasDefinedDimensions = function () {
       return this.hasDefinedWidth() && this.hasDefinedHeight()
     }
 
-    options.getRatio = function() {
+    options.getRatio = function () {
       let ratio = 1 // just a default one when no computations are possible
 
       // todo fix this, it's not really an option
@@ -30,7 +30,10 @@ export default {
       if (this.hasDefinedDimensions()) {
         if (hasVideoDimensions) {
           // figure out first which one to pick
-          if (this.videoHeight < this.video.height || this.videoWidth < this.video.width) {
+          if (
+            this.videoHeight < this.video.height ||
+            this.videoWidth < this.video.width
+          ) {
             ratio = this.videoHeight / this.videoWidth
           } else {
             ratio = this.video.height / this.video.width
@@ -45,15 +48,15 @@ export default {
       return ratio
     }
 
-    options.isAudioEnabled = function() {
+    options.isAudioEnabled = function () {
       return audioEnabled
     }
 
-    options.setAudioEnabled = function(enabled) {
+    options.setAudioEnabled = function (enabled) {
       audioEnabled = enabled
     }
 
-    options.isAutoPauseEnabled = function() {
+    options.isAutoPauseEnabled = function () {
       return this.enableAutoPause && this.enablePause
     }
   },
@@ -62,9 +65,9 @@ export default {
   // start to doubt, rest assured, it's solid and run thousand times over
   // and over again each day. and other large sites out there have their own
   // tech debts. hope i have shattered your illusion on perfection?
-  merge: function(defaultOptions, newOptions) {
+  merge: function (defaultOptions, newOptions) {
     const options = deepmerge(defaultOptions, newOptions, {
-      arrayMerge: function(destination, source) {
+      arrayMerge: function (destination, source) {
         return source
       }
     })
