@@ -10,7 +10,7 @@ const CHANNELS = 1
 
 // todo code needs rewrite
 
-export default function(userMedia, options) {
+export default function (userMedia, options) {
   let scriptProcessor
   let audioInput
   let vcAudioContext
@@ -45,7 +45,7 @@ export default function(userMedia, options) {
     cb(new AudioSample(float32Array))
   }
 
-  this.init = function(localMediaStream) {
+  this.init = function (localMediaStream) {
     options.debug('AudioRecorder: init()')
 
     // creates an audio node from the microphone incoming stream
@@ -84,15 +84,15 @@ export default function(userMedia, options) {
     volume.connect(scriptProcessor)
   }
 
-  this.record = function(cb) {
+  this.record = function (cb) {
     options.debug('AudioRecorder: record()')
 
-    scriptProcessor.onaudioprocess = function(e) {
+    scriptProcessor.onaudioprocess = function (e) {
       onAudioProcess(e, cb)
     }
   }
 
-  this.stop = function() {
+  this.stop = function () {
     options.debug('AudioRecorder: stop()')
 
     if (scriptProcessor) {
@@ -108,11 +108,11 @@ export default function(userMedia, options) {
       if (getAudioContext().close) {
         getAudioContext()
           .close()
-          .then(function() {
+          .then(function () {
             options.debug('AudioRecorder: audio context is closed')
             vcAudioContext = null
           })
-          .catch(function(err) {
+          .catch(function (err) {
             throw VideomailError.create(err, options)
           })
       } else {
@@ -121,7 +121,7 @@ export default function(userMedia, options) {
     }
   }
 
-  this.getSampleRate = function() {
+  this.getSampleRate = function () {
     if (hasAudioContext()) {
       return getAudioContext().sampleRate
     }

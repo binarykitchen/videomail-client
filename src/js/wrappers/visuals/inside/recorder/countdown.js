@@ -1,7 +1,7 @@
 import h from 'hyperscript'
 import hidden from 'hidden'
 
-export default function(visuals, options) {
+export default function (visuals, options) {
   const self = this
 
   let countdownElement
@@ -14,7 +14,7 @@ export default function(visuals, options) {
     self.hide()
 
     // keep all callbacks async
-    setTimeout(function() {
+    setTimeout(function () {
       cb()
     }, 0)
   }
@@ -32,7 +32,7 @@ export default function(visuals, options) {
     }
   }
 
-  this.start = function(cb) {
+  this.start = function (cb) {
     countdownElement.innerHTML = countdown = options.video.countdown
 
     this.show()
@@ -40,15 +40,15 @@ export default function(visuals, options) {
     intervalId = setInterval(countBackward.bind(this, cb), 950)
   }
 
-  this.pause = function() {
+  this.pause = function () {
     paused = true
   }
 
-  this.resume = function() {
+  this.resume = function () {
     paused = false
   }
 
-  this.build = function() {
+  this.build = function () {
     countdownElement = visuals.querySelector('.countdown')
 
     if (!countdownElement) {
@@ -62,21 +62,21 @@ export default function(visuals, options) {
     }
   }
 
-  this.show = function() {
+  this.show = function () {
     hidden(countdownElement, false)
   }
 
-  this.isCountingDown = function() {
+  this.isCountingDown = function () {
     return !!intervalId
   }
 
-  this.unload = function() {
+  this.unload = function () {
     clearInterval(intervalId)
     paused = false
     intervalId = null
   }
 
-  this.hide = function() {
+  this.hide = function () {
     hidden(countdownElement, true)
     this.unload()
   }

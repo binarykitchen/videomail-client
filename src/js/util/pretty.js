@@ -7,7 +7,7 @@ function arrayToString(array) {
   if (array && array.length > 0) {
     const lines = []
 
-    array.forEach(function(element) {
+    array.forEach(function (element) {
       if (element) {
         lines.push(stringify(element))
       }
@@ -29,7 +29,7 @@ function objectToString(object, options) {
   if (propertyNames && propertyNames.length > 0) {
     let exclude = false
 
-    propertyNames.forEach(function(name) {
+    propertyNames.forEach(function (name) {
       if (excludes) {
         exclude = excludes.indexOf(name) >= 0
       }
@@ -51,7 +51,7 @@ function objectToString(object, options) {
   return sLines
 }
 
-export default function(anything, options) {
+export default function (anything, options) {
   if (anything === null) {
     return 'null'
   } else if (typeof anything === 'undefined') {

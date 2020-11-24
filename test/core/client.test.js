@@ -12,29 +12,29 @@ function addDivForVideomail() {
   body.appendChild(div)
 }
 
-test('VideomailClient:', { timeout: 2000 }, function(t) {
+test('VideomailClient:', { timeout: 2000 }, function (t) {
   let client
 
   addDivForVideomail()
 
-  t.test('can be instantiated and emits built event', function(tt) {
+  t.test('can be instantiated and emits built event', function (tt) {
     tt.plan(2)
 
     const consoleFacade = console
 
     if (SILENT) {
-      consoleFacade.error = function() {}
-      consoleFacade.warn = function() {}
-      consoleFacade.debug = function() {}
+      consoleFacade.error = function () {}
+      consoleFacade.warn = function () {}
+      consoleFacade.debug = function () {}
     }
 
-    tt.doesNotThrow(function() {
+    tt.doesNotThrow(function () {
       client = new VideomailClient({
         verbose: !SILENT,
         logger: consoleFacade
       })
 
-      client.once(client.events.BUILT, function() {
+      client.once(client.events.BUILT, function () {
         tt.pass('Built event received')
       })
     })
@@ -42,22 +42,22 @@ test('VideomailClient:', { timeout: 2000 }, function(t) {
 
   // todo: add test for fn show() once tape-run + electronjs allow getUserMedia access
 
-  t.test('hiding does not throw error and emits event', function(tt) {
+  t.test('hiding does not throw error and emits event', function (tt) {
     tt.plan(2)
 
-    client.once(client.events.HIDE, function() {
+    client.once(client.events.HIDE, function () {
       tt.pass('Hide event received')
     })
 
-    tt.doesNotThrow(function() {
+    tt.doesNotThrow(function () {
       client.hide()
     })
   })
 
-  t.test('unload does not throw an error and emits event', function(tt) {
+  t.test('unload does not throw an error and emits event', function (tt) {
     tt.plan(1)
 
-    tt.doesNotThrow(function() {
+    tt.doesNotThrow(function () {
       client.unload()
     })
   })

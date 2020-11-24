@@ -2,38 +2,38 @@ import test from 'tape-catch'
 
 import pretty from './../../src/js/util/pretty'
 
-test('pretty:', function(t) {
-  t.test('prettifies undefined fine', function(tt) {
+test('pretty:', function (t) {
+  t.test('prettifies undefined fine', function (tt) {
     tt.plan(1)
 
     tt.equal(pretty(), 'undefined')
   })
 
-  t.test('prettifies null fine', function(tt) {
+  t.test('prettifies null fine', function (tt) {
     tt.plan(1)
 
     tt.equal(pretty(null), 'null')
   })
 
-  t.test('prettifies a string fine', function(tt) {
+  t.test('prettifies a string fine', function (tt) {
     tt.plan(1)
 
     tt.equal(pretty('sorry'), 'sorry')
   })
 
-  t.test('prettifies a true boolean fine', function(tt) {
+  t.test('prettifies a true boolean fine', function (tt) {
     tt.plan(1)
 
     tt.equal(pretty(true), 'true')
   })
 
-  t.test('prettifies a false boolean fine', function(tt) {
+  t.test('prettifies a false boolean fine', function (tt) {
     tt.plan(1)
 
     tt.equal(pretty(false), 'false')
   })
 
-  t.test('prettifies an object fine', function(tt) {
+  t.test('prettifies an object fine', function (tt) {
     tt.plan(1)
 
     tt.equal(
@@ -49,7 +49,7 @@ test('pretty:', function(t) {
     )
   })
 
-  t.test('prettifies an array fine', function(tt) {
+  t.test('prettifies an array fine', function (tt) {
     tt.plan(1)
 
     tt.equal(
@@ -58,7 +58,7 @@ test('pretty:', function(t) {
     )
   })
 
-  t.test('prettifies can exclude object keys', function(tt) {
+  t.test('prettifies can exclude object keys', function (tt) {
     tt.plan(4)
 
     tt.equal(

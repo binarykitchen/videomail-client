@@ -5,7 +5,7 @@ import hidden from 'hidden'
 import EventEmitter from './../../util/eventEmitter'
 import Events from './../../events'
 
-const Notifier = function(visuals, options) {
+const Notifier = function (visuals, options) {
   EventEmitter.call(this, options, 'Notifier')
 
   const self = this
@@ -77,28 +77,28 @@ const Notifier = function(visuals, options) {
     debug('Notifier: initEvents()')
 
     self
-      .on(Events.CONNECTING, function() {
+      .on(Events.CONNECTING, function () {
         onConnecting()
       })
-      .on(Events.LOADING_USER_MEDIA, function() {
+      .on(Events.LOADING_USER_MEDIA, function () {
         onLoadingUserMedia()
       })
-      .on(Events.USER_MEDIA_READY, function() {
+      .on(Events.USER_MEDIA_READY, function () {
         self.hide()
       })
-      .on(Events.LOADED_META_DATA, function() {
+      .on(Events.LOADED_META_DATA, function () {
         correctDimensions()
       })
-      .on(Events.PREVIEW, function() {
+      .on(Events.PREVIEW, function () {
         self.hide()
       })
-      .on(Events.STOPPING, function(limitReached) {
+      .on(Events.STOPPING, function (limitReached) {
         onStopping(limitReached)
       })
-      .on(Events.PROGRESS, function(frameProgress, sampleProgress) {
+      .on(Events.PROGRESS, function (frameProgress, sampleProgress) {
         onProgress(frameProgress, sampleProgress)
       })
-      .on(Events.BEGIN_VIDEO_ENCODING, function() {
+      .on(Events.BEGIN_VIDEO_ENCODING, function () {
         onBeginVideoEncoding()
       })
   }
@@ -122,7 +122,10 @@ const Notifier = function(visuals, options) {
         notifyElement.className =
           'notifier entertain ' + options.notifier.entertainClass + randomBackgroundClass
 
-        entertainTimeoutId = setTimeout(runEntertainment, options.notifier.entertainInterval)
+        entertainTimeoutId = setTimeout(
+          runEntertainment,
+          options.notifier.entertainInterval
+        )
         entertaining = true
       }
     } else {
@@ -146,11 +149,14 @@ const Notifier = function(visuals, options) {
     if (messageElement) {
       messageElement.innerHTML = (problem ? '&#x2639; ' : '') + message
     } else {
-      options.logger.warn('Unable to show following because messageElement is empty:', message)
+      options.logger.warn(
+        'Unable to show following because messageElement is empty:',
+        message
+      )
     }
   }
 
-  this.error = function(err) {
+  this.error = function (err) {
     const message = err.message ? err.message.toString() : err.toString()
     const explanation = err.explanation ? err.explanation.toString() : null
 
@@ -167,7 +173,7 @@ const Notifier = function(visuals, options) {
     })
   }
 
-  this.setExplanation = function(explanation) {
+  this.setExplanation = function (explanation) {
     if (!explanationElement) {
       explanationElement = h('p')
 
@@ -186,7 +192,7 @@ const Notifier = function(visuals, options) {
     hidden(explanationElement, false)
   }
 
-  this.build = function() {
+  this.build = function () {
     options.debug('Notifier: build()')
 
     notifyElement = visuals.querySelector('.notifier')
@@ -213,7 +219,7 @@ const Notifier = function(visuals, options) {
     }
   }
 
-  this.hide = function() {
+  this.hide = function () {
     cancelEntertainment()
 
     if (notifyElement) {
@@ -228,7 +234,7 @@ const Notifier = function(visuals, options) {
     hideExplanation()
   }
 
-  this.isVisible = function() {
+  this.isVisible = function () {
     if (!built) {
       return false
     }
@@ -236,11 +242,11 @@ const Notifier = function(visuals, options) {
     return notifyElement && !hidden(notifyElement)
   }
 
-  this.isBuilt = function() {
+  this.isBuilt = function () {
     return built
   }
 
-  this.notify = function(message, explanation, notifyOptions) {
+  this.notify = function (message, explanation, notifyOptions) {
     options.debug('Notifier: notify()')
 
     if (!notifyOptions) {
@@ -252,7 +258,9 @@ const Notifier = function(visuals, options) {
     const blocking = notifyOptions.blocking ? notifyOptions.blocking : false
     const hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false
     const classList = notifyOptions.classList ? notifyOptions.classList : false
-    const removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false
+    const removeDimensions = notifyOptions.removeDimensions
+      ? notifyOptions.removeDimensions
+      : false
 
     if (!messageElement && notifyElement) {
       messageElement = h('h2')
@@ -271,7 +279,7 @@ const Notifier = function(visuals, options) {
       }
 
       if (classList) {
-        classList.forEach(function(className) {
+        classList.forEach(function (className) {
           notifyElement.classList.add(className)
         })
       }

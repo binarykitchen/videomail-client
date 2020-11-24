@@ -10,7 +10,7 @@ import RecorderInsides from './visuals/inside/recorderInsides'
 import EventEmitter from './../util/eventEmitter'
 import Events from './../events'
 
-const Visuals = function(container, options) {
+const Visuals = function (container, options) {
   EventEmitter.call(this, options, 'Visuals')
 
   const self = this
@@ -59,7 +59,7 @@ const Visuals = function(container, options) {
       debug('Visuals: initEvents()')
 
       self
-        .on(Events.USER_MEDIA_READY, function() {
+        .on(Events.USER_MEDIA_READY, function () {
           built = true
           self.endWaiting()
           container.enableForm(false)
@@ -67,7 +67,7 @@ const Visuals = function(container, options) {
         .on(Events.PREVIEW, () => {
           self.endWaiting()
         })
-        .on(Events.BLOCKING, function(blockingOptions) {
+        .on(Events.BLOCKING, function (blockingOptions) {
           if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
             // do nothing, user still can enter form inputs
             // can be useful when you are on i.E. seeflow's contact page and
@@ -76,13 +76,13 @@ const Visuals = function(container, options) {
             container.disableForm(true)
           }
         })
-        .on(Events.PREVIEW_SHOWN, function() {
+        .on(Events.PREVIEW_SHOWN, function () {
           container.validate(true)
         })
-        .on(Events.LOADED_META_DATA, function() {
+        .on(Events.LOADED_META_DATA, function () {
           correctDimensions()
         })
-        .on(Events.ERROR, function(err) {
+        .on(Events.ERROR, function (err) {
           if (err.removeDimensions && err.removeDimensions()) {
             removeDimensions()
           }
@@ -100,7 +100,7 @@ const Visuals = function(container, options) {
     visualsElement.style.height = 'auto'
   }
 
-  this.getRatio = function() {
+  this.getRatio = function () {
     if (visualsElement.clientWidth) {
       // special case for safari, see getRatio() in recorder
       return visualsElement.clientHeight / visualsElement.clientWidth
@@ -113,11 +113,11 @@ const Visuals = function(container, options) {
     return !self.isNotifying() && !replay.isShown() && !self.isCountingDown()
   }
 
-  this.isCountingDown = function() {
+  this.isCountingDown = function () {
     return recorderInsides.isCountingDown()
   }
 
-  this.build = function() {
+  this.build = function () {
     visualsElement = container.querySelector('.' + options.selectors.visualsClass)
 
     if (!visualsElement) {
@@ -150,37 +150,37 @@ const Visuals = function(container, options) {
     built = true
   }
 
-  this.querySelector = function(selector) {
+  this.querySelector = function (selector) {
     return visualsElement && visualsElement.querySelector(selector)
   }
 
-  this.appendChild = function(child) {
+  this.appendChild = function (child) {
     visualsElement && visualsElement.appendChild(child)
   }
 
-  this.removeChild = function(child) {
+  this.removeChild = function (child) {
     visualsElement.removeChild(child)
   }
 
-  this.reset = function() {
+  this.reset = function () {
     this.endWaiting()
     recorder.reset()
   }
 
-  this.beginWaiting = function() {
+  this.beginWaiting = function () {
     container.beginWaiting()
   }
 
-  this.endWaiting = function() {
+  this.endWaiting = function () {
     container.endWaiting()
   }
 
-  this.stop = function(params) {
+  this.stop = function (params) {
     recorder.stop(params)
     recorderInsides.hidePause()
   }
 
-  this.back = function(params, cb) {
+  this.back = function (params, cb) {
     if (!cb && params) {
       cb = params
       params = {}
@@ -197,15 +197,15 @@ const Visuals = function(container, options) {
     }
   }
 
-  this.recordAgain = function() {
-    this.back(function() {
-      self.once(Events.USER_MEDIA_READY, function() {
+  this.recordAgain = function () {
+    this.back(function () {
+      self.once(Events.USER_MEDIA_READY, function () {
         self.record()
       })
     })
   }
 
-  this.unload = function(e) {
+  this.unload = function (e) {
     try {
       recorder.unload(e)
       recorderInsides.unload(e)
@@ -217,20 +217,20 @@ const Visuals = function(container, options) {
     }
   }
 
-  this.isNotifying = function() {
+  this.isNotifying = function () {
     return notifier.isVisible()
   }
 
-  this.isReplayShown = function() {
+  this.isReplayShown = function () {
     return replay.isShown()
   }
 
-  this.pause = function(params) {
+  this.pause = function (params) {
     recorder.pause(params)
     recorderInsides.showPause()
   }
 
-  this.resume = function() {
+  this.resume = function () {
     if (recorderInsides.isCountingDown()) {
       recorderInsides.resumeCountdown()
     } else {
@@ -240,7 +240,7 @@ const Visuals = function(container, options) {
     recorderInsides.hidePause()
   }
 
-  this.pauseOrResume = function() {
+  this.pauseOrResume = function () {
     if (isRecordable.call(this)) {
       if (this.isRecording()) {
         this.pause()
@@ -252,7 +252,7 @@ const Visuals = function(container, options) {
     }
   }
 
-  this.recordOrStop = function() {
+  this.recordOrStop = function () {
     if (isRecordable()) {
       if (this.isRecording()) {
         this.stop()
@@ -262,7 +262,7 @@ const Visuals = function(container, options) {
     }
   }
 
-  this.record = function() {
+  this.record = function () {
     if (options.video.countdown) {
       this.emit(Events.COUNTDOWN)
       recorderInsides.startCountdown(recorder.record.bind(recorder))
@@ -271,42 +271,42 @@ const Visuals = function(container, options) {
     }
   }
 
-  this.getRecorder = function() {
+  this.getRecorder = function () {
     return recorder
   }
 
-  this.getReplay = function() {
+  this.getReplay = function () {
     return replay
   }
 
-  this.validate = function() {
+  this.validate = function () {
     return recorder.validate() && this.isReplayShown()
   }
 
-  this.getRecordingStats = function() {
+  this.getRecordingStats = function () {
     return recorder.getRecordingStats()
   }
 
-  this.getAudioSampleRate = function() {
+  this.getAudioSampleRate = function () {
     return recorder.getAudioSampleRate()
   }
 
-  this.isPaused = function() {
+  this.isPaused = function () {
     return recorder.isPaused()
   }
 
-  this.error = function(err) {
+  this.error = function (err) {
     notifier.error(err)
   }
 
-  this.hide = function() {
+  this.hide = function () {
     if (visualsElement) {
       hidden(visualsElement, true)
       this.emit(Events.HIDE)
     }
   }
 
-  this.isHidden = function() {
+  this.isHidden = function () {
     if (!built) {
       return true
     } else if (visualsElement) {
@@ -314,16 +314,16 @@ const Visuals = function(container, options) {
     }
   }
 
-  this.showVisuals = function() {
+  this.showVisuals = function () {
     visualsElement && hidden(visualsElement, false)
   }
 
-  this.show = function() {
+  this.show = function () {
     !this.isReplayShown() && visualsElement && recorder.build()
     this.showVisuals()
   }
 
-  this.showReplayOnly = function() {
+  this.showReplayOnly = function () {
     !this.isReplayShown() && replay.show()
 
     this.show()
@@ -331,52 +331,52 @@ const Visuals = function(container, options) {
     notifier.hide()
   }
 
-  this.isRecorderUnloaded = function() {
+  this.isRecorderUnloaded = function () {
     return recorder.isUnloaded()
   }
 
-  this.isConnecting = function() {
+  this.isConnecting = function () {
     return recorder.isConnecting()
   }
 
-  this.getRecorderWidth = function(responsive) {
+  this.getRecorderWidth = function (responsive) {
     return recorder.getRecorderWidth(responsive)
   }
 
-  this.getRecorderHeight = function(responsive) {
+  this.getRecorderHeight = function (responsive) {
     return recorder.getRecorderHeight(responsive)
   }
 
-  this.limitWidth = function(width) {
+  this.limitWidth = function (width) {
     return container.limitWidth(width, options)
   }
 
-  this.limitHeight = function(height) {
+  this.limitHeight = function (height) {
     return container.limitHeight(height)
   }
 
-  this.calculateWidth = function(options) {
+  this.calculateWidth = function (options) {
     return container.calculateWidth(options)
   }
 
-  this.calculateHeight = function(options) {
+  this.calculateHeight = function (options) {
     return container.calculateHeight(options)
   }
 
-  this.getReplay = function() {
+  this.getReplay = function () {
     return replay
   }
 
-  this.getBoundingClientRect = function() {
+  this.getBoundingClientRect = function () {
     // fixes https://github.com/binarykitchen/videomail-client/issues/126
     return visualsElement && visualsElement.getBoundingClientRect()
   }
 
-  this.checkTimer = function(intervalSum) {
+  this.checkTimer = function (intervalSum) {
     recorderInsides.checkTimer(intervalSum)
   }
 
-  this.isNotifierBuilt = function() {
+  this.isNotifierBuilt = function () {
     return notifier && notifier.isBuilt()
   }
 

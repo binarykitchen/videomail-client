@@ -2,12 +2,17 @@
   "parser": "babel-eslint",
   "plugins": [],
   "extends": ["standard"],
-  "env": {
-  },
+  "env": {},
   "rules": {
     "no-else-return": 1,
-    "space-before-function-paren": 0
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "ignore",
+        "named": "ignore",
+        "asyncArrow": "ignore"
+      }
+    ]
   },
-  "globals": {
-  }
+  "globals": {}
 }

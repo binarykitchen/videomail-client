@@ -10,7 +10,7 @@ import VideomailError from './../../util/videomailError'
 
 import enableInlineVideo from 'iphone-inline-video'
 
-const Replay = function(parentElement, options) {
+const Replay = function (parentElement, options) {
   EventEmitter.call(this, options, 'Replay')
 
   const self = this
@@ -40,7 +40,7 @@ const Replay = function(parentElement, options) {
   function copyAttributes(newVideomail) {
     let attributeContainer
 
-    Object.keys(newVideomail).forEach(function(attribute) {
+    Object.keys(newVideomail).forEach(function (attribute) {
       attributeContainer = parentElement.querySelector('.' + attribute)
 
       if (attributeContainer) {
@@ -77,7 +77,7 @@ const Replay = function(parentElement, options) {
     }
   }
 
-  this.setVideomail = function(newVideomail) {
+  this.setVideomail = function (newVideomail) {
     videomail = newVideomail
 
     if (videomail) {
@@ -102,7 +102,7 @@ const Replay = function(parentElement, options) {
     this.show(videomail && videomail.width, videomail && videomail.height, hasAudio)
   }
 
-  this.show = function(recorderWidth, recorderHeight, hasAudio) {
+  this.show = function (recorderWidth, recorderHeight, hasAudio) {
     if (videomail) {
       correctDimensions({
         responsive: true,
@@ -148,7 +148,7 @@ const Replay = function(parentElement, options) {
     }
   }
 
-  this.build = function() {
+  this.build = function () {
     debug('Replay: build()')
 
     replayElement = parentElement.querySelector('video.' + options.selectors.replayClass)
@@ -169,14 +169,14 @@ const Replay = function(parentElement, options) {
 
     if (!built) {
       if (!isStandalone()) {
-        this.on(Events.PREVIEW, function(key, recorderWidth, recorderHeight) {
+        this.on(Events.PREVIEW, function (key, recorderWidth, recorderHeight) {
           self.show(recorderWidth, recorderHeight)
         })
       }
 
       // makes use of passive option automatically for better performance
       // https://www.npmjs.com/package/add-eventlistener-with-options
-      addEventListenerWithOptions(replayElement, 'touchstart', function(e) {
+      addEventListenerWithOptions(replayElement, 'touchstart', function (e) {
         try {
           e && e.preventDefault()
         } catch (exc) {
@@ -191,7 +191,7 @@ const Replay = function(parentElement, options) {
         }
       })
 
-      replayElement.onclick = function(e) {
+      replayElement.onclick = function (e) {
         e && e.preventDefault()
 
         if (this.paused) {
@@ -207,11 +207,11 @@ const Replay = function(parentElement, options) {
     debug('Replay: built.')
   }
 
-  this.unload = function() {
+  this.unload = function () {
     built = false
   }
 
-  this.getVideoSource = function(type) {
+  this.getVideoSource = function (type) {
     const sources = replayElement.getElementsByTagName('source')
     const l = sources && sources.length
     const videoType = 'video/' + type
@@ -256,15 +256,15 @@ const Replay = function(parentElement, options) {
     }
   }
 
-  this.setMp4Source = function(src, bustCache) {
+  this.setMp4Source = function (src, bustCache) {
     setVideoSource('mp4', src, bustCache)
   }
 
-  this.setWebMSource = function(src, bustCache) {
+  this.setWebMSource = function (src, bustCache) {
     setVideoSource('webm', src, bustCache)
   }
 
-  this.getVideoType = function() {
+  this.getVideoType = function () {
     return browser.getVideoType(replayElement)
   }
 
@@ -303,7 +303,7 @@ const Replay = function(parentElement, options) {
     }
   }
 
-  this.reset = function(cb) {
+  this.reset = function (cb) {
     // pause video to make sure it won't consume any memory
     pause(() => {
       if (replayElement) {
@@ -315,7 +315,7 @@ const Replay = function(parentElement, options) {
     })
   }
 
-  this.hide = function() {
+  this.hide = function () {
     if (isStandalone()) {
       hidden(parentElement, true)
     } else {
@@ -323,11 +323,11 @@ const Replay = function(parentElement, options) {
     }
   }
 
-  this.isShown = function() {
+  this.isShown = function () {
     return replayElement && !hidden(replayElement)
   }
 
-  this.getParentElement = function() {
+  this.getParentElement = function () {
     return parentElement
   }
 }

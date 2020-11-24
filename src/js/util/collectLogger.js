@@ -1,11 +1,12 @@
 import util from 'util'
 import Browser from './browser'
 
-export default function(localOptions = {}) {
+export default function (localOptions = {}) {
   const browser = new Browser(localOptions)
   const logger = localOptions.logger || console
   const containerId =
-    (localOptions.selectors && localOptions.selectors.containerId) || 'undefined container id'
+    (localOptions.selectors && localOptions.selectors.containerId) ||
+    'undefined container id'
   const stack = []
 
   function lifo(level, parameters) {
@@ -21,12 +22,14 @@ export default function(localOptions = {}) {
   }
 
   function addContainerId(firstArgument) {
-    return '#' + containerId + ' [' + new Date().toLocaleTimeString() + '] > ' + firstArgument
+    return (
+      '#' + containerId + ' [' + new Date().toLocaleTimeString() + '] > ' + firstArgument
+    )
   }
 
   // workaround: since we cannot overwrite console.log without having the correct file and line number
   // we'll use groupCollapsed() and trace() instead to get these.
-  this.debug = function() {
+  this.debug = function () {
     // always add it for better client error reports
     const args = [].slice.call(arguments, 0)
     args[0] = addContainerId(args[0])
@@ -49,21 +52,21 @@ export default function(localOptions = {}) {
     }
   }
 
-  this.error = function() {
+  this.error = function () {
     const args = [].slice.call(arguments, 0)
     args[0] = addContainerId(args[0])
 
     logger.error(lifo('error', args))
   }
 
-  this.warn = function() {
+  this.warn = function () {
     const args = [].slice.call(arguments, 0)
     args[0] = addContainerId(args[0])
 
     logger.warn(lifo('warn', args))
   }
 
-  this.getLines = function() {
+  this.getLines = function () {
     return stack
   }
 }

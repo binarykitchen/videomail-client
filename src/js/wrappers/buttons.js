@@ -6,7 +6,7 @@ import contains from 'contains'
 import Events from './../events'
 import EventEmitter from './../util/eventEmitter'
 
-const Buttons = function(container, options) {
+const Buttons = function (container, options) {
   EventEmitter.call(this, options, 'Buttons')
 
   const self = this
@@ -31,7 +31,7 @@ const Buttons = function(container, options) {
     }
 
     elements &&
-      elements.forEach(function(element) {
+      elements.forEach(function (element) {
         hidden(element, true)
       })
   }
@@ -42,7 +42,7 @@ const Buttons = function(container, options) {
     }
 
     elements &&
-      elements.forEach(function(element) {
+      elements.forEach(function (element) {
         hidden(element, false)
       })
   }
@@ -55,7 +55,7 @@ const Buttons = function(container, options) {
     }
 
     elements &&
-      elements.forEach(function(element) {
+      elements.forEach(function (element) {
         isShown = isShown && element && !hidden(element)
       })
 
@@ -68,7 +68,7 @@ const Buttons = function(container, options) {
     }
 
     elements &&
-      elements.forEach(function(element) {
+      elements.forEach(function (element) {
         // https://github.com/binarykitchen/videomail-client/issues/148
         if (element) {
           if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
@@ -86,7 +86,7 @@ const Buttons = function(container, options) {
     }
 
     elements &&
-      elements.forEach(function(element) {
+      elements.forEach(function (element) {
         // https://github.com/binarykitchen/videomail-client/issues/148
         if (element) {
           if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
@@ -173,7 +173,16 @@ const Buttons = function(container, options) {
     return [radioButtonElement, radioButtonGroup]
   }
 
-  function makeButton(buttonClass, text, clickHandler, show, id, type, selector, disabled = true) {
+  function makeButton(
+    buttonClass,
+    text,
+    clickHandler,
+    show,
+    id,
+    type,
+    selector,
+    disabled = true
+  ) {
     let buttonElement
 
     if (id) {
@@ -283,7 +292,7 @@ const Buttons = function(container, options) {
         value: 'off',
         label: options.text.audioOff,
         checked: !options.isAudioEnabled(),
-        changeHandler: function() {
+        changeHandler: function () {
           container.disableAudio()
         }
       })
@@ -294,7 +303,7 @@ const Buttons = function(container, options) {
         value: 'on',
         label: options.text.audioOn,
         checked: options.isAudioEnabled(),
-        changeHandler: function() {
+        changeHandler: function () {
           container.enableAudio()
         }
       })
@@ -369,11 +378,11 @@ const Buttons = function(container, options) {
     }
   }
 
-  this.enableSubmit = function() {
+  this.enableSubmit = function () {
     enable(submitButton)
   }
 
-  this.adjustButtonsForPause = function() {
+  this.adjustButtonsForPause = function () {
     if (!self.isCountingDown()) {
       pauseButton && hide(pauseButton)
       show(resumeButton)
@@ -498,69 +507,69 @@ const Buttons = function(container, options) {
     debug('Buttons: initEvents()')
 
     self
-      .on(Events.USER_MEDIA_READY, function(params) {
+      .on(Events.USER_MEDIA_READY, function (params) {
         if (!params.switchingFacingMode) {
           onUserMediaReady(params)
         }
       })
-      .on(Events.PREVIEW, function() {
+      .on(Events.PREVIEW, function () {
         onPreview()
       })
-      .on(Events.PAUSED, function() {
+      .on(Events.PAUSED, function () {
         self.adjustButtonsForPause()
       })
-      .on(Events.RECORDING, function(framesCount) {
+      .on(Events.RECORDING, function (framesCount) {
         onRecording(framesCount)
       })
-      .on(Events.FIRST_FRAME_SENT, function() {
+      .on(Events.FIRST_FRAME_SENT, function () {
         onFirstFrameSent()
       })
-      .on(Events.RESUMING, function() {
+      .on(Events.RESUMING, function () {
         onResuming()
       })
-      .on(Events.STOPPING, function() {
+      .on(Events.STOPPING, function () {
         onStopping()
       })
-      .on(Events.COUNTDOWN, function() {
+      .on(Events.COUNTDOWN, function () {
         onCountdown()
       })
-      .on(Events.SUBMITTING, function() {
+      .on(Events.SUBMITTING, function () {
         onSubmitting()
       })
-      .on(Events.RESETTING, function() {
+      .on(Events.RESETTING, function () {
         onResetting()
       })
-      .on(Events.INVALID, function() {
+      .on(Events.INVALID, function () {
         onInvalid()
       })
-      .on(Events.VALID, function() {
+      .on(Events.VALID, function () {
         onValid()
       })
-      .on(Events.SUBMITTED, function() {
+      .on(Events.SUBMITTED, function () {
         onSubmitted()
       })
-      .on(Events.HIDE, function() {
+      .on(Events.HIDE, function () {
         onHidden()
       })
-      .on(Events.FORM_READY, function(params) {
+      .on(Events.FORM_READY, function (params) {
         onFormReady(params)
       })
-      .on(Events.REPLAY_SHOWN, function() {
+      .on(Events.REPLAY_SHOWN, function () {
         onReplayShown()
       })
-      .on(Events.GOING_BACK, function() {
+      .on(Events.GOING_BACK, function () {
         onGoingBack()
       })
-      .on(Events.ENABLING_AUDIO, function() {
+      .on(Events.ENABLING_AUDIO, function () {
         onEnablingAudio()
       })
-      .on(Events.DISABLING_AUDIO, function() {
+      .on(Events.DISABLING_AUDIO, function () {
         onDisablingAudio()
       })
-      .on(Events.STARTING_OVER, function() {
+      .on(Events.STARTING_OVER, function () {
         onStartingOver()
       })
-      .on(Events.ERROR, function(err) {
+      .on(Events.ERROR, function (err) {
         // since https://github.com/binarykitchen/videomail-client/issues/60
         // we hide areas to make it easier for the user
         if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
@@ -569,7 +578,7 @@ const Buttons = function(container, options) {
       })
   }
 
-  this.reset = function() {
+  this.reset = function () {
     options.debug('Buttons: reset()')
 
     disable(pauseButton)
@@ -579,23 +588,23 @@ const Buttons = function(container, options) {
     disable(recordAgainButton)
   }
 
-  this.isRecordAgainButtonEnabled = function() {
+  this.isRecordAgainButtonEnabled = function () {
     return !recordAgainButton.disabled
   }
 
-  this.isRecordButtonEnabled = function() {
+  this.isRecordButtonEnabled = function () {
     return !recordButton.disabled
   }
 
-  this.setSubmitButton = function(newSubmitButton) {
+  this.setSubmitButton = function (newSubmitButton) {
     submitButton = newSubmitButton
   }
 
-  this.getSubmitButton = function() {
+  this.getSubmitButton = function () {
     return submitButton
   }
 
-  this.build = function() {
+  this.build = function () {
     buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
 
     if (!buttonsElement) {
@@ -611,11 +620,11 @@ const Buttons = function(container, options) {
     built = true
   }
 
-  this.unload = function() {
+  this.unload = function () {
     built = false
   }
 
-  this.hide = function(params) {
+  this.hide = function (params) {
     hide(buttonsElement)
 
     if (params && params.deep) {
@@ -628,11 +637,11 @@ const Buttons = function(container, options) {
     }
   }
 
-  this.show = function() {
+  this.show = function () {
     show(buttonsElement)
   }
 
-  this.isCountingDown = function() {
+  this.isCountingDown = function () {
     return container.isCountingDown()
   }
 }

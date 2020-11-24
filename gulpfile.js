@@ -100,7 +100,7 @@ function bundle(done, watching) {
   function pump() {
     return bundler
       .bundle()
-      .on('error', function(err) {
+      .on('error', function (err) {
         console.error(err.toString())
         this.emit('end')
       })
@@ -135,7 +135,7 @@ function middleware() {
   router.use(send.json())
 
   // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
-  router.post('/contact', function(req, res) {
+  router.post('/contact', function (req, res) {
     log.info('Videomail data received (with meta data):', req.body)
 
     // At this stage, a backend could store the videomail_key in req.body
@@ -191,7 +191,7 @@ function watch(done) {
   done()
 }
 
-exports.test = function(done) {
+exports.test = function (done) {
   const testFiles = glob.sync('test/**/*.test.js')
   const bundler = browserify({
     entries: testFiles
@@ -199,7 +199,7 @@ exports.test = function(done) {
 
   bundler
     .bundle()
-    .on('error', function(err) {
+    .on('error', function (err) {
       console.error(err.toString())
       this.emit('end')
       done()
@@ -209,7 +209,7 @@ exports.test = function(done) {
         wait: 4e3
       })
     )
-    .on('results', function() {
+    .on('results', function () {
       done()
     })
     .pipe(process.stdout)
@@ -218,7 +218,7 @@ exports.test = function(done) {
 // get inspired by
 // https://www.npmjs.com/package/gulp-tag-version and
 // https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
-exports.bumpVersion = function() {
+exports.bumpVersion = function () {
   const bumpOptions = {}
 
   if (options.version) {

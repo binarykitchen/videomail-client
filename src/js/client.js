@@ -18,7 +18,7 @@ let browser
 
 function adjustOptions(options = {}) {
   const localOptions = deepmerge(defaultOptions, options, {
-    arrayMerge: function(destination, source) {
+    arrayMerge: function (destination, source) {
       return source
     }
   })
@@ -41,7 +41,7 @@ function getBrowser(localOptions) {
   return browser
 }
 
-const VideomailClient = function(options) {
+const VideomailClient = function (options) {
   const localOptions = adjustOptions(options)
   const container = new Container(localOptions)
   const debug = localOptions.debug
@@ -56,7 +56,7 @@ const VideomailClient = function(options) {
   function build() {
     let building = false
 
-    readystate.interactive(function(previousState) {
+    readystate.interactive(function (previousState) {
       debug(
         'Client: interactive(),',
         'previousState =',
@@ -77,7 +77,7 @@ const VideomailClient = function(options) {
     })
   }
 
-  this.show = function() {
+  this.show = function () {
     if (container.isBuilt()) {
       container.show()
     } else {
@@ -87,7 +87,7 @@ const VideomailClient = function(options) {
 
   // automatically adds a <video> element inside the given parentElement and loads
   // it with the videomail
-  this.replay = function(videomail, parentElement) {
+  this.replay = function (videomail, parentElement) {
     function buildReplay() {
       if (typeof parentElement === 'string') {
         parentElement = document.getElementById(parentElement)
@@ -102,7 +102,9 @@ const VideomailClient = function(options) {
         if (!container.hasElement()) {
           // if container.setElement() failed too, then complain
           readystate.removeAllListeners()
-          throw new Error('Unable to replay video without a container nor parent element.')
+          throw new Error(
+            'Unable to replay video without a container nor parent element.'
+          )
         }
       } else {
         if (container.isOutsideElementOf(parentElement)) {
@@ -131,7 +133,7 @@ const VideomailClient = function(options) {
       }
 
       // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-      setTimeout(function() {
+      setTimeout(function () {
         replay.setVideomail(videomail)
         container.showReplayOnly()
       }, 10e2) // not sure, but probably can be reduced a bit
@@ -140,7 +142,7 @@ const VideomailClient = function(options) {
     readystate.interactive(buildReplay)
   }
 
-  this.startOver = function(params) {
+  this.startOver = function (params) {
     if (replay) {
       replay.hide()
       replay.reset()
@@ -149,17 +151,17 @@ const VideomailClient = function(options) {
     container.startOver(params)
   }
 
-  this.unload = function(e) {
+  this.unload = function (e) {
     readystate.removeAllListeners()
     container.unload(e)
   }
 
-  this.hide = function() {
+  this.hide = function () {
     container.hide()
   }
 
-  this.get = function(alias, cb) {
-    new Resource(localOptions).get(alias, function(err, videomail) {
+  this.get = function (alias, cb) {
+    new Resource(localOptions).get(alias, function (err, videomail) {
       if (err) {
         cb(err)
       } else {
@@ -168,24 +170,24 @@ const VideomailClient = function(options) {
     })
   }
 
-  this.canRecord = function() {
+  this.canRecord = function () {
     return getBrowser(localOptions).canRecord()
   }
 
   // return true when a video has been recorded but is not sent yet
-  this.isDirty = function() {
+  this.isDirty = function () {
     return container.isDirty()
   }
 
-  this.isRecording = function() {
+  this.isRecording = function () {
     return container.isRecording()
   }
 
-  this.submit = function() {
+  this.submit = function () {
     container.submit()
   }
 
-  this.getLogLines = function() {
+  this.getLogLines = function () {
     if (localOptions.logger && localOptions.logger.getLines) {
       return localOptions.logger.getLines()
     }
@@ -196,7 +198,7 @@ const VideomailClient = function(options) {
 
 util.inherits(VideomailClient, EventEmitter)
 
-Object.keys(Constants.public).forEach(function(name) {
+Object.keys(Constants.public).forEach(function (name) {
   VideomailClient[name] = Constants.public[name]
 })
 

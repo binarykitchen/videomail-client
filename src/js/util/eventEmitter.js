@@ -5,8 +5,8 @@ import Events from './../events'
 
 // TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 
-export default function(options, name) {
-  this.emit = function(event) {
+export default function (options, name) {
+  this.emit = function (event) {
     const args = Array.prototype.slice.call(arguments, 0)
 
     if (!event) {
@@ -47,23 +47,23 @@ export default function(options, name) {
     return result
   }
 
-  this.on = function(eventName, cb) {
+  this.on = function (eventName, cb) {
     return despot.on(eventName, cb)
   }
 
-  this.once = function(eventName, cb) {
+  this.once = function (eventName, cb) {
     return despot.once(eventName, cb)
   }
 
-  this.listeners = function(eventName) {
+  this.listeners = function (eventName) {
     return despot.listeners(eventName)
   }
 
-  this.removeListener = function(eventName, cb) {
+  this.removeListener = function (eventName, cb) {
     return despot.removeListener(eventName, cb)
   }
 
-  this.removeAllListeners = function() {
+  this.removeAllListeners = function () {
     despot.removeAllListeners()
   }
 }
