@@ -79,6 +79,9 @@ import React, { Component } from 'react';
 import { Helmet } from 'react-helmet';
 
 export default class VideomailReactExample extends Component{
+  state = {
+      videomailClient:null,
+  };
 
   componentDidMount() {
     (async() => {
