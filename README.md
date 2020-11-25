@@ -73,6 +73,46 @@ That's it. Easy as apple pie.
   </body>
 </html>
 ```
+## React example (just loading videomail)
+```jsx harmony
+import React, { Component } from 'react';
+import { Helmet } from 'react-helmet';
+
+export default class VideomailReactExample extends Component{
+
+  componentDidMount() {
+    (async() => {
+      console.log("waiting for videomail client library to load via CDN");
+      while(window.VideomailClient === undefined)
+        await new Promise(resolve => setTimeout(resolve, 500));
+      const videomailClient = new window.VideomailClient({
+        verbose: true,
+        video:{width:720, height: 480, fps:20, limitSeconds:60},
+        siteName:"videomail-client-demo",
+      });
+      this.setState({
+        videomailClient:videomailClient
+      })
+    })();
+  };
+  render(){
+    return(
+      <div>
+        <Helmet>
+          <script src="https://cdn.rawgit.com/binarykitchen/videomail-client/2.14.2/prototype/js/videomail-client.min.js" />
+        </Helmet>
+      {
+        this.state.videomailClient!=null ?
+          <div className={"videomail"} id="videomail"> </div>
+          :
+          <div/>
+      }
+      </div>
+    )
+  }
+}
+
+```
 
 The included JS file `/prototype/js/videomail-client.js` is already browserified and lies in the `js` folder.
 
