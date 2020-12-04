@@ -64,11 +64,12 @@ export default {
   },
 
   audio: {
-    enabled: false, // set to true for experimential audio recording
+    enabled: false, // set to true for experimental audio recording
     switch: false, // enables a switcher for audio recording (on/off)
-    volume: 0.2, // must be between 0 .. 1 but 0.20 is recommeded to avoid
+    volume: 0.2, // must be between 0 .. 1 but 0.20 is recommended to avoid
     // distorting at the higher volume peaks
-    bufferSize: 2048 // decides how often the audio is being sampled, must be a power of two.
+    bufferSize: 'auto' // decides how often the audio is being sampled,
+    // can be 'auto' or an integer being a power of two like 512 or 2048
     // the higher the less traffic, but harder to adjust with rubberband
     // to match with the video length on server side during encoding
   },
