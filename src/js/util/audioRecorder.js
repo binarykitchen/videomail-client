@@ -1,7 +1,7 @@
-import isPOT from 'is-power-of-two'
 import AudioSample from 'audio-sample'
-
+import Browser from './browser'
 import VideomailError from './videomailError'
+import isPOT from 'is-power-of-two'
 
 const CHANNELS = 1
 
@@ -14,6 +14,8 @@ export default function (userMedia, options) {
   let scriptProcessor
   let audioInput
   let vcAudioContext
+
+  const browser = new Browser(options)
 
   function getAudioContextClass() {
     return window.AudioContext || window.webkitAudioContext
@@ -57,9 +59,22 @@ export default function (userMedia, options) {
       throw VideomailError.create('Webcam has no audio', exc.toString(), options)
     }
 
-    if (!isPOT(options.audio.bufferSize)) {
+    let bufferSize = options.audio.bufferSize
+
+    // see https://github.com/binarykitchen/videomail-client/issues/184
+    if (bufferSize === 'auto') {
+      if (browser.isFirefox()) {
+        bufferSize = 512
+      } else {
+        bufferSize = 2048
+      }
+    }
+
+    if (!isPOT(bufferSize)) {
       throw VideomailError.create('Audio buffer size must be a power of two.', options)
-    } else if (!options.audio.volume || options.audio.volume > 1) {
+    }
+
+    if (!options.audio.volume || options.audio.volume > 1) {
       throw VideomailError.create('Audio volume must be between zero and one.', options)
     }
 
@@ -68,7 +83,7 @@ export default function (userMedia, options) {
     // Create a ScriptProcessorNode with the given bufferSize and
     // a single input and output channel
     scriptProcessor = getAudioContext().createScriptProcessor(
-      options.audio.bufferSize,
+      bufferSize,
       CHANNELS,
       CHANNELS
     )

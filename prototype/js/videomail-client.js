@@ -3881,13 +3881,14 @@ var arraySpeciesCreate = _dereq_('../internals/array-species-create');
 
 var push = [].push;
 
-// `Array.prototype.{ forEach, map, filter, some, every, find, findIndex }` methods implementation
+// `Array.prototype.{ forEach, map, filter, some, every, find, findIndex, filterOut }` methods implementation
 var createMethod = function (TYPE) {
   var IS_MAP = TYPE == 1;
   var IS_FILTER = TYPE == 2;
   var IS_SOME = TYPE == 3;
   var IS_EVERY = TYPE == 4;
   var IS_FIND_INDEX = TYPE == 6;
+  var IS_FILTER_OUT = TYPE == 7;
   var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
   return function ($this, callbackfn, that, specificCreate) {
     var O = toObject($this);
@@ -3896,7 +3897,7 @@ var createMethod = function (TYPE) {
     var length = toLength(self.length);
     var index = 0;
     var create = specificCreate || arraySpeciesCreate;
-    var target = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
+    var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_OUT ? create($this, 0) : undefined;
     var value, result;
     for (;length > index; index++) if (NO_HOLES || index in self) {
       value = self[index];
@@ -3908,7 +3909,10 @@ var createMethod = function (TYPE) {
           case 5: return value;             // find
           case 6: return index;             // findIndex
           case 2: push.call(target, value); // filter
-        } else if (IS_EVERY) return false;  // every
+        } else switch (TYPE) {
+          case 4: return false;             // every
+          case 7: push.call(target, value); // filterOut
+        }
       }
     }
     return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
@@ -3936,7 +3940,10 @@ module.exports = {
   find: createMethod(5),
   // `Array.prototype.findIndex` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
-  findIndex: createMethod(6)
+  findIndex: createMethod(6),
+  // `Array.prototype.filterOut` method
+  // https://github.com/tc39/proposal-array-filtering
+  filterOut: createMethod(7)
 };
 
 },{"../internals/array-species-create":38,"../internals/function-bind-context":61,"../internals/indexed-object":72,"../internals/to-length":135,"../internals/to-object":136}],33:[function(_dereq_,module,exports){
@@ -5988,7 +5995,7 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.7.0',
+  version: '3.8.0',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
 });
@@ -23393,7 +23400,7 @@ module.exports={
     "canvas-to-buffer": "1.1.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.7.0",
+    "core-js": "3.8.0",
     "create-error": "0.3.1",
     "deepmerge": "4.2.2",
     "defined": "1.0.0",
@@ -23418,11 +23425,11 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.12.8",
+    "@babel/core": "7.12.9",
     "@babel/plugin-transform-runtime": "7.12.1",
     "@babel/preset-env": "7.12.7",
     "audit-ci": "3.1.1",
-    "autoprefixer": "10.0.2",
+    "autoprefixer": "10.0.4",
     "babel-eslint": "10.1.0",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
@@ -23445,7 +23452,7 @@ module.exports={
     "gulp-derequire": "3.0.0",
     "gulp-if": "3.0.0",
     "gulp-inject-string": "1.1.2",
-    "gulp-load-plugins": "2.0.5",
+    "gulp-load-plugins": "2.0.6",
     "gulp-plumber": "1.2.1",
     "gulp-postcss": "9.0.0",
     "gulp-rename": "2.0.0",
@@ -23455,8 +23462,8 @@ module.exports={
     "gulp-todo": "7.1.1",
     "minimist": "1.2.5",
     "nib": "1.1.2",
-    "postcss": "8.1.10",
-    "prettier": "2.2.0",
+    "postcss": "8.1.14",
+    "prettier": "2.2.1",
     "router": "1.3.5",
     "tape": "5.0.1",
     "tape-catch": "1.0.6",
@@ -23902,13 +23909,14 @@ var _default = {
   },
   audio: {
     enabled: false,
-    // set to true for experimential audio recording
+    // set to true for experimental audio recording
     switch: false,
     // enables a switcher for audio recording (on/off)
     volume: 0.2,
-    // must be between 0 .. 1 but 0.20 is recommeded to avoid
+    // must be between 0 .. 1 but 0.20 is recommended to avoid
     // distorting at the higher volume peaks
-    bufferSize: 2048 // decides how often the audio is being sampled, must be a power of two.
+    bufferSize: 'auto' // decides how often the audio is being sampled,
+    // can be 'auto' or an integer being a power of two like 512 or 2048
     // the higher the less traffic, but harder to adjust with rubberband
     // to match with the video length on server side during encoding
 
@@ -24197,11 +24205,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 
-var _isPowerOfTwo = _interopRequireDefault(_dereq_("is-power-of-two"));
-
 var _audioSample = _interopRequireDefault(_dereq_("audio-sample"));
 
+var _browser = _interopRequireDefault(_dereq_("./browser"));
+
 var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
+
+var _isPowerOfTwo = _interopRequireDefault(_dereq_("is-power-of-two"));
 
 var CHANNELS = 1; // for inspiration see
 // https://github.com/saebekassebil/microphone-stream
@@ -24211,6 +24221,7 @@ function _default(userMedia, options) {
   var scriptProcessor;
   var audioInput;
   var vcAudioContext;
+  var browser = new _browser.default(options);
 
   function getAudioContextClass() {
     return window.AudioContext || window.webkitAudioContext;
@@ -24252,16 +24263,28 @@ function _default(userMedia, options) {
       throw _videomailError.default.create('Webcam has no audio', exc.toString(), options);
     }
 
-    if (!(0, _isPowerOfTwo.default)(options.audio.bufferSize)) {
+    var bufferSize = options.audio.bufferSize; // see https://github.com/binarykitchen/videomail-client/issues/184
+
+    if (bufferSize === 'auto') {
+      if (browser.isFirefox()) {
+        bufferSize = 512;
+      } else {
+        bufferSize = 2048;
+      }
+    }
+
+    if (!(0, _isPowerOfTwo.default)(bufferSize)) {
       throw _videomailError.default.create('Audio buffer size must be a power of two.', options);
-    } else if (!options.audio.volume || options.audio.volume > 1) {
+    }
+
+    if (!options.audio.volume || options.audio.volume > 1) {
       throw _videomailError.default.create('Audio volume must be between zero and one.', options);
     }
 
     volume.gain.value = options.audio.volume; // Create a ScriptProcessorNode with the given bufferSize and
     // a single input and output channel
 
-    scriptProcessor = getAudioContext().createScriptProcessor(options.audio.bufferSize, CHANNELS, CHANNELS); // connect stream to our scriptProcessor
+    scriptProcessor = getAudioContext().createScriptProcessor(bufferSize, CHANNELS, CHANNELS); // connect stream to our scriptProcessor
 
     audioInput.connect(scriptProcessor); // connect our scriptProcessor to the previous destination
 
@@ -24314,7 +24337,7 @@ function _default(userMedia, options) {
   };
 }
 
-},{"./videomailError":300,"@babel/runtime/helpers/interopRequireDefault":1,"audio-sample":7,"core-js/modules/es.object.to-string":159,"core-js/modules/es.regexp.to-string":164,"is-power-of-two":235}],293:[function(_dereq_,module,exports){
+},{"./browser":293,"./videomailError":300,"@babel/runtime/helpers/interopRequireDefault":1,"audio-sample":7,"core-js/modules/es.object.to-string":159,"core-js/modules/es.regexp.to-string":164,"is-power-of-two":235}],293:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");

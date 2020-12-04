@@ -1,7 +1,7 @@
 ### TODOs
 | Filename | line # | TODO
 |:------|:------:|:------
-| src/js/util/audioRecorder.js | 11 | code needs rewrite
+| src/js/util/audioRecorder.js | 10 | code needs rewrite
 | src/js/util/eventEmitter.js | 6 | MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 | src/js/util/eventEmitter.js | 43 | have this emitted through a configuration because it is pretty noisy
 | src/js/util/humanize.js | 4 | get rid of this class and use those imports directly
