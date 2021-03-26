@@ -1,113 +1,129 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>videomail-client examples</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head>
+    <title>videomail-client examples</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-        <style type="text/css">
-            input[type="email"], input[type="text"], fieldset, textarea, .buttons, #startOver {
-                margin:  1em 0;
-                display: block;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Contact Form Integration</h1>
-        <p>A JSON based contact form embracing Sign Language!</p>
-        <p>With the `submitWithVideomail` option, all videomail data is posted as well.</p>
-        <!-- Once you set the method to POST, then two request will be made internally. -->
-        <!-- The first one to the videomail server and the second one to the specified action -->
-        <form action="/contact" method="post" id="someForm">
-            <input name='from'    type='email' placeholder='Enter your email address' required/>
-            <input name='subject' type='text'  placeholder='Enter a subject' required/>
-            <fieldset>
-                <legend>How do you want to contact us?</legend>
-                <p>
-                    <input type="radio" name="how" id="writingOption" value="writing" checked/>
-                    <label for="writingOption">In Writing</label>
-                </p>
-                <p>
-                    <input type="radio" name="how" id="signLanguageOption" value="sign_language"/>
-                    <label for="signLanguageOption">In Sign Language</label>
-                </p>
-            </fieldset>
-            <textarea id='body' name='body' placeholder='Enter your message' cols='40' rows='5' required></textarea>
+    <style type="text/css">
+      input[type='email'],
+      input[type='text'],
+      fieldset,
+      textarea,
+      .buttons,
+      #startOver {
+        margin: 1em 0;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Contact Form Integration</h1>
+    <p>A JSON based contact form embracing Sign Language!</p>
+    <p>With the `submitWithVideomail` option, all videomail data is posted as well.</p>
+    <p class="warning" style="background-color: ff9800; padding: 5px; color: white">
+      This example does not work on Netlify. If you clone and run that locally or on your
+      own server it works fine ;)
+    </p>
+    <!-- Once you set the method to POST, then two request will be made internally. -->
+    <!-- The first one to the videomail server and the second one to the specified action -->
+    <form action="/contact" method="post" id="someForm">
+      <input name="from" type="email" placeholder="Enter your email address" required />
+      <input name="subject" type="text" placeholder="Enter a subject" required />
+      <fieldset>
+        <legend>How do you want to contact us?</legend>
+        <p>
+          <input type="radio" name="how" id="writingOption" value="writing" checked />
+          <label for="writingOption">In Writing</label>
+        </p>
+        <p>
+          <input type="radio" name="how" id="signLanguageOption" value="sign_language" />
+          <label for="signLanguageOption">In Sign Language</label>
+        </p>
+      </fieldset>
+      <textarea
+        id="body"
+        name="body"
+        placeholder="Enter your message"
+        cols="40"
+        rows="5"
+        required
+      ></textarea>
 
-            <div id="videomail"></div>
-        </form>
+      <div id="videomail"></div>
+    </form>
 
-        <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
-        <input type="button" value="Submit" disabled>
+    <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
+    <input type="button" value="Submit" disabled />
 
-        <div id="viewVideo" style="display:none">
-            <h2 class="subject"></h2>
-            <h3 class="status"></h3>
-            <p class="body"></p>
-            <video class="replay"></video>
-            <button id='startOver'>Start over</button>
-        </div>
+    <div id="viewVideo" style="display: none">
+      <h2 class="subject"></h2>
+      <h3 class="status"></h3>
+      <p class="body"></p>
+      <video class="replay"></video>
+      <button id="startOver">Start over</button>
+    </div>
 
-        <script src="/js/videomail-client.js"></script>
-        <script>
-            var videomailClient = new VideomailClient({
-              verbose: true,
-              submitWithVideomail: true,
-              video: {limitSeconds: 120, width: 320, countdown: false},
-              selectors: {
-                submitButtonSelector: 'body input[value="Submit"]',
-                formId: 'someForm'
-              },
-              callbacks: {
-                adjustFormDataBeforePosting: function (videomail, cb) {
-                  videomail.subject = 'Adjusted: ' + videomail.subject
+    <script src="/js/videomail-client.js"></script>
+    <script>
+      var videomailClient = new VideomailClient({
+        verbose: true,
+        submitWithVideomail: true,
+        video: { limitSeconds: 120, width: 320, countdown: false },
+        selectors: {
+          submitButtonSelector: 'body input[value="Submit"]',
+          formId: 'someForm'
+        },
+        callbacks: {
+          adjustFormDataBeforePosting: function (videomail, cb) {
+            videomail.subject = 'Adjusted: ' + videomail.subject
 
-                  cb(null, videomail)
-                }
-              },
-              defaults: {
-                body: 'No message content'
-              }
-            })
+            cb(null, videomail)
+          }
+        },
+        defaults: {
+          body: 'No message content'
+        }
+      })
 
-            var startOverButton = document.getElementById('startOver')
-            var writingOption = document.getElementById('writingOption')
-            var signLanguageOption = document.getElementById('signLanguageOption')
-            var body = document.getElementById('body')
+      var startOverButton = document.getElementById('startOver')
+      var writingOption = document.getElementById('writingOption')
+      var signLanguageOption = document.getElementById('signLanguageOption')
+      var body = document.getElementById('body')
 
-            var onSubmitted = function (videomail, response) {
-              // this videomail object has lots of useful information you can grab from
-              // i.E. the URL to view or even the average fps of the video
+      var onSubmitted = function (videomail, response) {
+        // this videomail object has lots of useful information you can grab from
+        // i.E. the URL to view or even the average fps of the video
 
-              var statusHeader = document.querySelector('h3.status')
+        var statusHeader = document.querySelector('h3.status')
 
-              // status has been generated on server side, see gulp task 'connect'
-              statusHeader.innerHTML = response.status
+        // status has been generated on server side, see gulp task 'connect'
+        statusHeader.innerHTML = response.status
 
-              this.replay(videomail, 'viewVideo')
+        this.replay(videomail, 'viewVideo')
 
-              startOverButton.onclick = function () {
-                videomailClient.startOver({keepHidden: writingOption.checked})
-              }
-            }
+        startOverButton.onclick = function () {
+          videomailClient.startOver({ keepHidden: writingOption.checked })
+        }
+      }
 
-            writingOption.onclick = function () {
-              videomailClient.hide()
+      writingOption.onclick = function () {
+        videomailClient.hide()
 
-              body.style.display = 'block'
-              body.required = true
-            }
+        body.style.display = 'block'
+        body.required = true
+      }
 
-            signLanguageOption.onclick = function () {
-              videomailClient.show()
+      signLanguageOption.onclick = function () {
+        videomailClient.show()
 
-              body.style.display = 'none'
-              body.required = false
-            }
+        body.style.display = 'none'
+        body.required = false
+      }
 
-            videomailClient.on(
-              videomailClient.events.SUBMITTED,
-              onSubmitted.bind(videomailClient)
-            )
-        </script>
-    </body>
+      videomailClient.on(
+        videomailClient.events.SUBMITTED,
+        onSubmitted.bind(videomailClient)
+      )
+    </script>
+  </body>
 </html>
