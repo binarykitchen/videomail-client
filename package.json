@@ -32,8 +32,8 @@
     "prettier-fix": "prettier --write ./src ./test gulpfile.js"
   },
   "engines": {
-    "node": "^14.4.0",
-    "yarn": "^1.22.4"
+    "node": "^10.24.0",
+    "yarn": "^1.17.0"
   },
   "keywords": [
     "webcam",
