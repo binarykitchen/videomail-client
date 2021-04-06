@@ -231,8 +231,8 @@ const Browser = function (options) {
       }
 
       if (isBadIOS) {
-        // on older iphones length of JSON is limited and breaking
-        // so just dont report and ignore
+        // on older iPhones length of JSON is limited and breaking
+        // so just don't report and ignore
         options.reportErrors = false
       }
 
