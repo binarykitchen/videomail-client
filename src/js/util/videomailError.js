@@ -184,7 +184,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       message = 'Webcam is unavailable'
       explanation = 'Maybe it is already busy in another window?'
 
-      if (browser.isChromeBased()) {
+      if (browser.isChromeBased() || browser.isFirefox()) {
         explanation += ' Or you have to allow access above?'
       }
 
