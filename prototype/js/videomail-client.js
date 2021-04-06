@@ -6,6 +6,7 @@ function _interopRequireDefault(obj) {
 }
 
 module.exports = _interopRequireDefault;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
 },{}],2:[function(_dereq_,module,exports){
 function _typeof(obj) {
   "@babel/helpers - typeof";
@@ -14,16 +15,21 @@ function _typeof(obj) {
     module.exports = _typeof = function _typeof(obj) {
       return typeof obj;
     };
+
+    module.exports["default"] = module.exports, module.exports.__esModule = true;
   } else {
     module.exports = _typeof = function _typeof(obj) {
       return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
     };
+
+    module.exports["default"] = module.exports, module.exports.__esModule = true;
   }
 
   return _typeof(obj);
 }
 
 module.exports = _typeof;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
 },{}],3:[function(_dereq_,module,exports){
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -3359,7 +3365,7 @@ module.exports = function (it) {
   } return it;
 };
 
-},{"../internals/is-object":83}],22:[function(_dereq_,module,exports){
+},{"../internals/is-object":82}],22:[function(_dereq_,module,exports){
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 var create = _dereq_('../internals/object-create');
 var definePropertyModule = _dereq_('../internals/object-define-property');
@@ -3381,7 +3387,7 @@ module.exports = function (key) {
   ArrayPrototype[UNSCOPABLES][key] = true;
 };
 
-},{"../internals/object-create":98,"../internals/object-define-property":100,"../internals/well-known-symbol":150}],23:[function(_dereq_,module,exports){
+},{"../internals/object-create":97,"../internals/object-define-property":99,"../internals/well-known-symbol":150}],23:[function(_dereq_,module,exports){
 'use strict';
 var charAt = _dereq_('../internals/string-multibyte').charAt;
 
@@ -3391,7 +3397,7 @@ module.exports = function (S, index, unicode) {
   return index + (unicode ? charAt(S, index).length : 1);
 };
 
-},{"../internals/string-multibyte":129}],24:[function(_dereq_,module,exports){
+},{"../internals/string-multibyte":128}],24:[function(_dereq_,module,exports){
 module.exports = function (it, Constructor, name) {
   if (!(it instanceof Constructor)) {
     throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
@@ -3407,7 +3413,8 @@ module.exports = function (it) {
   } return it;
 };
 
-},{"../internals/is-object":83}],26:[function(_dereq_,module,exports){
+},{"../internals/is-object":82}],26:[function(_dereq_,module,exports){
+// eslint-disable-next-line es/no-typed-arrays -- safe
 module.exports = typeof ArrayBuffer !== 'undefined' && typeof DataView !== 'undefined';
 
 },{}],27:[function(_dereq_,module,exports){
@@ -3535,7 +3542,7 @@ for (NAME in TypedArrayConstructorsList) {
 
 // WebKit bug - typed arrays constructors prototype is Object.prototype
 if (!NATIVE_ARRAY_BUFFER_VIEWS || typeof TypedArray != 'function' || TypedArray === Function.prototype) {
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line no-shadow -- safe
   TypedArray = function TypedArray() {
     throw TypeError('Incorrect invocation');
   };
@@ -3579,7 +3586,7 @@ module.exports = {
   TypedArrayPrototype: TypedArrayPrototype
 };
 
-},{"../internals/array-buffer-native":26,"../internals/classof":44,"../internals/create-non-enumerable-property":48,"../internals/descriptors":52,"../internals/global":69,"../internals/has":70,"../internals/is-object":83,"../internals/object-define-property":100,"../internals/object-get-prototype-of":105,"../internals/object-set-prototype-of":109,"../internals/redefine":116,"../internals/uid":148,"../internals/well-known-symbol":150}],28:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-native":26,"../internals/classof":43,"../internals/create-non-enumerable-property":47,"../internals/descriptors":51,"../internals/global":68,"../internals/has":69,"../internals/is-object":82,"../internals/object-define-property":99,"../internals/object-get-prototype-of":104,"../internals/object-set-prototype-of":108,"../internals/redefine":115,"../internals/uid":148,"../internals/well-known-symbol":150}],28:[function(_dereq_,module,exports){
 'use strict';
 var global = _dereq_('../internals/global');
 var DESCRIPTORS = _dereq_('../internals/descriptors');
@@ -3756,16 +3763,18 @@ if (!NATIVE_ARRAY_BUFFER) {
     }
   });
 } else {
+  /* eslint-disable no-new -- required for testing */
   if (!fails(function () {
     NativeArrayBuffer(1);
   }) || !fails(function () {
-    new NativeArrayBuffer(-1); // eslint-disable-line no-new
+    new NativeArrayBuffer(-1);
   }) || fails(function () {
-    new NativeArrayBuffer(); // eslint-disable-line no-new
-    new NativeArrayBuffer(1.5); // eslint-disable-line no-new
-    new NativeArrayBuffer(NaN); // eslint-disable-line no-new
+    new NativeArrayBuffer();
+    new NativeArrayBuffer(1.5);
+    new NativeArrayBuffer(NaN);
     return NativeArrayBuffer.name != ARRAY_BUFFER;
   })) {
+  /* eslint-enable no-new -- required for testing */
     $ArrayBuffer = function ArrayBuffer(length) {
       anInstance(this, $ArrayBuffer);
       return new NativeArrayBuffer(toIndex(length));
@@ -3786,15 +3795,15 @@ if (!NATIVE_ARRAY_BUFFER) {
 
   // iOS Safari 7.x bug
   var testView = new $DataView(new $ArrayBuffer(2));
-  var nativeSetInt8 = $DataViewPrototype.setInt8;
+  var $setInt8 = $DataViewPrototype.setInt8;
   testView.setInt8(0, 2147483648);
   testView.setInt8(1, 2147483649);
   if (testView.getInt8(0) || !testView.getInt8(1)) redefineAll($DataViewPrototype, {
     setInt8: function setInt8(byteOffset, value) {
-      nativeSetInt8.call(this, byteOffset, value << 24 >> 24);
+      $setInt8.call(this, byteOffset, value << 24 >> 24);
     },
     setUint8: function setUint8(byteOffset, value) {
-      nativeSetInt8.call(this, byteOffset, value << 24 >> 24);
+      $setInt8.call(this, byteOffset, value << 24 >> 24);
     }
   }, { unsafe: true });
 }
@@ -3807,7 +3816,7 @@ module.exports = {
   DataView: $DataView
 };
 
-},{"../internals/an-instance":24,"../internals/array-buffer-native":26,"../internals/array-fill":30,"../internals/create-non-enumerable-property":48,"../internals/descriptors":52,"../internals/fails":62,"../internals/global":69,"../internals/ieee754":75,"../internals/internal-state":79,"../internals/object-define-property":100,"../internals/object-get-own-property-names":103,"../internals/object-get-prototype-of":105,"../internals/object-set-prototype-of":109,"../internals/redefine-all":115,"../internals/set-to-string-tag":124,"../internals/to-index":136,"../internals/to-integer":138,"../internals/to-length":139}],29:[function(_dereq_,module,exports){
+},{"../internals/an-instance":24,"../internals/array-buffer-native":26,"../internals/array-fill":30,"../internals/create-non-enumerable-property":47,"../internals/descriptors":51,"../internals/fails":61,"../internals/global":68,"../internals/ieee754":74,"../internals/internal-state":78,"../internals/object-define-property":99,"../internals/object-get-own-property-names":102,"../internals/object-get-prototype-of":104,"../internals/object-set-prototype-of":108,"../internals/redefine-all":114,"../internals/set-to-string-tag":123,"../internals/to-index":135,"../internals/to-integer":137,"../internals/to-length":138}],29:[function(_dereq_,module,exports){
 'use strict';
 var toObject = _dereq_('../internals/to-object');
 var toAbsoluteIndex = _dereq_('../internals/to-absolute-index');
@@ -3817,6 +3826,7 @@ var min = Math.min;
 
 // `Array.prototype.copyWithin` method implementation
 // https://tc39.es/ecma262/#sec-array.prototype.copywithin
+// eslint-disable-next-line es/no-array-prototype-copywithin -- safe
 module.exports = [].copyWithin || function copyWithin(target /* = 0 */, start /* = 0, end = @length */) {
   var O = toObject(this);
   var len = toLength(O.length);
@@ -3838,7 +3848,7 @@ module.exports = [].copyWithin || function copyWithin(target /* = 0 */, start /*
   } return O;
 };
 
-},{"../internals/to-absolute-index":135,"../internals/to-length":139,"../internals/to-object":140}],30:[function(_dereq_,module,exports){
+},{"../internals/to-absolute-index":134,"../internals/to-length":138,"../internals/to-object":139}],30:[function(_dereq_,module,exports){
 'use strict';
 var toObject = _dereq_('../internals/to-object');
 var toAbsoluteIndex = _dereq_('../internals/to-absolute-index');
@@ -3857,22 +3867,21 @@ module.exports = function fill(value /* , start = 0, end = @length */) {
   return O;
 };
 
-},{"../internals/to-absolute-index":135,"../internals/to-length":139,"../internals/to-object":140}],31:[function(_dereq_,module,exports){
+},{"../internals/to-absolute-index":134,"../internals/to-length":138,"../internals/to-object":139}],31:[function(_dereq_,module,exports){
 'use strict';
 var $forEach = _dereq_('../internals/array-iteration').forEach;
 var arrayMethodIsStrict = _dereq_('../internals/array-method-is-strict');
-var arrayMethodUsesToLength = _dereq_('../internals/array-method-uses-to-length');
 
 var STRICT_METHOD = arrayMethodIsStrict('forEach');
-var USES_TO_LENGTH = arrayMethodUsesToLength('forEach');
 
 // `Array.prototype.forEach` method implementation
 // https://tc39.es/ecma262/#sec-array.prototype.foreach
-module.exports = (!STRICT_METHOD || !USES_TO_LENGTH) ? function forEach(callbackfn /* , thisArg */) {
+module.exports = !STRICT_METHOD ? function forEach(callbackfn /* , thisArg */) {
   return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+// eslint-disable-next-line es/no-array-prototype-foreach -- safe
 } : [].forEach;
 
-},{"../internals/array-iteration":34,"../internals/array-method-is-strict":37,"../internals/array-method-uses-to-length":38}],32:[function(_dereq_,module,exports){
+},{"../internals/array-iteration":34,"../internals/array-method-is-strict":37}],32:[function(_dereq_,module,exports){
 'use strict';
 var bind = _dereq_('../internals/function-bind-context');
 var toObject = _dereq_('../internals/to-object');
@@ -3915,7 +3924,7 @@ module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undef
   return result;
 };
 
-},{"../internals/call-with-safe-iteration-closing":41,"../internals/create-property":50,"../internals/function-bind-context":64,"../internals/get-iterator-method":66,"../internals/is-array-iterator-method":80,"../internals/to-length":139,"../internals/to-object":140}],33:[function(_dereq_,module,exports){
+},{"../internals/call-with-safe-iteration-closing":40,"../internals/create-property":49,"../internals/function-bind-context":63,"../internals/get-iterator-method":65,"../internals/is-array-iterator-method":79,"../internals/to-length":138,"../internals/to-object":139}],33:[function(_dereq_,module,exports){
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var toLength = _dereq_('../internals/to-length');
 var toAbsoluteIndex = _dereq_('../internals/to-absolute-index');
@@ -3928,10 +3937,10 @@ var createMethod = function (IS_INCLUDES) {
     var index = toAbsoluteIndex(fromIndex, length);
     var value;
     // Array#includes uses SameValueZero equality algorithm
-    // eslint-disable-next-line no-self-compare
+    // eslint-disable-next-line no-self-compare -- NaN check
     if (IS_INCLUDES && el != el) while (length > index) {
       value = O[index++];
-      // eslint-disable-next-line no-self-compare
+      // eslint-disable-next-line no-self-compare -- NaN check
       if (value != value) return true;
     // Array#indexOf ignores holes, Array#includes - not
     } else for (;length > index; index++) {
@@ -3949,7 +3958,7 @@ module.exports = {
   indexOf: createMethod(false)
 };
 
-},{"../internals/to-absolute-index":135,"../internals/to-indexed-object":137,"../internals/to-length":139}],34:[function(_dereq_,module,exports){
+},{"../internals/to-absolute-index":134,"../internals/to-indexed-object":136,"../internals/to-length":138}],34:[function(_dereq_,module,exports){
 var bind = _dereq_('../internals/function-bind-context');
 var IndexedObject = _dereq_('../internals/indexed-object');
 var toObject = _dereq_('../internals/to-object');
@@ -4023,27 +4032,25 @@ module.exports = {
   filterOut: createMethod(7)
 };
 
-},{"../internals/array-species-create":40,"../internals/function-bind-context":64,"../internals/indexed-object":76,"../internals/to-length":139,"../internals/to-object":140}],35:[function(_dereq_,module,exports){
+},{"../internals/array-species-create":39,"../internals/function-bind-context":63,"../internals/indexed-object":75,"../internals/to-length":138,"../internals/to-object":139}],35:[function(_dereq_,module,exports){
 'use strict';
+/* eslint-disable es/no-array-prototype-lastindexof -- safe */
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var toInteger = _dereq_('../internals/to-integer');
 var toLength = _dereq_('../internals/to-length');
 var arrayMethodIsStrict = _dereq_('../internals/array-method-is-strict');
-var arrayMethodUsesToLength = _dereq_('../internals/array-method-uses-to-length');
 
 var min = Math.min;
-var nativeLastIndexOf = [].lastIndexOf;
-var NEGATIVE_ZERO = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
+var $lastIndexOf = [].lastIndexOf;
+var NEGATIVE_ZERO = !!$lastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
 var STRICT_METHOD = arrayMethodIsStrict('lastIndexOf');
-// For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
-var USES_TO_LENGTH = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
-var FORCED = NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH;
+var FORCED = NEGATIVE_ZERO || !STRICT_METHOD;
 
 // `Array.prototype.lastIndexOf` method implementation
 // https://tc39.es/ecma262/#sec-array.prototype.lastindexof
 module.exports = FORCED ? function lastIndexOf(searchElement /* , fromIndex = @[*-1] */) {
   // convert -0 to +0
-  if (NEGATIVE_ZERO) return nativeLastIndexOf.apply(this, arguments) || 0;
+  if (NEGATIVE_ZERO) return $lastIndexOf.apply(this, arguments) || 0;
   var O = toIndexedObject(this);
   var length = toLength(O.length);
   var index = length - 1;
@@ -4051,9 +4058,9 @@ module.exports = FORCED ? function lastIndexOf(searchElement /* , fromIndex = @[
   if (index < 0) index = length + index;
   for (;index >= 0; index--) if (index in O && O[index] === searchElement) return index || 0;
   return -1;
-} : nativeLastIndexOf;
+} : $lastIndexOf;
 
-},{"../internals/array-method-is-strict":37,"../internals/array-method-uses-to-length":38,"../internals/to-indexed-object":137,"../internals/to-integer":138,"../internals/to-length":139}],36:[function(_dereq_,module,exports){
+},{"../internals/array-method-is-strict":37,"../internals/to-indexed-object":136,"../internals/to-integer":137,"../internals/to-length":138}],36:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 var V8_VERSION = _dereq_('../internals/engine-v8-version');
@@ -4074,48 +4081,19 @@ module.exports = function (METHOD_NAME) {
   });
 };
 
-},{"../internals/engine-v8-version":59,"../internals/fails":62,"../internals/well-known-symbol":150}],37:[function(_dereq_,module,exports){
+},{"../internals/engine-v8-version":58,"../internals/fails":61,"../internals/well-known-symbol":150}],37:[function(_dereq_,module,exports){
 'use strict';
 var fails = _dereq_('../internals/fails');
 
 module.exports = function (METHOD_NAME, argument) {
   var method = [][METHOD_NAME];
   return !!method && fails(function () {
-    // eslint-disable-next-line no-useless-call,no-throw-literal
+    // eslint-disable-next-line no-useless-call,no-throw-literal -- required for testing
     method.call(null, argument || function () { throw 1; }, 1);
   });
 };
 
-},{"../internals/fails":62}],38:[function(_dereq_,module,exports){
-var DESCRIPTORS = _dereq_('../internals/descriptors');
-var fails = _dereq_('../internals/fails');
-var has = _dereq_('../internals/has');
-
-var defineProperty = Object.defineProperty;
-var cache = {};
-
-var thrower = function (it) { throw it; };
-
-module.exports = function (METHOD_NAME, options) {
-  if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
-  if (!options) options = {};
-  var method = [][METHOD_NAME];
-  var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
-  var argument0 = has(options, 0) ? options[0] : thrower;
-  var argument1 = has(options, 1) ? options[1] : undefined;
-
-  return cache[METHOD_NAME] = !!method && !fails(function () {
-    if (ACCESSORS && !DESCRIPTORS) return true;
-    var O = { length: -1 };
-
-    if (ACCESSORS) defineProperty(O, 1, { enumerable: true, get: thrower });
-    else O[1] = 1;
-
-    method.call(O, argument0, argument1);
-  });
-};
-
-},{"../internals/descriptors":52,"../internals/fails":62,"../internals/has":70}],39:[function(_dereq_,module,exports){
+},{"../internals/fails":61}],38:[function(_dereq_,module,exports){
 var aFunction = _dereq_('../internals/a-function');
 var toObject = _dereq_('../internals/to-object');
 var IndexedObject = _dereq_('../internals/indexed-object');
@@ -4157,7 +4135,7 @@ module.exports = {
   right: createMethod(true)
 };
 
-},{"../internals/a-function":20,"../internals/indexed-object":76,"../internals/to-length":139,"../internals/to-object":140}],40:[function(_dereq_,module,exports){
+},{"../internals/a-function":20,"../internals/indexed-object":75,"../internals/to-length":138,"../internals/to-object":139}],39:[function(_dereq_,module,exports){
 var isObject = _dereq_('../internals/is-object');
 var isArray = _dereq_('../internals/is-array');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
@@ -4179,7 +4157,7 @@ module.exports = function (originalArray, length) {
   } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
 };
 
-},{"../internals/is-array":81,"../internals/is-object":83,"../internals/well-known-symbol":150}],41:[function(_dereq_,module,exports){
+},{"../internals/is-array":80,"../internals/is-object":82,"../internals/well-known-symbol":150}],40:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 var iteratorClose = _dereq_('../internals/iterator-close');
 
@@ -4194,7 +4172,7 @@ module.exports = function (iterator, fn, value, ENTRIES) {
   }
 };
 
-},{"../internals/an-object":25,"../internals/iterator-close":86}],42:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/iterator-close":85}],41:[function(_dereq_,module,exports){
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 
 var ITERATOR = wellKnownSymbol('iterator');
@@ -4213,7 +4191,7 @@ try {
   iteratorWithReturn[ITERATOR] = function () {
     return this;
   };
-  // eslint-disable-next-line no-throw-literal
+  // eslint-disable-next-line es/no-array-from, no-throw-literal -- required for testing
   Array.from(iteratorWithReturn, function () { throw 2; });
 } catch (error) { /* empty */ }
 
@@ -4234,14 +4212,14 @@ module.exports = function (exec, SKIP_CLOSING) {
   return ITERATION_SUPPORT;
 };
 
-},{"../internals/well-known-symbol":150}],43:[function(_dereq_,module,exports){
+},{"../internals/well-known-symbol":150}],42:[function(_dereq_,module,exports){
 var toString = {}.toString;
 
 module.exports = function (it) {
   return toString.call(it).slice(8, -1);
 };
 
-},{}],44:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 var TO_STRING_TAG_SUPPORT = _dereq_('../internals/to-string-tag-support');
 var classofRaw = _dereq_('../internals/classof-raw');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
@@ -4269,7 +4247,7 @@ module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
     : (result = classofRaw(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : result;
 };
 
-},{"../internals/classof-raw":43,"../internals/to-string-tag-support":144,"../internals/well-known-symbol":150}],45:[function(_dereq_,module,exports){
+},{"../internals/classof-raw":42,"../internals/to-string-tag-support":143,"../internals/well-known-symbol":150}],44:[function(_dereq_,module,exports){
 var has = _dereq_('../internals/has');
 var ownKeys = _dereq_('../internals/own-keys');
 var getOwnPropertyDescriptorModule = _dereq_('../internals/object-get-own-property-descriptor');
@@ -4285,16 +4263,17 @@ module.exports = function (target, source) {
   }
 };
 
-},{"../internals/has":70,"../internals/object-define-property":100,"../internals/object-get-own-property-descriptor":101,"../internals/own-keys":111}],46:[function(_dereq_,module,exports){
+},{"../internals/has":69,"../internals/object-define-property":99,"../internals/object-get-own-property-descriptor":100,"../internals/own-keys":110}],45:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 
 module.exports = !fails(function () {
   function F() { /* empty */ }
   F.prototype.constructor = null;
+  // eslint-disable-next-line es/no-object-getprototypeof -- required for testing
   return Object.getPrototypeOf(new F()) !== F.prototype;
 });
 
-},{"../internals/fails":62}],47:[function(_dereq_,module,exports){
+},{"../internals/fails":61}],46:[function(_dereq_,module,exports){
 'use strict';
 var IteratorPrototype = _dereq_('../internals/iterators-core').IteratorPrototype;
 var create = _dereq_('../internals/object-create');
@@ -4312,7 +4291,7 @@ module.exports = function (IteratorConstructor, NAME, next) {
   return IteratorConstructor;
 };
 
-},{"../internals/create-property-descriptor":49,"../internals/iterators":88,"../internals/iterators-core":87,"../internals/object-create":98,"../internals/set-to-string-tag":124}],48:[function(_dereq_,module,exports){
+},{"../internals/create-property-descriptor":48,"../internals/iterators":87,"../internals/iterators-core":86,"../internals/object-create":97,"../internals/set-to-string-tag":123}],47:[function(_dereq_,module,exports){
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var definePropertyModule = _dereq_('../internals/object-define-property');
 var createPropertyDescriptor = _dereq_('../internals/create-property-descriptor');
@@ -4324,7 +4303,7 @@ module.exports = DESCRIPTORS ? function (object, key, value) {
   return object;
 };
 
-},{"../internals/create-property-descriptor":49,"../internals/descriptors":52,"../internals/object-define-property":100}],49:[function(_dereq_,module,exports){
+},{"../internals/create-property-descriptor":48,"../internals/descriptors":51,"../internals/object-define-property":99}],48:[function(_dereq_,module,exports){
 module.exports = function (bitmap, value) {
   return {
     enumerable: !(bitmap & 1),
@@ -4334,7 +4313,7 @@ module.exports = function (bitmap, value) {
   };
 };
 
-},{}],50:[function(_dereq_,module,exports){
+},{}],49:[function(_dereq_,module,exports){
 'use strict';
 var toPrimitive = _dereq_('../internals/to-primitive');
 var definePropertyModule = _dereq_('../internals/object-define-property');
@@ -4346,7 +4325,7 @@ module.exports = function (object, key, value) {
   else object[propertyKey] = value;
 };
 
-},{"../internals/create-property-descriptor":49,"../internals/object-define-property":100,"../internals/to-primitive":143}],51:[function(_dereq_,module,exports){
+},{"../internals/create-property-descriptor":48,"../internals/object-define-property":99,"../internals/to-primitive":142}],50:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var createIteratorConstructor = _dereq_('../internals/create-iterator-constructor');
@@ -4438,15 +4417,16 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
   return methods;
 };
 
-},{"../internals/create-iterator-constructor":47,"../internals/create-non-enumerable-property":48,"../internals/export":61,"../internals/is-pure":84,"../internals/iterators":88,"../internals/iterators-core":87,"../internals/object-get-prototype-of":105,"../internals/object-set-prototype-of":109,"../internals/redefine":116,"../internals/set-to-string-tag":124,"../internals/well-known-symbol":150}],52:[function(_dereq_,module,exports){
+},{"../internals/create-iterator-constructor":46,"../internals/create-non-enumerable-property":47,"../internals/export":60,"../internals/is-pure":83,"../internals/iterators":87,"../internals/iterators-core":86,"../internals/object-get-prototype-of":104,"../internals/object-set-prototype-of":108,"../internals/redefine":115,"../internals/set-to-string-tag":123,"../internals/well-known-symbol":150}],51:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 
 // Detect IE8's incomplete defineProperty implementation
 module.exports = !fails(function () {
+  // eslint-disable-next-line es/no-object-defineproperty -- required for testing
   return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
 });
 
-},{"../internals/fails":62}],53:[function(_dereq_,module,exports){
+},{"../internals/fails":61}],52:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var isObject = _dereq_('../internals/is-object');
 
@@ -4458,7 +4438,7 @@ module.exports = function (it) {
   return EXISTS ? document.createElement(it) : {};
 };
 
-},{"../internals/global":69,"../internals/is-object":83}],54:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/is-object":82}],53:[function(_dereq_,module,exports){
 // iterable DOM collections
 // flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
 module.exports = {
@@ -4495,28 +4475,28 @@ module.exports = {
   TouchList: 0
 };
 
-},{}],55:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
 var userAgent = _dereq_('../internals/engine-user-agent');
 
 module.exports = /(iphone|ipod|ipad).*applewebkit/i.test(userAgent);
 
-},{"../internals/engine-user-agent":58}],56:[function(_dereq_,module,exports){
+},{"../internals/engine-user-agent":57}],55:[function(_dereq_,module,exports){
 var classof = _dereq_('../internals/classof-raw');
 var global = _dereq_('../internals/global');
 
 module.exports = classof(global.process) == 'process';
 
-},{"../internals/classof-raw":43,"../internals/global":69}],57:[function(_dereq_,module,exports){
+},{"../internals/classof-raw":42,"../internals/global":68}],56:[function(_dereq_,module,exports){
 var userAgent = _dereq_('../internals/engine-user-agent');
 
 module.exports = /web0s(?!.*chrome)/i.test(userAgent);
 
-},{"../internals/engine-user-agent":58}],58:[function(_dereq_,module,exports){
+},{"../internals/engine-user-agent":57}],57:[function(_dereq_,module,exports){
 var getBuiltIn = _dereq_('../internals/get-built-in');
 
 module.exports = getBuiltIn('navigator', 'userAgent') || '';
 
-},{"../internals/get-built-in":65}],59:[function(_dereq_,module,exports){
+},{"../internals/get-built-in":64}],58:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var userAgent = _dereq_('../internals/engine-user-agent');
 
@@ -4538,7 +4518,7 @@ if (v8) {
 
 module.exports = version && +version;
 
-},{"../internals/engine-user-agent":58,"../internals/global":69}],60:[function(_dereq_,module,exports){
+},{"../internals/engine-user-agent":57,"../internals/global":68}],59:[function(_dereq_,module,exports){
 // IE8- don't enum bug keys
 module.exports = [
   'constructor',
@@ -4550,7 +4530,7 @@ module.exports = [
   'valueOf'
 ];
 
-},{}],61:[function(_dereq_,module,exports){
+},{}],60:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var getOwnPropertyDescriptor = _dereq_('../internals/object-get-own-property-descriptor').f;
 var createNonEnumerableProperty = _dereq_('../internals/create-non-enumerable-property');
@@ -4606,7 +4586,7 @@ module.exports = function (options, source) {
   }
 };
 
-},{"../internals/copy-constructor-properties":45,"../internals/create-non-enumerable-property":48,"../internals/global":69,"../internals/is-forced":82,"../internals/object-get-own-property-descriptor":101,"../internals/redefine":116,"../internals/set-global":122}],62:[function(_dereq_,module,exports){
+},{"../internals/copy-constructor-properties":44,"../internals/create-non-enumerable-property":47,"../internals/global":68,"../internals/is-forced":81,"../internals/object-get-own-property-descriptor":100,"../internals/redefine":115,"../internals/set-global":121}],61:[function(_dereq_,module,exports){
 module.exports = function (exec) {
   try {
     return !!exec();
@@ -4615,7 +4595,7 @@ module.exports = function (exec) {
   }
 };
 
-},{}],63:[function(_dereq_,module,exports){
+},{}],62:[function(_dereq_,module,exports){
 'use strict';
 // TODO: Remove from `core-js@4` since it's moved to entry points
 _dereq_('../modules/es.regexp.exec');
@@ -4643,6 +4623,7 @@ var REPLACE_SUPPORTS_NAMED_GROUPS = !fails(function () {
 // IE <= 11 replaces $0 with the whole match, as if it was $&
 // https://stackoverflow.com/questions/6024666/getting-ie-to-replace-a-regex-with-the-literal-string-0
 var REPLACE_KEEPS_$0 = (function () {
+  // eslint-disable-next-line regexp/prefer-escape-replacement-dollar-char -- required for testing
   return 'a'.replace(/./, '$0') === '$0';
 })();
 
@@ -4658,6 +4639,7 @@ var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = (function () {
 // Chrome 51 has a buggy "split" implementation when RegExp#exec !== nativeExec
 // Weex JS has frozen built-in prototypes, so use try / catch wrapper
 var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails(function () {
+  // eslint-disable-next-line regexp/no-empty-group -- required for testing
   var re = /(?:)/;
   var originalExec = re.exec;
   re.exec = function () { return originalExec.apply(this, arguments); };
@@ -4742,7 +4724,7 @@ module.exports = function (KEY, length, exec, sham) {
   if (sham) createNonEnumerableProperty(RegExp.prototype[SYMBOL], 'sham', true);
 };
 
-},{"../internals/create-non-enumerable-property":48,"../internals/fails":62,"../internals/redefine":116,"../internals/regexp-exec":118,"../internals/well-known-symbol":150,"../modules/es.regexp.exec":167}],64:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":47,"../internals/fails":61,"../internals/redefine":115,"../internals/regexp-exec":117,"../internals/well-known-symbol":150,"../modules/es.regexp.exec":167}],63:[function(_dereq_,module,exports){
 var aFunction = _dereq_('../internals/a-function');
 
 // optional / simple context binding
@@ -4768,7 +4750,7 @@ module.exports = function (fn, that, length) {
   };
 };
 
-},{"../internals/a-function":20}],65:[function(_dereq_,module,exports){
+},{"../internals/a-function":20}],64:[function(_dereq_,module,exports){
 var path = _dereq_('../internals/path');
 var global = _dereq_('../internals/global');
 
@@ -4781,7 +4763,7 @@ module.exports = function (namespace, method) {
     : path[namespace] && path[namespace][method] || global[namespace] && global[namespace][method];
 };
 
-},{"../internals/global":69,"../internals/path":112}],66:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/path":111}],65:[function(_dereq_,module,exports){
 var classof = _dereq_('../internals/classof');
 var Iterators = _dereq_('../internals/iterators');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
@@ -4794,7 +4776,7 @@ module.exports = function (it) {
     || Iterators[classof(it)];
 };
 
-},{"../internals/classof":44,"../internals/iterators":88,"../internals/well-known-symbol":150}],67:[function(_dereq_,module,exports){
+},{"../internals/classof":43,"../internals/iterators":87,"../internals/well-known-symbol":150}],66:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 var getIteratorMethod = _dereq_('../internals/get-iterator-method');
 
@@ -4805,13 +4787,13 @@ module.exports = function (it) {
   } return anObject(iteratorMethod.call(it));
 };
 
-},{"../internals/an-object":25,"../internals/get-iterator-method":66}],68:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/get-iterator-method":65}],67:[function(_dereq_,module,exports){
 var toObject = _dereq_('../internals/to-object');
 
 var floor = Math.floor;
 var replace = ''.replace;
-var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d\d?|<[^>]*>)/g;
-var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d\d?)/g;
+var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d{1,2}|<[^>]*>)/g;
+var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d{1,2})/g;
 
 // https://tc39.es/ecma262/#sec-getsubstitution
 module.exports = function (matched, str, position, captures, namedCaptures, replacement) {
@@ -4847,7 +4829,7 @@ module.exports = function (matched, str, position, captures, namedCaptures, repl
   });
 };
 
-},{"../internals/to-object":140}],69:[function(_dereq_,module,exports){
+},{"../internals/to-object":139}],68:[function(_dereq_,module,exports){
 (function (global){(function (){
 var check = function (it) {
   return it && it.Math == Math && it;
@@ -4855,26 +4837,27 @@ var check = function (it) {
 
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 module.exports =
-  // eslint-disable-next-line no-undef
+  // eslint-disable-next-line es/no-global-this -- safe
   check(typeof globalThis == 'object' && globalThis) ||
   check(typeof window == 'object' && window) ||
+  // eslint-disable-next-line no-restricted-globals -- safe
   check(typeof self == 'object' && self) ||
   check(typeof global == 'object' && global) ||
-  // eslint-disable-next-line no-new-func
+  // eslint-disable-next-line no-new-func -- fallback
   (function () { return this; })() || Function('return this')();
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],70:[function(_dereq_,module,exports){
+},{}],69:[function(_dereq_,module,exports){
 var hasOwnProperty = {}.hasOwnProperty;
 
 module.exports = function (it, key) {
   return hasOwnProperty.call(it, key);
 };
 
-},{}],71:[function(_dereq_,module,exports){
+},{}],70:[function(_dereq_,module,exports){
 module.exports = {};
 
-},{}],72:[function(_dereq_,module,exports){
+},{}],71:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 
 module.exports = function (a, b) {
@@ -4884,27 +4867,26 @@ module.exports = function (a, b) {
   }
 };
 
-},{"../internals/global":69}],73:[function(_dereq_,module,exports){
+},{"../internals/global":68}],72:[function(_dereq_,module,exports){
 var getBuiltIn = _dereq_('../internals/get-built-in');
 
 module.exports = getBuiltIn('document', 'documentElement');
 
-},{"../internals/get-built-in":65}],74:[function(_dereq_,module,exports){
+},{"../internals/get-built-in":64}],73:[function(_dereq_,module,exports){
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var fails = _dereq_('../internals/fails');
 var createElement = _dereq_('../internals/document-create-element');
 
 // Thank's IE8 for his funny defineProperty
 module.exports = !DESCRIPTORS && !fails(function () {
+  // eslint-disable-next-line es/no-object-defineproperty -- requied for testing
   return Object.defineProperty(createElement('div'), 'a', {
     get: function () { return 7; }
   }).a != 7;
 });
 
-},{"../internals/descriptors":52,"../internals/document-create-element":53,"../internals/fails":62}],75:[function(_dereq_,module,exports){
+},{"../internals/descriptors":51,"../internals/document-create-element":52,"../internals/fails":61}],74:[function(_dereq_,module,exports){
 // IEEE754 conversions based on https://github.com/feross/ieee754
-// eslint-disable-next-line no-shadow-restricted-names
-var Infinity = 1 / 0;
 var abs = Math.abs;
 var pow = Math.pow;
 var floor = Math.floor;
@@ -4921,9 +4903,9 @@ var pack = function (number, mantissaLength, bytes) {
   var index = 0;
   var exponent, mantissa, c;
   number = abs(number);
-  // eslint-disable-next-line no-self-compare
+  // eslint-disable-next-line no-self-compare -- NaN check
   if (number != number || number === Infinity) {
-    // eslint-disable-next-line no-self-compare
+    // eslint-disable-next-line no-self-compare -- NaN check
     mantissa = number != number ? 1 : 0;
     exponent = eMax;
   } else {
@@ -4991,7 +4973,7 @@ module.exports = {
   unpack: unpack
 };
 
-},{}],76:[function(_dereq_,module,exports){
+},{}],75:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 var classof = _dereq_('../internals/classof-raw');
 
@@ -5000,13 +4982,13 @@ var split = ''.split;
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
 module.exports = fails(function () {
   // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
-  // eslint-disable-next-line no-prototype-builtins
+  // eslint-disable-next-line no-prototype-builtins -- safe
   return !Object('z').propertyIsEnumerable(0);
 }) ? function (it) {
   return classof(it) == 'String' ? split.call(it, '') : Object(it);
 } : Object;
 
-},{"../internals/classof-raw":43,"../internals/fails":62}],77:[function(_dereq_,module,exports){
+},{"../internals/classof-raw":42,"../internals/fails":61}],76:[function(_dereq_,module,exports){
 var isObject = _dereq_('../internals/is-object');
 var setPrototypeOf = _dereq_('../internals/object-set-prototype-of');
 
@@ -5025,7 +5007,7 @@ module.exports = function ($this, dummy, Wrapper) {
   return $this;
 };
 
-},{"../internals/is-object":83,"../internals/object-set-prototype-of":109}],78:[function(_dereq_,module,exports){
+},{"../internals/is-object":82,"../internals/object-set-prototype-of":108}],77:[function(_dereq_,module,exports){
 var store = _dereq_('../internals/shared-store');
 
 var functionToString = Function.toString;
@@ -5039,7 +5021,7 @@ if (typeof store.inspectSource != 'function') {
 
 module.exports = store.inspectSource;
 
-},{"../internals/shared-store":126}],79:[function(_dereq_,module,exports){
+},{"../internals/shared-store":125}],78:[function(_dereq_,module,exports){
 var NATIVE_WEAK_MAP = _dereq_('../internals/native-weak-map');
 var global = _dereq_('../internals/global');
 var isObject = _dereq_('../internals/is-object');
@@ -5105,7 +5087,7 @@ module.exports = {
   getterFor: getterFor
 };
 
-},{"../internals/create-non-enumerable-property":48,"../internals/global":69,"../internals/has":70,"../internals/hidden-keys":71,"../internals/is-object":83,"../internals/native-weak-map":93,"../internals/shared-key":125,"../internals/shared-store":126}],80:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":47,"../internals/global":68,"../internals/has":69,"../internals/hidden-keys":70,"../internals/is-object":82,"../internals/native-weak-map":92,"../internals/shared-key":124,"../internals/shared-store":125}],79:[function(_dereq_,module,exports){
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 var Iterators = _dereq_('../internals/iterators');
 
@@ -5117,16 +5099,17 @@ module.exports = function (it) {
   return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
 };
 
-},{"../internals/iterators":88,"../internals/well-known-symbol":150}],81:[function(_dereq_,module,exports){
+},{"../internals/iterators":87,"../internals/well-known-symbol":150}],80:[function(_dereq_,module,exports){
 var classof = _dereq_('../internals/classof-raw');
 
 // `IsArray` abstract operation
 // https://tc39.es/ecma262/#sec-isarray
+// eslint-disable-next-line es/no-array-isarray -- safe
 module.exports = Array.isArray || function isArray(arg) {
   return classof(arg) == 'Array';
 };
 
-},{"../internals/classof-raw":43}],82:[function(_dereq_,module,exports){
+},{"../internals/classof-raw":42}],81:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 
 var replacement = /#|\.prototype\./;
@@ -5149,15 +5132,15 @@ var POLYFILL = isForced.POLYFILL = 'P';
 
 module.exports = isForced;
 
-},{"../internals/fails":62}],83:[function(_dereq_,module,exports){
+},{"../internals/fails":61}],82:[function(_dereq_,module,exports){
 module.exports = function (it) {
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
 
-},{}],84:[function(_dereq_,module,exports){
+},{}],83:[function(_dereq_,module,exports){
 module.exports = false;
 
-},{}],85:[function(_dereq_,module,exports){
+},{}],84:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 var isArrayIteratorMethod = _dereq_('../internals/is-array-iterator-method');
 var toLength = _dereq_('../internals/to-length');
@@ -5217,7 +5200,7 @@ module.exports = function (iterable, unboundFunction, options) {
   } return new Result(false);
 };
 
-},{"../internals/an-object":25,"../internals/function-bind-context":64,"../internals/get-iterator-method":66,"../internals/is-array-iterator-method":80,"../internals/iterator-close":86,"../internals/to-length":139}],86:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/function-bind-context":63,"../internals/get-iterator-method":65,"../internals/is-array-iterator-method":79,"../internals/iterator-close":85,"../internals/to-length":138}],85:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 
 module.exports = function (iterator) {
@@ -5227,7 +5210,7 @@ module.exports = function (iterator) {
   }
 };
 
-},{"../internals/an-object":25}],87:[function(_dereq_,module,exports){
+},{"../internals/an-object":25}],86:[function(_dereq_,module,exports){
 'use strict';
 var fails = _dereq_('../internals/fails');
 var getPrototypeOf = _dereq_('../internals/object-get-prototype-of');
@@ -5245,6 +5228,7 @@ var returnThis = function () { return this; };
 // https://tc39.es/ecma262/#sec-%iteratorprototype%-object
 var IteratorPrototype, PrototypeOfArrayIteratorPrototype, arrayIterator;
 
+/* eslint-disable es/no-array-prototype-keys -- safe */
 if ([].keys) {
   arrayIterator = [].keys();
   // Safari 8 has buggy iterators w/o `next`
@@ -5273,9 +5257,9 @@ module.exports = {
   BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
 };
 
-},{"../internals/create-non-enumerable-property":48,"../internals/fails":62,"../internals/has":70,"../internals/is-pure":84,"../internals/object-get-prototype-of":105,"../internals/well-known-symbol":150}],88:[function(_dereq_,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"dup":71}],89:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":47,"../internals/fails":61,"../internals/has":69,"../internals/is-pure":83,"../internals/object-get-prototype-of":104,"../internals/well-known-symbol":150}],87:[function(_dereq_,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"dup":70}],88:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var getOwnPropertyDescriptor = _dereq_('../internals/object-get-own-property-descriptor').f;
 var macrotask = _dereq_('../internals/task').set;
@@ -5357,21 +5341,26 @@ module.exports = queueMicrotask || function (fn) {
   } last = task;
 };
 
-},{"../internals/engine-is-ios":55,"../internals/engine-is-node":56,"../internals/engine-is-webos-webkit":57,"../internals/global":69,"../internals/object-get-own-property-descriptor":101,"../internals/task":133}],90:[function(_dereq_,module,exports){
+},{"../internals/engine-is-ios":54,"../internals/engine-is-node":55,"../internals/engine-is-webos-webkit":56,"../internals/global":68,"../internals/object-get-own-property-descriptor":100,"../internals/task":132}],89:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 
 module.exports = global.Promise;
 
-},{"../internals/global":69}],91:[function(_dereq_,module,exports){
+},{"../internals/global":68}],90:[function(_dereq_,module,exports){
+var IS_NODE = _dereq_('../internals/engine-is-node');
+var V8_VERSION = _dereq_('../internals/engine-v8-version');
 var fails = _dereq_('../internals/fails');
 
+// eslint-disable-next-line es/no-object-getownpropertysymbols -- required for testing
 module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
-  // Chrome 38 Symbol has incorrect toString conversion
-  // eslint-disable-next-line no-undef
-  return !String(Symbol());
+  // eslint-disable-next-line es/no-symbol -- required for testing
+  return !Symbol.sham &&
+    // Chrome 38 Symbol has incorrect toString conversion
+    // Chrome 38-40 symbols are not inherited from DOM collections prototypes to instances
+    (IS_NODE ? V8_VERSION === 38 : V8_VERSION > 37 && V8_VERSION < 41);
 });
 
-},{"../internals/fails":62}],92:[function(_dereq_,module,exports){
+},{"../internals/engine-is-node":55,"../internals/engine-v8-version":58,"../internals/fails":61}],91:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 var IS_PURE = _dereq_('../internals/is-pure');
@@ -5406,7 +5395,7 @@ module.exports = !fails(function () {
     || new URL('http://x', undefined).host !== 'x';
 });
 
-},{"../internals/fails":62,"../internals/is-pure":84,"../internals/well-known-symbol":150}],93:[function(_dereq_,module,exports){
+},{"../internals/fails":61,"../internals/is-pure":83,"../internals/well-known-symbol":150}],92:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var inspectSource = _dereq_('../internals/inspect-source');
 
@@ -5414,7 +5403,7 @@ var WeakMap = global.WeakMap;
 
 module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
 
-},{"../internals/global":69,"../internals/inspect-source":78}],94:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/inspect-source":77}],93:[function(_dereq_,module,exports){
 'use strict';
 var aFunction = _dereq_('../internals/a-function');
 
@@ -5434,7 +5423,7 @@ module.exports.f = function (C) {
   return new PromiseCapability(C);
 };
 
-},{"../internals/a-function":20}],95:[function(_dereq_,module,exports){
+},{"../internals/a-function":20}],94:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var trim = _dereq_('../internals/string-trim').trim;
 var whitespaces = _dereq_('../internals/whitespaces');
@@ -5450,7 +5439,7 @@ module.exports = FORCED ? function parseFloat(string) {
   return result === 0 && trimmedString.charAt(0) == '-' ? -0 : result;
 } : $parseFloat;
 
-},{"../internals/global":69,"../internals/string-trim":132,"../internals/whitespaces":151}],96:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/string-trim":131,"../internals/whitespaces":151}],95:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var trim = _dereq_('../internals/string-trim').trim;
 var whitespaces = _dereq_('../internals/whitespaces');
@@ -5466,7 +5455,7 @@ module.exports = FORCED ? function parseInt(string, radix) {
   return $parseInt(S, (radix >>> 0) || (hex.test(S) ? 16 : 10));
 } : $parseInt;
 
-},{"../internals/global":69,"../internals/string-trim":132,"../internals/whitespaces":151}],97:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/string-trim":131,"../internals/whitespaces":151}],96:[function(_dereq_,module,exports){
 'use strict';
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var fails = _dereq_('../internals/fails');
@@ -5476,14 +5465,16 @@ var propertyIsEnumerableModule = _dereq_('../internals/object-property-is-enumer
 var toObject = _dereq_('../internals/to-object');
 var IndexedObject = _dereq_('../internals/indexed-object');
 
-var nativeAssign = Object.assign;
+// eslint-disable-next-line es/no-object-assign -- safe
+var $assign = Object.assign;
+// eslint-disable-next-line es/no-object-defineproperty -- required for testing
 var defineProperty = Object.defineProperty;
 
 // `Object.assign` method
 // https://tc39.es/ecma262/#sec-object.assign
-module.exports = !nativeAssign || fails(function () {
+module.exports = !$assign || fails(function () {
   // should have correct order of operations (Edge bug)
-  if (DESCRIPTORS && nativeAssign({ b: 1 }, nativeAssign(defineProperty({}, 'a', {
+  if (DESCRIPTORS && $assign({ b: 1 }, $assign(defineProperty({}, 'a', {
     enumerable: true,
     get: function () {
       defineProperty(this, 'b', {
@@ -5495,13 +5486,13 @@ module.exports = !nativeAssign || fails(function () {
   // should work with symbols and should have deterministic property order (V8 bug)
   var A = {};
   var B = {};
-  // eslint-disable-next-line no-undef
+  // eslint-disable-next-line es/no-symbol -- safe
   var symbol = Symbol();
   var alphabet = 'abcdefghijklmnopqrst';
   A[symbol] = 7;
   alphabet.split('').forEach(function (chr) { B[chr] = chr; });
-  return nativeAssign({}, A)[symbol] != 7 || objectKeys(nativeAssign({}, B)).join('') != alphabet;
-}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
+  return $assign({}, A)[symbol] != 7 || objectKeys($assign({}, B)).join('') != alphabet;
+}) ? function assign(target, source) { // eslint-disable-line no-unused-vars -- required for `.length`
   var T = toObject(target);
   var argumentsLength = arguments.length;
   var index = 1;
@@ -5518,9 +5509,9 @@ module.exports = !nativeAssign || fails(function () {
       if (!DESCRIPTORS || propertyIsEnumerable.call(S, key)) T[key] = S[key];
     }
   } return T;
-} : nativeAssign;
+} : $assign;
 
-},{"../internals/descriptors":52,"../internals/fails":62,"../internals/indexed-object":76,"../internals/object-get-own-property-symbols":104,"../internals/object-keys":107,"../internals/object-property-is-enumerable":108,"../internals/to-object":140}],98:[function(_dereq_,module,exports){
+},{"../internals/descriptors":51,"../internals/fails":61,"../internals/indexed-object":75,"../internals/object-get-own-property-symbols":103,"../internals/object-keys":106,"../internals/object-property-is-enumerable":107,"../internals/to-object":139}],97:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 var defineProperties = _dereq_('../internals/object-define-properties');
 var enumBugKeys = _dereq_('../internals/enum-bug-keys');
@@ -5575,7 +5566,7 @@ var NullProtoObjectViaIFrame = function () {
 var activeXDocument;
 var NullProtoObject = function () {
   try {
-    /* global ActiveXObject */
+    /* global ActiveXObject -- old IE */
     activeXDocument = document.domain && new ActiveXObject('htmlfile');
   } catch (error) { /* ignore */ }
   NullProtoObject = activeXDocument ? NullProtoObjectViaActiveX(activeXDocument) : NullProtoObjectViaIFrame();
@@ -5600,7 +5591,7 @@ module.exports = Object.create || function create(O, Properties) {
   return Properties === undefined ? result : defineProperties(result, Properties);
 };
 
-},{"../internals/an-object":25,"../internals/document-create-element":53,"../internals/enum-bug-keys":60,"../internals/hidden-keys":71,"../internals/html":73,"../internals/object-define-properties":99,"../internals/shared-key":125}],99:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/document-create-element":52,"../internals/enum-bug-keys":59,"../internals/hidden-keys":70,"../internals/html":72,"../internals/object-define-properties":98,"../internals/shared-key":124}],98:[function(_dereq_,module,exports){
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var definePropertyModule = _dereq_('../internals/object-define-property');
 var anObject = _dereq_('../internals/an-object');
@@ -5608,6 +5599,7 @@ var objectKeys = _dereq_('../internals/object-keys');
 
 // `Object.defineProperties` method
 // https://tc39.es/ecma262/#sec-object.defineproperties
+// eslint-disable-next-line es/no-object-defineproperties -- safe
 module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperties(O, Properties) {
   anObject(O);
   var keys = objectKeys(Properties);
@@ -5618,29 +5610,30 @@ module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperti
   return O;
 };
 
-},{"../internals/an-object":25,"../internals/descriptors":52,"../internals/object-define-property":100,"../internals/object-keys":107}],100:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/descriptors":51,"../internals/object-define-property":99,"../internals/object-keys":106}],99:[function(_dereq_,module,exports){
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var IE8_DOM_DEFINE = _dereq_('../internals/ie8-dom-define');
 var anObject = _dereq_('../internals/an-object');
 var toPrimitive = _dereq_('../internals/to-primitive');
 
-var nativeDefineProperty = Object.defineProperty;
+// eslint-disable-next-line es/no-object-defineproperty -- safe
+var $defineProperty = Object.defineProperty;
 
 // `Object.defineProperty` method
 // https://tc39.es/ecma262/#sec-object.defineproperty
-exports.f = DESCRIPTORS ? nativeDefineProperty : function defineProperty(O, P, Attributes) {
+exports.f = DESCRIPTORS ? $defineProperty : function defineProperty(O, P, Attributes) {
   anObject(O);
   P = toPrimitive(P, true);
   anObject(Attributes);
   if (IE8_DOM_DEFINE) try {
-    return nativeDefineProperty(O, P, Attributes);
+    return $defineProperty(O, P, Attributes);
   } catch (error) { /* empty */ }
   if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported');
   if ('value' in Attributes) O[P] = Attributes.value;
   return O;
 };
 
-},{"../internals/an-object":25,"../internals/descriptors":52,"../internals/ie8-dom-define":74,"../internals/to-primitive":143}],101:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/descriptors":51,"../internals/ie8-dom-define":73,"../internals/to-primitive":142}],100:[function(_dereq_,module,exports){
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var propertyIsEnumerableModule = _dereq_('../internals/object-property-is-enumerable');
 var createPropertyDescriptor = _dereq_('../internals/create-property-descriptor');
@@ -5649,22 +5642,24 @@ var toPrimitive = _dereq_('../internals/to-primitive');
 var has = _dereq_('../internals/has');
 var IE8_DOM_DEFINE = _dereq_('../internals/ie8-dom-define');
 
-var nativeGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 
 // `Object.getOwnPropertyDescriptor` method
 // https://tc39.es/ecma262/#sec-object.getownpropertydescriptor
-exports.f = DESCRIPTORS ? nativeGetOwnPropertyDescriptor : function getOwnPropertyDescriptor(O, P) {
+exports.f = DESCRIPTORS ? $getOwnPropertyDescriptor : function getOwnPropertyDescriptor(O, P) {
   O = toIndexedObject(O);
   P = toPrimitive(P, true);
   if (IE8_DOM_DEFINE) try {
-    return nativeGetOwnPropertyDescriptor(O, P);
+    return $getOwnPropertyDescriptor(O, P);
   } catch (error) { /* empty */ }
   if (has(O, P)) return createPropertyDescriptor(!propertyIsEnumerableModule.f.call(O, P), O[P]);
 };
 
-},{"../internals/create-property-descriptor":49,"../internals/descriptors":52,"../internals/has":70,"../internals/ie8-dom-define":74,"../internals/object-property-is-enumerable":108,"../internals/to-indexed-object":137,"../internals/to-primitive":143}],102:[function(_dereq_,module,exports){
+},{"../internals/create-property-descriptor":48,"../internals/descriptors":51,"../internals/has":69,"../internals/ie8-dom-define":73,"../internals/object-property-is-enumerable":107,"../internals/to-indexed-object":136,"../internals/to-primitive":142}],101:[function(_dereq_,module,exports){
+/* eslint-disable es/no-object-getownpropertynames -- safe */
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
-var nativeGetOwnPropertyNames = _dereq_('../internals/object-get-own-property-names').f;
+var $getOwnPropertyNames = _dereq_('../internals/object-get-own-property-names').f;
 
 var toString = {}.toString;
 
@@ -5673,7 +5668,7 @@ var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNa
 
 var getWindowNames = function (it) {
   try {
-    return nativeGetOwnPropertyNames(it);
+    return $getOwnPropertyNames(it);
   } catch (error) {
     return windowNames.slice();
   }
@@ -5683,10 +5678,10 @@ var getWindowNames = function (it) {
 module.exports.f = function getOwnPropertyNames(it) {
   return windowNames && toString.call(it) == '[object Window]'
     ? getWindowNames(it)
-    : nativeGetOwnPropertyNames(toIndexedObject(it));
+    : $getOwnPropertyNames(toIndexedObject(it));
 };
 
-},{"../internals/object-get-own-property-names":103,"../internals/to-indexed-object":137}],103:[function(_dereq_,module,exports){
+},{"../internals/object-get-own-property-names":102,"../internals/to-indexed-object":136}],102:[function(_dereq_,module,exports){
 var internalObjectKeys = _dereq_('../internals/object-keys-internal');
 var enumBugKeys = _dereq_('../internals/enum-bug-keys');
 
@@ -5694,14 +5689,16 @@ var hiddenKeys = enumBugKeys.concat('length', 'prototype');
 
 // `Object.getOwnPropertyNames` method
 // https://tc39.es/ecma262/#sec-object.getownpropertynames
+// eslint-disable-next-line es/no-object-getownpropertynames -- safe
 exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
   return internalObjectKeys(O, hiddenKeys);
 };
 
-},{"../internals/enum-bug-keys":60,"../internals/object-keys-internal":106}],104:[function(_dereq_,module,exports){
+},{"../internals/enum-bug-keys":59,"../internals/object-keys-internal":105}],103:[function(_dereq_,module,exports){
+// eslint-disable-next-line es/no-object-getownpropertysymbols -- safe
 exports.f = Object.getOwnPropertySymbols;
 
-},{}],105:[function(_dereq_,module,exports){
+},{}],104:[function(_dereq_,module,exports){
 var has = _dereq_('../internals/has');
 var toObject = _dereq_('../internals/to-object');
 var sharedKey = _dereq_('../internals/shared-key');
@@ -5712,6 +5709,7 @@ var ObjectPrototype = Object.prototype;
 
 // `Object.getPrototypeOf` method
 // https://tc39.es/ecma262/#sec-object.getprototypeof
+// eslint-disable-next-line es/no-object-getprototypeof -- safe
 module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O) {
   O = toObject(O);
   if (has(O, IE_PROTO)) return O[IE_PROTO];
@@ -5720,7 +5718,7 @@ module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O)
   } return O instanceof Object ? ObjectPrototype : null;
 };
 
-},{"../internals/correct-prototype-getter":46,"../internals/has":70,"../internals/shared-key":125,"../internals/to-object":140}],106:[function(_dereq_,module,exports){
+},{"../internals/correct-prototype-getter":45,"../internals/has":69,"../internals/shared-key":124,"../internals/to-object":139}],105:[function(_dereq_,module,exports){
 var has = _dereq_('../internals/has');
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var indexOf = _dereq_('../internals/array-includes').indexOf;
@@ -5739,44 +5737,48 @@ module.exports = function (object, names) {
   return result;
 };
 
-},{"../internals/array-includes":33,"../internals/has":70,"../internals/hidden-keys":71,"../internals/to-indexed-object":137}],107:[function(_dereq_,module,exports){
+},{"../internals/array-includes":33,"../internals/has":69,"../internals/hidden-keys":70,"../internals/to-indexed-object":136}],106:[function(_dereq_,module,exports){
 var internalObjectKeys = _dereq_('../internals/object-keys-internal');
 var enumBugKeys = _dereq_('../internals/enum-bug-keys');
 
 // `Object.keys` method
 // https://tc39.es/ecma262/#sec-object.keys
+// eslint-disable-next-line es/no-object-keys -- safe
 module.exports = Object.keys || function keys(O) {
   return internalObjectKeys(O, enumBugKeys);
 };
 
-},{"../internals/enum-bug-keys":60,"../internals/object-keys-internal":106}],108:[function(_dereq_,module,exports){
+},{"../internals/enum-bug-keys":59,"../internals/object-keys-internal":105}],107:[function(_dereq_,module,exports){
 'use strict';
-var nativePropertyIsEnumerable = {}.propertyIsEnumerable;
+var $propertyIsEnumerable = {}.propertyIsEnumerable;
+// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
 var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 
 // Nashorn ~ JDK8 bug
-var NASHORN_BUG = getOwnPropertyDescriptor && !nativePropertyIsEnumerable.call({ 1: 2 }, 1);
+var NASHORN_BUG = getOwnPropertyDescriptor && !$propertyIsEnumerable.call({ 1: 2 }, 1);
 
 // `Object.prototype.propertyIsEnumerable` method implementation
 // https://tc39.es/ecma262/#sec-object.prototype.propertyisenumerable
 exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
   var descriptor = getOwnPropertyDescriptor(this, V);
   return !!descriptor && descriptor.enumerable;
-} : nativePropertyIsEnumerable;
+} : $propertyIsEnumerable;
 
-},{}],109:[function(_dereq_,module,exports){
+},{}],108:[function(_dereq_,module,exports){
+/* eslint-disable no-proto -- safe */
 var anObject = _dereq_('../internals/an-object');
 var aPossiblePrototype = _dereq_('../internals/a-possible-prototype');
 
 // `Object.setPrototypeOf` method
 // https://tc39.es/ecma262/#sec-object.setprototypeof
 // Works with __proto__ only. Old v8 can't work with null proto objects.
-/* eslint-disable no-proto */
+// eslint-disable-next-line es/no-object-setprototypeof -- safe
 module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
   var CORRECT_SETTER = false;
   var test = {};
   var setter;
   try {
+    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
     setter = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set;
     setter.call(test, []);
     CORRECT_SETTER = test instanceof Array;
@@ -5790,7 +5792,7 @@ module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
   };
 }() : undefined);
 
-},{"../internals/a-possible-prototype":21,"../internals/an-object":25}],110:[function(_dereq_,module,exports){
+},{"../internals/a-possible-prototype":21,"../internals/an-object":25}],109:[function(_dereq_,module,exports){
 'use strict';
 var TO_STRING_TAG_SUPPORT = _dereq_('../internals/to-string-tag-support');
 var classof = _dereq_('../internals/classof');
@@ -5801,7 +5803,7 @@ module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
   return '[object ' + classof(this) + ']';
 };
 
-},{"../internals/classof":44,"../internals/to-string-tag-support":144}],111:[function(_dereq_,module,exports){
+},{"../internals/classof":43,"../internals/to-string-tag-support":143}],110:[function(_dereq_,module,exports){
 var getBuiltIn = _dereq_('../internals/get-built-in');
 var getOwnPropertyNamesModule = _dereq_('../internals/object-get-own-property-names');
 var getOwnPropertySymbolsModule = _dereq_('../internals/object-get-own-property-symbols');
@@ -5814,12 +5816,12 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
   return getOwnPropertySymbols ? keys.concat(getOwnPropertySymbols(it)) : keys;
 };
 
-},{"../internals/an-object":25,"../internals/get-built-in":65,"../internals/object-get-own-property-names":103,"../internals/object-get-own-property-symbols":104}],112:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/get-built-in":64,"../internals/object-get-own-property-names":102,"../internals/object-get-own-property-symbols":103}],111:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 
 module.exports = global;
 
-},{"../internals/global":69}],113:[function(_dereq_,module,exports){
+},{"../internals/global":68}],112:[function(_dereq_,module,exports){
 module.exports = function (exec) {
   try {
     return { error: false, value: exec() };
@@ -5828,7 +5830,7 @@ module.exports = function (exec) {
   }
 };
 
-},{}],114:[function(_dereq_,module,exports){
+},{}],113:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 var isObject = _dereq_('../internals/is-object');
 var newPromiseCapability = _dereq_('../internals/new-promise-capability');
@@ -5842,7 +5844,7 @@ module.exports = function (C, x) {
   return promiseCapability.promise;
 };
 
-},{"../internals/an-object":25,"../internals/is-object":83,"../internals/new-promise-capability":94}],115:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/is-object":82,"../internals/new-promise-capability":93}],114:[function(_dereq_,module,exports){
 var redefine = _dereq_('../internals/redefine');
 
 module.exports = function (target, src, options) {
@@ -5850,7 +5852,7 @@ module.exports = function (target, src, options) {
   return target;
 };
 
-},{"../internals/redefine":116}],116:[function(_dereq_,module,exports){
+},{"../internals/redefine":115}],115:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var createNonEnumerableProperty = _dereq_('../internals/create-non-enumerable-property');
 var has = _dereq_('../internals/has');
@@ -5892,7 +5894,7 @@ var TEMPLATE = String(String).split('String');
   return typeof this == 'function' && getInternalState(this).source || inspectSource(this);
 });
 
-},{"../internals/create-non-enumerable-property":48,"../internals/global":69,"../internals/has":70,"../internals/inspect-source":78,"../internals/internal-state":79,"../internals/set-global":122}],117:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":47,"../internals/global":68,"../internals/has":69,"../internals/inspect-source":77,"../internals/internal-state":78,"../internals/set-global":121}],116:[function(_dereq_,module,exports){
 var classof = _dereq_('./classof-raw');
 var regexpExec = _dereq_('./regexp-exec');
 
@@ -5916,16 +5918,17 @@ module.exports = function (R, S) {
 };
 
 
-},{"./classof-raw":43,"./regexp-exec":118}],118:[function(_dereq_,module,exports){
+},{"./classof-raw":42,"./regexp-exec":117}],117:[function(_dereq_,module,exports){
 'use strict';
 var regexpFlags = _dereq_('./regexp-flags');
 var stickyHelpers = _dereq_('./regexp-sticky-helpers');
+var shared = _dereq_('./shared');
 
 var nativeExec = RegExp.prototype.exec;
 // This always refers to the native implementation, because the
 // String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
 // which loads this file before patching the method.
-var nativeReplace = String.prototype.replace;
+var nativeReplace = shared('native-string-replace', String.prototype.replace);
 
 var patchedExec = nativeExec;
 
@@ -5940,6 +5943,7 @@ var UPDATES_LAST_INDEX_WRONG = (function () {
 var UNSUPPORTED_Y = stickyHelpers.UNSUPPORTED_Y || stickyHelpers.BROKEN_CARET;
 
 // nonparticipating capturing group, copied from es5-shim's String#split patch.
+// eslint-disable-next-line regexp/no-assertion-capturing-group, regexp/no-empty-group -- required for testing
 var NPCG_INCLUDED = /()??/.exec('')[1] !== undefined;
 
 var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y;
@@ -6005,7 +6009,7 @@ if (PATCH) {
 
 module.exports = patchedExec;
 
-},{"./regexp-flags":119,"./regexp-sticky-helpers":120}],119:[function(_dereq_,module,exports){
+},{"./regexp-flags":118,"./regexp-sticky-helpers":119,"./shared":126}],118:[function(_dereq_,module,exports){
 'use strict';
 var anObject = _dereq_('../internals/an-object');
 
@@ -6023,7 +6027,7 @@ module.exports = function () {
   return result;
 };
 
-},{"../internals/an-object":25}],120:[function(_dereq_,module,exports){
+},{"../internals/an-object":25}],119:[function(_dereq_,module,exports){
 'use strict';
 
 var fails = _dereq_('./fails');
@@ -6048,7 +6052,7 @@ exports.BROKEN_CARET = fails(function () {
   return re.exec('str') != null;
 });
 
-},{"./fails":62}],121:[function(_dereq_,module,exports){
+},{"./fails":61}],120:[function(_dereq_,module,exports){
 // `RequireObjectCoercible` abstract operation
 // https://tc39.es/ecma262/#sec-requireobjectcoercible
 module.exports = function (it) {
@@ -6056,7 +6060,7 @@ module.exports = function (it) {
   return it;
 };
 
-},{}],122:[function(_dereq_,module,exports){
+},{}],121:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var createNonEnumerableProperty = _dereq_('../internals/create-non-enumerable-property');
 
@@ -6068,7 +6072,7 @@ module.exports = function (key, value) {
   } return value;
 };
 
-},{"../internals/create-non-enumerable-property":48,"../internals/global":69}],123:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":47,"../internals/global":68}],122:[function(_dereq_,module,exports){
 'use strict';
 var getBuiltIn = _dereq_('../internals/get-built-in');
 var definePropertyModule = _dereq_('../internals/object-define-property');
@@ -6089,7 +6093,7 @@ module.exports = function (CONSTRUCTOR_NAME) {
   }
 };
 
-},{"../internals/descriptors":52,"../internals/get-built-in":65,"../internals/object-define-property":100,"../internals/well-known-symbol":150}],124:[function(_dereq_,module,exports){
+},{"../internals/descriptors":51,"../internals/get-built-in":64,"../internals/object-define-property":99,"../internals/well-known-symbol":150}],123:[function(_dereq_,module,exports){
 var defineProperty = _dereq_('../internals/object-define-property').f;
 var has = _dereq_('../internals/has');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
@@ -6102,7 +6106,7 @@ module.exports = function (it, TAG, STATIC) {
   }
 };
 
-},{"../internals/has":70,"../internals/object-define-property":100,"../internals/well-known-symbol":150}],125:[function(_dereq_,module,exports){
+},{"../internals/has":69,"../internals/object-define-property":99,"../internals/well-known-symbol":150}],124:[function(_dereq_,module,exports){
 var shared = _dereq_('../internals/shared');
 var uid = _dereq_('../internals/uid');
 
@@ -6112,7 +6116,7 @@ module.exports = function (key) {
   return keys[key] || (keys[key] = uid(key));
 };
 
-},{"../internals/shared":127,"../internals/uid":148}],126:[function(_dereq_,module,exports){
+},{"../internals/shared":126,"../internals/uid":148}],125:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var setGlobal = _dereq_('../internals/set-global');
 
@@ -6121,19 +6125,19 @@ var store = global[SHARED] || setGlobal(SHARED, {});
 
 module.exports = store;
 
-},{"../internals/global":69,"../internals/set-global":122}],127:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/set-global":121}],126:[function(_dereq_,module,exports){
 var IS_PURE = _dereq_('../internals/is-pure');
 var store = _dereq_('../internals/shared-store');
 
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.8.3',
+  version: '3.10.0',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
 
-},{"../internals/is-pure":84,"../internals/shared-store":126}],128:[function(_dereq_,module,exports){
+},{"../internals/is-pure":83,"../internals/shared-store":125}],127:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 var aFunction = _dereq_('../internals/a-function');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
@@ -6148,7 +6152,7 @@ module.exports = function (O, defaultConstructor) {
   return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction(S);
 };
 
-},{"../internals/a-function":20,"../internals/an-object":25,"../internals/well-known-symbol":150}],129:[function(_dereq_,module,exports){
+},{"../internals/a-function":20,"../internals/an-object":25,"../internals/well-known-symbol":150}],128:[function(_dereq_,module,exports){
 var toInteger = _dereq_('../internals/to-integer');
 var requireObjectCoercible = _dereq_('../internals/require-object-coercible');
 
@@ -6177,7 +6181,7 @@ module.exports = {
   charAt: createMethod(true)
 };
 
-},{"../internals/require-object-coercible":121,"../internals/to-integer":138}],130:[function(_dereq_,module,exports){
+},{"../internals/require-object-coercible":120,"../internals/to-integer":137}],129:[function(_dereq_,module,exports){
 'use strict';
 // based on https://github.com/bestiejs/punycode.js/blob/master/punycode.js
 var maxInt = 2147483647; // aka. 0x7FFFFFFF or 2^31-1
@@ -6254,7 +6258,7 @@ var adapt = function (delta, numPoints, firstTime) {
  * Converts a string of Unicode symbols (e.g. a domain name label) to a
  * Punycode string of ASCII-only symbols.
  */
-// eslint-disable-next-line  max-statements
+// eslint-disable-next-line max-statements -- TODO
 var encode = function (input) {
   var output = [];
 
@@ -6347,14 +6351,14 @@ module.exports = function (input) {
   return encoded.join('.');
 };
 
-},{}],131:[function(_dereq_,module,exports){
+},{}],130:[function(_dereq_,module,exports){
 'use strict';
 var toInteger = _dereq_('../internals/to-integer');
 var requireObjectCoercible = _dereq_('../internals/require-object-coercible');
 
 // `String.prototype.repeat` method implementation
 // https://tc39.es/ecma262/#sec-string.prototype.repeat
-module.exports = ''.repeat || function repeat(count) {
+module.exports = function repeat(count) {
   var str = String(requireObjectCoercible(this));
   var result = '';
   var n = toInteger(count);
@@ -6363,7 +6367,7 @@ module.exports = ''.repeat || function repeat(count) {
   return result;
 };
 
-},{"../internals/require-object-coercible":121,"../internals/to-integer":138}],132:[function(_dereq_,module,exports){
+},{"../internals/require-object-coercible":120,"../internals/to-integer":137}],131:[function(_dereq_,module,exports){
 var requireObjectCoercible = _dereq_('../internals/require-object-coercible');
 var whitespaces = _dereq_('../internals/whitespaces');
 
@@ -6393,7 +6397,7 @@ module.exports = {
   trim: createMethod(3)
 };
 
-},{"../internals/require-object-coercible":121,"../internals/whitespaces":151}],133:[function(_dereq_,module,exports){
+},{"../internals/require-object-coercible":120,"../internals/whitespaces":151}],132:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var fails = _dereq_('../internals/fails');
 var bind = _dereq_('../internals/function-bind-context');
@@ -6414,7 +6418,7 @@ var ONREADYSTATECHANGE = 'onreadystatechange';
 var defer, channel, port;
 
 var run = function (id) {
-  // eslint-disable-next-line no-prototype-builtins
+  // eslint-disable-next-line no-prototype-builtins -- safe
   if (queue.hasOwnProperty(id)) {
     var fn = queue[id];
     delete queue[id];
@@ -6444,7 +6448,7 @@ if (!set || !clear) {
     var i = 1;
     while (arguments.length > i) args.push(arguments[i++]);
     queue[++counter] = function () {
-      // eslint-disable-next-line no-new-func
+      // eslint-disable-next-line no-new-func -- spec requirement
       (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
     };
     defer(counter);
@@ -6502,7 +6506,7 @@ module.exports = {
   clear: clear
 };
 
-},{"../internals/document-create-element":53,"../internals/engine-is-ios":55,"../internals/engine-is-node":56,"../internals/fails":62,"../internals/function-bind-context":64,"../internals/global":69,"../internals/html":73}],134:[function(_dereq_,module,exports){
+},{"../internals/document-create-element":52,"../internals/engine-is-ios":54,"../internals/engine-is-node":55,"../internals/fails":61,"../internals/function-bind-context":63,"../internals/global":68,"../internals/html":72}],133:[function(_dereq_,module,exports){
 var classof = _dereq_('../internals/classof-raw');
 
 // `thisNumberValue` abstract operation
@@ -6514,7 +6518,7 @@ module.exports = function (value) {
   return +value;
 };
 
-},{"../internals/classof-raw":43}],135:[function(_dereq_,module,exports){
+},{"../internals/classof-raw":42}],134:[function(_dereq_,module,exports){
 var toInteger = _dereq_('../internals/to-integer');
 
 var max = Math.max;
@@ -6528,7 +6532,7 @@ module.exports = function (index, length) {
   return integer < 0 ? max(integer + length, 0) : min(integer, length);
 };
 
-},{"../internals/to-integer":138}],136:[function(_dereq_,module,exports){
+},{"../internals/to-integer":137}],135:[function(_dereq_,module,exports){
 var toInteger = _dereq_('../internals/to-integer');
 var toLength = _dereq_('../internals/to-length');
 
@@ -6542,7 +6546,7 @@ module.exports = function (it) {
   return length;
 };
 
-},{"../internals/to-integer":138,"../internals/to-length":139}],137:[function(_dereq_,module,exports){
+},{"../internals/to-integer":137,"../internals/to-length":138}],136:[function(_dereq_,module,exports){
 // toObject with fallback for non-array-like ES3 strings
 var IndexedObject = _dereq_('../internals/indexed-object');
 var requireObjectCoercible = _dereq_('../internals/require-object-coercible');
@@ -6551,7 +6555,7 @@ module.exports = function (it) {
   return IndexedObject(requireObjectCoercible(it));
 };
 
-},{"../internals/indexed-object":76,"../internals/require-object-coercible":121}],138:[function(_dereq_,module,exports){
+},{"../internals/indexed-object":75,"../internals/require-object-coercible":120}],137:[function(_dereq_,module,exports){
 var ceil = Math.ceil;
 var floor = Math.floor;
 
@@ -6561,7 +6565,7 @@ module.exports = function (argument) {
   return isNaN(argument = +argument) ? 0 : (argument > 0 ? floor : ceil)(argument);
 };
 
-},{}],139:[function(_dereq_,module,exports){
+},{}],138:[function(_dereq_,module,exports){
 var toInteger = _dereq_('../internals/to-integer');
 
 var min = Math.min;
@@ -6572,7 +6576,7 @@ module.exports = function (argument) {
   return argument > 0 ? min(toInteger(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
 };
 
-},{"../internals/to-integer":138}],140:[function(_dereq_,module,exports){
+},{"../internals/to-integer":137}],139:[function(_dereq_,module,exports){
 var requireObjectCoercible = _dereq_('../internals/require-object-coercible');
 
 // `ToObject` abstract operation
@@ -6581,7 +6585,7 @@ module.exports = function (argument) {
   return Object(requireObjectCoercible(argument));
 };
 
-},{"../internals/require-object-coercible":121}],141:[function(_dereq_,module,exports){
+},{"../internals/require-object-coercible":120}],140:[function(_dereq_,module,exports){
 var toPositiveInteger = _dereq_('../internals/to-positive-integer');
 
 module.exports = function (it, BYTES) {
@@ -6590,7 +6594,7 @@ module.exports = function (it, BYTES) {
   return offset;
 };
 
-},{"../internals/to-positive-integer":142}],142:[function(_dereq_,module,exports){
+},{"../internals/to-positive-integer":141}],141:[function(_dereq_,module,exports){
 var toInteger = _dereq_('../internals/to-integer');
 
 module.exports = function (it) {
@@ -6599,7 +6603,7 @@ module.exports = function (it) {
   return result;
 };
 
-},{"../internals/to-integer":138}],143:[function(_dereq_,module,exports){
+},{"../internals/to-integer":137}],142:[function(_dereq_,module,exports){
 var isObject = _dereq_('../internals/is-object');
 
 // `ToPrimitive` abstract operation
@@ -6615,7 +6619,7 @@ module.exports = function (input, PREFERRED_STRING) {
   throw TypeError("Can't convert object to primitive value");
 };
 
-},{"../internals/is-object":83}],144:[function(_dereq_,module,exports){
+},{"../internals/is-object":82}],143:[function(_dereq_,module,exports){
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
@@ -6625,7 +6629,7 @@ test[TO_STRING_TAG] = 'z';
 
 module.exports = String(test) === '[object z]';
 
-},{"../internals/well-known-symbol":150}],145:[function(_dereq_,module,exports){
+},{"../internals/well-known-symbol":150}],144:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var global = _dereq_('../internals/global');
@@ -6857,8 +6861,8 @@ if (DESCRIPTORS) {
   };
 } else module.exports = function () { /* empty */ };
 
-},{"../internals/an-instance":24,"../internals/array-buffer":28,"../internals/array-buffer-view-core":27,"../internals/array-iteration":34,"../internals/classof":44,"../internals/create-non-enumerable-property":48,"../internals/create-property-descriptor":49,"../internals/descriptors":52,"../internals/export":61,"../internals/global":69,"../internals/has":70,"../internals/inherit-if-required":77,"../internals/internal-state":79,"../internals/is-object":83,"../internals/object-create":98,"../internals/object-define-property":100,"../internals/object-get-own-property-descriptor":101,"../internals/object-get-own-property-names":103,"../internals/object-set-prototype-of":109,"../internals/set-species":123,"../internals/to-index":136,"../internals/to-length":139,"../internals/to-offset":141,"../internals/to-primitive":143,"../internals/typed-array-constructors-require-wrappers":146,"../internals/typed-array-from":147}],146:[function(_dereq_,module,exports){
-/* eslint-disable no-new */
+},{"../internals/an-instance":24,"../internals/array-buffer":28,"../internals/array-buffer-view-core":27,"../internals/array-iteration":34,"../internals/classof":43,"../internals/create-non-enumerable-property":47,"../internals/create-property-descriptor":48,"../internals/descriptors":51,"../internals/export":60,"../internals/global":68,"../internals/has":69,"../internals/inherit-if-required":76,"../internals/internal-state":78,"../internals/is-object":82,"../internals/object-create":97,"../internals/object-define-property":99,"../internals/object-get-own-property-descriptor":100,"../internals/object-get-own-property-names":102,"../internals/object-set-prototype-of":108,"../internals/set-species":122,"../internals/to-index":135,"../internals/to-length":138,"../internals/to-offset":140,"../internals/to-primitive":142,"../internals/typed-array-constructors-require-wrappers":145,"../internals/typed-array-from":147}],145:[function(_dereq_,module,exports){
+/* eslint-disable no-new -- required for testing */
 var global = _dereq_('../internals/global');
 var fails = _dereq_('../internals/fails');
 var checkCorrectnessOfIteration = _dereq_('../internals/check-correctness-of-iteration');
@@ -6881,7 +6885,20 @@ module.exports = !NATIVE_ARRAY_BUFFER_VIEWS || !fails(function () {
   return new Int8Array(new ArrayBuffer(2), 1, undefined).length !== 1;
 });
 
-},{"../internals/array-buffer-view-core":27,"../internals/check-correctness-of-iteration":42,"../internals/fails":62,"../internals/global":69}],147:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/check-correctness-of-iteration":41,"../internals/fails":61,"../internals/global":68}],146:[function(_dereq_,module,exports){
+var aTypedArrayConstructor = _dereq_('../internals/array-buffer-view-core').aTypedArrayConstructor;
+var speciesConstructor = _dereq_('../internals/species-constructor');
+
+module.exports = function (instance, list) {
+  var C = speciesConstructor(instance, instance.constructor);
+  var index = 0;
+  var length = list.length;
+  var result = new (aTypedArrayConstructor(C))(length);
+  while (length > index) result[index] = list[index++];
+  return result;
+};
+
+},{"../internals/array-buffer-view-core":27,"../internals/species-constructor":127}],147:[function(_dereq_,module,exports){
 var toObject = _dereq_('../internals/to-object');
 var toLength = _dereq_('../internals/to-length');
 var getIteratorMethod = _dereq_('../internals/get-iterator-method');
@@ -6915,7 +6932,7 @@ module.exports = function from(source /* , mapfn, thisArg */) {
   return result;
 };
 
-},{"../internals/array-buffer-view-core":27,"../internals/function-bind-context":64,"../internals/get-iterator-method":66,"../internals/is-array-iterator-method":80,"../internals/to-length":139,"../internals/to-object":140}],148:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/function-bind-context":63,"../internals/get-iterator-method":65,"../internals/is-array-iterator-method":79,"../internals/to-length":138,"../internals/to-object":139}],148:[function(_dereq_,module,exports){
 var id = 0;
 var postfix = Math.random();
 
@@ -6924,15 +6941,14 @@ module.exports = function (key) {
 };
 
 },{}],149:[function(_dereq_,module,exports){
+/* eslint-disable es/no-symbol -- required for testing */
 var NATIVE_SYMBOL = _dereq_('../internals/native-symbol');
 
 module.exports = NATIVE_SYMBOL
-  // eslint-disable-next-line no-undef
   && !Symbol.sham
-  // eslint-disable-next-line no-undef
   && typeof Symbol.iterator == 'symbol';
 
-},{"../internals/native-symbol":91}],150:[function(_dereq_,module,exports){
+},{"../internals/native-symbol":90}],150:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var shared = _dereq_('../internals/shared');
 var has = _dereq_('../internals/has');
@@ -6945,16 +6961,19 @@ var Symbol = global.Symbol;
 var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol : Symbol && Symbol.withoutSetter || uid;
 
 module.exports = function (name) {
-  if (!has(WellKnownSymbolsStore, name)) {
-    if (NATIVE_SYMBOL && has(Symbol, name)) WellKnownSymbolsStore[name] = Symbol[name];
-    else WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
+  if (!has(WellKnownSymbolsStore, name) || !(NATIVE_SYMBOL || typeof WellKnownSymbolsStore[name] == 'string')) {
+    if (NATIVE_SYMBOL && has(Symbol, name)) {
+      WellKnownSymbolsStore[name] = Symbol[name];
+    } else {
+      WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
+    }
   } return WellKnownSymbolsStore[name];
 };
 
-},{"../internals/global":69,"../internals/has":70,"../internals/native-symbol":91,"../internals/shared":127,"../internals/uid":148,"../internals/use-symbol-as-uid":149}],151:[function(_dereq_,module,exports){
+},{"../internals/global":68,"../internals/has":69,"../internals/native-symbol":90,"../internals/shared":126,"../internals/uid":148,"../internals/use-symbol-as-uid":149}],151:[function(_dereq_,module,exports){
 // a string of all valid unicode whitespaces
-// eslint-disable-next-line max-len
-module.exports = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+module.exports = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002' +
+  '\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
 
 },{}],152:[function(_dereq_,module,exports){
 'use strict';
@@ -6975,7 +6994,7 @@ $({ global: true, forced: NativeArrayBuffer !== ArrayBuffer }, {
 
 setSpecies(ARRAY_BUFFER);
 
-},{"../internals/array-buffer":28,"../internals/export":61,"../internals/global":69,"../internals/set-species":123}],153:[function(_dereq_,module,exports){
+},{"../internals/array-buffer":28,"../internals/export":60,"../internals/global":68,"../internals/set-species":122}],153:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var fails = _dereq_('../internals/fails');
@@ -7013,33 +7032,33 @@ $({ target: 'ArrayBuffer', proto: true, unsafe: true, forced: INCORRECT_SLICE },
   }
 });
 
-},{"../internals/an-object":25,"../internals/array-buffer":28,"../internals/export":61,"../internals/fails":62,"../internals/species-constructor":128,"../internals/to-absolute-index":135,"../internals/to-length":139}],154:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/array-buffer":28,"../internals/export":60,"../internals/fails":61,"../internals/species-constructor":127,"../internals/to-absolute-index":134,"../internals/to-length":138}],154:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var forEach = _dereq_('../internals/array-for-each');
 
 // `Array.prototype.forEach` method
 // https://tc39.es/ecma262/#sec-array.prototype.foreach
+// eslint-disable-next-line es/no-array-prototype-foreach -- safe
 $({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
   forEach: forEach
 });
 
-},{"../internals/array-for-each":31,"../internals/export":61}],155:[function(_dereq_,module,exports){
+},{"../internals/array-for-each":31,"../internals/export":60}],155:[function(_dereq_,module,exports){
 'use strict';
+/* eslint-disable es/no-array-prototype-indexof -- required for testing */
 var $ = _dereq_('../internals/export');
 var $indexOf = _dereq_('../internals/array-includes').indexOf;
 var arrayMethodIsStrict = _dereq_('../internals/array-method-is-strict');
-var arrayMethodUsesToLength = _dereq_('../internals/array-method-uses-to-length');
 
 var nativeIndexOf = [].indexOf;
 
 var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
 var STRICT_METHOD = arrayMethodIsStrict('indexOf');
-var USES_TO_LENGTH = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
 
 // `Array.prototype.indexOf` method
 // https://tc39.es/ecma262/#sec-array.prototype.indexof
-$({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH }, {
+$({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD }, {
   indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
     return NEGATIVE_ZERO
       // convert -0 to +0
@@ -7048,7 +7067,7 @@ $({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD || !US
   }
 });
 
-},{"../internals/array-includes":33,"../internals/array-method-is-strict":37,"../internals/array-method-uses-to-length":38,"../internals/export":61}],156:[function(_dereq_,module,exports){
+},{"../internals/array-includes":33,"../internals/array-method-is-strict":37,"../internals/export":60}],156:[function(_dereq_,module,exports){
 'use strict';
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var addToUnscopables = _dereq_('../internals/add-to-unscopables');
@@ -7103,7 +7122,7 @@ addToUnscopables('keys');
 addToUnscopables('values');
 addToUnscopables('entries');
 
-},{"../internals/add-to-unscopables":22,"../internals/define-iterator":51,"../internals/internal-state":79,"../internals/iterators":88,"../internals/to-indexed-object":137}],157:[function(_dereq_,module,exports){
+},{"../internals/add-to-unscopables":22,"../internals/define-iterator":50,"../internals/internal-state":78,"../internals/iterators":87,"../internals/to-indexed-object":136}],157:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var IndexedObject = _dereq_('../internals/indexed-object');
@@ -7123,7 +7142,7 @@ $({ target: 'Array', proto: true, forced: ES3_STRINGS || !STRICT_METHOD }, {
   }
 });
 
-},{"../internals/array-method-is-strict":37,"../internals/export":61,"../internals/indexed-object":76,"../internals/to-indexed-object":137}],158:[function(_dereq_,module,exports){
+},{"../internals/array-method-is-strict":37,"../internals/export":60,"../internals/indexed-object":75,"../internals/to-indexed-object":136}],158:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var isObject = _dereq_('../internals/is-object');
@@ -7134,10 +7153,8 @@ var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var createProperty = _dereq_('../internals/create-property');
 var wellKnownSymbol = _dereq_('../internals/well-known-symbol');
 var arrayMethodHasSpeciesSupport = _dereq_('../internals/array-method-has-species-support');
-var arrayMethodUsesToLength = _dereq_('../internals/array-method-uses-to-length');
 
 var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('slice');
-var USES_TO_LENGTH = arrayMethodUsesToLength('slice', { ACCESSORS: true, 0: 0, 1: 2 });
 
 var SPECIES = wellKnownSymbol('species');
 var nativeSlice = [].slice;
@@ -7146,7 +7163,7 @@ var max = Math.max;
 // `Array.prototype.slice` method
 // https://tc39.es/ecma262/#sec-array.prototype.slice
 // fallback for not array-like ES3 strings and DOM objects
-$({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
+$({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
   slice: function slice(start, end) {
     var O = toIndexedObject(this);
     var length = toLength(O.length);
@@ -7174,7 +7191,7 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGT
   }
 });
 
-},{"../internals/array-method-has-species-support":36,"../internals/array-method-uses-to-length":38,"../internals/create-property":50,"../internals/export":61,"../internals/is-array":81,"../internals/is-object":83,"../internals/to-absolute-index":135,"../internals/to-indexed-object":137,"../internals/to-length":139,"../internals/well-known-symbol":150}],159:[function(_dereq_,module,exports){
+},{"../internals/array-method-has-species-support":36,"../internals/create-property":49,"../internals/export":60,"../internals/is-array":80,"../internals/is-object":82,"../internals/to-absolute-index":134,"../internals/to-indexed-object":136,"../internals/to-length":138,"../internals/well-known-symbol":150}],159:[function(_dereq_,module,exports){
 var DESCRIPTORS = _dereq_('../internals/descriptors');
 var defineProperty = _dereq_('../internals/object-define-property').f;
 
@@ -7198,7 +7215,7 @@ if (DESCRIPTORS && !(NAME in FunctionPrototype)) {
   });
 }
 
-},{"../internals/descriptors":52,"../internals/object-define-property":100}],160:[function(_dereq_,module,exports){
+},{"../internals/descriptors":51,"../internals/object-define-property":99}],160:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var toInteger = _dereq_('../internals/to-integer');
@@ -7226,6 +7243,37 @@ var log = function (x) {
   } return n;
 };
 
+var multiply = function (data, n, c) {
+  var index = -1;
+  var c2 = c;
+  while (++index < 6) {
+    c2 += n * data[index];
+    data[index] = c2 % 1e7;
+    c2 = floor(c2 / 1e7);
+  }
+};
+
+var divide = function (data, n) {
+  var index = 6;
+  var c = 0;
+  while (--index >= 0) {
+    c += data[index];
+    data[index] = floor(c / n);
+    c = (c % n) * 1e7;
+  }
+};
+
+var dataToString = function (data) {
+  var index = 6;
+  var s = '';
+  while (--index >= 0) {
+    if (s !== '' || index === 0 || data[index] !== 0) {
+      var t = String(data[index]);
+      s = s === '' ? t : s + repeat.call('0', 7 - t.length) + t;
+    }
+  } return s;
+};
+
 var FORCED = nativeToFixed && (
   0.00008.toFixed(3) !== '0.000' ||
   0.9.toFixed(0) !== '1' ||
@@ -7239,7 +7287,6 @@ var FORCED = nativeToFixed && (
 // `Number.prototype.toFixed` method
 // https://tc39.es/ecma262/#sec-number.prototype.tofixed
 $({ target: 'Number', proto: true, forced: FORCED }, {
-  // eslint-disable-next-line max-statements
   toFixed: function toFixed(fractionDigits) {
     var number = thisNumberValue(this);
     var fractDigits = toInteger(fractionDigits);
@@ -7248,39 +7295,8 @@ $({ target: 'Number', proto: true, forced: FORCED }, {
     var result = '0';
     var e, z, j, k;
 
-    var multiply = function (n, c) {
-      var index = -1;
-      var c2 = c;
-      while (++index < 6) {
-        c2 += n * data[index];
-        data[index] = c2 % 1e7;
-        c2 = floor(c2 / 1e7);
-      }
-    };
-
-    var divide = function (n) {
-      var index = 6;
-      var c = 0;
-      while (--index >= 0) {
-        c += data[index];
-        data[index] = floor(c / n);
-        c = (c % n) * 1e7;
-      }
-    };
-
-    var dataToString = function () {
-      var index = 6;
-      var s = '';
-      while (--index >= 0) {
-        if (s !== '' || index === 0 || data[index] !== 0) {
-          var t = String(data[index]);
-          s = s === '' ? t : s + repeat.call('0', 7 - t.length) + t;
-        }
-      } return s;
-    };
-
     if (fractDigits < 0 || fractDigits > 20) throw RangeError('Incorrect fraction digits');
-    // eslint-disable-next-line no-self-compare
+    // eslint-disable-next-line no-self-compare -- NaN check
     if (number != number) return 'NaN';
     if (number <= -1e21 || number >= 1e21) return String(number);
     if (number < 0) {
@@ -7293,26 +7309,26 @@ $({ target: 'Number', proto: true, forced: FORCED }, {
       z *= 0x10000000000000;
       e = 52 - e;
       if (e > 0) {
-        multiply(0, z);
+        multiply(data, 0, z);
         j = fractDigits;
         while (j >= 7) {
-          multiply(1e7, 0);
+          multiply(data, 1e7, 0);
           j -= 7;
         }
-        multiply(pow(10, j, 1), 0);
+        multiply(data, pow(10, j, 1), 0);
         j = e - 1;
         while (j >= 23) {
-          divide(1 << 23);
+          divide(data, 1 << 23);
           j -= 23;
         }
-        divide(1 << j);
-        multiply(1, 1);
-        divide(2);
-        result = dataToString();
+        divide(data, 1 << j);
+        multiply(data, 1, 1);
+        divide(data, 2);
+        result = dataToString(data);
       } else {
-        multiply(0, z);
-        multiply(1 << -e, 0);
-        result = dataToString() + repeat.call('0', fractDigits);
+        multiply(data, 0, z);
+        multiply(data, 1 << -e, 0);
+        result = dataToString(data) + repeat.call('0', fractDigits);
       }
     }
     if (fractDigits > 0) {
@@ -7326,20 +7342,21 @@ $({ target: 'Number', proto: true, forced: FORCED }, {
   }
 });
 
-},{"../internals/export":61,"../internals/fails":62,"../internals/string-repeat":131,"../internals/this-number-value":134,"../internals/to-integer":138}],161:[function(_dereq_,module,exports){
+},{"../internals/export":60,"../internals/fails":61,"../internals/string-repeat":130,"../internals/this-number-value":133,"../internals/to-integer":137}],161:[function(_dereq_,module,exports){
 var $ = _dereq_('../internals/export');
 var fails = _dereq_('../internals/fails');
-var nativeGetOwnPropertyNames = _dereq_('../internals/object-get-own-property-names-external').f;
+var getOwnPropertyNames = _dereq_('../internals/object-get-own-property-names-external').f;
 
+// eslint-disable-next-line es/no-object-getownpropertynames -- required for testing
 var FAILS_ON_PRIMITIVES = fails(function () { return !Object.getOwnPropertyNames(1); });
 
 // `Object.getOwnPropertyNames` method
 // https://tc39.es/ecma262/#sec-object.getownpropertynames
 $({ target: 'Object', stat: true, forced: FAILS_ON_PRIMITIVES }, {
-  getOwnPropertyNames: nativeGetOwnPropertyNames
+  getOwnPropertyNames: getOwnPropertyNames
 });
 
-},{"../internals/export":61,"../internals/fails":62,"../internals/object-get-own-property-names-external":102}],162:[function(_dereq_,module,exports){
+},{"../internals/export":60,"../internals/fails":61,"../internals/object-get-own-property-names-external":101}],162:[function(_dereq_,module,exports){
 var $ = _dereq_('../internals/export');
 var toObject = _dereq_('../internals/to-object');
 var nativeKeys = _dereq_('../internals/object-keys');
@@ -7355,7 +7372,7 @@ $({ target: 'Object', stat: true, forced: FAILS_ON_PRIMITIVES }, {
   }
 });
 
-},{"../internals/export":61,"../internals/fails":62,"../internals/object-keys":107,"../internals/to-object":140}],163:[function(_dereq_,module,exports){
+},{"../internals/export":60,"../internals/fails":61,"../internals/object-keys":106,"../internals/to-object":139}],163:[function(_dereq_,module,exports){
 var TO_STRING_TAG_SUPPORT = _dereq_('../internals/to-string-tag-support');
 var redefine = _dereq_('../internals/redefine');
 var toString = _dereq_('../internals/object-to-string');
@@ -7366,7 +7383,7 @@ if (!TO_STRING_TAG_SUPPORT) {
   redefine(Object.prototype, 'toString', toString, { unsafe: true });
 }
 
-},{"../internals/object-to-string":110,"../internals/redefine":116,"../internals/to-string-tag-support":144}],164:[function(_dereq_,module,exports){
+},{"../internals/object-to-string":109,"../internals/redefine":115,"../internals/to-string-tag-support":143}],164:[function(_dereq_,module,exports){
 var $ = _dereq_('../internals/export');
 var parseFloatImplementation = _dereq_('../internals/number-parse-float');
 
@@ -7376,7 +7393,7 @@ $({ global: true, forced: parseFloat != parseFloatImplementation }, {
   parseFloat: parseFloatImplementation
 });
 
-},{"../internals/export":61,"../internals/number-parse-float":95}],165:[function(_dereq_,module,exports){
+},{"../internals/export":60,"../internals/number-parse-float":94}],165:[function(_dereq_,module,exports){
 var $ = _dereq_('../internals/export');
 var parseIntImplementation = _dereq_('../internals/number-parse-int');
 
@@ -7386,7 +7403,7 @@ $({ global: true, forced: parseInt != parseIntImplementation }, {
   parseInt: parseIntImplementation
 });
 
-},{"../internals/export":61,"../internals/number-parse-int":96}],166:[function(_dereq_,module,exports){
+},{"../internals/export":60,"../internals/number-parse-int":95}],166:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var IS_PURE = _dereq_('../internals/is-pure');
@@ -7626,7 +7643,7 @@ if (FORCED) {
       internalReject(state, error);
     }
   };
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars -- required for `.length`
   Internal = function Promise(executor) {
     setInternalState(this, {
       type: PROMISE,
@@ -7686,7 +7703,7 @@ if (FORCED) {
 
     // wrap fetch result
     if (typeof $fetch == 'function') $({ global: true, enumerable: true, forced: true }, {
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars -- required for `.length`
       fetch: function fetch(input /* , init */) {
         return promiseResolve(PromiseConstructor, $fetch.apply(global, arguments));
       }
@@ -7769,7 +7786,7 @@ $({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
   }
 });
 
-},{"../internals/a-function":20,"../internals/an-instance":24,"../internals/check-correctness-of-iteration":42,"../internals/engine-is-node":56,"../internals/engine-v8-version":59,"../internals/export":61,"../internals/get-built-in":65,"../internals/global":69,"../internals/host-report-errors":72,"../internals/inspect-source":78,"../internals/internal-state":79,"../internals/is-forced":82,"../internals/is-object":83,"../internals/is-pure":84,"../internals/iterate":85,"../internals/microtask":89,"../internals/native-promise-constructor":90,"../internals/new-promise-capability":94,"../internals/perform":113,"../internals/promise-resolve":114,"../internals/redefine":116,"../internals/redefine-all":115,"../internals/set-species":123,"../internals/set-to-string-tag":124,"../internals/species-constructor":128,"../internals/task":133,"../internals/well-known-symbol":150}],167:[function(_dereq_,module,exports){
+},{"../internals/a-function":20,"../internals/an-instance":24,"../internals/check-correctness-of-iteration":41,"../internals/engine-is-node":55,"../internals/engine-v8-version":58,"../internals/export":60,"../internals/get-built-in":64,"../internals/global":68,"../internals/host-report-errors":71,"../internals/inspect-source":77,"../internals/internal-state":78,"../internals/is-forced":81,"../internals/is-object":82,"../internals/is-pure":83,"../internals/iterate":84,"../internals/microtask":88,"../internals/native-promise-constructor":89,"../internals/new-promise-capability":93,"../internals/perform":112,"../internals/promise-resolve":113,"../internals/redefine":115,"../internals/redefine-all":114,"../internals/set-species":122,"../internals/set-to-string-tag":123,"../internals/species-constructor":127,"../internals/task":132,"../internals/well-known-symbol":150}],167:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var exec = _dereq_('../internals/regexp-exec');
@@ -7780,7 +7797,7 @@ $({ target: 'RegExp', proto: true, forced: /./.exec !== exec }, {
   exec: exec
 });
 
-},{"../internals/export":61,"../internals/regexp-exec":118}],168:[function(_dereq_,module,exports){
+},{"../internals/export":60,"../internals/regexp-exec":117}],168:[function(_dereq_,module,exports){
 'use strict';
 var redefine = _dereq_('../internals/redefine');
 var anObject = _dereq_('../internals/an-object');
@@ -7807,7 +7824,7 @@ if (NOT_GENERIC || INCORRECT_NAME) {
   }, { unsafe: true });
 }
 
-},{"../internals/an-object":25,"../internals/fails":62,"../internals/redefine":116,"../internals/regexp-flags":119}],169:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/fails":61,"../internals/redefine":115,"../internals/regexp-flags":118}],169:[function(_dereq_,module,exports){
 'use strict';
 var charAt = _dereq_('../internals/string-multibyte').charAt;
 var InternalStateModule = _dereq_('../internals/internal-state');
@@ -7838,7 +7855,7 @@ defineIterator(String, 'String', function (iterated) {
   return { value: point, done: false };
 });
 
-},{"../internals/define-iterator":51,"../internals/internal-state":79,"../internals/string-multibyte":129}],170:[function(_dereq_,module,exports){
+},{"../internals/define-iterator":50,"../internals/internal-state":78,"../internals/string-multibyte":128}],170:[function(_dereq_,module,exports){
 'use strict';
 var fixRegExpWellKnownSymbolLogic = _dereq_('../internals/fix-regexp-well-known-symbol-logic');
 var anObject = _dereq_('../internals/an-object');
@@ -7938,7 +7955,7 @@ fixRegExpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, ma
   ];
 });
 
-},{"../internals/advance-string-index":23,"../internals/an-object":25,"../internals/fix-regexp-well-known-symbol-logic":63,"../internals/get-substitution":68,"../internals/regexp-exec-abstract":117,"../internals/require-object-coercible":121,"../internals/to-integer":138,"../internals/to-length":139}],171:[function(_dereq_,module,exports){
+},{"../internals/advance-string-index":23,"../internals/an-object":25,"../internals/fix-regexp-well-known-symbol-logic":62,"../internals/get-substitution":67,"../internals/regexp-exec-abstract":116,"../internals/require-object-coercible":120,"../internals/to-integer":137,"../internals/to-length":138}],171:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var $copyWithin = _dereq_('../internals/array-copy-within');
@@ -7976,7 +7993,7 @@ var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
 
 // `%TypedArray%.prototype.fill` method
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype.fill
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars -- required for `.length`
 exportTypedArrayMethod('fill', function fill(value /* , start, end */) {
   return $fill.apply(aTypedArray(this), arguments);
 });
@@ -7985,25 +8002,19 @@ exportTypedArrayMethod('fill', function fill(value /* , start, end */) {
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var $filter = _dereq_('../internals/array-iteration').filter;
-var speciesConstructor = _dereq_('../internals/species-constructor');
+var fromSpeciesAndList = _dereq_('../internals/typed-array-from-species-and-list');
 
 var aTypedArray = ArrayBufferViewCore.aTypedArray;
-var aTypedArrayConstructor = ArrayBufferViewCore.aTypedArrayConstructor;
 var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
 
 // `%TypedArray%.prototype.filter` method
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype.filter
 exportTypedArrayMethod('filter', function filter(callbackfn /* , thisArg */) {
   var list = $filter(aTypedArray(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  var C = speciesConstructor(this, this.constructor);
-  var index = 0;
-  var length = list.length;
-  var result = new (aTypedArrayConstructor(C))(length);
-  while (length > index) result[index] = list[index++];
-  return result;
+  return fromSpeciesAndList(this, list);
 });
 
-},{"../internals/array-buffer-view-core":27,"../internals/array-iteration":34,"../internals/species-constructor":128}],175:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/array-iteration":34,"../internals/typed-array-from-species-and-list":146}],175:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var $findIndex = _dereq_('../internals/array-iteration').findIndex;
@@ -8113,7 +8124,7 @@ exportTypedArrayMethod('values', typedArrayValues, !CORRECT_ITER_NAME);
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype-@@iterator
 exportTypedArrayMethod(ITERATOR, typedArrayValues, !CORRECT_ITER_NAME);
 
-},{"../internals/array-buffer-view-core":27,"../internals/global":69,"../internals/well-known-symbol":150,"../modules/es.array.iterator":156}],181:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/global":68,"../internals/well-known-symbol":150,"../modules/es.array.iterator":156}],181:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 
@@ -8123,7 +8134,7 @@ var $join = [].join;
 
 // `%TypedArray%.prototype.join` method
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype.join
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars -- required for `.length`
 exportTypedArrayMethod('join', function join(separator) {
   return $join.apply(aTypedArray(this), arguments);
 });
@@ -8138,7 +8149,7 @@ var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
 
 // `%TypedArray%.prototype.lastIndexOf` method
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype.lastindexof
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars -- required for `.length`
 exportTypedArrayMethod('lastIndexOf', function lastIndexOf(searchElement /* , fromIndex */) {
   return $lastIndexOf.apply(aTypedArray(this), arguments);
 });
@@ -8161,7 +8172,7 @@ exportTypedArrayMethod('map', function map(mapfn /* , thisArg */) {
   });
 });
 
-},{"../internals/array-buffer-view-core":27,"../internals/array-iteration":34,"../internals/species-constructor":128}],184:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/array-iteration":34,"../internals/species-constructor":127}],184:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var $reduceRight = _dereq_('../internals/array-reduce').right;
@@ -8175,7 +8186,7 @@ exportTypedArrayMethod('reduceRight', function reduceRight(callbackfn /* , initi
   return $reduceRight(aTypedArray(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 });
 
-},{"../internals/array-buffer-view-core":27,"../internals/array-reduce":39}],185:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/array-reduce":38}],185:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var $reduce = _dereq_('../internals/array-reduce').left;
@@ -8189,7 +8200,7 @@ exportTypedArrayMethod('reduce', function reduce(callbackfn /* , initialValue */
   return $reduce(aTypedArray(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 });
 
-},{"../internals/array-buffer-view-core":27,"../internals/array-reduce":39}],186:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/array-reduce":38}],186:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 
@@ -8224,7 +8235,7 @@ var aTypedArray = ArrayBufferViewCore.aTypedArray;
 var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
 
 var FORCED = fails(function () {
-  // eslint-disable-next-line no-undef
+  // eslint-disable-next-line es/no-typed-arrays -- required for testing
   new Int8Array(1).set({});
 });
 
@@ -8241,7 +8252,7 @@ exportTypedArrayMethod('set', function set(arrayLike /* , offset */) {
   while (index < len) this[offset + index] = src[index++];
 }, FORCED);
 
-},{"../internals/array-buffer-view-core":27,"../internals/fails":62,"../internals/to-length":139,"../internals/to-object":140,"../internals/to-offset":141}],188:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/fails":61,"../internals/to-length":138,"../internals/to-object":139,"../internals/to-offset":140}],188:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var speciesConstructor = _dereq_('../internals/species-constructor');
@@ -8253,7 +8264,7 @@ var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
 var $slice = [].slice;
 
 var FORCED = fails(function () {
-  // eslint-disable-next-line no-undef
+  // eslint-disable-next-line es/no-typed-arrays -- required for testing
   new Int8Array(1).slice();
 });
 
@@ -8269,7 +8280,7 @@ exportTypedArrayMethod('slice', function slice(start, end) {
   return result;
 }, FORCED);
 
-},{"../internals/array-buffer-view-core":27,"../internals/fails":62,"../internals/species-constructor":128}],189:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/fails":61,"../internals/species-constructor":127}],189:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var $some = _dereq_('../internals/array-iteration').some;
@@ -8320,7 +8331,7 @@ exportTypedArrayMethod('subarray', function subarray(begin, end) {
   );
 });
 
-},{"../internals/array-buffer-view-core":27,"../internals/species-constructor":128,"../internals/to-absolute-index":135,"../internals/to-length":139}],192:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/species-constructor":127,"../internals/to-absolute-index":134,"../internals/to-length":138}],192:[function(_dereq_,module,exports){
 'use strict';
 var global = _dereq_('../internals/global');
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
@@ -8349,7 +8360,7 @@ exportTypedArrayMethod('toLocaleString', function toLocaleString() {
   return $toLocaleString.apply(TO_LOCALE_STRING_BUG ? $slice.call(aTypedArray(this)) : aTypedArray(this), arguments);
 }, FORCED);
 
-},{"../internals/array-buffer-view-core":27,"../internals/fails":62,"../internals/global":69}],193:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/fails":61,"../internals/global":68}],193:[function(_dereq_,module,exports){
 'use strict';
 var exportTypedArrayMethod = _dereq_('../internals/array-buffer-view-core').exportTypedArrayMethod;
 var fails = _dereq_('../internals/fails');
@@ -8372,7 +8383,7 @@ var IS_NOT_ARRAY_METHOD = Uint8ArrayPrototype.toString != arrayToString;
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype.tostring
 exportTypedArrayMethod('toString', arrayToString, IS_NOT_ARRAY_METHOD);
 
-},{"../internals/array-buffer-view-core":27,"../internals/fails":62,"../internals/global":69}],194:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":27,"../internals/fails":61,"../internals/global":68}],194:[function(_dereq_,module,exports){
 var createTypedArrayConstructor = _dereq_('../internals/typed-array-constructor');
 
 // `Uint8Array` constructor
@@ -8383,7 +8394,7 @@ createTypedArrayConstructor('Uint8', function (init) {
   };
 });
 
-},{"../internals/typed-array-constructor":145}],195:[function(_dereq_,module,exports){
+},{"../internals/typed-array-constructor":144}],195:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var DOMIterables = _dereq_('../internals/dom-iterables');
 var forEach = _dereq_('../internals/array-for-each');
@@ -8400,7 +8411,7 @@ for (var COLLECTION_NAME in DOMIterables) {
   }
 }
 
-},{"../internals/array-for-each":31,"../internals/create-non-enumerable-property":48,"../internals/dom-iterables":54,"../internals/global":69}],196:[function(_dereq_,module,exports){
+},{"../internals/array-for-each":31,"../internals/create-non-enumerable-property":47,"../internals/dom-iterables":53,"../internals/global":68}],196:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var DOMIterables = _dereq_('../internals/dom-iterables');
 var ArrayIteratorMethods = _dereq_('../modules/es.array.iterator');
@@ -8435,7 +8446,7 @@ for (var COLLECTION_NAME in DOMIterables) {
   }
 }
 
-},{"../internals/create-non-enumerable-property":48,"../internals/dom-iterables":54,"../internals/global":69,"../internals/well-known-symbol":150,"../modules/es.array.iterator":156}],197:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":47,"../internals/dom-iterables":53,"../internals/global":68,"../internals/well-known-symbol":150,"../modules/es.array.iterator":156}],197:[function(_dereq_,module,exports){
 'use strict';
 // TODO: in core-js@4, move /modules/ dependencies to public entries for better optimization by tools like `preset-env`
 _dereq_('../modules/es.array.iterator');
@@ -8784,7 +8795,7 @@ module.exports = {
   getState: getInternalParamsState
 };
 
-},{"../internals/an-instance":24,"../internals/an-object":25,"../internals/classof":44,"../internals/create-iterator-constructor":47,"../internals/create-property-descriptor":49,"../internals/export":61,"../internals/function-bind-context":64,"../internals/get-built-in":65,"../internals/get-iterator":67,"../internals/get-iterator-method":66,"../internals/has":70,"../internals/internal-state":79,"../internals/is-object":83,"../internals/native-url":92,"../internals/object-create":98,"../internals/redefine":116,"../internals/redefine-all":115,"../internals/set-to-string-tag":124,"../internals/well-known-symbol":150,"../modules/es.array.iterator":156}],198:[function(_dereq_,module,exports){
+},{"../internals/an-instance":24,"../internals/an-object":25,"../internals/classof":43,"../internals/create-iterator-constructor":46,"../internals/create-property-descriptor":48,"../internals/export":60,"../internals/function-bind-context":63,"../internals/get-built-in":64,"../internals/get-iterator":66,"../internals/get-iterator-method":65,"../internals/has":69,"../internals/internal-state":78,"../internals/is-object":82,"../internals/native-url":91,"../internals/object-create":97,"../internals/redefine":115,"../internals/redefine-all":114,"../internals/set-to-string-tag":123,"../internals/well-known-symbol":150,"../modules/es.array.iterator":156}],198:[function(_dereq_,module,exports){
 'use strict';
 // TODO: in core-js@4, move /modules/ dependencies to public entries for better optimization by tools like `preset-env`
 _dereq_('../modules/es.string.iterator');
@@ -8824,14 +8835,12 @@ var HEX_START = /^(0x|0X)/;
 var OCT = /^[0-7]+$/;
 var DEC = /^\d+$/;
 var HEX = /^[\dA-Fa-f]+$/;
-// eslint-disable-next-line no-control-regex
-var FORBIDDEN_HOST_CODE_POINT = /[\u0000\u0009\u000A\u000D #%/:?@[\\]]/;
-// eslint-disable-next-line no-control-regex
-var FORBIDDEN_HOST_CODE_POINT_EXCLUDING_PERCENT = /[\u0000\u0009\u000A\u000D #/:?@[\\]]/;
-// eslint-disable-next-line no-control-regex
+/* eslint-disable no-control-regex -- safe */
+var FORBIDDEN_HOST_CODE_POINT = /[\u0000\t\u000A\u000D #%/:?@[\\]]/;
+var FORBIDDEN_HOST_CODE_POINT_EXCLUDING_PERCENT = /[\u0000\t\u000A\u000D #/:?@[\\]]/;
 var LEADING_AND_TRAILING_C0_CONTROL_OR_SPACE = /^[\u0000-\u001F ]+|[\u0000-\u001F ]+$/g;
-// eslint-disable-next-line no-control-regex
-var TAB_AND_NEW_LINE = /[\u0009\u000A\u000D]/g;
+var TAB_AND_NEW_LINE = /[\t\u000A\u000D]/g;
+/* eslint-enable no-control-regex -- safe */
 var EOF;
 
 var parseHost = function (url, input) {
@@ -8897,7 +8906,7 @@ var parseIPv4 = function (input) {
   return ipv4;
 };
 
-// eslint-disable-next-line max-statements
+// eslint-disable-next-line max-statements -- TODO
 var parseIPv6 = function (input) {
   var address = [0, 0, 0, 0, 0, 0, 0, 0];
   var pieceIndex = 0;
@@ -9119,7 +9128,7 @@ var CANNOT_BE_A_BASE_URL_PATH = {};
 var QUERY = {};
 var FRAGMENT = {};
 
-// eslint-disable-next-line max-statements
+// eslint-disable-next-line max-statements -- TODO
 var parseURL = function (url, input, stateOverride, base) {
   var state = stateOverride || SCHEME_START;
   var pointer = 0;
@@ -9775,13 +9784,13 @@ if (NativeURL) {
   var nativeRevokeObjectURL = NativeURL.revokeObjectURL;
   // `URL.createObjectURL` method
   // https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars -- required for `.length`
   if (nativeCreateObjectURL) redefine(URLConstructor, 'createObjectURL', function createObjectURL(blob) {
     return nativeCreateObjectURL.apply(NativeURL, arguments);
   });
   // `URL.revokeObjectURL` method
   // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars -- required for `.length`
   if (nativeRevokeObjectURL) redefine(URLConstructor, 'revokeObjectURL', function revokeObjectURL(url) {
     return nativeRevokeObjectURL.apply(NativeURL, arguments);
   });
@@ -9793,7 +9802,7 @@ $({ global: true, forced: !USE_NATIVE_URL, sham: !DESCRIPTORS }, {
   URL: URLConstructor
 });
 
-},{"../internals/an-instance":24,"../internals/array-from":32,"../internals/descriptors":52,"../internals/export":61,"../internals/global":69,"../internals/has":70,"../internals/internal-state":79,"../internals/native-url":92,"../internals/object-assign":97,"../internals/object-define-properties":99,"../internals/redefine":116,"../internals/set-to-string-tag":124,"../internals/string-multibyte":129,"../internals/string-punycode-to-ascii":130,"../modules/es.string.iterator":169,"../modules/web.url-search-params":197}],199:[function(_dereq_,module,exports){
+},{"../internals/an-instance":24,"../internals/array-from":32,"../internals/descriptors":51,"../internals/export":60,"../internals/global":68,"../internals/has":69,"../internals/internal-state":78,"../internals/native-url":91,"../internals/object-assign":96,"../internals/object-define-properties":98,"../internals/redefine":115,"../internals/set-to-string-tag":123,"../internals/string-multibyte":128,"../internals/string-punycode-to-ascii":129,"../modules/es.string.iterator":169,"../modules/web.url-search-params":197}],199:[function(_dereq_,module,exports){
 (function (Buffer){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -21774,12 +21783,12 @@ module.exports = function typedarrayToBuffer (arr) {
 
 }).call(this)}).call(this,_dereq_("buffer").Buffer)
 },{"buffer":12,"is-typedarray":240}],281:[function(_dereq_,module,exports){
-/*!
- * UAParser.js v0.7.23
+/*!@license
+ * UAParser.js v0.7.27
  * Lightweight JavaScript-based User-Agent string parser
  * https://github.com/faisalman/ua-parser-js
  *
- * Copyright © 2012-2019 Faisal Salman <f@faisalman.com>
+ * Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
  * Licensed under MIT License
  */
 
@@ -21792,7 +21801,7 @@ module.exports = function typedarrayToBuffer (arr) {
     /////////////
 
 
-    var LIBVERSION  = '0.7.23',
+    var LIBVERSION  = '0.7.27',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -21811,7 +21820,8 @@ module.exports = function typedarrayToBuffer (arr) {
         TABLET      = 'tablet',
         SMARTTV     = 'smarttv',
         WEARABLE    = 'wearable',
-        EMBEDDED    = 'embedded';
+        EMBEDDED    = 'embedded',
+        UA_MAX_LENGTH = 255;
 
 
     ///////////
@@ -21832,11 +21842,7 @@ module.exports = function typedarrayToBuffer (arr) {
             return mergedRegexes;
         },
         has : function (str1, str2) {
-          if (typeof str1 === "string") {
-            return str2.toLowerCase().indexOf(str1.toLowerCase()) !== -1;
-          } else {
-            return false;
-          }
+            return typeof str1 === STR_TYPE ? str2.toLowerCase().indexOf(str1.toLowerCase()) !== -1 : false;
         },
         lowerize : function (str) {
             return str.toLowerCase();
@@ -21844,8 +21850,9 @@ module.exports = function typedarrayToBuffer (arr) {
         major : function (version) {
             return typeof(version) === STR_TYPE ? version.replace(/[^\d\.]/g,'').split(".")[0] : undefined;
         },
-        trim : function (str) {
-          return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+        trim : function (str, len) {
+            str = str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+            return typeof(len) === UNDEF_TYPE ? str : str.substring(0, UA_MAX_LENGTH);
         }
     };
 
@@ -21936,7 +21943,8 @@ module.exports = function typedarrayToBuffer (arr) {
     var maps = {
 
         browser : {
-            oldsafari : {
+            // Safari < 3.0
+            oldSafari : {
                 version : {
                     '1.0'   : '/8',
                     '1.2'   : '/1',
@@ -21947,22 +21955,16 @@ module.exports = function typedarrayToBuffer (arr) {
                     '2.0.4' : '/419',
                     '?'     : '/'
                 }
-            }
-        },
-
-        device : {
-            amazon : {
-                model : {
-                    'Fire Phone' : ['SD', 'KF']
-                }
             },
-            sprint : {
-                model : {
-                    'Evo Shift 4G' : '7373KT'
-                },
-                vendor : {
-                    'HTC'       : 'APA',
-                    'Sprint'    : 'Sprint'
+            oldEdge : {
+                version : {
+                    '0.1'   : '12.',
+                    '21'    : '13.',
+                    '31'    : '14.',
+                    '39'    : '15.',
+                    '41'    : '16.',
+                    '42'    : '17.',
+                    '44'    : '18.'
                 }
             }
         },
@@ -21996,159 +21998,107 @@ module.exports = function typedarrayToBuffer (arr) {
 
         browser : [[
 
+            /\b(?:crmo|crios)\/([\w\.]+)/i                                      // Chrome for Android/iOS
+            ], [VERSION, [NAME, 'Chrome']], [
+            /(?:edgios|edga|edg)\/([\w\.]+)/i                                   // Microsoft Edge
+            ], [VERSION, [NAME, 'Edge']], [
+            /edge\/([\w\.]+)/i                                                  // Old Edge (Trident)
+            ], [[VERSION, mapper.str, maps.browser.oldEdge.version], [NAME, 'Edge']], [
+
             // Presto based
             /(opera\smini)\/([\w\.-]+)/i,                                       // Opera Mini
-            /(opera\s[mobiletab]{3,6}).+version\/([\w\.-]+)/i,                  // Opera Mobi/Tablet
-            /(opera).+version\/([\w\.]+)/i,                                     // Opera > 9.80
-            /(opera)[\/\s]+([\w\.]+)/i                                          // Opera < 9.80
+            /(opera\s[mobiletab]{3,6})\b.+version\/([\w\.-]+)/i,                // Opera Mobi/Tablet
+            /(opera)(?:.+version\/|[\/\s]+)([\w\.]+)/i,                         // Opera
             ], [NAME, VERSION], [
-
-            /(opios)[\/\s]+([\w\.]+)/i                                          // Opera mini on iphone >= 8.0
-            ], [[NAME, 'Opera Mini'], VERSION], [
-
-            /\s(opr)\/([\w\.]+)/i                                               // Opera Webkit
-            ], [[NAME, 'Opera'], VERSION], [
+            /opios[\/\s]+([\w\.]+)/i                                            // Opera mini on iphone >= 8.0
+            ], [VERSION, [NAME, 'Opera Mini']], [
+            /\sopr\/([\w\.]+)/i                                                 // Opera Webkit
+            ], [VERSION, [NAME, 'Opera']], [
 
             // Mixed
             /(kindle)\/([\w\.]+)/i,                                             // Kindle
-            /(lunascape|maxthon|netfront|jasmine|blazer)[\/\s]?([\w\.]*)/i,
-                                                                                // Lunascape/Maxthon/Netfront/Jasmine/Blazer
+            /(lunascape|maxthon|netfront|jasmine|blazer|instagram)[\/\s]?([\w\.]*)/i,  // Lunascape/Maxthon/Netfront/Jasmine/Blazer/Instagram
             // Trident based
-            /(avant\s|iemobile|slim)(?:browser)?[\/\s]?([\w\.]*)/i,
-                                                                                // Avant/IEMobile/SlimBrowser
-            /(bidubrowser|baidubrowser)[\/\s]?([\w\.]+)/i,                      // Baidu Browser
+            /(avant\s|iemobile|slim)(?:browser)?[\/\s]?([\w\.]*)/i,             // Avant/IEMobile/SlimBrowser
+            /(ba?idubrowser)[\/\s]?([\w\.]+)/i,                                 // Baidu Browser
             /(?:ms|\()(ie)\s([\w\.]+)/i,                                        // Internet Explorer
 
             // Webkit/KHTML based
-            /(rekonq)\/([\w\.]*)/i,                                             // Rekonq
-            /(chromium|flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|quark|qupzilla|falkon)\/([\w\.-]+)/i
+            /(chromium|flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|quark|qupzilla|falkon)\/([\w\.-]+)/i,
                                                                                 // Chromium/Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron/Iridium/PhantomJS/Bowser/QupZilla/Falkon
+            /(rekonq|puffin|brave|whale|qqbrowserlite|qq)\/([\w\.]+)/i,         // Rekonq/Puffin/Brave/Whale/QQBrowserLite/QQ, aka ShouQ
+            /(weibo)__([\d\.]+)/i                                               // Weibo
             ], [NAME, VERSION], [
-
-            /(konqueror)\/([\w\.]+)/i                                           // Konqueror
-            ], [[NAME, 'Konqueror'], VERSION], [
-
-            /(trident).+rv[:\s]([\w\.]{1,9}).+like\sgecko/i                     // IE11
-            ], [[NAME, 'IE'], VERSION], [
-
-            /(edge|edgios|edga|edg)\/((\d+)?[\w\.]+)/i                          // Microsoft Edge
-            ], [[NAME, 'Edge'], VERSION], [
-
-            /(yabrowser)\/([\w\.]+)/i                                           // Yandex
-            ], [[NAME, 'Yandex'], VERSION], [
-
-            /(Avast)\/([\w\.]+)/i                                               // Avast Secure Browser
-            ], [[NAME, 'Avast Secure Browser'], VERSION], [
-
-            /(AVG)\/([\w\.]+)/i                                                 // AVG Secure Browser
-            ], [[NAME, 'AVG Secure Browser'], VERSION], [
-
-            /(puffin)\/([\w\.]+)/i                                              // Puffin
-            ], [[NAME, 'Puffin'], VERSION], [
-
-            /(focus)\/([\w\.]+)/i                                               // Firefox Focus
-            ], [[NAME, 'Firefox Focus'], VERSION], [
-
-            /(opt)\/([\w\.]+)/i                                                 // Opera Touch
-            ], [[NAME, 'Opera Touch'], VERSION], [
-
-            /((?:[\s\/])uc?\s?browser|(?:juc.+)ucweb)[\/\s]?([\w\.]+)/i         // UCBrowser
-            ], [[NAME, 'UCBrowser'], VERSION], [
-
+            /(?:[\s\/]uc?\s?browser|(?:juc.+)ucweb)[\/\s]?([\w\.]+)/i           // UCBrowser
+            ], [VERSION, [NAME, 'UCBrowser']], [
+            /(?:windowswechat)?\sqbcore\/([\w\.]+)\b.*(?:windowswechat)?/i      // WeChat Desktop for Windows Built-in Browser
+            ], [VERSION, [NAME, 'WeChat(Win) Desktop']], [
+            /micromessenger\/([\w\.]+)/i                                        // WeChat
+            ], [VERSION, [NAME, 'WeChat']], [
+            /konqueror\/([\w\.]+)/i                                             // Konqueror
+            ], [VERSION, [NAME, 'Konqueror']], [
+            /trident.+rv[:\s]([\w\.]{1,9})\b.+like\sgecko/i                     // IE11
+            ], [VERSION, [NAME, 'IE']], [
+            /yabrowser\/([\w\.]+)/i                                             // Yandex
+            ], [VERSION, [NAME, 'Yandex']], [
+            /(avast|avg)\/([\w\.]+)/i                                           // Avast/AVG Secure Browser
+            ], [[NAME, /(.+)/, '$1 Secure Browser'], VERSION], [
+            /focus\/([\w\.]+)/i                                                 // Firefox Focus
+            ], [VERSION, [NAME, 'Firefox Focus']], [
+            /opt\/([\w\.]+)/i                                                   // Opera Touch
+            ], [VERSION, [NAME, 'Opera Touch']], [
+            /coc_coc_browser\/([\w\.]+)/i                                       // Coc Coc Browser
+            ], [VERSION, [NAME, 'Coc Coc']], [
+            /dolfin\/([\w\.]+)/i                                                // Dolphin
+            ], [VERSION, [NAME, 'Dolphin']], [
+            /coast\/([\w\.]+)/i                                                 // Opera Coast
+            ], [VERSION, [NAME, 'Opera Coast']],
+            [/xiaomi\/miuibrowser\/([\w\.]+)/i                                  // MIUI Browser
+            ], [VERSION, [NAME, 'MIUI Browser']], [
+            /fxios\/([\w\.-]+)/i                                                // Firefox for iOS
+            ], [VERSION, [NAME, 'Firefox']], [
+            /(qihu|qhbrowser|qihoobrowser|360browser)/i                         // 360
+            ], [[NAME, '360 Browser']], [
+            /(oculus|samsung|sailfish)browser\/([\w\.]+)/i
+            ], [[NAME, /(.+)/, '$1 Browser'], VERSION], [                       // Oculus/Samsung/Sailfish Browser
             /(comodo_dragon)\/([\w\.]+)/i                                       // Comodo Dragon
             ], [[NAME, /_/g, ' '], VERSION], [
-
-            /(windowswechat qbcore)\/([\w\.]+)/i                                // WeChat Desktop for Windows Built-in Browser
-            ], [[NAME, 'WeChat(Win) Desktop'], VERSION], [
-
-            /(micromessenger)\/([\w\.]+)/i                                      // WeChat
-            ], [[NAME, 'WeChat'], VERSION], [
-
-            /(brave)\/([\w\.]+)/i                                               // Brave browser
-            ], [[NAME, 'Brave'], VERSION], [
-
-            /(whale)\/([\w\.]+)/i                                               // Whale browser
-            ], [[NAME, 'Whale'], VERSION], [
-
-            /(qqbrowserlite)\/([\w\.]+)/i                                       // QQBrowserLite
+            /m?(qqbrowser|baiduboxapp|2345Explorer)[\/\s]?([\w\.]+)/i           // QQBrowser/Baidu App/2345 Browser
             ], [NAME, VERSION], [
-
-            /(QQ)\/([\d\.]+)/i                                                  // QQ, aka ShouQ
-            ], [NAME, VERSION], [
-
-            /m?(qqbrowser)[\/\s]?([\w\.]+)/i                                    // QQBrowser
-            ], [NAME, VERSION], [
-
-            /(baiduboxapp)[\/\s]?([\w\.]+)/i                                    // Baidu App
-            ], [NAME, VERSION], [
-
-            /(2345Explorer)[\/\s]?([\w\.]+)/i                                   // 2345 Browser
-            ], [NAME, VERSION], [
-
-            /(MetaSr)[\/\s]?([\w\.]+)/i                                         // SouGouBrowser
-            ], [NAME], [
-
+            /(MetaSr)[\/\s]?([\w\.]+)/i,                                        // SouGouBrowser
             /(LBBROWSER)/i                                                      // LieBao Browser
             ], [NAME], [
 
-            /xiaomi\/miuibrowser\/([\w\.]+)/i                                   // MIUI Browser
-            ], [VERSION, [NAME, 'MIUI Browser']], [
-
+            // WebView
             /;fbav\/([\w\.]+);/i                                                // Facebook App for iOS & Android with version
             ], [VERSION, [NAME, 'Facebook']], [
-            
             /FBAN\/FBIOS|FB_IAB\/FB4A/i                                         // Facebook App for iOS & Android without version
             ], [[NAME, 'Facebook']], [
-
+            /\s(electron)\/([\w\.]+)\ssafari/i,                                 // Electron-based App
             /safari\s(line)\/([\w\.]+)/i,                                       // Line App for iOS
-            /android.+(line)\/([\w\.]+)\/iab/i                                  // Line App for Android
+            /\b(line)\/([\w\.]+)\/iab/i                                         // Line App for Android
             ], [NAME, VERSION], [
+            /\bgsa\/([\w\.]+)\s.*safari\//i                                     // Google Search Appliance on iOS
+            ], [VERSION, [NAME, 'GSA']], [
 
             /headlesschrome(?:\/([\w\.]+)|\s)/i                                 // Chrome Headless
             ], [VERSION, [NAME, 'Chrome Headless']], [
 
             /\swv\).+(chrome)\/([\w\.]+)/i                                      // Chrome WebView
-            ], [[NAME, /(.+)/, '$1 WebView'], VERSION], [
+            ], [[NAME, 'Chrome WebView'], VERSION], [
 
-            /((?:oculus|samsung)browser)\/([\w\.]+)/i
-            ], [[NAME, /(.+(?:g|us))(.+)/, '$1 $2'], VERSION], [                // Oculus / Samsung Browser
-
-            /android.+version\/([\w\.]+)\s+(?:mobile\s?safari|safari)*/i        // Android Browser
+            /droid.+\sversion\/([\w\.]+)\b.+(?:mobile\ssafari|safari)/i         // Android Browser
             ], [VERSION, [NAME, 'Android Browser']], [
 
-            /(sailfishbrowser)\/([\w\.]+)/i                                     // Sailfish Browser
-            ], [[NAME, 'Sailfish Browser'], VERSION], [
-
-            /(chrome|omniweb|arora|[tizenoka]{5}\s?browser)\/v?([\w\.]+)/i
-                                                                                // Chrome/OmniWeb/Arora/Tizen/Nokia
+            /(chrome|omniweb|arora|[tizenoka]{5}\s?browser)\/v?([\w\.]+)/i      // Chrome/OmniWeb/Arora/Tizen/Nokia
             ], [NAME, VERSION], [
-
-            /(dolfin)\/([\w\.]+)/i                                              // Dolphin
-            ], [[NAME, 'Dolphin'], VERSION], [
-
-            /(qihu|qhbrowser|qihoobrowser|360browser)/i                         // 360
-            ], [[NAME, '360 Browser']], [
-
-            /((?:android.+)crmo|crios)\/([\w\.]+)/i                             // Chrome for Android/iOS
-            ], [[NAME, 'Chrome'], VERSION], [
-
-            /(coast)\/([\w\.]+)/i                                               // Opera Coast
-            ], [[NAME, 'Opera Coast'], VERSION], [
-
-            /fxios\/([\w\.-]+)/i                                                // Firefox for iOS
-            ], [VERSION, [NAME, 'Firefox']], [
 
             /version\/([\w\.]+)\s.*mobile\/\w+\s(safari)/i                      // Mobile Safari
             ], [VERSION, [NAME, 'Mobile Safari']], [
-
             /version\/([\w\.]+)\s.*(mobile\s?safari|safari)/i                   // Safari & Safari Mobile
             ], [VERSION, NAME], [
-
-            /webkit.+?(gsa)\/([\w\.]+)\s.*(mobile\s?safari|safari)(\/[\w\.]+)/i // Google Search Appliance on iOS
-            ], [[NAME, 'GSA'], VERSION], [
-
             /webkit.+?(mobile\s?safari|safari)(\/[\w\.]+)/i                     // Safari < 3.0
-            ], [NAME, [VERSION, mapper.str, maps.browser.oldsafari.version]], [
+            ], [NAME, [VERSION, mapper.str, maps.browser.oldSafari.version]], [
 
             /(webkit|khtml)\/([\w\.]+)/i
             ], [NAME, VERSION], [
@@ -22156,11 +22106,13 @@ module.exports = function typedarrayToBuffer (arr) {
             // Gecko based
             /(navigator|netscape)\/([\w\.-]+)/i                                 // Netscape
             ], [[NAME, 'Netscape'], VERSION], [
+            /ile\svr;\srv:([\w\.]+)\).+firefox/i                                // Firefox Reality
+            ], [VERSION, [NAME, 'Firefox Reality']], [
+            /ekiohf.+(flow)\/([\w\.]+)/i,                                       // Flow
             /(swiftfox)/i,                                                      // Swiftfox
             /(icedragon|iceweasel|camino|chimera|fennec|maemo\sbrowser|minimo|conkeror)[\/\s]?([\w\.\+]+)/i,
                                                                                 // IceDragon/Iceweasel/Camino/Chimera/Fennec/Maemo/Minimo/Conkeror
             /(firefox|seamonkey|k-meleon|icecat|iceape|firebird|phoenix|palemoon|basilisk|waterfox)\/([\w\.-]+)$/i,
-
                                                                                 // Firefox/SeaMonkey/K-Meleon/IceCat/IceApe/Firebird/Phoenix
             /(firefox)\/([\w\.]+)\s[\w\s\-]+\/[\w\.]+$/i,                       // Other Firefox-based
             /(mozilla)\/([\w\.]+)\s.+rv\:.+gecko\/\d+/i,                        // Mozilla
@@ -22177,14 +22129,20 @@ module.exports = function typedarrayToBuffer (arr) {
 
         cpu : [[
 
-            /(?:(amd|x(?:(?:86|64)[_-])?|wow|win)64)[;\)]/i                     // AMD64
+            /(?:(amd|x(?:(?:86|64)[_-])?|wow|win)64)[;\)]/i                     // AMD64 (x64)
             ], [[ARCHITECTURE, 'amd64']], [
 
             /(ia32(?=;))/i                                                      // IA32 (quicktime)
             ], [[ARCHITECTURE, util.lowerize]], [
 
-            /((?:i[346]|x)86)[;\)]/i                                            // IA32
+            /((?:i[346]|x)86)[;\)]/i                                            // IA32 (x86)
             ], [[ARCHITECTURE, 'ia32']], [
+
+            /\b(aarch64|armv?8e?l?)\b/i                                         // ARM64
+            ], [[ARCHITECTURE, 'arm64']], [
+
+            /\b(arm(?:v[67])?ht?n?[fl]p?)\b/i                                   // ARMHF
+            ], [[ARCHITECTURE, 'armhf']], [
 
             // PocketPC mistakenly identified as PowerPC
             /windows\s(ce|mobile);\sppc;/i
@@ -22196,276 +22154,294 @@ module.exports = function typedarrayToBuffer (arr) {
             /(sun4\w)[;\)]/i                                                    // SPARC
             ], [[ARCHITECTURE, 'sparc']], [
 
-            /((?:avr32|ia64(?=;))|68k(?=\))|arm(?:64|(?=v\d+[;l]))|(?=atmel\s)avr|(?:irix|mips|sparc)(?:64)?(?=;)|pa-risc)/i
+            /((?:avr32|ia64(?=;))|68k(?=\))|\barm(?:64|(?=v(?:[1-7]|[5-7]1)l?|;|eabi))|(?=atmel\s)avr|(?:irix|mips|sparc)(?:64)?\b|pa-risc)/i
                                                                                 // IA64, 68K, ARM/64, AVR/32, IRIX/64, MIPS/64, SPARC/64, PA-RISC
             ], [[ARCHITECTURE, util.lowerize]]
         ],
 
         device : [[
 
-            /\((ipad|playbook);[\w\s\),;-]+(rim|apple)/i                        // iPad/PlayBook
-            ], [MODEL, VENDOR, [TYPE, TABLET]], [
+            //////////////////////////
+            // MOBILES & TABLETS
+            // Ordered by popularity
+            /////////////////////////
 
-            /applecoremedia\/[\w\.]+ \((ipad)/                                  // iPad
+            // Samsung
+            /\b(sch-i[89]0\d|shw-m380s|sm-[pt]\w{2,4}|gt-[pn]\d{2,4}|sgh-t8[56]9|nexus\s10)/i
+            ], [MODEL, [VENDOR, 'Samsung'], [TYPE, TABLET]], [
+            /\b((?:s[cgp]h|gt|sm)-\w+|galaxy\snexus)/i,
+            /\ssamsung[\s-]([\w-]+)/i,
+            /sec-(sgh\w+)/i
+            ], [MODEL, [VENDOR, 'Samsung'], [TYPE, MOBILE]], [
+
+            // Apple
+            /\((ip(?:hone|od)[\s\w]*);/i                                        // iPod/iPhone
+            ], [MODEL, [VENDOR, 'Apple'], [TYPE, MOBILE]], [
+            /\((ipad);[\w\s\),;-]+apple/i,                                      // iPad
+            /applecoremedia\/[\w\.]+\s\((ipad)/i,
+            /\b(ipad)\d\d?,\d\d?[;\]].+ios/i
             ], [MODEL, [VENDOR, 'Apple'], [TYPE, TABLET]], [
 
-            /(apple\s{0,1}tv)/i                                                 // Apple TV
-            ], [[MODEL, 'Apple TV'], [VENDOR, 'Apple'], [TYPE, SMARTTV]], [
+            // Huawei
+            /\b((?:agr|ags[23]|bah2?|sht?)-a?[lw]\d{2})/i,
+            ], [MODEL, [VENDOR, 'Huawei'], [TYPE, TABLET]], [
+            /d\/huawei([\w\s-]+)[;\)]/i,
+            /\b(nexus\s6p|vog-[at]?l\d\d|ane-[at]?l[x\d]\d|eml-a?l\d\da?|lya-[at]?l\d[\dc]|clt-a?l\d\di?|ele-l\d\d)/i,
+            /\b(\w{2,4}-[atu][ln][01259][019])[;\)\s]/i
+            ], [MODEL, [VENDOR, 'Huawei'], [TYPE, MOBILE]], [
 
-            /(archos)\s(gamepad2?)/i,                                           // Archos
-            /(hp).+(touchpad)/i,                                                // HP TouchPad
-            /(hp).+(tablet)/i,                                                  // HP Tablet
-            /(kindle)\/([\w\.]+)/i,                                             // Kindle
-            /\s(nook)[\w\s]+build\/(\w+)/i,                                     // Nook
-            /(dell)\s(strea[kpr\s\d]*[\dko])/i                                  // Dell Streak
-            ], [VENDOR, MODEL, [TYPE, TABLET]], [
+            // Xiaomi
+            /\b(poco[\s\w]+)(?:\sbuild|\))/i,                                   // Xiaomi POCO
+            /\b;\s(\w+)\sbuild\/hm\1/i,                                         // Xiaomi Hongmi 'numeric' models
+            /\b(hm[\s\-_]?note?[\s_]?(?:\d\w)?)\sbuild/i,                       // Xiaomi Hongmi
+            /\b(redmi[\s\-_]?(?:note|k)?[\w\s_]+)(?:\sbuild|\))/i,              // Xiaomi Redmi
+            /\b(mi[\s\-_]?(?:a\d|one|one[\s_]plus|note lte)?[\s_]?(?:\d?\w?)[\s_]?(?:plus)?)\sbuild/i  // Xiaomi Mi
+            ], [[MODEL, /_/g, ' '], [VENDOR, 'Xiaomi'], [TYPE, MOBILE]], [
+            /\b(mi[\s\-_]?(?:pad)(?:[\w\s_]+))(?:\sbuild|\))/i                  // Mi Pad tablets
+            ],[[MODEL, /_/g, ' '], [VENDOR, 'Xiaomi'], [TYPE, TABLET]], [
 
-            /(kf[A-z]+)(\sbuild\/|\)).+silk\//i                                 // Kindle Fire HD
+            // OPPO
+            /;\s(\w+)\sbuild.+\soppo/i,
+            /\s(cph[12]\d{3}|p(?:af|c[al]|d\w|e[ar])[mt]\d0|x9007)\b/i
+            ], [MODEL, [VENDOR, 'OPPO'], [TYPE, MOBILE]], [
+
+            // Vivo
+            /\svivo\s(\w+)(?:\sbuild|\))/i,
+            /\s(v[12]\d{3}\w?[at])(?:\sbuild|;)/i
+            ], [MODEL, [VENDOR, 'Vivo'], [TYPE, MOBILE]], [
+
+            // Realme
+            /\s(rmx[12]\d{3})(?:\sbuild|;)/i
+            ], [MODEL, [VENDOR, 'Realme'], [TYPE, MOBILE]], [
+
+            // Motorola
+            /\s(milestone|droid(?:[2-4x]|\s(?:bionic|x2|pro|razr))?:?(\s4g)?)\b[\w\s]+build\//i,
+            /\smot[\s-](\w*)/i,
+            /((?:moto[\s\w\(\)]+|xt\d{3,4}|nexus\s6)(?=\sbuild|\)))/i
+            ], [MODEL, [VENDOR, 'Motorola'], [TYPE, MOBILE]], [
+            /\s(mz60\d|xoom[\s2]{0,2})\sbuild\//i
+            ], [MODEL, [VENDOR, 'Motorola'], [TYPE, TABLET]], [
+
+            // LG
+            /((?=lg)?[vl]k\-?\d{3})\sbuild|\s3\.[\s\w;-]{10}lg?-([06cv9]{3,4})/i
+            ], [MODEL, [VENDOR, 'LG'], [TYPE, TABLET]], [
+            /(nexus\s[45])/i,
+            /lg[e;\s\/-]+((?!browser|netcast)\w+)/i,
+            /\blg(\-?[\d\w]+)\sbuild/i
+            ], [MODEL, [VENDOR, 'LG'], [TYPE, MOBILE]], [
+
+            // Lenovo
+            /(ideatab[\w\-\s]+)/i,
+            /lenovo\s?(s(?:5000|6000)(?:[\w-]+)|tab(?:[\s\w]+)|yt[\d\w-]{6}|tb[\d\w-]{6})/i        // Lenovo tablets
+            ], [MODEL, [VENDOR, 'Lenovo'], [TYPE, TABLET]], [
+
+            // Nokia
+            /(?:maemo|nokia).*(n900|lumia\s\d+)/i,
+            /nokia[\s_-]?([\w\.-]*)/i
+            ], [MODEL, [VENDOR, 'Nokia'], [TYPE, MOBILE]], [
+
+            // Google
+            /droid.+;\s(pixel\sc)[\s)]/i                                        // Google Pixel C
+            ], [MODEL, [VENDOR, 'Google'], [TYPE, TABLET]], [
+            /droid.+;\s(pixel[\s\daxl]{0,6})(?:\sbuild|\))/i                    // Google Pixel
+            ], [MODEL, [VENDOR, 'Google'], [TYPE, MOBILE]], [
+
+            // Sony
+            /droid.+\s([c-g]\d{4}|so[-l]\w+|xq-a\w[4-7][12])(?=\sbuild\/|\).+chrome\/(?![1-6]{0,1}\d\.))/i
+            ], [MODEL, [VENDOR, 'Sony'], [TYPE, MOBILE]], [
+            /sony\stablet\s[ps]\sbuild\//i,
+            /(?:sony)?sgp\w+(?:\sbuild\/|\))/i
+            ], [[MODEL, 'Xperia Tablet'], [VENDOR, 'Sony'], [TYPE, TABLET]], [
+
+            // OnePlus
+            /\s(kb2005|in20[12]5|be20[12][59])\b/i,
+            /\ba000(1)\sbuild/i,                                                // OnePlus
+            /\boneplus\s(a\d{4})[\s)]/i
+            ], [MODEL, [VENDOR, 'OnePlus'], [TYPE, MOBILE]], [
+
+            // Amazon
+            /(alexa)webm/i,
+            /(kf[a-z]{2}wi)(\sbuild\/|\))/i,                                    // Kindle Fire without Silk
+            /(kf[a-z]+)(\sbuild\/|\)).+silk\//i                                 // Kindle Fire HD
             ], [MODEL, [VENDOR, 'Amazon'], [TYPE, TABLET]], [
             /(sd|kf)[0349hijorstuw]+(\sbuild\/|\)).+silk\//i                    // Fire Phone
-            ], [[MODEL, mapper.str, maps.device.amazon.model], [VENDOR, 'Amazon'], [TYPE, MOBILE]], [
-            /android.+aft([bms])\sbuild/i                                       // Fire TV
-            ], [MODEL, [VENDOR, 'Amazon'], [TYPE, SMARTTV]], [
+            ], [[MODEL, 'Fire Phone'], [VENDOR, 'Amazon'], [TYPE, MOBILE]], [
 
-            /\((ip[honed|\s\w*]+);.+(apple)/i                                   // iPod/iPhone
-            ], [MODEL, VENDOR, [TYPE, MOBILE]], [
-            /\((ip[honed|\s\w*]+);/i                                            // iPod/iPhone
-            ], [MODEL, [VENDOR, 'Apple'], [TYPE, MOBILE]], [
+            // BlackBerry
+            /\((playbook);[\w\s\),;-]+(rim)/i                                   // BlackBerry PlayBook
+            ], [MODEL, VENDOR, [TYPE, TABLET]], [
+            /\(bb10;\s(\w+)/i                                                   // BlackBerry 10
+            ], [MODEL, [VENDOR, 'BlackBerry'], [TYPE, MOBILE]], [
 
+            // Asus
+            /(?:\b|asus_)(transfo[prime\s]{4,10}\s\w+|eeepc|slider\s\w+|nexus\s7|padfone|p00[cj])/i
+            ], [MODEL, [VENDOR, 'ASUS'], [TYPE, TABLET]], [
+            /\s(z[es]6[027][01][km][ls]|zenfone\s\d\w?)\b/i
+            ], [MODEL, [VENDOR, 'ASUS'], [TYPE, MOBILE]], [
+
+            // HTC
+            /(nexus\s9)/i                                                       // HTC Nexus 9
+            ], [MODEL, [VENDOR, 'HTC'], [TYPE, TABLET]], [
+            /(htc)[;_\s-]{1,2}([\w\s]+(?=\)|\sbuild)|\w+)/i,                    // HTC
+
+            // ZTE
+            /(zte)-(\w*)/i,
+            /(alcatel|geeksphone|nexian|panasonic|(?=;\s)sony)[_\s-]?([\w-]*)/i // Alcatel/GeeksPhone/Nexian/Panasonic/Sony
+            ], [VENDOR, [MODEL, /_/g, ' '], [TYPE, MOBILE]], [
+
+            // Acer
+            /droid[x\d\.\s;]+\s([ab][1-7]\-?[0178a]\d\d?)/i
+            ], [MODEL, [VENDOR, 'Acer'], [TYPE, TABLET]], [
+
+            // Meizu
+            /droid.+;\s(m[1-5]\snote)\sbuild/i,
+            /\bmz-([\w-]{2,})/i
+            ], [MODEL, [VENDOR, 'Meizu'], [TYPE, MOBILE]], [
+
+            // MIXED
             /(blackberry)[\s-]?(\w+)/i,                                         // BlackBerry
             /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron)[\s_-]?([\w-]*)/i,
                                                                                 // BenQ/Palm/Sony-Ericsson/Acer/Asus/Dell/Meizu/Motorola/Polytron
             /(hp)\s([\w\s]+\w)/i,                                               // HP iPAQ
-            /(asus)-?(\w+)/i                                                    // Asus
-            ], [VENDOR, MODEL, [TYPE, MOBILE]], [
-            /\(bb10;\s(\w+)/i                                                   // BlackBerry 10
-            ], [MODEL, [VENDOR, 'BlackBerry'], [TYPE, MOBILE]], [
-                                                                                // Asus Tablets
-            /android.+(transfo[prime\s]{4,10}\s\w+|eeepc|slider\s\w+|nexus 7|padfone|p00c)/i
-            ], [MODEL, [VENDOR, 'Asus'], [TYPE, TABLET]], [
-
-            /(sony)\s(tablet\s[ps])\sbuild\//i,                                  // Sony
-            /(sony)?(?:sgp.+)\sbuild\//i
-            ], [[VENDOR, 'Sony'], [MODEL, 'Xperia Tablet'], [TYPE, TABLET]], [
-            /android.+\s([c-g]\d{4}|so[-l]\w+)(?=\sbuild\/|\).+chrome\/(?![1-6]{0,1}\d\.))/i
-            ], [MODEL, [VENDOR, 'Sony'], [TYPE, MOBILE]], [
-
-            /\s(ouya)\s/i,                                                      // Ouya
-            /(nintendo)\s([wids3u]+)/i                                          // Nintendo
-            ], [VENDOR, MODEL, [TYPE, CONSOLE]], [
-
-            /android.+;\s(shield)\sbuild/i                                      // Nvidia
-            ], [MODEL, [VENDOR, 'Nvidia'], [TYPE, CONSOLE]], [
-
-            /(playstation\s[34portablevi]+)/i                                   // Playstation
-            ], [MODEL, [VENDOR, 'Sony'], [TYPE, CONSOLE]], [
-
-            /(sprint\s(\w+))/i                                                  // Sprint Phones
-            ], [[VENDOR, mapper.str, maps.device.sprint.vendor], [MODEL, mapper.str, maps.device.sprint.model], [TYPE, MOBILE]], [
-
-            /(htc)[;_\s-]{1,2}([\w\s]+(?=\)|\sbuild)|\w+)/i,                    // HTC
-            /(zte)-(\w*)/i,                                                     // ZTE
-            /(alcatel|geeksphone|nexian|panasonic|(?=;\s)sony)[_\s-]?([\w-]*)/i
-                                                                                // Alcatel/GeeksPhone/Nexian/Panasonic/Sony
-            ], [VENDOR, [MODEL, /_/g, ' '], [TYPE, MOBILE]], [
-
-            /(nexus\s9)/i                                                       // HTC Nexus 9
-            ], [MODEL, [VENDOR, 'HTC'], [TYPE, TABLET]], [
-
-            /d\/huawei([\w\s-]+)[;\)]/i,                                        // Huawei
-            /android.+\s(nexus\s6p|vog-[at]?l\d\d|ane-[at]?l[x\d]\d|eml-a?l\d\da?|lya-[at]?l\d[\dc]|clt-a?l\d\di?)/i
-
-            ], [MODEL, [VENDOR, 'Huawei'], [TYPE, MOBILE]], [
-
-            /android.+(bah2?-a?[lw]\d{2})/i                                     // Huawei MediaPad
-            ], [MODEL, [VENDOR, 'Huawei'], [TYPE, TABLET]], [
-
-            /(microsoft);\s(lumia[\s\w]+)/i                                     // Microsoft Lumia
+            /(asus)-?(\w+)/i,                                                   // Asus
+            /(microsoft);\s(lumia[\s\w]+)/i,                                    // Microsoft Lumia
+            /(lenovo)[_\s-]?([\w-]+)/i,                                         // Lenovo
+            /linux;.+(jolla);/i,                                                // Jolla
+            /droid.+;\s(oppo)\s?([\w\s]+)\sbuild/i                              // OPPO
             ], [VENDOR, MODEL, [TYPE, MOBILE]], [
 
-            /[\s\(;](xbox(?:\sone)?)[\s\);]/i                                   // Microsoft Xbox
-            ], [MODEL, [VENDOR, 'Microsoft'], [TYPE, CONSOLE]], [
-            /(kin\.[onetw]{3})/i                                                // Microsoft Kin
-            ], [[MODEL, /\./g, ' '], [VENDOR, 'Microsoft'], [TYPE, MOBILE]], [
+            /(archos)\s(gamepad2?)/i,                                           // Archos
+            /(hp).+(touchpad(?!.+tablet)|tablet)/i,                             // HP TouchPad
+            /(kindle)\/([\w\.]+)/i,                                             // Kindle
+            /\s(nook)[\w\s]+build\/(\w+)/i,                                     // Nook
+            /(dell)\s(strea[kpr\s\d]*[\dko])/i,                                 // Dell Streak
+            /[;\/]\s?(le[\s\-]+pan)[\s\-]+(\w{1,9})\sbuild/i,                   // Le Pan Tablets
+            /[;\/]\s?(trinity)[\-\s]*(t\d{3})\sbuild/i,                         // Trinity Tablets
+            /\b(gigaset)[\s\-]+(q\w{1,9})\sbuild/i,                             // Gigaset Tablets
+            /\b(vodafone)\s([\w\s]+)(?:\)|\sbuild)/i                            // Vodafone
+            ], [VENDOR, MODEL, [TYPE, TABLET]], [
 
-                                                                                // Motorola
-            /\s(milestone|droid(?:[2-4x]|\s(?:bionic|x2|pro|razr))?:?(\s4g)?)[\w\s]+build\//i,
-            /mot[\s-]?(\w*)/i,
-            /(XT\d{3,4}) build\//i,
-            /(nexus\s6)/i
-            ], [MODEL, [VENDOR, 'Motorola'], [TYPE, MOBILE]], [
-            /android.+\s(mz60\d|xoom[\s2]{0,2})\sbuild\//i
-            ], [MODEL, [VENDOR, 'Motorola'], [TYPE, TABLET]], [
-
-            /hbbtv\/\d+\.\d+\.\d+\s+\([\w\s]*;\s*(\w[^;]*);([^;]*)/i            // HbbTV devices
-            ], [[VENDOR, util.trim], [MODEL, util.trim], [TYPE, SMARTTV]], [
-
-            /hbbtv.+maple;(\d+)/i
-            ], [[MODEL, /^/, 'SmartTV'], [VENDOR, 'Samsung'], [TYPE, SMARTTV]], [
-
-            /\(dtv[\);].+(aquos)/i                                              // Sharp
-            ], [MODEL, [VENDOR, 'Sharp'], [TYPE, SMARTTV]], [
-
-            /android.+((sch-i[89]0\d|shw-m380s|SM-P605|SM-P610|gt-p\d{4}|gt-n\d+|sgh-t8[56]9|nexus 10))/i,
-            /((SM-T\w+))/i
-            ], [[VENDOR, 'Samsung'], MODEL, [TYPE, TABLET]], [                  // Samsung
-            /smart-tv.+(samsung)/i
-            ], [VENDOR, [TYPE, SMARTTV], MODEL], [
-            /((s[cgp]h-\w+|gt-\w+|galaxy\snexus|sm-\w[\w\d]+))/i,
-            /(sam[sung]*)[\s-]*(\w+-?[\w-]*)/i,
-            /sec-((sgh\w+))/i
-            ], [[VENDOR, 'Samsung'], MODEL, [TYPE, MOBILE]], [
-
+            /\s(surface\sduo)\s/i                                               // Surface Duo
+            ], [MODEL, [VENDOR, 'Microsoft'], [TYPE, TABLET]], [
+            /droid\s[\d\.]+;\s(fp\du?)\sbuild/i
+            ], [MODEL, [VENDOR, 'Fairphone'], [TYPE, MOBILE]], [
+            /\s(u304aa)\sbuild/i                                                // AT&T
+            ], [MODEL, [VENDOR, 'AT&T'], [TYPE, MOBILE]], [
             /sie-(\w*)/i                                                        // Siemens
             ], [MODEL, [VENDOR, 'Siemens'], [TYPE, MOBILE]], [
-
-            /(maemo|nokia).*(n900|lumia\s\d+)/i,                                // Nokia
-            /(nokia)[\s_-]?([\w-]*)/i
-            ], [[VENDOR, 'Nokia'], MODEL, [TYPE, MOBILE]], [
-
-            /android[x\d\.\s;]+\s([ab][1-7]\-?[0178a]\d\d?)/i                   // Acer
-            ], [MODEL, [VENDOR, 'Acer'], [TYPE, TABLET]], [
-
-            /android.+([vl]k\-?\d{3})\s+build/i                                 // LG Tablet
-            ], [MODEL, [VENDOR, 'LG'], [TYPE, TABLET]], [
-            /android\s3\.[\s\w;-]{10}(lg?)-([06cv9]{3,4})/i                     // LG Tablet
-            ], [[VENDOR, 'LG'], MODEL, [TYPE, TABLET]], [
-            /linux;\snetcast.+smarttv/i,                                        // LG SmartTV
-            /lg\snetcast\.tv-201\d/i
-            ], [[VENDOR, 'LG'], MODEL, [TYPE, SMARTTV]], [
-            /(nexus\s[45])/i,                                                   // LG
-            /lg[e;\s\/-]+(\w*)/i,
-            /android.+lg(\-?[\d\w]+)\s+build/i
-            ], [MODEL, [VENDOR, 'LG'], [TYPE, MOBILE]], [
-
-            /(lenovo)\s?(s(?:5000|6000)(?:[\w-]+)|tab(?:[\s\w]+))/i             // Lenovo tablets
-            ], [VENDOR, MODEL, [TYPE, TABLET]], [
-            /android.+(ideatab[a-z0-9\-\s]+)/i                                  // Lenovo
-            ], [MODEL, [VENDOR, 'Lenovo'], [TYPE, TABLET]], [
-            /(lenovo)[_\s-]?([\w-]+)/i
+            /[;\/]\s?(rct\w+)\sbuild/i                                          // RCA Tablets
+            ], [MODEL, [VENDOR, 'RCA'], [TYPE, TABLET]], [
+            /[;\/\s](venue[\d\s]{2,7})\sbuild/i                                 // Dell Venue Tablets
+            ], [MODEL, [VENDOR, 'Dell'], [TYPE, TABLET]], [
+            /[;\/]\s?(q(?:mv|ta)\w+)\sbuild/i                                   // Verizon Tablet
+            ], [MODEL, [VENDOR, 'Verizon'], [TYPE, TABLET]], [
+            /[;\/]\s(?:barnes[&\s]+noble\s|bn[rt])([\w\s\+]*)\sbuild/i          // Barnes & Noble Tablet
+            ], [MODEL, [VENDOR, 'Barnes & Noble'], [TYPE, TABLET]], [
+            /[;\/]\s(tm\d{3}\w+)\sbuild/i
+            ], [MODEL, [VENDOR, 'NuVision'], [TYPE, TABLET]], [
+            /;\s(k88)\sbuild/i                                                  // ZTE K Series Tablet
+            ], [MODEL, [VENDOR, 'ZTE'], [TYPE, TABLET]], [
+            /;\s(nx\d{3}j)\sbuild/i                                             // ZTE Nubia
+            ], [MODEL, [VENDOR, 'ZTE'], [TYPE, MOBILE]], [
+            /[;\/]\s?(gen\d{3})\sbuild.*49h/i                                   // Swiss GEN Mobile
+            ], [MODEL, [VENDOR, 'Swiss'], [TYPE, MOBILE]], [
+            /[;\/]\s?(zur\d{3})\sbuild/i                                        // Swiss ZUR Tablet
+            ], [MODEL, [VENDOR, 'Swiss'], [TYPE, TABLET]], [
+            /[;\/]\s?((zeki)?tb.*\b)\sbuild/i                                   // Zeki Tablets
+            ], [MODEL, [VENDOR, 'Zeki'], [TYPE, TABLET]], [
+            /[;\/]\s([yr]\d{2})\sbuild/i,
+            /[;\/]\s(dragon[\-\s]+touch\s|dt)(\w{5})\sbuild/i                   // Dragon Touch Tablet
+            ], [[VENDOR, 'Dragon Touch'], MODEL, [TYPE, TABLET]], [
+            /[;\/]\s?(ns-?\w{0,9})\sbuild/i                                     // Insignia Tablets
+            ], [MODEL, [VENDOR, 'Insignia'], [TYPE, TABLET]], [
+            /[;\/]\s?((nxa|Next)-?\w{0,9})\sbuild/i                             // NextBook Tablets
+            ], [MODEL, [VENDOR, 'NextBook'], [TYPE, TABLET]], [
+            /[;\/]\s?(xtreme\_)?(v(1[045]|2[015]|[3469]0|7[05]))\sbuild/i
+            ], [[VENDOR, 'Voice'], MODEL, [TYPE, MOBILE]], [                    // Voice Xtreme Phones
+            /[;\/]\s?(lvtel\-)?(v1[12])\sbuild/i                                // LvTel Phones
+            ], [[VENDOR, 'LvTel'], MODEL, [TYPE, MOBILE]], [
+            /;\s(ph-1)\s/i
+            ], [MODEL, [VENDOR, 'Essential'], [TYPE, MOBILE]], [                // Essential PH-1
+            /[;\/]\s?(v(100md|700na|7011|917g).*\b)\sbuild/i                    // Envizen Tablets
+            ], [MODEL, [VENDOR, 'Envizen'], [TYPE, TABLET]], [
+            /[;\/]\s?(trio[\s\w\-\.]+)\sbuild/i                                 // MachSpeed Tablets
+            ], [MODEL, [VENDOR, 'MachSpeed'], [TYPE, TABLET]], [
+            /[;\/]\s?tu_(1491)\sbuild/i                                         // Rotor Tablets
+            ], [MODEL, [VENDOR, 'Rotor'], [TYPE, TABLET]], [
+            /(shield[\w\s]+)\sbuild/i                                           // Nvidia Shield Tablets
+            ], [MODEL, [VENDOR, 'Nvidia'], [TYPE, TABLET]], [
+            /(sprint)\s(\w+)/i                                                  // Sprint Phones
             ], [VENDOR, MODEL, [TYPE, MOBILE]], [
+            /(kin\.[onetw]{3})/i                                                // Microsoft Kin
+            ], [[MODEL, /\./g, ' '], [VENDOR, 'Microsoft'], [TYPE, MOBILE]], [
+            /droid\s[\d\.]+;\s(cc6666?|et5[16]|mc[239][23]x?|vc8[03]x?)\)/i     // Zebra
+            ], [MODEL, [VENDOR, 'Zebra'], [TYPE, TABLET]], [
+            /droid\s[\d\.]+;\s(ec30|ps20|tc[2-8]\d[kx])\)/i
+            ], [MODEL, [VENDOR, 'Zebra'], [TYPE, MOBILE]], [
 
-            /linux;.+((jolla));/i                                               // Jolla
-            ], [VENDOR, MODEL, [TYPE, MOBILE]], [
+            ///////////////////
+            // CONSOLES
+            ///////////////////
+
+            /\s(ouya)\s/i,                                                      // Ouya
+            /(nintendo)\s([wids3utch]+)/i                                       // Nintendo
+            ], [VENDOR, MODEL, [TYPE, CONSOLE]], [
+            /droid.+;\s(shield)\sbuild/i                                        // Nvidia
+            ], [MODEL, [VENDOR, 'Nvidia'], [TYPE, CONSOLE]], [
+            /(playstation\s[345portablevi]+)/i                                  // Playstation
+            ], [MODEL, [VENDOR, 'Sony'], [TYPE, CONSOLE]], [
+            /[\s\(;](xbox(?:\sone)?(?!;\sxbox))[\s\);]/i                        // Microsoft Xbox
+            ], [MODEL, [VENDOR, 'Microsoft'], [TYPE, CONSOLE]], [
+
+            ///////////////////
+            // SMARTTVS
+            ///////////////////
+
+            /smart-tv.+(samsung)/i                                              // Samsung
+            ], [VENDOR, [TYPE, SMARTTV]], [
+            /hbbtv.+maple;(\d+)/i
+            ], [[MODEL, /^/, 'SmartTV'], [VENDOR, 'Samsung'], [TYPE, SMARTTV]], [
+            /(?:linux;\snetcast.+smarttv|lg\snetcast\.tv-201\d)/i,              // LG SmartTV
+            ], [[VENDOR, 'LG'], [TYPE, SMARTTV]], [
+            /(apple)\s?tv/i                                                     // Apple TV
+            ], [VENDOR, [MODEL, 'Apple TV'], [TYPE, SMARTTV]], [
+            /crkey/i                                                            // Google Chromecast
+            ], [[MODEL, 'Chromecast'], [VENDOR, 'Google'], [TYPE, SMARTTV]], [
+            /droid.+aft([\w])(\sbuild\/|\))/i                                   // Fire TV
+            ], [MODEL, [VENDOR, 'Amazon'], [TYPE, SMARTTV]], [
+            /\(dtv[\);].+(aquos)/i                                              // Sharp
+            ], [MODEL, [VENDOR, 'Sharp'], [TYPE, SMARTTV]], [
+            /hbbtv\/\d+\.\d+\.\d+\s+\([\w\s]*;\s*(\w[^;]*);([^;]*)/i            // HbbTV devices
+            ], [[VENDOR, util.trim], [MODEL, util.trim], [TYPE, SMARTTV]], [
+            /[\s\/\(](android\s|smart[-\s]?|opera\s)tv[;\)\s]/i                 // SmartTV from Unidentified Vendors
+            ], [[TYPE, SMARTTV]], [
+
+            ///////////////////
+            // WEARABLES
+            ///////////////////
 
             /((pebble))app\/[\d\.]+\s/i                                         // Pebble
             ], [VENDOR, MODEL, [TYPE, WEARABLE]], [
-
-            /android.+;\s(oppo)\s?([\w\s]+)\sbuild/i                            // OPPO
-            ], [VENDOR, MODEL, [TYPE, MOBILE]], [
-
-            /crkey/i                                                            // Google Chromecast
-            ], [[MODEL, 'Chromecast'], [VENDOR, 'Google'], [TYPE, SMARTTV]], [
-
-            /android.+;\s(glass)\s\d/i                                          // Google Glass
+            /droid.+;\s(glass)\s\d/i                                            // Google Glass
             ], [MODEL, [VENDOR, 'Google'], [TYPE, WEARABLE]], [
+            /droid\s[\d\.]+;\s(wt63?0{2,3})\)/i
+            ], [MODEL, [VENDOR, 'Zebra'], [TYPE, WEARABLE]], [
 
-            /android.+;\s(pixel c)[\s)]/i                                       // Google Pixel C
-            ], [MODEL, [VENDOR, 'Google'], [TYPE, TABLET]], [
+            ////////////////////
+            // MIXED (GENERIC)
+            ///////////////////
 
-            /android.+;\s(pixel( [2-9]a?)?( xl)?)[\s)]/i                        // Google Pixel
-            ], [MODEL, [VENDOR, 'Google'], [TYPE, MOBILE]], [
-
-            /android.+;\s(\w+)\s+build\/hm\1/i,                                 // Xiaomi Hongmi 'numeric' models
-            /android.+(hm[\s\-_]?note?[\s_]?(?:\d\w)?)\sbuild/i,                // Xiaomi Hongmi
-            /android.+(redmi[\s\-_]?(?:note|k)?(?:[\s_]?[\w\s]+))(?:\sbuild|\))/i,      
-                                                                                // Xiaomi Redmi
-            /android.+(mi[\s\-_]?(?:a\d|one|one[\s_]plus|note lte)?[\s_]?(?:\d?\w?)[\s_]?(?:plus)?)\sbuild/i    
-                                                                                // Xiaomi Mi
-            ], [[MODEL, /_/g, ' '], [VENDOR, 'Xiaomi'], [TYPE, MOBILE]], [
-            /android.+(mi[\s\-_]?(?:pad)(?:[\s_]?[\w\s]+))(?:\sbuild|\))/i     // Mi Pad tablets
-            ],[[MODEL, /_/g, ' '], [VENDOR, 'Xiaomi'], [TYPE, TABLET]], [
-            /android.+;\s(m[1-5]\snote)\sbuild/i                                // Meizu
-            ], [MODEL, [VENDOR, 'Meizu'], [TYPE, MOBILE]], [
-            /(mz)-([\w-]{2,})/i
-            ], [[VENDOR, 'Meizu'], MODEL, [TYPE, MOBILE]], [
-
-            /android.+a000(1)\s+build/i,                                        // OnePlus
-            /android.+oneplus\s(a\d{4})[\s)]/i
-            ], [MODEL, [VENDOR, 'OnePlus'], [TYPE, MOBILE]], [
-
-            /android.+[;\/]\s*(RCT[\d\w]+)\s+build/i                            // RCA Tablets
-            ], [MODEL, [VENDOR, 'RCA'], [TYPE, TABLET]], [
-
-            /android.+[;\/\s](Venue[\d\s]{2,7})\s+build/i                       // Dell Venue Tablets
-            ], [MODEL, [VENDOR, 'Dell'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(Q[T|M][\d\w]+)\s+build/i                         // Verizon Tablet
-            ], [MODEL, [VENDOR, 'Verizon'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s+(Barnes[&\s]+Noble\s+|BN[RT])(V?.*)\s+build/i     // Barnes & Noble Tablet
-            ], [[VENDOR, 'Barnes & Noble'], MODEL, [TYPE, TABLET]], [
-
-            /android.+[;\/]\s+(TM\d{3}.*\b)\s+build/i                           // Barnes & Noble Tablet
-            ], [MODEL, [VENDOR, 'NuVision'], [TYPE, TABLET]], [
-
-            /android.+;\s(k88)\sbuild/i                                         // ZTE K Series Tablet
-            ], [MODEL, [VENDOR, 'ZTE'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(gen\d{3})\s+build.*49h/i                         // Swiss GEN Mobile
-            ], [MODEL, [VENDOR, 'Swiss'], [TYPE, MOBILE]], [
-
-            /android.+[;\/]\s*(zur\d{3})\s+build/i                              // Swiss ZUR Tablet
-            ], [MODEL, [VENDOR, 'Swiss'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*((Zeki)?TB.*\b)\s+build/i                         // Zeki Tablets
-            ], [MODEL, [VENDOR, 'Zeki'], [TYPE, TABLET]], [
-
-            /(android).+[;\/]\s+([YR]\d{2})\s+build/i,
-            /android.+[;\/]\s+(Dragon[\-\s]+Touch\s+|DT)(\w{5})\sbuild/i        // Dragon Touch Tablet
-            ], [[VENDOR, 'Dragon Touch'], MODEL, [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(NS-?\w{0,9})\sbuild/i                            // Insignia Tablets
-            ], [MODEL, [VENDOR, 'Insignia'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*((NX|Next)-?\w{0,9})\s+build/i                    // NextBook Tablets
-            ], [MODEL, [VENDOR, 'NextBook'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(Xtreme\_)?(V(1[045]|2[015]|30|40|60|7[05]|90))\s+build/i
-            ], [[VENDOR, 'Voice'], MODEL, [TYPE, MOBILE]], [                    // Voice Xtreme Phones
-
-            /android.+[;\/]\s*(LVTEL\-)?(V1[12])\s+build/i                     // LvTel Phones
-            ], [[VENDOR, 'LvTel'], MODEL, [TYPE, MOBILE]], [
-
-            /android.+;\s(PH-1)\s/i
-            ], [MODEL, [VENDOR, 'Essential'], [TYPE, MOBILE]], [                // Essential PH-1
-
-            /android.+[;\/]\s*(V(100MD|700NA|7011|917G).*\b)\s+build/i          // Envizen Tablets
-            ], [MODEL, [VENDOR, 'Envizen'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(Le[\s\-]+Pan)[\s\-]+(\w{1,9})\s+build/i          // Le Pan Tablets
-            ], [VENDOR, MODEL, [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(Trio[\s\w\-\.]+)\s+build/i                       // MachSpeed Tablets
-            ], [MODEL, [VENDOR, 'MachSpeed'], [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*(Trinity)[\-\s]*(T\d{3})\s+build/i                // Trinity Tablets
-            ], [VENDOR, MODEL, [TYPE, TABLET]], [
-
-            /android.+[;\/]\s*TU_(1491)\s+build/i                               // Rotor Tablets
-            ], [MODEL, [VENDOR, 'Rotor'], [TYPE, TABLET]], [
-
-            //android.+(KS(.+))\s+build/i                                        // Amazon Kindle Tablets
-            //], [MODEL, [VENDOR, 'Amazon'], [TYPE, TABLET]], [
-
-            /android.+(Gigaset)[\s\-]+(Q\w{1,9})\s+build/i                      // Gigaset Tablets
-            ], [VENDOR, MODEL, [TYPE, TABLET]], [
-                                                                                // Android Phones from Unidentified Vendors
-            /android .+?; ([^;]+?)(?: build|\) applewebkit).+? mobile safari/i
+            /droid .+?; ([^;]+?)(?: build|\) applewebkit).+? mobile safari/i    // Android Phones from Unidentified Vendors
             ], [MODEL, [TYPE, MOBILE]], [
-                                                                                // Android Tablets from Unidentified Vendors
-            /android .+?;\s([^;]+?)(?: build|\) applewebkit).+?(?! mobile) safari/i
+            /droid .+?;\s([^;]+?)(?: build|\) applewebkit).+?(?! mobile) safari/i  // Android Tablets from Unidentified Vendors
             ], [MODEL, [TYPE, TABLET]], [
-
             /\s(tablet|tab)[;\/]/i,                                             // Unidentifiable Tablet
             /\s(mobile)(?:[;\/]|\ssafari)/i                                     // Unidentifiable Mobile
-            ], [[TYPE, util.lowerize], VENDOR, MODEL], [
-
-            /[\s\/\(](smart-?tv)[;\)]/i                                         // SmartTV
-            ], [[TYPE, SMARTTV]], [
-
+            ], [[TYPE, util.lowerize]], [
             /(android[\w\.\s\-]{0,9});.+build/i                                 // Generic Android Device
-            ], [MODEL, [VENDOR, 'Generic']]
+            ], [MODEL, [VENDOR, 'Generic']], [
+            /(phone)/i
+            ], [[TYPE, MOBILE]]
         ],
 
         engine : [[
@@ -22477,87 +22453,81 @@ module.exports = function typedarrayToBuffer (arr) {
             ], [VERSION, [NAME, 'Blink']], [
 
             /(presto)\/([\w\.]+)/i,                                             // Presto
-            /(webkit|trident|netfront|netsurf|amaya|lynx|w3m|goanna)\/([\w\.]+)/i,
-                                                                                // WebKit/Trident/NetFront/NetSurf/Amaya/Lynx/w3m/Goanna
+            /(webkit|trident|netfront|netsurf|amaya|lynx|w3m|goanna)\/([\w\.]+)/i, // WebKit/Trident/NetFront/NetSurf/Amaya/Lynx/w3m/Goanna
+            /ekioh(flow)\/([\w\.]+)/i,                                          // Flow
             /(khtml|tasman|links)[\/\s]\(?([\w\.]+)/i,                          // KHTML/Tasman/Links
             /(icab)[\/\s]([23]\.[\d\.]+)/i                                      // iCab
             ], [NAME, VERSION], [
 
-            /rv\:([\w\.]{1,9}).+(gecko)/i                                       // Gecko
+            /rv\:([\w\.]{1,9})\b.+(gecko)/i                                     // Gecko
             ], [VERSION, NAME]
         ],
 
         os : [[
 
-            // Windows based
+            // Windows
             /microsoft\s(windows)\s(vista|xp)/i                                 // Windows (iTunes)
             ], [NAME, VERSION], [
             /(windows)\snt\s6\.2;\s(arm)/i,                                     // Windows RT
             /(windows\sphone(?:\sos)*)[\s\/]?([\d\.\s\w]*)/i,                   // Windows Phone
-            /(windows\smobile|windows)[\s\/]?([ntce\d\.\s]+\w)/i
+            /(windows\smobile|windows)[\s\/]?([ntce\d\.\s]+\w)(?!.+xbox)/i
             ], [NAME, [VERSION, mapper.str, maps.os.windows.version]], [
             /(win(?=3|9|n)|win\s9x\s)([nt\d\.]+)/i
             ], [[NAME, 'Windows'], [VERSION, mapper.str, maps.os.windows.version]], [
 
-            // Mobile/Embedded OS
-            /\((bb)(10);/i                                                      // BlackBerry 10
-            ], [[NAME, 'BlackBerry'], VERSION], [
-            /(blackberry)\w*\/?([\w\.]*)/i,                                     // Blackberry
+            // iOS/macOS
+            /ip[honead]{2,4}\b(?:.*os\s([\w]+)\slike\smac|;\sopera)/i,          // iOS
+            /cfnetwork\/.+darwin/i
+            ], [[VERSION, /_/g, '.'], [NAME, 'iOS']], [
+            /(mac\sos\sx)\s?([\w\s\.]*)/i,
+            /(macintosh|mac(?=_powerpc)\s)(?!.+haiku)/i                         // Mac OS
+            ], [[NAME, 'Mac OS'], [VERSION, /_/g, '.']], [
+
+            // Mobile OSes                                                      // Android/WebOS/Palm/QNX/Bada/RIM/MeeGo/Contiki/Sailfish OS
+            /(android|webos|palm\sos|qnx|bada|rim\stablet\sos|meego|sailfish|contiki)[\/\s-]?([\w\.]*)/i,
+            /(blackberry)\w*\/([\w\.]*)/i,                                      // Blackberry
             /(tizen|kaios)[\/\s]([\w\.]+)/i,                                    // Tizen/KaiOS
-            /(android|webos|palm\sos|qnx|bada|rim\stablet\sos|meego|sailfish|contiki)[\/\s-]?([\w\.]*)/i
-                                                                                // Android/WebOS/Palm/QNX/Bada/RIM/MeeGo/Contiki/Sailfish OS
-            ], [NAME, VERSION], [
-            /(symbian\s?os|symbos|s60(?=;))[\/\s-]?([\w\.]*)/i                  // Symbian
-            ], [[NAME, 'Symbian'], VERSION], [
             /\((series40);/i                                                    // Series 40
-            ], [NAME], [
+            ], [NAME, VERSION], [
+            /\(bb(10);/i                                                        // BlackBerry 10
+            ], [VERSION, [NAME, 'BlackBerry']], [
+            /(?:symbian\s?os|symbos|s60(?=;)|series60)[\/\s-]?([\w\.]*)/i       // Symbian
+            ], [VERSION, [NAME, 'Symbian']], [
             /mozilla.+\(mobile;.+gecko.+firefox/i                               // Firefox OS
-            ], [[NAME, 'Firefox OS'], VERSION], [
+            ], [[NAME, 'Firefox OS']], [
+            /\b(?:hp)?wos(?:browser)?\/([\w\.]+)/i                              // WebOS
+            ], [VERSION, [NAME, 'webOS']], [
 
             // Google Chromecast
             /crkey\/([\d\.]+)/i                                                 // Google Chromecast
             ], [VERSION, [NAME, 'Chromecast']], [
-
-            // Console
-            /(nintendo|playstation)\s([wids34portablevu]+)/i,                   // Nintendo/Playstation
-
-            // GNU/Linux based
-            /(mint)[\/\s\(]?(\w*)/i,                                            // Mint
-            /(mageia|vectorlinux)[;\s]/i,                                       // Mageia/VectorLinux
-            /(joli|[kxln]?ubuntu|debian|suse|opensuse|gentoo|(?=\s)arch|slackware|fedora|mandriva|centos|pclinuxos|redhat|zenwalk|linpus)[\/\s-]?(?!chrom)([\w\.-]*)/i,
-                                                                                // Joli/Ubuntu/Debian/SUSE/Gentoo/Arch/Slackware
-                                                                                // Fedora/Mandriva/CentOS/PCLinuxOS/RedHat/Zenwalk/Linpus
-            /(hurd|linux)\s?([\w\.]*)/i,                                        // Hurd/Linux
-            /(gnu)\s?([\w\.]*)/i                                                // GNU
-            ], [NAME, VERSION], [
-
             /(cros)\s[\w]+\s([\w\.]+\w)/i                                       // Chromium OS
             ], [[NAME, 'Chromium OS'], VERSION],[
 
-            // Solaris
-            /(sunos)\s?([\w\.\d]*)/i                                            // Solaris
-            ], [[NAME, 'Solaris'], VERSION], [
+            // Console
+            /(nintendo|playstation)\s([wids345portablevuch]+)/i,                // Nintendo/Playstation
+            /(xbox);\s+xbox\s([^\);]+)/i,                                       // Microsoft Xbox (360, One, X, S, Series X, Series S)
+
+            // GNU/Linux based
+            /(mint)[\/\s\(\)]?(\w*)/i,                                          // Mint
+            /(mageia|vectorlinux)[;\s]/i,                                       // Mageia/VectorLinux
+            /(joli|[kxln]?ubuntu|debian|suse|opensuse|gentoo|arch(?=\slinux)|slackware|fedora|mandriva|centos|pclinuxos|redhat|zenwalk|linpus|raspbian)(?:\sgnu\/linux)?(?:\slinux)?[\/\s-]?(?!chrom|package)([\w\.-]*)/i,
+                                                                                // Joli/Ubuntu/Debian/SUSE/Gentoo/Arch/Slackware
+                                                                                // Fedora/Mandriva/CentOS/PCLinuxOS/RedHat/Zenwalk/Linpus
+            /(hurd|linux)\s?([\w\.]*)/i,                                        // Hurd/Linux
+            /(gnu)\s?([\w\.]*)/i,                                               // GNU
 
             // BSD based
-            /\s([frentopc-]{0,4}bsd|dragonfly)\s?([\w\.]*)/i                    // FreeBSD/NetBSD/OpenBSD/PC-BSD/DragonFly
-            ], [NAME, VERSION],[
-
+            /\s([frentopc-]{0,4}bsd|dragonfly)\s?(?!amd|[ix346]{1,2}86)([\w\.]*)/i,  // FreeBSD/NetBSD/OpenBSD/PC-BSD/DragonFly
             /(haiku)\s(\w+)/i                                                   // Haiku
-            ], [NAME, VERSION],[
-
-            /cfnetwork\/.+darwin/i,
-            /ip[honead]{2,4}(?:.*os\s([\w]+)\slike\smac|;\sopera)/i             // iOS
-            ], [[VERSION, /_/g, '.'], [NAME, 'iOS']], [
-
-            /(mac\sos\sx)\s?([\w\s\.]*)/i,
-            /(macintosh|mac(?=_powerpc)\s)/i                                    // Mac OS
-            ], [[NAME, 'Mac OS'], [VERSION, /_/g, '.']], [
+            ], [NAME, VERSION], [
 
             // Other
+            /(sunos)\s?([\w\.\d]*)/i                                            // Solaris
+            ], [[NAME, 'Solaris'], VERSION], [
             /((?:open)?solaris)[\/\s-]?([\w\.]*)/i,                             // Solaris
             /(aix)\s((\d)(?=\.|\)|\s)[\w\.])*/i,                                // AIX
-            /(plan\s9|minix|beos|os\/2|amigaos|morphos|risc\sos|openvms|fuchsia)/i,
-                                                                                // Plan9/Minix/BeOS/OS2/AmigaOS/MorphOS/RISCOS/OpenVMS/Fuchsia
+            /(plan\s9|minix|beos|os\/2|amigaos|morphos|risc\sos|openvms|fuchsia)/i,  // Plan9/Minix/BeOS/OS2/AmigaOS/MorphOS/RISCOS/OpenVMS/Fuchsia
             /(unix)\s?([\w\.]*)/i                                               // UNIX
             ], [NAME, VERSION]
         ]
@@ -22567,45 +22537,45 @@ module.exports = function typedarrayToBuffer (arr) {
     /////////////////
     // Constructor
     ////////////////
-    var UAParser = function (uastring, extensions) {
+    var UAParser = function (ua, extensions) {
 
-        if (typeof uastring === 'object') {
-            extensions = uastring;
-            uastring = undefined;
+        if (typeof ua === 'object') {
+            extensions = ua;
+            ua = undefined;
         }
 
         if (!(this instanceof UAParser)) {
-            return new UAParser(uastring, extensions).getResult();
+            return new UAParser(ua, extensions).getResult();
         }
 
-        var ua = uastring || ((window && window.navigator && window.navigator.userAgent) ? window.navigator.userAgent : EMPTY);
-        var rgxmap = extensions ? util.extend(regexes, extensions) : regexes;
+        var _ua = ua || ((typeof window !== 'undefined' && window.navigator && window.navigator.userAgent) ? window.navigator.userAgent : EMPTY);
+        var _rgxmap = extensions ? util.extend(regexes, extensions) : regexes;
 
         this.getBrowser = function () {
-            var browser = { name: undefined, version: undefined };
-            mapper.rgx.call(browser, ua, rgxmap.browser);
-            browser.major = util.major(browser.version); // deprecated
-            return browser;
+            var _browser = { name: undefined, version: undefined };
+            mapper.rgx.call(_browser, _ua, _rgxmap.browser);
+            _browser.major = util.major(_browser.version); // deprecated
+            return _browser;
         };
         this.getCPU = function () {
-            var cpu = { architecture: undefined };
-            mapper.rgx.call(cpu, ua, rgxmap.cpu);
-            return cpu;
+            var _cpu = { architecture: undefined };
+            mapper.rgx.call(_cpu, _ua, _rgxmap.cpu);
+            return _cpu;
         };
         this.getDevice = function () {
-            var device = { vendor: undefined, model: undefined, type: undefined };
-            mapper.rgx.call(device, ua, rgxmap.device);
-            return device;
+            var _device = { vendor: undefined, model: undefined, type: undefined };
+            mapper.rgx.call(_device, _ua, _rgxmap.device);
+            return _device;
         };
         this.getEngine = function () {
-            var engine = { name: undefined, version: undefined };
-            mapper.rgx.call(engine, ua, rgxmap.engine);
-            return engine;
+            var _engine = { name: undefined, version: undefined };
+            mapper.rgx.call(_engine, _ua, _rgxmap.engine);
+            return _engine;
         };
         this.getOS = function () {
-            var os = { name: undefined, version: undefined };
-            mapper.rgx.call(os, ua, rgxmap.os);
-            return os;
+            var _os = { name: undefined, version: undefined };
+            mapper.rgx.call(_os, _ua, _rgxmap.os);
+            return _os;
         };
         this.getResult = function () {
             return {
@@ -22618,12 +22588,13 @@ module.exports = function typedarrayToBuffer (arr) {
             };
         };
         this.getUA = function () {
-            return ua;
+            return _ua;
         };
-        this.setUA = function (uastring) {
-            ua = uastring;
+        this.setUA = function (ua) {
+            _ua = (typeof ua === STR_TYPE && ua.length > UA_MAX_LENGTH) ? util.trim(ua, UA_MAX_LENGTH) : ua;
             return this;
         };
+        this.setUA(_ua);
         return this;
     };
 
@@ -22674,7 +22645,7 @@ module.exports = function typedarrayToBuffer (arr) {
             define(function () {
                 return UAParser;
             });
-        } else if (window) {
+        } else if (typeof window !== 'undefined') {
             // browser env
             window.UAParser = UAParser;
         }
@@ -22685,7 +22656,7 @@ module.exports = function typedarrayToBuffer (arr) {
     //   In AMD env the global scope should be kept clean, but jQuery is an exception.
     //   jQuery always exports to global scope, unless jQuery.noConflict(true) is used,
     //   and we should catch that.
-    var $ = window && (window.jQuery || window.Zepto);
+    var $ = typeof window !== 'undefined' && (window.jQuery || window.Zepto);
     if ($ && !$.ua) {
         var parser = new UAParser();
         $.ua = parser.getResult();
@@ -24165,7 +24136,7 @@ function wrappy (fn, cb) {
 },{}],291:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "2.15.7",
+  "version": "2.15.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -24224,14 +24195,14 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.12.5",
+    "@babel/runtime": "7.13.10",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "1.1.1",
     "canvas-to-buffer": "1.1.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.8.3",
+    "core-js": "3.10.0",
     "create-error": "0.3.1",
     "deepmerge": "4.2.2",
     "defined": "1.0.0",
@@ -24252,27 +24223,27 @@ module.exports={
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
     "superagent": "6.1.0",
-    "ua-parser-js": "0.7.23",
+    "ua-parser-js": "0.7.27",
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.12.10",
-    "@babel/plugin-transform-runtime": "7.12.10",
-    "@babel/preset-env": "7.12.11",
+    "@babel/core": "7.13.14",
+    "@babel/plugin-transform-runtime": "7.13.10",
+    "@babel/preset-env": "7.13.12",
     "audit-ci": "3.1.1",
-    "autoprefixer": "10.2.3",
+    "autoprefixer": "10.2.5",
     "babel-eslint": "10.1.0",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
     "browserify": "17.0.0",
     "connect-send-json": "1.0.0",
-    "cssnano": "4.1.10",
+    "cssnano": "4.1.11",
     "del": "6.0.0",
-    "eslint": "7.18.0",
+    "eslint": "7.23.0",
     "eslint-config-standard": "16.0.2",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-promise": "4.3.1",
     "fancy-log": "1.3.3",
     "glob": "7.1.6",
     "gulp": "4.0.2",
@@ -24289,19 +24260,19 @@ module.exports={
     "gulp-rename": "2.0.0",
     "gulp-sourcemaps": "3.0.0",
     "gulp-stylus": "2.7.0",
-    "gulp-terser": "1.4.1",
+    "gulp-terser": "2.0.1",
     "gulp-todo": "7.1.1",
     "minimist": "1.2.5",
     "nib": "1.1.2",
-    "postcss": "8.2.4",
+    "postcss": "8.2.9",
     "prettier": "2.2.1",
     "router": "1.3.5",
-    "tape": "5.1.1",
+    "tape": "5.2.2",
     "tape-catch": "1.0.6",
     "tape-run": "8.0.0",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
-    "watchify": "3.11.1"
+    "watchify": "4.0.0"
   }
 }
 
@@ -24310,16 +24281,16 @@ module.exports={
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
-
-_dereq_("core-js/modules/es.object.keys.js");
-
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+_dereq_("core-js/modules/es.array.for-each.js");
+
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+
+_dereq_("core-js/modules/es.object.keys.js");
 
 var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
 
@@ -25027,14 +24998,14 @@ function _default(options) {
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.regexp.to-string.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
+
+_dereq_("core-js/modules/es.object.to-string.js");
+
+_dereq_("core-js/modules/es.regexp.to-string.js");
 
 var _audioSample = _interopRequireDefault(_dereq_("audio-sample"));
 
@@ -25173,17 +25144,22 @@ function _default(userMedia, options) {
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.iterator.js");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _typeof2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/typeof"));
+
+_dereq_("core-js/modules/es.function.name.js");
+
+_dereq_("core-js/modules/es.parse-float.js");
 
 _dereq_("core-js/modules/es.array-buffer.constructor.js");
 
 _dereq_("core-js/modules/es.array-buffer.slice.js");
 
-_dereq_("core-js/modules/es.function.name.js");
-
 _dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.parse-float.js");
 
 _dereq_("core-js/modules/es.typed-array.uint8-array.js");
 
@@ -25233,12 +25209,7 @@ _dereq_("core-js/modules/es.typed-array.to-locale-string.js");
 
 _dereq_("core-js/modules/es.typed-array.to-string.js");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _typeof2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/typeof"));
+_dereq_("core-js/modules/es.array.iterator.js");
 
 var _uaParserJs = _interopRequireDefault(_dereq_("ua-parser-js"));
 
@@ -25406,8 +25377,8 @@ var Browser = function Browser(options) {
       }
 
       if (isBadIOS) {
-        // on older iphones length of JSON is limited and breaking
-        // so just dont report and ignore
+        // on older iPhones length of JSON is limited and breaking
+        // so just don't report and ignore
         options.reportErrors = false;
       }
 
@@ -25527,12 +25498,12 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.slice.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
+
+_dereq_("core-js/modules/es.array.slice.js");
 
 var _util = _interopRequireDefault(_dereq_("util"));
 
@@ -25606,12 +25577,12 @@ function _default() {
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.slice.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
+
+_dereq_("core-js/modules/es.array.slice.js");
 
 var _despot = _interopRequireDefault(_dereq_("despot"));
 
@@ -25787,26 +25758,26 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
-
-_dereq_("core-js/modules/es.array.index-of.js");
-
-_dereq_("core-js/modules/es.array.join.js");
-
-_dereq_("core-js/modules/es.object.get-own-property-names.js");
-
-_dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.regexp.to-string.js");
-
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
 
 var _typeof2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/typeof"));
+
+_dereq_("core-js/modules/es.array.for-each.js");
+
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+
+_dereq_("core-js/modules/es.array.join.js");
+
+_dereq_("core-js/modules/es.object.get-own-property-names.js");
+
+_dereq_("core-js/modules/es.array.index-of.js");
+
+_dereq_("core-js/modules/es.object.to-string.js");
+
+_dereq_("core-js/modules/es.regexp.to-string.js");
 
 var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 
@@ -25878,16 +25849,6 @@ function _default(anything, options) {
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.iterator.js");
-
-_dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.string.iterator.js");
-
-_dereq_("core-js/modules/web.dom-collections.iterator.js");
-
-_dereq_("core-js/modules/web.url.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -25949,18 +25910,10 @@ function _default() {
   }
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":1,"classlist.js":17,"core-js/modules/es.array.iterator.js":156,"core-js/modules/es.object.to-string.js":163,"core-js/modules/es.string.iterator.js":169,"core-js/modules/web.dom-collections.iterator.js":196,"core-js/modules/web.url.js":198,"request-frame":268}],305:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":1,"classlist.js":17,"request-frame":268}],305:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
-
-_dereq_("core-js/modules/es.array.index-of.js");
-
-_dereq_("core-js/modules/es.function.name.js");
-
-_dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.regexp.to-string.js");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25968,6 +25921,14 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var _typeof2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/typeof"));
+
+_dereq_("core-js/modules/es.function.name.js");
+
+_dereq_("core-js/modules/es.object.to-string.js");
+
+_dereq_("core-js/modules/es.regexp.to-string.js");
+
+_dereq_("core-js/modules/es.array.index-of.js");
 
 var _resource = _interopRequireDefault(_dereq_("./../resource"));
 
@@ -26143,7 +26104,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       message = 'Webcam is unavailable';
       explanation = 'Maybe it is already busy in another window?';
 
-      if (browser.isChromeBased()) {
+      if (browser.isChromeBased() || browser.isFirefox()) {
         explanation += ' Or you have to allow access above?';
       }
 
@@ -26390,16 +26351,16 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
-
-_dereq_("core-js/modules/es.function.name.js");
-
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+_dereq_("core-js/modules/es.array.for-each.js");
+
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+
+_dereq_("core-js/modules/es.function.name.js");
 
 var _util = _interopRequireDefault(_dereq_("util"));
 
@@ -26970,22 +26931,22 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
-
-_dereq_("core-js/modules/es.function.name.js");
-
-_dereq_("core-js/modules/es.object.keys.js");
-
-_dereq_("core-js/modules/es.regexp.exec.js");
-
-_dereq_("core-js/modules/es.string.replace.js");
-
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+_dereq_("core-js/modules/es.string.replace.js");
+
+_dereq_("core-js/modules/es.regexp.exec.js");
+
+_dereq_("core-js/modules/es.array.for-each.js");
+
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+
+_dereq_("core-js/modules/es.object.keys.js");
+
+_dereq_("core-js/modules/es.function.name.js");
 
 var _buttons = _interopRequireDefault(_dereq_("./buttons"));
 
@@ -27712,12 +27673,12 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.parse-int.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+_dereq_("core-js/modules/es.parse-int.js");
 
 var _numberIsInteger = _interopRequireDefault(_dereq_("number-is-integer"));
 
@@ -27846,12 +27807,12 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.function.name.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+_dereq_("core-js/modules/es.function.name.js");
 
 var _eventEmitter = _interopRequireDefault(_dereq_("./../util/eventEmitter"));
 
@@ -28839,12 +28800,12 @@ function _default(visuals) {
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.parse-int.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
+
+_dereq_("core-js/modules/es.parse-int.js");
 
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 
@@ -29135,18 +29096,18 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
 _dereq_("core-js/modules/es.object.to-string.js");
 
 _dereq_("core-js/modules/es.regexp.to-string.js");
 
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
+_dereq_("core-js/modules/es.array.for-each.js");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
 
 var _util = _interopRequireDefault(_dereq_("util"));
 
@@ -29450,7 +29411,10 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.function.name.js");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
 _dereq_("core-js/modules/es.number.to-fixed.js");
 
@@ -29458,10 +29422,7 @@ _dereq_("core-js/modules/es.object.to-string.js");
 
 _dereq_("core-js/modules/es.regexp.to-string.js");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+_dereq_("core-js/modules/es.function.name.js");
 
 var _browser = _interopRequireDefault(_dereq_("./../../util/browser"));
 
@@ -30609,22 +30570,22 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
-
-_dereq_("core-js/modules/es.function.name.js");
-
-_dereq_("core-js/modules/es.object.keys.js");
-
-_dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.promise.js");
-
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+_dereq_("core-js/modules/es.function.name.js");
+
+_dereq_("core-js/modules/es.array.for-each.js");
+
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+
+_dereq_("core-js/modules/es.object.keys.js");
+
+_dereq_("core-js/modules/es.promise.js");
+
+_dereq_("core-js/modules/es.object.to-string.js");
 
 var _util = _interopRequireDefault(_dereq_("util"));
 
@@ -30962,28 +30923,28 @@ exports.default = _default;
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
 
-_dereq_("core-js/modules/es.array.for-each.js");
-
-_dereq_("core-js/modules/es.array.iterator.js");
-
-_dereq_("core-js/modules/es.object.to-string.js");
-
-_dereq_("core-js/modules/es.promise.js");
-
-_dereq_("core-js/modules/es.regexp.to-string.js");
-
-_dereq_("core-js/modules/es.string.iterator.js");
-
-_dereq_("core-js/modules/web.dom-collections.for-each.js");
-
-_dereq_("core-js/modules/web.dom-collections.iterator.js");
-
-_dereq_("core-js/modules/web.url.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
+
+_dereq_("core-js/modules/web.url.js");
+
+_dereq_("core-js/modules/es.object.to-string.js");
+
+_dereq_("core-js/modules/es.string.iterator.js");
+
+_dereq_("core-js/modules/es.array.iterator.js");
+
+_dereq_("core-js/modules/web.dom-collections.iterator.js");
+
+_dereq_("core-js/modules/es.promise.js");
+
+_dereq_("core-js/modules/es.array.for-each.js");
+
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+
+_dereq_("core-js/modules/es.regexp.to-string.js");
 
 var _audioRecorder = _interopRequireDefault(_dereq_("./../../util/audioRecorder"));
 
