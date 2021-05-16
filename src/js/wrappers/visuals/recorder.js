@@ -1,19 +1,20 @@
-import Browser from './../../util/browser'
-import Constants from './../../constants'
-import EventEmitter from './../../util/eventEmitter'
-import Events from './../../events'
-import Frame from 'canvas-to-buffer'
-import Humanize from './../../util/humanize'
-import UserMedia from './userMedia'
-import VideomailError from './../../util/videomailError'
 import animitter from 'animitter'
+import Frame from 'canvas-to-buffer'
 import deepmerge from 'deepmerge'
-import h from 'hyperscript'
 import hidden from 'hidden'
-import pretty from './../../util/pretty'
+import h from 'hyperscript'
 import stringify from 'safe-json-stringify'
 import util from 'util'
 import websocket from 'websocket-stream'
+
+import Constants from '../../constants'
+import Events from '../../events'
+import Browser from '../../util/browser'
+import EventEmitter from '../../util/eventEmitter'
+import Humanize from '../../util/humanize'
+import pretty from '../../util/pretty'
+import VideomailError from '../../util/videomailError'
+import UserMedia from './userMedia'
 
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = '°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ '
@@ -811,30 +812,37 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     loop.complete()
 
-    stopTime = Date.now()
+    const self = this
 
-    recordingStats = {
-      // do not use loop.getFPS() as this will only return the fps from the last delta,
-      // not the average. see https://github.com/hapticdata/animitter/issues/3
-      avgFps: getAvgFps(),
-      wantedFps: options.video.fps,
-      avgInterval: getAvgInterval(),
-      wantedInterval: 1e3 / options.video.fps,
+    // needed to give dom enough time to prepare the replay element
+    // to show up upon the STOPPING event so that we can evaluate
+    // the right video type
+    setTimeout(function () {
+      stopTime = Date.now()
 
-      intervalSum: getIntervalSum(),
-      framesCount: framesCount,
-      videoType: replay.getVideoType()
-    }
+      recordingStats = {
+        // do not use loop.getFPS() as this will only return the fps from the last delta,
+        // not the average. see https://github.com/hapticdata/animitter/issues/3
+        avgFps: getAvgFps(),
+        wantedFps: options.video.fps,
+        avgInterval: getAvgInterval(),
+        wantedInterval: 1e3 / options.video.fps,
 
-    if (options.isAudioEnabled()) {
-      recordingStats.samplesCount = samplesCount
-      recordingStats.sampleRate = userMedia.getAudioSampleRate()
-    }
+        intervalSum: getIntervalSum(),
+        framesCount: framesCount,
+        videoType: replay.getVideoType()
+      }
 
-    writeCommand('stop', recordingStats)
+      if (options.isAudioEnabled()) {
+        recordingStats.samplesCount = samplesCount
+        recordingStats.sampleRate = userMedia.getAudioSampleRate()
+      }
 
-    // beware, resetting will set framesCount to zero, so leave this here
-    this.reset()
+      writeCommand('stop', recordingStats)
+
+      // beware, resetting will set framesCount to zero, so leave this here
+      self.reset()
+    }, 60)
   }
 
   this.back = function (cb) {
