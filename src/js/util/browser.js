@@ -1,6 +1,7 @@
-import UAParser from 'ua-parser-js'
-import VideomailError from './videomailError'
 import defined from 'defined'
+import UAParser from 'ua-parser-js'
+
+import VideomailError from './videomailError'
 
 const Browser = function (options) {
   options = options || {}
@@ -167,6 +168,11 @@ const Browser = function (options) {
       canPlayType = video.canPlayType('video/' + type)
     }
 
+    // definitely cannot be played here
+    if (canPlayType === '') {
+      return false
+    }
+
     return canPlayType
   }
 
@@ -288,6 +294,11 @@ const Browser = function (options) {
   }
 
   this.getVideoType = function (video) {
+    if (!video) {
+      // no type without video
+      return
+    }
+
     if (!videoType) {
       // there is a bug in canPlayType within chrome for mp4
       if (canPlayType(video, 'mp4') && !chromeBased) {
@@ -295,6 +306,12 @@ const Browser = function (options) {
       } else if (canPlayType(video, 'webm')) {
         videoType = 'webm'
       }
+    }
+
+    if (!videoType || videoType === '') {
+      // pick this one as a fallback since it's widely used and has
+      // greatly improved
+      videoType = 'mp4'
     }
 
     return videoType
