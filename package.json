@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "2.15.9",
+  "version": "2.15.10",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -91,8 +91,8 @@
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.14.2",
-    "@babel/plugin-transform-runtime": "7.14.2",
+    "@babel/core": "7.14.3",
+    "@babel/plugin-transform-runtime": "7.14.3",
     "@babel/preset-env": "7.14.2",
     "audit-ci": "4.0.0",
     "autoprefixer": "10.2.5",
@@ -101,11 +101,11 @@
     "body-parser": "1.19.0",
     "browserify": "17.0.0",
     "connect-send-json": "1.0.0",
-    "cssnano": "5.0.2",
+    "cssnano": "5.0.4",
     "del": "6.0.0",
-    "eslint": "7.26.0",
-    "eslint-config-standard": "16.0.2",
-    "eslint-plugin-import": "2.23.2",
+    "eslint": "7.27.0",
+    "eslint-config-standard": "16.0.3",
+    "eslint-plugin-import": "2.23.3",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "5.1.0",
     "fancy-log": "1.3.3",
@@ -128,7 +128,7 @@
     "gulp-todo": "7.1.1",
     "minimist": "1.2.5",
     "nib": "1.1.2",
-    "postcss": "8.2.15",
+    "postcss": "8.3.0",
     "prettier": "2.3.0",
     "router": "1.3.5",
     "tape": "5.2.2",
