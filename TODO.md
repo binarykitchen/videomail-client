@@ -8,10 +8,10 @@
 | src/js/wrappers/container.js | 323 | figure out how to fire dom's onload event again
 | src/js/wrappers/container.js | 324 | or how to run all the scripts over again
 | src/js/wrappers/optionsWrapper.js | 27 | fix this, it's not really an option
-| src/js/wrappers/visuals/recorder.js | 561 | in https://github.com/binarykitchen/videomail-client/issues/142
-| src/js/wrappers/visuals/recorder.js | 598 | retry with navigator.getUserMedia_() maybe?
-| src/js/wrappers/visuals/recorder.js | 738 | commented out because for some reasons server does not accept such a long
-| src/js/wrappers/visuals/recorder.js | 743 | consider removing this later or have it for debug=1 only?
+| src/js/wrappers/visuals/recorder.js | 563 | in https://github.com/binarykitchen/videomail-client/issues/142
+| src/js/wrappers/visuals/recorder.js | 600 | retry with navigator.getUserMedia_() maybe?
+| src/js/wrappers/visuals/recorder.js | 740 | commented out because for some reasons server does not accept such a long
+| src/js/wrappers/visuals/recorder.js | 745 | consider removing this later or have it for debug=1 only?
 | src/js/wrappers/visuals/userMedia.js | 309 | consider removing that if it's not the case anymore (for better performance)
 | gulpfile.js | 1 | write this in ES6 once i have figured out how to
 | gulpfile.js | 57 | fix this, so that it also works when not minified, this

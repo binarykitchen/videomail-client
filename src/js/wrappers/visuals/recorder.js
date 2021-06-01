@@ -406,11 +406,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           // setting custom text since that err object isn't really an error
           // on iphones when locked, and unlocked, this err is actually
           // an event object with stuff we can't use at all (an external bug)
+          //
+          // or else it could be a poor wifi connection...
           self.emit(
             Events.ERROR,
             VideomailError.create(
-              'Connection error',
-              'Data exchange has been interrupted. Please reload.',
+              'Data exchange interrupted',
+              'Please check your network connection and reload.',
               options
             )
           )
