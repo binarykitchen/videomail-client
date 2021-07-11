@@ -1,16 +1,15 @@
 import test from 'tape-catch'
 
-import Browser from './../../src/js/util/browser'
+import Browser from '../../src/js/util/browser'
 
 test('Browser:', { timeout: 2000 }, function (t) {
   t.test('without arguments', function (tt) {
-    tt.plan(9)
+    tt.plan(8)
 
     const browser = new Browser({ debug: function () {} })
 
     let err = browser.checkPlaybackCapabilities()
     tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(err.explanation.indexOf('Probably you need to') >= 0)
 
     err = browser.checkBufferTypes()
     tt.equal(err, undefined)
@@ -20,9 +19,9 @@ test('Browser:', { timeout: 2000 }, function (t) {
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
-    tt.equal(err.explanation, 'Click on the allow button to grant access to your webcam.')
+    tt.equal(err.explanation, 'Your system does not let your browser access your webcam.')
 
-    tt.equal(browser.isChromeBased(), true)
+    tt.equal(browser.isChromeBased(), false)
     tt.equal(browser.isFirefox(), false)
     tt.equal(browser.isEdge(), false)
   })
