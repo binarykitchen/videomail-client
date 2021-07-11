@@ -389,7 +389,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
               VideomailError.create(
                 'Invalid server command',
                 // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-                'Contact us asap. Bad commmand was ' + data.toString() + '. ',
+                'Contact us asap. Bad command was ' + data.toString() + '. ',
                 options
               )
             )
