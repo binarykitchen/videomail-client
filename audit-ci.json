@@ -1,5 +1,5 @@
 {
   "high": true,
   "package-manager": "yarn",
-  "allowlist": [1555]
+  "allowlist": [1754, 1755, 1753]
 }
