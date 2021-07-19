@@ -36,7 +36,7 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 To run the prototype full of examples in your browser with Gulp, just do:
 
 1. `npm install`
-2. `yarn run watch` to ignite a static server and
+2. `npm run watch` to ignite a static server and
 3. open `https://localhost:8443` in your browser
 
 Best is to study `/prototype/contact_form_json.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.

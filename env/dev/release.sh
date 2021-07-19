@@ -19,24 +19,23 @@ die() {
 info "Checking for vulnerabilities...\n"
 
 # thanks to set -e it will exit here if audit fails
-yarn run audit
+npm run audit
 
 # todo: figure out an elegant solution to avoid duplicate code
 # when having three bash scripts for patches, features and releases
 # maybe with command line args?
 # when done, rename this file
 
-for i in "$@"
-do
-case $i in
-    -i=*|--importance=*)
-    IMPORTANCE="${i#*=}"
-    shift # past argument=value
-    ;;
+for i in "$@"; do
+    case $i in
+    -i=* | --importance=*)
+        IMPORTANCE="${i#*=}"
+        shift # past argument=value
+        ;;
     *)
-    # unknown option
-    ;;
-esac
+        # unknown option
+        ;;
+    esac
 done
 
 if [[ -z ${IMPORTANCE:-} ]]; then
@@ -44,7 +43,7 @@ if [[ -z ${IMPORTANCE:-} ]]; then
 fi
 
 # ensures all is commited
-if [[ `git status --porcelain` ]]; then
+if [[ $(git status --porcelain) ]]; then
     die "Aborting the bump! You have uncommitted changes"
 fi
 
@@ -53,7 +52,7 @@ git checkout master
 git pull
 git checkout develop
 
-read VERSION <<< $(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
+read VERSION <<<$(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
 
 git checkout master
 git push
@@ -67,7 +66,7 @@ git flow release start $VERSION
 gulp bumpVersion --write --version=$VERSION
 
 # Ensure dependencies are okay
-yarn
+npm install
 
 # Rebuild all assets
 gulp build --minify
@@ -76,10 +75,10 @@ git add -A
 git commit -m "Final commit of version $VERSION" --no-edit
 
 info "Logging to npm ...\n"
-yarn login
+npm login
 
 info "Publishing to npm ...\n"
-yarn publish --new-version $VERSION
+npm publish --new-version $VERSION
 
 # Complete the previous release
 git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
