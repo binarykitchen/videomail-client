@@ -74,11 +74,12 @@ gulp build --minify
 git add -A
 git commit -m "Final commit of version $VERSION" --no-edit
 
-info "Logging to npm ...\n"
-npm login
+# not needed anymore with the switch from yarn to npm
+# info "Logging to npm ...\n"
+# npm login
 
 info "Publishing to npm ...\n"
-npm publish --new-version $VERSION
+npm publish
 
 # Complete the previous release
 git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
