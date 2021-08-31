@@ -3881,6 +3881,7 @@ var callWithSafeIterationClosing = _dereq_('../internals/call-with-safe-iteratio
 var isArrayIteratorMethod = _dereq_('../internals/is-array-iterator-method');
 var toLength = _dereq_('../internals/to-length');
 var createProperty = _dereq_('../internals/create-property');
+var getIterator = _dereq_('../internals/get-iterator');
 var getIteratorMethod = _dereq_('../internals/get-iterator-method');
 
 // `Array.from` method implementation
@@ -3897,7 +3898,7 @@ module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undef
   if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined, 2);
   // if the target is not iterable or it's an array with the default iterator - use a simple case
   if (iteratorMethod != undefined && !(C == Array && isArrayIteratorMethod(iteratorMethod))) {
-    iterator = iteratorMethod.call(O);
+    iterator = getIterator(O, iteratorMethod);
     next = iterator.next;
     result = new C();
     for (;!(step = next.call(iterator)).done; index++) {
@@ -3916,7 +3917,7 @@ module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undef
   return result;
 };
 
-},{"../internals/call-with-safe-iteration-closing":42,"../internals/create-property":51,"../internals/function-bind-context":70,"../internals/get-iterator-method":72,"../internals/is-array-iterator-method":86,"../internals/to-length":149,"../internals/to-object":150}],33:[function(_dereq_,module,exports){
+},{"../internals/call-with-safe-iteration-closing":42,"../internals/create-property":51,"../internals/function-bind-context":70,"../internals/get-iterator":73,"../internals/get-iterator-method":72,"../internals/is-array-iterator-method":86,"../internals/to-length":149,"../internals/to-object":150}],33:[function(_dereq_,module,exports){
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var toLength = _dereq_('../internals/to-length');
 var toAbsoluteIndex = _dereq_('../internals/to-absolute-index');
@@ -4214,8 +4215,7 @@ module.exports = function (iterator, fn, value, ENTRIES) {
   try {
     return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
   } catch (error) {
-    iteratorClose(iterator);
-    throw error;
+    iteratorClose(iterator, 'throw', error);
   }
 };
 
@@ -4799,8 +4799,8 @@ module.exports = function (it) {
 var anObject = _dereq_('../internals/an-object');
 var getIteratorMethod = _dereq_('../internals/get-iterator-method');
 
-module.exports = function (it) {
-  var iteratorMethod = getIteratorMethod(it);
+module.exports = function (it, usingIterator) {
+  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(it) : usingIterator;
   if (typeof iteratorMethod != 'function') {
     throw TypeError(String(it) + ' is not iterable');
   } return anObject(iteratorMethod.call(it));
@@ -5192,6 +5192,7 @@ var anObject = _dereq_('../internals/an-object');
 var isArrayIteratorMethod = _dereq_('../internals/is-array-iterator-method');
 var toLength = _dereq_('../internals/to-length');
 var bind = _dereq_('../internals/function-bind-context');
+var getIterator = _dereq_('../internals/get-iterator');
 var getIteratorMethod = _dereq_('../internals/get-iterator-method');
 var iteratorClose = _dereq_('../internals/iterator-close');
 
@@ -5209,7 +5210,7 @@ module.exports = function (iterable, unboundFunction, options) {
   var iterator, iterFn, index, length, result, next, step;
 
   var stop = function (condition) {
-    if (iterator) iteratorClose(iterator);
+    if (iterator) iteratorClose(iterator, 'return', condition);
     return new Result(true, condition);
   };
 
@@ -5232,7 +5233,7 @@ module.exports = function (iterable, unboundFunction, options) {
         if (result && result instanceof Result) return result;
       } return new Result(false);
     }
-    iterator = iterFn.call(iterable);
+    iterator = getIterator(iterable, iterFn);
   }
 
   next = iterator.next;
@@ -5240,21 +5241,33 @@ module.exports = function (iterable, unboundFunction, options) {
     try {
       result = callFn(step.value);
     } catch (error) {
-      iteratorClose(iterator);
-      throw error;
+      iteratorClose(iterator, 'throw', error);
     }
     if (typeof result == 'object' && result && result instanceof Result) return result;
   } return new Result(false);
 };
 
-},{"../internals/an-object":24,"../internals/function-bind-context":70,"../internals/get-iterator-method":72,"../internals/is-array-iterator-method":86,"../internals/iterator-close":94,"../internals/to-length":149}],94:[function(_dereq_,module,exports){
+},{"../internals/an-object":24,"../internals/function-bind-context":70,"../internals/get-iterator":73,"../internals/get-iterator-method":72,"../internals/is-array-iterator-method":86,"../internals/iterator-close":94,"../internals/to-length":149}],94:[function(_dereq_,module,exports){
 var anObject = _dereq_('../internals/an-object');
 
-module.exports = function (iterator) {
-  var returnMethod = iterator['return'];
-  if (returnMethod !== undefined) {
-    return anObject(returnMethod.call(iterator)).value;
+module.exports = function (iterator, kind, value) {
+  var innerResult, innerError;
+  anObject(iterator);
+  try {
+    innerResult = iterator['return'];
+    if (innerResult === undefined) {
+      if (kind === 'throw') throw value;
+      return value;
+    }
+    innerResult = innerResult.call(iterator);
+  } catch (error) {
+    innerError = true;
+    innerResult = error;
   }
+  if (kind === 'throw') throw value;
+  if (innerError) throw innerResult;
+  anObject(innerResult);
+  return value;
 };
 
 },{"../internals/an-object":24}],95:[function(_dereq_,module,exports){
@@ -6243,7 +6256,7 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.16.3',
+  version: '3.16.4',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
@@ -7050,6 +7063,7 @@ module.exports = function (instance, list) {
 },{"../internals/array-from-constructor-and-list":31,"../internals/typed-array-species-constructor":161}],160:[function(_dereq_,module,exports){
 var toObject = _dereq_('../internals/to-object');
 var toLength = _dereq_('../internals/to-length');
+var getIterator = _dereq_('../internals/get-iterator');
 var getIteratorMethod = _dereq_('../internals/get-iterator-method');
 var isArrayIteratorMethod = _dereq_('../internals/is-array-iterator-method');
 var bind = _dereq_('../internals/function-bind-context');
@@ -7063,7 +7077,7 @@ module.exports = function from(source /* , mapfn, thisArg */) {
   var iteratorMethod = getIteratorMethod(O);
   var i, length, result, step, iterator, next;
   if (iteratorMethod != undefined && !isArrayIteratorMethod(iteratorMethod)) {
-    iterator = iteratorMethod.call(O);
+    iterator = getIterator(O, iteratorMethod);
     next = iterator.next;
     O = [];
     while (!(step = next.call(iterator)).done) {
@@ -7081,7 +7095,7 @@ module.exports = function from(source /* , mapfn, thisArg */) {
   return result;
 };
 
-},{"../internals/array-buffer-view-core":26,"../internals/function-bind-context":70,"../internals/get-iterator-method":72,"../internals/is-array-iterator-method":86,"../internals/to-length":149,"../internals/to-object":150}],161:[function(_dereq_,module,exports){
+},{"../internals/array-buffer-view-core":26,"../internals/function-bind-context":70,"../internals/get-iterator":73,"../internals/get-iterator-method":72,"../internals/is-array-iterator-method":86,"../internals/to-length":149,"../internals/to-object":150}],161:[function(_dereq_,module,exports){
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var speciesConstructor = _dereq_('../internals/species-constructor');
 
@@ -8870,7 +8884,7 @@ var URLSearchParamsConstructor = function URLSearchParams(/* init */) {
     if (isObject(init)) {
       iteratorMethod = getIteratorMethod(init);
       if (typeof iteratorMethod === 'function') {
-        iterator = iteratorMethod.call(init);
+        iterator = getIterator(init, iteratorMethod);
         next = iterator.next;
         while (!(step = next.call(iterator)).done) {
           entryIterator = getIterator(anObject(step.value));
@@ -24918,7 +24932,7 @@ module.exports={
     "canvas-to-buffer": "1.1.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.16.3",
+    "core-js": "3.16.4",
     "create-error": "0.3.1",
     "deepmerge": "4.2.2",
     "defined": "1.0.0",
@@ -24972,7 +24986,7 @@ module.exports={
     "gulp-inject-string": "1.1.2",
     "gulp-load-plugins": "2.0.7",
     "gulp-plumber": "1.2.1",
-    "gulp-postcss": "9.0.0",
+    "gulp-postcss": "9.0.1",
     "gulp-rename": "2.0.0",
     "gulp-sourcemaps": "3.0.0",
     "gulp-stylus": "2.7.0",
@@ -30526,10 +30540,11 @@ var Recorder = function Recorder(visuals, replay) {
     return connected && (isNotifying() || !isHidden() || blocking);
   }
 
-  function userMediaErrorCallback(err) {
+  function userMediaErrorCallback(err, extraA, extraB) {
     userMediaLoading = false;
     clearUserMediaTimeout();
-    debug('Recorder: userMediaErrorCallback()', ', Webcam characteristics:', userMedia.getCharacteristics());
+    debug('Recorder: userMediaErrorCallback()', ', name:', err.name, ', message:', err.message, ', Webcam characteristics:', userMedia.getCharacteristics(), // added recently in the hope to investigate weird webcam issues
+    ', extraA arguments:', extraA.toString(), ', extraB arguments:', extraB.toString());
     var errorListeners = self.listeners(_events.default.ERROR);
 
     if (errorListeners && errorListeners.length) {

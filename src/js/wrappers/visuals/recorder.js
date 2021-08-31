@@ -473,14 +473,23 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     return connected && (isNotifying() || !isHidden() || blocking)
   }
 
-  function userMediaErrorCallback(err) {
+  function userMediaErrorCallback(err, extraA, extraB) {
     userMediaLoading = false
     clearUserMediaTimeout()
 
     debug(
       'Recorder: userMediaErrorCallback()',
+      ', name:',
+      err.name,
+      ', message:',
+      err.message,
       ', Webcam characteristics:',
-      userMedia.getCharacteristics()
+      userMedia.getCharacteristics(),
+      // added recently in the hope to investigate weird webcam issues
+      ', extraA arguments:',
+      extraA.toString(),
+      ', extraB arguments:',
+      extraB.toString()
     )
 
     const errorListeners = self.listeners(Events.ERROR)
