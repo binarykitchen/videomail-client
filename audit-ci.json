@@ -1,5 +1,5 @@
 {
   "high": true,
   "package-manager": "npm",
-  "allowlist": [1753]
+  "allowlist": [1005154, 1006307, 1005151]
 }
