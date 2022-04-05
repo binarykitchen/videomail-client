@@ -36,7 +36,8 @@ const options = minimist(process.argv.slice(2), { default: defaultOptions })
 log.info('Options:', options)
 
 function cleanJs(cb) {
-  return del(['prototype/js/*.js', 'prototype/js/*.js.map'])
+  del.sync(['prototype/js/*.js', 'prototype/js/*.js.map'])
+  cb()
 }
 
 function stylus() {
