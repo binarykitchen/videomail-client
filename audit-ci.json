@@ -2,11 +2,9 @@
   "high": true,
   "package-manager": "npm",
   "allowlist": [
-    "GHSA-wg6g-ppvx-927h",
     "GHSA-ww39-953v-wcq6",
     "GHSA-jf85-cpcp-j695",
     "GHSA-xvch-5gv4-984h",
-    "GHSA-4cpg-3vgw-4877",
     "GHSA-7p7h-4mm5-852v"
   ]
 }
