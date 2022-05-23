@@ -356,6 +356,10 @@ const Browser = function (options) {
     return isOkSafari
   }
 
+  this.isIOS = function () {
+    return isIOS
+  }
+
   this.getUsefulData = function () {
     return {
       browser: uaParser.browser,
