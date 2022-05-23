@@ -403,19 +403,27 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
           connecting = connected = false
 
-          // setting custom text since that err object isn't really an error
-          // on iphones when locked, and unlocked, this err is actually
-          // an event object with stuff we can't use at all (an external bug)
-          //
-          // or else it could be a poor wifi connection...
-          self.emit(
-            Events.ERROR,
-            VideomailError.create(
+          let videomailError
+
+          if (browser.isIOS()) {
+            // setting custom text since that err object isn't really an error
+            // on iphones when locked, and unlocked, this err is actually
+            // an event object with stuff we can't use at all (an external bug)
+            videomailError = VideomailError.create(
+              'Sorry, connection has timed out',
+              'iPhones cannot maintain a websocket longer than three minutes.',
+              options
+            )
+          } else {
+            // or else it could be a poor wifi connection...
+            videomailError = VideomailError.create(
               'Data exchange interrupted',
               'Please check your network connection and reload.',
               options
             )
-          )
+          }
+
+          self.emit(Events.ERROR, videomailError)
         })
 
         // just experimental
