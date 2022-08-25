@@ -1,19 +1,20 @@
-import Buttons from './buttons'
-import Dimension from './dimension'
-import EventEmitter from './../util/eventEmitter'
-import Events from './../events'
-import Form from './form'
-import OptionsWrapper from './optionsWrapper'
-import Resource from './../resource'
-import VideomailError from './../util/videomailError'
 import Visibility from 'document-visibility'
-import Visuals from './visuals'
-import css from './../../styles/css/main.min.css.js'
 // needed for IE 11
 import elementClosest from 'element-closest'
 import hidden from 'hidden'
 import insertCss from 'insert-css'
 import util from 'util'
+
+import css from '../../styles/css/main.min.css.js'
+import Events from '../events'
+import Resource from '../resource'
+import EventEmitter from '../util/eventEmitter'
+import VideomailError from '../util/videomailError'
+import Buttons from './buttons'
+import Dimension from './dimension'
+import Form from './form'
+import OptionsWrapper from './optionsWrapper'
+import Visuals from './visuals'
 
 elementClosest(window)
 
@@ -509,9 +510,9 @@ const Container = function (options) {
       submitted = false
       form.show()
       visuals.back(params, function () {
-        if (params.keepHidden) {
+        if (params && params.keepHidden) {
           // just enable form, do nothing else.
-          // see example contact_form.html when you submit without videomil
+          // see example contact_form.html when you submit without videomail
           // and go back
           self.enableForm()
         } else {
