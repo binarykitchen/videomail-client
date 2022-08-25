@@ -108,7 +108,6 @@ Looking at the examples in the `/prototype` folder should give you some ideas ho
 - <a href="#constructor">`new VideomailClient()`</a>
 - <a href="#on">`videomailClient.on()`</a>
 - <a href="#show">`videomailClient.show()`</a>
-- <a href="#build">`videomailClient.build()`</a>
 - <a href="#replay">`videomailClient.replay()`</a>
 - <a href="#startOver">`videomailClient.startOver()`</a>
 - <a href="#get">`videomailClient.get()`</a>

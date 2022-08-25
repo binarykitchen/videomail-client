@@ -1,14 +1,13 @@
-import util from 'util'
-import h from 'hyperscript'
 import hidden from 'hidden'
+import h from 'hyperscript'
+import util from 'util'
 
-import Replay from './visuals/replay'
-import Recorder from './visuals/recorder'
-import Notifier from './visuals/notifier'
+import Events from '../events'
+import EventEmitter from '../util/eventEmitter'
 import RecorderInsides from './visuals/inside/recorderInsides'
-
-import EventEmitter from './../util/eventEmitter'
-import Events from './../events'
+import Notifier from './visuals/notifier'
+import Recorder from './visuals/recorder'
+import Replay from './visuals/replay'
 
 const Visuals = function (container, options) {
   EventEmitter.call(this, options, 'Visuals')
@@ -189,7 +188,7 @@ const Visuals = function (container, options) {
     replay.hide()
     notifier.hide()
 
-    if (params.keepHidden) {
+    if (params && params.keepHidden) {
       recorder.hide()
       cb && cb()
     } else {
