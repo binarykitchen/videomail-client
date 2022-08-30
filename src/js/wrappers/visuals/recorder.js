@@ -995,6 +995,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height)
 
+        const nanoseconds = Math.round(window.performance.now() * 1000000)
+
         recordingBuffer = frame.toBuffer()
         recordingBufferLength = recordingBuffer.length
 
@@ -1004,7 +1006,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         bytesSum += recordingBufferLength
 
-        writeStream(recordingBuffer, {
+        const timeControlBuffer = Buffer.from(
+          stringify({ frameNumber: framesCount, timestamp: nanoseconds })
+        )
+        const frameBuffer = Buffer.concat([recordingBuffer, timeControlBuffer])
+
+        writeStream(frameBuffer, {
           frameNumber: framesCount,
           onFlushedCallback: onFlushed
         })
