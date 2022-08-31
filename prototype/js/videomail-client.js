@@ -32012,7 +32012,6 @@ var Recorder = function Recorder(visuals, replay) {
 
         framesCount++;
         ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height);
-        var nanoseconds = Math.round(window.performance.now() * 1000000);
         recordingBuffer = frame.toBuffer();
         recordingBufferLength = recordingBuffer.length;
 
@@ -32023,7 +32022,7 @@ var Recorder = function Recorder(visuals, replay) {
         bytesSum += recordingBufferLength;
         var timeControlBuffer = Buffer.from((0, _safeJsonStringify.default)({
           frameNumber: framesCount,
-          timestamp: nanoseconds
+          milliseconds: Date.now()
         }));
         var frameBuffer = Buffer.concat([recordingBuffer, timeControlBuffer]);
         writeStream(frameBuffer, {
