@@ -25842,7 +25842,7 @@ function wrappy (fn, cb) {
 },{}],341:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -32012,7 +32012,6 @@ var Recorder = function Recorder(visuals, replay) {
 
         framesCount++;
         ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height);
-        var nanoseconds = Math.round(window.performance.now() * 1000000);
         recordingBuffer = frame.toBuffer();
         recordingBufferLength = recordingBuffer.length;
 
@@ -32023,7 +32022,7 @@ var Recorder = function Recorder(visuals, replay) {
         bytesSum += recordingBufferLength;
         var timeControlBuffer = Buffer.from((0, _safeJsonStringify.default)({
           frameNumber: framesCount,
-          timestamp: nanoseconds
+          milliseconds: Date.now()
         }));
         var frameBuffer = Buffer.concat([recordingBuffer, timeControlBuffer]);
         writeStream(frameBuffer, {
