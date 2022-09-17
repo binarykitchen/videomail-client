@@ -10,7 +10,6 @@ const Browser = function (options) {
   const edgeDownload = 'https://www.microsoft.com/en-us/download/details.aspx?id=48126'
   const chromeDownload = 'http://www.google.com/chrome/'
   const chromiumDownload = 'http://www.chromium.org/getting-involved/download-chromium'
-  const browseHappyLink = 'http://browsehappy.com'
   const ua = defined(
     options.fakeUaString,
     typeof window !== 'undefined' && window.navigator && window.navigator.userAgent,
@@ -45,8 +44,6 @@ const Browser = function (options) {
     chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS
 
   const self = this
-
-  let videoType
 
   function getRecommendation() {
     let warning
@@ -148,34 +145,6 @@ const Browser = function (options) {
     return warning
   }
 
-  function getPlaybackWarning() {
-    let warning = getRecommendation()
-
-    if (!warning) {
-      warning =
-        '<a href="' +
-        browseHappyLink +
-        '" target="_blank">Upgrading your browser</a> might help.'
-    }
-
-    return warning
-  }
-
-  function canPlayType(video, type) {
-    let canPlayType
-
-    if (video && video.canPlayType) {
-      canPlayType = video.canPlayType('video/' + type)
-    }
-
-    // definitely cannot be played here
-    if (canPlayType === '') {
-      return false
-    }
-
-    return canPlayType
-  }
-
   // just temporary
   this.canRecord = function () {
     const hasNavigator = typeof navigator !== 'undefined'
@@ -257,28 +226,6 @@ const Browser = function (options) {
     return err
   }
 
-  this.checkPlaybackCapabilities = function (video) {
-    options.debug('Browser: checkPlaybackCapabilities()')
-
-    let err
-    let message
-
-    if (!video) {
-      message = 'No HTML5 support for video tag!'
-    } else if (!this.getVideoType(video)) {
-      message = 'Your old browser cannot support modern video codecs'
-    } else if (!video.setAttribute) {
-      // fixes "Not implemented" error on older browsers
-      message = 'Unable to set video attributes in your old browser'
-    }
-
-    if (message) {
-      err = VideomailError.create(message, getPlaybackWarning(), options)
-    }
-
-    return err
-  }
-
   this.checkBufferTypes = function () {
     let err
 
@@ -291,30 +238,6 @@ const Browser = function (options) {
     }
 
     return err
-  }
-
-  this.getVideoType = function (video) {
-    if (!video) {
-      // no type without video
-      return
-    }
-
-    if (!videoType) {
-      // there is a bug in canPlayType within chrome for mp4
-      if (canPlayType(video, 'mp4') && !chromeBased) {
-        videoType = 'mp4'
-      } else if (canPlayType(video, 'webm')) {
-        videoType = 'webm'
-      }
-    }
-
-    if (!videoType || videoType === '') {
-      // pick this one as a fallback since it's widely used and has
-      // greatly improved
-      videoType = 'mp4'
-    }
-
-    return videoType
   }
 
   this.getNoAccessIssue = function () {

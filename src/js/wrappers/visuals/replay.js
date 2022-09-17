@@ -1,14 +1,13 @@
-import util from 'util'
-import h from 'hyperscript'
-import hidden from 'hidden'
 import addEventListenerWithOptions from 'add-eventlistener-with-options'
-
-import Events from './../../events'
-import Browser from './../../util/browser'
-import EventEmitter from './../../util/eventEmitter'
-import VideomailError from './../../util/videomailError'
-
+import hidden from 'hidden'
+import h from 'hyperscript'
 import enableInlineVideo from 'iphone-inline-video'
+import util from 'util'
+
+import Events from '../../events'
+import Browser from '../../util/browser'
+import EventEmitter from '../../util/eventEmitter'
+import VideomailError from '../../util/videomailError'
 
 const Replay = function (parentElement, options) {
   EventEmitter.call(this, options, 'Replay')
@@ -85,6 +84,8 @@ const Replay = function (parentElement, options) {
         this.setWebMSource(videomail.webm)
       }
 
+      // We are not serving MP4 videos anymore due to licensing but are keeping code
+      // for compatibility and documentation
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4)
       }
