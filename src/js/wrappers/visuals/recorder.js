@@ -237,6 +237,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     key = args.key
 
+    // We are not serving MP4 videos anymore due to licensing but are keeping code
+    // for compatibility and documentation
     if (args.mp4) {
       replay.setMp4Source(
         args.mp4 + Constants.SITE_NAME_LABEL + '/' + options.siteName + '/videomail.mp4',
@@ -848,8 +850,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         wantedInterval: 1e3 / options.video.fps,
 
         intervalSum: getIntervalSum(),
-        framesCount: framesCount,
-        videoType: replay.getVideoType()
+        framesCount: framesCount
       }
 
       if (options.isAudioEnabled()) {
