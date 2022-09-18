@@ -26993,6 +26993,7 @@ var Browser = function Browser(options) {
   var isHTTPS = options.fakeHttps || window.location.protocol === 'https:';
   var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS;
   var self = this;
+  var videoType;
 
   function getRecommendation() {
     var warning;
@@ -27044,8 +27045,7 @@ var Browser = function Browser(options) {
     }
 
     return warning;
-  } // just temporary
-
+  }
 
   this.canRecord = function () {
     var hasNavigator = typeof navigator !== 'undefined';
@@ -27127,6 +27127,43 @@ var Browser = function Browser(options) {
     }
 
     return err;
+  };
+
+  function canPlayType(video, type) {
+    var canPlayType;
+
+    if (video && video.canPlayType) {
+      canPlayType = video.canPlayType('video/' + type);
+    } // definitely cannot be played here
+
+
+    if (canPlayType === '') {
+      return false;
+    }
+
+    return canPlayType;
+  }
+
+  this.getVideoType = function (video) {
+    if (!video) {
+      // no type without video
+      return;
+    }
+
+    if (!videoType) {
+      if (canPlayType(video, 'webm')) {
+        videoType = 'webm';
+      } else if (canPlayType(video, 'mp4')) {
+        videoType = 'mp4';
+      }
+    }
+
+    if (!videoType || videoType === '') {
+      // just as a fallback
+      videoType = 'webm';
+    }
+
+    return videoType;
   };
 
   this.getNoAccessIssue = function () {
@@ -31843,7 +31880,8 @@ var Recorder = function Recorder(visuals, replay) {
         avgInterval: getAvgInterval(),
         wantedInterval: 1e3 / options.video.fps,
         intervalSum: getIntervalSum(),
-        framesCount: framesCount
+        framesCount: framesCount,
+        videoType: replay.getVideoType()
       };
 
       if (options.isAudioEnabled()) {
@@ -32427,9 +32465,7 @@ var Replay = function Replay(parentElement, options) {
     if (videomail) {
       if (videomail.webm) {
         this.setWebMSource(videomail.webm);
-      } // We are not serving MP4 videos anymore due to licensing but are keeping code
-      // for compatibility and documentation
-
+      }
 
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4);

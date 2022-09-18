@@ -850,7 +850,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         wantedInterval: 1e3 / options.video.fps,
 
         intervalSum: getIntervalSum(),
-        framesCount: framesCount
+        framesCount: framesCount,
+        videoType: replay.getVideoType()
       }
 
       if (options.isAudioEnabled()) {
