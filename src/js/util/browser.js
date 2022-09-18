@@ -45,6 +45,8 @@ const Browser = function (options) {
 
   const self = this
 
+  let videoType
+
   function getRecommendation() {
     let warning
 
@@ -145,7 +147,6 @@ const Browser = function (options) {
     return warning
   }
 
-  // just temporary
   this.canRecord = function () {
     const hasNavigator = typeof navigator !== 'undefined'
     let canRecord = false
@@ -238,6 +239,43 @@ const Browser = function (options) {
     }
 
     return err
+  }
+
+  function canPlayType(video, type) {
+    let canPlayType
+
+    if (video && video.canPlayType) {
+      canPlayType = video.canPlayType('video/' + type)
+    }
+
+    // definitely cannot be played here
+    if (canPlayType === '') {
+      return false
+    }
+
+    return canPlayType
+  }
+
+  this.getVideoType = function (video) {
+    if (!video) {
+      // no type without video
+      return
+    }
+
+    if (!videoType) {
+      if (canPlayType(video, 'webm')) {
+        videoType = 'webm'
+      } else if (canPlayType(video, 'mp4')) {
+        videoType = 'mp4'
+      }
+    }
+
+    if (!videoType || videoType === '') {
+      // just as a fallback
+      videoType = 'webm'
+    }
+
+    return videoType
   }
 
   this.getNoAccessIssue = function () {

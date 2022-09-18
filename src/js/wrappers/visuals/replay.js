@@ -84,8 +84,6 @@ const Replay = function (parentElement, options) {
         this.setWebMSource(videomail.webm)
       }
 
-      // We are not serving MP4 videos anymore due to licensing but are keeping code
-      // for compatibility and documentation
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4)
       }
