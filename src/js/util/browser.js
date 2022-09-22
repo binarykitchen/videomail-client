@@ -3,6 +3,8 @@ import UAParser from 'ua-parser-js'
 
 import VideomailError from './videomailError'
 
+const FALLBACK_VIDEO_TYPE = 'webm'
+
 const Browser = function (options) {
   options = options || {}
 
@@ -257,12 +259,7 @@ const Browser = function (options) {
   }
 
   this.getVideoType = function (video) {
-    if (!video) {
-      // no type without video
-      return
-    }
-
-    if (!videoType) {
+    if (!videoType && video) {
       if (canPlayType(video, 'webm')) {
         videoType = 'webm'
       } else if (canPlayType(video, 'mp4')) {
@@ -270,9 +267,14 @@ const Browser = function (options) {
       }
     }
 
+    if (videoType !== 'webm' && videoType !== 'mp4') {
+      // we only support these two. anything else defaults to the fallback.
+      videoType = FALLBACK_VIDEO_TYPE
+    }
+
     if (!videoType || videoType === '') {
       // just as a fallback
-      videoType = 'webm'
+      videoType = FALLBACK_VIDEO_TYPE
     }
 
     return videoType

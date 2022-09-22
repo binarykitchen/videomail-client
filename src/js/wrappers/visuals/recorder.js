@@ -88,6 +88,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   let recordingBufferLength
   let recordingBuffer
 
+  const timeControlEnabled = Boolean(options.video.timeControl)
+
   function writeStream(buffer, opts) {
     if (stream) {
       if (stream.destroyed) {
@@ -991,6 +993,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       if (!self.isPaused() && stream && ctx) {
         if (framesCount === 0) {
           self.emit(Events.SENDING_FIRST_FRAME)
+          debug('Recorder: time control is', timeControlEnabled.toString())
         }
 
         framesCount++
@@ -1006,10 +1009,17 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         bytesSum += recordingBufferLength
 
-        const timeControlBuffer = Buffer.from(
-          stringify({ frameNumber: framesCount, milliseconds: Date.now() })
-        )
-        const frameBuffer = Buffer.concat([recordingBuffer, timeControlBuffer])
+        let frameBuffer
+
+        if (timeControlEnabled) {
+          const timeControlBuffer = Buffer.from(
+            stringify({ frameNumber: framesCount, milliseconds: Date.now() })
+          )
+
+          frameBuffer = Buffer.concat([recordingBuffer, timeControlBuffer])
+        } else {
+          frameBuffer = recordingBuffer
+        }
 
         writeStream(frameBuffer, {
           frameNumber: framesCount,
