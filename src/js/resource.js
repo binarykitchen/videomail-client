@@ -1,5 +1,6 @@
-import Constants from './constants'
 import superagent from 'superagent'
+
+import Constants from './constants'
 
 const CACHE_KEY = 'alias'
 
@@ -39,9 +40,12 @@ export default function (options) {
   }
 
   function fetch(alias, cb) {
+    const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone
+
     superagent
       .get('/videomail/' + alias + '/snapshot')
       .set('Accept', 'application/json')
+      .set('Accept-Timezone', timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
       .timeout(options.timeouts.connection)
       .end(function (err, res) {
