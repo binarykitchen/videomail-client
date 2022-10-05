@@ -25899,7 +25899,7 @@ function wrappy (fn, cb) {
 },{}],345:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26598,6 +26598,7 @@ var _superagent = _interopRequireDefault(_dereq_("superagent"));
 var _constants = _interopRequireDefault(_dereq_("./constants"));
 
 var CACHE_KEY = 'alias';
+var timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 function _default(options) {
   var cache = {};
@@ -26635,9 +26636,7 @@ function _default(options) {
   }
 
   function fetch(alias, cb) {
-    var timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    _superagent.default.get('/videomail/' + alias + '/snapshot').set('Accept', 'application/json').set('Accept-Timezone', timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
+    _superagent.default.get('/videomail/' + alias + '/snapshot').set('Accept', 'application/json').set('Timezone-Id', timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
       err = packError(err, res);
 
       if (err) {
@@ -26669,7 +26668,7 @@ function _default(options) {
 
     var request = (0, _superagent.default)(method, url);
     queryParams[_constants.default.SITE_NAME_LABEL] = options.siteName;
-    request.query(queryParams).send(videomail).timeout(options.timeout).end(function (err, res) {
+    request.query(queryParams).set('Timezone-Id', timezoneId).send(videomail).timeout(options.timeout).end(function (err, res) {
       err = packError(err, res);
 
       if (err) {
@@ -26756,7 +26755,7 @@ function _default(options) {
     }
 
     if (formType) {
-      _superagent.default.post(url).type(formType).send(formData).timeout(options.timeout).end(function (err, res) {
+      _superagent.default.post(url).type(formType).set('Timezone-Id', timezoneId).send(formData).timeout(options.timeout).end(function (err, res) {
         err = packError(err, res);
 
         if (err) {
