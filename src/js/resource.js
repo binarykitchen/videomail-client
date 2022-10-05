@@ -3,6 +3,7 @@ import superagent from 'superagent'
 import Constants from './constants'
 
 const CACHE_KEY = 'alias'
+const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 export default function (options) {
   const cache = {}
@@ -40,12 +41,10 @@ export default function (options) {
   }
 
   function fetch(alias, cb) {
-    const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone
-
     superagent
       .get('/videomail/' + alias + '/snapshot')
       .set('Accept', 'application/json')
-      .set('Accept-Timezone', timezoneId)
+      .set('Timezone-Id', timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
       .timeout(options.timeouts.connection)
       .end(function (err, res) {
@@ -85,6 +84,7 @@ export default function (options) {
 
     request
       .query(queryParams)
+      .set('Timezone-Id', timezoneId)
       .send(videomail)
       .timeout(options.timeout)
       .end(function (err, res) {
@@ -185,6 +185,7 @@ export default function (options) {
       superagent
         .post(url)
         .type(formType)
+        .set('Timezone-Id', timezoneId)
         .send(formData)
         .timeout(options.timeout)
         .end(function (err, res) {
