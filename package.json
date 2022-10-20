@@ -106,7 +106,7 @@
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "6.1.0",
+    "eslint-plugin-promise": "6.1.1",
     "fancy-log": "2.0.0",
     "glob": "8.0.3",
     "gulp": "4.0.2",

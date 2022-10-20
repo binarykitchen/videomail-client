@@ -232,6 +232,8 @@ const Container = function (options) {
       subject: options.selectors.subjectInputName,
       from: options.selectors.fromInputName,
       to: options.selectors.toInputName,
+      cc: options.selectors.ccInputName,
+      bcc: options.selectors.bccInputName,
       body: options.selectors.bodyInputName,
       key: options.selectors.keyInputName,
       parentKey: options.selectors.parentKeyInputName,
