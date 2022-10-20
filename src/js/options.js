@@ -50,6 +50,8 @@ export default {
     subjectInputName: 'subject', // the form input name for subject
     fromInputName: 'from', // the form input name for the from email
     toInputName: 'to', // the form input name for the to email
+    ccInputName: 'cc', // the form input name for the cc email
+    bccInputName: 'bcc', // the form input name for the bcc email
     bodyInputName: 'body', // the form input name for the message (body)
     sendCopyInputName: 'sendCopy', // the form checkbox name for sending myself a copy
 

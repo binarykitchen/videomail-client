@@ -20,6 +20,8 @@ export default function (options) {
     if (options.defaults) {
       videomail = applyDefaultValue(videomail, 'from')
       videomail = applyDefaultValue(videomail, 'to')
+      videomail = applyDefaultValue(videomail, 'cc')
+      videomail = applyDefaultValue(videomail, 'bcc')
       videomail = applyDefaultValue(videomail, 'subject')
       videomail = applyDefaultValue(videomail, 'body')
     }
