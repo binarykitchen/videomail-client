@@ -26140,7 +26140,7 @@ function wrappy (fn, cb) {
 },{}],345:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -27680,14 +27680,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _filesize2 = _interopRequireDefault(_dereq_("filesize"));
+var _filesize2 = _dereq_("filesize");
 
 var _humanizeDuration = _interopRequireDefault(_dereq_("humanize-duration"));
 
 // todo get rid of this class and use those imports directly
 var _default = {
   filesize: function filesize(bytes, round) {
-    return (0, _filesize2.default)(bytes, {
+    return (0, _filesize2.filesize)(bytes, {
       round: round
     });
   },
