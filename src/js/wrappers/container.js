@@ -258,6 +258,14 @@ const Container = function (options) {
       videomailFormData.to = trimEmail(videomailFormData.to)
     }
 
+    if (videomailFormData.cc) {
+      videomailFormData.cc = trimEmail(videomailFormData.cc)
+    }
+
+    if (videomailFormData.bcc) {
+      videomailFormData.bcc = trimEmail(videomailFormData.bcc)
+    }
+
     // when method is undefined, treat it as a post
     if (isPost(method) || !method) {
       videomailFormData.recordingStats = visuals.getRecordingStats()
@@ -595,7 +603,12 @@ const Container = function (options) {
           const invalidInput = form.getInvalidElement()
 
           if (invalidInput) {
-            whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid'
+            whyInvalid =
+              'Form input named ' +
+              invalidInput.name +
+              ' is invalid. It has the value: "' +
+              invalidInput.value +
+              '"'
           } else {
             whyInvalid = 'Form input(s() are invalid'
           }
