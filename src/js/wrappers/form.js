@@ -1,17 +1,17 @@
-import EventEmitter from './../util/eventEmitter'
-import Events from './../events'
-import VideomailError from './../util/videomailError'
 import getFormData from 'get-form-data'
-import h from 'hyperscript'
 import hidden from 'hidden'
+import h from 'hyperscript'
 import util from 'util'
+
+import Events from '../events'
+import EventEmitter from '../util/eventEmitter'
+import VideomailError from '../util/videomailError'
 
 const Form = function (container, formElement, options) {
   EventEmitter.call(this, options, 'Form')
 
   const self = this
 
-  let disableContainerValidation
   let keyInput
 
   function getData() {
@@ -97,16 +97,12 @@ const Form = function (container, formElement, options) {
           })
         } else {
           inputElement.addEventListener('input', function () {
-            container.validate()
+            // let angular validate first, e.g. remove the custom error
+            setTimeout(function () {
+              container.validate()
+            }, 0)
           })
         }
-
-        // because of angular's digest cycle, validate again when it became invalid
-        inputElement.addEventListener('invalid', function () {
-          if (!disableContainerValidation) {
-            container.validate()
-          }
-        })
       }
 
       const selectElements = getSelectElements()
@@ -225,12 +221,7 @@ const Form = function (container, formElement, options) {
   }
 
   this.validate = function () {
-    // prevents endless validation loop
-    disableContainerValidation = true
-
     const formIsValid = formElement.checkValidity()
-
-    disableContainerValidation = false
 
     return formIsValid
   }
