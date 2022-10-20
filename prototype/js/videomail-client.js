@@ -26140,7 +26140,7 @@ function wrappy (fn, cb) {
 },{}],345:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -29232,6 +29232,14 @@ var Container = function Container(options) {
 
     if (videomailFormData.to) {
       videomailFormData.to = trimEmail(videomailFormData.to);
+    }
+
+    if (videomailFormData.cc) {
+      videomailFormData.cc = trimEmail(videomailFormData.cc);
+    }
+
+    if (videomailFormData.bcc) {
+      videomailFormData.bcc = trimEmail(videomailFormData.bcc);
     } // when method is undefined, treat it as a post
 
 
@@ -29541,7 +29549,7 @@ var Container = function Container(options) {
           var invalidInput = form.getInvalidElement();
 
           if (invalidInput) {
-            whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid';
+            whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid. It has the value: "' + invalidInput.value + '"';
           } else {
             whyInvalid = 'Form input(s() are invalid';
           }
@@ -29847,25 +29855,24 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _eventEmitter = _interopRequireDefault(_dereq_("./../util/eventEmitter"));
-
-var _events = _interopRequireDefault(_dereq_("./../events"));
-
-var _videomailError = _interopRequireDefault(_dereq_("./../util/videomailError"));
-
 var _getFormData = _interopRequireDefault(_dereq_("get-form-data"));
-
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
+
 var _util = _interopRequireDefault(_dereq_("util"));
+
+var _events = _interopRequireDefault(_dereq_("../events"));
+
+var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
+
+var _videomailError = _interopRequireDefault(_dereq_("../util/videomailError"));
 
 var Form = function Form(container, formElement, options) {
   _eventEmitter.default.call(this, options, 'Form');
 
   var self = this;
-  var disableContainerValidation;
   var keyInput;
 
   function getData() {
@@ -29949,16 +29956,12 @@ var Form = function Form(container, formElement, options) {
           });
         } else {
           inputElement.addEventListener('input', function () {
-            container.validate();
+            // let angular validate first, e.g. remove the custom error
+            setTimeout(function () {
+              container.validate();
+            }, 0);
           });
-        } // because of angular's digest cycle, validate again when it became invalid
-
-
-        inputElement.addEventListener('invalid', function () {
-          if (!disableContainerValidation) {
-            container.validate();
-          }
-        });
+        }
       }
 
       var selectElements = getSelectElements();
@@ -30059,10 +30062,7 @@ var Form = function Form(container, formElement, options) {
   };
 
   this.validate = function () {
-    // prevents endless validation loop
-    disableContainerValidation = true;
     var formIsValid = formElement.checkValidity();
-    disableContainerValidation = false;
     return formIsValid;
   };
 
@@ -30084,7 +30084,7 @@ _util.default.inherits(Form, _eventEmitter.default);
 var _default = Form;
 exports.default = _default;
 
-},{"./../events":348,"./../util/eventEmitter":354,"./../util/videomailError":359,"@babel/runtime/helpers/interopRequireDefault":1,"core-js/modules/es.object.define-property.js":208,"get-form-data":271,"hidden":281,"hyperscript":283,"util":338}],364:[function(_dereq_,module,exports){
+},{"../events":348,"../util/eventEmitter":354,"../util/videomailError":359,"@babel/runtime/helpers/interopRequireDefault":1,"core-js/modules/es.object.define-property.js":208,"get-form-data":271,"hidden":281,"hyperscript":283,"util":338}],364:[function(_dereq_,module,exports){
 "use strict";
 
 _dereq_("core-js/modules/es.object.define-property.js");
