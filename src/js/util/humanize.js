@@ -1,4 +1,4 @@
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 import humanizeDuration from 'humanize-duration'
 
 // todo get rid of this class and use those imports directly
