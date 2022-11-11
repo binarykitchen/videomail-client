@@ -26004,7 +26004,7 @@ function wrappy (fn, cb) {
 },{}],345:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -30571,7 +30571,6 @@ var Recorder = function Recorder(visuals, replay) {
   var frame;
   var recordingBufferLength;
   var recordingBuffer;
-  var timeControlEnabled = Boolean(options.video.timeControl);
   function writeStream(buffer, opts) {
     if (stream) {
       if (stream.destroyed) {
@@ -31221,7 +31220,6 @@ var Recorder = function Recorder(visuals, replay) {
       if (!self.isPaused() && stream && ctx) {
         if (framesCount === 0) {
           self.emit(_events.default.SENDING_FIRST_FRAME);
-          debug('Recorder: time control is', timeControlEnabled.toString());
         }
         framesCount++;
         ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height);
@@ -31231,16 +31229,10 @@ var Recorder = function Recorder(visuals, replay) {
           throw _videomailError.default.create('Failed to extract webcam data.', options);
         }
         bytesSum += recordingBufferLength;
-        var frameBuffer;
-        if (timeControlEnabled) {
-          var timeControlBuffer = Buffer.from((0, _safeJsonStringify.default)({
-            frameNumber: framesCount,
-            milliseconds: Date.now()
-          }));
-          frameBuffer = Buffer.concat([recordingBuffer, timeControlBuffer]);
-        } else {
-          frameBuffer = recordingBuffer;
-        }
+        var frameControlBuffer = Buffer.from((0, _safeJsonStringify.default)({
+          frameNumber: framesCount
+        }));
+        var frameBuffer = Buffer.concat([recordingBuffer, frameControlBuffer]);
         writeStream(frameBuffer, {
           frameNumber: framesCount,
           onFlushedCallback: onFlushed
