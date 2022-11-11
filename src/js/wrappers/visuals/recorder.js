@@ -814,8 +814,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function getAvgFps() {
-    // see https://github.com/hapticdata/animitter/issues/3
-    return (loop.getFrameCount() / loop.getElapsedTime()) * 1000
+    return (framesCount / getIntervalSum()) * 1000
   }
 
   this.getRecordingStats = function () {
@@ -945,7 +944,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       params.eventType = e.type
     }
 
-    debug('pause()', params)
+    debug(`pause() at frame ${framesCount}`, params)
 
     userMedia.pause()
     loop.stop()
@@ -960,7 +959,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.resume = function () {
-    debug('Recorder: resume()')
+    debug(`Recorder: resume() with frame ${framesCount}`)
 
     stopPings()
 
@@ -1093,6 +1092,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     userMedia.record()
 
     self.emit(Events.RECORDING, framesCount)
+
+    // see https://github.com/hapticdata/animitter/issues/3
+    loop.on('update', function (deltaTime, elapsedTime) {
+      // x1000 because of milliseconds
+      const avgFPS = (framesCount / elapsedTime) * 1000
+      debug('Recorder: avgFps =', Math.round(avgFPS))
+    })
 
     loop.start()
   }
