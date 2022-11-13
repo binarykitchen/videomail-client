@@ -756,8 +756,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         args: args
       }
 
-      // todo commented out because for some reasons server does not accept such a long
-      // array of many log lines. to examine later.
+      // todo commented out because for some reasons server does
+      // not accept such a long array of many log lines. to examine later.
       //
       // add some useful debug info to examine weird stuff like this one
       // UnprocessableError: Unable to encode a video with FPS near zero.
@@ -858,7 +858,9 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         recordingStats.sampleRate = userMedia.getAudioSampleRate()
       }
 
-      writeCommand('stop', recordingStats)
+      writeCommand('stop', recordingStats, function () {
+        self.emit(Events.STOPPED, { recordingStats })
+      })
 
       // beware, resetting will set framesCount to zero, so leave this here
       self.reset()

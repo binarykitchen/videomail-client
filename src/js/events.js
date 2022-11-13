@@ -11,6 +11,7 @@ export default keymirror({
   COUNTDOWN: null, // countdown for recording has started
   RECORDING: null, // webcam is recording
   STOPPING: null, // recording is being stopped (= preview)
+  STOPPED: null, // recording has stopped
   PROGRESS: null, // start sending
   BEGIN_AUDIO_ENCODING: null, // encoding video
   BEGIN_VIDEO_ENCODING: null, // encoding video

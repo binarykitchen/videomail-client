@@ -26004,7 +26004,7 @@ function wrappy (fn, cb) {
 },{}],345:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "5.2.1",
+  "version": "5.2.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26375,6 +26375,8 @@ var _default = (0, _keymirror.default)({
   // webcam is recording
   STOPPING: null,
   // recording is being stopped (= preview)
+  STOPPED: null,
+  // recording has stopped
   PROGRESS: null,
   // start sending
   BEGIN_AUDIO_ENCODING: null,
@@ -31041,8 +31043,8 @@ var Recorder = function Recorder(visuals, replay) {
         args: args
       };
 
-      // todo commented out because for some reasons server does not accept such a long
-      // array of many log lines. to examine later.
+      // todo commented out because for some reasons server does
+      // not accept such a long array of many log lines. to examine later.
       //
       // add some useful debug info to examine weird stuff like this one
       // UnprocessableError: Unable to encode a video with FPS near zero.
@@ -31124,7 +31126,11 @@ var Recorder = function Recorder(visuals, replay) {
         recordingStats.samplesCount = samplesCount;
         recordingStats.sampleRate = userMedia.getAudioSampleRate();
       }
-      writeCommand('stop', recordingStats);
+      writeCommand('stop', recordingStats, function () {
+        self.emit(_events.default.STOPPED, {
+          recordingStats: recordingStats
+        });
+      });
 
       // beware, resetting will set framesCount to zero, so leave this here
       self.reset();
