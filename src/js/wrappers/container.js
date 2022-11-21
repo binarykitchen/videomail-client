@@ -222,49 +222,8 @@ const Container = function (options) {
     hidden(containerElement, true)
   }
 
-  // fixes https://github.com/binarykitchen/videomail-client/issues/71
-  function trimEmail(email) {
-    return email.replace(/(^[,\s]+)|([,\s]+$)/g, '')
-  }
-
   function submitVideomail(formData, method, cb) {
-    const FORM_FIELDS = {
-      subject: options.selectors.subjectInputName,
-      from: options.selectors.fromInputName,
-      to: options.selectors.toInputName,
-      cc: options.selectors.ccInputName,
-      bcc: options.selectors.bccInputName,
-      body: options.selectors.bodyInputName,
-      key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
-      sendCopy: options.selectors.sendCopyInputName
-    }
-
-    const videomailFormData = {}
-
-    Object.keys(FORM_FIELDS).forEach(function (key) {
-      const formFieldValue = FORM_FIELDS[key]
-
-      if (formFieldValue in formData) {
-        videomailFormData[key] = formData[formFieldValue]
-      }
-    })
-
-    if (videomailFormData.from) {
-      videomailFormData.from = trimEmail(videomailFormData.from)
-    }
-
-    if (videomailFormData.to) {
-      videomailFormData.to = trimEmail(videomailFormData.to)
-    }
-
-    if (videomailFormData.cc) {
-      videomailFormData.cc = trimEmail(videomailFormData.cc)
-    }
-
-    if (videomailFormData.bcc) {
-      videomailFormData.bcc = trimEmail(videomailFormData.bcc)
-    }
+    const videomailFormData = form.transformFormData(formData)
 
     // when method is undefined, treat it as a post
     if (isPost(method) || !method) {
@@ -612,6 +571,56 @@ const Container = function (options) {
           } else {
             whyInvalid = 'Form input(s() are invalid'
           }
+        }
+
+        // TODO CONTINUE FROM HERE, MAKE VALIDATION CLEVER WHEN AUTOMATIC SO THAT IT REQUIRES AT
+        // LEAST ONE RECIPIENT AMONG TO/CC/BCC
+        if (valid) {
+          // If CC and/or BCC exist, validate one more time to ensure at least
+          // one recipient is given
+          const recipients = form.getRecipients()
+
+          const toIsConfigured = 'to' in recipients
+          const ccIsConfigured = 'cc' in recipients
+          const bccIsConfigured = 'bcc' in recipients
+
+          const hasTo = recipients.to?.length > 0
+          const hasCc = recipients.cc?.length > 0
+          const hasBcc = recipients.bcc?.length > 0
+
+          if (toIsConfigured) {
+            if (!hasTo) {
+              if (ccIsConfigured && bccIsConfigured) {
+                if (!hasCc && !hasBcc) {
+                  valid = false
+                }
+              } else if (ccIsConfigured) {
+                if (!hasCc) {
+                  valid = false
+                }
+              } else if (bccIsConfigured) {
+                if (!hasBcc) {
+                  valid = false
+                }
+              } else {
+                whyInvalid = 'Please configure the form to have at least one recipient.'
+              }
+            }
+          } else if (ccIsConfigured) {
+            if (!hasCc) {
+              if (bccIsConfigured) {
+                if (!hasBcc) {
+                  valid = false
+                }
+              }
+            }
+          }
+
+          if (!valid) {
+            whyInvalid = 'Please enter at least one recipient.'
+          }
+
+          console.log({ recipients })
         }
       } else {
         valid = visualsValid
