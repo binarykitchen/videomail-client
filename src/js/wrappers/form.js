@@ -7,6 +7,11 @@ import Events from '../events'
 import EventEmitter from '../util/eventEmitter'
 import VideomailError from '../util/videomailError'
 
+// fixes https://github.com/binarykitchen/videomail-client/issues/71
+function trimEmail(email) {
+  return email.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+}
+
 const Form = function (container, formElement, options) {
   EventEmitter.call(this, options, 'Form')
 
@@ -16,6 +21,68 @@ const Form = function (container, formElement, options) {
 
   function getData() {
     return getFormData(formElement, { includeDisabled: true })
+  }
+
+  this.transformFormData = function (formData) {
+    const FORM_FIELDS = {
+      subject: options.selectors.subjectInputName,
+      from: options.selectors.fromInputName,
+      to: options.selectors.toInputName,
+      cc: options.selectors.ccInputName,
+      bcc: options.selectors.bccInputName,
+      body: options.selectors.bodyInputName,
+      key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
+      sendCopy: options.selectors.sendCopyInputName
+    }
+
+    const transformedFormData = {}
+
+    Object.keys(FORM_FIELDS).forEach(function (key) {
+      const formFieldValue = FORM_FIELDS[key]
+
+      if (formFieldValue in formData) {
+        transformedFormData[key] = formData[formFieldValue]
+      }
+    })
+
+    if (transformedFormData.from) {
+      transformedFormData.from = trimEmail(transformedFormData.from)
+    }
+
+    if (transformedFormData.to) {
+      transformedFormData.to = trimEmail(transformedFormData.to)
+    }
+
+    if (transformedFormData.cc) {
+      transformedFormData.cc = trimEmail(transformedFormData.cc)
+    }
+
+    if (transformedFormData.bcc) {
+      transformedFormData.bcc = trimEmail(transformedFormData.bcc)
+    }
+
+    return transformedFormData
+  }
+
+  this.getRecipients = function () {
+    const videomailFormData = this.transformFormData(getData())
+
+    const recipients = {}
+
+    if ('to' in videomailFormData) {
+      recipients.to = videomailFormData.to
+    }
+
+    if ('cc' in videomailFormData) {
+      recipients.cc = videomailFormData.cc
+    }
+
+    if ('bcc' in videomailFormData) {
+      recipients.bcc = videomailFormData.bcc
+    }
+
+    return recipients
   }
 
   this.loadVideomail = function (videomail) {

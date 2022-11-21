@@ -135,6 +135,8 @@ export default {
   defaults: {
     from: null, // define default FROM email address
     to: null, // define default TO email address
+    cc: null, // define default CC email address
+    bcc: null, // define default BCC email address
     subject: null, // define default subject line
     body: null // define default body content
   },

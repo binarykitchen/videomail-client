@@ -4344,16 +4344,16 @@ module.exports = function (exec, SKIP_CLOSING) {
 };
 
 },{"../internals/well-known-symbol":197}],47:[function(_dereq_,module,exports){
-var uncurryThisRaw = _dereq_('../internals/function-uncurry-this-raw');
+var uncurryThis = _dereq_('../internals/function-uncurry-this');
 
-var toString = uncurryThisRaw({}.toString);
-var stringSlice = uncurryThisRaw(''.slice);
+var toString = uncurryThis({}.toString);
+var stringSlice = uncurryThis(''.slice);
 
 module.exports = function (it) {
   return stringSlice(toString(it), 8, -1);
 };
 
-},{"../internals/function-uncurry-this-raw":86}],48:[function(_dereq_,module,exports){
+},{"../internals/function-uncurry-this":87}],48:[function(_dereq_,module,exports){
 var TO_STRING_TAG_SUPPORT = _dereq_('../internals/to-string-tag-support');
 var isCallable = _dereq_('../internals/is-callable');
 var classofRaw = _dereq_('../internals/classof-raw');
@@ -4779,7 +4779,7 @@ module.exports = function (exec) {
 'use strict';
 // TODO: Remove from `core-js@4` since it's moved to entry points
 _dereq_('../modules/es.regexp.exec');
-var uncurryThis = _dereq_('../internals/function-uncurry-this');
+var uncurryThis = _dereq_('../internals/function-uncurry-this-clause');
 var defineBuiltIn = _dereq_('../internals/define-built-in');
 var regexpExec = _dereq_('../internals/regexp-exec');
 var fails = _dereq_('../internals/fails');
@@ -4851,7 +4851,7 @@ module.exports = function (KEY, exec, FORCED, SHAM) {
   if (SHAM) createNonEnumerableProperty(RegExpPrototype[SYMBOL], 'sham', true);
 };
 
-},{"../internals/create-non-enumerable-property":52,"../internals/define-built-in":56,"../internals/fails":79,"../internals/function-uncurry-this":87,"../internals/regexp-exec":152,"../internals/well-known-symbol":197,"../modules/es.regexp.exec":221}],81:[function(_dereq_,module,exports){
+},{"../internals/create-non-enumerable-property":52,"../internals/define-built-in":56,"../internals/fails":79,"../internals/function-uncurry-this-clause":86,"../internals/regexp-exec":152,"../internals/well-known-symbol":197,"../modules/es.regexp.exec":221}],81:[function(_dereq_,module,exports){
 var NATIVE_BIND = _dereq_('../internals/function-bind-native');
 
 var FunctionPrototype = Function.prototype;
@@ -4864,7 +4864,7 @@ module.exports = typeof Reflect == 'object' && Reflect.apply || (NATIVE_BIND ? c
 });
 
 },{"../internals/function-bind-native":83}],82:[function(_dereq_,module,exports){
-var uncurryThis = _dereq_('../internals/function-uncurry-this');
+var uncurryThis = _dereq_('../internals/function-uncurry-this-clause');
 var aCallable = _dereq_('../internals/a-callable');
 var NATIVE_BIND = _dereq_('../internals/function-bind-native');
 
@@ -4878,7 +4878,7 @@ module.exports = function (fn, that) {
   };
 };
 
-},{"../internals/a-callable":19,"../internals/function-bind-native":83,"../internals/function-uncurry-this":87}],83:[function(_dereq_,module,exports){
+},{"../internals/a-callable":19,"../internals/function-bind-native":83,"../internals/function-uncurry-this-clause":86}],83:[function(_dereq_,module,exports){
 var fails = _dereq_('../internals/fails');
 
 module.exports = !fails(function () {
@@ -4917,6 +4917,17 @@ module.exports = {
 };
 
 },{"../internals/descriptors":60,"../internals/has-own-property":94}],86:[function(_dereq_,module,exports){
+var classofRaw = _dereq_('../internals/classof-raw');
+var uncurryThis = _dereq_('../internals/function-uncurry-this');
+
+module.exports = function (fn) {
+  // Nashorn bug:
+  //   https://github.com/zloirock/core-js/issues/1128
+  //   https://github.com/zloirock/core-js/issues/1130
+  if (classofRaw(fn) === 'Function') return uncurryThis(fn);
+};
+
+},{"../internals/classof-raw":47,"../internals/function-uncurry-this":87}],87:[function(_dereq_,module,exports){
 var NATIVE_BIND = _dereq_('../internals/function-bind-native');
 
 var FunctionPrototype = Function.prototype;
@@ -4929,18 +4940,7 @@ module.exports = NATIVE_BIND ? uncurryThisWithBind : function (fn) {
   };
 };
 
-},{"../internals/function-bind-native":83}],87:[function(_dereq_,module,exports){
-var classofRaw = _dereq_('../internals/classof-raw');
-var uncurryThisRaw = _dereq_('../internals/function-uncurry-this-raw');
-
-module.exports = function (fn) {
-  // Nashorn bug:
-  //   https://github.com/zloirock/core-js/issues/1128
-  //   https://github.com/zloirock/core-js/issues/1130
-  if (classofRaw(fn) === 'Function') return uncurryThisRaw(fn);
-};
-
-},{"../internals/classof-raw":47,"../internals/function-uncurry-this-raw":86}],88:[function(_dereq_,module,exports){
+},{"../internals/function-bind-native":83}],88:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var isCallable = _dereq_('../internals/is-callable');
 
@@ -6842,10 +6842,10 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.26.0',
+  version: '3.26.1',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-  license: 'https://github.com/zloirock/core-js/blob/v3.26.0/LICENSE',
+  license: 'https://github.com/zloirock/core-js/blob/v3.26.1/LICENSE',
   source: 'https://github.com/zloirock/core-js'
 });
 
@@ -7925,7 +7925,7 @@ setSpecies(ARRAY_BUFFER);
 },{"../internals/array-buffer":28,"../internals/export":78,"../internals/global":93,"../internals/set-species":159}],200:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
-var uncurryThis = _dereq_('../internals/function-uncurry-this');
+var uncurryThis = _dereq_('../internals/function-uncurry-this-clause');
 var fails = _dereq_('../internals/fails');
 var ArrayBufferModule = _dereq_('../internals/array-buffer');
 var anObject = _dereq_('../internals/an-object');
@@ -7964,7 +7964,7 @@ $({ target: 'ArrayBuffer', proto: true, unsafe: true, forced: INCORRECT_SLICE },
   }
 });
 
-},{"../internals/an-object":25,"../internals/array-buffer":28,"../internals/export":78,"../internals/fails":79,"../internals/function-uncurry-this":87,"../internals/species-constructor":164,"../internals/to-absolute-index":172,"../internals/to-length":177}],201:[function(_dereq_,module,exports){
+},{"../internals/an-object":25,"../internals/array-buffer":28,"../internals/export":78,"../internals/fails":79,"../internals/function-uncurry-this-clause":86,"../internals/species-constructor":164,"../internals/to-absolute-index":172,"../internals/to-length":177}],201:[function(_dereq_,module,exports){
 'use strict';
 var $ = _dereq_('../internals/export');
 var fails = _dereq_('../internals/fails');
@@ -8042,7 +8042,7 @@ $({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
 'use strict';
 /* eslint-disable es/no-array-prototype-indexof -- required for testing */
 var $ = _dereq_('../internals/export');
-var uncurryThis = _dereq_('../internals/function-uncurry-this');
+var uncurryThis = _dereq_('../internals/function-uncurry-this-clause');
 var $indexOf = _dereq_('../internals/array-includes').indexOf;
 var arrayMethodIsStrict = _dereq_('../internals/array-method-is-strict');
 
@@ -8063,7 +8063,7 @@ $({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD }, {
   }
 });
 
-},{"../internals/array-includes":34,"../internals/array-method-is-strict":38,"../internals/export":78,"../internals/function-uncurry-this":87}],204:[function(_dereq_,module,exports){
+},{"../internals/array-includes":34,"../internals/array-method-is-strict":38,"../internals/export":78,"../internals/function-uncurry-this-clause":86}],204:[function(_dereq_,module,exports){
 'use strict';
 var toIndexedObject = _dereq_('../internals/to-indexed-object');
 var addToUnscopables = _dereq_('../internals/add-to-unscopables');
@@ -9435,7 +9435,7 @@ exportTypedArrayMethod('some', function some(callbackfn /* , thisArg */) {
 },{"../internals/array-buffer-view-core":27,"../internals/array-iteration":35}],244:[function(_dereq_,module,exports){
 'use strict';
 var global = _dereq_('../internals/global');
-var uncurryThis = _dereq_('../internals/function-uncurry-this');
+var uncurryThis = _dereq_('../internals/function-uncurry-this-clause');
 var fails = _dereq_('../internals/fails');
 var aCallable = _dereq_('../internals/a-callable');
 var internalSort = _dereq_('../internals/array-sort');
@@ -9504,7 +9504,7 @@ exportTypedArrayMethod('sort', function sort(comparefn) {
   return internalSort(aTypedArray(this), getSortCompare(comparefn));
 }, !STABLE_SORT || ACCEPT_INCORRECT_ARGUMENTS);
 
-},{"../internals/a-callable":19,"../internals/array-buffer-view-core":27,"../internals/array-sort":42,"../internals/engine-ff-version":66,"../internals/engine-is-ie-or-edge":69,"../internals/engine-v8-version":75,"../internals/engine-webkit-version":76,"../internals/fails":79,"../internals/function-uncurry-this":87,"../internals/global":93}],245:[function(_dereq_,module,exports){
+},{"../internals/a-callable":19,"../internals/array-buffer-view-core":27,"../internals/array-sort":42,"../internals/engine-ff-version":66,"../internals/engine-is-ie-or-edge":69,"../internals/engine-v8-version":75,"../internals/engine-webkit-version":76,"../internals/fails":79,"../internals/function-uncurry-this-clause":86,"../internals/global":93}],245:[function(_dereq_,module,exports){
 'use strict';
 var ArrayBufferViewCore = _dereq_('../internals/array-buffer-view-core');
 var toLength = _dereq_('../internals/to-length');
@@ -26069,7 +26069,7 @@ module.exports={
     "canvas-to-buffer": "2.0.0",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.26.0",
+    "core-js": "3.26.1",
     "create-error": "0.3.1",
     "deepmerge": "4.2.2",
     "defined": "1.0.1",
@@ -26106,7 +26106,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "5.1.14",
     "del": "6.1.1",
-    "eslint": "8.27.0",
+    "eslint": "8.28.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-node": "11.1.0",
@@ -26616,6 +26616,10 @@ var _default = {
     // define default FROM email address
     to: null,
     // define default TO email address
+    cc: null,
+    // define default CC email address
+    bcc: null,
+    // define default BCC email address
     subject: null,
     // define default subject line
     body: null // define default body content
@@ -28452,8 +28456,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-_dereq_("core-js/modules/es.regexp.exec.js");
-_dereq_("core-js/modules/es.string.replace.js");
 _dereq_("core-js/modules/es.array.for-each.js");
 _dereq_("core-js/modules/es.object.to-string.js");
 _dereq_("core-js/modules/web.dom-collections.for-each.js");
@@ -28637,42 +28639,8 @@ var Container = function Container(options) {
   function hideMySelf() {
     (0, _hidden.default)(containerElement, true);
   }
-
-  // fixes https://github.com/binarykitchen/videomail-client/issues/71
-  function trimEmail(email) {
-    return email.replace(/(^[,\s]+)|([,\s]+$)/g, '');
-  }
   function submitVideomail(formData, method, cb) {
-    var FORM_FIELDS = {
-      subject: options.selectors.subjectInputName,
-      from: options.selectors.fromInputName,
-      to: options.selectors.toInputName,
-      cc: options.selectors.ccInputName,
-      bcc: options.selectors.bccInputName,
-      body: options.selectors.bodyInputName,
-      key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
-      sendCopy: options.selectors.sendCopyInputName
-    };
-    var videomailFormData = {};
-    Object.keys(FORM_FIELDS).forEach(function (key) {
-      var formFieldValue = FORM_FIELDS[key];
-      if (formFieldValue in formData) {
-        videomailFormData[key] = formData[formFieldValue];
-      }
-    });
-    if (videomailFormData.from) {
-      videomailFormData.from = trimEmail(videomailFormData.from);
-    }
-    if (videomailFormData.to) {
-      videomailFormData.to = trimEmail(videomailFormData.to);
-    }
-    if (videomailFormData.cc) {
-      videomailFormData.cc = trimEmail(videomailFormData.cc);
-    }
-    if (videomailFormData.bcc) {
-      videomailFormData.bcc = trimEmail(videomailFormData.bcc);
-    }
+    var videomailFormData = form.transformFormData(formData);
 
     // when method is undefined, treat it as a post
     if (isPost(method) || !method) {
@@ -28949,6 +28917,54 @@ var Container = function Container(options) {
             whyInvalid = 'Form input(s() are invalid';
           }
         }
+
+        // TODO CONTINUE FROM HERE, MAKE VALIDATION CLEVER WHEN AUTOMATIC SO THAT IT REQUIRES AT
+        // LEAST ONE RECIPIENT AMONG TO/CC/BCC
+        if (valid) {
+          var _recipients$to, _recipients$cc, _recipients$bcc;
+          // If CC and/or BCC exist, validate one more time to ensure at least
+          // one recipient is given
+          var recipients = form.getRecipients();
+          var toIsConfigured = ('to' in recipients);
+          var ccIsConfigured = ('cc' in recipients);
+          var bccIsConfigured = ('bcc' in recipients);
+          var hasTo = ((_recipients$to = recipients.to) === null || _recipients$to === void 0 ? void 0 : _recipients$to.length) > 0;
+          var hasCc = ((_recipients$cc = recipients.cc) === null || _recipients$cc === void 0 ? void 0 : _recipients$cc.length) > 0;
+          var hasBcc = ((_recipients$bcc = recipients.bcc) === null || _recipients$bcc === void 0 ? void 0 : _recipients$bcc.length) > 0;
+          if (toIsConfigured) {
+            if (!hasTo) {
+              if (ccIsConfigured && bccIsConfigured) {
+                if (!hasCc && !hasBcc) {
+                  valid = false;
+                }
+              } else if (ccIsConfigured) {
+                if (!hasCc) {
+                  valid = false;
+                }
+              } else if (bccIsConfigured) {
+                if (!hasBcc) {
+                  valid = false;
+                }
+              } else {
+                whyInvalid = 'Please configure the form to have at least one recipient.';
+              }
+            }
+          } else if (ccIsConfigured) {
+            if (!hasCc) {
+              if (bccIsConfigured) {
+                if (!hasBcc) {
+                  valid = false;
+                }
+              }
+            }
+          }
+          if (!valid) {
+            whyInvalid = 'Please enter at least one recipient.';
+          }
+          console.log({
+            recipients: recipients
+          });
+        }
       } else {
         valid = visualsValid;
       }
@@ -29076,7 +29092,7 @@ _util.default.inherits(Container, _eventEmitter.default);
 var _default = Container;
 exports.default = _default;
 
-},{"../../styles/css/main.min.css.js":376,"../events":348,"../resource":350,"../util/eventEmitter":354,"../util/videomailError":359,"./buttons":360,"./dimension":362,"./form":363,"./optionsWrapper":364,"./visuals":365,"@babel/runtime/helpers/interopRequireDefault":1,"core-js/modules/es.array.for-each.js":202,"core-js/modules/es.object.define-property.js":208,"core-js/modules/es.object.keys.js":210,"core-js/modules/es.object.to-string.js":211,"core-js/modules/es.regexp.exec.js":221,"core-js/modules/es.string.replace.js":224,"core-js/modules/web.dom-collections.for-each.js":249,"document-visibility":260,"element-closest":262,"hidden":281,"insert-css":287,"util":338}],362:[function(_dereq_,module,exports){
+},{"../../styles/css/main.min.css.js":376,"../events":348,"../resource":350,"../util/eventEmitter":354,"../util/videomailError":359,"./buttons":360,"./dimension":362,"./form":363,"./optionsWrapper":364,"./visuals":365,"@babel/runtime/helpers/interopRequireDefault":1,"core-js/modules/es.array.for-each.js":202,"core-js/modules/es.object.define-property.js":208,"core-js/modules/es.object.keys.js":210,"core-js/modules/es.object.to-string.js":211,"core-js/modules/web.dom-collections.for-each.js":249,"document-visibility":260,"element-closest":262,"hidden":281,"insert-css":287,"util":338}],362:[function(_dereq_,module,exports){
 "use strict";
 
 _dereq_("core-js/modules/es.object.define-property.js");
@@ -29200,6 +29216,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+_dereq_("core-js/modules/es.regexp.exec.js");
+_dereq_("core-js/modules/es.string.replace.js");
+_dereq_("core-js/modules/es.array.for-each.js");
+_dereq_("core-js/modules/es.object.to-string.js");
+_dereq_("core-js/modules/web.dom-collections.for-each.js");
+_dereq_("core-js/modules/es.object.keys.js");
 var _getFormData = _interopRequireDefault(_dereq_("get-form-data"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
@@ -29207,6 +29229,10 @@ var _util = _interopRequireDefault(_dereq_("util"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var _videomailError = _interopRequireDefault(_dereq_("../util/videomailError"));
+// fixes https://github.com/binarykitchen/videomail-client/issues/71
+function trimEmail(email) {
+  return email.replace(/(^[,\s]+)|([,\s]+$)/g, '');
+}
 var Form = function Form(container, formElement, options) {
   _eventEmitter.default.call(this, options, 'Form');
   var self = this;
@@ -29216,6 +29242,53 @@ var Form = function Form(container, formElement, options) {
       includeDisabled: true
     });
   }
+  this.transformFormData = function (formData) {
+    var FORM_FIELDS = {
+      subject: options.selectors.subjectInputName,
+      from: options.selectors.fromInputName,
+      to: options.selectors.toInputName,
+      cc: options.selectors.ccInputName,
+      bcc: options.selectors.bccInputName,
+      body: options.selectors.bodyInputName,
+      key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
+      sendCopy: options.selectors.sendCopyInputName
+    };
+    var transformedFormData = {};
+    Object.keys(FORM_FIELDS).forEach(function (key) {
+      var formFieldValue = FORM_FIELDS[key];
+      if (formFieldValue in formData) {
+        transformedFormData[key] = formData[formFieldValue];
+      }
+    });
+    if (transformedFormData.from) {
+      transformedFormData.from = trimEmail(transformedFormData.from);
+    }
+    if (transformedFormData.to) {
+      transformedFormData.to = trimEmail(transformedFormData.to);
+    }
+    if (transformedFormData.cc) {
+      transformedFormData.cc = trimEmail(transformedFormData.cc);
+    }
+    if (transformedFormData.bcc) {
+      transformedFormData.bcc = trimEmail(transformedFormData.bcc);
+    }
+    return transformedFormData;
+  };
+  this.getRecipients = function () {
+    var videomailFormData = this.transformFormData(getData());
+    var recipients = {};
+    if ('to' in videomailFormData) {
+      recipients.to = videomailFormData.to;
+    }
+    if ('cc' in videomailFormData) {
+      recipients.cc = videomailFormData.cc;
+    }
+    if ('bcc' in videomailFormData) {
+      recipients.bcc = videomailFormData.bcc;
+    }
+    return recipients;
+  };
   this.loadVideomail = function (videomail) {
     var limit = formElement.elements.length;
     var input;
@@ -29385,7 +29458,7 @@ _util.default.inherits(Form, _eventEmitter.default);
 var _default = Form;
 exports.default = _default;
 
-},{"../events":348,"../util/eventEmitter":354,"../util/videomailError":359,"@babel/runtime/helpers/interopRequireDefault":1,"core-js/modules/es.object.define-property.js":208,"get-form-data":271,"hidden":281,"hyperscript":283,"util":338}],364:[function(_dereq_,module,exports){
+},{"../events":348,"../util/eventEmitter":354,"../util/videomailError":359,"@babel/runtime/helpers/interopRequireDefault":1,"core-js/modules/es.array.for-each.js":202,"core-js/modules/es.object.define-property.js":208,"core-js/modules/es.object.keys.js":210,"core-js/modules/es.object.to-string.js":211,"core-js/modules/es.regexp.exec.js":221,"core-js/modules/es.string.replace.js":224,"core-js/modules/web.dom-collections.for-each.js":249,"get-form-data":271,"hidden":281,"hyperscript":283,"util":338}],364:[function(_dereq_,module,exports){
 "use strict";
 
 _dereq_("core-js/modules/es.object.define-property.js");
