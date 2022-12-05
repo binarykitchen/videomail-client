@@ -22758,7 +22758,7 @@ RequestBase.prototype.field = function (name, value, options) {
     value = String(value);
   }
 
-  // fix https://github.com/visionmedia/superagent/issues/1680
+  // fix https://github.com/ladjs/superagent/issues/1680
   if (options) this._getFormData().append(name, value, options);else this._getFormData().append(name, value);
   return this;
 };
@@ -22784,7 +22784,7 @@ RequestBase.prototype.abort = function () {
     //
     // References:
     // <https://github.com/nodejs/node/issues/31630>
-    // <https://github.com/visionmedia/superagent/pull/1084/commits/dc18679a7c5ccfc6046d882015e5126888973bc8>
+    // <https://github.com/ladjs/superagent/pull/1084/commits/dc18679a7c5ccfc6046d882015e5126888973bc8>
     //
     // Thanks to @shadowgate15 and @niftylettuce
     if (semver.gte(process.version, 'v13.0.0') && semver.lt(process.version, 'v14.0.0')) {
@@ -22829,7 +22829,8 @@ RequestBase.prototype._auth = function (user, pass, options, base64Encoder) {
  * using "Access-Control-Allow-Origin" with a wildcard,
  * and also must set "Access-Control-Allow-Credentials"
  * to "true".
- *
+ * @param {Boolean} [on=true] - Set 'withCredentials' state
+ * @return {Request} for chaining
  * @api public
  */
 
@@ -26004,7 +26005,7 @@ function wrappy (fn, cb) {
 },{}],345:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26062,7 +26063,7 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.20.1",
+    "@babel/runtime": "7.20.6",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "2.0.0",
@@ -26089,12 +26090,12 @@ module.exports={
     "readystate": "0.4.1",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
-    "superagent": "8.0.3",
+    "superagent": "8.0.5",
     "ua-parser-js": "0.7.32",
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.20.2",
+    "@babel/core": "7.20.5",
     "@babel/eslint-parser": "7.19.1",
     "@babel/plugin-transform-runtime": "7.19.6",
     "@babel/preset-env": "7.20.2",
@@ -26106,7 +26107,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "5.1.14",
     "del": "6.1.1",
-    "eslint": "8.28.0",
+    "eslint": "8.29.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-node": "11.1.0",
@@ -26132,7 +26133,7 @@ module.exports={
     "minimist": "1.2.7",
     "nib": "1.2.0",
     "postcss": "8.4.19",
-    "prettier": "2.7.1",
+    "prettier": "2.8.0",
     "router": "1.3.7",
     "tape": "5.6.1",
     "tape-catch": "1.0.6",
@@ -28914,12 +28915,9 @@ var Container = function Container(options) {
           if (invalidInput) {
             whyInvalid = 'Form input named ' + invalidInput.name + ' is invalid. It has the value: "' + invalidInput.value + '"';
           } else {
-            whyInvalid = 'Form input(s() are invalid';
+            whyInvalid = 'Form input(s) are invalid';
           }
         }
-
-        // TODO CONTINUE FROM HERE, MAKE VALIDATION CLEVER WHEN AUTOMATIC SO THAT IT REQUIRES AT
-        // LEAST ONE RECIPIENT AMONG TO/CC/BCC
         if (valid) {
           var _recipients$to, _recipients$cc, _recipients$bcc;
           // If CC and/or BCC exist, validate one more time to ensure at least
@@ -28961,9 +28959,6 @@ var Container = function Container(options) {
           if (!valid) {
             whyInvalid = 'Please enter at least one recipient.';
           }
-          console.log({
-            recipients: recipients
-          });
         }
       } else {
         valid = visualsValid;

@@ -7,7 +7,6 @@
 | src/js/util/humanize.js | 4 | get rid of this class and use those imports directly
 | src/js/wrappers/container.js | 293 | figure out how to fire dom's onload event again
 | src/js/wrappers/container.js | 294 | or how to run all the scripts over again
-| src/js/wrappers/container.js | 576 | CONTINUE FROM HERE, MAKE VALIDATION CLEVER WHEN AUTOMATIC SO THAT IT REQUIRES AT
 | src/js/wrappers/optionsWrapper.js | 27 | fix this, it's not really an option
 | src/js/wrappers/visuals/recorder.js | 582 | in https://github.com/binarykitchen/videomail-client/issues/142
 | src/js/wrappers/visuals/recorder.js | 619 | retry with navigator.getUserMedia_() maybe?

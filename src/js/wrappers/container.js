@@ -569,12 +569,10 @@ const Container = function (options) {
               invalidInput.value +
               '"'
           } else {
-            whyInvalid = 'Form input(s() are invalid'
+            whyInvalid = 'Form input(s) are invalid'
           }
         }
 
-        // TODO CONTINUE FROM HERE, MAKE VALIDATION CLEVER WHEN AUTOMATIC SO THAT IT REQUIRES AT
-        // LEAST ONE RECIPIENT AMONG TO/CC/BCC
         if (valid) {
           // If CC and/or BCC exist, validate one more time to ensure at least
           // one recipient is given
@@ -619,8 +617,6 @@ const Container = function (options) {
           if (!valid) {
             whyInvalid = 'Please enter at least one recipient.'
           }
-
-          console.log({ recipients })
         }
       } else {
         valid = visualsValid
