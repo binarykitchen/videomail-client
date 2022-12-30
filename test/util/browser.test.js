@@ -4,18 +4,15 @@ import Browser from '../../src/js/util/browser'
 
 test('Browser:', { timeout: 2000 }, function (t) {
   t.test('without arguments', function (tt) {
-    tt.plan(8)
+    tt.plan(7)
 
     const browser = new Browser({ debug: function () {} })
 
-    let err = browser.checkPlaybackCapabilities()
-    tt.equal(err.message, 'No HTML5 support for video tag!')
-
-    err = browser.checkBufferTypes()
+    let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
     const videoType = browser.getVideoType()
-    tt.equal(videoType, undefined)
+    tt.equal(videoType, 'webm')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -27,7 +24,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
   })
 
   t.test('fake old Firefox', function (tt) {
-    tt.plan(9)
+    tt.plan(7)
 
     const options = {
       fakeUaString:
@@ -36,16 +33,10 @@ test('Browser:', { timeout: 2000 }, function (t) {
     }
 
     const browser = new Browser(options)
-    let err
-
-    err = browser.checkPlaybackCapabilities()
-    tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(err.explanation.indexOf('upgrade Firefox') >= 0)
-
-    err = browser.checkBufferTypes()
+    let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), undefined)
+    tt.equal(browser.getVideoType(), 'webm')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -57,7 +48,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
   })
 
   t.test('fake old Chrome', function (tt) {
-    tt.plan(9)
+    tt.plan(7)
 
     const options = {
       fakeUaString:
@@ -66,16 +57,10 @@ test('Browser:', { timeout: 2000 }, function (t) {
     }
 
     const browser = new Browser(options)
-    let err
-
-    err = browser.checkPlaybackCapabilities()
-    tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(err.explanation.indexOf('upgrade Chrome') >= 0)
-
-    err = browser.checkBufferTypes()
+    let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), undefined)
+    tt.equal(browser.getVideoType(), 'webm')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -87,7 +72,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
   })
 
   t.test('fake old IE', function (tt) {
-    tt.plan(11)
+    tt.plan(9)
 
     const options = {
       fakeUaString:
@@ -105,16 +90,10 @@ test('Browser:', { timeout: 2000 }, function (t) {
       err.explanation.indexOf('Instead of Internet Explorer you need to upgrade') >= 0
     )
 
-    err = browser.checkPlaybackCapabilities()
-    tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(
-      err.explanation.indexOf('Instead of Internet Explorer you need to upgrade') >= 0
-    )
-
     err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), undefined)
+    tt.equal(browser.getVideoType(), 'webm')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -126,7 +105,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
   })
 
   t.test('fake old Safari', function (tt) {
-    tt.plan(11)
+    tt.plan(7)
 
     const options = {
       fakeUaString:
@@ -136,20 +115,10 @@ test('Browser:', { timeout: 2000 }, function (t) {
     }
 
     const browser = new Browser(options)
-    let err
-
-    err = browser.checkRecordingCapabilities()
-    tt.equal(err.message, 'Sorry, your browser is unable to use webcams')
-    tt.ok(err.explanation.indexOf('Safari below version 11 has no webcam support.') >= 0)
-
-    err = browser.checkPlaybackCapabilities()
-    tt.equal(err.message, 'No HTML5 support for video tag!')
-    tt.ok(err.explanation.indexOf('Safari below version 11 has no webcam support.') >= 0)
-
-    err = browser.checkBufferTypes()
+    let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), undefined)
+    tt.equal(browser.getVideoType(), 'webm')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
