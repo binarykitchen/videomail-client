@@ -26342,7 +26342,7 @@ function wrappy (fn, cb) {
 },{}],357:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "6.0.0",
+  "version": "5.4.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26437,7 +26437,7 @@ module.exports={
     "@babel/eslint-parser": "7.19.1",
     "@babel/plugin-transform-runtime": "7.19.6",
     "@babel/preset-env": "7.20.2",
-    "audit-ci": "6.4.1",
+    "audit-ci": "6.5.0",
     "autoprefixer": "10.4.13",
     "babelify": "10.0.0",
     "body-parser": "1.20.1",
@@ -26445,8 +26445,8 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "5.1.14",
     "del": "6.1.1",
-    "eslint": "8.30.0",
-    "eslint-config-prettier": "8.5.0",
+    "eslint": "8.31.0",
+    "eslint-config-prettier": "8.6.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.1.1",
@@ -32184,7 +32184,9 @@ var Replay = function Replay(parentElement, options) {
     if (!source) {
       if (src) {
         source = (0, _hyperscript["default"])('source', {
-          src: src,
+          // Ensures HTML video thumbnail turns up on iOS, see
+          // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
+          src: src + '#t=0.001',
           type: 'video/' + type
         });
         replayElement.appendChild(source);
