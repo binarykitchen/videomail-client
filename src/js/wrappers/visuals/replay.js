@@ -240,7 +240,9 @@ const Replay = function (parentElement, options) {
     if (!source) {
       if (src) {
         source = h('source', {
-          src: src,
+          // Ensures HTML video thumbnail turns up on iOS, see
+          // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
+          src: src + '#t=0.001',
           type: 'video/' + type
         })
 
