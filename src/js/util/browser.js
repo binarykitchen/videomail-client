@@ -23,6 +23,7 @@ const Browser = function (options) {
   const isIOS = uaParser.os.name === 'iOS'
   const browserVersion = parseFloat(uaParser.browser.version)
   const isChrome = uaParser.browser.name === 'Chrome'
+  const isBrave = uaParser.browser.name === 'Brave'
   const isChromium = uaParser.browser.name === 'Chromium'
   const firefox = uaParser.browser.name === 'Firefox'
   const osVersion = parseFloat(uaParser.os.version)
@@ -43,7 +44,14 @@ const Browser = function (options) {
   const isHTTPS = options.fakeHttps || window.location.protocol === 'https:'
 
   const okBrowser =
-    chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS
+    chromeBased ||
+    firefox ||
+    isAndroid ||
+    isOpera ||
+    isEdge ||
+    isOkSafari ||
+    isOkIOS ||
+    isBrave
 
   const self = this
 

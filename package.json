@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "6.0.1",
+  "version": "6.0.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -104,7 +104,7 @@
     "cssnano": "5.1.15",
     "del": "6.1.1",
     "eslint": "8.35.0",
-    "eslint-config-prettier": "8.6.0",
+    "eslint-config-prettier": "8.7.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.1.1",
