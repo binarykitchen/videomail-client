@@ -26453,7 +26453,7 @@ function wrappy (fn, cb) {
 },{}],358:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "6.0.2",
+  "version": "6.0.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26557,7 +26557,7 @@ module.exports={
     "cssnano": "5.1.15",
     "del": "6.1.1",
     "eslint": "8.35.0",
-    "eslint-config-prettier": "8.6.0",
+    "eslint-config-prettier": "8.7.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.1.1",
@@ -27435,6 +27435,7 @@ var Browser = function Browser(options) {
   var isIOS = uaParser.os.name === 'iOS';
   var browserVersion = parseFloat(uaParser.browser.version);
   var isChrome = uaParser.browser.name === 'Chrome';
+  var isBrave = uaParser.browser.name === 'Brave';
   var isChromium = uaParser.browser.name === 'Chromium';
   var firefox = uaParser.browser.name === 'Firefox';
   var osVersion = parseFloat(uaParser.os.version);
@@ -27453,7 +27454,7 @@ var Browser = function Browser(options) {
   var isBadIOS = isIOS && osVersion < 11;
   // unfortunately need to be able to fake https because tape-run can't run on https
   var isHTTPS = options.fakeHttps || window.location.protocol === 'https:';
-  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS;
+  var okBrowser = chromeBased || firefox || isAndroid || isOpera || isEdge || isOkSafari || isOkIOS || isBrave;
   var self = this;
   var videoType;
   function getRecommendation() {
