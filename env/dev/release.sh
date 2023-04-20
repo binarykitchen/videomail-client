@@ -88,6 +88,9 @@ git push --follow-tags
 # Prepare the develop branch for the new cycle
 git checkout develop
 
+# Strange bug, have to bump it again
+gulp bumpVersion --write --version=$VERSION
+
 unset GIT_MERGE_AUTOEDIT
 
 info "\nAll good. Ready for the next cycle!\n"
