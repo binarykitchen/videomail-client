@@ -26459,7 +26459,7 @@ function wrappy (fn, cb) {
 },{}],358:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "6.0.6",
+  "version": "6.0.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -31333,31 +31333,22 @@ var Recorder = function Recorder(visuals, replay) {
           }
         });
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream *error* event emitted: ' + (0, _pretty["default"])(err));
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted');
+          debug(err);
+          connecting = connected = false;
+          var videomailError;
+          if (browser.isIOS()) {
+            _videomailError["default"].create(err);
 
-          // connecting = connected = false
-
-          // let videomailError
-
-          // if (browser.isIOS()) {
-          //   // setting custom text since that err object isn't really an error
-          //   // on iphones when locked, and unlocked, this err is actually
-          //   // an event object with stuff we can't use at all (an external bug)
-          //   videomailError = VideomailError.create(
-          //     'Sorry, connection has timed out',
-          //     'iPhones cannot maintain a live connection for too long.',
-          //     options
-          //   )
-          // } else {
-          //   // or else it could be a poor wifi connection...
-          //   videomailError = VideomailError.create(
-          //     'Data exchange interrupted',
-          //     'Please check your network connection and reload.',
-          //     options
-          //   )
-          // }
-
-          // self.emit(Events.ERROR, videomailError)
+            // setting custom text since that err object isn't really an error
+            // on iphones when locked, and unlocked, this err is actually
+            // an event object with stuff we can't use at all (an external bug)
+            videomailError = _videomailError["default"].create('Sorry, connection has timed out', 'iPhones cannot maintain a live connection for too long.', options);
+          } else {
+            // or else it could be a poor wifi connection...
+            videomailError = _videomailError["default"].create('Data exchange interrupted', 'Please check your network connection and reload.', options);
+          }
+          self.emit(_events["default"].ERROR, videomailError);
         });
 
         // just experimental
