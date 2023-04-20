@@ -401,31 +401,34 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         })
 
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream *error* event emitted: ' + pretty(err))
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted')
+          debug(err)
 
-          // connecting = connected = false
+          connecting = connected = false
 
-          // let videomailError
+          let videomailError
 
-          // if (browser.isIOS()) {
-          //   // setting custom text since that err object isn't really an error
-          //   // on iphones when locked, and unlocked, this err is actually
-          //   // an event object with stuff we can't use at all (an external bug)
-          //   videomailError = VideomailError.create(
-          //     'Sorry, connection has timed out',
-          //     'iPhones cannot maintain a live connection for too long.',
-          //     options
-          //   )
-          // } else {
-          //   // or else it could be a poor wifi connection...
-          //   videomailError = VideomailError.create(
-          //     'Data exchange interrupted',
-          //     'Please check your network connection and reload.',
-          //     options
-          //   )
-          // }
+          if (browser.isIOS()) {
+            VideomailError.create(err)
 
-          // self.emit(Events.ERROR, videomailError)
+            // setting custom text since that err object isn't really an error
+            // on iphones when locked, and unlocked, this err is actually
+            // an event object with stuff we can't use at all (an external bug)
+            videomailError = VideomailError.create(
+              'Sorry, connection has timed out',
+              'iPhones cannot maintain a live connection for too long.',
+              options
+            )
+          } else {
+            // or else it could be a poor wifi connection...
+            videomailError = VideomailError.create(
+              'Data exchange interrupted',
+              'Please check your network connection and reload.',
+              options
+            )
+          }
+
+          self.emit(Events.ERROR, videomailError)
         })
 
         // just experimental
