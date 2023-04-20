@@ -79,10 +79,8 @@ git commit -m "Final commit of version $VERSION" --no-edit
 info "Publishing to npm ...\n"
 npm publish
 
-# Complete the previous release
-git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
-
-git push
+# Complete the release. This will also tag it.
+git flow release finish $VERSION -p -m "Completing release of $VERSION"
 
 git checkout master
 git push --follow-tags
