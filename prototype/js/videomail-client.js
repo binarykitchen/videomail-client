@@ -6938,10 +6938,10 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.29.0',
+  version: '3.30.1',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-  license: 'https://github.com/zloirock/core-js/blob/v3.29.0/LICENSE',
+  license: 'https://github.com/zloirock/core-js/blob/v3.30.1/LICENSE',
   source: 'https://github.com/zloirock/core-js'
 });
 
@@ -12665,13 +12665,11 @@ function replaceGetterValues (replacer) {
 /**
  * filesize
  *
- * @copyright 2022 Jason Mulligan <jason.mulligan@avoidwork.com>
+ * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.0.6
+ * @version 10.0.7
  */
 'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
 
 const ARRAY = "array";
 const BIT = "bit";
@@ -23828,7 +23826,7 @@ module.exports = function typedarrayToBuffer (arr) {
 }).call(this)}).call(this,_dereq_("buffer").Buffer)
 },{"buffer":11}],347:[function(_dereq_,module,exports){
 /////////////////////////////////////////////////////////////////////////////////
-/* UAParser.js v1.0.34
+/* UAParser.js v1.0.35
    Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
    MIT License *//*
    Detect Browser, Engine, OS, CPU, and Device type/model from User-Agent data.
@@ -23846,7 +23844,7 @@ module.exports = function typedarrayToBuffer (arr) {
     /////////////
 
 
-    var LIBVERSION  = '1.0.34',
+    var LIBVERSION  = '1.0.35',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -24065,8 +24063,9 @@ module.exports = function typedarrayToBuffer (arr) {
             /(?:ms|\()(ie) ([\w\.]+)/i,                                         // Internet Explorer
 
             // Webkit/KHTML based                                               // Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron/Iridium/PhantomJS/Bowser/QupZilla/Falkon
-            /(flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|quark|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|qq|duckduckgo)\/([-\w\.]+)/i,
+            /(flock|rockmelt|midori|epiphany|silk|skyfire|bolt|iron|vivaldi|iridium|phantomjs|bowser|quark|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|qq|duckduckgo)\/([-\w\.]+)/i,
                                                                                 // Rekonq/Puffin/Brave/Whale/QQBrowserLite/QQ, aka ShouQ
+            /(heytap|ovi)browser\/([\d\.]+)/i,                                  // Heytap/Ovi
             /(weibo)__([\d\.]+)/i                                               // Weibo
             ], [NAME, VERSION], [
             /(?:\buc? ?browser|(?:juc.+)ucweb)[\/ ]?([\w\.]+)/i                 // UCBrowser
@@ -24080,7 +24079,7 @@ module.exports = function typedarrayToBuffer (arr) {
             ], [VERSION, [NAME, 'Konqueror']], [
             /trident.+rv[: ]([\w\.]{1,9})\b.+like gecko/i                       // IE11
             ], [VERSION, [NAME, 'IE']], [
-            /yabrowser\/([\w\.]+)/i                                             // Yandex
+            /ya(?:search)?browser\/([\w\.]+)/i                                  // Yandex
             ], [VERSION, [NAME, 'Yandex']], [
             /(avast|avg)\/([\w\.]+)/i                                           // Avast/AVG Secure Browser
             ], [[NAME, /(.+)/, '$1 Secure '+BROWSER], VERSION], [
@@ -24124,6 +24123,8 @@ module.exports = function typedarrayToBuffer (arr) {
             ], [NAME, VERSION], [
             /\bgsa\/([\w\.]+) .*safari\//i                                      // Google Search Appliance on iOS
             ], [VERSION, [NAME, 'GSA']], [
+            /musical_ly(?:.+app_?version\/|_)([\w\.]+)/i                        // TikTok
+            ], [VERSION, [NAME, 'TikTok']], [
 
             /headlesschrome(?:\/([\w\.]+)| )/i                                  // Chrome Headless
             ], [VERSION, [NAME, CHROME+' Headless']], [
@@ -24219,7 +24220,7 @@ module.exports = function typedarrayToBuffer (arr) {
             ], [MODEL, [VENDOR, SAMSUNG], [TYPE, MOBILE]], [
 
             // Apple
-            /\((ip(?:hone|od)[\w ]*);/i                                         // iPod/iPhone
+            /(?:\/|\()(ip(?:hone|od)[\w, ]*)(?:\/|;)/i                          // iPod/iPhone
             ], [MODEL, [VENDOR, APPLE], [TYPE, MOBILE]], [
             /\((ipad);[-\w\),; ]+apple/i,                                       // iPad
             /applecoremedia\/[\w\.]+ \((ipad)/i,
@@ -24309,7 +24310,7 @@ module.exports = function typedarrayToBuffer (arr) {
 
             // Amazon
             /(alexa)webm/i,
-            /(kf[a-z]{2}wi)( bui|\))/i,                                         // Kindle Fire without Silk
+            /(kf[a-z]{2}wi|aeo[c-r]{2})( bui|\))/i,                             // Kindle Fire without Silk / Echo Show
             /(kf[a-z]+)( bui|\)).+silk\//i                                      // Kindle Fire HD
             ], [MODEL, [VENDOR, AMAZON], [TYPE, TABLET]], [
             /((?:sd|kf)[0349hijorstuw]+)( bui|\)).+silk\//i                     // Fire Phone
@@ -24494,6 +24495,8 @@ module.exports = function typedarrayToBuffer (arr) {
 
             /(tesla)(?: qtcarbrowser|\/[-\w\.]+)/i                              // Tesla
             ], [VENDOR, [TYPE, EMBEDDED]], [
+            /(aeobc)\b/i                                                        // Echo Dot
+            ], [MODEL, [VENDOR, AMAZON], [TYPE, EMBEDDED]], [
 
             ////////////////////
             // MIXED (GENERIC)
@@ -24523,7 +24526,8 @@ module.exports = function typedarrayToBuffer (arr) {
             /(webkit|trident|netfront|netsurf|amaya|lynx|w3m|goanna)\/([\w\.]+)/i, // WebKit/Trident/NetFront/NetSurf/Amaya/Lynx/w3m/Goanna
             /ekioh(flow)\/([\w\.]+)/i,                                          // Flow
             /(khtml|tasman|links)[\/ ]\(?([\w\.]+)/i,                           // KHTML/Tasman/Links
-            /(icab)[\/ ]([23]\.[\d\.]+)/i                                       // iCab
+            /(icab)[\/ ]([23]\.[\d\.]+)/i,                                      // iCab
+            /\b(libweb)/i
             ], [NAME, VERSION], [
 
             /rv\:([\w\.]{1,9})\b.+(gecko)/i                                     // Gecko
@@ -24544,6 +24548,7 @@ module.exports = function typedarrayToBuffer (arr) {
 
             // iOS/macOS
             /ip[honead]{2,4}\b(?:.*os ([\w]+) like mac|; opera)/i,              // iOS
+            /ios;fbsv\/([\d\.]+)/i,
             /cfnetwork\/.+darwin/i
             ], [[VERSION, /_/g, '.'], [NAME, 'iOS']], [
             /(mac os x) ?([\w\. ]*)/i,
@@ -24600,7 +24605,7 @@ module.exports = function typedarrayToBuffer (arr) {
             ], [[NAME, 'Solaris'], VERSION], [
             /((?:open)?solaris)[-\/ ]?([\w\.]*)/i,                              // Solaris
             /(aix) ((\d)(?=\.|\)| )[\w\.])*/i,                                  // AIX
-            /\b(beos|os\/2|amigaos|morphos|openvms|fuchsia|hp-ux)/i,            // BeOS/OS2/AmigaOS/MorphOS/OpenVMS/Fuchsia/HP-UX
+            /\b(beos|os\/2|amigaos|morphos|openvms|fuchsia|hp-ux|serenityos)/i, // BeOS/OS2/AmigaOS/MorphOS/OpenVMS/Fuchsia/HP-UX/SerenityOS
             /(unix) ?([\w\.]*)/i                                                // UNIX
             ], [NAME, VERSION]
         ]
@@ -24625,6 +24630,7 @@ module.exports = function typedarrayToBuffer (arr) {
         var _ua = ua || ((_navigator && _navigator.userAgent) ? _navigator.userAgent : EMPTY);
         var _uach = (_navigator && _navigator.userAgentData) ? _navigator.userAgentData : undefined;
         var _rgxmap = extensions ? extend(regexes, extensions) : regexes;
+        var _isSelfNav = _navigator && _navigator.userAgent == _ua;
 
         this.getBrowser = function () {
             var _browser = {};
@@ -24633,7 +24639,7 @@ module.exports = function typedarrayToBuffer (arr) {
             rgxMapper.call(_browser, _ua, _rgxmap.browser);
             _browser[MAJOR] = majorize(_browser[VERSION]);
             // Brave-specific detection
-            if (_navigator && _navigator.brave && typeof _navigator.brave.isBrave == FUNC_TYPE) {
+            if (_isSelfNav && _navigator && _navigator.brave && typeof _navigator.brave.isBrave == FUNC_TYPE) {
                 _browser[NAME] = 'Brave';
             }
             return _browser;
@@ -24650,11 +24656,11 @@ module.exports = function typedarrayToBuffer (arr) {
             _device[MODEL] = undefined;
             _device[TYPE] = undefined;
             rgxMapper.call(_device, _ua, _rgxmap.device);
-            if (!_device[TYPE] && _uach && _uach.mobile) {
+            if (_isSelfNav && !_device[TYPE] && _uach && _uach.mobile) {
                 _device[TYPE] = MOBILE;
             }
             // iPadOS-specific detection: identified as Mac, but has some iOS-only properties
-            if (_device[MODEL] == 'Macintosh' && _navigator && typeof _navigator.standalone !== UNDEF_TYPE && _navigator.maxTouchPoints && _navigator.maxTouchPoints > 2) {
+            if (_isSelfNav && _device[MODEL] == 'Macintosh' && _navigator && typeof _navigator.standalone !== UNDEF_TYPE && _navigator.maxTouchPoints && _navigator.maxTouchPoints > 2) {
                 _device[MODEL] = 'iPad';
                 _device[TYPE] = TABLET;
             }
@@ -24672,7 +24678,7 @@ module.exports = function typedarrayToBuffer (arr) {
             _os[NAME] = undefined;
             _os[VERSION] = undefined;
             rgxMapper.call(_os, _ua, _rgxmap.os);
-            if (!_os[NAME] && _uach && _uach.platform != 'Unknown') {
+            if (_isSelfNav && !_os[NAME] && _uach && _uach.platform != 'Unknown') {
                 _os[NAME] = _uach.platform  
                                     .replace(/chrome os/i, CHROMIUM_OS)
                                     .replace(/macos/i, MAC_OS);           // backward compatibility
@@ -26453,7 +26459,7 @@ function wrappy (fn, cb) {
 },{}],358:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "6.0.4",
+  "version": "6.0.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26519,14 +26525,14 @@ module.exports={
     "canvas-to-buffer": "3.0.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.29.0",
+    "core-js": "3.30.1",
     "create-error": "0.3.1",
-    "deepmerge": "4.3.0",
+    "deepmerge": "4.3.1",
     "defined": "1.0.1",
     "despot": "1.1.3",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.2",
-    "filesize": "10.0.6",
+    "filesize": "10.0.7",
     "get-form-data": "3.0.0",
     "hidden": "1.1.1",
     "humanize-duration": "3.28.0",
@@ -26540,24 +26546,24 @@ module.exports={
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
     "superagent": "8.0.9",
-    "ua-parser-js": "1.0.34",
+    "ua-parser-js": "1.0.35",
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.21.0",
-    "@babel/eslint-parser": "7.19.1",
-    "@babel/plugin-transform-runtime": "7.21.0",
-    "@babel/preset-env": "7.20.2",
+    "@babel/core": "7.21.4",
+    "@babel/eslint-parser": "7.21.3",
+    "@babel/plugin-transform-runtime": "7.21.4",
+    "@babel/preset-env": "7.21.4",
     "audit-ci": "6.6.1",
-    "autoprefixer": "10.4.13",
+    "autoprefixer": "10.4.14",
     "babelify": "10.0.0",
     "body-parser": "1.20.2",
     "browserify": "17.0.0",
     "connect-send-json": "1.0.0",
     "cssnano": "5.1.15",
     "del": "6.1.1",
-    "eslint": "8.35.0",
-    "eslint-config-prettier": "8.7.0",
+    "eslint": "8.38.0",
+    "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.1.1",
@@ -26581,8 +26587,8 @@ module.exports={
     "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.21",
-    "prettier": "2.8.4",
+    "postcss": "8.4.23",
+    "prettier": "2.8.7",
     "router": "1.3.8",
     "tape": "5.6.3",
     "tape-catch": "1.0.6",
@@ -31327,19 +31333,31 @@ var Recorder = function Recorder(visuals, replay) {
           }
         });
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream *error* event emitted', err);
-          connecting = connected = false;
-          var videomailError;
-          if (browser.isIOS()) {
-            // setting custom text since that err object isn't really an error
-            // on iphones when locked, and unlocked, this err is actually
-            // an event object with stuff we can't use at all (an external bug)
-            videomailError = _videomailError["default"].create('Sorry, connection has timed out', 'iPhones cannot maintain a websocket longer than three minutes.', options);
-          } else {
-            // or else it could be a poor wifi connection...
-            videomailError = _videomailError["default"].create('Data exchange interrupted', 'Please check your network connection and reload.', options);
-          }
-          self.emit(_events["default"].ERROR, videomailError);
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted: ' + (0, _pretty["default"])(err));
+
+          // connecting = connected = false
+
+          // let videomailError
+
+          // if (browser.isIOS()) {
+          //   // setting custom text since that err object isn't really an error
+          //   // on iphones when locked, and unlocked, this err is actually
+          //   // an event object with stuff we can't use at all (an external bug)
+          //   videomailError = VideomailError.create(
+          //     'Sorry, connection has timed out',
+          //     'iPhones cannot maintain a live connection for too long.',
+          //     options
+          //   )
+          // } else {
+          //   // or else it could be a poor wifi connection...
+          //   videomailError = VideomailError.create(
+          //     'Data exchange interrupted',
+          //     'Please check your network connection and reload.',
+          //     options
+          //   )
+          // }
+
+          // self.emit(Events.ERROR, videomailError)
         });
 
         // just experimental
