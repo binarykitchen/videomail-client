@@ -79,17 +79,17 @@ git commit -m "Final commit of version $VERSION" --no-edit
 info "Publishing to npm ...\n"
 npm publish
 
-# # Complete the previous release
-# git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
+# Complete the previous release
+git flow release finish $VERSION -m "Completing release of $VERSION" # This will also tag it
 
-# git push
+git push
 
-# git checkout master
-# git push --follow-tags
+git checkout master
+git push --follow-tags
 
-# # Prepare the develop branch for the new cycle
-# git checkout develop
+# Prepare the develop branch for the new cycle
+git checkout develop
 
-# unset GIT_MERGE_AUTOEDIT
+unset GIT_MERGE_AUTOEDIT
 
-# info "\nAll good. Ready for the next cycle!\n"
+info "\nAll good. Ready for the next cycle!\n"
