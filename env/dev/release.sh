@@ -54,7 +54,7 @@ git checkout develop
 
 info "Figuring next version for importance ${IMPORTANCE}...\n"
 read VERSION <<<$(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
-printf "${GREEN}It's ${VERSION}${NC}\n"
+info "It's version ${VERSION}\n"
 
 git checkout master
 git push
