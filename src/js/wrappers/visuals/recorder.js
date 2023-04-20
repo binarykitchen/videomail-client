@@ -333,11 +333,11 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       if (stream) {
         // // useful for debugging streams
-        //
+
         // if (!stream.originalEmit) {
         //   stream.originalEmit = stream.emit
         // }
-        //
+
         // stream.emit = function (type) {
         //   if (stream) {
         //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
@@ -401,16 +401,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         })
 
         stream.on('error', function (err) {
-          debug(PIPE_SYMBOL + 'Stream *error* event emitted')
-          debug(err)
+          debug(PIPE_SYMBOL + 'Stream *error* event emitted', err)
 
           connecting = connected = false
 
           let videomailError
 
           if (browser.isIOS()) {
-            VideomailError.create(err)
-
             // setting custom text since that err object isn't really an error
             // on iphones when locked, and unlocked, this err is actually
             // an event object with stuff we can't use at all (an external bug)
