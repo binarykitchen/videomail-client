@@ -32304,7 +32304,7 @@ var Replay = function Replay(parentElement, options) {
         source = (0, _hyperscript["default"])('source', {
           // Ensures HTML video thumbnail turns up on iOS, see
           // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
-          src: src + '#t=0.001',
+          src: src + '#t=0.01',
           type: 'video/' + type
         });
         replayElement.appendChild(source);
