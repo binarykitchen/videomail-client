@@ -67,9 +67,6 @@ git flow release start $VERSION
 # This will increment version in package.json
 gulp bumpVersion --write --version=$VERSION
 
-git add -A
-git commit -m "Bump version to $VERSION" --no-edit
-
 # Ensure dependencies are okay
 npm install
 
