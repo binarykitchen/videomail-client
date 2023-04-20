@@ -228,6 +228,8 @@ exports.bumpVersion = function () {
     bumpOptions.type = options.importance
   }
 
+  console.log({ bumpOptions })
+
   return gulp
     .src(['./package.json'])
     .pipe(plugins.bump(bumpOptions))
