@@ -5122,7 +5122,7 @@ module.exports =
   check(typeof self == 'object' && self) ||
   check(typeof global == 'object' && global) ||
   // eslint-disable-next-line no-new-func -- fallback
-  (function () { return this; })() || Function('return this')();
+  (function () { return this; })() || this || Function('return this')();
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],97:[function(_dereq_,module,exports){
@@ -6938,10 +6938,10 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.30.1',
+  version: '3.30.2',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-  license: 'https://github.com/zloirock/core-js/blob/v3.30.1/LICENSE',
+  license: 'https://github.com/zloirock/core-js/blob/v3.30.2/LICENSE',
   source: 'https://github.com/zloirock/core-js'
 });
 
@@ -7236,18 +7236,23 @@ module.exports = {
 /* eslint-disable es/no-symbol -- required for testing */
 var V8_VERSION = _dereq_('../internals/engine-v8-version');
 var fails = _dereq_('../internals/fails');
+var global = _dereq_('../internals/global');
+
+var $String = global.String;
 
 // eslint-disable-next-line es/no-object-getownpropertysymbols -- required for testing
 module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
   var symbol = Symbol();
   // Chrome 38 Symbol has incorrect toString conversion
   // `get-own-property-symbols` polyfill symbols converted to object are not Symbol instances
-  return !String(symbol) || !(Object(symbol) instanceof Symbol) ||
+  // nb: Do not call `String` directly to avoid this being optimized out to `symbol+''` which will,
+  // of course, fail.
+  return !$String(symbol) || !(Object(symbol) instanceof Symbol) ||
     // Chrome 38-40 symbols are not inherited from DOM collections prototypes to instances
     !Symbol.sham && V8_VERSION && V8_VERSION < 41;
 });
 
-},{"../internals/engine-v8-version":76,"../internals/fails":80}],174:[function(_dereq_,module,exports){
+},{"../internals/engine-v8-version":76,"../internals/fails":80,"../internals/global":96}],174:[function(_dereq_,module,exports){
 var global = _dereq_('../internals/global');
 var apply = _dereq_('../internals/function-apply');
 var bind = _dereq_('../internals/function-bind-context');
@@ -26459,7 +26464,7 @@ function wrappy (fn, cb) {
 },{}],358:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "6.0.17",
+  "version": "6.0.18",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26518,14 +26523,14 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.21.0",
+    "@babel/runtime": "7.21.5",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "3.0.1",
     "canvas-to-buffer": "3.0.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.30.1",
+    "core-js": "3.30.2",
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",
@@ -26550,19 +26555,19 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.21.4",
-    "@babel/eslint-parser": "7.21.3",
+    "@babel/core": "7.21.8",
+    "@babel/eslint-parser": "7.21.8",
     "@babel/plugin-transform-runtime": "7.21.4",
-    "@babel/preset-env": "7.21.4",
+    "@babel/preset-env": "7.21.5",
     "audit-ci": "6.6.1",
     "autoprefixer": "10.4.14",
     "babelify": "10.0.0",
     "body-parser": "1.20.2",
     "browserify": "17.0.0",
     "connect-send-json": "1.0.0",
-    "cssnano": "5.1.15",
+    "cssnano": "6.0.1",
     "del": "6.1.1",
-    "eslint": "8.38.0",
+    "eslint": "8.41.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
@@ -26588,7 +26593,7 @@ module.exports={
     "minimist": "1.2.8",
     "nib": "1.2.0",
     "postcss": "8.4.23",
-    "prettier": "2.8.7",
+    "prettier": "2.8.8",
     "router": "1.3.8",
     "tape": "5.6.3",
     "tape-catch": "1.0.6",
@@ -27429,7 +27434,7 @@ _dereq_("core-js/modules/es.typed-array.to-string.js");
 var _defined = _interopRequireDefault(_dereq_("defined"));
 var _uaParserJs = _interopRequireDefault(_dereq_("ua-parser-js"));
 var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
-var FALLBACK_VIDEO_TYPE = 'webm';
+var FALLBACK_VIDEO_TYPE = 'mp4';
 var Browser = function Browser(options) {
   options = options || {};
   var firefoxDownload = 'http://www.mozilla.org/firefox/update/';
@@ -27592,10 +27597,10 @@ var Browser = function Browser(options) {
   }
   this.getVideoType = function (video) {
     if (!videoType && video) {
-      if (canPlayType(video, 'webm')) {
-        videoType = 'webm';
-      } else if (canPlayType(video, 'mp4')) {
+      if (canPlayType(video, 'mp4')) {
         videoType = 'mp4';
+      } else if (canPlayType(video, 'webm')) {
+        videoType = 'webm';
       }
     }
     if (videoType !== 'webm' && videoType !== 'mp4') {
@@ -32173,11 +32178,11 @@ var Replay = function Replay(parentElement, options) {
   this.setVideomail = function (newVideomail) {
     videomail = newVideomail;
     if (videomail) {
-      if (videomail.webm) {
-        this.setWebMSource(videomail.webm);
-      }
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4);
+      }
+      if (videomail.webm) {
+        this.setWebMSource(videomail.webm);
       }
       if (videomail.poster) {
         replayElement.setAttribute('poster', videomail.poster);
@@ -32301,10 +32306,14 @@ var Replay = function Replay(parentElement, options) {
     }
     if (!source) {
       if (src) {
+        var fps = options.video.fps;
+
+        // Ensure it's greater than the frame duration itself
+        var t = 2 * (1 / fps);
         source = (0, _hyperscript["default"])('source', {
           // Ensures HTML video thumbnail turns up on iOS, see
           // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
-          src: src + '#t=0.1',
+          src: src + '#t=' + t,
           type: 'video/' + type
         });
         replayElement.appendChild(source);

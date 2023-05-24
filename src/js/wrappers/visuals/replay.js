@@ -80,12 +80,12 @@ const Replay = function (parentElement, options) {
     videomail = newVideomail
 
     if (videomail) {
-      if (videomail.webm) {
-        this.setWebMSource(videomail.webm)
-      }
-
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4)
+      }
+
+      if (videomail.webm) {
+        this.setWebMSource(videomail.webm)
       }
 
       if (videomail.poster) {
@@ -239,10 +239,15 @@ const Replay = function (parentElement, options) {
 
     if (!source) {
       if (src) {
+        const fps = options.video.fps
+
+        // Ensure it's greater than the frame duration itself
+        const t = 2 * (1 / fps)
+
         source = h('source', {
           // Ensures HTML video thumbnail turns up on iOS, see
           // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
-          src: src + '#t=0.1',
+          src: src + '#t=' + t,
           type: 'video/' + type
         })
 
