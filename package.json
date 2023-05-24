@@ -103,7 +103,7 @@
     "connect-send-json": "1.0.0",
     "cssnano": "6.0.1",
     "del": "6.1.1",
-    "eslint": "8.40.0",
+    "eslint": "8.41.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",

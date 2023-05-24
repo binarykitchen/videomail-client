@@ -80,12 +80,12 @@ const Replay = function (parentElement, options) {
     videomail = newVideomail
 
     if (videomail) {
-      if (videomail.webm) {
-        this.setWebMSource(videomail.webm)
-      }
-
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4)
+      }
+
+      if (videomail.webm) {
+        this.setWebMSource(videomail.webm)
       }
 
       if (videomail.poster) {

@@ -26567,7 +26567,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "6.0.1",
     "del": "6.1.1",
-    "eslint": "8.40.0",
+    "eslint": "8.41.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
@@ -27434,7 +27434,7 @@ _dereq_("core-js/modules/es.typed-array.to-string.js");
 var _defined = _interopRequireDefault(_dereq_("defined"));
 var _uaParserJs = _interopRequireDefault(_dereq_("ua-parser-js"));
 var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
-var FALLBACK_VIDEO_TYPE = 'webm';
+var FALLBACK_VIDEO_TYPE = 'mp4';
 var Browser = function Browser(options) {
   options = options || {};
   var firefoxDownload = 'http://www.mozilla.org/firefox/update/';
@@ -27597,10 +27597,10 @@ var Browser = function Browser(options) {
   }
   this.getVideoType = function (video) {
     if (!videoType && video) {
-      if (canPlayType(video, 'webm')) {
-        videoType = 'webm';
-      } else if (canPlayType(video, 'mp4')) {
+      if (canPlayType(video, 'mp4')) {
         videoType = 'mp4';
+      } else if (canPlayType(video, 'webm')) {
+        videoType = 'webm';
       }
     }
     if (videoType !== 'webm' && videoType !== 'mp4') {
@@ -32178,11 +32178,11 @@ var Replay = function Replay(parentElement, options) {
   this.setVideomail = function (newVideomail) {
     videomail = newVideomail;
     if (videomail) {
-      if (videomail.webm) {
-        this.setWebMSource(videomail.webm);
-      }
       if (videomail.mp4) {
         this.setMp4Source(videomail.mp4);
+      }
+      if (videomail.webm) {
+        this.setWebMSource(videomail.webm);
       }
       if (videomail.poster) {
         replayElement.setAttribute('poster', videomail.poster);
