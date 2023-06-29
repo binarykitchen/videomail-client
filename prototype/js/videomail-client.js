@@ -6938,10 +6938,10 @@ var store = _dereq_('../internals/shared-store');
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.30.2',
+  version: '3.31.0',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-  license: 'https://github.com/zloirock/core-js/blob/v3.30.2/LICENSE',
+  license: 'https://github.com/zloirock/core-js/blob/v3.31.0/LICENSE',
   source: 'https://github.com/zloirock/core-js'
 });
 
@@ -7913,13 +7913,15 @@ module.exports = !fails(function () {
   // eslint-disable-next-line unicorn/relative-url-style -- required for testing
   var url = new URL('b?a=1&b=2&c=3', 'http://a');
   var searchParams = url.searchParams;
+  var searchParams2 = new URLSearchParams('a=1&a=2');
   var result = '';
   url.pathname = 'c%20d';
   searchParams.forEach(function (value, key) {
     searchParams['delete']('b');
     result += key + value;
   });
-  return (IS_PURE && !url.toJSON)
+  searchParams2['delete']('a', 2);
+  return (IS_PURE && (!url.toJSON || !searchParams2.has('a', 1) || searchParams2.has('a', 2)))
     || (!searchParams.size && (IS_PURE || !DESCRIPTORS))
     || !searchParams.sort
     || url.href !== 'http://a/c%20d?a=1&c=3'
@@ -10083,7 +10085,7 @@ var URLSearchParamsConstructor = function URLSearchParams(/* init */) {
   anInstance(this, URLSearchParamsPrototype);
   var init = arguments.length > 0 ? arguments[0] : undefined;
   var state = setInternalState(this, new URLSearchParamsState(init));
-  if (!DESCRIPTORS) this.length = state.entries.length;
+  if (!DESCRIPTORS) this.size = state.entries.length;
 };
 
 var URLSearchParamsPrototype = URLSearchParamsConstructor.prototype;
@@ -10092,32 +10094,37 @@ defineBuiltIns(URLSearchParamsPrototype, {
   // `URLSearchParams.prototype.append` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-append
   append: function append(name, value) {
-    validateArgumentsLength(arguments.length, 2);
     var state = getInternalParamsState(this);
+    validateArgumentsLength(arguments.length, 2);
     push(state.entries, { key: $toString(name), value: $toString(value) });
     if (!DESCRIPTORS) this.length++;
     state.updateURL();
   },
   // `URLSearchParams.prototype.delete` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-delete
-  'delete': function (name) {
-    validateArgumentsLength(arguments.length, 1);
+  'delete': function (name /* , value */) {
     var state = getInternalParamsState(this);
+    var length = validateArgumentsLength(arguments.length, 1);
     var entries = state.entries;
     var key = $toString(name);
+    var $value = length < 2 ? undefined : arguments[1];
+    var value = $value === undefined ? $value : $toString($value);
     var index = 0;
     while (index < entries.length) {
-      if (entries[index].key === key) splice(entries, index, 1);
-      else index++;
+      var entry = entries[index];
+      if (entry.key === key && (value === undefined || entry.value === value)) {
+        splice(entries, index, 1);
+        if (value !== undefined) break;
+      } else index++;
     }
-    if (!DESCRIPTORS) this.length = entries.length;
+    if (!DESCRIPTORS) this.size = entries.length;
     state.updateURL();
   },
   // `URLSearchParams.prototype.get` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-get
   get: function get(name) {
-    validateArgumentsLength(arguments.length, 1);
     var entries = getInternalParamsState(this).entries;
+    validateArgumentsLength(arguments.length, 1);
     var key = $toString(name);
     var index = 0;
     for (; index < entries.length; index++) {
@@ -10128,8 +10135,8 @@ defineBuiltIns(URLSearchParamsPrototype, {
   // `URLSearchParams.prototype.getAll` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-getall
   getAll: function getAll(name) {
-    validateArgumentsLength(arguments.length, 1);
     var entries = getInternalParamsState(this).entries;
+    validateArgumentsLength(arguments.length, 1);
     var key = $toString(name);
     var result = [];
     var index = 0;
@@ -10140,21 +10147,24 @@ defineBuiltIns(URLSearchParamsPrototype, {
   },
   // `URLSearchParams.prototype.has` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-has
-  has: function has(name) {
-    validateArgumentsLength(arguments.length, 1);
+  has: function has(name /* , value */) {
     var entries = getInternalParamsState(this).entries;
+    var length = validateArgumentsLength(arguments.length, 1);
     var key = $toString(name);
+    var $value = length < 2 ? undefined : arguments[1];
+    var value = $value === undefined ? $value : $toString($value);
     var index = 0;
     while (index < entries.length) {
-      if (entries[index++].key === key) return true;
+      var entry = entries[index++];
+      if (entry.key === key && (value === undefined || entry.value === value)) return true;
     }
     return false;
   },
   // `URLSearchParams.prototype.set` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-set
   set: function set(name, value) {
-    validateArgumentsLength(arguments.length, 1);
     var state = getInternalParamsState(this);
+    validateArgumentsLength(arguments.length, 1);
     var entries = state.entries;
     var found = false;
     var key = $toString(name);
@@ -10172,7 +10182,7 @@ defineBuiltIns(URLSearchParamsPrototype, {
       }
     }
     if (!found) push(entries, { key: key, value: val });
-    if (!DESCRIPTORS) this.length = entries.length;
+    if (!DESCRIPTORS) this.size = entries.length;
     state.updateURL();
   },
   // `URLSearchParams.prototype.sort` method
@@ -26464,7 +26474,7 @@ function wrappy (fn, cb) {
 },{}],358:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "6.0.18",
+  "version": "6.0.19",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -26523,14 +26533,14 @@ module.exports={
     ]
   },
   "dependencies": {
-    "@babel/runtime": "7.21.5",
+    "@babel/runtime": "7.22.5",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "3.0.1",
     "canvas-to-buffer": "3.0.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.30.2",
+    "core-js": "3.31.0",
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",
@@ -26555,10 +26565,10 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/core": "7.21.8",
-    "@babel/eslint-parser": "7.21.8",
-    "@babel/plugin-transform-runtime": "7.21.4",
-    "@babel/preset-env": "7.21.5",
+    "@babel/core": "7.22.5",
+    "@babel/eslint-parser": "7.22.5",
+    "@babel/plugin-transform-runtime": "7.22.5",
+    "@babel/preset-env": "7.22.5",
     "audit-ci": "6.6.1",
     "autoprefixer": "10.4.14",
     "babelify": "10.0.0",
@@ -26567,7 +26577,7 @@ module.exports={
     "connect-send-json": "1.0.0",
     "cssnano": "6.0.1",
     "del": "6.1.1",
-    "eslint": "8.41.0",
+    "eslint": "8.43.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
@@ -26592,7 +26602,7 @@ module.exports={
     "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.23",
+    "postcss": "8.4.24",
     "prettier": "2.8.8",
     "router": "1.3.8",
     "tape": "5.6.3",
@@ -31054,6 +31064,7 @@ _dereq_("core-js/modules/web.timers.js");
 _dereq_("core-js/modules/es.number.to-fixed.js");
 _dereq_("core-js/modules/es.date.now.js");
 _dereq_("core-js/modules/es.date.to-string.js");
+_dereq_("core-js/modules/es.object.keys.js");
 _dereq_("core-js/modules/es.object.to-string.js");
 _dereq_("core-js/modules/es.regexp.to-string.js");
 _dereq_("core-js/modules/es.function.name.js");
@@ -31401,7 +31412,7 @@ var Recorder = function Recorder(visuals, replay) {
     clearUserMediaTimeout();
     debug('Recorder: userMediaErrorCallback()', ', name:', err.name, ', message:', err.message, ', Webcam characteristics:', userMedia.getCharacteristics(),
     // added recently in the hope to investigate weird webcam issues
-    ', extraA arguments:', extraA.toString(), ', extraB arguments:', extraB.toString());
+    ', extraA arguments:', extraA ? extraA.toString() : undefined, ', extraB arguments:', extraB ? extraB.toString() : undefined);
     var errorListeners = self.listeners(_events["default"].ERROR);
     if (errorListeners && errorListeners.length) {
       if (err.name !== _videomailError["default"].MEDIA_DEVICE_NOT_SUPPORTED) {
@@ -32097,7 +32108,7 @@ var _default = Recorder;
 exports["default"] = _default;
 
 }).call(this)}).call(this,_dereq_("buffer").Buffer)
-},{"../../constants":360,"../../events":361,"../../util/browser":365,"../../util/eventEmitter":367,"../../util/humanize":368,"../../util/pretty":370,"../../util/videomailError":372,"./userMedia":388,"@babel/runtime/helpers/interopRequireDefault":1,"animitter":4,"buffer":11,"canvas-to-buffer":14,"core-js/modules/es.array.concat.js":205,"core-js/modules/es.date.now.js":212,"core-js/modules/es.date.to-string.js":213,"core-js/modules/es.function.bind.js":214,"core-js/modules/es.function.name.js":215,"core-js/modules/es.number.to-fixed.js":216,"core-js/modules/es.object.define-property.js":217,"core-js/modules/es.object.to-string.js":220,"core-js/modules/es.regexp.to-string.js":231,"core-js/modules/web.timers.js":262,"deepmerge":269,"hidden":293,"hyperscript":295,"safe-json-stringify":337,"util":351,"websocket-stream":354}],387:[function(_dereq_,module,exports){
+},{"../../constants":360,"../../events":361,"../../util/browser":365,"../../util/eventEmitter":367,"../../util/humanize":368,"../../util/pretty":370,"../../util/videomailError":372,"./userMedia":388,"@babel/runtime/helpers/interopRequireDefault":1,"animitter":4,"buffer":11,"canvas-to-buffer":14,"core-js/modules/es.array.concat.js":205,"core-js/modules/es.date.now.js":212,"core-js/modules/es.date.to-string.js":213,"core-js/modules/es.function.bind.js":214,"core-js/modules/es.function.name.js":215,"core-js/modules/es.number.to-fixed.js":216,"core-js/modules/es.object.define-property.js":217,"core-js/modules/es.object.keys.js":219,"core-js/modules/es.object.to-string.js":220,"core-js/modules/es.regexp.to-string.js":231,"core-js/modules/web.timers.js":262,"deepmerge":269,"hidden":293,"hyperscript":295,"safe-json-stringify":337,"util":351,"websocket-stream":354}],387:[function(_dereq_,module,exports){
 "use strict";
 
 _dereq_("core-js/modules/es.object.define-property.js");

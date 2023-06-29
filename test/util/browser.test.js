@@ -12,7 +12,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
     tt.equal(err, undefined)
 
     const videoType = browser.getVideoType()
-    tt.equal(videoType, 'webm')
+    tt.equal(videoType, 'mp4')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -36,7 +36,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
     let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), 'webm')
+    tt.equal(browser.getVideoType(), 'mp4')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -60,7 +60,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
     let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), 'webm')
+    tt.equal(browser.getVideoType(), 'mp4')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -93,7 +93,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
     err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), 'webm')
+    tt.equal(browser.getVideoType(), 'mp4')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
@@ -118,7 +118,7 @@ test('Browser:', { timeout: 2000 }, function (t) {
     let err = browser.checkBufferTypes()
     tt.equal(err, undefined)
 
-    tt.equal(browser.getVideoType(), 'webm')
+    tt.equal(browser.getVideoType(), 'mp4')
 
     err = browser.getNoAccessIssue()
     tt.equal(err.message, 'Unable to access webcam')
