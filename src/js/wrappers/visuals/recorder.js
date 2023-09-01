@@ -412,10 +412,19 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             // on iphones when locked, and unlocked, this err is actually
             // an event object with stuff we can't use at all (an external bug)
             videomailError = VideomailError.create(
-              'Sorry, connection has timed out',
-              'iPhones cannot maintain a live connection for too long.',
+              err,
+              'iPhones cannot maintain a live connection for too long. Original error message is: ' +
+                err.toString(),
               options
             )
+
+            // Changed temporarily for better investigations
+            // videomailError = VideomailError.create(
+            //   'Sorry, connection has timed out',
+            //   'iPhones cannot maintain a live connection for too long. Original error message is: ' +
+            //     err.toString(),
+            //   options
+            // )
           } else {
             // or else it could be a poor wifi connection...
             videomailError = VideomailError.create(
