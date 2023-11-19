@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - 18
+  - 20
 notifications:
   email:
     on_success: never

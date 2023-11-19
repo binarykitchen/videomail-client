@@ -205,11 +205,7 @@ exports.test = function (done) {
       this.emit('end')
       done()
     })
-    .pipe(
-      tapeRun({
-        wait: 4e3
-      })
-    )
+    .pipe(tapeRun({ sandbox: false }))
     .on('results', function () {
       done()
     })

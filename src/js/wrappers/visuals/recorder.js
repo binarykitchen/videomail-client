@@ -418,11 +418,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
               options
             )
 
-            // Changed temporarily for better investigations
+            // Changed to the above temporarily for better investigations
             // videomailError = VideomailError.create(
             //   'Sorry, connection has timed out',
-            //   'iPhones cannot maintain a live connection for too long. Original error message is: ' +
-            //     err.toString(),
+            //   'iPhones cannot maintain a live connection for too long,
             //   options
             // )
           } else {
