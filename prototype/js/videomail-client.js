@@ -19008,10 +19008,10 @@ module.exports={
     "gulp-inject-string": "1.1.2",
     "gulp-load-plugins": "2.0.8",
     "gulp-plumber": "1.2.1",
-    "gulp-postcss": "9.0.1",
+    "gulp-postcss": "10.0.0",
     "gulp-rename": "2.0.0",
     "gulp-sourcemaps": "3.0.0",
-    "gulp-stylus": "2.7.1",
+    "gulp-stylus": "3.0.1",
     "gulp-terser": "2.1.0",
     "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
@@ -19310,7 +19310,9 @@ var _default = exports.default = (0, _keymirror.default)({
   // document just became visible
   INVISIBLE: null,
   // document just became INvisible
-  SWITCH_FACING_MODE: null // to switch camera on mobiles between fron and back
+  SWITCH_FACING_MODE: null,
+  // to switch camera on mobiles between fron and back
+  SERVER_READY: null // Gets emitted when the ready command is sent through sockets from the server for recording
 });
 
 },{"@babel/runtime/helpers/interopRequireDefault":1,"keymirror":72}],126:[function(_dereq_,module,exports){
@@ -19441,7 +19443,7 @@ var _default = exports.default = {
     facingModeButton: false
   },
   image: {
-    quality: 0.44,
+    quality: 0.42,
     types: ['webp', 'jpeg'] // recommended settings to make most of all browsers
   },
   // alter these text for internationalisation
@@ -19473,8 +19475,9 @@ var _default = exports.default = {
     // in milliseconds, increase if you want user give more time to enable webcam
     connection: 1e4,
     // in seconds, increase if api is slow
-    pingInterval: 35e3 // in milliseconds, keeps webstream (connection) alive when pausing
+    pingInterval: 35e3 // in milliseconds, keeps web stream (connection) alive when pausing
   },
+  loadUserMediaOnRecord: true,
   callbacks: {
     // a custom callback to tweak form data before posting to server
     // this is for advanced use only and shouldn't be used if possible
@@ -20776,12 +20779,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _util = _interopRequireDefault(_dereq_("util"));
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _contains = _interopRequireDefault(_dereq_("contains"));
-var _events = _interopRequireDefault(_dereq_("./../events"));
-var _eventEmitter = _interopRequireDefault(_dereq_("./../util/eventEmitter"));
+var _hidden = _interopRequireDefault(_dereq_("hidden"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
+var _util = _interopRequireDefault(_dereq_("util"));
+var _events = _interopRequireDefault(_dereq_("../events"));
+var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var Buttons = function Buttons(container, options) {
   _eventEmitter.default.call(this, options, 'Buttons');
   var self = this;
@@ -21002,6 +21005,14 @@ var Buttons = function Buttons(container, options) {
     if (!options.enableAutoValidation) {
       enable(submitButton);
     }
+    if (!params.recordWhenReady) {
+      if (isShown(audioOnRadioPair)) {
+        enable(audioOnRadioPair);
+      }
+      if (isShown(audioOffRadioPair)) {
+        enable(audioOffRadioPair);
+      }
+    }
   }
   function onGoingBack() {
     hide(recordAgainButton);
@@ -21013,14 +21024,8 @@ var Buttons = function Buttons(container, options) {
   }
   function onUserMediaReady(params) {
     onFormReady(params);
-    if (isShown(recordButton)) {
+    if (isShown(recordButton) && !params.recordWhenReady) {
       enable(recordButton);
-    }
-    if (isShown(audioOnRadioPair)) {
-      enable(audioOnRadioPair);
-    }
-    if (isShown(audioOffRadioPair)) {
-      enable(audioOffRadioPair);
     }
     if (options.enableAutoValidation) {
       disable(submitButton);
@@ -21086,6 +21091,7 @@ var Buttons = function Buttons(container, options) {
   }
   function onStopping() {
     disable(previewButton);
+    disable(recordButton);
     hide(pauseButton);
     hide(resumeButton);
   }
@@ -21189,6 +21195,13 @@ var Buttons = function Buttons(container, options) {
       onDisablingAudio();
     }).on(_events.default.STARTING_OVER, function () {
       onStartingOver();
+    }).on(_events.default.CONNECTED, function () {
+      if (options.loadUserMediaOnRecord) {
+        if (isShown(recordButton)) {
+          console.log('here');
+          enable(recordButton);
+        }
+      }
     }).on(_events.default.ERROR, function (err) {
       // since https://github.com/binarykitchen/videomail-client/issues/60
       // we hide areas to make it easier for the user
@@ -21251,7 +21264,7 @@ var Buttons = function Buttons(container, options) {
 _util.default.inherits(Buttons, _eventEmitter.default);
 var _default = exports.default = Buttons;
 
-},{"./../events":125,"./../util/eventEmitter":131,"@babel/runtime/helpers/interopRequireDefault":1,"contains":18,"hidden":56,"hyperscript":58,"util":115}],138:[function(_dereq_,module,exports){
+},{"../events":125,"../util/eventEmitter":131,"@babel/runtime/helpers/interopRequireDefault":1,"contains":18,"hidden":56,"hyperscript":58,"util":115}],138:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22470,9 +22483,15 @@ var Visuals = function Visuals(container, options) {
   };
   this.recordAgain = function () {
     this.back(function () {
-      self.once(_events.default.USER_MEDIA_READY, function () {
-        self.record();
-      });
+      if (options.loadUserMediaOnRecord) {
+        self.once(_events.default.SERVER_READY, function () {
+          self.record();
+        });
+      } else {
+        self.once(_events.default.USER_MEDIA_READY, function () {
+          self.record();
+        });
+      }
     });
   };
   this.unload = function (e) {
@@ -23084,11 +23103,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _util = _interopRequireDefault(_dereq_("util"));
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
-var _eventEmitter = _interopRequireDefault(_dereq_("./../../util/eventEmitter"));
-var _events = _interopRequireDefault(_dereq_("./../../events"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
+var _util = _interopRequireDefault(_dereq_("util"));
+var _events = _interopRequireDefault(_dereq_("../../events"));
+var _eventEmitter = _interopRequireDefault(_dereq_("../../util/eventEmitter"));
 var Notifier = function Notifier(visuals, options) {
   _eventEmitter.default.call(this, options, 'Notifier');
   var self = this;
@@ -23157,6 +23176,11 @@ var Notifier = function Notifier(visuals, options) {
       onProgress(frameProgress, sampleProgress);
     }).on(_events.default.BEGIN_VIDEO_ENCODING, function () {
       onBeginVideoEncoding();
+    }).on(_events.default.CONNECTED, function () {
+      self.notify('Connected.');
+      if (options.loadUserMediaOnRecord) {
+        self.hide();
+      }
     });
   }
   function correctDimensions() {
@@ -23324,7 +23348,7 @@ var Notifier = function Notifier(visuals, options) {
 _util.default.inherits(Notifier, _eventEmitter.default);
 var _default = exports.default = Notifier;
 
-},{"./../../events":125,"./../../util/eventEmitter":131,"@babel/runtime/helpers/interopRequireDefault":1,"hidden":56,"hyperscript":58,"util":115}],150:[function(_dereq_,module,exports){
+},{"../../events":125,"../../util/eventEmitter":131,"@babel/runtime/helpers/interopRequireDefault":1,"hidden":56,"hyperscript":58,"util":115}],150:[function(_dereq_,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -23455,9 +23479,13 @@ var Recorder = function Recorder(visuals, replay) {
         loop = createLoop();
       }
       show();
+      if (params.recordWhenReady) {
+        self.record();
+      }
       self.emit(_events.default.USER_MEDIA_READY, {
         switchingFacingMode: params.switchingFacingMode,
-        paused: self.isPaused()
+        paused: self.isPaused(),
+        recordWhenReady: params.recordWhenReady
       });
     } catch (exc) {
       self.emit(_events.default.ERROR, exc);
@@ -23593,7 +23621,6 @@ var Recorder = function Recorder(visuals, replay) {
             connected = true;
             connecting = unloaded = false;
             self.emit(_events.default.CONNECTED);
-            debug('Going to ask for webcam permissons now ...');
             cb && cb();
           }
         });
@@ -23789,15 +23816,16 @@ var Recorder = function Recorder(visuals, replay) {
     }
   }
   function loadUserMedia() {
+    var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     if (userMediaLoaded) {
       debug('Recorder: skipping loadUserMedia() because it is already loaded');
-      onUserMediaReady();
+      onUserMediaReady(params);
       return false;
     } else if (userMediaLoading) {
       debug('Recorder: skipping loadUserMedia() because it is already asking for permission');
       return false;
     }
-    debug('Recorder: loadUserMedia()');
+    debug('Recorder: loadUserMedia()', params);
     self.emit(_events.default.LOADING_USER_MEDIA);
     try {
       userMediaTimeout = setTimeout(function () {
@@ -23806,7 +23834,7 @@ var Recorder = function Recorder(visuals, replay) {
         }
       }, options.timeouts.userMedia);
       userMediaLoading = true;
-      loadGenuineUserMedia();
+      loadGenuineUserMedia(params);
     } catch (exc) {
       debug('Recorder: failed to load genuine user media');
       userMediaLoading = false;
@@ -23821,11 +23849,19 @@ var Recorder = function Recorder(visuals, replay) {
   }
   function executeCommand(command) {
     try {
-      debug('Server commanded: %s', command.command, command.args ? ', ' + (0, _safeJsonStringify.default)(command.args) : '');
+      debug('Server commanded: %s',
+      // command.command,
+      command.args ? ', ' + (0, _safeJsonStringify.default)(command.args) : '');
       switch (command.command) {
         case 'ready':
+          this.emit(_events.default.SERVER_READY);
           if (!userMediaTimeout) {
-            loadUserMedia();
+            if (options.loadUserMediaOnRecord) {
+              // Still show it but have it blank
+              show();
+            } else {
+              loadUserMedia();
+            }
           }
           break;
         case 'preview':
@@ -24010,7 +24046,7 @@ var Recorder = function Recorder(visuals, replay) {
       // important to free memory
       userMedia && userMedia.stop();
       replay.reset();
-      userMediaLoaded = key = canvas = ctx = waitingTime = null;
+      userMediaLoaded = key = canvas = ctx = recordingBuffer = recordingBufferLength = null;
     }
   };
   this.validate = function () {
@@ -24107,6 +24143,16 @@ var Recorder = function Recorder(visuals, replay) {
         self.once(_events.default.USER_MEDIA_READY, self.record);
       });
       return false;
+    }
+    if (!userMediaLoaded) {
+      if (options.loadUserMediaOnRecord) {
+        loadUserMedia({
+          recordWhenReady: true
+        });
+      } else {
+        self.emit(_events.default.ERROR, _videomailError.default.create('Load and enable your camera first', options));
+      }
+      return false; // do nothing further
     }
     try {
       canvas = userMedia.createCanvas();
@@ -24265,10 +24311,10 @@ var Recorder = function Recorder(visuals, replay) {
         initEvents();
         if (!connected) {
           initSocket();
-        } else {
+        } else if (!options.loadUserMediaOnRecord) {
           loadUserMedia();
         }
-      } else {
+      } else if (options.loadUserMediaOnRecord) {
         loadUserMedia();
       }
       built = true;

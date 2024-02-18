@@ -41,5 +41,6 @@ export default keymirror({
   ASKING_WEBCAM_PERMISSION: null, // when about to ask for webcam permissions
   VISIBLE: null, // document just became visible
   INVISIBLE: null, // document just became INvisible
-  SWITCH_FACING_MODE: null // to switch camera on mobiles between fron and back
+  SWITCH_FACING_MODE: null, // to switch camera on mobiles between fron and back
+  SERVER_READY: null // Gets emitted when the ready command is sent through sockets from the server for recording
 })

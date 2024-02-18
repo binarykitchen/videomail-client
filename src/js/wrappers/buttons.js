@@ -1,10 +1,10 @@
-import util from 'util'
-import h from 'hyperscript'
-import hidden from 'hidden'
 import contains from 'contains'
+import hidden from 'hidden'
+import h from 'hyperscript'
+import util from 'util'
 
-import Events from './../events'
-import EventEmitter from './../util/eventEmitter'
+import Events from '../events'
+import EventEmitter from '../util/eventEmitter'
 
 const Buttons = function (container, options) {
   EventEmitter.call(this, options, 'Buttons')
@@ -326,6 +326,16 @@ const Buttons = function (container, options) {
     if (!options.enableAutoValidation) {
       enable(submitButton)
     }
+
+    if (!params.recordWhenReady) {
+      if (isShown(audioOnRadioPair)) {
+        enable(audioOnRadioPair)
+      }
+
+      if (isShown(audioOffRadioPair)) {
+        enable(audioOffRadioPair)
+      }
+    }
   }
 
   function onGoingBack() {
@@ -341,16 +351,8 @@ const Buttons = function (container, options) {
   function onUserMediaReady(params) {
     onFormReady(params)
 
-    if (isShown(recordButton)) {
+    if (isShown(recordButton) && !params.recordWhenReady) {
       enable(recordButton)
-    }
-
-    if (isShown(audioOnRadioPair)) {
-      enable(audioOnRadioPair)
-    }
-
-    if (isShown(audioOffRadioPair)) {
-      enable(audioOffRadioPair)
     }
 
     if (options.enableAutoValidation) {
@@ -431,6 +433,8 @@ const Buttons = function (container, options) {
 
   function onStopping() {
     disable(previewButton)
+    disable(recordButton)
+
     hide(pauseButton)
     hide(resumeButton)
   }
@@ -568,6 +572,13 @@ const Buttons = function (container, options) {
       })
       .on(Events.STARTING_OVER, function () {
         onStartingOver()
+      })
+      .on(Events.CONNECTED, function () {
+        if (options.loadUserMediaOnRecord) {
+          if (isShown(recordButton)) {
+            enable(recordButton)
+          }
+        }
       })
       .on(Events.ERROR, function (err) {
         // since https://github.com/binarykitchen/videomail-client/issues/60

@@ -1,9 +1,9 @@
-import util from 'util'
-import h from 'hyperscript'
 import hidden from 'hidden'
+import h from 'hyperscript'
+import util from 'util'
 
-import EventEmitter from './../../util/eventEmitter'
-import Events from './../../events'
+import Events from '../../events'
+import EventEmitter from '../../util/eventEmitter'
 
 const Notifier = function (visuals, options) {
   EventEmitter.call(this, options, 'Notifier')
@@ -100,6 +100,13 @@ const Notifier = function (visuals, options) {
       })
       .on(Events.BEGIN_VIDEO_ENCODING, function () {
         onBeginVideoEncoding()
+      })
+      .on(Events.CONNECTED, function () {
+        self.notify('Connected.')
+
+        if (options.loadUserMediaOnRecord) {
+          self.hide()
+        }
       })
   }
 
