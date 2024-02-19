@@ -91,7 +91,7 @@ export default {
   },
 
   image: {
-    quality: 0.44,
+    quality: 0.42,
     types: ['webp', 'jpeg'] // recommended settings to make most of all browsers
   },
 
@@ -123,8 +123,10 @@ export default {
   timeouts: {
     userMedia: 20e3, // in milliseconds, increase if you want user give more time to enable webcam
     connection: 1e4, // in seconds, increase if api is slow
-    pingInterval: 35e3 // in milliseconds, keeps webstream (connection) alive when pausing
+    pingInterval: 35e3 // in milliseconds, keeps web stream (connection) alive when pausing
   },
+
+  loadUserMediaOnRecord: false, // when true, user media is loaded only when record button is pressed
 
   callbacks: {
     // a custom callback to tweak form data before posting to server

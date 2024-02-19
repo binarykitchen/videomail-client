@@ -166,9 +166,15 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       }
 
       show()
+
+      if (params.recordWhenReady) {
+        self.record()
+      }
+
       self.emit(Events.USER_MEDIA_READY, {
         switchingFacingMode: params.switchingFacingMode,
-        paused: self.isPaused()
+        paused: self.isPaused(),
+        recordWhenReady: params.recordWhenReady
       })
     } catch (exc) {
       self.emit(Events.ERROR, exc)
@@ -369,8 +375,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             connecting = unloaded = false
 
             self.emit(Events.CONNECTED)
-
-            debug('Going to ask for webcam permissons now ...')
 
             cb && cb()
           }
@@ -645,10 +649,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
   }
 
-  function loadUserMedia() {
+  function loadUserMedia(params = {}) {
     if (userMediaLoaded) {
       debug('Recorder: skipping loadUserMedia() because it is already loaded')
-      onUserMediaReady()
+      onUserMediaReady(params)
       return false
     } else if (userMediaLoading) {
       debug(
@@ -657,7 +661,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       return false
     }
 
-    debug('Recorder: loadUserMedia()')
+    debug('Recorder: loadUserMedia()', params)
 
     self.emit(Events.LOADING_USER_MEDIA)
 
@@ -670,7 +674,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       userMediaLoading = true
 
-      loadGenuineUserMedia()
+      loadGenuineUserMedia(params)
     } catch (exc) {
       debug('Recorder: failed to load genuine user media')
 
@@ -697,8 +701,15 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       switch (command.command) {
         case 'ready':
+          this.emit(Events.SERVER_READY)
+
           if (!userMediaTimeout) {
-            loadUserMedia()
+            if (options.loadUserMediaOnRecord) {
+              // Still show it but have it blank
+              show()
+            } else {
+              loadUserMedia()
+            }
           }
           break
         case 'preview':
@@ -933,7 +944,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       replay.reset()
 
-      userMediaLoaded = key = canvas = ctx = waitingTime = null
+      userMediaLoaded =
+        key =
+        canvas =
+        ctx =
+        recordingBuffer =
+        recordingBufferLength =
+          null
     }
   }
 
@@ -1052,6 +1069,19 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       })
 
       return false
+    }
+
+    if (!userMediaLoaded) {
+      if (options.loadUserMediaOnRecord) {
+        loadUserMedia({ recordWhenReady: true })
+      } else {
+        self.emit(
+          Events.ERROR,
+          VideomailError.create('Load and enable your camera first', options)
+        )
+      }
+
+      return false // do nothing further
     }
 
     try {
@@ -1267,10 +1297,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         if (!connected) {
           initSocket()
-        } else {
+        } else if (!options.loadUserMediaOnRecord) {
           loadUserMedia()
         }
-      } else {
+      } else if (options.loadUserMediaOnRecord) {
         loadUserMedia()
       }
 

@@ -198,9 +198,15 @@ const Visuals = function (container, options) {
 
   this.recordAgain = function () {
     this.back(function () {
-      self.once(Events.USER_MEDIA_READY, function () {
-        self.record()
-      })
+      if (options.loadUserMediaOnRecord) {
+        self.once(Events.SERVER_READY, function () {
+          self.record()
+        })
+      } else {
+        self.once(Events.USER_MEDIA_READY, function () {
+          self.record()
+        })
+      }
     })
   }
 
