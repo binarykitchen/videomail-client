@@ -10,8 +10,8 @@
 | src/js/wrappers/optionsWrapper.js | 27 | fix this, it's not really an option
 | src/js/wrappers/visuals/recorder.js | 594 | in https://github.com/binarykitchen/videomail-client/issues/142
 | src/js/wrappers/visuals/recorder.js | 631 | retry with navigator.getUserMedia_() maybe?
-| src/js/wrappers/visuals/recorder.js | 782 | commented out because for some reasons server does
-| src/js/wrappers/visuals/recorder.js | 787 | consider removing this later or have it for debug=1 only?
+| src/js/wrappers/visuals/recorder.js | 778 | commented out because for some reasons server does
+| src/js/wrappers/visuals/recorder.js | 783 | consider removing this later or have it for debug=1 only?
 | src/js/wrappers/visuals/userMedia.js | 309 | consider removing that if it's not the case anymore (for better performance)
 | gulpfile.js | 1 | write this in ES6 once i have figured out how to
 | gulpfile.js | 58 | fix this, so that it also works when not minified, this
