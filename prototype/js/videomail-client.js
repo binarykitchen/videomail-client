@@ -18902,7 +18902,7 @@ function wrappy (fn, cb) {
 },{}],122:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -18930,9 +18930,9 @@ module.exports={
     "minor": "./env/dev/release.sh --importance=minor",
     "major": "./env/dev/release.sh --importance=major",
     "lint": "eslint --color ./src ./test ./gulpfile.js",
-    "lint-fix": "npm --silent run lint -- --fix",
+    "lint:fix": "npm --silent run lint -- --fix",
     "prettier": "prettier --check ./src ./test gulpfile.js",
-    "prettier-fix": "prettier --write ./src ./test gulpfile.js"
+    "prettier:fix": "prettier --write ./src ./test gulpfile.js"
   },
   "engines": {
     "node": ">=20.5.1",
@@ -19017,7 +19017,7 @@ module.exports={
     "minimist": "1.2.8",
     "nib": "1.2.0",
     "postcss": "8.4.35",
-    "prettier": "2.8.8",
+    "prettier": "3.2.5",
     "router": "1.3.8",
     "tape": "5.7.5",
     "tape-catch": "1.0.6",
@@ -19477,7 +19477,9 @@ var _default = exports.default = {
     // in seconds, increase if api is slow
     pingInterval: 35e3 // in milliseconds, keeps web stream (connection) alive when pausing
   },
-  loadUserMediaOnRecord: true,
+  loadUserMediaOnRecord: false,
+  // when true, user media is loaded only when record button is pressed
+
   callbacks: {
     // a custom callback to tweak form data before posting to server
     // this is for advanced use only and shouldn't be used if possible
@@ -21198,7 +21200,6 @@ var Buttons = function Buttons(container, options) {
     }).on(_events.default.CONNECTED, function () {
       if (options.loadUserMediaOnRecord) {
         if (isShown(recordButton)) {
-          console.log('here');
           enable(recordButton);
         }
       }
@@ -23849,9 +23850,7 @@ var Recorder = function Recorder(visuals, replay) {
   }
   function executeCommand(command) {
     try {
-      debug('Server commanded: %s',
-      // command.command,
-      command.args ? ', ' + (0, _safeJsonStringify.default)(command.args) : '');
+      debug('Server commanded: %s', command.command, command.args ? ', ' + (0, _safeJsonStringify.default)(command.args) : '');
       switch (command.command) {
         case 'ready':
           this.emit(_events.default.SERVER_READY);
