@@ -87,7 +87,7 @@
     "body-parser": "1.20.2",
     "browserify": "17.0.0",
     "connect-send-json": "1.0.0",
-    "cssnano": "6.0.4",
+    "cssnano": "6.0.5",
     "del": "6.1.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
