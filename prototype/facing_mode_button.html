@@ -1,28 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>videomail-client examples</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-    </head>
-    <body>
-        <h1>With a facing mode button to switch camera for mobiles</h1>
-        <p>Only seen when you are on mobile.</p>
-        <div id="videomail"></div>
-        <script src="/js/videomail-client.js"></script>
-        <script>
-            var videomailClient = new VideomailClient({
-              verbose: true,
-              disableSubmit: true,
-              audio: {
-                enabled: true
-              },
-              video: {
-                width: 320,
-                facingModeButton: true
-              }
-            })
+  <head>
+    <title>videomail-client examples</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h1>With a facing mode button to switch camera for mobiles</h1>
+    <p>Only seen when you are on mobile.</p>
+    <div id="videomail"></div>
+    <script src="/js/videomail-client.js"></script>
+    <script>
+      var videomailClient = new VideomailClient({
+        verbose: true,
+        disableSubmit: true,
+        audio: {
+          enabled: true
+        },
+        video: {
+          width: 320,
+          facingModeButton: true
+        }
+      })
 
-            videomailClient.show()
-        </script>
-    </body>
+      videomailClient.show()
+    </script>
+  </body>
 </html>

@@ -9172,7 +9172,10 @@ module.exports = function inspect_(obj, options, depth, seen) {
     if (typeof window !== 'undefined' && obj === window) {
         return '{ [object Window] }';
     }
-    if (obj === global) {
+    if (
+        (typeof globalThis !== 'undefined' && obj === globalThis)
+        || (typeof global !== 'undefined' && obj === global)
+    ) {
         return '{ [object globalThis] }';
     }
     if (!isDate(obj) && !isRegExp(obj)) {
@@ -14000,9 +14003,7 @@ var gOPD = _dereq_('gopd');
 var $TypeError = _dereq_('es-errors/type');
 var $floor = GetIntrinsic('%Math.floor%');
 
-/** @typedef {(...args: unknown[]) => unknown} Func */
-
-/** @type {<T extends Func = Func>(fn: T, length: number, loose?: boolean) => T} */
+/** @type {import('.')} */
 module.exports = function setFunctionLength(fn, length) {
 	if (typeof fn !== 'function') {
 		throw new $TypeError('`fn` is not a function');
@@ -14058,42 +14059,54 @@ var $mapHas = callBound('Map.prototype.has', true);
 *
 * That node is also moved to the head of the list, so that if it's accessed again we don't need to traverse the whole list. By doing so, all the recently used nodes can be accessed relatively quickly.
 */
+/** @type {import('.').listGetNode} */
 var listGetNode = function (list, key) { // eslint-disable-line consistent-return
-	for (var prev = list, curr; (curr = prev.next) !== null; prev = curr) {
+	/** @type {typeof list | NonNullable<(typeof list)['next']>} */
+	var prev = list;
+	/** @type {(typeof list)['next']} */
+	var curr;
+	for (; (curr = prev.next) !== null; prev = curr) {
 		if (curr.key === key) {
 			prev.next = curr.next;
-			curr.next = list.next;
+			// eslint-disable-next-line no-extra-parens
+			curr.next = /** @type {NonNullable<typeof list.next>} */ (list.next);
 			list.next = curr; // eslint-disable-line no-param-reassign
 			return curr;
 		}
 	}
 };
 
+/** @type {import('.').listGet} */
 var listGet = function (objects, key) {
 	var node = listGetNode(objects, key);
 	return node && node.value;
 };
+/** @type {import('.').listSet} */
 var listSet = function (objects, key, value) {
 	var node = listGetNode(objects, key);
 	if (node) {
 		node.value = value;
 	} else {
 		// Prepend the new node to the beginning of the list
-		objects.next = { // eslint-disable-line no-param-reassign
+		objects.next = /** @type {import('.').ListNode<typeof value>} */ ({ // eslint-disable-line no-param-reassign, no-extra-parens
 			key: key,
 			next: objects.next,
 			value: value
-		};
+		});
 	}
 };
+/** @type {import('.').listHas} */
 var listHas = function (objects, key) {
 	return !!listGetNode(objects, key);
 };
 
+/** @type {import('.')} */
 module.exports = function getSideChannel() {
-	var $wm;
-	var $m;
-	var $o;
+	/** @type {WeakMap<object, unknown>} */ var $wm;
+	/** @type {Map<object, unknown>} */ var $m;
+	/** @type {import('.').RootNode<unknown>} */ var $o;
+
+	/** @type {import('.').Channel} */
 	var channel = {
 		assert: function (key) {
 			if (!channel.has(key)) {
@@ -18965,7 +18978,7 @@ function wrappy (fn, cb) {
 },{}],123:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.0.2",
+  "version": "8.1.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -18994,8 +19007,8 @@ module.exports={
     "major": "./env/dev/release.sh --importance=major",
     "lint": "eslint --color ./src ./test ./gulpfile.js",
     "lint:fix": "npm --silent run lint -- --fix",
-    "prettier": "prettier --check ./src ./test gulpfile.js",
-    "prettier:fix": "prettier --write ./src ./test gulpfile.js"
+    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
+    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js"
   },
   "engines": {
     "node": ">=20.5.1",
@@ -19079,7 +19092,7 @@ module.exports={
     "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.38",
+    "postcss": "8.4.39",
     "prettier": "3.3.2",
     "router": "1.3.8",
     "tape": "5.8.1",
@@ -19503,7 +19516,8 @@ var _default = exports.default = {
     // or use an integer for exact pixels
     facingMode: 'user',
     // can be 'user', 'environment', 'left' or 'right'. useful for mobiles.
-    facingModeButton: false
+    facingModeButton: false,
+    stretch: false // Set to true if you want the video to take the full width of the parent container
   },
   image: {
     quality: 0.42,
@@ -21497,11 +21511,15 @@ var Container = function Container(options) {
   // this will just set the width but not the height because
   // it can be a form with more inputs elements
   function correctDimensions() {
-    var width = visuals.getRecorderWidth(true);
-    if (width < 1) {
-      throw _videomailError.default.create('Recorder width cannot be less than 1!', options);
+    if (options.video.stretch) {
+      removeDimensions();
     } else {
-      containerElement.style.width = width + 'px';
+      var width = visuals.getRecorderWidth(true);
+      if (width < 1) {
+        throw _videomailError.default.create('Recorder width cannot be less than 1!', options);
+      } else {
+        containerElement.style.width = width + 'px';
+      }
     }
   }
   function removeDimensions() {
@@ -22461,8 +22479,12 @@ var Visuals = function Visuals(container, options) {
     }
   }
   function correctDimensions() {
-    visualsElement.style.width = self.getRecorderWidth(true) + 'px';
-    visualsElement.style.height = self.getRecorderHeight(true) + 'px';
+    if (options.video.stretch) {
+      removeDimensions();
+    } else {
+      visualsElement.style.width = self.getRecorderWidth(true) + 'px';
+      visualsElement.style.height = self.getRecorderHeight(true) + 'px';
+    }
   }
   function removeDimensions() {
     visualsElement.style.width = 'auto';
@@ -24365,6 +24387,9 @@ var Recorder = function Recorder(visuals, replay) {
       recorderElement.style.transform = 'rotateY(180deg)';
       recorderElement.style['-webkit-transform'] = 'rotateY(180deg)';
       recorderElement.style['-moz-transform'] = 'rotateY(180deg)';
+      if (options.video.stretch) {
+        recorderElement.style['width'] = '100%';
+      }
       if (!userMedia) {
         userMedia = new _userMedia.default(this, options);
       }

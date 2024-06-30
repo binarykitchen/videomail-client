@@ -1286,6 +1286,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       recorderElement.style['-webkit-transform'] = 'rotateY(180deg)'
       recorderElement.style['-moz-transform'] = 'rotateY(180deg)'
 
+      if (options.video.stretch) {
+        recorderElement.style['width'] = '100%'
+      }
+
       if (!userMedia) {
         userMedia = new UserMedia(this, options)
       }

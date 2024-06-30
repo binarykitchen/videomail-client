@@ -199,12 +199,16 @@ const Container = function (options) {
   // this will just set the width but not the height because
   // it can be a form with more inputs elements
   function correctDimensions() {
-    const width = visuals.getRecorderWidth(true)
-
-    if (width < 1) {
-      throw VideomailError.create('Recorder width cannot be less than 1!', options)
+    if (options.video.stretch) {
+      removeDimensions()
     } else {
-      containerElement.style.width = width + 'px'
+      const width = visuals.getRecorderWidth(true)
+
+      if (width < 1) {
+        throw VideomailError.create('Recorder width cannot be less than 1!', options)
+      } else {
+        containerElement.style.width = width + 'px'
+      }
     }
   }
 
