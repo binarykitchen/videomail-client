@@ -1,27 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>videomail-client examples</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-    </head>
-    <body>
-        <h1>How it looks on an unsupported iPhone</h1>
-        <div id="videomail"></div>
-        <script src="/js/videomail-client.js"></script>
-        <script>
-            var videomailClient = new VideomailClient({
-              verbose: true,
-              adjustFormOnBrowserError: true,
-              fakeUaString: 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25',
-              reportErrors: true,
-              video: {
-                 // just to test that this height will get removed so that the whole error
-                 // message will be shown.
-                height: 100
-              }
-            })
+  <head>
+    <title>videomail-client examples</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h1>How it looks on an unsupported iPhone</h1>
+    <div id="videomail"></div>
+    <script src="/js/videomail-client.js"></script>
+    <script>
+      var videomailClient = new VideomailClient({
+        verbose: true,
+        adjustFormOnBrowserError: true,
+        fakeUaString:
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25',
+        reportErrors: true,
+        video: {
+          // just to test that this height will get removed so that the whole error
+          // message will be shown.
+          height: 100
+        }
+      })
 
-            videomailClient.show()
-        </script>
-    </body>
+      videomailClient.show()
+    </script>
+  </body>
 </html>

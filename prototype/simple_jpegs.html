@@ -1,30 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>videomail-client examples</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-    </head>
-    <body>
-        <h1>Dead simple too but based on jpeg image frames only</h1>
-        <div id="videomail"></div>
-        <script src="/js/videomail-client.js"></script>
-        <script>
-            var videomailClient = new VideomailClient({
-              verbose: true,
-              disableSubmit: true,
-              enablePause: true,
-              enableAutoPause: true,
-              image: {
-                types: ['jpeg']
-              },
-              video: {
-                countdown: 0,
-                width: 280,
-                limitSeconds: 20
-              }
-            })
+  <head>
+    <title>videomail-client examples</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h1>Dead simple too but based on jpeg image frames only</h1>
+    <div id="videomail"></div>
+    <script src="/js/videomail-client.js"></script>
+    <script>
+      var videomailClient = new VideomailClient({
+        verbose: true,
+        disableSubmit: true,
+        enablePause: true,
+        enableAutoPause: true,
+        image: {
+          types: ['jpeg']
+        },
+        video: {
+          countdown: 0,
+          width: 280,
+          limitSeconds: 20
+        }
+      })
 
-            videomailClient.show()
-        </script>
-    </body>
+      videomailClient.show()
+    </script>
+  </body>
 </html>

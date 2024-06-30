@@ -1,79 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>videomail-client examples</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head>
+    <title>videomail-client examples</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-        <style type="text/css">
-            .buttons, #startOver {
-                margin:  1em 0;
-                display: block;
-            }
+    <style type="text/css">
+      .buttons,
+      #startOver {
+        margin: 1em 0;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Form to submit video without sending an email</h1>
 
-        </style>
-    </head>
-    <body>
-        <h1>Form to submit video without sending an email</h1>
+    <p>
+      It is very similar to the contact_form.html example with the exception that it does
+      not submit any form data nor won't trigger an email being sent on the server.
+    </p>
+    <p>
+      In the POST reponse you'll get data about the newly generated videomail, i.E. its
+      ID. It is up to you how to process it further.
+    </p>
 
-        <p>It is very similar to the contact_form.html example with the exception that it does not submit any form data nor won't trigger an email being sent on the server.</p>
-        <p>In the POST reponse you'll get data about the newly generated videomail, i.E. its ID. It is up to you how to process it further.</p>
+    <!-- Once you set the method to POST, then two request will be made internally. -->
+    <!-- The first one to the videomail server and the second one to the specified action -->
+    <form id="videomail" action="/contact" method="post">
+      <div class="buttons">
+        <button type="submit" disabled>Submit</button>
+      </div>
+    </form>
 
-        <!-- Once you set the method to POST, then two request will be made internally. -->
-        <!-- The first one to the videomail server and the second one to the specified action -->
-        <form id="videomail" action="/contact" method="post">
-            <div class="buttons">
-                <button type='submit' disabled>Submit</button>
-            </div>
-        </form>
+    <div id="viewVideo" style="display: none">
+      <h4 style="display: none">Permalink to view online <a class="url"></a></h4>
+      <h4 style="display: none">Permalink to WebM video <a class="webm"></a></h4>
+      <h4 style="display: none">Permalink to MP4 video <a class="mp4"></a></h4>
+      <video class="replay"></video>
+      <button id="startOver">Start over</button>
+    </div>
 
-        <div id="viewVideo" style="display:none">
-            <h4 style="display:none">Permalink to view online <a class="url"></a></h4>
-            <h4 style="display:none">Permalink to WebM video <a class="webm"></a></h4>
-            <h4 style="display:none">Permalink to MP4 video <a class="mp4"></a></h4>
-            <video class="replay"></video>
-            <button id='startOver'>Start over</button>
-        </div>
+    <script src="/js/videomail-client.js"></script>
+    <script>
+      var videomailClient = new VideomailClient({
+        verbose: true,
+        enablePause: false,
+        video: {
+          limitSeconds: 80,
+          width: 640,
+          height: 340,
+          countdown: false
+        }
+      })
 
-        <script src="/js/videomail-client.js"></script>
-        <script>
-            var videomailClient = new VideomailClient({
-              verbose: true,
-              enablePause: false,
-              video: {
-                limitSeconds: 80,
-                width: 640,
-                height: 340,
-                countdown: false
-              }
-            })
+      var startOverButton = document.getElementById('startOver')
 
-            var startOverButton = document.getElementById('startOver')
+      function setAttribute(videomail, name) {
+        if (videomail[name]) {
+          var element = document.querySelector('a.' + name)
+          element.innerHTML = videomail[name]
+          element.setAttribute('href', videomail[name])
+          element.parentElement.style.display = 'block'
+        }
+      }
 
-            function setAttribute (videomail, name) {
-              if (videomail[name]) {
-                var element = document.querySelector('a.' + name)
-                element.innerHTML = videomail[name]
-                element.setAttribute('href', videomail[name])
-                element.parentElement.style.display = 'block'
-              }
-            }
+      var onSubmitted = function (videomail) {
+        setAttribute(videomail, 'url')
+        setAttribute(videomail, 'webm')
+        setAttribute(videomail, 'mp4')
 
-            var onSubmitted = function (videomail) {
-              setAttribute(videomail, 'url')
-              setAttribute(videomail, 'webm')
-              setAttribute(videomail, 'mp4')
+        this.replay(videomail, 'viewVideo')
 
-              this.replay(videomail, 'viewVideo')
+        startOverButton.onclick = this.startOver
+      }
 
-              startOverButton.onclick = this.startOver
-            }
+      videomailClient.on(
+        videomailClient.events.SUBMITTED,
+        onSubmitted.bind(videomailClient)
+      )
 
-            videomailClient.on(
-              videomailClient.events.SUBMITTED,
-              onSubmitted.bind(videomailClient)
-            )
-
-            videomailClient.show()
-        </script>
-    </body>
+      videomailClient.show()
+    </script>
+  </body>
 </html>

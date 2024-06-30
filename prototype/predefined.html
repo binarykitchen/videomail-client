@@ -1,53 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>videomail-client examples</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-    </head>
-    <body>
-        <h1>Accept existing HTML, start recording asap and allow 10 min recording wohooo</h1>
-        <div id="videomail2" class="videomail">
-            <div class='da_window'>
-                <noscript>Please enable Javascript</noscript>
-                <p class="recordNote" style="display:none"></p>
-                <p class="recordTimer" style="display:none"></p>
-                <p class="paused" style="display:none"></p>
-                <p class="countdown" style="display:none"></p>
-                <div class="notifier"></div>
-                <video class="replay" controls style="display:none"></video>
-                <video class="webcam" style="display:none"></video>
-            </div>
-            <div class="all_my_buttons" style="display:none">
-                <button class="record" style="display:none">&#9673; Record</button>
-                <button class="pause" style="display:none">&#9553; Pause</button>
-                <button class="resume" style="display:none">&#9673; Resume</button>
-                <button class="preview" style="display:none">&#x25ba; Preview</button>
-                <button class="recordAgain" style="display:none">&#x25c0; Record again</button>
-            </div>
-        </div>
-        <script src="/js/videomail-client.js"></script>
-        <script>
-            var videomailClient = new VideomailClient({
-              verbose: true,
-              disableSubmit: true,
-              enableAutoPause: true,
-              // default. if you chance this, need to whitelist first here
-              // https://videomail.io/whitelist
-              siteName: 'videomail-client-demo',
-              selectors: {
-                containerId: 'videomail2',
-                userMediaClass: 'webcam',
-                visualsClass: 'da_window',
-                buttonsClass: 'all_my_buttons'
-              },
-              video: {
-                countdown: 3,
-                width: 640,
-                limitSeconds: 600
-              }
-            })
+  <head>
+    <title>videomail-client examples</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h1>Accept existing HTML, start recording asap and allow 10 min recording wohooo</h1>
+    <div id="videomail2" class="videomail">
+      <div class="da_window">
+        <noscript>Please enable Javascript</noscript>
+        <p class="recordNote" style="display: none"></p>
+        <p class="recordTimer" style="display: none"></p>
+        <p class="paused" style="display: none"></p>
+        <p class="countdown" style="display: none"></p>
+        <div class="notifier"></div>
+        <video class="replay" controls style="display: none"></video>
+        <video class="webcam" style="display: none"></video>
+      </div>
+      <div class="all_my_buttons" style="display: none">
+        <button class="record" style="display: none">&#9673; Record</button>
+        <button class="pause" style="display: none">&#9553; Pause</button>
+        <button class="resume" style="display: none">&#9673; Resume</button>
+        <button class="preview" style="display: none">&#x25ba; Preview</button>
+        <button class="recordAgain" style="display: none">&#x25c0; Record again</button>
+      </div>
+    </div>
+    <script src="/js/videomail-client.js"></script>
+    <script>
+      var videomailClient = new VideomailClient({
+        verbose: true,
+        disableSubmit: true,
+        enableAutoPause: true,
+        // default. if you chance this, need to whitelist first here
+        // https://videomail.io/whitelist
+        siteName: 'videomail-client-demo',
+        selectors: {
+          containerId: 'videomail2',
+          userMediaClass: 'webcam',
+          visualsClass: 'da_window',
+          buttonsClass: 'all_my_buttons'
+        },
+        video: {
+          countdown: 3,
+          width: 640,
+          limitSeconds: 600
+        }
+      })
 
-            videomailClient.show()
-        </script>
-    </body>
+      videomailClient.show()
+    </script>
+  </body>
 </html>
