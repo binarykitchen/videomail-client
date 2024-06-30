@@ -22692,8 +22692,8 @@ var Visuals = function Visuals(container, options) {
   this.getRecorderWidth = function (responsive) {
     return recorder.getRecorderWidth(responsive);
   };
-  this.getRecorderHeight = function (responsive) {
-    return recorder.getRecorderHeight(responsive);
+  this.getRecorderHeight = function (responsive, useBoundingClientRect) {
+    return recorder.getRecorderHeight(responsive, useBoundingClientRect);
   };
   this.limitWidth = function (width) {
     return container.limitWidth(width, options);
@@ -23251,10 +23251,10 @@ var Notifier = function Notifier(visuals, options) {
     }).on(_events.default.LOADING_USER_MEDIA, function () {
       onLoadingUserMedia();
     }).on(_events.default.USER_MEDIA_READY, function () {
+      // Ensure notifier has correct dimensions, especially when stretched
+      correctNotifierDimensions();
       self.hide();
-    }).on(_events.default.LOADED_META_DATA, function () {
-      correctDimensions();
-    }).on(_events.default.PREVIEW, function () {
+    }).on(_events.default.LOADED_META_DATA, function () {}).on(_events.default.PREVIEW, function () {
       self.hide();
     }).on(_events.default.STOPPING, function (limitReached) {
       onStopping(limitReached);
@@ -23269,9 +23269,14 @@ var Notifier = function Notifier(visuals, options) {
       }
     });
   }
-  function correctDimensions() {
-    notifyElement.style.width = visuals.getRecorderWidth(true) + 'px';
-    notifyElement.style.height = visuals.getRecorderHeight(true) + 'px';
+  function correctNotifierDimensions() {
+    if (options.video.stretch) {
+      notifyElement.style.width = 'auto';
+      notifyElement.style.height = visuals.getRecorderHeight(true, true) + 'px';
+    } else {
+      notifyElement.style.width = visuals.getRecorderWidth(true) + 'px';
+      notifyElement.style.height = visuals.getRecorderHeight(true) + 'px';
+    }
   }
   function show() {
     notifyElement && (0, _hidden.default)(notifyElement, false);
@@ -24436,8 +24441,10 @@ var Recorder = function Recorder(visuals, replay) {
       return this.limitWidth(options.video.width);
     }
   };
-  this.getRecorderHeight = function (responsive) {
-    if (userMedia) {
+  this.getRecorderHeight = function (responsive, useBoundingClientRect) {
+    if (userMedia && useBoundingClientRect) {
+      return recorderElement.getBoundingClientRect().height;
+    } else if (userMedia) {
       return userMedia.getRawHeight(responsive);
     } else if (responsive && options.hasDefinedHeight()) {
       return this.calculateHeight(responsive);

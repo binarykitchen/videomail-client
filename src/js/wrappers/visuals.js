@@ -352,8 +352,8 @@ const Visuals = function (container, options) {
     return recorder.getRecorderWidth(responsive)
   }
 
-  this.getRecorderHeight = function (responsive) {
-    return recorder.getRecorderHeight(responsive)
+  this.getRecorderHeight = function (responsive, useBoundingClientRect) {
+    return recorder.getRecorderHeight(responsive, useBoundingClientRect)
   }
 
   this.limitWidth = function (width) {

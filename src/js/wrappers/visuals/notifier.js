@@ -84,11 +84,12 @@ const Notifier = function (visuals, options) {
         onLoadingUserMedia()
       })
       .on(Events.USER_MEDIA_READY, function () {
+        // Ensure notifier has correct dimensions, especially when stretched
+        correctNotifierDimensions()
+
         self.hide()
       })
-      .on(Events.LOADED_META_DATA, function () {
-        correctDimensions()
-      })
+      .on(Events.LOADED_META_DATA, function () {})
       .on(Events.PREVIEW, function () {
         self.hide()
       })
@@ -110,9 +111,14 @@ const Notifier = function (visuals, options) {
       })
   }
 
-  function correctDimensions() {
-    notifyElement.style.width = visuals.getRecorderWidth(true) + 'px'
-    notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
+  function correctNotifierDimensions() {
+    if (options.video.stretch) {
+      notifyElement.style.width = 'auto'
+      notifyElement.style.height = visuals.getRecorderHeight(true, true) + 'px'
+    } else {
+      notifyElement.style.width = visuals.getRecorderWidth(true) + 'px'
+      notifyElement.style.height = visuals.getRecorderHeight(true) + 'px'
+    }
   }
 
   function show() {
