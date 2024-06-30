@@ -1353,8 +1353,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
   }
 
-  this.getRecorderHeight = function (responsive) {
-    if (userMedia) {
+  this.getRecorderHeight = function (responsive, useBoundingClientRect) {
+    if (userMedia && useBoundingClientRect) {
+      return recorderElement.getBoundingClientRect().height
+    } else if (userMedia) {
       return userMedia.getRawHeight(responsive)
     } else if (responsive && options.hasDefinedHeight()) {
       return this.calculateHeight(responsive)
