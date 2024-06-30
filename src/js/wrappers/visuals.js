@@ -90,8 +90,12 @@ const Visuals = function (container, options) {
   }
 
   function correctDimensions() {
-    visualsElement.style.width = self.getRecorderWidth(true) + 'px'
-    visualsElement.style.height = self.getRecorderHeight(true) + 'px'
+    if (options.video.stretch) {
+      removeDimensions()
+    } else {
+      visualsElement.style.width = self.getRecorderWidth(true) + 'px'
+      visualsElement.style.height = self.getRecorderHeight(true) + 'px'
+    }
   }
 
   function removeDimensions() {

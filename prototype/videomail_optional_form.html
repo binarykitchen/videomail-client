@@ -17,8 +17,11 @@
     </style>
   </head>
   <body>
-    <h1>Have Videomail optional in forms</h1>
-    <p>Another form example where the videomail input itself is optional.</p>
+    <h1>Have Videomail optional in forms taking full width</h1>
+    <p>
+      Another form example where the videomail input itself is optional and takes full
+      width of the parent container (stretch = true)
+    </p>
 
     <!-- Once you set the method to POST, then two request will be made internally. -->
     <!-- The first one to the videomail server and the second one to the specified action -->
@@ -51,7 +54,7 @@
     <script>
       var videomailClient = new VideomailClient({
         verbose: true,
-        video: { limitSeconds: 120, width: 320, countdown: false },
+        video: { limitSeconds: 120, width: 320, countdown: false, stretch: true },
         enableAutoValidation: false,
         selectors: {
           submitButtonSelector: 'body input[value="Submit"]',
