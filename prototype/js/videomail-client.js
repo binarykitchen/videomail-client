@@ -583,7 +583,7 @@ Date.now = Date.now || function now() {
     return new Date().getTime();
 };
 
-},{"events":37,"inherits":61,"raf":85}],5:[function(_dereq_,module,exports){
+},{"events":38,"inherits":61,"raf":85}],5:[function(_dereq_,module,exports){
 (function (Buffer){(function (){
 (function (w) {
   "use strict";
@@ -2716,7 +2716,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 	return intrinsic;
 };
 
-},{"./":13,"get-intrinsic":44}],13:[function(_dereq_,module,exports){
+},{"./":13,"get-intrinsic":45}],13:[function(_dereq_,module,exports){
 'use strict';
 
 var bind = _dereq_('function-bind');
@@ -2753,7 +2753,7 @@ if ($defineProperty) {
 	module.exports.apply = applyBind;
 }
 
-},{"es-define-property":29,"es-errors/type":35,"function-bind":42,"get-intrinsic":44,"set-function-length":102}],14:[function(_dereq_,module,exports){
+},{"es-define-property":30,"es-errors/type":36,"function-bind":43,"get-intrinsic":45,"set-function-length":102}],14:[function(_dereq_,module,exports){
 var t,e=_dereq_("typedarray-to-buffer"),n=_dereq_("atob"),a="undefined"!=typeof document&&"function"==typeof document.createElement;module.exports=function(i,r){void 0===r&&(r={});var o=this;if(r.image=r.image?r.image:{},r.image.types=r.image.types?r.image.types:[],r.image.types.length>2)throw new Error("Too many image types are specified!");r.image.types.length<1&&(r.image.types=a?["webp","jpeg"]:["png"]),r.image.quality||(r.image.quality=.5);var u=parseFloat(r.image.quality);function g(t){var e;return r.image.types[t]&&(e="image/"+r.image.types[t]),e}function f(t,e){var n=t&&t.match(e);return n&&r.debug&&r.debug("Image type %s verified",e),n}function c(){var t;return a?(t=document.createElement("canvas")).width=t.height=1:t=i,t}function l(t,e){try{c().toDataURL(t,function(n,a){n?e(n):e(null,f(a,t))})}catch(t){e(null,!1)}}function m(t){var e;try{var n=c();e=f(n.toDataURL&&n.toDataURL(t),t)}catch(e){r.debug&&r.logger.debug("Failed to call toDataURL() on canvas for image type %s",t)}return e}function y(t){var e=g(0);if(!t)return function(t){return m(t)||r.image.types[1]&&m(t=g(1))||(t=null),!t&&r.debug&&r.logger.debug("Unable to verify image type"),t}(e);!function(t,e){l(t,function(n,a){n?e(n):a?e(null,t):l(t=g(1),function(n,a){n?e(n):e(null,a?t:null)})})}(e,t)}function p(t){var a,i=t.split(",")[1];if("function"==typeof n)a=n(i);else{if("function"!=typeof o.constructor.atob)throw new Error("atob function is missing");a=o.constructor.atob(i)}for(var r=new Uint8Array(a.length),u=0,g=a.length;u<g;u++)r[u]=a.charCodeAt(u);return e(r)}this.toBuffer=function(t){if(!t)return(n=o.getImageType())&&(e=p(i.toDataURL(n,u))),e;var e,n;!function(t){o.getImageType(function(e,n){e?t(e):n?i.toDataURL(n,function(e,n){e?t(e):t(null,p(n))}):t()})}(t)},this.getImageType=function(e){if(!e)return t&&a||(t=y()),t;t&&a?e(null,t):y(function(n,a){n?e(n):e(null,t=a)})}};
 
 
@@ -3714,7 +3714,7 @@ module.exports = function defineDataProperty(
 	}
 };
 
-},{"es-define-property":29,"es-errors/syntax":34,"es-errors/type":35,"gopd":49}],23:[function(_dereq_,module,exports){
+},{"es-define-property":30,"es-errors/syntax":35,"es-errors/type":36,"gopd":49}],23:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function defined() {
@@ -3726,28 +3726,45 @@ module.exports = function defined() {
 };
 
 },{}],24:[function(_dereq_,module,exports){
-var util = _dereq_('util')
-var global = _dereq_('global')
-var EventEmitter = _dereq_('events')
+var inherits = _dereq_("inherits");
+var global = _dereq_("global");
+var EventEmitter = _dereq_("events");
 
 var makeDespot = function () {
   var Despot = function () {
     if (global._singletonDespotInstance) {
-      return global._singletonDespotInstance
-    } else {
-      global._singletonDespotInstance = this
-      EventEmitter.call(this)
+      return global._singletonDespotInstance;
     }
-  }
 
-  util.inherits(Despot, EventEmitter)
+    global._singletonDespotInstance = this;
+    EventEmitter.call(this);
+  };
 
-  return new Despot()
+  inherits(Despot, EventEmitter);
+
+  return new Despot();
+};
+
+module.exports = makeDespot();
+
+},{"events":38,"global":25,"inherits":61}],25:[function(_dereq_,module,exports){
+(function (global){(function (){
+var win;
+
+if (typeof window !== "undefined") {
+    win = window;
+} else if (typeof global !== "undefined") {
+    win = global;
+} else if (typeof self !== "undefined"){
+    win = self;
+} else {
+    win = {};
 }
 
-module.exports = makeDespot()
+module.exports = win;
 
-},{"events":37,"global":48,"util":116}],25:[function(_dereq_,module,exports){
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],26:[function(_dereq_,module,exports){
 'use strict'
 
 var document = _dereq_('global/document')
@@ -3787,7 +3804,7 @@ function noopShim () {
 
 function noop () {}
 
-},{"./keys":26,"geval":46,"global/document":47}],26:[function(_dereq_,module,exports){
+},{"./keys":27,"geval":47,"global/document":48}],27:[function(_dereq_,module,exports){
 'use strict'
 
 module.exports = keys
@@ -3812,7 +3829,7 @@ function lowercaseFirst (string) {
   return string.substring(0, 1).toLowerCase() + string.substring(1)
 }
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 function polyfill(window) {
   var ElementPrototype = window.Element.prototype;
 
@@ -3850,7 +3867,7 @@ function polyfill(window) {
 module.exports = polyfill;
 
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 (function (process){(function (){
 var once = _dereq_('once');
 
@@ -3948,7 +3965,7 @@ var eos = function(stream, opts, callback) {
 module.exports = eos;
 
 }).call(this)}).call(this,_dereq_('_process'))
-},{"_process":79,"once":75}],29:[function(_dereq_,module,exports){
+},{"_process":79,"once":75}],30:[function(_dereq_,module,exports){
 'use strict';
 
 var GetIntrinsic = _dereq_('get-intrinsic');
@@ -3966,49 +3983,49 @@ if ($defineProperty) {
 
 module.exports = $defineProperty;
 
-},{"get-intrinsic":44}],30:[function(_dereq_,module,exports){
+},{"get-intrinsic":45}],31:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('./eval')} */
 module.exports = EvalError;
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('.')} */
 module.exports = Error;
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('./range')} */
 module.exports = RangeError;
 
-},{}],33:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('./ref')} */
 module.exports = ReferenceError;
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('./syntax')} */
 module.exports = SyntaxError;
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('./type')} */
 module.exports = TypeError;
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 'use strict';
 
 /** @type {import('./uri')} */
 module.exports = URIError;
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4507,7 +4524,7 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 module.exports = stringify
 stringify.default = stringify
 stringify.stable = deterministicStringify
@@ -4738,7 +4755,7 @@ function replaceGetterValues (replacer) {
   }
 }
 
-},{}],39:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 /**
  * filesize
  *
@@ -4977,7 +4994,7 @@ function partial ({
 exports.filesize = filesize;
 exports.partial = partial;
 
-},{}],40:[function(_dereq_,module,exports){
+},{}],41:[function(_dereq_,module,exports){
 'use strict';
 
 var isCallable = _dereq_('is-callable');
@@ -5041,7 +5058,7 @@ var forEach = function forEach(list, iterator, thisArg) {
 
 module.exports = forEach;
 
-},{"is-callable":66}],41:[function(_dereq_,module,exports){
+},{"is-callable":66}],42:[function(_dereq_,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -5127,14 +5144,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],42:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 'use strict';
 
 var implementation = _dereq_('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":41}],43:[function(_dereq_,module,exports){
+},{"./implementation":42}],44:[function(_dereq_,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5341,7 +5358,7 @@ function getFormElementValue(element, trim) {
 
 
 getFormData.getFieldData = getFieldData;
-},{}],44:[function(_dereq_,module,exports){
+},{}],45:[function(_dereq_,module,exports){
 'use strict';
 
 var undefined;
@@ -5702,7 +5719,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return value;
 };
 
-},{"es-errors":31,"es-errors/eval":30,"es-errors/range":32,"es-errors/ref":33,"es-errors/syntax":34,"es-errors/type":35,"es-errors/uri":36,"function-bind":42,"has-proto":51,"has-symbols":52,"hasown":55}],45:[function(_dereq_,module,exports){
+},{"es-errors":32,"es-errors/eval":31,"es-errors/range":33,"es-errors/ref":34,"es-errors/syntax":35,"es-errors/type":36,"es-errors/uri":37,"function-bind":43,"has-proto":51,"has-symbols":52,"hasown":55}],46:[function(_dereq_,module,exports){
 module.exports = Event
 
 function Event() {
@@ -5730,7 +5747,7 @@ function Event() {
     }
 }
 
-},{}],46:[function(_dereq_,module,exports){
+},{}],47:[function(_dereq_,module,exports){
 var Event = _dereq_('./event.js')
 
 module.exports = Source
@@ -5743,7 +5760,7 @@ function Source(broadcaster) {
     return tuple.listen
 }
 
-},{"./event.js":45}],47:[function(_dereq_,module,exports){
+},{"./event.js":46}],48:[function(_dereq_,module,exports){
 (function (global){(function (){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -5764,24 +5781,7 @@ if (typeof document !== 'undefined') {
 module.exports = doccy;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":9}],48:[function(_dereq_,module,exports){
-(function (global){(function (){
-var win;
-
-if (typeof window !== "undefined") {
-    win = window;
-} else if (typeof global !== "undefined") {
-    win = global;
-} else if (typeof self !== "undefined"){
-    win = self;
-} else {
-    win = {};
-}
-
-module.exports = win;
-
-}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],49:[function(_dereq_,module,exports){
+},{"min-document":9}],49:[function(_dereq_,module,exports){
 'use strict';
 
 var GetIntrinsic = _dereq_('get-intrinsic');
@@ -5799,7 +5799,7 @@ if ($gOPD) {
 
 module.exports = $gOPD;
 
-},{"get-intrinsic":44}],50:[function(_dereq_,module,exports){
+},{"get-intrinsic":45}],50:[function(_dereq_,module,exports){
 'use strict';
 
 var $defineProperty = _dereq_('es-define-property');
@@ -5823,7 +5823,7 @@ hasPropertyDescriptors.hasArrayLengthDefineBug = function hasArrayLengthDefineBu
 
 module.exports = hasPropertyDescriptors;
 
-},{"es-define-property":29}],51:[function(_dereq_,module,exports){
+},{"es-define-property":30}],51:[function(_dereq_,module,exports){
 'use strict';
 
 var test = {
@@ -5919,7 +5919,7 @@ var bind = _dereq_('function-bind');
 /** @type {import('.')} */
 module.exports = bind.call(call, $hasOwn);
 
-},{"function-bind":42}],56:[function(_dereq_,module,exports){
+},{"function-bind":43}],56:[function(_dereq_,module,exports){
 module.exports = shim
 
 function shim (element, value) {
@@ -11958,7 +11958,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this)}).call(this,_dereq_('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":86,"./internal/streams/BufferList":91,"./internal/streams/destroy":92,"./internal/streams/stream":93,"_process":79,"core-util-is":19,"events":37,"inherits":61,"isarray":71,"process-nextick-args":78,"safe-buffer":94,"string_decoder/":95,"util":9}],89:[function(_dereq_,module,exports){
+},{"./_stream_duplex":86,"./internal/streams/BufferList":91,"./internal/streams/destroy":92,"./internal/streams/stream":93,"_process":79,"core-util-is":19,"events":38,"inherits":61,"isarray":71,"process-nextick-args":78,"safe-buffer":94,"string_decoder/":95,"util":9}],89:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13028,7 +13028,7 @@ module.exports = {
 },{"process-nextick-args":78}],93:[function(_dereq_,module,exports){
 module.exports = _dereq_('events').EventEmitter;
 
-},{"events":37}],94:[function(_dereq_,module,exports){
+},{"events":38}],94:[function(_dereq_,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = _dereq_('buffer')
 var Buffer = buffer.Buffer
@@ -14036,7 +14036,7 @@ module.exports = function setFunctionLength(fn, length) {
 	return fn;
 };
 
-},{"define-data-property":22,"es-errors/type":35,"get-intrinsic":44,"gopd":49,"has-property-descriptors":50}],103:[function(_dereq_,module,exports){
+},{"define-data-property":22,"es-errors/type":36,"get-intrinsic":45,"gopd":49,"has-property-descriptors":50}],103:[function(_dereq_,module,exports){
 'use strict';
 
 var GetIntrinsic = _dereq_('get-intrinsic');
@@ -14167,7 +14167,7 @@ module.exports = function getSideChannel() {
 	return channel;
 };
 
-},{"call-bind/callBound":12,"es-errors/type":35,"get-intrinsic":44,"object-inspect":74}],104:[function(_dereq_,module,exports){
+},{"call-bind/callBound":12,"es-errors/type":36,"get-intrinsic":45,"object-inspect":74}],104:[function(_dereq_,module,exports){
 module.exports = shift
 
 function shift (stream) {
@@ -15174,7 +15174,7 @@ request.put = (url, data, fn) => {
   return request_;
 };
 
-},{"./agent-base":105,"./request-base":107,"./response-base":108,"./utils":109,"component-emitter":17,"fast-safe-stringify":38,"qs":81}],107:[function(_dereq_,module,exports){
+},{"./agent-base":105,"./request-base":107,"./response-base":108,"./utils":109,"component-emitter":17,"fast-safe-stringify":39,"qs":81}],107:[function(_dereq_,module,exports){
 (function (process){(function (){
 "use strict";
 
@@ -18613,7 +18613,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 module.exports = Duplexify
 
 }).call(this)}).call(this,_dereq_('_process'),_dereq_("buffer").Buffer)
-},{"_process":79,"buffer":11,"end-of-stream":28,"inherits":61,"readable-stream":96,"stream-shift":104}],119:[function(_dereq_,module,exports){
+},{"_process":79,"buffer":11,"end-of-stream":29,"inherits":61,"readable-stream":96,"stream-shift":104}],119:[function(_dereq_,module,exports){
 (function (process,global){(function (){
 'use strict'
 
@@ -18940,7 +18940,7 @@ module.exports = function whichTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":7,"call-bind":13,"call-bind/callBound":12,"for-each":40,"gopd":49,"has-tostringtag/shams":54}],122:[function(_dereq_,module,exports){
+},{"available-typed-arrays":7,"call-bind":13,"call-bind/callBound":12,"for-each":41,"gopd":49,"has-tostringtag/shams":54}],122:[function(_dereq_,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -19036,7 +19036,7 @@ module.exports={
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",
-    "despot": "1.1.3",
+    "despot": "2.0.0",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.2",
     "filesize": "10.1.2",
@@ -20259,7 +20259,7 @@ var _default = exports.default = {
   }
 };
 
-},{"@babel/runtime/helpers/interopRequireDefault":1,"filesize":39,"humanize-duration":57}],134:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":1,"filesize":40,"humanize-duration":57}],134:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21979,7 +21979,7 @@ var Container = function Container(options) {
 _util.default.inherits(Container, _eventEmitter.default);
 var _default = exports.default = Container;
 
-},{"../../styles/css/main.min.css.js":154,"../events":126,"../resource":128,"../util/eventEmitter":132,"../util/videomailError":137,"./buttons":138,"./dimension":140,"./form":141,"./optionsWrapper":142,"./visuals":143,"@babel/runtime/helpers/interopRequireDefault":1,"document-visibility":25,"element-closest":27,"hidden":56,"insert-css":62,"util":116}],140:[function(_dereq_,module,exports){
+},{"../../styles/css/main.min.css.js":154,"../events":126,"../resource":128,"../util/eventEmitter":132,"../util/videomailError":137,"./buttons":138,"./dimension":140,"./form":141,"./optionsWrapper":142,"./visuals":143,"@babel/runtime/helpers/interopRequireDefault":1,"document-visibility":26,"element-closest":28,"hidden":56,"insert-css":62,"util":116}],140:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22333,7 +22333,7 @@ var Form = function Form(container, formElement, options) {
 _util.default.inherits(Form, _eventEmitter.default);
 var _default = exports.default = Form;
 
-},{"../events":126,"../util/eventEmitter":132,"../util/videomailError":137,"@babel/runtime/helpers/interopRequireDefault":1,"get-form-data":43,"hidden":56,"hyperscript":58,"util":116}],142:[function(_dereq_,module,exports){
+},{"../events":126,"../util/eventEmitter":132,"../util/videomailError":137,"@babel/runtime/helpers/interopRequireDefault":1,"get-form-data":44,"hidden":56,"hyperscript":58,"util":116}],142:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
