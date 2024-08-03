@@ -1,6 +1,6 @@
 import hidden from "hidden";
 import h from "hyperscript";
-import util from "util";
+import inherits from "inherits";
 
 import Events from "../../events";
 import EventEmitter from "../../util/eventEmitter";
@@ -335,6 +335,6 @@ const Notifier = function (visuals, options) {
   };
 };
 
-util.inherits(Notifier, EventEmitter);
+inherits(Notifier, EventEmitter);
 
 export default Notifier;

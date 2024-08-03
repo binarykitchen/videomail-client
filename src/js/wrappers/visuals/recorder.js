@@ -4,7 +4,8 @@ import deepmerge from "deepmerge";
 import hidden from "hidden";
 import h from "hyperscript";
 import stringify from "safe-json-stringify";
-import util from "util";
+import inherits from "inherits";
+
 import websocket from "websocket-stream";
 
 import Constants from "../../constants";
@@ -1442,6 +1443,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   };
 };
 
-util.inherits(Recorder, EventEmitter);
+inherits(Recorder, EventEmitter);
 
 export default Recorder;

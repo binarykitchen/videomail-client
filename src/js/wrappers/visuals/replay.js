@@ -2,7 +2,7 @@ import addEventListenerWithOptions from "add-eventlistener-with-options";
 import hidden from "hidden";
 import h from "hyperscript";
 import enableInlineVideo from "iphone-inline-video";
-import util from "util";
+import inherits from "inherits";
 
 import Events from "../../events";
 import Browser from "../../util/browser";
@@ -338,6 +338,6 @@ const Replay = function (parentElement, options) {
   };
 };
 
-util.inherits(Replay, EventEmitter);
+inherits(Replay, EventEmitter);
 
 export default Replay;

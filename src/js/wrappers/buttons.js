@@ -1,7 +1,7 @@
 import contains from "contains";
 import hidden from "hidden";
 import h from "hyperscript";
-import util from "util";
+import inherits from "inherits";
 
 import Events from "../events";
 import EventEmitter from "../util/eventEmitter";
@@ -657,6 +657,6 @@ const Buttons = function (container, options) {
   };
 };
 
-util.inherits(Buttons, EventEmitter);
+inherits(Buttons, EventEmitter);
 
 export default Buttons;

@@ -1,7 +1,7 @@
 import getFormData from "get-form-data";
 import hidden from "hidden";
 import h from "hyperscript";
-import util from "util";
+import inherits from "inherits";
 
 import Events from "../events";
 import EventEmitter from "../util/eventEmitter";
@@ -306,6 +306,6 @@ const Form = function (container, formElement, options) {
   };
 };
 
-util.inherits(Form, EventEmitter);
+inherits(Form, EventEmitter);
 
 export default Form;

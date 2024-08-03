@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge";
 import readystate from "readystate";
-import util from "util";
+import inherits from "inherits";
 
 import defaultOptions from "./options";
 import Constants from "./constants";
@@ -196,7 +196,7 @@ const VideomailClient = function (options) {
   build();
 };
 
-util.inherits(VideomailClient, EventEmitter);
+inherits(VideomailClient, EventEmitter);
 
 Object.keys(Constants.public).forEach(function (name) {
   VideomailClient[name] = Constants.public[name];

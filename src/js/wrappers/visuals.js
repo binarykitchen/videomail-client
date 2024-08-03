@@ -1,6 +1,6 @@
 import hidden from "hidden";
 import h from "hyperscript";
-import util from "util";
+import inherits from "inherits";
 
 import Events from "../events";
 import EventEmitter from "../util/eventEmitter";
@@ -399,6 +399,6 @@ const Visuals = function (container, options) {
   this.isConnected = recorder.isConnected.bind(recorder);
 };
 
-util.inherits(Visuals, EventEmitter);
+inherits(Visuals, EventEmitter);
 
 export default Visuals;

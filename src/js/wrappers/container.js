@@ -3,7 +3,7 @@ import Visibility from "document-visibility";
 import elementClosest from "element-closest";
 import hidden from "hidden";
 import insertCss from "insert-css";
-import util from "util";
+import inherits from "inherits";
 
 import css from "../../styles/css/main.min.css.js";
 import Events from "../events";
@@ -771,6 +771,6 @@ const Container = function (options) {
   this.recordAgain = visuals.recordAgain.bind(visuals);
 };
 
-util.inherits(Container, EventEmitter);
+inherits(Container, EventEmitter);
 
 export default Container;

@@ -1,4 +1,4 @@
-import util from "util";
+import inherits from "inherits";
 
 import Events from "./../../../events";
 import EventEmitter from "./../../../util/eventEmitter";
@@ -139,6 +139,6 @@ const RecorderInsides = function (visuals, options) {
   };
 };
 
-util.inherits(RecorderInsides, EventEmitter);
+inherits(RecorderInsides, EventEmitter);
 
 export default RecorderInsides;

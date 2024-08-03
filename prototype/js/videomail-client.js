@@ -19044,6 +19044,7 @@ module.exports={
     "hidden": "1.1.1",
     "humanize-duration": "3.32.1",
     "hyperscript": "2.0.2",
+    "inherits": "2.0.4",
     "insert-css": "2.0.0",
     "iphone-inline-video": "2.2.2",
     "is-power-of-two": "1.0.0",
@@ -19115,7 +19116,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
 var _readystate = _interopRequireDefault(_dereq_("readystate"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _options = _interopRequireDefault(_dereq_("./options"));
 var _constants = _interopRequireDefault(_dereq_("./constants"));
 var _events = _interopRequireDefault(_dereq_("./events"));
@@ -19271,7 +19272,7 @@ var VideomailClient = function VideomailClient(options) {
   };
   build();
 };
-_util.default.inherits(VideomailClient, _eventEmitter.default);
+(0, _inherits.default)(VideomailClient, _eventEmitter.default);
 Object.keys(_constants.default.public).forEach(function (name) {
   VideomailClient[name] = _constants.default.public[name];
 });
@@ -19280,7 +19281,7 @@ Object.keys(_constants.default.public).forEach(function (name) {
 VideomailClient.events = _events.default;
 var _default = exports.default = VideomailClient;
 
-},{"./constants":125,"./events":126,"./options":127,"./resource":128,"./util/browser":130,"./util/collectLogger":131,"./util/eventEmitter":132,"./wrappers/container":139,"./wrappers/optionsWrapper":142,"./wrappers/visuals/replay":152,"@babel/runtime/helpers/interopRequireDefault":1,"deepmerge":21,"readystate":97,"util":116}],125:[function(_dereq_,module,exports){
+},{"./constants":125,"./events":126,"./options":127,"./resource":128,"./util/browser":130,"./util/collectLogger":131,"./util/eventEmitter":132,"./wrappers/container":139,"./wrappers/optionsWrapper":142,"./wrappers/visuals/replay":152,"@babel/runtime/helpers/interopRequireDefault":1,"deepmerge":21,"inherits":61,"readystate":97}],125:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20862,7 +20863,7 @@ exports.default = void 0;
 var _contains = _interopRequireDefault(_dereq_("contains"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var Buttons = function Buttons(container, options) {
@@ -21340,10 +21341,10 @@ var Buttons = function Buttons(container, options) {
     return container.isCountingDown();
   };
 };
-_util.default.inherits(Buttons, _eventEmitter.default);
+(0, _inherits.default)(Buttons, _eventEmitter.default);
 var _default = exports.default = Buttons;
 
-},{"../events":126,"../util/eventEmitter":132,"@babel/runtime/helpers/interopRequireDefault":1,"contains":18,"hidden":56,"hyperscript":58,"util":116}],139:[function(_dereq_,module,exports){
+},{"../events":126,"../util/eventEmitter":132,"@babel/runtime/helpers/interopRequireDefault":1,"contains":18,"hidden":56,"hyperscript":58,"inherits":61}],139:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21355,7 +21356,7 @@ var _documentVisibility = _interopRequireDefault(_dereq_("document-visibility"))
 var _elementClosest = _interopRequireDefault(_dereq_("element-closest"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _insertCss = _interopRequireDefault(_dereq_("insert-css"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _mainMinCss = _interopRequireDefault(_dereq_("../../styles/css/main.min.css.js"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _resource = _interopRequireDefault(_dereq_("../resource"));
@@ -21976,10 +21977,10 @@ var Container = function Container(options) {
   this.stop = visuals.stop.bind(visuals);
   this.recordAgain = visuals.recordAgain.bind(visuals);
 };
-_util.default.inherits(Container, _eventEmitter.default);
+(0, _inherits.default)(Container, _eventEmitter.default);
 var _default = exports.default = Container;
 
-},{"../../styles/css/main.min.css.js":154,"../events":126,"../resource":128,"../util/eventEmitter":132,"../util/videomailError":137,"./buttons":138,"./dimension":140,"./form":141,"./optionsWrapper":142,"./visuals":143,"@babel/runtime/helpers/interopRequireDefault":1,"document-visibility":26,"element-closest":28,"hidden":56,"insert-css":62,"util":116}],140:[function(_dereq_,module,exports){
+},{"../../styles/css/main.min.css.js":154,"../events":126,"../resource":128,"../util/eventEmitter":132,"../util/videomailError":137,"./buttons":138,"./dimension":140,"./form":141,"./optionsWrapper":142,"./visuals":143,"@babel/runtime/helpers/interopRequireDefault":1,"document-visibility":26,"element-closest":28,"hidden":56,"inherits":61,"insert-css":62}],140:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22102,7 +22103,7 @@ exports.default = void 0;
 var _getFormData = _interopRequireDefault(_dereq_("get-form-data"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var _videomailError = _interopRequireDefault(_dereq_("../util/videomailError"));
@@ -22330,10 +22331,10 @@ var Form = function Form(container, formElement, options) {
     formElement && (0, _hidden.default)(formElement, false);
   };
 };
-_util.default.inherits(Form, _eventEmitter.default);
+(0, _inherits.default)(Form, _eventEmitter.default);
 var _default = exports.default = Form;
 
-},{"../events":126,"../util/eventEmitter":132,"../util/videomailError":137,"@babel/runtime/helpers/interopRequireDefault":1,"get-form-data":44,"hidden":56,"hyperscript":58,"util":116}],142:[function(_dereq_,module,exports){
+},{"../events":126,"../util/eventEmitter":132,"../util/videomailError":137,"@babel/runtime/helpers/interopRequireDefault":1,"get-form-data":44,"hidden":56,"hyperscript":58,"inherits":61}],142:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22414,7 +22415,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var _recorderInsides = _interopRequireDefault(_dereq_("./visuals/inside/recorderInsides"));
@@ -22728,10 +22729,10 @@ var Visuals = function Visuals(container, options) {
   this.isUserMediaLoaded = recorder.isUserMediaLoaded.bind(recorder);
   this.isConnected = recorder.isConnected.bind(recorder);
 };
-_util.default.inherits(Visuals, _eventEmitter.default);
+(0, _inherits.default)(Visuals, _eventEmitter.default);
 var _default = exports.default = Visuals;
 
-},{"../events":126,"../util/eventEmitter":132,"./visuals/inside/recorderInsides":149,"./visuals/notifier":150,"./visuals/recorder":151,"./visuals/replay":152,"@babel/runtime/helpers/interopRequireDefault":1,"hidden":56,"hyperscript":58,"util":116}],144:[function(_dereq_,module,exports){
+},{"../events":126,"../util/eventEmitter":132,"./visuals/inside/recorderInsides":149,"./visuals/notifier":150,"./visuals/recorder":151,"./visuals/replay":152,"@babel/runtime/helpers/interopRequireDefault":1,"hidden":56,"hyperscript":58,"inherits":61}],144:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -23076,7 +23077,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("./../../../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("./../../../util/eventEmitter"));
 var _browser = _interopRequireDefault(_dereq_("./../../../util/browser"));
@@ -23179,10 +23180,10 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
     recordTimer.check(intervalSum);
   };
 };
-_util.default.inherits(RecorderInsides, _eventEmitter.default);
+(0, _inherits.default)(RecorderInsides, _eventEmitter.default);
 var _default = exports.default = RecorderInsides;
 
-},{"./../../../events":126,"./../../../util/browser":130,"./../../../util/eventEmitter":132,"./recorder/countdown":144,"./recorder/facingMode":145,"./recorder/pausedNote":146,"./recorder/recordNote":147,"./recorder/recordTimer":148,"@babel/runtime/helpers/interopRequireDefault":1,"util":116}],150:[function(_dereq_,module,exports){
+},{"./../../../events":126,"./../../../util/browser":130,"./../../../util/eventEmitter":132,"./recorder/countdown":144,"./recorder/facingMode":145,"./recorder/pausedNote":146,"./recorder/recordNote":147,"./recorder/recordTimer":148,"@babel/runtime/helpers/interopRequireDefault":1,"inherits":61}],150:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -23192,7 +23193,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../../util/eventEmitter"));
 var Notifier = function Notifier(visuals, options) {
@@ -23437,10 +23438,10 @@ var Notifier = function Notifier(visuals, options) {
     !stillWait && visuals.endWaiting();
   };
 };
-_util.default.inherits(Notifier, _eventEmitter.default);
+(0, _inherits.default)(Notifier, _eventEmitter.default);
 var _default = exports.default = Notifier;
 
-},{"../../events":126,"../../util/eventEmitter":132,"@babel/runtime/helpers/interopRequireDefault":1,"hidden":56,"hyperscript":58,"util":116}],151:[function(_dereq_,module,exports){
+},{"../../events":126,"../../util/eventEmitter":132,"@babel/runtime/helpers/interopRequireDefault":1,"hidden":56,"hyperscript":58,"inherits":61}],151:[function(_dereq_,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -23455,7 +23456,7 @@ var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _websocketStream = _interopRequireDefault(_dereq_("websocket-stream"));
 var _constants = _interopRequireDefault(_dereq_("../../constants"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
@@ -24513,11 +24514,11 @@ var Recorder = function Recorder(visuals, replay) {
     return userMediaLoaded;
   };
 };
-_util.default.inherits(Recorder, _eventEmitter.default);
+(0, _inherits.default)(Recorder, _eventEmitter.default);
 var _default = exports.default = Recorder;
 
 }).call(this)}).call(this,_dereq_("buffer").Buffer)
-},{"../../constants":125,"../../events":126,"../../util/browser":130,"../../util/eventEmitter":132,"../../util/humanize":133,"../../util/pretty":135,"../../util/videomailError":137,"./userMedia":153,"@babel/runtime/helpers/interopRequireDefault":1,"animitter":4,"buffer":11,"canvas-to-buffer":14,"deepmerge":21,"hidden":56,"hyperscript":58,"safe-json-stringify":101,"util":116,"websocket-stream":119}],152:[function(_dereq_,module,exports){
+},{"../../constants":125,"../../events":126,"../../util/browser":130,"../../util/eventEmitter":132,"../../util/humanize":133,"../../util/pretty":135,"../../util/videomailError":137,"./userMedia":153,"@babel/runtime/helpers/interopRequireDefault":1,"animitter":4,"buffer":11,"canvas-to-buffer":14,"deepmerge":21,"hidden":56,"hyperscript":58,"inherits":61,"safe-json-stringify":101,"websocket-stream":119}],152:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -24529,7 +24530,7 @@ var _addEventlistenerWithOptions = _interopRequireDefault(_dereq_("add-eventlist
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _iphoneInlineVideo = _interopRequireDefault(_dereq_("iphone-inline-video"));
-var _util = _interopRequireDefault(_dereq_("util"));
+var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
 var _browser = _interopRequireDefault(_dereq_("../../util/browser"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../../util/eventEmitter"));
@@ -24799,10 +24800,10 @@ var Replay = function Replay(parentElement, options) {
     return parentElement;
   };
 };
-_util.default.inherits(Replay, _eventEmitter.default);
+(0, _inherits.default)(Replay, _eventEmitter.default);
 var _default = exports.default = Replay;
 
-},{"../../events":126,"../../util/browser":130,"../../util/eventEmitter":132,"../../util/videomailError":137,"@babel/runtime/helpers/interopRequireDefault":1,"add-eventlistener-with-options":3,"hidden":56,"hyperscript":58,"iphone-inline-video":64,"util":116}],153:[function(_dereq_,module,exports){
+},{"../../events":126,"../../util/browser":130,"../../util/eventEmitter":132,"../../util/videomailError":137,"@babel/runtime/helpers/interopRequireDefault":1,"add-eventlistener-with-options":3,"hidden":56,"hyperscript":58,"inherits":61,"iphone-inline-video":64}],153:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
