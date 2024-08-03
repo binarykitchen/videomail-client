@@ -1,15 +1,15 @@
-import test from 'tape-catch'
+import test from "tape-catch";
 
-import standardize from './../../src/js/util/standardize'
+import standardize from "./../../src/js/util/standardize";
 
-const root = this
+const root = this;
 
-test('standardize:', function (t) {
-  t.test('can be called', function (tt) {
-    tt.plan(1)
+test("standardize:", function (t) {
+  t.test("can be called", function (tt) {
+    tt.plan(1);
 
     tt.doesNotThrow(function () {
-      standardize(this, root)
-    })
-  })
-})
+      standardize(this, root);
+    });
+  });
+});

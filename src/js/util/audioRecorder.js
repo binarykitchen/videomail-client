@@ -1,9 +1,9 @@
-import AudioSample from 'audio-sample'
-import Browser from './browser'
-import VideomailError from './videomailError'
-import isPOT from 'is-power-of-two'
+import AudioSample from "audio-sample";
+import Browser from "./browser";
+import VideomailError from "./videomailError";
+import isPOT from "is-power-of-two";
 
-const CHANNELS = 1
+const CHANNELS = 1;
 
 // for inspiration see
 // https://github.com/saebekassebil/microphone-stream
@@ -11,111 +11,111 @@ const CHANNELS = 1
 // todo code needs rewrite
 
 export default function (userMedia, options) {
-  let scriptProcessor
-  let audioInput
-  let vcAudioContext
+  let scriptProcessor;
+  let audioInput;
+  let vcAudioContext;
 
-  const browser = new Browser(options)
+  const browser = new Browser(options);
 
   function getAudioContextClass() {
-    return window.AudioContext || window.webkitAudioContext
+    return window.AudioContext || window.webkitAudioContext;
   }
 
   function hasAudioContext() {
-    return !!getAudioContextClass() && !!getAudioContext()
+    return !!getAudioContextClass() && !!getAudioContext();
   }
 
   function getAudioContext() {
     // instantiate only once
     if (!vcAudioContext) {
-      const AudioContext = getAudioContextClass()
-      vcAudioContext = new AudioContext()
+      const AudioContext = getAudioContextClass();
+      vcAudioContext = new AudioContext();
     }
 
-    return vcAudioContext
+    return vcAudioContext;
   }
 
   function onAudioProcess(e, cb) {
     if (!userMedia.isRecording() || userMedia.isPaused()) {
-      return
+      return;
     }
 
     // Returns a Float32Array containing the PCM data associated with the channel,
     // defined by the channel parameter (with 0 representing the first channel)
-    const float32Array = e.inputBuffer.getChannelData(0)
+    const float32Array = e.inputBuffer.getChannelData(0);
 
-    cb(new AudioSample(float32Array))
+    cb(new AudioSample(float32Array));
   }
 
   this.init = function (localMediaStream) {
-    options.debug('AudioRecorder: init()')
+    options.debug("AudioRecorder: init()");
 
     // creates an audio node from the microphone incoming stream
-    const volume = getAudioContext().createGain()
+    const volume = getAudioContext().createGain();
 
     try {
-      audioInput = getAudioContext().createMediaStreamSource(localMediaStream)
+      audioInput = getAudioContext().createMediaStreamSource(localMediaStream);
     } catch (exc) {
-      throw VideomailError.create('Webcam has no audio', exc.toString(), options)
+      throw VideomailError.create("Webcam has no audio", exc.toString(), options);
     }
 
-    let bufferSize = options.audio.bufferSize
+    let bufferSize = options.audio.bufferSize;
 
     // see https://github.com/binarykitchen/videomail-client/issues/184
-    if (bufferSize === 'auto') {
+    if (bufferSize === "auto") {
       if (browser.isFirefox()) {
-        bufferSize = 512
+        bufferSize = 512;
       } else {
-        bufferSize = 2048
+        bufferSize = 2048;
       }
     }
 
     if (!isPOT(bufferSize)) {
-      throw VideomailError.create('Audio buffer size must be a power of two.', options)
+      throw VideomailError.create("Audio buffer size must be a power of two.", options);
     }
 
     if (!options.audio.volume || options.audio.volume > 1) {
-      throw VideomailError.create('Audio volume must be between zero and one.', options)
+      throw VideomailError.create("Audio volume must be between zero and one.", options);
     }
 
-    volume.gain.value = options.audio.volume
+    volume.gain.value = options.audio.volume;
 
     // Create a ScriptProcessorNode with the given bufferSize and
     // a single input and output channel
     scriptProcessor = getAudioContext().createScriptProcessor(
       bufferSize,
       CHANNELS,
-      CHANNELS
-    )
+      CHANNELS,
+    );
 
     // connect stream to our scriptProcessor
-    audioInput.connect(scriptProcessor)
+    audioInput.connect(scriptProcessor);
 
     // connect our scriptProcessor to the previous destination
-    scriptProcessor.connect(getAudioContext().destination)
+    scriptProcessor.connect(getAudioContext().destination);
 
     // connect volume
-    audioInput.connect(volume)
-    volume.connect(scriptProcessor)
-  }
+    audioInput.connect(volume);
+    volume.connect(scriptProcessor);
+  };
 
   this.record = function (cb) {
-    options.debug('AudioRecorder: record()')
+    options.debug("AudioRecorder: record()");
 
     scriptProcessor.onaudioprocess = function (e) {
-      onAudioProcess(e, cb)
-    }
-  }
+      onAudioProcess(e, cb);
+    };
+  };
 
   this.stop = function () {
-    options.debug('AudioRecorder: stop()')
+    options.debug("AudioRecorder: stop()");
 
     if (scriptProcessor) {
-      scriptProcessor.onaudioprocess = undefined
+      scriptProcessor.onaudioprocess = undefined;
     }
 
     if (audioInput) {
-      audioInput.disconnect()
+      audioInput.disconnect();
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
@@ -124,23 +124,23 @@ export default function (userMedia, options) {
         getAudioContext()
           .close()
           .then(function () {
-            options.debug('AudioRecorder: audio context is closed')
-            vcAudioContext = null
+            options.debug("AudioRecorder: audio context is closed");
+            vcAudioContext = null;
           })
           .catch(function (err) {
-            throw VideomailError.create(err, options)
-          })
+            throw VideomailError.create(err, options);
+          });
       } else {
-        vcAudioContext = null
+        vcAudioContext = null;
       }
     }
-  }
+  };
 
   this.getSampleRate = function () {
     if (hasAudioContext()) {
-      return getAudioContext().sampleRate
+      return getAudioContext().sampleRate;
     }
 
-    return -1
-  }
+    return -1;
+  };
 }

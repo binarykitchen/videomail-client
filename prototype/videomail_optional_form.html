@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
 
     <style type="text/css">
-      input[type='email'],
-      input[type='text'],
+      input[type="email"],
+      input[type="text"],
       fieldset,
       textarea,
       .buttons,
@@ -58,29 +58,29 @@
         enableAutoValidation: false,
         selectors: {
           submitButtonSelector: 'body input[value="Submit"]',
-          formId: 'optionalVideomailForm'
-        }
-      })
+          formId: "optionalVideomailForm",
+        },
+      });
 
-      var startOverButton = document.getElementById('startOver')
+      var startOverButton = document.getElementById("startOver");
 
       var onSubmitted = function (videomail, response) {
-        var statusHeader = document.querySelector('h3.status')
+        var statusHeader = document.querySelector("h3.status");
 
         // status has been generated on server side, see gulp task 'connect'
-        statusHeader.innerHTML = response.status
+        statusHeader.innerHTML = response.status;
 
-        this.replay(videomail, 'viewVideo')
+        this.replay(videomail, "viewVideo");
 
-        startOverButton.onclick = this.startOver
-      }
+        startOverButton.onclick = this.startOver;
+      };
 
       videomailClient.on(
         videomailClient.events.SUBMITTED,
-        onSubmitted.bind(videomailClient)
-      )
+        onSubmitted.bind(videomailClient),
+      );
 
-      videomailClient.show()
+      videomailClient.show();
     </script>
   </body>
 </html>

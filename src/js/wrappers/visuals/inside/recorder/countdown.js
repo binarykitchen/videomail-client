@@ -1,83 +1,83 @@
-import h from 'hyperscript'
-import hidden from 'hidden'
+import h from "hyperscript";
+import hidden from "hidden";
 
 export default function (visuals, options) {
-  const self = this
+  const self = this;
 
-  let countdownElement
-  let intervalId
-  let countdown
-  let paused
+  let countdownElement;
+  let intervalId;
+  let countdown;
+  let paused;
 
   function fire(cb) {
-    self.unload()
-    self.hide()
+    self.unload();
+    self.hide();
 
     // keep all callbacks async
     setTimeout(function () {
-      cb()
-    }, 0)
+      cb();
+    }, 0);
   }
 
   function countBackward(cb) {
     if (!paused) {
-      options.debug('Countdown', countdown)
-      countdown--
+      options.debug("Countdown", countdown);
+      countdown--;
 
       if (countdown < 1) {
-        fire(cb)
+        fire(cb);
       } else {
-        countdownElement.innerHTML = countdown
+        countdownElement.innerHTML = countdown;
       }
     }
   }
 
   this.start = function (cb) {
-    countdownElement.innerHTML = countdown = options.video.countdown
+    countdownElement.innerHTML = countdown = options.video.countdown;
 
-    this.show()
+    this.show();
 
-    intervalId = setInterval(countBackward.bind(this, cb), 950)
-  }
+    intervalId = setInterval(countBackward.bind(this, cb), 950);
+  };
 
   this.pause = function () {
-    paused = true
-  }
+    paused = true;
+  };
 
   this.resume = function () {
-    paused = false
-  }
+    paused = false;
+  };
 
   this.build = function () {
-    countdownElement = visuals.querySelector('.countdown')
+    countdownElement = visuals.querySelector(".countdown");
 
     if (!countdownElement) {
-      countdownElement = h('p.countdown')
+      countdownElement = h("p.countdown");
 
-      this.hide()
+      this.hide();
 
-      visuals.appendChild(countdownElement)
+      visuals.appendChild(countdownElement);
     } else {
-      this.hide()
+      this.hide();
     }
-  }
+  };
 
   this.show = function () {
-    hidden(countdownElement, false)
-  }
+    hidden(countdownElement, false);
+  };
 
   this.isCountingDown = function () {
-    return !!intervalId
-  }
+    return !!intervalId;
+  };
 
   this.unload = function () {
-    clearInterval(intervalId)
-    paused = false
-    intervalId = null
-  }
+    clearInterval(intervalId);
+    paused = false;
+    intervalId = null;
+  };
 
   this.hide = function () {
-    hidden(countdownElement, true)
-    this.unload()
-  }
+    hidden(countdownElement, true);
+    this.unload();
+  };
 }

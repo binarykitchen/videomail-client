@@ -1,176 +1,176 @@
-import contains from 'contains'
-import hidden from 'hidden'
-import h from 'hyperscript'
-import util from 'util'
+import contains from "contains";
+import hidden from "hidden";
+import h from "hyperscript";
+import util from "util";
 
-import Events from '../events'
-import EventEmitter from '../util/eventEmitter'
+import Events from "../events";
+import EventEmitter from "../util/eventEmitter";
 
 const Buttons = function (container, options) {
-  EventEmitter.call(this, options, 'Buttons')
+  EventEmitter.call(this, options, "Buttons");
 
-  const self = this
-  const debug = options.debug
+  const self = this;
+  const debug = options.debug;
 
-  let buttonsElement
-  let recordButton
-  let pauseButton
-  let resumeButton
-  let previewButton
-  let recordAgainButton
-  let submitButton
+  let buttonsElement;
+  let recordButton;
+  let pauseButton;
+  let resumeButton;
+  let previewButton;
+  let recordAgainButton;
+  let submitButton;
 
-  let audioOnRadioPair
-  let audioOffRadioPair
+  let audioOnRadioPair;
+  let audioOffRadioPair;
 
-  let built
+  let built;
 
   function hide(elements) {
     if (elements && !Array.isArray(elements)) {
-      elements = [elements]
+      elements = [elements];
     }
 
     elements &&
       elements.forEach(function (element) {
-        hidden(element, true)
-      })
+        hidden(element, true);
+      });
   }
 
   function show(elements) {
     if (elements && !Array.isArray(elements)) {
-      elements = [elements]
+      elements = [elements];
     }
 
     elements &&
       elements.forEach(function (element) {
-        hidden(element, false)
-      })
+        hidden(element, false);
+      });
   }
 
   function isShown(elements) {
-    let isShown = elements && true
+    let isShown = elements && true;
 
     if (elements && !Array.isArray(elements)) {
-      elements = [elements]
+      elements = [elements];
     }
 
     elements &&
       elements.forEach(function (element) {
-        isShown = isShown && element && !hidden(element)
-      })
+        isShown = isShown && element && !hidden(element);
+      });
 
-    return isShown
+    return isShown;
   }
 
   function disable(elements) {
     if (elements && !Array.isArray(elements)) {
-      elements = [elements]
+      elements = [elements];
     }
 
     elements &&
       elements.forEach(function (element) {
         // https://github.com/binarykitchen/videomail-client/issues/148
         if (element) {
-          if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-            element.disabled = true
+          if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
+            element.disabled = true;
           } else {
-            element.classList.add('disabled')
+            element.classList.add("disabled");
           }
         }
-      })
+      });
   }
 
   function enable(elements) {
     if (elements && !Array.isArray(elements)) {
-      elements = [elements]
+      elements = [elements];
     }
 
     elements &&
       elements.forEach(function (element) {
         // https://github.com/binarykitchen/videomail-client/issues/148
         if (element) {
-          if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-            element.disabled = false
+          if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
+            element.disabled = false;
           } else {
-            element.classList.remove('disabled')
+            element.classList.remove("disabled");
           }
         }
-      })
+      });
   }
 
   function adjustButton(buttonElement, show, type, disabled) {
     if (disabled) {
-      disable(buttonElement)
+      disable(buttonElement);
     }
 
     if (type) {
-      buttonElement.type = type
+      buttonElement.type = type;
     } else if (!buttonElement.type) {
-      buttonElement.type = 'button'
+      buttonElement.type = "button";
     }
 
-    !show && hide(buttonElement)
+    !show && hide(buttonElement);
 
-    return buttonElement
+    return buttonElement;
   }
 
   function replaceClickHandler(element, clickHandler) {
     const wrappedClickHandler = (e) => {
-      e && e.preventDefault()
+      e && e.preventDefault();
 
       try {
-        clickHandler({ event: e })
+        clickHandler({ event: e });
       } catch (exc) {
-        self.emit(Events.ERROR, exc)
+        self.emit(Events.ERROR, exc);
       }
-    }
+    };
 
-    element.onclick = wrappedClickHandler
+    element.onclick = wrappedClickHandler;
   }
 
   function makeRadioButtonPair(options) {
-    let radioButtonElement
-    let radioButtonGroup
+    let radioButtonElement;
+    let radioButtonGroup;
 
     if (options.id) {
-      radioButtonElement = document.getElementById(options.id)
+      radioButtonElement = document.getElementById(options.id);
     }
 
     if (!radioButtonElement) {
-      radioButtonElement = h('input#' + options.id, {
-        type: 'radio',
+      radioButtonElement = h("input#" + options.id, {
+        type: "radio",
         name: options.name,
         value: options.value,
-        checked: options.checked
-      })
+        checked: options.checked,
+      });
 
       radioButtonGroup = h(
-        'span.radioGroup',
+        "span.radioGroup",
         radioButtonElement,
         h(
-          'label',
+          "label",
           {
-            htmlFor: options.id
+            htmlFor: options.id,
           },
-          options.label
-        )
-      )
+          options.label,
+        ),
+      );
 
       // double check that submit button is already in the buttonsElement container as a child?
       if (submitButton && contains(buttonsElement, submitButton)) {
-        buttonsElement.insertBefore(radioButtonGroup, submitButton)
+        buttonsElement.insertBefore(radioButtonGroup, submitButton);
       } else {
-        buttonsElement.appendChild(radioButtonGroup)
+        buttonsElement.appendChild(radioButtonGroup);
       }
     }
 
     if (options.changeHandler) {
-      radioButtonElement.onchange = options.changeHandler
+      radioButtonElement.onchange = options.changeHandler;
     }
 
-    disable(radioButtonElement)
+    disable(radioButtonElement);
 
-    return [radioButtonElement, radioButtonGroup]
+    return [radioButtonElement, radioButtonGroup];
   }
 
   function makeButton(
@@ -181,43 +181,43 @@ const Buttons = function (container, options) {
     id,
     type,
     selector,
-    disabled = true
+    disabled = true,
   ) {
-    let buttonElement
+    let buttonElement;
 
     if (id) {
-      buttonElement = document.getElementById(id)
+      buttonElement = document.getElementById(id);
     } else if (selector) {
-      buttonElement = document.querySelector(selector)
+      buttonElement = document.querySelector(selector);
     } else {
-      buttonElement = buttonsElement.querySelector('.' + buttonClass)
+      buttonElement = buttonsElement.querySelector("." + buttonClass);
     }
 
     if (!buttonElement) {
       if (options.selectors.buttonClass) {
-        buttonClass += '.' + options.selectors.buttonClass
+        buttonClass += "." + options.selectors.buttonClass;
       }
 
-      buttonElement = h('button.' + buttonClass)
-      buttonElement = adjustButton(buttonElement, show, type, disabled)
+      buttonElement = h("button." + buttonClass);
+      buttonElement = adjustButton(buttonElement, show, type, disabled);
 
-      buttonElement.innerHTML = text
+      buttonElement.innerHTML = text;
 
       // double check that submit button is already in the buttonsElement container
       if (submitButton && contains(buttonsElement, submitButton)) {
-        buttonsElement.insertBefore(buttonElement, submitButton)
+        buttonsElement.insertBefore(buttonElement, submitButton);
       } else {
-        buttonsElement.appendChild(buttonElement)
+        buttonsElement.appendChild(buttonElement);
       }
     } else {
-      buttonElement = adjustButton(buttonElement, show, type, disabled)
+      buttonElement = adjustButton(buttonElement, show, type, disabled);
     }
 
     if (clickHandler) {
-      replaceClickHandler(buttonElement, clickHandler)
+      replaceClickHandler(buttonElement, clickHandler);
     }
 
-    return buttonElement
+    return buttonElement;
   }
 
   function buildButtons() {
@@ -225,22 +225,22 @@ const Buttons = function (container, options) {
       if (!submitButton) {
         submitButton = makeButton(
           options.selectors.submitButtonClass,
-          'Submit',
+          "Submit",
           null,
           true,
           options.selectors.submitButtonId,
-          'submit',
+          "submit",
           options.selectors.submitButtonSelector,
-          options.enableAutoValidation
-        )
+          options.enableAutoValidation,
+        );
       } else {
-        disable(submitButton)
+        disable(submitButton);
       }
 
       // no need to listen to the submit event when it's already listened
       // within the form element class
       if (!container.hasForm() && submitButton) {
-        replaceClickHandler(submitButton, submit)
+        replaceClickHandler(submitButton, submit);
       }
     }
 
@@ -248,16 +248,16 @@ const Buttons = function (container, options) {
       options.selectors.recordButtonClass,
       options.text.buttons.record,
       record,
-      false
-    )
+      false,
+    );
 
     if (options.enablePause) {
       pauseButton = makeButton(
         options.selectors.pauseButtonClass,
         options.text.buttons.pause,
         container.pause,
-        false
-      )
+        false,
+      );
     }
 
     if (options.enablePause) {
@@ -265,8 +265,8 @@ const Buttons = function (container, options) {
         options.selectors.resumeButtonClass,
         options.text.buttons.resume,
         container.resume,
-        false
-      )
+        false,
+      );
     }
 
     // show stop only when pause is enabled - looks better that way otherwise button
@@ -275,38 +275,38 @@ const Buttons = function (container, options) {
       options.selectors.previewButtonClass,
       options.text.buttons.preview,
       container.stop,
-      false
-    )
+      false,
+    );
 
     recordAgainButton = makeButton(
       options.selectors.recordAgainButtonClass,
       options.text.buttons.recordAgain,
       recordAgain,
-      false
-    )
+      false,
+    );
 
     if (options.audio && options.audio.switch) {
       audioOffRadioPair = makeRadioButtonPair({
-        id: 'audioOffOption',
-        name: 'audio',
-        value: 'off',
+        id: "audioOffOption",
+        name: "audio",
+        value: "off",
         label: options.text.audioOff,
         checked: !options.isAudioEnabled(),
         changeHandler: function () {
-          container.disableAudio()
-        }
-      })
+          container.disableAudio();
+        },
+      });
 
       audioOnRadioPair = makeRadioButtonPair({
-        id: 'audioOnOption',
-        name: 'audio',
-        value: 'on',
+        id: "audioOnOption",
+        name: "audio",
+        value: "on",
         label: options.text.audioOn,
         checked: options.isAudioEnabled(),
         changeHandler: function () {
-          container.enableAudio()
-        }
-      })
+          container.enableAudio();
+        },
+      });
     }
   }
 
@@ -314,269 +314,269 @@ const Buttons = function (container, options) {
     // no need to show record button when doing a record again
     if (!isShown(recordAgainButton)) {
       if (!params.paused) {
-        show(recordButton)
+        show(recordButton);
       }
     }
 
     if (!params.paused) {
-      disable(previewButton)
-      hide(previewButton)
+      disable(previewButton);
+      hide(previewButton);
     }
 
     if (!options.enableAutoValidation) {
-      enable(submitButton)
+      enable(submitButton);
     }
 
     if (!params.recordWhenReady) {
       if (isShown(audioOnRadioPair)) {
-        enable(audioOnRadioPair)
+        enable(audioOnRadioPair);
       }
 
       if (isShown(audioOffRadioPair)) {
-        enable(audioOffRadioPair)
+        enable(audioOffRadioPair);
       }
     }
   }
 
   function onGoingBack() {
-    hide(recordAgainButton)
-    show(recordButton)
-    show(submitButton)
+    hide(recordAgainButton);
+    show(recordButton);
+    show(submitButton);
   }
 
   function onReplayShown() {
-    self.hide()
+    self.hide();
   }
 
   function onUserMediaReady(params) {
-    onFormReady(params)
+    onFormReady(params);
 
     if (isShown(recordButton) && !params.recordWhenReady) {
-      enable(recordButton)
+      enable(recordButton);
     }
 
     if (options.enableAutoValidation) {
-      disable(submitButton)
+      disable(submitButton);
     }
   }
 
   function onResetting() {
-    disable(submitButton)
+    disable(submitButton);
 
-    self.reset()
+    self.reset();
   }
 
   function onPreview() {
-    hide(recordButton)
-    hide(previewButton)
-    disable(audioOnRadioPair)
-    disable(audioOffRadioPair)
+    hide(recordButton);
+    hide(previewButton);
+    disable(audioOnRadioPair);
+    disable(audioOffRadioPair);
 
-    show(recordAgainButton)
-    enable(recordAgainButton)
+    show(recordAgainButton);
+    enable(recordAgainButton);
 
     if (!options.enableAutoValidation) {
-      enable(submitButton)
+      enable(submitButton);
     }
   }
 
   this.enableSubmit = function () {
-    enable(submitButton)
-  }
+    enable(submitButton);
+  };
 
   this.adjustButtonsForPause = function () {
     if (!self.isCountingDown()) {
-      pauseButton && hide(pauseButton)
-      show(resumeButton)
-      enable(resumeButton)
-      hide(recordButton)
-      show(previewButton)
-      enable(previewButton)
+      pauseButton && hide(pauseButton);
+      show(resumeButton);
+      enable(resumeButton);
+      hide(recordButton);
+      show(previewButton);
+      enable(previewButton);
     }
-  }
+  };
 
   function onFirstFrameSent() {
-    hide(recordButton)
-    hide(recordAgainButton)
+    hide(recordButton);
+    hide(recordAgainButton);
 
     if (pauseButton) {
-      show(pauseButton)
-      enable(pauseButton)
+      show(pauseButton);
+      enable(pauseButton);
     }
 
-    enable(previewButton)
-    show(previewButton)
+    enable(previewButton);
+    show(previewButton);
   }
 
   function onRecording(framesCount) {
     // it is possible to hide while recording, hence
     // check framesCount first (coming from recorder)
     if (framesCount > 1) {
-      onFirstFrameSent()
+      onFirstFrameSent();
     } else {
-      disable(audioOffRadioPair)
-      disable(audioOnRadioPair)
-      disable(recordAgainButton)
-      disable(recordButton)
+      disable(audioOffRadioPair);
+      disable(audioOnRadioPair);
+      disable(recordAgainButton);
+      disable(recordButton);
     }
   }
 
   function onResuming() {
-    hide(resumeButton)
-    hide(recordButton)
+    hide(resumeButton);
+    hide(recordButton);
 
     if (pauseButton) {
-      enable(pauseButton)
-      show(pauseButton)
+      enable(pauseButton);
+      show(pauseButton);
     }
   }
 
   function onStopping() {
-    disable(previewButton)
-    disable(recordButton)
+    disable(previewButton);
+    disable(recordButton);
 
-    hide(pauseButton)
-    hide(resumeButton)
+    hide(pauseButton);
+    hide(resumeButton);
   }
 
   function onCountdown() {
-    disable(recordButton)
-    disable(audioOffRadioPair)
-    disable(audioOnRadioPair)
+    disable(recordButton);
+    disable(audioOffRadioPair);
+    disable(audioOnRadioPair);
   }
 
   function onSubmitting() {
-    disable(submitButton)
-    disable(recordAgainButton)
+    disable(submitButton);
+    disable(recordAgainButton);
   }
 
   function onSubmitted() {
-    disable(previewButton)
-    disable(recordAgainButton)
-    disable(recordButton)
-    disable(submitButton)
+    disable(previewButton);
+    disable(recordAgainButton);
+    disable(recordButton);
+    disable(submitButton);
   }
 
   function onInvalid() {
     if (options.enableAutoValidation) {
-      disable(submitButton)
+      disable(submitButton);
     }
   }
 
   function onValid() {
     if (options.enableAutoValidation) {
-      enable(submitButton)
+      enable(submitButton);
     }
   }
 
   function onHidden() {
-    hide(recordButton)
-    hide(previewButton)
-    hide(recordAgainButton)
-    hide(resumeButton)
+    hide(recordButton);
+    hide(previewButton);
+    hide(recordAgainButton);
+    hide(resumeButton);
   }
 
   function onEnablingAudio() {
-    disable(recordButton)
-    disable(audioOnRadioPair)
-    disable(audioOffRadioPair)
+    disable(recordButton);
+    disable(audioOnRadioPair);
+    disable(audioOffRadioPair);
   }
 
   function onDisablingAudio() {
-    disable(recordButton)
-    disable(audioOnRadioPair)
-    disable(audioOffRadioPair)
+    disable(recordButton);
+    disable(audioOnRadioPair);
+    disable(audioOffRadioPair);
   }
 
   function recordAgain() {
-    disable(recordAgainButton)
-    container.beginWaiting()
-    container.recordAgain()
+    disable(recordAgainButton);
+    container.beginWaiting();
+    container.recordAgain();
   }
 
   function onStartingOver() {
-    show(submitButton)
+    show(submitButton);
   }
 
   function submit() {
-    container.submit()
+    container.submit();
   }
 
   function record(params) {
-    disable(recordButton)
-    container.record(params)
+    disable(recordButton);
+    container.record(params);
   }
 
   function initEvents() {
-    debug('Buttons: initEvents()')
+    debug("Buttons: initEvents()");
 
     self
       .on(Events.USER_MEDIA_READY, function (params) {
         if (!params.switchingFacingMode) {
-          onUserMediaReady(params)
+          onUserMediaReady(params);
         }
       })
       .on(Events.PREVIEW, function () {
-        onPreview()
+        onPreview();
       })
       .on(Events.PAUSED, function () {
-        self.adjustButtonsForPause()
+        self.adjustButtonsForPause();
       })
       .on(Events.RECORDING, function (framesCount) {
-        onRecording(framesCount)
+        onRecording(framesCount);
       })
       .on(Events.FIRST_FRAME_SENT, function () {
-        onFirstFrameSent()
+        onFirstFrameSent();
       })
       .on(Events.RESUMING, function () {
-        onResuming()
+        onResuming();
       })
       .on(Events.STOPPING, function () {
-        onStopping()
+        onStopping();
       })
       .on(Events.COUNTDOWN, function () {
-        onCountdown()
+        onCountdown();
       })
       .on(Events.SUBMITTING, function () {
-        onSubmitting()
+        onSubmitting();
       })
       .on(Events.RESETTING, function () {
-        onResetting()
+        onResetting();
       })
       .on(Events.INVALID, function () {
-        onInvalid()
+        onInvalid();
       })
       .on(Events.VALID, function () {
-        onValid()
+        onValid();
       })
       .on(Events.SUBMITTED, function () {
-        onSubmitted()
+        onSubmitted();
       })
       .on(Events.HIDE, function () {
-        onHidden()
+        onHidden();
       })
       .on(Events.FORM_READY, function (params) {
-        onFormReady(params)
+        onFormReady(params);
       })
       .on(Events.REPLAY_SHOWN, function () {
-        onReplayShown()
+        onReplayShown();
       })
       .on(Events.GOING_BACK, function () {
-        onGoingBack()
+        onGoingBack();
       })
       .on(Events.ENABLING_AUDIO, function () {
-        onEnablingAudio()
+        onEnablingAudio();
       })
       .on(Events.DISABLING_AUDIO, function () {
-        onDisablingAudio()
+        onDisablingAudio();
       })
       .on(Events.STARTING_OVER, function () {
-        onStartingOver()
+        onStartingOver();
       })
       .on(Events.CONNECTED, function () {
         if (options.loadUserMediaOnRecord) {
           if (isShown(recordButton)) {
-            enable(recordButton)
+            enable(recordButton);
           }
         }
       })
@@ -584,79 +584,79 @@ const Buttons = function (container, options) {
         // since https://github.com/binarykitchen/videomail-client/issues/60
         // we hide areas to make it easier for the user
         if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
-          self.hide()
+          self.hide();
         }
-      })
+      });
   }
 
   this.reset = function () {
-    options.debug('Buttons: reset()')
+    options.debug("Buttons: reset()");
 
-    disable(pauseButton)
-    disable(resumeButton)
-    disable(recordButton)
-    disable(previewButton)
-    disable(recordAgainButton)
-  }
+    disable(pauseButton);
+    disable(resumeButton);
+    disable(recordButton);
+    disable(previewButton);
+    disable(recordAgainButton);
+  };
 
   this.isRecordAgainButtonEnabled = function () {
-    return !recordAgainButton.disabled
-  }
+    return !recordAgainButton.disabled;
+  };
 
   this.isRecordButtonEnabled = function () {
-    return !recordButton.disabled
-  }
+    return !recordButton.disabled;
+  };
 
   this.setSubmitButton = function (newSubmitButton) {
-    submitButton = newSubmitButton
-  }
+    submitButton = newSubmitButton;
+  };
 
   this.getSubmitButton = function () {
-    return submitButton
-  }
+    return submitButton;
+  };
 
   this.build = function () {
-    buttonsElement = container.querySelector('.' + options.selectors.buttonsClass)
+    buttonsElement = container.querySelector("." + options.selectors.buttonsClass);
 
     if (!buttonsElement) {
-      buttonsElement = h('div.' + options.selectors.buttonsClass)
+      buttonsElement = h("div." + options.selectors.buttonsClass);
 
-      container.appendChild(buttonsElement)
+      container.appendChild(buttonsElement);
     }
 
-    buildButtons()
+    buildButtons();
 
-    !built && initEvents()
+    !built && initEvents();
 
-    built = true
-  }
+    built = true;
+  };
 
   this.unload = function () {
-    built = false
-  }
+    built = false;
+  };
 
   this.hide = function (params) {
-    hide(buttonsElement)
+    hide(buttonsElement);
 
     if (params && params.deep) {
-      hide(recordButton)
-      hide(pauseButton)
-      hide(resumeButton)
-      hide(previewButton)
-      hide(recordAgainButton)
-      hide(submitButton)
+      hide(recordButton);
+      hide(pauseButton);
+      hide(resumeButton);
+      hide(previewButton);
+      hide(recordAgainButton);
+      hide(submitButton);
     }
-  }
+  };
 
   this.show = function () {
-    show(buttonsElement)
-  }
+    show(buttonsElement);
+  };
 
   this.isCountingDown = function () {
-    return container.isCountingDown()
-  }
-}
+    return container.isCountingDown();
+  };
+};
 
-util.inherits(Buttons, EventEmitter)
+util.inherits(Buttons, EventEmitter);
 
-export default Buttons
+export default Buttons;

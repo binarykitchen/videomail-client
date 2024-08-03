@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
 
     <style type="text/css">
-      input[type='email'],
-      input[type='text'],
+      input[type="email"],
+      input[type="text"],
       fieldset,
       textarea,
       .buttons,
@@ -71,59 +71,59 @@
         video: { limitSeconds: 120, width: 320, countdown: false },
         selectors: {
           submitButtonSelector: 'body input[value="Submit"]',
-          formId: 'someForm'
+          formId: "someForm",
         },
         callbacks: {
           adjustFormDataBeforePosting: function (videomail, cb) {
-            videomail.subject = 'Adjusted: ' + videomail.subject
+            videomail.subject = "Adjusted: " + videomail.subject;
 
-            cb(null, videomail)
-          }
+            cb(null, videomail);
+          },
         },
         defaults: {
-          body: 'No message content'
-        }
-      })
+          body: "No message content",
+        },
+      });
 
-      var startOverButton = document.getElementById('startOver')
-      var writingOption = document.getElementById('writingOption')
-      var signLanguageOption = document.getElementById('signLanguageOption')
-      var body = document.getElementById('body')
+      var startOverButton = document.getElementById("startOver");
+      var writingOption = document.getElementById("writingOption");
+      var signLanguageOption = document.getElementById("signLanguageOption");
+      var body = document.getElementById("body");
 
       var onSubmitted = function (videomail, response) {
         // this videomail object has lots of useful information you can grab from
         // i.E. the URL to view or even the average fps of the video
 
-        var statusHeader = document.querySelector('h3.status')
+        var statusHeader = document.querySelector("h3.status");
 
         // status has been generated on server side, see gulp task 'connect'
-        statusHeader.innerHTML = response.status
+        statusHeader.innerHTML = response.status;
 
-        this.replay(videomail, 'viewVideo')
+        this.replay(videomail, "viewVideo");
 
         startOverButton.onclick = function () {
-          videomailClient.startOver({ keepHidden: writingOption.checked })
-        }
-      }
+          videomailClient.startOver({ keepHidden: writingOption.checked });
+        };
+      };
 
       writingOption.onclick = function () {
-        videomailClient.hide()
+        videomailClient.hide();
 
-        body.style.display = 'block'
-        body.required = true
-      }
+        body.style.display = "block";
+        body.required = true;
+      };
 
       signLanguageOption.onclick = function () {
-        videomailClient.show()
+        videomailClient.show();
 
-        body.style.display = 'none'
-        body.required = false
-      }
+        body.style.display = "none";
+        body.required = false;
+      };
 
       videomailClient.on(
         videomailClient.events.SUBMITTED,
-        onSubmitted.bind(videomailClient)
-      )
+        onSubmitted.bind(videomailClient),
+      );
     </script>
   </body>
 </html>

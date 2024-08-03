@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "8.0.2",
+  "version": "8.1.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -33,8 +33,8 @@
     "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js"
   },
   "engines": {
-    "node": ">=20.5.1",
-    "npm": ">=9.8.0"
+    "node": "^20.12.2",
+    "npm": "^10.5.0"
   },
   "keywords": [
     "webcam",
@@ -45,6 +45,7 @@
     "audio",
     "recorder"
   ],
+  "prettier": "./prettier.config.js",
   "dependencies": {
     "@babel/core": "7.24.7",
     "add-eventlistener-with-options": "1.25.5",

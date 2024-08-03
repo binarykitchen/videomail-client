@@ -21,19 +21,19 @@
       }
 
       .bg1 {
-        background-image: url('/img/wait1.gif');
+        background-image: url("/img/wait1.gif");
       }
 
       .bg2 {
-        background-image: url('/img/wait2.gif');
+        background-image: url("/img/wait2.gif");
       }
 
       .bg3 {
-        background-image: url('/img/wait3.gif');
+        background-image: url("/img/wait3.gif");
       }
 
       .bg4 {
-        background-image: url('/img/wait4.gif');
+        background-image: url("/img/wait4.gif");
       }
     </style>
   </head>
@@ -50,20 +50,20 @@
           fps: 30,
           limitSeconds: 60,
           countdown: false,
-          width: 720
+          width: 720,
         },
         image: {
-          quality: 0.9
+          quality: 0.9,
         },
         notifier: {
           entertain: true,
-          entertainClass: 'bg',
+          entertainClass: "bg",
           entertainLimit: 4,
-          entertainInterval: 2e3
-        }
-      })
+          entertainInterval: 2e3,
+        },
+      });
 
-      videomailClient.show()
+      videomailClient.show();
     </script>
   </body>
 </html>

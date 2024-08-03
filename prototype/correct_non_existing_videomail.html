@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
 
     <style type="text/css">
-      input[type='email'],
-      input[type='text'],
+      input[type="email"],
+      input[type="text"],
       textarea,
       .buttons {
         margin: 1em 0;
@@ -48,30 +48,30 @@
       var videomailClient = new VideomailClient({
         verbose: true,
         video: {
-          width: 400
+          width: 400,
         },
         selectors: {
-          formId: 'email',
-          keyInputName: 'key'
-        }
-      })
+          formId: "email",
+          keyInputName: "key",
+        },
+      });
 
       videomailClient.replay(
         {
-          subject: 'i am a subject',
-          from: 'noreply@videomail.io',
-          to: 'to1@binarykitchen.com, to2@binarykitchen.com',
-          body: 'i am a body\nand a have a second line',
+          subject: "i am a subject",
+          from: "noreply@videomail.io",
+          to: "to1@binarykitchen.com, to2@binarykitchen.com",
+          body: "i am a body\nand a have a second line",
           width: 400,
           height: 300,
-          url: 'https://videomail.io/videomail/test-for-correcting-videomails-962278245395',
-          key: '11e5-d1e4-43f02b30-bf04-7b4befb9ed2d',
-          webm: 'https://videomail.io/videomail/test-for-correcting-videomails-962278245395/type/webm/',
+          url: "https://videomail.io/videomail/test-for-correcting-videomails-962278245395",
+          key: "11e5-d1e4-43f02b30-bf04-7b4befb9ed2d",
+          webm: "https://videomail.io/videomail/test-for-correcting-videomails-962278245395/type/webm/",
           poster:
-            'https://videomail.io/videomail/test-for-correcting-videomails-962278245395/poster/'
+            "https://videomail.io/videomail/test-for-correcting-videomails-962278245395/poster/",
         },
-        'videomail'
-      )
+        "videomail",
+      );
     </script>
   </body>
 </html>
