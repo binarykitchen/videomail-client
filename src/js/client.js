@@ -18,12 +18,12 @@ let browser;
 
 function adjustOptions(options = {}) {
   const localOptions = deepmerge(defaultOptions, options, {
-    arrayMerge: function (destination, source) {
+    arrayMerge(destination, source) {
       return source;
     },
   });
 
-  collectLogger = collectLogger || new CollectLogger(localOptions);
+  collectLogger ||= new CollectLogger(localOptions);
 
   localOptions.logger = collectLogger;
   localOptions.debug = localOptions.logger.debug;
@@ -44,7 +44,7 @@ function getBrowser(localOptions) {
 const VideomailClient = function (options) {
   const localOptions = adjustOptions(options);
   const container = new Container(localOptions);
-  const debug = localOptions.debug;
+  const { debug } = localOptions;
 
   let replay;
 
@@ -60,15 +60,17 @@ const VideomailClient = function (options) {
       debug(
         "Client: interactive(),",
         "previousState =",
-        previousState + ",",
+        `${previousState},`,
         "!building =",
-        !building + ",",
+        `${!building},`,
         "!isBuilt() =",
         !container.isBuilt(),
       );
 
-      // it can happen that it gets called twice, i.E. when an error is thrown
-      // in the middle of the build() fn
+      /*
+       * it can happen that it gets called twice, i.E. when an error is thrown
+       * in the middle of the build() fn
+       */
       if (!building && !container.isBuilt()) {
         building = true;
         container.build();
@@ -85,8 +87,10 @@ const VideomailClient = function (options) {
     }
   };
 
-  // automatically adds a <video> element inside the given parentElement and loads
-  // it with the videomail
+  /*
+   * automatically adds a <video> element inside the given parentElement and loads
+   * it with the videomail
+   */
   this.replay = function (videomail, parentElement) {
     function buildReplay() {
       if (typeof parentElement === "string") {
@@ -106,11 +110,9 @@ const VideomailClient = function (options) {
             "Unable to replay video without a container nor parent element.",
           );
         }
-      } else {
-        if (container.isOutsideElementOf(parentElement)) {
-          replay = new Replay(parentElement, localOptions);
-          replay.build();
-        }
+      } else if (container.isOutsideElementOf(parentElement)) {
+        replay = new Replay(parentElement, localOptions);
+        replay.build();
       }
 
       if (!replay) {

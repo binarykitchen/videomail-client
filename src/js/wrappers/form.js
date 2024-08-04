@@ -182,7 +182,7 @@ const Form = function (container, formElement, options) {
     }
 
     keyInput = formElement.querySelector(
-      'input[name="' + options.selectors.keyInputName + '"]',
+      `input[name="${options.selectors.keyInputName}"]`,
     );
 
     if (!keyInput) {
@@ -195,9 +195,11 @@ const Form = function (container, formElement, options) {
     }
 
     this.on(Events.PREVIEW, function (videomailKey) {
-      // beware that preview doesn't always come with a key, i.E.
-      // container.show() can emit PREVIEW without a key when a replay already exists
-      // (can happen when showing - hiding - showing videomail over again)
+      /*
+       * beware that preview doesn't always come with a key, i.E.
+       * container.show() can emit PREVIEW without a key when a replay already exists
+       * (can happen when showing - hiding - showing videomail over again)
+       */
 
       // only emit error if key is missing AND the input has no key (value) yet
       if (!videomailKey && !keyInput.value) {
@@ -208,8 +210,10 @@ const Form = function (container, formElement, options) {
       } else if (videomailKey) {
         keyInput.value = videomailKey;
       }
-      // else
-      // leave as it and use existing keyInput.value
+      /*
+       * else
+       * leave as it and use existing keyInput.value
+       */
     });
 
     // fixes https://github.com/binarykitchen/videomail-client/issues/91
@@ -218,9 +222,11 @@ const Form = function (container, formElement, options) {
     });
 
     this.on(Events.ERROR, function (err) {
-      // since https://github.com/binarykitchen/videomail-client/issues/60
-      // we hide areas to make it easier for the user to process an error
-      // (= less distractions)
+      /*
+       * since https://github.com/binarykitchen/videomail-client/issues/60
+       * we hide areas to make it easier for the user to process an error
+       * (= less distractions)
+       */
       if (err.hideForm && err.hideForm() && options.adjustFormOnBrowserError) {
         hideAll();
       } else if (
@@ -252,8 +258,10 @@ const Form = function (container, formElement, options) {
       e.preventDefault();
     }
 
-    // only submit when there is a container,
-    // otherwise do nothing and leave as it
+    /*
+     * only submit when there is a container,
+     * otherwise do nothing and leave as it
+     */
     if (container.hasElement()) {
       container.submitAll(
         getData(),

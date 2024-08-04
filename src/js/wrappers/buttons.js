@@ -10,7 +10,7 @@ const Buttons = function (container, options) {
   EventEmitter.call(this, options, "Buttons");
 
   const self = this;
-  const debug = options.debug;
+  const { debug } = options;
 
   let buttonsElement;
   let recordButton;
@@ -56,7 +56,7 @@ const Buttons = function (container, options) {
 
     elements &&
       elements.forEach(function (element) {
-        isShown = isShown && element && !hidden(element);
+        isShown &&= element && !hidden(element);
       });
 
     return isShown;
@@ -137,7 +137,7 @@ const Buttons = function (container, options) {
     }
 
     if (!radioButtonElement) {
-      radioButtonElement = h("input#" + options.id, {
+      radioButtonElement = h(`input#${options.id}`, {
         type: "radio",
         name: options.name,
         value: options.value,
@@ -190,15 +190,15 @@ const Buttons = function (container, options) {
     } else if (selector) {
       buttonElement = document.querySelector(selector);
     } else {
-      buttonElement = buttonsElement.querySelector("." + buttonClass);
+      buttonElement = buttonsElement.querySelector(`.${buttonClass}`);
     }
 
     if (!buttonElement) {
       if (options.selectors.buttonClass) {
-        buttonClass += "." + options.selectors.buttonClass;
+        buttonClass += `.${options.selectors.buttonClass}`;
       }
 
-      buttonElement = h("button." + buttonClass);
+      buttonElement = h(`button.${buttonClass}`);
       buttonElement = adjustButton(buttonElement, show, type, disabled);
 
       buttonElement.innerHTML = text;
@@ -237,8 +237,10 @@ const Buttons = function (container, options) {
         disable(submitButton);
       }
 
-      // no need to listen to the submit event when it's already listened
-      // within the form element class
+      /*
+       * no need to listen to the submit event when it's already listened
+       * within the form element class
+       */
       if (!container.hasForm() && submitButton) {
         replaceClickHandler(submitButton, submit);
       }
@@ -269,8 +271,10 @@ const Buttons = function (container, options) {
       );
     }
 
-    // show stop only when pause is enabled - looks better that way otherwise button
-    // move left and right between record and stop (preview)
+    /*
+     * show stop only when pause is enabled - looks better that way otherwise button
+     * move left and right between record and stop (preview)
+     */
     previewButton = makeButton(
       options.selectors.previewButtonClass,
       options.text.buttons.preview,
@@ -292,7 +296,7 @@ const Buttons = function (container, options) {
         value: "off",
         label: options.text.audioOff,
         checked: !options.isAudioEnabled(),
-        changeHandler: function () {
+        changeHandler() {
           container.disableAudio();
         },
       });
@@ -303,7 +307,7 @@ const Buttons = function (container, options) {
         value: "on",
         label: options.text.audioOn,
         checked: options.isAudioEnabled(),
-        changeHandler: function () {
+        changeHandler() {
           container.enableAudio();
         },
       });
@@ -409,8 +413,10 @@ const Buttons = function (container, options) {
   }
 
   function onRecording(framesCount) {
-    // it is possible to hide while recording, hence
-    // check framesCount first (coming from recorder)
+    /*
+     * it is possible to hide while recording, hence
+     * check framesCount first (coming from recorder)
+     */
     if (framesCount > 1) {
       onFirstFrameSent();
     } else {
@@ -581,8 +587,10 @@ const Buttons = function (container, options) {
         }
       })
       .on(Events.ERROR, function (err) {
-        // since https://github.com/binarykitchen/videomail-client/issues/60
-        // we hide areas to make it easier for the user
+        /*
+         * since https://github.com/binarykitchen/videomail-client/issues/60
+         * we hide areas to make it easier for the user
+         */
         if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
           self.hide();
         }
@@ -616,10 +624,10 @@ const Buttons = function (container, options) {
   };
 
   this.build = function () {
-    buttonsElement = container.querySelector("." + options.selectors.buttonsClass);
+    buttonsElement = container.querySelector(`.${options.selectors.buttonsClass}`);
 
     if (!buttonsElement) {
-      buttonsElement = h("div." + options.selectors.buttonsClass);
+      buttonsElement = h(`div.${options.selectors.buttonsClass}`);
 
       container.appendChild(buttonsElement);
     }

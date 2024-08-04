@@ -1,5 +1,7 @@
-// todo write this in ES6 once i have figured out how to
-// transpile it with babelify itself
+/*
+ * todo write this in ES6 once i have figured out how to
+ * transpile it with babelify itself
+ */
 
 const path = require("path");
 const fs = require("fs");
@@ -53,10 +55,12 @@ function stylus() {
           errors: true,
         }),
       )
-      // always minify otherwise it gets broken with line-breaks
-      // when surrounded with `'s when injected
-      // todo: fix this, so that it also works when not minified, this
-      // for faster builds during development
+      /*
+       * always minify otherwise it gets broken with line-breaks
+       * when surrounded with `'s when injected
+       * todo: fix this, so that it also works when not minified, this
+       * for faster builds during development
+       */
       .pipe(plugins.postcss(postCssPlugins))
       .pipe(plugins.rename({ suffix: ".min", extname: ".css.js" }))
       .pipe(plugins.injectString.wrap("module.exports='", "'"))
@@ -84,9 +88,9 @@ function bundle(done, watching) {
   const entry = path.join(__dirname, packageJson.module);
   const bundler = browserify({
     entries: [entry],
-    cache: cache,
+    cache,
     standalone: "VideomailClient",
-    packageCache: packageCache,
+    packageCache,
     plugin: watching ? [watchify] : null,
     debug: !options.minify, // enables inline source maps
   })
@@ -139,12 +143,14 @@ function middleware() {
   router.post("/contact", function (req, res) {
     log.info("Videomail data received (with meta data):", req.body);
 
-    // At this stage, a backend could store the videomail_key in req.body
-    // into a database for replay functionality
+    /*
+     * At this stage, a backend could store the videomail_key in req.body
+     * into a database for replay functionality
+     */
 
     // Just an example to see that the backend can do anything with the data
     res.json({
-      status: "Inserted on " + new Date().toISOString(),
+      status: `Inserted on ${new Date().toISOString()}`,
     });
   });
 
@@ -156,7 +162,7 @@ const connectOptions = {
   port: 8080,
   debug: true,
   livereload: false, // disabled since it's broken unfortunately, see https://github.com/intesso/connect-livereload/issues/79
-  middleware: middleware,
+  middleware,
 };
 
 function connectHttp(done) {
@@ -167,15 +173,14 @@ function connectHttp(done) {
 function connectHttps(done) {
   const SSL_CERTS_PATH = path.join(__dirname, "env", "dev");
 
-  plugins.connect.server(
-    Object.assign({}, connectOptions, {
-      port: 8443,
-      https: {
-        key: fs.readFileSync(path.join(SSL_CERTS_PATH, "key.pem")),
-        cert: fs.readFileSync(path.join(SSL_CERTS_PATH, "cert.pem")),
-      },
-    }),
-  );
+  plugins.connect.server({
+    ...connectOptions,
+    port: 8443,
+    https: {
+      key: fs.readFileSync(path.join(SSL_CERTS_PATH, "key.pem")),
+      cert: fs.readFileSync(path.join(SSL_CERTS_PATH, "cert.pem")),
+    },
+  });
 
   done();
 }
@@ -212,9 +217,11 @@ exports.test = function (done) {
     .pipe(process.stdout);
 };
 
-// get inspired by
-// https://www.npmjs.com/package/gulp-tag-version and
-// https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
+/*
+ * get inspired by
+ * https://www.npmjs.com/package/gulp-tag-version and
+ * https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
+ */
 exports.bumpVersion = function () {
   const bumpOptions = {};
 

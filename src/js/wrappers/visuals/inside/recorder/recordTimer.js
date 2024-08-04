@@ -11,7 +11,7 @@ export default function (visuals, recordNote, options) {
   let countdown;
 
   function pad(n) {
-    return n < 10 ? "0" + n : n;
+    return n < 10 ? `0${n}` : n;
   }
 
   function thresholdReached(secs, threshold) {
@@ -66,16 +66,16 @@ export default function (visuals, recordNote, options) {
         recordNote.setNear();
         setNear();
 
-        options.debug("End is near, " + countdown + " seconds to go");
+        options.debug(`End is near, ${countdown} seconds to go`);
       } else if (endIsNigh(remainingSeconds)) {
         recordNote.setNigh();
         setNigh();
 
-        options.debug("End is nigh, " + countdown + " seconds to go");
+        options.debug(`End is nigh, ${countdown} seconds to go`);
       }
     }
 
-    recordTimerElement.innerHTML = mins + ":" + pad(secs);
+    recordTimerElement.innerHTML = `${mins}:${pad(secs)}`;
   }
 
   function hide() {
@@ -122,9 +122,7 @@ export default function (visuals, recordNote, options) {
   this.stop = function () {
     if (!isStopped() && started) {
       options.debug(
-        "Stopping record timer. Was recording for about ~" +
-          getSecondsRecorded() +
-          " seconds.",
+        `Stopping record timer. Was recording for about ~${getSecondsRecorded()} seconds.`,
       );
 
       hide();

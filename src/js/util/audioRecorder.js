@@ -5,8 +5,10 @@ import isPOT from "is-power-of-two";
 
 const CHANNELS = 1;
 
-// for inspiration see
-// https://github.com/saebekassebil/microphone-stream
+/*
+ * for inspiration see
+ * https://github.com/saebekassebil/microphone-stream
+ */
 
 // todo code needs rewrite
 
@@ -22,7 +24,7 @@ export default function (userMedia, options) {
   }
 
   function hasAudioContext() {
-    return !!getAudioContextClass() && !!getAudioContext();
+    return Boolean(getAudioContextClass()) && Boolean(getAudioContext());
   }
 
   function getAudioContext() {
@@ -40,8 +42,10 @@ export default function (userMedia, options) {
       return;
     }
 
-    // Returns a Float32Array containing the PCM data associated with the channel,
-    // defined by the channel parameter (with 0 representing the first channel)
+    /*
+     * Returns a Float32Array containing the PCM data associated with the channel,
+     * defined by the channel parameter (with 0 representing the first channel)
+     */
     const float32Array = e.inputBuffer.getChannelData(0);
 
     cb(new AudioSample(float32Array));
@@ -59,7 +63,7 @@ export default function (userMedia, options) {
       throw VideomailError.create("Webcam has no audio", exc.toString(), options);
     }
 
-    let bufferSize = options.audio.bufferSize;
+    let { bufferSize } = options.audio;
 
     // see https://github.com/binarykitchen/videomail-client/issues/184
     if (bufferSize === "auto") {
@@ -80,8 +84,10 @@ export default function (userMedia, options) {
 
     volume.gain.value = options.audio.volume;
 
-    // Create a ScriptProcessorNode with the given bufferSize and
-    // a single input and output channel
+    /*
+     * Create a ScriptProcessorNode with the given bufferSize and
+     * a single input and output channel
+     */
     scriptProcessor = getAudioContext().createScriptProcessor(
       bufferSize,
       CHANNELS,

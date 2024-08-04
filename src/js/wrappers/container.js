@@ -29,7 +29,7 @@ const Container = function (options) {
   const resource = new Resource(options);
   const htmlElement =
     document && document.querySelector && document.querySelector("html");
-  const debug = options.debug;
+  const { debug } = options;
 
   let hasError = false;
   let submitted = false;
@@ -145,7 +145,7 @@ const Container = function (options) {
     if (options.enableSpace) {
       if (!options.playerOnly) {
         window.addEventListener("keypress", function (e) {
-          const tagName = e.target.tagName;
+          const { tagName } = e.target;
           const isEditable =
             e.target.isContentEditable ||
             e.target.contentEditable === "true" ||
@@ -169,8 +169,10 @@ const Container = function (options) {
       }
     }
 
-    // better to keep the one and only error listeners
-    // at one spot, here, because unload() will do a removeAllListeners()
+    /*
+     * better to keep the one and only error listeners
+     * at one spot, here, because unload() will do a removeAllListeners()
+     */
     self.on(Events.ERROR, function (err) {
       processError(err);
       unloadChildren(err);
@@ -197,8 +199,10 @@ const Container = function (options) {
     }
   }
 
-  // this will just set the width but not the height because
-  // it can be a form with more inputs elements
+  /*
+   * this will just set the width but not the height because
+   * it can be a form with more inputs elements
+   */
   function correctDimensions() {
     if (options.video.stretch) {
       removeDimensions();
@@ -208,7 +212,7 @@ const Container = function (options) {
       if (width < 1) {
         throw VideomailError.create("Recorder width cannot be less than 1!", options);
       } else {
-        containerElement.style.width = width + "px";
+        containerElement.style.width = `${width}px`;
       }
     }
   }
@@ -238,7 +242,7 @@ const Container = function (options) {
 
       if (navigator.connection) {
         videomailFormData.connection = {
-          downlink: navigator.connection.downlink + " Mbit/s",
+          downlink: `${navigator.connection.downlink} Mbit/s`,
           effectiveType: navigator.connection.effectiveType,
           rtt: navigator.connection.rtt,
           type: navigator.connection.type,
@@ -252,8 +256,10 @@ const Container = function (options) {
   }
 
   function submitForm(formData, videomailResponse, url, cb) {
-    // for now, accept POSTs only which have an URL unlike null and
-    // treat all other submissions as direct submissions
+    /*
+     * for now, accept POSTs only which have an URL unlike null and
+     * treat all other submissions as direct submissions
+     */
 
     if (!url || url === "") {
       // figure out URL automatically then
@@ -264,8 +270,10 @@ const Container = function (options) {
     if (videomailResponse) {
       formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias;
 
-      // this in case if user wants all videomail metadata to be posted
-      // altogether with the remaining form
+      /*
+       * this in case if user wants all videomail metadata to be posted
+       * altogether with the remaining form
+       */
       if (options.submitWithVideomail) {
         formData.videomail = videomailResponse.videomail;
       }
@@ -295,8 +303,10 @@ const Container = function (options) {
         // server replied with HTML contents - display these
         document.body.innerHTML = formResponse.text;
 
-        // todo: figure out how to fire dom's onload event again
-        // todo: or how to run all the scripts over again
+        /*
+         * todo: figure out how to fire dom's onload event again
+         * todo: or how to run all the scripts over again
+         */
       }
     }
   }
@@ -357,15 +367,17 @@ const Container = function (options) {
   };
 
   this.hasElement = function () {
-    return !!containerElement;
+    return Boolean(containerElement);
   };
 
   this.build = function () {
     try {
       containerElement = document.getElementById(options.selectors.containerId);
 
-      // only build when a container element hast been found, otherwise
-      // be silent and do nothing
+      /*
+       * only build when a container element hast been found, otherwise
+       * be silent and do nothing
+       */
       if (containerElement) {
         options.insertCss && prependDefaultCss();
 
@@ -387,8 +399,10 @@ const Container = function (options) {
           debug("Container: building failed due to an error.");
         }
       } else {
-        // commented out since it does too much noise on videomail's view page which is fine
-        // debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
+        /*
+         * commented out since it does too much noise on videomail's view page which is fine
+         * debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
+         */
       }
     } catch (exc) {
       if (visuals.isNotifierBuilt()) {
@@ -449,8 +463,10 @@ const Container = function (options) {
           buttons.adjustButtonsForPause();
         }
 
-        // since https://github.com/binarykitchen/videomail-client/issues/60
-        // we hide areas to make it easier for the user
+        /*
+         * since https://github.com/binarykitchen/videomail-client/issues/60
+         * we hide areas to make it easier for the user
+         */
         buttons.show();
 
         if (self.isReplayShown()) {
@@ -485,9 +501,11 @@ const Container = function (options) {
       form.show();
       visuals.back(params, function () {
         if (params && params.keepHidden) {
-          // just enable form, do nothing else.
-          // see example contact_form.html when you submit without videomail
-          // and go back
+          /*
+           * just enable form, do nothing else.
+           * see example contact_form.html when you submit without videomail
+           * and go back
+           */
           self.enableForm();
         } else {
           self.show(params);
@@ -567,20 +585,19 @@ const Container = function (options) {
           const invalidInput = form.getInvalidElement();
 
           if (invalidInput) {
-            whyInvalid =
-              "Form input named " +
-              invalidInput.name +
-              ' is invalid. It has the value: "' +
-              invalidInput.value +
-              '"';
+            whyInvalid = `Form input named ${
+              invalidInput.name
+            } is invalid. It has the value: "${invalidInput.value}"`;
           } else {
             whyInvalid = "Form input(s) are invalid";
           }
         }
 
         if (valid) {
-          // If CC and/or BCC exist, validate one more time to ensure at least
-          // one recipient is given
+          /*
+           * If CC and/or BCC exist, validate one more time to ensure at least
+           * one recipient is given
+           */
           const recipients = form.getRecipients();
 
           const toIsConfigured = "to" in recipients;
@@ -648,7 +665,7 @@ const Container = function (options) {
   };
 
   this.hasForm = function () {
-    return !!form;
+    return Boolean(form);
   };
 
   this.isReady = function () {
@@ -665,7 +682,7 @@ const Container = function (options) {
 
   this.submitAll = function (formData, method, url) {
     const post = isPost(method);
-    const hasVideomailKey = !!formData[options.selectors.keyInputName];
+    const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
 
     function startSubmission() {
       self.beginWaiting();
@@ -687,8 +704,10 @@ const Container = function (options) {
       }
     };
 
-    // !hasVideomailKey makes it possible to submit form when videomail itself
-    // is not optional.
+    /*
+     * !hasVideomailKey makes it possible to submit form when videomail itself
+     * is not optional.
+     */
     if (!hasVideomailKey) {
       if (options.enableAutoSubmission) {
         startSubmission();
@@ -696,10 +715,12 @@ const Container = function (options) {
           finalizeSubmissions(err2, method, null, null, formResponse);
         });
       }
-      // ... and when the enableAutoSubmission option is false,
-      // then that can mean, leave it to the framework to process with the form
-      // validation/handling/submission itself. for example the ninja form
-      // will want to highlight which one input are wrong.
+      /*
+       * ... and when the enableAutoSubmission option is false,
+       * then that can mean, leave it to the framework to process with the form
+       * validation/handling/submission itself. for example the ninja form
+       * will want to highlight which one input are wrong.
+       */
     } else {
       startSubmission();
       submitVideomail(formData, method, submitVideomailCallback);

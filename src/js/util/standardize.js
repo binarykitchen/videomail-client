@@ -12,8 +12,10 @@ export default function (window = {}, navigator = {}) {
 
   requestFrame("native");
 
-  // avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
-  // see https://github.com/binarykitchen/videomail-client/issues/79
+  /*
+   * avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
+   * see https://github.com/binarykitchen/videomail-client/issues/79
+   */
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     // do not shim
   } else {
@@ -57,7 +59,7 @@ export default function (window = {}, navigator = {}) {
   }
 
   let method;
-  let length = methods.length;
+  let { length } = methods;
 
   while (length--) {
     method = methods[length];

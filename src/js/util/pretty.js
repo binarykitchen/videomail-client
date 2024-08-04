@@ -1,7 +1,7 @@
 import stringify from "safe-json-stringify";
 
 const DASH = "- ";
-const SEPARATOR = "<br/>" + DASH;
+const SEPARATOR = `<br/>${DASH}`;
 
 function arrayToString(array) {
   if (array && array.length > 0) {
@@ -35,8 +35,10 @@ function objectToString(object, options) {
       }
 
       if (!exclude && object[name]) {
-        // this to cover this problem:
-        // https://github.com/binarykitchen/videomail-client/issues/157
+        /*
+         * this to cover this problem:
+         * https://github.com/binarykitchen/videomail-client/issues/157
+         */
         lines.push(stringify(object[name]));
       }
     });

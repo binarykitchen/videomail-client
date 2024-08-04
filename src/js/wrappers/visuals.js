@@ -22,7 +22,7 @@ const Visuals = function (container, options) {
 
   const notifier = new Notifier(this, options);
 
-  const debug = options.debug;
+  const { debug } = options;
 
   let visualsElement;
   let built;
@@ -68,9 +68,11 @@ const Visuals = function (container, options) {
         })
         .on(Events.BLOCKING, function (blockingOptions) {
           if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
-            // do nothing, user still can enter form inputs
-            // can be useful when you are on i.E. seeflow's contact page and
-            // still want to tick off the webcam option
+            /*
+             * do nothing, user still can enter form inputs
+             * can be useful when you are on i.E. seeflow's contact page and
+             * still want to tick off the webcam option
+             */
           } else {
             container.disableForm(true);
           }
@@ -93,8 +95,8 @@ const Visuals = function (container, options) {
     if (options.video.stretch) {
       removeDimensions();
     } else {
-      visualsElement.style.width = self.getRecorderWidth(true) + "px";
-      visualsElement.style.height = self.getRecorderHeight(true) + "px";
+      visualsElement.style.width = `${self.getRecorderWidth(true)}px`;
+      visualsElement.style.height = `${self.getRecorderHeight(true)}px`;
     }
   }
 
@@ -121,17 +123,19 @@ const Visuals = function (container, options) {
   };
 
   this.build = function () {
-    visualsElement = container.querySelector("." + options.selectors.visualsClass);
+    visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
     if (!visualsElement) {
-      visualsElement = h("div." + options.selectors.visualsClass);
+      visualsElement = h(`div.${options.selectors.visualsClass}`);
 
       const buttonsElement = container.querySelector(
-        "." + options.selectors.buttonsClass,
+        `.${options.selectors.buttonsClass}`,
       );
 
-      // make sure it's placed before the buttons, but only if it's a child
-      // element of the container = inside the container
+      /*
+       * make sure it's placed before the buttons, but only if it's a child
+       * element of the container = inside the container
+       */
       if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
         container.insertBefore(visualsElement, buttonsElement);
       } else {
@@ -139,8 +143,10 @@ const Visuals = function (container, options) {
       }
     }
 
-    // do not hide visuals element so that apps can give it a predefined
-    // width or height through css but hide all children
+    /*
+     * do not hide visuals element so that apps can give it a predefined
+     * width or height through css but hide all children
+     */
 
     visualsElement.classList.add("visuals");
 

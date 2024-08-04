@@ -16,19 +16,19 @@ export default function (localOptions = {}) {
       stack.pop();
     }
 
-    stack.push("[" + level + "] " + line);
+    stack.push(`[${level}] ${line}`);
 
     return line;
   }
 
   function addContainerId(firstArgument) {
-    return (
-      "#" + containerId + " [" + new Date().toLocaleTimeString() + "] > " + firstArgument
-    );
+    return `#${containerId} [${new Date().toLocaleTimeString()}] > ${firstArgument}`;
   }
 
-  // workaround: since we cannot overwrite console.log without having the correct file and line number
-  // we'll use groupCollapsed() and trace() instead to get these.
+  /*
+   * workaround: since we cannot overwrite console.log without having the correct file and line number
+   * we'll use groupCollapsed() and trace() instead to get these.
+   */
   this.debug = function () {
     // always add it for better client error reports
     const args = [].slice.call(arguments, 0);

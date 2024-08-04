@@ -6,7 +6,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
   t.test("without arguments", function (tt) {
     tt.plan(7);
 
-    const browser = new Browser({ debug: function () {} });
+    const browser = new Browser({ debug() {} });
 
     let err = browser.checkBufferTypes();
     tt.equal(err, undefined);
@@ -32,7 +32,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     const options = {
       fakeUaString:
         "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:23.0) Gecko/20131011 Firefox/23.0",
-      debug: function () {},
+      debug() {},
     };
 
     const browser = new Browser(options);
@@ -56,7 +56,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     const options = {
       fakeUaString:
         "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.8 (KHTML, like Gecko) Chrome/17.0.940.0 Safari/535.8",
-      debug: function () {},
+      debug() {},
     };
 
     const browser = new Browser(options);
@@ -118,7 +118,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
       fakeUaString:
         "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_8; en-us) AppleWebKit/532.0+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9",
       fakeHttps: true,
-      debug: function () {},
+      debug() {},
     };
 
     const browser = new Browser(options);

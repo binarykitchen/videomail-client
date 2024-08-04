@@ -14,7 +14,7 @@ const RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, "RecorderInsides");
 
   const self = this;
-  const debug = options.debug;
+  const { debug } = options;
 
   const recordNote = new RecordNote(visuals);
   const recordTimer = new RecordTimer(visuals, recordNote, options);

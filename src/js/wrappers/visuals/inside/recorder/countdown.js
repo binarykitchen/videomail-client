@@ -67,7 +67,7 @@ export default function (visuals, options) {
   };
 
   this.isCountingDown = function () {
-    return !!intervalId;
+    return Boolean(intervalId);
   };
 
   this.unload = function () {

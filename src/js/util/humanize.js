@@ -4,13 +4,13 @@ import humanizeDuration from "humanize-duration";
 // todo get rid of this class and use those imports directly
 
 export default {
-  filesize: function (bytes, round) {
+  filesize(bytes, round) {
     return filesize(bytes, {
-      round: round,
+      round,
     });
   },
 
-  toTime: function (t) {
+  toTime(t) {
     return humanizeDuration(t);
   },
 };

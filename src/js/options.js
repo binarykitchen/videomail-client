@@ -22,11 +22,15 @@ export default {
   disableSubmit: false, // set this to true if you do not want to submit videos,
   // but just want to record and replay these temporarily
   enableAutoValidation: true, // automatically validates all form inputs if any exist and
-  // does not /enable disable submit button after recording
-  // when something else seems invalid.
+  /*
+   * does not /enable disable submit button after recording
+   * when something else seems invalid.
+   */
   enableAutoSubmission: true, // automatically submits the form where the videomail-client
-  // appears upon press of submit button. disable it when
-  // you want a framework to deal with the form submission itself.
+  /*
+   * appears upon press of submit button. disable it when
+   * you want a framework to deal with the form submission itself.
+   */
 
   enctype: "application/json", // enctype for the form submission. currently implemented are:
   // 'application/json' and 'application/x-www-form-urlencoded'
@@ -71,9 +75,11 @@ export default {
     volume: 0.2, // must be between 0 .. 1 but 0.20 is recommended to avoid
     // distorting at the higher volume peaks
     bufferSize: "auto", // decides how often the audio is being sampled,
-    // can be 'auto' or an integer being a power of two like 512 or 2048
-    // the higher the less traffic, but harder to adjust with rubberband
-    // to match with the video length on server side during encoding
+    /*
+     * can be 'auto' or an integer being a power of two like 512 or 2048
+     * the higher the less traffic, but harder to adjust with rubberband
+     * to match with the video length on server side during encoding
+     */
   },
 
   video: {
@@ -81,8 +87,10 @@ export default {
     limitSeconds: 30, // recording automatically stops after that limit
     countdown: 3, // set it to 0 or false to disable it
 
-    // it is recommended to set one dimension only and leave the other one to auto
-    // because each webcam has a different aspect ratio
+    /*
+     * it is recommended to set one dimension only and leave the other one to auto
+     * because each webcam has a different aspect ratio
+     */
 
     width: "auto", // or use an integer for exact pixels
     height: "auto", // or use an integer for exact pixels
@@ -131,8 +139,10 @@ export default {
   loadUserMediaOnRecord: false, // when true, user media is loaded only when record button is pressed
 
   callbacks: {
-    // a custom callback to tweak form data before posting to server
-    // this is for advanced use only and shouldn't be used if possible
+    /*
+     * a custom callback to tweak form data before posting to server
+     * this is for advanced use only and shouldn't be used if possible
+     */
     adjustFormDataBeforePosting: null,
   },
 
@@ -145,8 +155,10 @@ export default {
     body: null, // define default body content
   },
 
-  // a special flag to indicate that everything to be initialised
-  // serves only for playing existing videomails with the replay function
+  /*
+   * a special flag to indicate that everything to be initialised
+   * serves only for playing existing videomails with the replay function
+   */
   playerOnly: false,
 
   // show errors inside the container?
@@ -155,12 +167,14 @@ export default {
   // true = all form inputs get disabled and disappear when browser can't record
   adjustFormOnBrowserError: false,
 
-  // when true, any errors will be sent to the videomail server for analysis
-  // ps: can be a function too returning a boolean
+  /*
+   * when true, any errors will be sent to the videomail server for analysis
+   * ps: can be a function too returning a boolean
+   */
   reportErrors: false,
 
   // just for testing purposes to simulate browser agent handling
   fakeUaString: null,
 
-  version: version,
+  version,
 };

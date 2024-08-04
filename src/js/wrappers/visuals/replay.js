@@ -14,7 +14,7 @@ const Replay = function (parentElement, options) {
 
   const self = this;
   const browser = new Browser(options);
-  const debug = options.debug;
+  const { debug } = options;
 
   let built;
   let replayElement;
@@ -23,7 +23,7 @@ const Replay = function (parentElement, options) {
   function buildElement() {
     debug("Replay: buildElement()");
 
-    replayElement = h("video." + options.selectors.replayClass);
+    replayElement = h(`video.${options.selectors.replayClass}`);
 
     if (!replayElement.setAttribute) {
       throw VideomailError.create("Please upgrade browser", options);
@@ -40,7 +40,7 @@ const Replay = function (parentElement, options) {
     let attributeContainer;
 
     Object.keys(newVideomail).forEach(function (attribute) {
-      attributeContainer = parentElement.querySelector("." + attribute);
+      attributeContainer = parentElement.querySelector(`.${attribute}`);
 
       if (attributeContainer) {
         attributeContainer.innerHTML = newVideomail[attribute];
@@ -49,7 +49,7 @@ const Replay = function (parentElement, options) {
   }
 
   function correctDimensions(options) {
-    let width, height;
+    let height, width;
 
     if (videomail && videomail.playerWidth) {
       width = videomail.playerWidth;
@@ -64,13 +64,13 @@ const Replay = function (parentElement, options) {
     }
 
     if (width > 0) {
-      replayElement.style.width = width + "px";
+      replayElement.style.width = `${width}px`;
     } else {
       replayElement.style.width = "auto";
     }
 
     if (height > 0) {
-      replayElement.style.height = height + "px";
+      replayElement.style.height = `${height}px`;
     } else {
       replayElement.style.height = "auto";
     }
@@ -123,15 +123,19 @@ const Replay = function (parentElement, options) {
     }
 
     if (hasAudio) {
-      // https://github.com/binarykitchen/videomail-client/issues/115
-      // do not set mute to false as this will mess up. just do not mention this attribute at all
+      /*
+       * https://github.com/binarykitchen/videomail-client/issues/115
+       * do not set mute to false as this will mess up. just do not mention this attribute at all
+       */
       replayElement.setAttribute("volume", 1);
     } else if (!options.isAudioEnabled()) {
       replayElement.setAttribute("muted", true);
     }
 
-    // this must be called after setting the sources and when becoming visible
-    // see https://github.com/bfred-it/iphone-inline-video/issues/16
+    /*
+     * this must be called after setting the sources and when becoming visible
+     * see https://github.com/bfred-it/iphone-inline-video/issues/16
+     */
     enableInlineVideo &&
       enableInlineVideo(replayElement, {
         iPad: true,
@@ -150,7 +154,7 @@ const Replay = function (parentElement, options) {
   this.build = function () {
     debug("Replay: build()");
 
-    replayElement = parentElement.querySelector("video." + options.selectors.replayClass);
+    replayElement = parentElement.querySelector(`video.${options.selectors.replayClass}`);
 
     if (!replayElement) {
       buildElement();
@@ -173,14 +177,18 @@ const Replay = function (parentElement, options) {
         });
       }
 
-      // makes use of passive option automatically for better performance
-      // https://www.npmjs.com/package/add-eventlistener-with-options
+      /*
+       * makes use of passive option automatically for better performance
+       * https://www.npmjs.com/package/add-eventlistener-with-options
+       */
       addEventListenerWithOptions(replayElement, "touchstart", function (e) {
         try {
           e && e.preventDefault();
         } catch (exc) {
-          // ignore errors like
-          // Unable to preventDefault inside passive event listener invocation.
+          /*
+           * ignore errors like
+           * Unable to preventDefault inside passive event listener invocation.
+           */
         }
 
         if (this.paused) {
@@ -213,7 +221,7 @@ const Replay = function (parentElement, options) {
   this.getVideoSource = function (type) {
     const sources = replayElement.getElementsByTagName("source");
     const l = sources && sources.length;
-    const videoType = "video/" + type;
+    const videoType = `video/${type}`;
 
     let source;
 
@@ -234,31 +242,31 @@ const Replay = function (parentElement, options) {
     let source = self.getVideoSource(type);
 
     if (src && bustCache) {
-      src += "?" + Date.now();
+      src += `?${Date.now()}`;
     }
 
     if (!source) {
       if (src) {
-        const fps = options.video.fps;
+        const { fps } = options.video;
 
         // Ensure it's greater than the frame duration itself
         const t = 2 * (1 / fps);
 
         source = h("source", {
-          // Ensures HTML video thumbnail turns up on iOS, see
-          // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
-          src: src + "#t=" + t,
-          type: "video/" + type,
+          /*
+           * Ensures HTML video thumbnail turns up on iOS, see
+           * https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
+           */
+          src: `${src}#t=${t}`,
+          type: `video/${type}`,
         });
 
         replayElement.appendChild(source);
       }
+    } else if (src) {
+      source.setAttribute("src", src);
     } else {
-      if (src) {
-        source.setAttribute("src", src);
-      } else {
-        replayElement.removeChild(source);
-      }
+      replayElement.removeChild(source);
     }
   }
 
@@ -275,8 +283,10 @@ const Replay = function (parentElement, options) {
   };
 
   function pause(cb) {
-    // avoids race condition, inspired by
-    // http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
+    /*
+     * avoids race condition, inspired by
+     * http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
+     */
     setTimeout(() => {
       try {
         replayElement.pause();
@@ -296,8 +306,10 @@ const Replay = function (parentElement, options) {
       try {
         p = replayElement.play();
       } catch (exc) {
-        // this in the hope to catch InvalidStateError, see
-        // https://github.com/binarykitchen/videomail-client/issues/149
+        /*
+         * this in the hope to catch InvalidStateError, see
+         * https://github.com/binarykitchen/videomail-client/issues/149
+         */
         options.logger.warn("Caught replay exception:", exc);
       }
 

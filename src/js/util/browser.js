@@ -6,7 +6,7 @@ import VideomailError from "./videomailError";
 const FALLBACK_VIDEO_TYPE = "mp4";
 
 const Browser = function (options) {
-  options = options || {};
+  options ||= {};
 
   const firefoxDownload = "http://www.mozilla.org/firefox/update/";
   const edgeDownload = "https://www.microsoft.com/en-us/download/details.aspx?id=48126";
@@ -66,10 +66,8 @@ const Browser = function (options) {
           "Firefox on iOS is not ready for cameras yet. Hopefully in near future ...";
       } else {
         warning =
-          'Probably you need to <a href="' +
-          firefoxDownload +
-          '" target="_blank">' +
-          "upgrade Firefox</a> to fix this.";
+          `Probably you need to <a href="${firefoxDownload}" target="_blank">` +
+          `upgrade Firefox</a> to fix this.`;
       }
     } else if (isChrome) {
       if (isIOS) {
@@ -77,35 +75,25 @@ const Browser = function (options) {
           "Use Safari instead. Apple doesn't give Chrome access to iPhone cameras (booo).";
       } else {
         warning =
-          'Probably you need to <a href="' +
-          chromeDownload +
-          '" target="_blank">' +
-          "upgrade Chrome</a> to fix this.";
+          `Probably you need to <a href="${chromeDownload}" target="_blank">` +
+          `upgrade Chrome</a> to fix this.`;
       }
     } else if (isChromium) {
       warning =
-        'Probably you need to <a href="' +
-        chromiumDownload +
-        '" target="_blank">' +
-        "upgrade Chromium</a> to fix this.";
+        `Probably you need to <a href="${chromiumDownload}" target="_blank">` +
+        `upgrade Chromium</a> to fix this.`;
     } else if (isIE) {
       warning =
-        "Instead of Internet Explorer you need to upgrade to" +
-        ' <a href="' +
-        edgeDownload +
-        '" target="_blank">Edge</a>.';
+        `Instead of Internet Explorer you need to upgrade to` +
+        ` <a href="${edgeDownload}" target="_blank">Edge</a>.`;
     } else if (isOkSafari) {
       warning =
         "Probably you need to shut down Safari and restart it, this for correct webcam access.";
     } else if (isSafari) {
       warning =
-        "Safari below version 11 has no webcam support.<br/>Better upgrade Safari or pick" +
-        ' <a href="' +
-        chromeDownload +
-        '" target="_blank">Chrome</a>,' +
-        ' <a href="' +
-        firefoxDownload +
-        '" target="_blank">Firefox</a> or Android.';
+        `Safari below version 11 has no webcam support.<br/>Better upgrade Safari or pick` +
+        ` <a href="${chromeDownload}" target="_blank">Chrome</a>,` +
+        ` <a href="${firefoxDownload}" target="_blank">Firefox</a> or Android.`;
     }
 
     return warning;
@@ -125,32 +113,18 @@ const Browser = function (options) {
     if (!warning) {
       if (self.isChromeBased() || self.isFirefox() || isSafari) {
         warning = "For the webcam feature, your browser needs an upgrade.";
+      } else if (isFacebook) {
+        warning =
+          `Hence we recommend you to use a real browser like ` +
+          `<a href="${chromeDownload}" target="_blank">Chrome</a>, ` +
+          `<a href="${firefoxDownload}" target="_blank">Firefox</a> or ` +
+          `<a href="${edgeDownload}" target="_blank">Edge</a>.`;
       } else {
-        if (isFacebook) {
-          warning =
-            "Hence we recommend you to use a real browser like " +
-            '<a href="' +
-            chromeDownload +
-            '" target="_blank">Chrome</a>, ' +
-            '<a href="' +
-            firefoxDownload +
-            '" target="_blank">Firefox</a> or ' +
-            '<a href="' +
-            edgeDownload +
-            '" target="_blank">Edge</a>.';
-        } else {
-          warning =
-            "Hence we recommend you to use either " +
-            '<a href="' +
-            chromeDownload +
-            '" target="_blank">Chrome</a>, ' +
-            '<a href="' +
-            firefoxDownload +
-            '" target="_blank">Firefox</a>, ' +
-            '<a href="' +
-            edgeDownload +
-            '" target="_blank">Edge</a> or Android.';
-        }
+        warning =
+          `Hence we recommend you to use either ` +
+          `<a href="${chromeDownload}" target="_blank">Chrome</a>, ` +
+          `<a href="${firefoxDownload}" target="_blank">Firefox</a>, ` +
+          `<a href="${edgeDownload}" target="_blank">Edge</a> or Android.`;
       }
     }
 
@@ -204,32 +178,32 @@ const Browser = function (options) {
         } else {
           message = "Sorry, your browser is unable to use webcams";
         }
-      } else {
-        if (isMobile) {
-          if (isFacebook) {
-            message = "Sorry, the Facebook app cannot record from your mobile camera";
-          } else {
-            message = "Sorry, your browser cannot record from your mobile camera";
-          }
+      } else if (isMobile) {
+        if (isFacebook) {
+          message = "Sorry, the Facebook app cannot record from your mobile camera";
         } else {
-          message = "Sorry, your browser cannot record from webcams";
+          message = "Sorry, your browser cannot record from your mobile camera";
         }
+      } else {
+        message = "Sorry, your browser cannot record from webcams";
       }
 
       if (isBadIOS) {
-        // on older iPhones length of JSON is limited and breaking
-        // so just don't report and ignore
+        /*
+         * on older iPhones length of JSON is limited and breaking
+         * so just don't report and ignore
+         */
         options.reportErrors = false;
       }
 
       err = VideomailError.create(
         {
-          message: message,
+          message,
         },
         getUserMediaWarning(),
         options,
         {
-          classList: classList,
+          classList,
         },
       );
     }
@@ -255,7 +229,7 @@ const Browser = function (options) {
     let canPlayType;
 
     if (video && video.canPlayType) {
-      canPlayType = video.canPlayType("video/" + type);
+      canPlayType = video.canPlayType(`video/${type}`);
     }
 
     // definitely cannot be played here

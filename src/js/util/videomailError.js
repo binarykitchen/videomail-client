@@ -47,8 +47,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
     explanation = undefined;
   }
 
-  options = options || {};
-  parameters = parameters || {};
+  options ||= {};
+  parameters ||= {};
 
   // be super robust
   const debug = (options && options.debug) || console.log;
@@ -58,8 +58,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   const classList = parameters.classList || [];
 
-  // Require Browser here, not at the top of the file to avoid
-  // recursion. Because the Browser class is requiring this file as well.
+  /*
+   * Require Browser here, not at the top of the file to avoid
+   * recursion. Because the Browser class is requiring this file as well.
+   */
   const Browser = require("./browser").default;
   const browser = new Browser(options);
 
@@ -124,7 +126,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
         if (err.constraint === "width") {
           explanation = "Your webcam does not meet the width requirement.";
         } else {
-          explanation = "Unmet constraint: " + err.constraint;
+          explanation = `Unmet constraint: ${err.constraint}`;
         }
       } else {
         explanation = err.toString();
@@ -140,7 +142,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       explanation = "Probably it is locked from another process or has a hardware error.";
 
       if (err.message) {
-        err.message += " Details: " + err.message;
+        err.message += ` Details: ${err.message}`;
       }
 
       break;
@@ -241,14 +243,11 @@ VideomailError.create = function (err, explanation, options, parameters) {
           classList.push(VideomailError.WEBCAM_PROBLEM);
           break;
         case 9: {
-          const newUrl =
-            "https:" + window.location.href.substring(window.location.protocol.length);
+          const newUrl = `https:${window.location.href.substring(window.location.protocol.length)}`;
           message = "Security upgrade needed";
           explanation =
-            'Click <a href="' +
-            newUrl +
-            '">here</a> to switch to HTTPs which is more safe ' +
-            " and enables encrypted videomail transfers.";
+            `Click <a href="${newUrl}">here</a> to switch to HTTPs which is more safe ` +
+            ` and enables encrypted videomail transfers.`;
           classList.push(VideomailError.BROWSER_PROBLEM);
           break;
         }
@@ -265,12 +264,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
       }
       break;
 
-    // Chrome has a weird problem where if you try to do a getUserMedia request too early, it
-    // can return a MediaDeviceNotSupported error (even though nothing is wrong and permission
-    // has been granted). Look at userMediaErrorCallback() in recorder, there we do not
-    // emit those kind of errors further and just retry.
-    //
-    // but for whatever reasons, if it happens to reach this code, then investigate this further.
+    /*
+     * Chrome has a weird problem where if you try to do a getUserMedia request too early, it
+     * can return a MediaDeviceNotSupported error (even though nothing is wrong and permission
+     * has been granted). Look at userMediaErrorCallback() in recorder, there we do not
+     * emit those kind of errors further and just retry.
+     *
+     * but for whatever reasons, if it happens to reach this code, then investigate this further.
+     */
     case VideomailError.MEDIA_DEVICE_NOT_SUPPORTED:
       message = "Media device not supported";
       explanation = pretty(err);
@@ -283,14 +284,16 @@ VideomailError.create = function (err, explanation, options, parameters) {
         explanation = pretty(explanation);
       }
 
-      // it can be that explanation itself is an error object
-      // error objects can be prettified to undefined sometimes
+      /*
+       * it can be that explanation itself is an error object
+       * error objects can be prettified to undefined sometimes
+       */
       if (!explanation && originalExplanation) {
         if (originalExplanation.message) {
           explanation = originalExplanation.message;
         } else {
           // tried toString before but nah
-          explanation = "Inspected: " + stringify(originalExplanation);
+          explanation = `Inspected: ${stringify(originalExplanation)}`;
         }
       }
 
@@ -306,7 +309,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
             if (!explanation) {
               explanation = pretty(err.explanation);
             } else {
-              explanation += ";<br/>" + pretty(err.explanation);
+              explanation += `;<br/>${pretty(err.explanation)}`;
             }
           }
 
@@ -316,7 +319,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
             if (!explanation) {
               explanation = details;
             } else {
-              explanation += ";<br/>" + details;
+              explanation += `;<br/>${details}`;
             }
           }
         }
@@ -356,20 +359,20 @@ VideomailError.create = function (err, explanation, options, parameters) {
   let errCode = "none";
 
   if (err) {
-    errCode = "code=" + (err.code ? err.code : "undefined");
-    errCode += ", type=" + (err.type ? err.type : "undefined");
-    errCode += ", name=" + (err.name ? err.name : "undefined");
-    errCode += ", message=" + (err.message ? err.message : "undefined");
+    errCode = `code=${err.code ? err.code : "undefined"}`;
+    errCode += `, type=${err.type ? err.type : "undefined"}`;
+    errCode += `, name=${err.name ? err.name : "undefined"}`;
+    errCode += `, message=${err.message ? err.message : "undefined"}`;
   }
 
   const videomailError = new VideomailError(message, {
-    explanation: explanation,
-    logLines: logLines,
+    explanation,
+    logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
     siteName: options.siteName,
     code: errCode,
-    stack: stack, // have to assign it manually again because it is kinda protected
+    stack, // have to assign it manually again because it is kinda protected
   });
 
   let resource;

@@ -25,10 +25,10 @@ const Notifier = function (visuals, options) {
 
     if (limitReached) {
       debug("Limit reached");
-      lead += options.text.limitReached + ".<br/>";
+      lead += `${options.text.limitReached}.<br/>`;
     }
 
-    lead += options.text.sending + " …";
+    lead += `${options.text.sending} …`;
 
     self.notify(lead, null, {
       stillWait: true,
@@ -48,10 +48,10 @@ const Notifier = function (visuals, options) {
     let overallProgress;
 
     if (options.isAudioEnabled()) {
-      overallProgress = "Video: " + frameProgress;
+      overallProgress = `Video: ${frameProgress}`;
 
       if (sampleProgress) {
-        overallProgress += ", Audio: " + sampleProgress;
+        overallProgress += `, Audio: ${sampleProgress}`;
       }
     } else {
       overallProgress = frameProgress;
@@ -63,7 +63,7 @@ const Notifier = function (visuals, options) {
   function onBeginVideoEncoding() {
     visuals.beginWaiting();
 
-    const lead = options.text.encoding + " …";
+    const lead = `${options.text.encoding} …`;
 
     self.notify(lead, null, {
       stillWait: true,
@@ -114,10 +114,10 @@ const Notifier = function (visuals, options) {
   function correctNotifierDimensions() {
     if (options.video.stretch) {
       notifyElement.style.width = "auto";
-      notifyElement.style.height = visuals.getRecorderHeight(true, true) + "px";
+      notifyElement.style.height = `${visuals.getRecorderHeight(true, true)}px`;
     } else {
-      notifyElement.style.width = visuals.getRecorderWidth(true) + "px";
-      notifyElement.style.height = visuals.getRecorderHeight(true) + "px";
+      notifyElement.style.width = `${visuals.getRecorderWidth(true)}px`;
+      notifyElement.style.height = `${visuals.getRecorderHeight(true)}px`;
     }
   }
 
@@ -132,8 +132,7 @@ const Notifier = function (visuals, options) {
           Math.random() * options.notifier.entertainLimit + 1,
         );
 
-        notifyElement.className =
-          "notifier entertain " + options.notifier.entertainClass + randomBackgroundClass;
+        notifyElement.className = `notifier entertain ${options.notifier.entertainClass}${randomBackgroundClass}`;
 
         entertainTimeoutId = setTimeout(
           runEntertainment,
@@ -305,7 +304,7 @@ const Notifier = function (visuals, options) {
 
     if (blocking) {
       notifyElement && notifyElement.classList.add("blocking");
-      this.emit(Events.BLOCKING, { hideForm: hideForm });
+      this.emit(Events.BLOCKING, { hideForm });
     } else {
       this.emit(Events.NOTIFYING);
     }
@@ -325,8 +324,10 @@ const Notifier = function (visuals, options) {
       cancelEntertainment();
     }
 
-    // just as a safety in case if an error is thrown in the middle of the build process
-    // and visuals aren't built/shown yet.
+    /*
+     * just as a safety in case if an error is thrown in the middle of the build process
+     * and visuals aren't built/shown yet.
+     */
     visuals.showVisuals();
 
     show();

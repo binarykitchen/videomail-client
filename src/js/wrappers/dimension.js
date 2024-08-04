@@ -30,7 +30,7 @@ function figureMinHeight(height, options) {
 
   if (numberIsInteger(height) && height < 1) {
     throw VideomailError.create(
-      "Got a video height less than 1 (" + height + ") while figuring out the minimum!",
+      `Got a video height less than 1 (${height}) while figuring out the minimum!`,
       options,
     );
   }
@@ -40,7 +40,7 @@ function figureMinHeight(height, options) {
 }
 
 export default {
-  limitWidth: function (element, width, options) {
+  limitWidth(element, width, options) {
     let limitedWidth;
 
     const outerWidth = getOuterWidth(element);
@@ -60,9 +60,11 @@ export default {
     }
   },
 
-  // this is difficult to compute and is not entirely correct.
-  // but good enough for now to ensure some stability.
-  limitHeight: function (height, options) {
+  /*
+   * this is difficult to compute and is not entirely correct.
+   * but good enough for now to ensure some stability.
+   */
+  limitHeight(height, options) {
     if (numberIsInteger(height) && height < 1) {
       throw VideomailError.create(
         "Passed limit-height argument cannot be less than 1!",
@@ -83,7 +85,7 @@ export default {
     }
   },
 
-  calculateWidth: function (options) {
+  calculateWidth(options) {
     let height = options.videoHeight || null;
     const ratio = options.ratio || options.getRatio();
 
@@ -112,7 +114,7 @@ export default {
     }
   },
 
-  calculateHeight: function (element, options) {
+  calculateHeight(element, options) {
     let width = options.videoWidth || null;
     let height;
 

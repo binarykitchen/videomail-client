@@ -44,7 +44,7 @@ export default function (options) {
 
   function fetch(alias, cb) {
     superagent
-      .get("/videomail/" + alias + "/snapshot")
+      .get(`/videomail/${alias}/snapshot`)
       .set("Accept", "application/json")
       .set("Timezone-Id", timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
@@ -74,7 +74,7 @@ export default function (options) {
 
     const queryParams = {};
 
-    let url = options.baseUrl + "/videomail/";
+    let url = `${options.baseUrl}/videomail/`;
 
     if (identifier) {
       url += identifier;
@@ -120,7 +120,7 @@ export default function (options) {
 
   this.reportError = function (err, cb) {
     const queryParams = {};
-    const url = options.baseUrl + "/client-error/";
+    const url = `${options.baseUrl}/client-error/`;
     const request = superagent("post", url);
 
     queryParams[Constants.SITE_NAME_LABEL] = options.siteName;
@@ -142,8 +142,10 @@ export default function (options) {
   this.post = function (videomail, cb) {
     videomail = applyDefaultValues(videomail);
 
-    // always good to know the version of the client
-    // the videomail was submitted with
+    /*
+     * always good to know the version of the client
+     * the videomail was submitted with
+     */
     videomail[Constants.VERSION_LABEL] = options.version;
 
     if (options.callbacks.adjustFormDataBeforePosting) {
@@ -179,7 +181,7 @@ export default function (options) {
       default:
         // keep all callbacks async
         setTimeout(() => {
-          cb(new Error("Invalid enctype given: " + options.enctype));
+          cb(new Error(`Invalid enctype given: ${options.enctype}`));
         }, 0);
     }
 

@@ -40,7 +40,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   const self = this;
-  const debug = options.debug;
+  const { debug } = options;
 
   let loop = null;
 
@@ -48,7 +48,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   let samplesCount = 0;
   let framesCount = 0;
-  let facingMode = options.video.facingMode; // default is 'user'
+  let { facingMode } = options.video; // default is 'user'
 
   let recordingStats = {};
 
@@ -115,7 +115,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             Events.ERROR,
             VideomailError.create(
               "Failed writing to server",
-              "stream.write() failed because of " + pretty(exc),
+              `stream.write() failed because of ${pretty(exc)}`,
               options,
             ),
           );
@@ -140,11 +140,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     const audioBuffer = audioSample.toBuffer();
 
-    // if (options.verbose) {
-    //     debug(
-    //         'Sample #' + samplesCount + ' (' + audioBuffer.length + ' bytes):'
-    //     )
-    // }
+    /*
+     * if (options.verbose) {
+     *     debug(
+     *         'Sample #' + samplesCount + ' (' + audioBuffer.length + ' bytes):'
+     *     )
+     * }
+     */
 
     writeStream(audioBuffer);
   }
@@ -157,7 +159,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     try {
       debug("Recorder: onUserMediaReady()", stringify(params));
 
-      const switchingFacingMode = params.switchingFacingMode;
+      const { switchingFacingMode } = params;
 
       userMediaLoading = blocking = unloaded = submitting = false;
       userMediaLoaded = true;
@@ -199,16 +201,18 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function calculateFrameProgress() {
-    return ((confirmedFrameNumber / (framesCount || 1)) * 100).toFixed(2) + "%";
+    return `${((confirmedFrameNumber / (framesCount || 1)) * 100).toFixed(2)}%`;
   }
 
   function calculateSampleProgress() {
-    return ((confirmedSampleNumber / (samplesCount || 1)) * 100).toFixed(2) + "%";
+    return `${((confirmedSampleNumber / (samplesCount || 1)) * 100).toFixed(2)}%`;
   }
 
   function updateOverallProgress() {
-    // when progresses aren't initialized,
-    // then do a first calculation to avoid `infinite` or `null` displays
+    /*
+     * when progresses aren't initialized,
+     * then do a first calculation to avoid `infinite` or `null` displays
+     */
 
     if (!frameProgress) {
       frameProgress = calculateFrameProgress();
@@ -244,22 +248,20 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     key = args.key;
 
-    // We are not serving MP4 videos anymore due to licensing but are keeping code
-    // for compatibility and documentation
+    /*
+     * We are not serving MP4 videos anymore due to licensing but are keeping code
+     * for compatibility and documentation
+     */
     if (args.mp4) {
       replay.setMp4Source(
-        args.mp4 + Constants.SITE_NAME_LABEL + "/" + options.siteName + "/videomail.mp4",
+        `${args.mp4 + Constants.SITE_NAME_LABEL}/${options.siteName}/videomail.mp4`,
         true,
       );
     }
 
     if (args.webm) {
       replay.setWebMSource(
-        args.webm +
-          Constants.SITE_NAME_LABEL +
-          "/" +
-          options.siteName +
-          "/videomail.webm",
+        `${args.webm + Constants.SITE_NAME_LABEL}/${options.siteName}/videomail.webm`,
         true,
       );
     }
@@ -295,19 +297,20 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       // https://github.com/maxogden/websocket-stream#binary-sockets
 
-      // we use query parameters here because we cannot set custom headers in web sockets,
-      // see https://github.com/websockets/ws/issues/467
+      /*
+       * we use query parameters here because we cannot set custom headers in web sockets,
+       * see https://github.com/websockets/ws/issues/467
+       */
 
-      const url2Connect =
-        options.socketUrl +
-        "?" +
-        encodeURIComponent(Constants.SITE_NAME_LABEL) +
-        "=" +
-        encodeURIComponent(options.siteName);
+      const url2Connect = `${options.socketUrl}?${encodeURIComponent(
+        Constants.SITE_NAME_LABEL,
+      )}=${encodeURIComponent(options.siteName)}`;
 
       try {
-        // websocket options cannot be set on client side, only on server, see
-        // https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
+        /*
+         * websocket options cannot be set on client side, only on server, see
+         * https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
+         */
         stream = websocket(url2Connect, {
           perMessageDeflate: false,
           // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
@@ -321,7 +324,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         if (typeof websocket === "undefined") {
           err = VideomailError.create(
             "There is no websocket",
-            "Cause: " + pretty(exc),
+            `Cause: ${pretty(exc)}`,
             options,
           );
         } else {
@@ -341,20 +344,24 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       if (stream) {
         // // useful for debugging streams
 
-        // if (!stream.originalEmit) {
-        //   stream.originalEmit = stream.emit
-        // }
+        /*
+         * if (!stream.originalEmit) {
+         *   stream.originalEmit = stream.emit
+         * }
+         */
 
-        // stream.emit = function (type) {
-        //   if (stream) {
-        //     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
-        //     var args = Array.prototype.slice.call(arguments, 0)
-        //     return stream.originalEmit.apply(stream, args)
-        //   }
-        // }
+        /*
+         * stream.emit = function (type) {
+         *   if (stream) {
+         *     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
+         *     var args = Array.prototype.slice.call(arguments, 0)
+         *     return stream.originalEmit.apply(stream, args)
+         *   }
+         * }
+         */
 
         stream.on("close", function (err) {
-          debug(PIPE_SYMBOL + "Stream has closed");
+          debug(`${PIPE_SYMBOL}Stream has closed`);
 
           connecting = connected = false;
 
@@ -369,7 +376,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         });
 
         stream.on("connect", function () {
-          debug(PIPE_SYMBOL + "Stream *connect* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
 
           if (!connected) {
             connected = true;
@@ -382,7 +389,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         });
 
         stream.on("data", function (data) {
-          debug(PIPE_SYMBOL + "Stream *data* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
           let command;
 
@@ -396,7 +403,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
               VideomailError.create(
                 "Invalid server command",
                 // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-                "Contact us asap. Bad command was " + data.toString() + ". ",
+                `Contact us asap. Bad command was ${data.toString()}. `,
                 options,
               ),
             );
@@ -406,29 +413,32 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         });
 
         stream.on("error", function (err) {
-          debug(PIPE_SYMBOL + "Stream *error* event emitted", err);
+          debug(`${PIPE_SYMBOL}Stream *error* event emitted`, err);
 
           connecting = connected = false;
 
           let videomailError;
 
           if (browser.isIOS()) {
-            // setting custom text since that err object isn't really an error
-            // on iphones when locked, and unlocked, this err is actually
-            // an event object with stuff we can't use at all (an external bug)
+            /*
+             * setting custom text since that err object isn't really an error
+             * on iphones when locked, and unlocked, this err is actually
+             * an event object with stuff we can't use at all (an external bug)
+             */
             videomailError = VideomailError.create(
               err,
-              "iPhones cannot maintain a live connection for too long. Original error message is: " +
-                err.toString(),
+              `iPhones cannot maintain a live connection for too long. Original error message is: ${err.toString()}`,
               options,
             );
 
-            // Changed to the above temporarily for better investigations
-            // videomailError = VideomailError.create(
-            //   'Sorry, connection has timed out',
-            //   'iPhones cannot maintain a live connection for too long,
-            //   options
-            // )
+            /*
+             * Changed to the above temporarily for better investigations
+             * videomailError = VideomailError.create(
+             *   'Sorry, connection has timed out',
+             *   'iPhones cannot maintain a live connection for too long,
+             *   options
+             * )
+             */
           } else {
             // or else it could be a poor wifi connection...
             videomailError = VideomailError.create(
@@ -444,55 +454,57 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         // just experimental
 
         stream.on("drain", function () {
-          debug(PIPE_SYMBOL + "Stream *drain* event emitted (should not happen!)");
+          debug(`${PIPE_SYMBOL}Stream *drain* event emitted (should not happen!)`);
         });
 
         stream.on("preend", function () {
-          debug(PIPE_SYMBOL + "Stream *preend* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
 
         stream.on("end", function () {
-          debug(PIPE_SYMBOL + "Stream *end* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
         });
 
         stream.on("drain", function () {
-          debug(PIPE_SYMBOL + "Stream *drain* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *drain* event emitted`);
         });
 
         stream.on("pipe", function () {
-          debug(PIPE_SYMBOL + "Stream *pipe* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *pipe* event emitted`);
         });
 
         stream.on("unpipe", function () {
-          debug(PIPE_SYMBOL + "Stream *unpipe* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *unpipe* event emitted`);
         });
 
         stream.on("resume", function () {
-          debug(PIPE_SYMBOL + "Stream *resume* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *resume* event emitted`);
         });
 
         stream.on("uncork", function () {
-          debug(PIPE_SYMBOL + "Stream *uncork* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *uncork* event emitted`);
         });
 
         stream.on("readable", function () {
-          debug(PIPE_SYMBOL + "Stream *preend* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
 
         stream.on("prefinish", function () {
-          debug(PIPE_SYMBOL + "Stream *preend* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
 
         stream.on("finish", function () {
-          debug(PIPE_SYMBOL + "Stream *preend* event emitted");
+          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
       }
     }
   }
 
   function showUserMedia() {
-    // use connected flag to prevent this from happening
-    // https://github.com/binarykitchen/videomail.io/issues/323
+    /*
+     * use connected flag to prevent this from happening
+     * https://github.com/binarykitchen/videomail.io/issues/323
+     */
     return connected && (isNotifying() || !isHidden() || blocking);
   }
 
@@ -527,21 +539,21 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       // retry after a while
       retryTimeout = setTimeout(initSocket, options.timeouts.userMedia);
+    } else if (unloaded) {
+      /*
+       * can happen that container is unloaded but some user media related callbacks
+       * are still in process. in that case ignore error.
+       */
+      debug("Recorder: already unloaded. Not going to throw error", err);
     } else {
-      if (unloaded) {
-        // can happen that container is unloaded but some user media related callbacks
-        // are still in process. in that case ignore error.
-        debug("Recorder: already unloaded. Not going to throw error", err);
-      } else {
-        debug("Recorder: no error listeners attached but throwing error", err);
+      debug("Recorder: no error listeners attached but throwing error", err);
 
-        // weird situation, throw it instead of emitting since there are no error listeners
-        throw VideomailError.create(
-          err,
-          "Unable to process this error since there are no error listeners anymore.",
-          options,
-        );
-      }
+      // weird situation, throw it instead of emitting since there are no error listeners
+      throw VideomailError.create(
+        err,
+        "Unable to process this error since there are no error listeners anymore.",
+        options,
+      );
     }
   }
 
@@ -583,23 +595,27 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       // prefer the front camera (if one is available) over the rear one
       const constraints = {
         video: {
-          facingMode: facingMode,
+          facingMode,
           frameRate: { ideal: options.video.fps },
         },
         audio: options.isAudioEnabled(),
       };
 
       if (browser.isOkSafari()) {
-        // do not use those width/height constraints yet,
-        // current safari would throw an error
-        // todo in https://github.com/binarykitchen/videomail-client/issues/142
+        /*
+         * do not use those width/height constraints yet,
+         * current safari would throw an error
+         * todo in https://github.com/binarykitchen/videomail-client/issues/142
+         */
       } else {
         if (options.hasDefinedWidth()) {
           constraints.video.width = { ideal: options.video.width };
         } else {
-          // otherwise try to apply the same width as the element is having
-          // but there is no 100% guarantee that this will happen. not
-          // all webcam drivers behave the same way
+          /*
+           * otherwise try to apply the same width as the element is having
+           * but there is no 100% guarantee that this will happen. not
+           * all webcam drivers behave the same way
+           */
           constraints.video.width = { ideal: self.limitWidth() };
         }
 
@@ -630,8 +646,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           })
           .catch(userMediaErrorCallback);
       } else {
-        // this to trap errors like these
-        // Cannot read property 'then' of undefined
+        /*
+         * this to trap errors like these
+         * Cannot read property 'then' of undefined
+         */
 
         // todo retry with navigator.getUserMedia_() maybe?
         throw VideomailError.create(
@@ -701,7 +719,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       debug(
         "Server commanded: %s",
         command.command,
-        command.args ? ", " + stringify(command.args) : "",
+        command.args ? `, ${stringify(command.args)}` : "",
       );
 
       switch (command.command) {
@@ -743,7 +761,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           this.emit(Events.BEGIN_VIDEO_ENCODING);
           break;
         default:
-          this.emit(Events.ERROR, "Unknown server command: " + command.command);
+          this.emit(Events.ERROR, `Unknown server command: ${command.command}`);
           break;
       }
     } catch (exc) {
@@ -776,20 +794,22 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       debug("$ %s", command, args ? stringify(args) : "");
 
       const commandObj = {
-        command: command,
-        args: args,
+        command,
+        args,
       };
 
-      // todo commented out because for some reasons server does
-      // not accept such a long array of many log lines. to examine later.
-      //
-      // add some useful debug info to examine weird stuff like this one
-      // UnprocessableError: Unable to encode a video with FPS near zero.
-      // todo consider removing this later or have it for debug=1 only?
-      //
-      // if (options.logger && options.logger.getLines) {
-      //   commandObj.logLines = options.logger.getLines()
-      // }
+      /*
+       * todo commented out because for some reasons server does
+       * not accept such a long array of many log lines. to examine later.
+       *
+       * add some useful debug info to examine weird stuff like this one
+       * UnprocessableError: Unable to encode a video with FPS near zero.
+       * todo consider removing this later or have it for debug=1 only?
+       *
+       * if (options.logger && options.logger.getLines) {
+       *   commandObj.logLines = options.logger.getLines()
+       * }
+       */
 
       writeStream(Buffer.from(stringify(commandObj)));
 
@@ -815,8 +835,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         // server will disconnect socket automatically after submitting
         connecting = connected = false;
       } else if (stream) {
-        // force to disconnect socket right now to clean temp files on server
-        // event listeners will do the rest
+        /*
+         * force to disconnect socket right now to clean temp files on server
+         * event listeners will do the rest
+         */
         stream.end();
         stream = undefined;
       }
@@ -850,7 +872,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   this.stop = function (params) {
     debug("stop()", params);
 
-    const limitReached = params.limitReached;
+    const { limitReached } = params;
 
     this.emit(Events.STOPPING, limitReached);
 
@@ -858,22 +880,26 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     const self = this;
 
-    // needed to give dom enough time to prepare the replay element
-    // to show up upon the STOPPING event so that we can evaluate
-    // the right video type
+    /*
+     * needed to give dom enough time to prepare the replay element
+     * to show up upon the STOPPING event so that we can evaluate
+     * the right video type
+     */
     setTimeout(function () {
       stopTime = Date.now();
 
       recordingStats = {
-        // do not use loop.getFPS() as this will only return the fps from the last delta,
-        // not the average. see https://github.com/hapticdata/animitter/issues/3
+        /*
+         * do not use loop.getFPS() as this will only return the fps from the last delta,
+         * not the average. see https://github.com/hapticdata/animitter/issues/3
+         */
         avgFps: getAvgFps(),
         wantedFps: options.video.fps,
         avgInterval: getAvgInterval(),
         wantedInterval: 1e3 / options.video.fps,
 
         intervalSum: getIntervalSum(),
-        framesCount: framesCount,
+        framesCount,
         videoType: replay.getVideoType(),
       };
 
@@ -921,7 +947,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         cause = e.name || e.statusText || e.toString();
       }
 
-      debug("Recorder: unload()" + (cause ? ", cause: " + cause : ""));
+      debug(`Recorder: unload()${cause ? `, cause: ${cause}` : ""}`);
 
       this.reset();
 
@@ -1007,15 +1033,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
   }
 
-  function createLoop() {
-    const newLoop = animitter({ fps: options.video.fps }, draw);
-
-    // remember it first
-    originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject();
-
-    return newLoop;
-  }
-
   function draw(deltaTime, elapsedTime) {
     try {
       // ctx and stream might become null while unloading
@@ -1045,19 +1062,30 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           onFlushedCallback: onFlushed,
         });
 
-        // if (options.verbose) {
-        //   debug(
-        //     'Frame #' + framesCount + ' (' + recordingBufferLength + ' bytes):',
-        //     ' delta=' + deltaTime + 'ms, ' +
-        //     ' elapsed=' + elapsedTime + 'ms'
-        //   )
-        // }
+        /*
+         * if (options.verbose) {
+         *   debug(
+         *     'Frame #' + framesCount + ' (' + recordingBufferLength + ' bytes):',
+         *     ' delta=' + deltaTime + 'ms, ' +
+         *     ' elapsed=' + elapsedTime + 'ms'
+         *   )
+         * }
+         */
 
         visuals.checkTimer({ intervalSum: elapsedTime });
       }
     } catch (exc) {
       self.emit(Events.ERROR, exc);
     }
+  }
+
+  function createLoop() {
+    const newLoop = animitter({ fps: options.video.fps }, draw);
+
+    // remember it first
+    originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject();
+
+    return newLoop;
   }
 
   this.record = function () {
@@ -1137,8 +1165,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   };
 
   function setAnimationFrameObject(newObj) {
-    // must stop and then start to make it become effective, see
-    // https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
+    /*
+     * must stop and then start to make it become effective, see
+     * https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
+     */
     if (loop) {
       const isRecording = self.isRecording();
 
@@ -1172,9 +1202,11 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           fn();
           processingTime = Date.now() - start;
         },
-        // reducing wanted interval by respecting the time it takes to
-        // compute internally since this is not multi-threaded like
-        // requestAnimationFrame
+        /*
+         * reducing wanted interval by respecting the time it takes to
+         * compute internally since this is not multi-threaded like
+         * requestAnimationFrame
+         */
         wantedInterval - processingTime,
       );
     }
@@ -1190,7 +1222,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function buildElement() {
-    recorderElement = h("video." + options.selectors.userMediaClass);
+    recorderElement = h(`video.${options.selectors.userMediaClass}`);
 
     visuals.appendChild(recorderElement);
   }
@@ -1270,7 +1302,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       this.emit(Events.ERROR, err);
     } else {
       recorderElement = visuals.querySelector(
-        "video." + options.selectors.userMediaClass,
+        `video.${options.selectors.userMediaClass}`,
       );
 
       if (!recorderElement) {
@@ -1279,22 +1311,26 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       correctDimensions();
 
-      // prevent audio feedback, see
-      // https://github.com/binarykitchen/videomail-client/issues/35
+      /*
+       * prevent audio feedback, see
+       * https://github.com/binarykitchen/videomail-client/issues/35
+       */
       recorderElement.muted = true;
 
       // for iphones, see https://github.com/webrtc/samples/issues/929
       recorderElement.setAttribute("playsinline", true);
       recorderElement.setAttribute("webkit-playsinline", "webkit-playsinline");
 
-      // add these here, not in CSS because users can configure custom
-      // class names
+      /*
+       * add these here, not in CSS because users can configure custom
+       * class names
+       */
       recorderElement.style.transform = "rotateY(180deg)";
       recorderElement.style["-webkit-transform"] = "rotateY(180deg)";
       recorderElement.style["-moz-transform"] = "rotateY(180deg)";
 
       if (options.video.stretch) {
-        recorderElement.style["width"] = "100%";
+        recorderElement.style.width = "100%";
       }
 
       if (!userMedia) {
@@ -1324,8 +1360,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   };
 
   this.isRecording = function () {
-    // checking for stream.destroyed needed since
-    // https://github.com/binarykitchen/videomail.io/issues/296
+    /*
+     * checking for stream.destroyed needed since
+     * https://github.com/binarykitchen/videomail.io/issues/296
+     */
     return (
       loop &&
       loop.isRunning() &&
@@ -1349,8 +1387,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     return unloaded;
   };
 
-  // these two return the true dimensions of the webcam area.
-  // needed because on mobiles they might be different.
+  /*
+   * these two return the true dimensions of the webcam area.
+   * needed because on mobiles they might be different.
+   */
 
   this.getRecorderWidth = function (responsive) {
     if (userMedia && userMedia.hasVideoWidth()) {
@@ -1400,9 +1440,9 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
 
     return visuals.calculateWidth({
-      responsive: responsive,
+      responsive,
       ratio: getRatio(),
-      videoHeight: videoHeight,
+      videoHeight,
     });
   };
 
@@ -1416,9 +1456,9 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
 
     return visuals.calculateHeight({
-      responsive: responsive,
+      responsive,
       ratio: getRatio(),
-      videoWidth: videoWidth,
+      videoWidth,
     });
   };
 

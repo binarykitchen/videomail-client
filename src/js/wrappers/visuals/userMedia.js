@@ -151,7 +151,7 @@ export default function (recorder, options) {
     let playingPromiseReached = false;
 
     if (options && options.isAudioEnabled()) {
-      audioRecorder = audioRecorder || new AudioRecorder(this, options);
+      audioRecorder ||= new AudioRecorder(this, options);
     }
 
     function audioRecord() {
@@ -178,15 +178,17 @@ export default function (recorder, options) {
       try {
         rawVisualUserMedia.load();
 
-        // fixes https://github.com/binarykitchen/videomail.io/issues/401
-        // see https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
+        /*
+         * fixes https://github.com/binarykitchen/videomail.io/issues/401
+         * see https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
+         */
         if (rawVisualUserMedia.paused) {
           options.debug(
             "UserMedia: play()",
-            "media.readyState=" + rawVisualUserMedia.readyState,
-            "media.paused=" + rawVisualUserMedia.paused,
-            "media.ended=" + rawVisualUserMedia.ended,
-            "media.played=" + pretty(rawVisualUserMedia.played),
+            `media.readyState=${rawVisualUserMedia.readyState}`,
+            `media.paused=${rawVisualUserMedia.paused}`,
+            `media.ended=${rawVisualUserMedia.ended}`,
+            `media.played=${pretty(rawVisualUserMedia.played)}`,
           );
 
           let p;
@@ -194,13 +196,17 @@ export default function (recorder, options) {
           try {
             p = rawVisualUserMedia.play();
           } catch (exc) {
-            // this in the hope to catch InvalidStateError, see
-            // https://github.com/binarykitchen/videomail-client/issues/149
+            /*
+             * this in the hope to catch InvalidStateError, see
+             * https://github.com/binarykitchen/videomail-client/issues/149
+             */
             options.logger.warn("Caught raw usermedia play exception:", exc);
           }
 
-          // using the promise here just experimental for now
-          // and this to catch any weird errors early if possible
+          /*
+           * using the promise here just experimental for now
+           * and this to catch any weird errors early if possible
+           */
           if (isPromise(p)) {
             p.then(function () {
               if (!playingPromiseReached) {
@@ -208,9 +214,11 @@ export default function (recorder, options) {
                 playingPromiseReached = true;
               }
             }).catch(function (reason) {
-              // promise can be interrupted, i.E. when switching tabs
-              // and promise can get resumed when switching back to tab, hence
-              // do not treat this like an error
+              /*
+               * promise can be interrupted, i.E. when switching tabs
+               * and promise can get resumed when switching back to tab, hence
+               * do not treat this like an error
+               */
               options.logger.warn(
                 "Caught pending usermedia promise exception: %s",
                 reason.toString(),
@@ -225,20 +233,14 @@ export default function (recorder, options) {
     }
 
     function fireCallbacks() {
-      const readyState = rawVisualUserMedia.readyState;
+      const { readyState } = rawVisualUserMedia;
 
       // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
       options.debug(
-        "UserMedia: fireCallbacks(" +
-          "readyState=" +
-          readyState +
-          ", " +
-          "onPlayReached=" +
-          onPlayReached +
-          ", " +
-          "onLoadedMetaDataReached=" +
-          onLoadedMetaDataReached +
-          ")",
+        `UserMedia: fireCallbacks(` +
+          `readyState=${readyState}, ` +
+          `onPlayReached=${onPlayReached}, ` +
+          `onLoadedMetaDataReached=${onLoadedMetaDataReached})`,
       );
 
       if (onPlayReached && onLoadedMetaDataReached) {
@@ -305,8 +307,10 @@ export default function (recorder, options) {
       if (!hasEnded() && !hasInvalidDimensions()) {
         self.emit(Events.LOADED_META_DATA);
 
-        // for android devices, we cannot call play() unless meta data has been loaded!
-        // todo consider removing that if it's not the case anymore (for better performance)
+        /*
+         * for android devices, we cannot call play() unless meta data has been loaded!
+         * todo consider removing that if it's not the case anymore (for better performance)
+         */
         if (browser.isAndroid()) {
           play();
         }
@@ -334,13 +338,13 @@ export default function (recorder, options) {
           description = videoTrack.label;
         }
 
-        description += " with enabled=" + videoTrack.enabled;
-        description += ", muted=" + videoTrack.muted;
-        description += ", remote=" + videoTrack.remote;
-        description += ", readyState=" + videoTrack.readyState;
-        description += ", error=" + videoTrack.error;
+        description += ` with enabled=${videoTrack.enabled}`;
+        description += `, muted=${videoTrack.muted}`;
+        description += `, remote=${videoTrack.remote}`;
+        description += `, readyState=${videoTrack.readyState}`;
+        description += `, error=${videoTrack.error}`;
 
-        options.debug("UserMedia: " + videoTrack.kind + " detected.", description || "");
+        options.debug(`UserMedia: ${videoTrack.kind} detected.`, description || "");
       }
 
       // very useful i think, so leave this and just use options.debug()
@@ -355,10 +359,12 @@ export default function (recorder, options) {
       rawVisualUserMedia.addEventListener("loadedmetadata", onLoadedMetaData);
       rawVisualUserMedia.addEventListener("play", onPlay);
 
-      // experimental, not sure if this is ever needed/called? since 2 apr 2017
-      // An error occurs while fetching the media data.
-      // Error can be an object with the code MEDIA_ERR_NETWORK or higher.
-      // networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
+      /*
+       * experimental, not sure if this is ever needed/called? since 2 apr 2017
+       * An error occurs while fetching the media data.
+       * Error can be an object with the code MEDIA_ERR_NETWORK or higher.
+       * networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
+       */
       rawVisualUserMedia.addEventListener("error", function (err) {
         options.logger.warn("Caught video element error event: %s", pretty(err));
       });
@@ -372,14 +378,14 @@ export default function (recorder, options) {
   };
 
   this.isReady = function () {
-    return !!rawVisualUserMedia.src;
+    return Boolean(rawVisualUserMedia.src);
   };
 
   this.stop = function (visualStream, params = {}) {
     try {
       // do not stop "too much" when going to initialize anyway
-      const aboutToInitialize = params.aboutToInitialize;
-      const switchingFacingMode = params.switchingFacingMode;
+      const { aboutToInitialize } = params;
+      const { switchingFacingMode } = params;
 
       if (!aboutToInitialize) {
         if (!visualStream) {
@@ -408,8 +414,10 @@ export default function (recorder, options) {
         audioRecorder = null;
       }
 
-      // don't have to reset these states when just switching camera
-      // while still recording or pausing
+      /*
+       * don't have to reset these states when just switching camera
+       * while still recording or pausing
+       */
       if (!switchingFacingMode) {
         paused = record = false;
       }

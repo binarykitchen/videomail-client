@@ -41,9 +41,11 @@ export default function (options, name) {
 
     const result = despot.emit.apply(despot, args);
 
-    // Todo: have this emitted through a configuration because it is pretty noisy
-    // if (event !== Events.EVENT_EMITTED)
-    //     this.emit(Events.EVENT_EMITTED, event)
+    /*
+     * Todo: have this emitted through a configuration because it is pretty noisy
+     * if (event !== Events.EVENT_EMITTED)
+     *     this.emit(Events.EVENT_EMITTED, event)
+     */
 
     return result;
   };

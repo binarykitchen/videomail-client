@@ -1,6 +1,6 @@
 module.exports = {
   parser: "@babel/eslint-parser",
-  extends: ["eslint:all", "plugin:import/recommended", "prettier"],
+  extends: ["eslint:recommended", "plugin:import/recommended", "prettier"],
   env: {
     browser: true,
     node: true,
@@ -33,5 +33,13 @@ module.exports = {
     "no-inline-comments": "off",
     "line-comment-position": "off",
     "capitalized-comments": "off",
+    "func-style": "off",
+    "prefer-destructuring": "off",
+    "init-declarations": "off",
+    "no-invalid-this": "off",
+    "no-multi-assign": "off",
+    "max-params": "off",
+    "no-plusplus": "off",
+    "no-ternary": "off",
   },
 };
