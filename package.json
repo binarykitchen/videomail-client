@@ -61,6 +61,7 @@
     "despot": "2.0.0",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.2",
+    "fast-printf": "1.6.9",
     "filesize": "10.1.2",
     "get-form-data": "3.0.0",
     "hidden": "1.1.1",
