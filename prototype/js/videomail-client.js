@@ -4786,7 +4786,7 @@ function replaceGetterValues (replacer) {
  *
  * @copyright 2024 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.1.2
+ * @version 10.1.4
  */
 'use strict';
 
@@ -17623,7 +17623,7 @@ module.exports={
   ],
   "prettier": "./prettier.config.js",
   "dependencies": {
-    "@babel/core": "7.24.7",
+    "@babel/core": "7.25.2",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
     "audio-sample": "3.0.1",
@@ -17637,7 +17637,7 @@ module.exports={
     "despot": "2.0.0",
     "document-visibility": "1.0.1",
     "element-closest": "3.0.2",
-    "filesize": "10.1.2",
+    "filesize": "10.1.4",
     "format-util": "1.0.5",
     "get-form-data": "3.0.0",
     "hidden": "1.1.1",
@@ -17657,11 +17657,11 @@ module.exports={
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "7.24.7",
+    "@babel/eslint-parser": "7.25.1",
     "@babel/plugin-transform-runtime": "7.24.7",
-    "@babel/preset-env": "7.24.7",
+    "@babel/preset-env": "7.25.3",
     "audit-ci": "6.6.1",
-    "autoprefixer": "10.4.19",
+    "autoprefixer": "10.4.20",
     "babelify": "10.0.0",
     "body-parser": "1.20.2",
     "browserify": "17.0.0",
@@ -17693,8 +17693,8 @@ module.exports={
     "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.39",
-    "prettier": "3.3.2",
+    "postcss": "8.4.40",
+    "prettier": "3.3.3",
     "router": "1.3.8",
     "tape": "5.8.1",
     "tape-catch": "1.0.6",

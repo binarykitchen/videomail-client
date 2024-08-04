@@ -8,7 +8,7 @@ test("Replay:", function (t) {
 
     tt.doesNotThrow(function () {
       return new Replay(null, {
-        debug: function () {},
+        debug() {},
       });
     });
   });

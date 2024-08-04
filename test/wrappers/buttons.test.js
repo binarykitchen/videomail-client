@@ -8,7 +8,7 @@ test("Buttons:", function (t) {
 
     tt.doesNotThrow(function () {
       return new Buttons(null, {
-        debug: function () {},
+        debug() {},
       });
     });
   });

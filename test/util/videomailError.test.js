@@ -2,7 +2,7 @@ import VideomailError from "./../../src/js/util/videomailError";
 import test from "tape-catch";
 
 const fakeOptions = {
-  debug: function () {},
+  debug() {},
 };
 
 test("Videomail Error:", function (t) {
@@ -68,7 +68,7 @@ test("Videomail Error:", function (t) {
       tt.plan(3);
 
       const err = VideomailError.create(undefined, undefined, {
-        debug: function () {}, // so that it wont pollute output during tests
+        debug() {}, // so that it wont pollute output during tests
       });
 
       tt.equal(err.toString(), "Videomail Error");
@@ -298,7 +298,7 @@ test("Videomail Error:", function (t) {
       tt.equal(err.message, "Starting video failed");
       tt.equal(
         err.explanation,
-        "Most likely this happens when the webam is already active in another browser.",
+        "Most likely this happens when the webcam is already active in another browser.",
       );
     });
 

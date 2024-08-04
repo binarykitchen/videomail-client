@@ -290,8 +290,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
           explanation = originalExplanation.message;
         } else {
           // tried toString before but nah
-          explanation =
-            "Inspected: " + stringify(originalExplanation);
+          explanation = "Inspected: " + stringify(originalExplanation);
         }
       }
 

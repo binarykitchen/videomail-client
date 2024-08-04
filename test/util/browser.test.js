@@ -84,13 +84,11 @@ test("Browser:", { timeout: 2000 }, function (t) {
       fakeUaString:
         "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; Media Center PC 4.0; SLCC1; .NET CLR 3.0.04320)",
       fakeHttps: true,
-      debug: function () {},
+      debug() {},
     };
 
     const browser = new Browser(options);
-    let err;
-
-    err = browser.checkRecordingCapabilities();
+    let err = browser.checkRecordingCapabilities();
     tt.equal(err.message, "Sorry, your browser is unable to use webcams");
     tt.ok(
       err.explanation.indexOf("Instead of Internet Explorer you need to upgrade") >= 0,
@@ -147,7 +145,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     const options = {
       fakeUaString:
         "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10136",
-      debug: function () {},
+      debug() {},
     };
 
     const browser = new Browser(options);
