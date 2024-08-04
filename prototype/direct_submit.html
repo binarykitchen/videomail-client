@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
 
     <style type="text/css">
-      input[type='text'],
+      input[type="text"],
       .buttons {
         margin: 1em 0;
       }
@@ -40,15 +40,15 @@
       var videomailClient = new VideomailClient({
         verbose: true,
         enablePause: false,
-        video: { limitSeconds: 3600, width: 460, countdown: false }
-      })
-      var startOverButton = document.getElementById('startOver')
+        video: { limitSeconds: 3600, width: 460, countdown: false },
+      });
+      var startOverButton = document.getElementById("startOver");
 
       var onSubmitted = function (videomail) {
-        this.replay(videomail, 'viewVideo')
+        this.replay(videomail, "viewVideo");
 
-        startOverButton.onclick = this.startOver
-      }
+        startOverButton.onclick = this.startOver;
+      };
 
       // allow direct submits, means:
       // any form data here is submitted directly into the videomail server
@@ -56,10 +56,10 @@
       // you grab the key from the videomail server and use it in your own form (preferred solution).
       videomailClient.on(
         videomailClient.events.SUBMITTED,
-        onSubmitted.bind(videomailClient)
-      )
+        onSubmitted.bind(videomailClient),
+      );
 
-      videomailClient.show()
+      videomailClient.show();
     </script>
   </body>
 </html>

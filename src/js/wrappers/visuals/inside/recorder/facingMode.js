@@ -1,53 +1,53 @@
-import h from 'hyperscript'
-import hidden from 'hidden'
+import h from "hyperscript";
+import hidden from "hidden";
 
-import Events from './../../../../events'
-import EventEmitter from './../../../../util/eventEmitter'
+import Events from "./../../../../events";
+import EventEmitter from "./../../../../util/eventEmitter";
 
 export default function (visuals, options) {
-  EventEmitter.call(this, options, 'Facing Mode')
+  EventEmitter.call(this, options, "Facing Mode");
 
-  const self = this
-  let facingModeElement
+  const self = this;
+  let facingModeElement;
 
   function initEvents() {
     self.on(Events.ERROR, function () {
-      self.hide()
-    })
+      self.hide();
+    });
   }
 
   this.build = function () {
-    facingModeElement = visuals.querySelector('.facingMode')
+    facingModeElement = visuals.querySelector(".facingMode");
 
     if (!facingModeElement) {
-      facingModeElement = h('button.facingMode')
-      facingModeElement.innerHTML = '⤾'
+      facingModeElement = h("button.facingMode");
+      facingModeElement.innerHTML = "⤾";
 
       facingModeElement.onclick = (e) => {
-        e && e.preventDefault()
+        e && e.preventDefault();
 
         try {
-          self.emit(Events.SWITCH_FACING_MODE)
+          self.emit(Events.SWITCH_FACING_MODE);
         } catch (exc) {
-          self.emit(Events.ERROR, exc)
+          self.emit(Events.ERROR, exc);
         }
-      }
+      };
 
-      this.hide()
+      this.hide();
 
-      visuals.appendChild(facingModeElement)
+      visuals.appendChild(facingModeElement);
     } else {
-      this.hide()
+      this.hide();
     }
 
-    initEvents()
-  }
+    initEvents();
+  };
 
   this.hide = function () {
-    hidden(facingModeElement, true)
-  }
+    hidden(facingModeElement, true);
+  };
 
   this.show = function () {
-    hidden(facingModeElement, false)
-  }
+    hidden(facingModeElement, false);
+  };
 }

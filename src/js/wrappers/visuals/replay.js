@@ -1,105 +1,105 @@
-import addEventListenerWithOptions from 'add-eventlistener-with-options'
-import hidden from 'hidden'
-import h from 'hyperscript'
-import enableInlineVideo from 'iphone-inline-video'
-import util from 'util'
+import addEventListenerWithOptions from "add-eventlistener-with-options";
+import hidden from "hidden";
+import h from "hyperscript";
+import enableInlineVideo from "iphone-inline-video";
+import inherits from "inherits";
 
-import Events from '../../events'
-import Browser from '../../util/browser'
-import EventEmitter from '../../util/eventEmitter'
-import VideomailError from '../../util/videomailError'
+import Events from "../../events";
+import Browser from "../../util/browser";
+import EventEmitter from "../../util/eventEmitter";
+import VideomailError from "../../util/videomailError";
 
 const Replay = function (parentElement, options) {
-  EventEmitter.call(this, options, 'Replay')
+  EventEmitter.call(this, options, "Replay");
 
-  const self = this
-  const browser = new Browser(options)
-  const debug = options.debug
+  const self = this;
+  const browser = new Browser(options);
+  const { debug } = options;
 
-  let built
-  let replayElement
-  let videomail
+  let built;
+  let replayElement;
+  let videomail;
 
   function buildElement() {
-    debug('Replay: buildElement()')
+    debug("Replay: buildElement()");
 
-    replayElement = h('video.' + options.selectors.replayClass)
+    replayElement = h(`video.${options.selectors.replayClass}`);
 
     if (!replayElement.setAttribute) {
-      throw VideomailError.create('Please upgrade browser', options)
+      throw VideomailError.create("Please upgrade browser", options);
     }
 
-    parentElement.appendChild(replayElement)
+    parentElement.appendChild(replayElement);
   }
 
   function isStandalone() {
-    return parentElement.constructor.name === 'HTMLDivElement'
+    return parentElement.constructor.name === "HTMLDivElement";
   }
 
   function copyAttributes(newVideomail) {
-    let attributeContainer
+    let attributeContainer;
 
     Object.keys(newVideomail).forEach(function (attribute) {
-      attributeContainer = parentElement.querySelector('.' + attribute)
+      attributeContainer = parentElement.querySelector(`.${attribute}`);
 
       if (attributeContainer) {
-        attributeContainer.innerHTML = newVideomail[attribute]
+        attributeContainer.innerHTML = newVideomail[attribute];
       }
-    })
+    });
   }
 
   function correctDimensions(options) {
-    let width, height
+    let height, width;
 
     if (videomail && videomail.playerWidth) {
-      width = videomail.playerWidth
+      width = videomail.playerWidth;
     } else if (parentElement.calculateWidth) {
-      width = parentElement.calculateWidth(options)
+      width = parentElement.calculateWidth(options);
     }
 
     if (videomail && videomail.playerHeight) {
-      height = videomail.playerHeight
+      height = videomail.playerHeight;
     } else if (parentElement.calculateHeight) {
-      height = parentElement.calculateHeight(options)
+      height = parentElement.calculateHeight(options);
     }
 
     if (width > 0) {
-      replayElement.style.width = width + 'px'
+      replayElement.style.width = `${width}px`;
     } else {
-      replayElement.style.width = 'auto'
+      replayElement.style.width = "auto";
     }
 
     if (height > 0) {
-      replayElement.style.height = height + 'px'
+      replayElement.style.height = `${height}px`;
     } else {
-      replayElement.style.height = 'auto'
+      replayElement.style.height = "auto";
     }
   }
 
   this.setVideomail = function (newVideomail) {
-    videomail = newVideomail
+    videomail = newVideomail;
 
     if (videomail) {
       if (videomail.mp4) {
-        this.setMp4Source(videomail.mp4)
+        this.setMp4Source(videomail.mp4);
       }
 
       if (videomail.webm) {
-        this.setWebMSource(videomail.webm)
+        this.setWebMSource(videomail.webm);
       }
 
       if (videomail.poster) {
-        replayElement.setAttribute('poster', videomail.poster)
+        replayElement.setAttribute("poster", videomail.poster);
       }
 
-      copyAttributes(videomail)
+      copyAttributes(videomail);
     }
 
     const hasAudio =
-      videomail && videomail.recordingStats && videomail.recordingStats.sampleRate > 0
+      videomail && videomail.recordingStats && videomail.recordingStats.sampleRate > 0;
 
-    this.show(videomail && videomail.width, videomail && videomail.height, hasAudio)
-  }
+    this.show(videomail && videomail.width, videomail && videomail.height, hasAudio);
+  };
 
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
     if (videomail) {
@@ -107,204 +107,216 @@ const Replay = function (parentElement, options) {
         responsive: true,
         // beware that recorderWidth and recorderHeight can be null sometimes
         videoWidth: recorderWidth || replayElement.videoWidth,
-        videoHeight: recorderHeight || replayElement.videoHeight
-      })
+        videoHeight: recorderHeight || replayElement.videoHeight,
+      });
     }
 
-    hidden(replayElement, false)
+    hidden(replayElement, false);
 
     // parent element can be any object, be careful!
     if (parentElement) {
       if (parentElement.style) {
-        hidden(parentElement, false)
+        hidden(parentElement, false);
       } else if (parentElement.show) {
-        parentElement.show()
+        parentElement.show();
       }
     }
 
     if (hasAudio) {
-      // https://github.com/binarykitchen/videomail-client/issues/115
-      // do not set mute to false as this will mess up. just do not mention this attribute at all
-      replayElement.setAttribute('volume', 1)
+      /*
+       * https://github.com/binarykitchen/videomail-client/issues/115
+       * do not set mute to false as this will mess up. just do not mention this attribute at all
+       */
+      replayElement.setAttribute("volume", 1);
     } else if (!options.isAudioEnabled()) {
-      replayElement.setAttribute('muted', true)
+      replayElement.setAttribute("muted", true);
     }
 
-    // this must be called after setting the sources and when becoming visible
-    // see https://github.com/bfred-it/iphone-inline-video/issues/16
+    /*
+     * this must be called after setting the sources and when becoming visible
+     * see https://github.com/bfred-it/iphone-inline-video/issues/16
+     */
     enableInlineVideo &&
       enableInlineVideo(replayElement, {
-        iPad: true
-      })
+        iPad: true,
+      });
 
     // this forces to actually fetch the videos from the server
-    replayElement.load()
+    replayElement.load();
 
     if (!videomail) {
-      self.emit(Events.PREVIEW_SHOWN)
+      self.emit(Events.PREVIEW_SHOWN);
     } else {
-      self.emit(Events.REPLAY_SHOWN)
+      self.emit(Events.REPLAY_SHOWN);
     }
-  }
+  };
 
   this.build = function () {
-    debug('Replay: build()')
+    debug("Replay: build()");
 
-    replayElement = parentElement.querySelector('video.' + options.selectors.replayClass)
+    replayElement = parentElement.querySelector(`video.${options.selectors.replayClass}`);
 
     if (!replayElement) {
-      buildElement()
+      buildElement();
     }
 
-    this.hide()
+    this.hide();
 
-    replayElement.setAttribute('autoplay', true)
-    replayElement.setAttribute('autostart', true)
-    replayElement.setAttribute('autobuffer', true)
-    replayElement.setAttribute('playsinline', true)
-    replayElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
-    replayElement.setAttribute('controls', 'controls')
-    replayElement.setAttribute('preload', 'auto')
+    replayElement.setAttribute("autoplay", true);
+    replayElement.setAttribute("autostart", true);
+    replayElement.setAttribute("autobuffer", true);
+    replayElement.setAttribute("playsinline", true);
+    replayElement.setAttribute("webkit-playsinline", "webkit-playsinline");
+    replayElement.setAttribute("controls", "controls");
+    replayElement.setAttribute("preload", "auto");
 
     if (!built) {
       if (!isStandalone()) {
         this.on(Events.PREVIEW, function (key, recorderWidth, recorderHeight) {
-          self.show(recorderWidth, recorderHeight)
-        })
+          self.show(recorderWidth, recorderHeight);
+        });
       }
 
-      // makes use of passive option automatically for better performance
-      // https://www.npmjs.com/package/add-eventlistener-with-options
-      addEventListenerWithOptions(replayElement, 'touchstart', function (e) {
+      /*
+       * makes use of passive option automatically for better performance
+       * https://www.npmjs.com/package/add-eventlistener-with-options
+       */
+      addEventListenerWithOptions(replayElement, "touchstart", function (e) {
         try {
-          e && e.preventDefault()
+          e && e.preventDefault();
         } catch (exc) {
-          // ignore errors like
-          // Unable to preventDefault inside passive event listener invocation.
+          /*
+           * ignore errors like
+           * Unable to preventDefault inside passive event listener invocation.
+           */
         }
 
         if (this.paused) {
-          play()
+          play();
         } else {
-          pause()
+          pause();
         }
-      })
+      });
 
       replayElement.onclick = function (e) {
-        e && e.preventDefault()
+        e && e.preventDefault();
 
         if (this.paused) {
-          play()
+          play();
         } else {
-          pause()
+          pause();
         }
-      }
+      };
     }
 
-    built = true
+    built = true;
 
-    debug('Replay: built.')
-  }
+    debug("Replay: built.");
+  };
 
   this.unload = function () {
-    built = false
-  }
+    built = false;
+  };
 
   this.getVideoSource = function (type) {
-    const sources = replayElement.getElementsByTagName('source')
-    const l = sources && sources.length
-    const videoType = 'video/' + type
+    const sources = replayElement.getElementsByTagName("source");
+    const l = sources && sources.length;
+    const videoType = `video/${type}`;
 
-    let source
+    let source;
 
     if (l) {
-      let i
+      let i;
 
       for (i = 0; i < l && !source; i++) {
-        if (sources[i].getAttribute('type') === videoType) {
-          source = sources[i]
+        if (sources[i].getAttribute("type") === videoType) {
+          source = sources[i];
         }
       }
     }
 
-    return source
-  }
+    return source;
+  };
 
   function setVideoSource(type, src, bustCache) {
-    let source = self.getVideoSource(type)
+    let source = self.getVideoSource(type);
 
     if (src && bustCache) {
-      src += '?' + Date.now()
+      src += `?${Date.now()}`;
     }
 
     if (!source) {
       if (src) {
-        const fps = options.video.fps
+        const { fps } = options.video;
 
         // Ensure it's greater than the frame duration itself
-        const t = 2 * (1 / fps)
+        const t = 2 * (1 / fps);
 
-        source = h('source', {
-          // Ensures HTML video thumbnail turns up on iOS, see
-          // https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
-          src: src + '#t=' + t,
-          type: 'video/' + type
-        })
+        source = h("source", {
+          /*
+           * Ensures HTML video thumbnail turns up on iOS, see
+           * https://muffinman.io/blog/hack-for-ios-safari-to-display-html-video-thumbnail/
+           */
+          src: `${src}#t=${t}`,
+          type: `video/${type}`,
+        });
 
-        replayElement.appendChild(source)
+        replayElement.appendChild(source);
       }
+    } else if (src) {
+      source.setAttribute("src", src);
     } else {
-      if (src) {
-        source.setAttribute('src', src)
-      } else {
-        replayElement.removeChild(source)
-      }
+      replayElement.removeChild(source);
     }
   }
 
   this.setMp4Source = function (src, bustCache) {
-    setVideoSource('mp4', src, bustCache)
-  }
+    setVideoSource("mp4", src, bustCache);
+  };
 
   this.setWebMSource = function (src, bustCache) {
-    setVideoSource('webm', src, bustCache)
-  }
+    setVideoSource("webm", src, bustCache);
+  };
 
   this.getVideoType = function () {
-    return browser.getVideoType(replayElement)
-  }
+    return browser.getVideoType(replayElement);
+  };
 
   function pause(cb) {
-    // avoids race condition, inspired by
-    // http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
+    /*
+     * avoids race condition, inspired by
+     * http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
+     */
     setTimeout(() => {
       try {
-        replayElement.pause()
+        replayElement.pause();
       } catch (exc) {
         // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
-        options.logger.warn(exc)
+        options.logger.warn(exc);
       }
 
-      cb && cb()
-    }, 15)
+      cb && cb();
+    }, 15);
   }
 
   function play() {
     if (replayElement && replayElement.play) {
-      let p
+      let p;
 
       try {
-        p = replayElement.play()
+        p = replayElement.play();
       } catch (exc) {
-        // this in the hope to catch InvalidStateError, see
-        // https://github.com/binarykitchen/videomail-client/issues/149
-        options.logger.warn('Caught replay exception:', exc)
+        /*
+         * this in the hope to catch InvalidStateError, see
+         * https://github.com/binarykitchen/videomail-client/issues/149
+         */
+        options.logger.warn("Caught replay exception:", exc);
       }
 
-      if (p && typeof Promise !== 'undefined' && p instanceof Promise) {
+      if (p && typeof Promise !== "undefined" && p instanceof Promise) {
         p.catch((reason) => {
-          options.logger.warn('Caught pending replay promise exception: %s', reason)
-        })
+          options.logger.warn("Caught pending replay promise exception: %s", reason);
+        });
       }
     }
   }
@@ -313,31 +325,31 @@ const Replay = function (parentElement, options) {
     // pause video to make sure it won't consume any memory
     pause(() => {
       if (replayElement) {
-        self.setMp4Source(null)
-        self.setWebMSource(null)
+        self.setMp4Source(null);
+        self.setWebMSource(null);
       }
 
-      cb && cb()
-    })
-  }
+      cb && cb();
+    });
+  };
 
   this.hide = function () {
     if (isStandalone()) {
-      hidden(parentElement, true)
+      hidden(parentElement, true);
     } else {
-      replayElement && hidden(replayElement, true)
+      replayElement && hidden(replayElement, true);
     }
-  }
+  };
 
   this.isShown = function () {
-    return replayElement && !hidden(replayElement)
-  }
+    return replayElement && !hidden(replayElement);
+  };
 
   this.getParentElement = function () {
-    return parentElement
-  }
-}
+    return parentElement;
+  };
+};
 
-util.inherits(Replay, EventEmitter)
+inherits(Replay, EventEmitter);
 
-export default Replay
+export default Replay;

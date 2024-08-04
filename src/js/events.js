@@ -1,4 +1,4 @@
-import keymirror from 'keymirror'
+import keymirror from "keymirror";
 
 export default keymirror({
   BUILT: null, // all dom elements are ready, are in the DOM
@@ -42,5 +42,5 @@ export default keymirror({
   VISIBLE: null, // document just became visible
   INVISIBLE: null, // document just became INvisible
   SWITCH_FACING_MODE: null, // to switch camera on mobiles between fron and back
-  SERVER_READY: null // Gets emitted when the ready command is sent through sockets from the server for recording
-})
+  SERVER_READY: null, // Gets emitted when the ready command is sent through sockets from the server for recording
+});

@@ -1,13 +1,13 @@
-import test from 'tape-catch'
+import test from "tape-catch";
 
-import Form from './../../src/js/wrappers/form'
+import Form from "./../../src/js/wrappers/form";
 
-test('Form:', function (t) {
-  t.test('can be instantiated', function (tt) {
-    tt.plan(1)
+test("Form:", function (t) {
+  t.test("can be instantiated", function (tt) {
+    tt.plan(1);
 
     tt.doesNotThrow(function () {
-      return new Form()
-    })
-  })
-})
+      return new Form();
+    });
+  });
+});

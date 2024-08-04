@@ -1,19 +1,21 @@
-import 'classlist.js'
+import "classlist.js";
 
 // https://github.com/julienetie/request-frame
-import requestFrame from 'request-frame'
+import requestFrame from "request-frame";
 
 // use those default params for unit tests
 export default function (window = {}, navigator = {}) {
   // https://github.com/julienetie/request-frame/issues/6
   if (!window.screen) {
-    window.screen = {}
+    window.screen = {};
   }
 
-  requestFrame('native')
+  requestFrame("native");
 
-  // avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
-  // see https://github.com/binarykitchen/videomail-client/issues/79
+  /*
+   * avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
+   * see https://github.com/binarykitchen/videomail-client/issues/79
+   */
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     // do not shim
   } else {
@@ -21,49 +23,49 @@ export default function (window = {}, navigator = {}) {
       navigator.getUserMedia ||
       navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia ||
-      navigator.msGetUserMedia
+      navigator.msGetUserMedia;
   }
 
   if (!window.AudioContext && window.webkitAudioContext) {
-    window.AudioContext = window.webkitAudioContext
+    window.AudioContext = window.webkitAudioContext;
   }
 
   if (!window.URL) {
-    window.URL = window.webkitURL || window.mozURL || window.msURL
+    window.URL = window.webkitURL || window.mozURL || window.msURL;
   }
 
   if (!navigator.connection) {
-    navigator.connection = navigator.mozConnection || navigator.webkitConnection
+    navigator.connection = navigator.mozConnection || navigator.webkitConnection;
   }
 
   const methods = [
-    'debug',
-    'groupCollapsed',
-    'groupEnd',
-    'error',
-    'exception',
-    'info',
-    'log',
-    'trace',
-    'warn'
-  ]
+    "debug",
+    "groupCollapsed",
+    "groupEnd",
+    "error",
+    "exception",
+    "info",
+    "log",
+    "trace",
+    "warn",
+  ];
 
-  let console = {}
+  let console = {};
 
   if (window.console) {
-    console = window.console
+    console = window.console;
   } else {
-    window.console = function () {}
+    window.console = function () {};
   }
 
-  let method
-  let length = methods.length
+  let method;
+  let { length } = methods;
 
   while (length--) {
-    method = methods[length]
+    method = methods[length];
 
     if (!console[method]) {
-      console[method] = function () {}
+      console[method] = function () {};
     }
   }
 }

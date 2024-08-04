@@ -1,204 +1,206 @@
-import superagent from 'superagent'
+import superagent from "superagent";
 
-import Constants from './constants'
+import Constants from "./constants";
 
-const CACHE_KEY = 'alias'
-const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone
+const CACHE_KEY = "alias";
+const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export default function (options) {
-  const cache = {}
+  const cache = {};
 
   function applyDefaultValue(videomail, name) {
     if (options.defaults[name] && !videomail[name]) {
-      videomail[name] = options.defaults[name]
+      videomail[name] = options.defaults[name];
     }
 
-    return videomail
+    return videomail;
   }
 
   function applyDefaultValues(videomail) {
     if (options.defaults) {
-      videomail = applyDefaultValue(videomail, 'from')
-      videomail = applyDefaultValue(videomail, 'to')
-      videomail = applyDefaultValue(videomail, 'cc')
-      videomail = applyDefaultValue(videomail, 'bcc')
-      videomail = applyDefaultValue(videomail, 'subject')
-      videomail = applyDefaultValue(videomail, 'body')
+      videomail = applyDefaultValue(videomail, "from");
+      videomail = applyDefaultValue(videomail, "to");
+      videomail = applyDefaultValue(videomail, "cc");
+      videomail = applyDefaultValue(videomail, "bcc");
+      videomail = applyDefaultValue(videomail, "subject");
+      videomail = applyDefaultValue(videomail, "body");
     }
 
-    return videomail
+    return videomail;
   }
 
   function packError(err, res) {
     if (res && res.body && res.body.error) {
       // use the server generated text instead of the superagent's default text
-      err = res.body.error
+      err = res.body.error;
 
       if (!err.message && res.text) {
-        err.message = res.text
+        err.message = res.text;
       }
     }
 
-    return err
+    return err;
   }
 
   function fetch(alias, cb) {
     superagent
-      .get('/videomail/' + alias + '/snapshot')
-      .set('Accept', 'application/json')
-      .set('Timezone-Id', timezoneId)
+      .get(`/videomail/${alias}/snapshot`)
+      .set("Accept", "application/json")
+      .set("Timezone-Id", timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
       .timeout(options.timeouts.connection)
       .end(function (err, res) {
-        err = packError(err, res)
+        err = packError(err, res);
 
         if (err) {
-          cb(err)
+          cb(err);
         } else {
-          const videomail = res.body ? res.body : null
+          const videomail = res.body ? res.body : null;
 
           if (options.cache) {
-            cache[CACHE_KEY] = videomail
+            cache[CACHE_KEY] = videomail;
           }
 
-          cb(null, videomail)
+          cb(null, videomail);
         }
-      })
+      });
   }
 
   function write(method, videomail, identifier, cb) {
     if (!cb) {
-      cb = identifier
-      identifier = null
+      cb = identifier;
+      identifier = null;
     }
 
-    const queryParams = {}
+    const queryParams = {};
 
-    let url = options.baseUrl + '/videomail/'
+    let url = `${options.baseUrl}/videomail/`;
 
     if (identifier) {
-      url += identifier
+      url += identifier;
     }
 
-    const request = superagent(method, url)
+    const request = superagent(method, url);
 
-    queryParams[Constants.SITE_NAME_LABEL] = options.siteName
+    queryParams[Constants.SITE_NAME_LABEL] = options.siteName;
 
     request
       .query(queryParams)
-      .set('Timezone-Id', timezoneId)
+      .set("Timezone-Id", timezoneId)
       .send(videomail)
       .timeout(options.timeout)
       .end(function (err, res) {
-        err = packError(err, res)
+        err = packError(err, res);
 
         if (err) {
-          cb(err)
+          cb(err);
         } else {
           const returnedVideomail =
-            res.body && res.body.videomail ? res.body.videomail : null
+            res.body && res.body.videomail ? res.body.videomail : null;
 
           if (options.cache && videomail[CACHE_KEY]) {
-            cache[videomail[CACHE_KEY]] = returnedVideomail
+            cache[videomail[CACHE_KEY]] = returnedVideomail;
           }
 
-          cb(null, returnedVideomail, res.body)
+          cb(null, returnedVideomail, res.body);
         }
-      })
+      });
   }
 
   this.get = function (alias, cb) {
     if (options.cache && cache[alias]) {
       // keep all callbacks async
       setTimeout(() => {
-        cb(null, cache[alias])
-      }, 0)
+        cb(null, cache[alias]);
+      }, 0);
     } else {
-      fetch(alias, cb)
+      fetch(alias, cb);
     }
-  }
+  };
 
   this.reportError = function (err, cb) {
-    const queryParams = {}
-    const url = options.baseUrl + '/client-error/'
-    const request = superagent('post', url)
+    const queryParams = {};
+    const url = `${options.baseUrl}/client-error/`;
+    const request = superagent("post", url);
 
-    queryParams[Constants.SITE_NAME_LABEL] = options.siteName
+    queryParams[Constants.SITE_NAME_LABEL] = options.siteName;
 
     request
       .query(queryParams)
       .send(err)
       .timeout(options.timeout)
       .end(function (err, res) {
-        err = packError(err, res)
+        err = packError(err, res);
         if (err) {
-          cb && cb(err)
+          cb && cb(err);
         } else {
-          cb && cb()
+          cb && cb();
         }
-      })
-  }
+      });
+  };
 
   this.post = function (videomail, cb) {
-    videomail = applyDefaultValues(videomail)
+    videomail = applyDefaultValues(videomail);
 
-    // always good to know the version of the client
-    // the videomail was submitted with
-    videomail[Constants.VERSION_LABEL] = options.version
+    /*
+     * always good to know the version of the client
+     * the videomail was submitted with
+     */
+    videomail[Constants.VERSION_LABEL] = options.version;
 
     if (options.callbacks.adjustFormDataBeforePosting) {
       options.callbacks.adjustFormDataBeforePosting(
         videomail,
         function (err, adjustedVideomail) {
           if (err) {
-            cb(err)
+            cb(err);
           } else {
-            write('post', adjustedVideomail, cb)
+            write("post", adjustedVideomail, cb);
           }
-        }
-      )
+        },
+      );
     } else {
-      write('post', videomail, cb)
+      write("post", videomail, cb);
     }
-  }
+  };
 
   this.put = function (videomail, cb) {
-    write('put', videomail, videomail.key, cb)
-  }
+    write("put", videomail, videomail.key, cb);
+  };
 
   this.form = function (formData, url, cb) {
-    let formType
+    let formType;
 
     switch (options.enctype) {
       case Constants.public.ENC_TYPE_APP_JSON:
-        formType = 'json'
-        break
+        formType = "json";
+        break;
       case Constants.public.ENC_TYPE_FORM:
-        formType = 'form'
-        break
+        formType = "form";
+        break;
       default:
         // keep all callbacks async
         setTimeout(() => {
-          cb(new Error('Invalid enctype given: ' + options.enctype))
-        }, 0)
+          cb(new Error(`Invalid enctype given: ${options.enctype}`));
+        }, 0);
     }
 
     if (formType) {
       superagent
         .post(url)
         .type(formType)
-        .set('Timezone-Id', timezoneId)
+        .set("Timezone-Id", timezoneId)
         .send(formData)
         .timeout(options.timeout)
         .end(function (err, res) {
-          err = packError(err, res)
+          err = packError(err, res);
 
           if (err) {
-            cb(err)
+            cb(err);
           } else {
-            cb(null, res)
+            cb(null, res);
           }
-        })
+        });
     }
-  }
+  };
 }

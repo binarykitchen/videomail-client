@@ -1,13 +1,13 @@
-import test from 'tape-catch'
+import test from "tape-catch";
 
-import AudioRecorder from './../../src/js/util/audioRecorder'
+import AudioRecorder from "./../../src/js/util/audioRecorder";
 
-test('AudioRecorder:', function (t) {
-  t.test('can be instantiated', function (tt) {
-    tt.plan(1)
+test("AudioRecorder:", function (t) {
+  t.test("can be instantiated", function (tt) {
+    tt.plan(1);
 
     tt.doesNotThrow(function () {
-      return new AudioRecorder()
-    })
-  })
-})
+      return new AudioRecorder();
+    });
+  });
+});

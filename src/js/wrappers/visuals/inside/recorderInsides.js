@@ -1,144 +1,144 @@
-import util from 'util'
+import inherits from "inherits";
 
-import Events from './../../../events'
-import EventEmitter from './../../../util/eventEmitter'
-import Browser from './../../../util/browser'
+import Events from "./../../../events";
+import EventEmitter from "./../../../util/eventEmitter";
+import Browser from "./../../../util/browser";
 
-import Countdown from './recorder/countdown'
-import PausedNote from './recorder/pausedNote'
-import RecordNote from './recorder/recordNote'
-import RecordTimer from './recorder/recordTimer'
-import FacingMode from './recorder/facingMode'
+import Countdown from "./recorder/countdown";
+import PausedNote from "./recorder/pausedNote";
+import RecordNote from "./recorder/recordNote";
+import RecordTimer from "./recorder/recordTimer";
+import FacingMode from "./recorder/facingMode";
 
 const RecorderInsides = function (visuals, options) {
-  EventEmitter.call(this, options, 'RecorderInsides')
+  EventEmitter.call(this, options, "RecorderInsides");
 
-  const self = this
-  const debug = options.debug
+  const self = this;
+  const { debug } = options;
 
-  const recordNote = new RecordNote(visuals)
-  const recordTimer = new RecordTimer(visuals, recordNote, options)
-  const browser = new Browser(options)
+  const recordNote = new RecordNote(visuals);
+  const recordTimer = new RecordTimer(visuals, recordNote, options);
+  const browser = new Browser(options);
 
-  let countdown
-  let pausedNote
-  let built
-  let facingMode
+  let countdown;
+  let pausedNote;
+  let built;
+  let facingMode;
 
   if (options.video.countdown) {
-    countdown = new Countdown(visuals, options)
+    countdown = new Countdown(visuals, options);
   }
 
   if (options.video.facingModeButton && browser.isMobile()) {
-    facingMode = new FacingMode(visuals, options)
+    facingMode = new FacingMode(visuals, options);
   }
 
   if (options.enablePause) {
-    pausedNote = new PausedNote(visuals, options)
+    pausedNote = new PausedNote(visuals, options);
   }
 
   function startRecording() {
-    recordTimer.start()
+    recordTimer.start();
   }
 
   function resumeRecording() {
-    recordTimer.resume()
+    recordTimer.resume();
   }
 
   function stopRecording() {
-    recordTimer.stop()
+    recordTimer.stop();
   }
 
   function pauseRecording() {
     if (self.isCountingDown()) {
-      countdown.pause()
+      countdown.pause();
     } else {
-      recordTimer.pause()
+      recordTimer.pause();
     }
   }
 
   function onResetting() {
-    self.hidePause()
-    self.hideCountdown()
-    recordTimer.stop()
-    facingMode && facingMode.hide()
+    self.hidePause();
+    self.hideCountdown();
+    recordTimer.stop();
+    facingMode && facingMode.hide();
   }
 
   function initEvents() {
-    debug('RecorderInsides: initEvents()')
+    debug("RecorderInsides: initEvents()");
 
     self
       .on(Events.USER_MEDIA_READY, function () {
-        facingMode && facingMode.show()
+        facingMode && facingMode.show();
       })
       .on(Events.RECORDING, function () {
-        startRecording()
+        startRecording();
       })
       .on(Events.RESUMING, function () {
-        resumeRecording()
+        resumeRecording();
       })
       .on(Events.STOPPING, function () {
-        stopRecording()
+        stopRecording();
       })
       .on(Events.PAUSED, function () {
-        pauseRecording()
+        pauseRecording();
       })
       .on(Events.RESETTING, onResetting)
       .on(Events.HIDE, function () {
-        self.hideCountdown()
-      })
+        self.hideCountdown();
+      });
   }
 
   this.build = function () {
-    debug('RecorderInsides: build()')
+    debug("RecorderInsides: build()");
 
-    countdown && countdown.build()
-    pausedNote && pausedNote.build()
-    facingMode && facingMode.build()
+    countdown && countdown.build();
+    pausedNote && pausedNote.build();
+    facingMode && facingMode.build();
 
-    recordNote.build()
-    recordTimer.build()
+    recordNote.build();
+    recordTimer.build();
 
-    !built && initEvents()
+    !built && initEvents();
 
-    built = true
-  }
+    built = true;
+  };
 
   this.unload = function () {
-    countdown && countdown.unload()
+    countdown && countdown.unload();
 
-    built = false
-  }
+    built = false;
+  };
 
   this.showPause = function () {
-    pausedNote && pausedNote.show()
-  }
+    pausedNote && pausedNote.show();
+  };
 
   this.hidePause = function () {
-    pausedNote && pausedNote.hide()
-  }
+    pausedNote && pausedNote.hide();
+  };
 
   this.hideCountdown = function () {
-    countdown && countdown.hide()
-  }
+    countdown && countdown.hide();
+  };
 
   this.startCountdown = function (cb) {
-    countdown && countdown.start(cb)
-  }
+    countdown && countdown.start(cb);
+  };
 
   this.resumeCountdown = function () {
-    countdown && countdown.resume()
-  }
+    countdown && countdown.resume();
+  };
 
   this.isCountingDown = function () {
-    return countdown && countdown.isCountingDown()
-  }
+    return countdown && countdown.isCountingDown();
+  };
 
   this.checkTimer = function (intervalSum) {
-    recordTimer.check(intervalSum)
-  }
-}
+    recordTimer.check(intervalSum);
+  };
+};
 
-util.inherits(RecorderInsides, EventEmitter)
+inherits(RecorderInsides, EventEmitter);
 
-export default RecorderInsides
+export default RecorderInsides;

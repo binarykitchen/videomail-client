@@ -1,151 +1,149 @@
-import h from 'hyperscript'
-import hidden from 'hidden'
+import h from "hyperscript";
+import hidden from "hidden";
 
 export default function (visuals, recordNote, options) {
-  let recordTimerElement
+  let recordTimerElement;
 
-  let nearComputed = false
-  let endNighComputed = false
+  let nearComputed = false;
+  let endNighComputed = false;
 
-  let started
-  let countdown
+  let started;
+  let countdown;
 
   function pad(n) {
-    return n < 10 ? '0' + n : n
+    return n < 10 ? `0${n}` : n;
   }
 
   function thresholdReached(secs, threshold) {
-    return secs >= options.video.limitSeconds * threshold
+    return secs >= options.video.limitSeconds * threshold;
   }
 
   function isNear(secs) {
     if (!nearComputed && thresholdReached(secs, 0.6)) {
-      nearComputed = true
-      return true
+      nearComputed = true;
+      return true;
     }
 
-    return false
+    return false;
   }
 
   function endIsNigh(secs) {
     if (!endNighComputed && thresholdReached(secs, 0.8)) {
-      endNighComputed = true
-      return true
+      endNighComputed = true;
+      return true;
     }
 
-    return false
+    return false;
   }
 
   function setNear() {
-    recordTimerElement.classList.add('near')
+    recordTimerElement.classList.add("near");
   }
 
   function setNigh() {
-    recordTimerElement.classList.add('nigh')
+    recordTimerElement.classList.add("nigh");
   }
 
   this.check = function (opts) {
-    const newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3)
+    const newCountdown = getStartSeconds() - Math.floor(opts.intervalSum / 1e3);
 
     // performance optimisation (another reason we need react here!)
     if (newCountdown !== countdown) {
-      countdown = newCountdown
-      update()
-      countdown < 1 && visuals.stop(true)
+      countdown = newCountdown;
+      update();
+      countdown < 1 && visuals.stop(true);
     }
-  }
+  };
 
   function update() {
-    const mins = parseInt(countdown / 60, 10)
-    const secs = countdown - mins * 60
+    const mins = parseInt(countdown / 60, 10);
+    const secs = countdown - mins * 60;
 
     if (!nearComputed || !endNighComputed) {
-      const remainingSeconds = options.video.limitSeconds - countdown
+      const remainingSeconds = options.video.limitSeconds - countdown;
 
       if (isNear(remainingSeconds)) {
-        recordNote.setNear()
-        setNear()
+        recordNote.setNear();
+        setNear();
 
-        options.debug('End is near, ' + countdown + ' seconds to go')
+        options.debug(`End is near, ${countdown} seconds to go`);
       } else if (endIsNigh(remainingSeconds)) {
-        recordNote.setNigh()
-        setNigh()
+        recordNote.setNigh();
+        setNigh();
 
-        options.debug('End is nigh, ' + countdown + ' seconds to go')
+        options.debug(`End is nigh, ${countdown} seconds to go`);
       }
     }
 
-    recordTimerElement.innerHTML = mins + ':' + pad(secs)
+    recordTimerElement.innerHTML = `${mins}:${pad(secs)}`;
   }
 
   function hide() {
-    hidden(recordTimerElement, true)
+    hidden(recordTimerElement, true);
   }
 
   function show() {
-    recordTimerElement.classList.remove('near')
-    recordTimerElement.classList.remove('nigh')
+    recordTimerElement.classList.remove("near");
+    recordTimerElement.classList.remove("nigh");
 
-    hidden(recordTimerElement, false)
+    hidden(recordTimerElement, false);
   }
 
   function getSecondsRecorded() {
-    return getStartSeconds() - countdown
+    return getStartSeconds() - countdown;
   }
 
   function getStartSeconds() {
-    return options.video.limitSeconds
+    return options.video.limitSeconds;
   }
 
   this.start = function () {
-    countdown = getStartSeconds()
-    nearComputed = endNighComputed = false
-    started = true
+    countdown = getStartSeconds();
+    nearComputed = endNighComputed = false;
+    started = true;
 
-    update()
+    update();
 
-    show()
-  }
+    show();
+  };
 
   this.pause = function () {
-    recordNote.hide()
-  }
+    recordNote.hide();
+  };
 
   this.resume = function () {
-    recordNote.show()
-  }
+    recordNote.show();
+  };
 
   function isStopped() {
-    return countdown === null
+    return countdown === null;
   }
 
   this.stop = function () {
     if (!isStopped() && started) {
       options.debug(
-        'Stopping record timer. Was recording for about ~' +
-          getSecondsRecorded() +
-          ' seconds.'
-      )
+        `Stopping record timer. Was recording for about ~${getSecondsRecorded()} seconds.`,
+      );
 
-      hide()
-      recordNote.stop()
+      hide();
+      recordNote.stop();
 
-      countdown = null
-      started = false
+      countdown = null;
+      started = false;
     }
-  }
+  };
 
   this.build = function () {
-    recordTimerElement = visuals.querySelector('.recordTimer')
+    recordTimerElement = visuals.querySelector(".recordTimer");
 
     if (!recordTimerElement) {
-      recordTimerElement = h('p.recordTimer')
+      recordTimerElement = h("p.recordTimer");
 
-      hide()
+      hide();
 
-      visuals.appendChild(recordTimerElement)
+      visuals.appendChild(recordTimerElement);
     } else {
-      hide()
+      hide();
     }
-  }
+  };
 }
