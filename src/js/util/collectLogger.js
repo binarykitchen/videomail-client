@@ -1,5 +1,5 @@
 import Browser from "./browser";
-import { printf } from "fast-printf";
+import formatUtil from "format-util";
 
 export default function (localOptions = {}) {
   const browser = new Browser(localOptions);
@@ -10,7 +10,7 @@ export default function (localOptions = {}) {
   const stack = [];
 
   function lifo(level, parameters) {
-    const line = printf(...parameters);
+    const line = formatUtil(...parameters);
 
     if (stack.length > localOptions.logStackSize) {
       stack.pop();

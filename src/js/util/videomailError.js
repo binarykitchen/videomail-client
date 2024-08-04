@@ -2,7 +2,7 @@ import Resource from "./../resource";
 // https://github.com/tgriesser/create-error
 import createError from "create-error";
 import originalPretty from "./pretty";
-import util from "util";
+import stringify from "safe-json-stringify";
 
 const VIDEOMAIL_ERR_NAME = "Videomail Error";
 
@@ -291,10 +291,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
         } else {
           // tried toString before but nah
           explanation =
-            "Inspected: " +
-            util.inspect(originalExplanation, {
-              showHidden: true,
-            });
+            "Inspected: " + stringify(originalExplanation);
         }
       }
 
