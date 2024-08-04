@@ -1147,7 +1147,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     bytesSum = 0;
 
-    frame = new Frame(canvas, options);
+    frame = new Frame(canvas, options.image.types, options.image.quality);
 
     debug("Recorder: record()");
     userMedia.record();
