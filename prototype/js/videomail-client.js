@@ -17690,7 +17690,6 @@ module.exports={
     "gulp-sourcemaps": "3.0.0",
     "gulp-stylus": "3.0.1",
     "gulp-terser": "2.1.0",
-    "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
     "nib": "1.2.0",
     "postcss": "8.4.40",

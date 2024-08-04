@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "8.1.1",
+  "version": "8.2.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -114,7 +114,6 @@
     "gulp-sourcemaps": "3.0.0",
     "gulp-stylus": "3.0.1",
     "gulp-terser": "2.1.0",
-    "gulp-todo": "7.1.1",
     "minimist": "1.2.8",
     "nib": "1.2.0",
     "postcss": "8.4.40",

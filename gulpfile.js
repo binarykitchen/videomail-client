@@ -70,17 +70,6 @@ function stylus() {
   );
 }
 
-function todo() {
-  return gulp
-    .src(["src/**/*.{js, styl}", "gulpfile.js", "prototype/*.html"], { base: "./" })
-    .pipe(
-      plugins.todo({
-        fileName: "TODO.md",
-      }),
-    )
-    .pipe(gulp.dest("./"));
-}
-
 const cache = {};
 const packageCache = {};
 
@@ -240,10 +229,10 @@ exports.bumpVersion = function () {
     .on("error", log.error);
 };
 
-const build = gulp.series(gulp.parallel(gulp.series(stylus, cleanJs, bundle), todo));
+const build = gulp.series(gulp.parallel(gulp.series(stylus, cleanJs, bundle)));
 
 exports.watch = gulp.series(
-  gulp.parallel(gulp.series(stylus, cleanJs, bundleWithWatchify), todo),
+  gulp.parallel(gulp.series(stylus, cleanJs, bundleWithWatchify)),
   gulp.parallel(connectHttp, connectHttps),
   watch,
 );
