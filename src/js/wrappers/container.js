@@ -3,6 +3,7 @@ import Visibility from "document-visibility";
 import elementClosest from "element-closest";
 import hidden from "hidden";
 import insertCss from "insert-css";
+
 import inherits from "inherits";
 
 import css from "../../styles/css/main.min.css.js";

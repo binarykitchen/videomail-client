@@ -1,5 +1,4 @@
 import despot from "despot";
-import stringify from "safe-json-stringify";
 
 import VideomailError from "./videomailError";
 import Events from "./../events";
@@ -32,7 +31,7 @@ export default function (options, name) {
         }
 
         if (moreArguments) {
-          options.debug("%s emits: %s", name, event, stringify(moreArguments));
+          options.debug("%s emits: %s", name, event, moreArguments);
         } else {
           options.debug("%s emits: %s", name, event);
         }

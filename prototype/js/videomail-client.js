@@ -17502,7 +17502,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.1",
+  "version": "8.3.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -18731,7 +18731,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 var _despot = _interopRequireDefault(_dereq_("despot"));
-var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
 var _events = _interopRequireDefault(_dereq_("./../events"));
 // TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
@@ -18756,7 +18755,7 @@ function _default(options, name) {
           moreArguments = args.slice(1);
         }
         if (moreArguments) {
-          options.debug("%s emits: %s", name, event, (0, _safeJsonStringify.default)(moreArguments));
+          options.debug("%s emits: %s", name, event, moreArguments);
         } else {
           options.debug("%s emits: %s", name, event);
         }
@@ -18789,7 +18788,7 @@ function _default(options, name) {
   };
 }
 
-},{"./../events":119,"./videomailError":130,"@babel/runtime/helpers/interopRequireDefault":3,"despot":28,"safe-json-stringify":99}],126:[function(_dereq_,module,exports){
+},{"./../events":119,"./videomailError":130,"@babel/runtime/helpers/interopRequireDefault":3,"despot":28}],126:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22214,7 +22213,7 @@ var Recorder = function Recorder(visuals, replay) {
   function onUserMediaReady() {
     var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     try {
-      debug("Recorder: onUserMediaReady()", (0, _safeJsonStringify.default)(params));
+      debug("Recorder: onUserMediaReady()", params);
       var switchingFacingMode = params.switchingFacingMode;
       userMediaLoading = blocking = unloaded = submitting = false;
       userMediaLoaded = true;
@@ -22495,7 +22494,7 @@ var Recorder = function Recorder(visuals, replay) {
     }
   }
   function getUserMediaCallback(localStream, params) {
-    debug("Recorder: getUserMediaCallback()", (0, _safeJsonStringify.default)(params));
+    debug("Recorder: getUserMediaCallback()", params);
     if (showUserMedia()) {
       try {
         clearUserMediaTimeout();
@@ -22555,9 +22554,9 @@ var Recorder = function Recorder(visuals, replay) {
           };
         }
       }
-      debug("Recorder: navigator.mediaDevices.getUserMedia()", "constraints", (0, _safeJsonStringify.default)(constraints));
+      debug("Recorder: navigator.mediaDevices.getUserMedia()", "constraints", constraints);
       if (navigator.mediaDevices.getSupportedConstraints) {
-        debug("Recorder: navigator.mediaDevices.getSupportedConstraints()", (0, _safeJsonStringify.default)(navigator.mediaDevices.getSupportedConstraints()));
+        debug("Recorder: navigator.mediaDevices.getSupportedConstraints()", navigator.mediaDevices.getSupportedConstraints());
       }
       var genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints);
       if (genuineUserMediaRequest) {
@@ -22591,7 +22590,7 @@ var Recorder = function Recorder(visuals, replay) {
       debug("Recorder: skipping loadUserMedia() because it is already asking for permission");
       return false;
     }
-    debug("Recorder: loadUserMedia()", (0, _safeJsonStringify.default)(params));
+    debug("Recorder: loadUserMedia()", params);
     self.emit(_events.default.LOADING_USER_MEDIA);
     try {
       userMediaTimeout = setTimeout(function () {
@@ -22672,7 +22671,7 @@ var Recorder = function Recorder(visuals, replay) {
         cb && cb();
       });
     } else if (stream) {
-      debug("$ %s", command, args ? (0, _safeJsonStringify.default)(args) : "");
+      debug("$ %s", command, args);
       var commandObj = {
         command: command,
         args: args
@@ -23456,7 +23455,7 @@ var Replay = function Replay(parentElement, options) {
      */
     setTimeout(function () {
       try {
-        replayElement.pause();
+        replayElement && replayElement.pause();
       } catch (exc) {
         // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
         options.logger.warn(exc);
@@ -23526,7 +23525,6 @@ var _mediaEvents = _interopRequireDefault(_dereq_("./../../util/mediaEvents"));
 var _videomailError = _interopRequireDefault(_dereq_("./../../util/videomailError"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _pretty = _interopRequireDefault(_dereq_("./../../util/pretty"));
-var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var EVENT_ASCII = "|—O—|";
 function _default(recorder, options) {
   _eventEmitter.default.call(this, options, "UserMedia");
@@ -23600,7 +23598,7 @@ function _default(recorder, options) {
     return videoTrack;
   }
   function logEvent(event, params) {
-    options.debug("UserMedia: ...", EVENT_ASCII, "event", event, (0, _safeJsonStringify.default)(params));
+    options.debug("UserMedia: ...", EVENT_ASCII, "event", event, params);
   }
   function isPromise(anything) {
     return anything && typeof Promise !== "undefined" && anything instanceof Promise;
@@ -23925,7 +23923,7 @@ function _default(recorder, options) {
   };
 }
 
-},{"./../../events":119,"./../../util/audioRecorder":122,"./../../util/browser":123,"./../../util/eventEmitter":125,"./../../util/mediaEvents":127,"./../../util/pretty":128,"./../../util/videomailError":130,"@babel/runtime/helpers/interopRequireDefault":3,"hyperscript":61,"safe-json-stringify":99}],147:[function(_dereq_,module,exports){
+},{"./../../events":119,"./../../util/audioRecorder":122,"./../../util/browser":123,"./../../util/eventEmitter":125,"./../../util/mediaEvents":127,"./../../util/pretty":128,"./../../util/videomailError":130,"@babel/runtime/helpers/interopRequireDefault":3,"hyperscript":61}],147:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = '@-webkit-keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.IIV::-webkit-media-controls-play-button,.IIV::-webkit-media-controls-start-playback-button{opacity:0;pointer-events:none;width:5px}.videomail .visuals{position:relative}.videomail .visuals video.replay{height:100%;width:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{height:auto;margin:0}.videomail .countdown,.videomail .facingMode,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute;z-index:100}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%);width:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{letter-spacing:4px;text-align:center;text-shadow:-2px 0 #fff,0 2px #fff,2px 0 #fff,0 -2px #fff}.videomail .countdown,.videomail .pausedHeader{font-size:460%;opacity:.9}.videomail .pausedHint{font-size:150%}.videomail .facingMode{background:rgba(30,30,30,.5);border:none;bottom:.6em;color:hsla(0,0%,96%,.9);font-family:monospace;font-size:1.2em;outline:none;padding:.1em .3em;right:.7em;-webkit-transition:all .2s ease;transition:all .2s ease;z-index:10}.videomail .facingMode:hover{background:rgba(50,50,50,.7);cursor:pointer}.videomail .recordNote,.videomail .recordTimer{background:hsla(0,0%,4%,.8);color:#00d814;font-family:monospace;opacity:.9;padding:.3em .4em;right:.7em;-webkit-transition:all 1s ease;transition:all 1s ease}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{-webkit-animation:blink 1s infinite;animation:blink 1s infinite;content:"REC"}.videomail .notifier{-webkit-box-sizing:border-box;box-sizing:border-box;height:100%;overflow:hidden}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}.videomail video.userMedia{background-color:rgba(50,50,50,.1)}';

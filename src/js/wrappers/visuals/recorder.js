@@ -157,7 +157,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   function onUserMediaReady(params = {}) {
     try {
-      debug("Recorder: onUserMediaReady()", stringify(params));
+      debug("Recorder: onUserMediaReady()", params);
 
       const { switchingFacingMode } = params;
 
@@ -558,7 +558,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function getUserMediaCallback(localStream, params) {
-    debug("Recorder: getUserMediaCallback()", stringify(params));
+    debug("Recorder: getUserMediaCallback()", params);
 
     if (showUserMedia()) {
       try {
@@ -627,13 +627,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       debug(
         "Recorder: navigator.mediaDevices.getUserMedia()",
         "constraints",
-        stringify(constraints),
+        constraints,
       );
 
       if (navigator.mediaDevices.getSupportedConstraints) {
         debug(
           "Recorder: navigator.mediaDevices.getSupportedConstraints()",
-          stringify(navigator.mediaDevices.getSupportedConstraints()),
+          navigator.mediaDevices.getSupportedConstraints(),
         );
       }
 
@@ -684,7 +684,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       return false;
     }
 
-    debug("Recorder: loadUserMedia()", stringify(params));
+    debug("Recorder: loadUserMedia()", params);
 
     self.emit(Events.LOADING_USER_MEDIA);
 
@@ -791,7 +791,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         cb && cb();
       });
     } else if (stream) {
-      debug("$ %s", command, args ? stringify(args) : "");
+      debug("$ %s", command, args);
 
       const commandObj = {
         command,
