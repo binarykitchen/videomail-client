@@ -24,8 +24,6 @@ const log = require("fancy-log");
 const autoprefixer = require("autoprefixer");
 const cssnano = require("cssnano");
 
-const packageJson = require("./package.json");
-
 const defaultOptions = {
   minify: true,
   importance: null,
@@ -74,7 +72,7 @@ const cache = {};
 const packageCache = {};
 
 function bundle(done, watching) {
-  const entry = path.join(__dirname, packageJson.module);
+  const entry = path.join(__dirname, "src/js/index.js");
   const bundler = browserify({
     entries: [entry],
     cache,

@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "8.2.1",
+  "version": "8.3.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -16,7 +16,6 @@
   },
   "license": "CC0-1.0",
   "readmeFilename": "README.md",
-  "module": "src/js/index.js",
   "main": "prototype/js/videomail-client.js",
   "scripts": {
     "build": "gulp build",

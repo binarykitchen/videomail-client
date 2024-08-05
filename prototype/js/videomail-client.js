@@ -17518,7 +17518,6 @@ module.exports={
   },
   "license": "CC0-1.0",
   "readmeFilename": "README.md",
-  "module": "src/js/index.js",
   "main": "prototype/js/videomail-client.js",
   "scripts": {
     "build": "gulp build",
