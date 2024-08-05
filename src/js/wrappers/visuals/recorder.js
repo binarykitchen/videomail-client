@@ -157,7 +157,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   function onUserMediaReady(params = {}) {
     try {
-      debug("Recorder: onUserMediaReady()", params);
+      debug("Recorder: onUserMediaReady()", stringify(params));
 
       const { switchingFacingMode } = params;
 
@@ -558,7 +558,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function getUserMediaCallback(localStream, params) {
-    debug("Recorder: getUserMediaCallback()", params);
+    debug("Recorder: getUserMediaCallback()", stringify(params));
 
     if (showUserMedia()) {
       try {
@@ -624,16 +624,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         }
       }
 
-      debug(
-        "Recorder: navigator.mediaDevices.getUserMedia()",
-        "constraints",
-        constraints,
-      );
+      debug("Recorder: navigator.mediaDevices.getUserMedia()", stringify(constraints));
 
       if (navigator.mediaDevices.getSupportedConstraints) {
         debug(
           "Recorder: navigator.mediaDevices.getSupportedConstraints()",
-          navigator.mediaDevices.getSupportedConstraints(),
+          stringify(navigator.mediaDevices.getSupportedConstraints()),
         );
       }
 

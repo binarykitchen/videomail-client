@@ -4,6 +4,7 @@ import EventEmitter from "./../../util/eventEmitter";
 import Events from "./../../events";
 import MEDIA_EVENTS from "./../../util/mediaEvents";
 import VideomailError from "./../../util/videomailError";
+import stringify from "safe-json-stringify";
 import h from "hyperscript";
 import pretty from "./../../util/pretty";
 
@@ -110,7 +111,7 @@ export default function (recorder, options) {
   }
 
   function logEvent(event, params) {
-    options.debug("UserMedia: ...", EVENT_ASCII, "event", event, params);
+    options.debug("UserMedia: ...", EVENT_ASCII, "event", event, stringify(params));
   }
 
   function isPromise(anything) {
