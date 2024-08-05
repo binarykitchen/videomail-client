@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "8.2.0",
+  "version": "8.2.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -50,11 +50,11 @@
     "@babel/core": "7.25.2",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
-    "audio-sample": "3.0.1",
+    "audio-sample": "4.0.1",
     "canvas-to-buffer": "4.0.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.37.1",
+    "core-js": "3.38.0",
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",

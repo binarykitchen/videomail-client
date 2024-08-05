@@ -541,8 +541,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       retryTimeout = setTimeout(initSocket, options.timeouts.userMedia);
     } else if (unloaded) {
       /*
-       * can happen that container is unloaded but some user media related callbacks
-       * are still in process. in that case ignore error.
+       * This can happen when a container is unloaded but some user media related callbacks
+       * are still in process. In that case ignore error.
        */
       debug("Recorder: already unloaded. Not going to throw error", err);
     } else {
