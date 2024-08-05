@@ -41,5 +41,6 @@ module.exports = {
     "max-params": "off",
     "no-plusplus": "off",
     "no-ternary": "off",
+    complexity: "off",
   },
 };
