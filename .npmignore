@@ -1,5 +1,6 @@
 env
 test
+src
 .eslintignore
 .eslintrc.js
 .nvmrc
