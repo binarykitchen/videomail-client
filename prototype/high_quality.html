@@ -13,9 +13,9 @@
       performance issues and will use a lower one instead.
     </p>
     <div id="videomail"></div>
-    <script src="/js/videomail-client.js"></script>
-    <script>
-      var videomailClient = new VideomailClient({
+    <script src="./js/videomail-client.js"></script>
+    <script type="module">
+      var videomailClient = new VideomailClient.default({
         verbose: true,
         enableAutoPause: false,
         disableSubmit: true,

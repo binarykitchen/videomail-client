@@ -23947,8 +23947,11 @@ if (!navigator) {
   // Ensures Videomail functionality is not broken on exotic browsers with shims.
   (0, _standardize.default)(window, navigator);
 }
-var _default = exports.default = _client.default; // also add that so that we can require() it the normal ES5 way
-module.exports = _client.default;
+
+// Provide both ways
+
+// export { Client };
+var _default = exports.default = _client.default;
 
 },{"./client":117,"./util/standardize":129,"@babel/runtime/helpers/interopRequireDefault":3}]},{},["videomail-client"])("videomail-client")
 });
