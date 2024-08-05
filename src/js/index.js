@@ -8,7 +8,8 @@ if (!navigator) {
   standardize(window, navigator);
 }
 
-export default Client;
+// Provide both ways
 
-// also add that so that we can require() it the normal ES5 way
-module.exports = Client;
+// export { Client };
+
+export default Client;
