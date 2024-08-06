@@ -7,11 +7,19 @@ import stringify from "safe-json-stringify";
 const VIDEOMAIL_ERR_NAME = "Videomail Error";
 
 const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
+  title: undefined,
   explanation: undefined,
   logLines: undefined,
-  useragent: undefined,
-  url: undefined,
-  stack: undefined,
+  cookie: undefined,
+  location: undefined,
+  err: undefined,
+  browser: undefined,
+  cpu: undefined,
+  device: undefined,
+  engine: undefined,
+  os: undefined,
+  screen: undefined,
+  orientation: undefined,
 });
 
 // shim pretty to exclude stack always
@@ -50,11 +58,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   options ||= {};
   parameters ||= {};
 
-  // be super robust
-  const debug = (options && options.debug) || console.log;
   const audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled();
-
-  debug("VideomailError: create()", err, explanation || "(no explanation set)");
 
   const classList = parameters.classList || [];
 
@@ -67,7 +71,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
   let errType;
   let message;
-  let stack;
 
   // whole code is ugly because all browsers behave so differently :(
 
@@ -94,8 +97,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       err.constructor.name === VideomailError.OVERCONSTRAINED
     ) {
       errType = VideomailError.OVERCONSTRAINED;
-    } else if (err.message === VideomailError.STARTING_FAILED) {
-      errType = err.message;
+    } else if (err.explanation === VideomailError.STARTING_FAILED) {
+      errType = err.explanation;
     } else if (err.name) {
       errType = err.name;
     } else if (err.type === "error" && err.target.bufferedAmount === 0) {
@@ -105,12 +108,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errType = VideomailError.NOT_CONNECTED;
   } else {
     errType = err;
-  }
-
-  if (err && err.stack) {
-    stack = err.stack;
-  } else {
-    stack = new Error().stack;
   }
 
   switch (errType) {
@@ -141,8 +138,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       message = "Source of your webcam cannot be accessed";
       explanation = "Probably it is locked from another process or has a hardware error.";
 
-      if (err.message) {
-        err.message += ` Details: ${err.message}`;
+      if (err.explanation) {
+        err.explanation += ` Details: ${err.explanation}`;
       }
 
       break;
@@ -210,7 +207,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.STARTING_FAILED:
       message = "Starting video failed";
       explanation =
-        "Most likely this happens when the webam is already active in another browser.";
+        "Most likely this happens when the webcam is already active in another browser.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
@@ -289,8 +286,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
        * error objects can be prettified to undefined sometimes
        */
       if (!explanation && originalExplanation) {
-        if (originalExplanation.message) {
-          explanation = originalExplanation.message;
+        if (originalExplanation.explanation) {
+          explanation = originalExplanation.explanation;
         } else {
           // tried toString before but nah
           explanation = `Inspected: ${stringify(originalExplanation)}`;
@@ -318,7 +315,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
             if (!explanation) {
               explanation = details;
-            } else {
+            } else if (details) {
               explanation += `;<br/>${details}`;
             }
           }
@@ -351,28 +348,30 @@ VideomailError.create = function (err, explanation, options, parameters) {
     logLines = options.logger.getLines();
   }
 
-  if (stack) {
-    message = new Error(message);
-    message.stack = stack;
-  }
+  // be super robust
+  const debug = (options && options.debug) || console.log;
+  debug("VideomailError: create()", message, explanation || "(no explanation set)");
 
-  let errCode = "none";
-
-  if (err) {
-    errCode = `code=${err.code ? err.code : "undefined"}`;
-    errCode += `, type=${err.type ? err.type : "undefined"}`;
-    errCode += `, name=${err.name ? err.name : "undefined"}`;
-    errCode += `, message=${err.message ? err.message : "undefined"}`;
-  }
+  const usefulClientData = browser.getUsefulData();
 
   const videomailError = new VideomailError(message, {
+    title: "videomail-client error",
     explanation,
     logLines,
-    client: browser.getUsefulData(),
-    url: window.location.href,
+    location: window.location.href,
+    cookie: global.document.cookie.split("; ").join(",\n"),
     siteName: options.siteName,
-    code: errCode,
-    stack, // have to assign it manually again because it is kinda protected
+    err: err instanceof Error ? err : undefined,
+    browser: usefulClientData.browser,
+    cpu: usefulClientData.cpu,
+    device: usefulClientData.device,
+    engine: usefulClientData.engine,
+    os: usefulClientData.os,
+    screen: [screen.width, screen.height, screen.colorDepth].join("×"),
+    orientation:
+      typeof screen.orientation === "string"
+        ? screen.orientation
+        : screen.orientation.type.toString(),
   });
 
   let resource;

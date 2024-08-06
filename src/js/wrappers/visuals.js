@@ -70,7 +70,7 @@ const Visuals = function (container, options) {
           if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
             /*
              * do nothing, user still can enter form inputs
-             * can be useful when you are on i.E. seeflow's contact page and
+             * can be useful when you are on i.E. Seeflow's contact page and
              * still want to tick off the webcam option
              */
           } else {

@@ -739,7 +739,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             Events.ERROR,
             VideomailError.create(
               "Oh no, server error!",
-              command.args.err.toString() || "(No explanation given)",
+              command.args.err.toString() || "(No message given)",
               options,
             ),
           );

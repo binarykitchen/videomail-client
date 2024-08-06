@@ -473,7 +473,7 @@ const Container = function (options) {
         if (self.isReplayShown()) {
           self.emit(Events.PREVIEW);
         } else {
-          self.emit(Events.FORM_READY, "paused", paused);
+          self.emit(Events.FORM_READY, { paused });
         }
       }
     }

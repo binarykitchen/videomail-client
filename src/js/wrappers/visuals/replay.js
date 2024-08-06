@@ -289,7 +289,9 @@ const Replay = function (parentElement, options) {
      */
     setTimeout(() => {
       try {
-        replayElement && replayElement.pause();
+        if (replayElement) {
+          replayElement.pause();
+        }
       } catch (exc) {
         // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
         options.logger.warn(exc);

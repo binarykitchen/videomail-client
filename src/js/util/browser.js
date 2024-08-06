@@ -151,9 +151,7 @@ const Browser = function (options) {
 
     if (!isHTTPS) {
       err = VideomailError.create(
-        {
-          message: "Sorry, your page is insecure",
-        },
+        "Sorry, your page is insecure",
         "Please switch to HTTPS to ensure all is encrypted.",
         options,
         {
@@ -174,18 +172,18 @@ const Browser = function (options) {
       // good to be able to distinguish between two reasons why and what sort of camera it is
       if (!okBrowser) {
         if (isMobile) {
-          message = "Sorry, your browser is unable to use your mobile camera";
+          message = "Sorry, your browser is unable to use your mobile camera.";
         } else {
-          message = "Sorry, your browser is unable to use webcams";
+          message = "Sorry, your browser is unable to use webcams.";
         }
       } else if (isMobile) {
         if (isFacebook) {
-          message = "Sorry, the Facebook app cannot record from your mobile camera";
+          message = "Sorry, the Facebook app cannot record from your mobile camera.";
         } else {
-          message = "Sorry, your browser cannot record from your mobile camera";
+          message = "Sorry, your browser cannot record from your mobile camera.";
         }
       } else {
-        message = "Sorry, your browser cannot record from webcams";
+        message = "Sorry, your browser cannot record from webcams.";
       }
 
       if (isBadIOS) {
@@ -196,16 +194,9 @@ const Browser = function (options) {
         options.reportErrors = false;
       }
 
-      err = VideomailError.create(
-        {
-          message,
-        },
-        getUserMediaWarning(),
-        options,
-        {
-          classList,
-        },
-      );
+      err = VideomailError.create(message, getUserMediaWarning(), options, {
+        classList,
+      });
     }
 
     return err;
@@ -311,7 +302,7 @@ const Browser = function (options) {
       device: uaParser.device,
       os: uaParser.os,
       engine: uaParser.engine,
-      userAgent: ua,
+      cpu: uaParser.cpu,
     };
   };
 };
