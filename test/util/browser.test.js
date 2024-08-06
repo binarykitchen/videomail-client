@@ -89,7 +89,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
 
     const browser = new Browser(options);
     let err = browser.checkRecordingCapabilities();
-    tt.equal(err.message, "Sorry, your browser is unable to use webcams");
+    tt.equal(err.message, "Sorry, your browser is unable to use webcams.");
     tt.ok(
       err.explanation.indexOf("Instead of Internet Explorer you need to upgrade") >= 0,
     );

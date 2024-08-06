@@ -17617,7 +17617,7 @@ module.exports={
     "gulp-terser": "2.1.0",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.40",
+    "postcss": "8.4.41",
     "prettier": "3.3.3",
     "router": "1.3.8",
     "tape": "5.8.1",
@@ -18523,9 +18523,7 @@ var Browser = function Browser(options) {
   this.checkRecordingCapabilities = function () {
     var err;
     if (!isHTTPS) {
-      err = _videomailError.default.create({
-        message: "Sorry, your page is insecure"
-      }, "Please switch to HTTPS to ensure all is encrypted.", options, {
+      err = _videomailError.default.create("Sorry, your page is insecure", "Please switch to HTTPS to ensure all is encrypted.", options, {
         classList: [_videomailError.default.BROWSER_PROBLEM]
       });
     } else if (!okBrowser || !this.canRecord()) {
@@ -18540,18 +18538,18 @@ var Browser = function Browser(options) {
       // good to be able to distinguish between two reasons why and what sort of camera it is
       if (!okBrowser) {
         if (isMobile) {
-          message = "Sorry, your browser is unable to use your mobile camera";
+          message = "Sorry, your browser is unable to use your mobile camera.";
         } else {
-          message = "Sorry, your browser is unable to use webcams";
+          message = "Sorry, your browser is unable to use webcams.";
         }
       } else if (isMobile) {
         if (isFacebook) {
-          message = "Sorry, the Facebook app cannot record from your mobile camera";
+          message = "Sorry, the Facebook app cannot record from your mobile camera.";
         } else {
-          message = "Sorry, your browser cannot record from your mobile camera";
+          message = "Sorry, your browser cannot record from your mobile camera.";
         }
       } else {
-        message = "Sorry, your browser cannot record from webcams";
+        message = "Sorry, your browser cannot record from webcams.";
       }
       if (isBadIOS) {
         /*
@@ -18560,9 +18558,7 @@ var Browser = function Browser(options) {
          */
         options.reportErrors = false;
       }
-      err = _videomailError.default.create({
-        message: message
-      }, getUserMediaWarning(), options, {
+      err = _videomailError.default.create(message, getUserMediaWarning(), options, {
         classList: classList
       });
     }
@@ -18648,7 +18644,7 @@ var Browser = function Browser(options) {
       device: uaParser.device,
       os: uaParser.os,
       engine: uaParser.engine,
-      userAgent: ua
+      cpu: uaParser.cpu
     };
   };
 };
@@ -19073,6 +19069,7 @@ function _default() {
 }
 
 },{"@babel/runtime/helpers/interopRequireDefault":3,"classlist.js":20,"request-frame":97}],130:[function(_dereq_,module,exports){
+(function (global){(function (){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -19089,11 +19086,19 @@ var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 
 var VIDEOMAIL_ERR_NAME = "Videomail Error";
 var VideomailError = (0, _createError.default)(Error, VIDEOMAIL_ERR_NAME, {
+  title: undefined,
   explanation: undefined,
   logLines: undefined,
-  useragent: undefined,
-  url: undefined,
-  stack: undefined
+  cookie: undefined,
+  location: undefined,
+  err: undefined,
+  browser: undefined,
+  cpu: undefined,
+  device: undefined,
+  engine: undefined,
+  os: undefined,
+  screen: undefined,
+  orientation: undefined
 });
 
 // shim pretty to exclude stack always
@@ -19131,11 +19136,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
   }
   options || (options = {});
   parameters || (parameters = {});
-
-  // be super robust
-  var debug = options && options.debug || console.log;
   var audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled();
-  debug("VideomailError: create()", err, explanation || "(no explanation set)");
   var classList = parameters.classList || [];
 
   /*
@@ -19146,7 +19147,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
   var browser = new Browser(options);
   var errType;
   var message;
-  var stack;
 
   // whole code is ugly because all browsers behave so differently :(
 
@@ -19170,8 +19170,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
       }
     } else if (err.constructor && err.constructor.name === VideomailError.OVERCONSTRAINED) {
       errType = VideomailError.OVERCONSTRAINED;
-    } else if (err.message === VideomailError.STARTING_FAILED) {
-      errType = err.message;
+    } else if (err.explanation === VideomailError.STARTING_FAILED) {
+      errType = err.explanation;
     } else if (err.name) {
       errType = err.name;
     } else if (err.type === "error" && err.target.bufferedAmount === 0) {
@@ -19181,11 +19181,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errType = VideomailError.NOT_CONNECTED;
   } else {
     errType = err;
-  }
-  if (err && err.stack) {
-    stack = err.stack;
-  } else {
-    stack = new Error().stack;
   }
   switch (errType) {
     case VideomailError.SECURITY_ERROR:
@@ -19212,8 +19207,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case "SourceUnavailableError":
       message = "Source of your webcam cannot be accessed";
       explanation = "Probably it is locked from another process or has a hardware error.";
-      if (err.message) {
-        err.message += " Details: ".concat(err.message);
+      if (err.explanation) {
+        err.explanation += " Details: ".concat(err.explanation);
       }
       break;
     case VideomailError.NOT_FOUND_ERROR:
@@ -19258,7 +19253,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
     case VideomailError.STARTING_FAILED:
       message = "Starting video failed";
-      explanation = "Most likely this happens when the webam is already active in another browser.";
+      explanation = "Most likely this happens when the webcam is already active in another browser.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
     case "DevicesNotFoundError":
@@ -19329,8 +19324,8 @@ VideomailError.create = function (err, explanation, options, parameters) {
          * error objects can be prettified to undefined sometimes
          */
         if (!explanation && originalExplanation) {
-          if (originalExplanation.message) {
-            explanation = originalExplanation.message;
+          if (originalExplanation.explanation) {
+            explanation = originalExplanation.explanation;
           } else {
             // tried toString before but nah
             explanation = "Inspected: ".concat((0, _safeJsonStringify.default)(originalExplanation));
@@ -19354,7 +19349,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
               var details = pretty(err.details);
               if (!explanation) {
                 explanation = details;
-              } else {
+              } else if (details) {
                 explanation += ";<br/>".concat(details);
               }
             }
@@ -19384,25 +19379,26 @@ VideomailError.create = function (err, explanation, options, parameters) {
   if (options.logger && options.logger.getLines) {
     logLines = options.logger.getLines();
   }
-  if (stack) {
-    message = new Error(message);
-    message.stack = stack;
-  }
-  var errCode = "none";
-  if (err) {
-    errCode = "code=".concat(err.code ? err.code : "undefined");
-    errCode += ", type=".concat(err.type ? err.type : "undefined");
-    errCode += ", name=".concat(err.name ? err.name : "undefined");
-    errCode += ", message=".concat(err.message ? err.message : "undefined");
-  }
+
+  // be super robust
+  var debug = options && options.debug || console.log;
+  debug("VideomailError: create()", message, explanation || "(no explanation set)");
+  var usefulClientData = browser.getUsefulData();
   var videomailError = new VideomailError(message, {
+    title: "videomail-client error",
     explanation: explanation,
     logLines: logLines,
-    client: browser.getUsefulData(),
-    url: window.location.href,
+    location: window.location.href,
+    cookie: global.document.cookie.split("; ").join(",\n"),
     siteName: options.siteName,
-    code: errCode,
-    stack: stack // have to assign it manually again because it is kinda protected
+    err: err instanceof Error ? err : undefined,
+    browser: usefulClientData.browser,
+    cpu: usefulClientData.cpu,
+    device: usefulClientData.device,
+    engine: usefulClientData.engine,
+    os: usefulClientData.os,
+    screen: [screen.width, screen.height, screen.colorDepth].join("×"),
+    orientation: typeof screen.orientation === "string" ? screen.orientation : screen.orientation.type.toString()
   });
   var resource;
   var reportErrors = false;
@@ -19449,6 +19445,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 };
 var _default = exports.default = VideomailError;
 
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./../resource":121,"./browser":123,"./pretty":128,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/typeof":7,"create-error":24,"safe-json-stringify":99}],131:[function(_dereq_,module,exports){
 "use strict";
 
@@ -20342,7 +20339,9 @@ var Container = function Container(options) {
         if (self.isReplayShown()) {
           self.emit(_events.default.PREVIEW);
         } else {
-          self.emit(_events.default.FORM_READY, "paused", paused);
+          self.emit(_events.default.FORM_READY, {
+            paused: paused
+          });
         }
       }
     }
@@ -21104,7 +21103,7 @@ var Visuals = function Visuals(container, options) {
         if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
           /*
            * do nothing, user still can enter form inputs
-           * can be useful when you are on i.E. seeflow's contact page and
+           * can be useful when you are on i.E. Seeflow's contact page and
            * still want to tick off the webcam option
            */
         } else {
@@ -21960,7 +21959,7 @@ var Notifier = function Notifier(visuals, options) {
     var message = err.message ? err.message.toString() : err.toString();
     var explanation = err.explanation ? err.explanation.toString() : null;
     if (!message) {
-      options.debug("Weird empty message generated for error", err);
+      options.debug("Weird empty error message generated for error", err);
     }
     self.notify(message, explanation, {
       blocking: true,
@@ -22631,7 +22630,7 @@ var Recorder = function Recorder(visuals, replay) {
           preview(command.args);
           break;
         case "error":
-          this.emit(_events.default.ERROR, _videomailError.default.create("Oh no, server error!", command.args.err.toString() || "(No explanation given)", options));
+          this.emit(_events.default.ERROR, _videomailError.default.create("Oh no, server error!", command.args.err.toString() || "(No message given)", options));
           break;
         case "confirmFrame":
           updateFrameProgress(command.args);
@@ -23455,7 +23454,9 @@ var Replay = function Replay(parentElement, options) {
      */
     setTimeout(function () {
       try {
-        replayElement && replayElement.pause();
+        if (replayElement) {
+          replayElement.pause();
+        }
       } catch (exc) {
         // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
         options.logger.warn(exc);

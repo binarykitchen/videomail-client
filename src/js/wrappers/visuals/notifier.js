@@ -173,7 +173,7 @@ const Notifier = function (visuals, options) {
     const explanation = err.explanation ? err.explanation.toString() : null;
 
     if (!message) {
-      options.debug("Weird empty message generated for error", err);
+      options.debug("Weird empty error message generated for error", err);
     }
 
     self.notify(message, explanation, {
