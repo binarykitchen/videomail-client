@@ -17502,7 +17502,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.5",
+  "version": "8.3.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -19583,7 +19583,7 @@ var Buttons = function Buttons(container, options) {
       radioButtonElement.onchange = options.changeHandler;
     }
     disable(radioButtonElement);
-    return [radioButtonElement, radioButtonGroup];
+    return radioButtonElement;
   }
   function makeButton(buttonClass, text, clickHandler, show, id, type, selector) {
     var disabled = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;

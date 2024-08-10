@@ -170,7 +170,7 @@ const Buttons = function (container, options) {
 
     disable(radioButtonElement);
 
-    return [radioButtonElement, radioButtonGroup];
+    return radioButtonElement;
   }
 
   function makeButton(
