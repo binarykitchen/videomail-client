@@ -19583,7 +19583,7 @@ var Buttons = function Buttons(container, options) {
       radioButtonElement.onchange = options.changeHandler;
     }
     disable(radioButtonElement);
-    return [radioButtonElement, radioButtonGroup];
+    return radioButtonElement;
   }
   function makeButton(buttonClass, text, clickHandler, show, id, type, selector) {
     var disabled = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;
