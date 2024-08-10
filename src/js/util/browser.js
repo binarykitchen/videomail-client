@@ -299,7 +299,7 @@ const Browser = function (options) {
   this.getUsefulData = function () {
     return {
       browser: uaParser.browser,
-      device: uaParser.device,
+      device: uaParser.device.type ? uaParser.device : undefined,
       os: uaParser.os,
       engine: uaParser.engine,
       cpu: uaParser.cpu,

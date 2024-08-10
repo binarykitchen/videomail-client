@@ -483,12 +483,16 @@ const Buttons = function (container, options) {
   }
 
   function onEnablingAudio() {
+    debug("Buttons: onEnablingAudio()");
+
     disable(recordButton);
     disable(audioOnRadioPair);
     disable(audioOffRadioPair);
   }
 
   function onDisablingAudio() {
+    debug("Buttons: onDisablingAudio()");
+
     disable(recordButton);
     disable(audioOnRadioPair);
     disable(audioOffRadioPair);
