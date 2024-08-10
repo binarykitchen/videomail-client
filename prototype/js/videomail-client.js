@@ -17502,7 +17502,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.4",
+  "version": "8.3.5",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -17534,8 +17534,8 @@ module.exports={
     "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js"
   },
   "engines": {
-    "node": "^20.12.2",
-    "npm": "^10.5.0"
+    "node": "^20.16.0",
+    "npm": "^10.8.1"
   },
   "keywords": [
     "webcam",
@@ -18641,7 +18641,7 @@ var Browser = function Browser(options) {
   this.getUsefulData = function () {
     return {
       browser: uaParser.browser,
-      device: uaParser.device,
+      device: uaParser.device.type ? uaParser.device : undefined,
       os: uaParser.os,
       engine: uaParser.engine,
       cpu: uaParser.cpu
@@ -19808,11 +19808,13 @@ var Buttons = function Buttons(container, options) {
     hide(resumeButton);
   }
   function onEnablingAudio() {
+    debug("Buttons: onEnablingAudio()");
     disable(recordButton);
     disable(audioOnRadioPair);
     disable(audioOffRadioPair);
   }
   function onDisablingAudio() {
+    debug("Buttons: onDisablingAudio()");
     disable(recordButton);
     disable(audioOnRadioPair);
     disable(audioOffRadioPair);
