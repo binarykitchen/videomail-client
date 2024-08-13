@@ -17445,11 +17445,9 @@ var VideomailClient = function VideomailClient(options) {
   var container = new _container.default(localOptions);
   var debug = localOptions.debug;
   var replay;
-  _eventEmitter.default.call(this, localOptions, "VideomailClient");
-
-  // expose all possible events
   this.events = _events.default;
-  function build() {
+  _eventEmitter.default.call(this, localOptions, "VideomailClient");
+  this.build = function () {
     var building = false;
     debug("Client: build(),", "!building =", "".concat(!building, ","), "!isBuilt() =", !container.isBuilt());
 
@@ -17462,13 +17460,12 @@ var VideomailClient = function VideomailClient(options) {
       container.build();
       building = false;
     }
-  }
+  };
   this.show = function () {
-    if (container.isBuilt()) {
-      container.show();
-    } else {
-      this.once(_events.default.BUILT, container.show);
+    if (!container.isBuilt()) {
+      this.build();
     }
+    container.show();
   };
 
   /*
@@ -17562,7 +17559,6 @@ var VideomailClient = function VideomailClient(options) {
       return localOptions.logger.getLines();
     }
   };
-  build();
 };
 (0, _inherits.default)(VideomailClient, _eventEmitter.default);
 Object.keys(_constants.default.public).forEach(function (name) {
@@ -17570,7 +17566,7 @@ Object.keys(_constants.default.public).forEach(function (name) {
 });
 
 // just another convenient thing
-VideomailClient.events = _events.default;
+VideomailClient.Events = _events.default;
 var _default = exports.default = VideomailClient;
 
 },{"./constants":116,"./events":117,"./options":118,"./resource":119,"./util/browser":121,"./util/collectLogger":122,"./util/eventEmitter":123,"./wrappers/container":130,"./wrappers/optionsWrapper":133,"./wrappers/visuals/replay":143,"@babel/runtime/helpers/interopRequireDefault":3,"deepmerge":25,"inherits":64}],116:[function(_dereq_,module,exports){
@@ -23063,6 +23059,7 @@ var Replay = function Replay(parentElement, options) {
     this.show(videomail && videomail.width, videomail && videomail.height, hasAudio);
   };
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
+    var _replayElement3;
     if (videomail) {
       correctDimensions({
         responsive: true,
@@ -23071,7 +23068,9 @@ var Replay = function Replay(parentElement, options) {
         videoHeight: recorderHeight || replayElement.videoHeight
       });
     }
-    (0, _hidden.default)(replayElement, false);
+    if (replayElement) {
+      (0, _hidden.default)(replayElement, false);
+    }
 
     // parent element can be any object, be careful!
     if (parentElement) {
@@ -23082,25 +23081,27 @@ var Replay = function Replay(parentElement, options) {
       }
     }
     if (hasAudio) {
+      var _replayElement;
       /*
        * https://github.com/binarykitchen/videomail-client/issues/115
        * do not set mute to false as this will mess up. just do not mention this attribute at all
        */
-      replayElement.setAttribute("volume", 1);
+      (_replayElement = replayElement) === null || _replayElement === void 0 || _replayElement.setAttribute("volume", 1);
     } else if (!options.isAudioEnabled()) {
-      replayElement.setAttribute("muted", true);
+      var _replayElement2;
+      (_replayElement2 = replayElement) === null || _replayElement2 === void 0 || _replayElement2.setAttribute("muted", true);
     }
 
     /*
      * this must be called after setting the sources and when becoming visible
      * see https://github.com/bfred-it/iphone-inline-video/issues/16
      */
-    _iphoneInlineVideo.default && (0, _iphoneInlineVideo.default)(replayElement, {
+    _iphoneInlineVideo.default && replayElement && (0, _iphoneInlineVideo.default)(replayElement, {
       iPad: true
     });
 
     // this forces to actually fetch the videos from the server
-    replayElement.load();
+    (_replayElement3 = replayElement) === null || _replayElement3 === void 0 || _replayElement3.load();
     if (!videomail) {
       self.emit(_events.default.PREVIEW_SHOWN);
     } else {
