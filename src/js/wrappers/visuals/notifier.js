@@ -180,6 +180,8 @@ const Notifier = function (visuals, options) {
         message,
       );
     }
+
+    hidden(notifierMessage, false);
   }
 
   this.error = function (err) {

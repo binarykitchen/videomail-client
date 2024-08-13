@@ -21726,6 +21726,7 @@ var Notifier = function Notifier(visuals, options) {
     } else {
       options.logger.warn("Unable to update notifierMessage element because none is defined", message);
     }
+    (0, _hidden.default)(notifierMessage, false);
   }
   this.error = function (err) {
     var message = err.message ? err.message.toString() : err.toString();
