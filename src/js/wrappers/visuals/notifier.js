@@ -160,11 +160,13 @@ const Notifier = function (visuals, options) {
   }
 
   function setMessage(message, messageOptions) {
-    const problem = messageOptions.problem ? messageOptions.problem : false;
+    options.debug("Notifier: setMessage()", message);
+
     const notifierMessage = getNotifierMessage();
 
     if (notifierMessage) {
       if (message.length > 0) {
+        const problem = messageOptions.problem ? messageOptions.problem : false;
         notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
       } else {
         options.logger.warn(
@@ -238,15 +240,14 @@ const Notifier = function (visuals, options) {
 
   function hideMessage() {
     const notifierMessage = getNotifierMessage();
+
     if (notifierMessage) {
-      notifierMessage.innerHTML = null;
       hidden(notifierMessage, true);
     }
   }
 
   function hideExplanation() {
     if (explanationElement) {
-      explanationElement.innerHTML = null;
       hidden(explanationElement, true);
     }
   }
