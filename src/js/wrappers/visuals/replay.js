@@ -111,7 +111,9 @@ const Replay = function (parentElement, options) {
       });
     }
 
-    hidden(replayElement, false);
+    if (replayElement) {
+      hidden(replayElement, false);
+    }
 
     // parent element can be any object, be careful!
     if (parentElement) {
@@ -127,9 +129,9 @@ const Replay = function (parentElement, options) {
        * https://github.com/binarykitchen/videomail-client/issues/115
        * do not set mute to false as this will mess up. just do not mention this attribute at all
        */
-      replayElement.setAttribute("volume", 1);
+      replayElement?.setAttribute("volume", 1);
     } else if (!options.isAudioEnabled()) {
-      replayElement.setAttribute("muted", true);
+      replayElement?.setAttribute("muted", true);
     }
 
     /*
@@ -137,12 +139,13 @@ const Replay = function (parentElement, options) {
      * see https://github.com/bfred-it/iphone-inline-video/issues/16
      */
     enableInlineVideo &&
+      replayElement &&
       enableInlineVideo(replayElement, {
         iPad: true,
       });
 
     // this forces to actually fetch the videos from the server
-    replayElement.load();
+    replayElement?.load();
 
     if (!videomail) {
       self.emit(Events.PREVIEW_SHOWN);

@@ -47,12 +47,11 @@ const VideomailClient = function (options) {
 
   let replay;
 
-  EventEmitter.call(this, localOptions, "VideomailClient");
-
-  // expose all possible events
   this.events = Events;
 
-  function build() {
+  EventEmitter.call(this, localOptions, "VideomailClient");
+
+  this.build = function () {
     let building = false;
 
     debug(
@@ -72,14 +71,14 @@ const VideomailClient = function (options) {
       container.build();
       building = false;
     }
-  }
+  };
 
   this.show = function () {
-    if (container.isBuilt()) {
-      container.show();
-    } else {
-      this.once(Events.BUILT, container.show);
+    if (!container.isBuilt()) {
+      this.build();
     }
+
+    container.show();
   };
 
   /*
@@ -190,8 +189,6 @@ const VideomailClient = function (options) {
       return localOptions.logger.getLines();
     }
   };
-
-  build();
 };
 
 inherits(VideomailClient, EventEmitter);
@@ -201,6 +198,6 @@ Object.keys(Constants.public).forEach(function (name) {
 });
 
 // just another convenient thing
-VideomailClient.events = Events;
+VideomailClient.Events = Events;
 
 export default VideomailClient;
