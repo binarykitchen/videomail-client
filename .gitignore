@@ -3,5 +3,4 @@ npm-debug.log
 yarn-error.log
 .source.*.html
 .DS_Store
-.vscode
 *.code-workspace

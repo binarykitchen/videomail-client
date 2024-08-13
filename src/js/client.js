@@ -1,5 +1,4 @@
 import deepmerge from "deepmerge";
-import readystate from "readystate";
 import inherits from "inherits";
 
 import defaultOptions from "./options";
@@ -56,27 +55,23 @@ const VideomailClient = function (options) {
   function build() {
     let building = false;
 
-    readystate.interactive(function (previousState) {
-      debug(
-        "Client: interactive(),",
-        "previousState =",
-        `${previousState},`,
-        "!building =",
-        `${!building},`,
-        "!isBuilt() =",
-        !container.isBuilt(),
-      );
+    debug(
+      "Client: build(),",
+      "!building =",
+      `${!building},`,
+      "!isBuilt() =",
+      !container.isBuilt(),
+    );
 
-      /*
-       * it can happen that it gets called twice, i.E. when an error is thrown
-       * in the middle of the build() fn
-       */
-      if (!building && !container.isBuilt()) {
-        building = true;
-        container.build();
-        building = false;
-      }
-    });
+    /*
+     * it can happen that it gets called twice, i.E. when an error is thrown
+     * in the middle of the build() fn
+     */
+    if (!building && !container.isBuilt()) {
+      building = true;
+      container.build();
+      building = false;
+    }
   }
 
   this.show = function () {
@@ -104,8 +99,6 @@ const VideomailClient = function (options) {
         }
 
         if (!container.hasElement()) {
-          // if container.setElement() failed too, then complain
-          readystate.removeAllListeners();
           throw new Error(
             "Unable to replay video without a container nor parent element.",
           );
@@ -141,7 +134,7 @@ const VideomailClient = function (options) {
       }, 10e2); // not sure, but probably can be reduced a bit
     }
 
-    readystate.interactive(buildReplay);
+    buildReplay();
   };
 
   this.startOver = function (params) {
@@ -154,7 +147,6 @@ const VideomailClient = function (options) {
   };
 
   this.unload = function (e) {
-    readystate.removeAllListeners();
     container.unload(e);
   };
 
@@ -179,6 +171,10 @@ const VideomailClient = function (options) {
   // return true when a video has been recorded but is not sent yet
   this.isDirty = function () {
     return container.isDirty();
+  };
+
+  this.isBuilt = function () {
+    return container.isBuilt();
   };
 
   this.isRecording = function () {
