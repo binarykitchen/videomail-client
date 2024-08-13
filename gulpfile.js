@@ -152,11 +152,6 @@ const connectOptions = {
   middleware,
 };
 
-function connectHttp(done) {
-  plugins.connect.server(connectOptions);
-  done();
-}
-
 function connectHttps(done) {
   const SSL_CERTS_PATH = path.join(__dirname, "env", "dev");
 
@@ -231,7 +226,7 @@ const build = gulp.series(gulp.parallel(gulp.series(stylus, cleanJs, bundle)));
 
 exports.watch = gulp.series(
   gulp.parallel(gulp.series(stylus, cleanJs, bundleWithWatchify)),
-  gulp.parallel(connectHttp, connectHttps),
+  connectHttps,
   watch,
 );
 

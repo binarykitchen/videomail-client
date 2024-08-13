@@ -102,6 +102,9 @@ const Notifier = function (visuals, options) {
       .on(Events.BEGIN_VIDEO_ENCODING, function () {
         onBeginVideoEncoding();
       })
+      .on(Events.DISCONNECTED, function () {
+        self.notify("Disconnected.");
+      })
       .on(Events.CONNECTED, function () {
         self.notify("Connected.");
 
