@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.19",
+  "version": "8.3.20",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21726,6 +21726,7 @@ var Notifier = function Notifier(visuals, options) {
     } else {
       options.logger.warn("Unable to update notifierMessage element because none is defined", message);
     }
+    (0, _hidden.default)(notifierMessage, false);
   }
   this.error = function (err) {
     var message = err.message ? err.message.toString() : err.toString();
