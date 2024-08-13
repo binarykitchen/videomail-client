@@ -34,9 +34,7 @@ test("VideomailClient:", { timeout: 2000 }, function (t) {
         logger: consoleFacade,
       });
 
-      client.once(client.events.BUILT, function () {
-        tt.pass("Built event received");
-      });
+      tt.equal(client.isBuilt(), true);
     });
   });
 

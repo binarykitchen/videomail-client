@@ -72,7 +72,6 @@
     "is-power-of-two": "1.0.0",
     "keymirror": "0.1.1",
     "number-is-integer": "2.0.0",
-    "readystate": "0.4.1",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
     "superagent": "8.1.2",
