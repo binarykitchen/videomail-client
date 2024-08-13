@@ -2,15 +2,12 @@ import { version } from "../../package.json";
 
 const PRODUCTION = process.env.NODE_ENV === "production";
 
-/* eslint-disable no-multi-spaces */
-/* eslint indent: ["error", 2, { "ignoreComments": true }] */
-
 export default {
   logger: null, // define logging instance. leave null for default, console.
   logStackSize: 30, // limits the stack size of log outputs to collect
   verbose: !PRODUCTION, // set true to log more info
-  baseUrl: "https://videomail.io", // leave as it, permanent url to post videos
-  socketUrl: "wss://videomail.io", // leave as it, permanent url to send frames
+  baseUrl: "https://videomail.io", // leave as it, permanent API url to post videos
+  socketUrl: "wss://videomail.io", // leave as it, permanent websocket url to send frames
   siteName: "videomail-client-demo", // Required for API, use https://videomail.io/whitelist
   cache: true, // reduces GET queries when loading videos
   insertCss: true, // inserts predefined CSS, see examples
@@ -105,7 +102,7 @@ export default {
     types: ["webp", "jpeg"], // recommended settings to make most of all browsers
   },
 
-  // alter these text for internationalisation
+  // alter these text for internationalization
   text: {
     pausedHeader: "Paused",
     pausedHint: null,
@@ -156,7 +153,7 @@ export default {
   },
 
   /*
-   * a special flag to indicate that everything to be initialised
+   * a special flag to indicate that everything to be initialized
    * serves only for playing existing videomails with the replay function
    */
   playerOnly: false,
