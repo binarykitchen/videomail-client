@@ -284,16 +284,18 @@ const Notifier = function (visuals, options) {
       ? notifyOptions.removeDimensions
       : false;
 
-    if (!messageElement && notifyElement) {
+    const notifierMessage = document.getElementById("notifierMessage");
+
+    if (!notifierMessage && notifyElement) {
       messageElement = h("h2", {
-        className: "message",
+        id: "notifierMessage",
       });
 
-      if (explanationElement) {
-        notifyElement.insertBefore(messageElement, explanationElement);
-      } else {
-        notifyElement.appendChild(messageElement);
-      }
+      notifyElement.appendChild(messageElement);
+    }
+
+    if (notifyElement && messageElement && explanationElement) {
+      notifyElement.insertBefore(messageElement, explanationElement);
     }
 
     if (notifyElement) {

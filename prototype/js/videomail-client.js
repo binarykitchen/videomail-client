@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.16",
+  "version": "8.3.17",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21806,15 +21806,15 @@ var Notifier = function Notifier(visuals, options) {
     var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     var classList = notifyOptions.classList ? notifyOptions.classList : false;
     var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false;
-    if (!messageElement && notifyElement) {
+    var notifierMessage = document.getElementById("notifierMessage");
+    if (!notifierMessage && notifyElement) {
       messageElement = (0, _hyperscript.default)("h2", {
-        className: "message"
+        id: "notifierMessage"
       });
-      if (explanationElement) {
-        notifyElement.insertBefore(messageElement, explanationElement);
-      } else {
-        notifyElement.appendChild(messageElement);
-      }
+      notifyElement.appendChild(messageElement);
+    }
+    if (notifyElement && messageElement && explanationElement) {
+      notifyElement.insertBefore(messageElement, explanationElement);
     }
     if (notifyElement) {
       // reset
