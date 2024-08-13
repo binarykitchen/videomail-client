@@ -609,6 +609,8 @@ const Buttons = function (container, options) {
     disable(recordButton);
     disable(previewButton);
     disable(recordAgainButton);
+    disable(audioOnRadioPair);
+    disable(audioOffRadioPair);
   };
 
   this.isRecordAgainButtonEnabled = function () {

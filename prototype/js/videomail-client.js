@@ -19661,6 +19661,8 @@ var Buttons = function Buttons(container, options) {
     disable(recordButton);
     disable(previewButton);
     disable(recordAgainButton);
+    disable(audioOnRadioPair);
+    disable(audioOffRadioPair);
   };
   this.isRecordAgainButtonEnabled = function () {
     return !recordAgainButton.disabled;
@@ -21713,7 +21715,7 @@ var Notifier = function Notifier(visuals, options) {
   }
   function setMessage(message, messageOptions) {
     var problem = messageOptions.problem ? messageOptions.problem : false;
-    if (messageElement) {
+    if (messageElement && messageElement.length > 0) {
       messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
     } else {
       options.logger.warn("Unable to show following because messageElement is empty:", message);
@@ -21796,12 +21798,16 @@ var Notifier = function Notifier(visuals, options) {
     var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     var classList = notifyOptions.classList ? notifyOptions.classList : false;
     var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false;
-    if (!messageElement && notifyElement) {
-      messageElement = (0, _hyperscript.default)("h2");
-      if (explanationElement) {
-        notifyElement.insertBefore(messageElement, explanationElement);
-      } else {
-        notifyElement.appendChild(messageElement);
+    if (!messageElement) {
+      if (notifyElement) {
+        messageElement = (0, _hyperscript.default)("h2", {
+          className: "message"
+        });
+        if (explanationElement) {
+          notifyElement.insertBefore(messageElement, explanationElement);
+        } else {
+          notifyElement.replaceChildren(messageElement);
+        }
       }
     }
     if (notifyElement) {

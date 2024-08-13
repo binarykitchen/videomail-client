@@ -161,7 +161,7 @@ const Notifier = function (visuals, options) {
   function setMessage(message, messageOptions) {
     const problem = messageOptions.problem ? messageOptions.problem : false;
 
-    if (messageElement) {
+    if (messageElement && messageElement.length > 0) {
       messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
     } else {
       options.logger.warn(
@@ -277,13 +277,17 @@ const Notifier = function (visuals, options) {
       ? notifyOptions.removeDimensions
       : false;
 
-    if (!messageElement && notifyElement) {
-      messageElement = h("h2");
+    if (!messageElement) {
+      if (notifyElement) {
+        messageElement = h("h2", {
+          className: "message",
+        });
 
-      if (explanationElement) {
-        notifyElement.insertBefore(messageElement, explanationElement);
-      } else {
-        notifyElement.appendChild(messageElement);
+        if (explanationElement) {
+          notifyElement.insertBefore(messageElement, explanationElement);
+        } else {
+          notifyElement.replaceChildren(messageElement);
+        }
       }
     }
 
