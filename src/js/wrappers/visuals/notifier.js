@@ -234,20 +234,18 @@ const Notifier = function (visuals, options) {
     built = true;
   };
 
+  function hideMessage() {
+    if (messageElement) {
+      messageElement.innerHTML = null;
+      hidden(messageElement, true);
+    }
+  }
+
   function hideExplanation() {
     if (explanationElement) {
       explanationElement.innerHTML = null;
       hidden(explanationElement, true);
     }
-  }
-
-  function removeMessageElement() {
-    if (!messageElement) return; // skip
-
-    messageElement.innerHTML = null;
-    messageElement = undefined;
-
-    notifyElement.removeChild(messageElement);
   }
 
   this.hide = function () {
@@ -258,10 +256,7 @@ const Notifier = function (visuals, options) {
       notifyElement.classList.remove("blocking");
     }
 
-    if (messageElement) {
-      removeMessageElement();
-    }
-
+    hideMessage();
     hideExplanation();
   };
 
