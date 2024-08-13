@@ -243,10 +243,11 @@ const Notifier = function (visuals, options) {
 
   function removeMessageElement() {
     if (!messageElement) return; // skip
-    notifyElement.removeChild(messageElement);
 
     messageElement.innerHTML = null;
     messageElement = undefined;
+
+    notifyElement.removeChild(messageElement);
   }
 
   this.hide = function () {
@@ -276,12 +277,8 @@ const Notifier = function (visuals, options) {
     return built;
   };
 
-  this.notify = function (message, explanation, notifyOptions) {
-    options.debug("Notifier: notify()");
-
-    if (!notifyOptions) {
-      notifyOptions = {};
-    }
+  this.notify = function (message, explanation, notifyOptions = {}) {
+    options.debug("Notifier: notify()", message, explanation);
 
     const stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false;
     const entertain = notifyOptions.entertain ? notifyOptions.entertain : false;
@@ -292,22 +289,15 @@ const Notifier = function (visuals, options) {
       ? notifyOptions.removeDimensions
       : false;
 
-    if (notifyElement) {
-      // Always remove previous one before setting a new one
-      removeMessageElement();
-    }
+    if (!messageElement && notifyElement) {
+      messageElement = h("h2", {
+        className: "message",
+      });
 
-    if (!messageElement) {
-      if (notifyElement) {
-        messageElement = h("h2", {
-          className: "message",
-        });
-
-        if (explanationElement) {
-          notifyElement.insertBefore(messageElement, explanationElement);
-        } else {
-          notifyElement.appendChild(messageElement);
-        }
+      if (explanationElement) {
+        notifyElement.insertBefore(messageElement, explanationElement);
+      } else {
+        notifyElement.appendChild(messageElement);
       }
     }
 
