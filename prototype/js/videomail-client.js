@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.12",
+  "version": "8.3.13",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21715,10 +21715,14 @@ var Notifier = function Notifier(visuals, options) {
   }
   function setMessage(message, messageOptions) {
     var problem = messageOptions.problem ? messageOptions.problem : false;
-    if (messageElement && messageElement.length > 0) {
-      messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+    if (messageElement) {
+      if (message.length > 0) {
+        messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+      } else {
+        options.logger.warn("Not going to update messageElement because message is empty", message);
+      }
     } else {
-      options.logger.warn("Unable to show following because messageElement is empty:", message);
+      options.logger.warn("Unable to update messageElement because none is defined", message);
     }
   }
   this.error = function (err) {
@@ -21776,7 +21780,9 @@ var Notifier = function Notifier(visuals, options) {
       notifyElement.classList.remove("blocking");
     }
     if (messageElement) {
+      notifyElement.removeChild(messageElement);
       messageElement.innerHTML = null;
+      messageElement = undefined;
     }
     hideExplanation();
   };
