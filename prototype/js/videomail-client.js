@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.17",
+  "version": "8.3.18",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21604,12 +21604,12 @@ var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../../util/eventEmitter"));
+var NOTIFIER_MESSAGE_ID = "notifierMessage";
 var Notifier = function Notifier(visuals, options) {
   _eventEmitter.default.call(this, options, "Notifier");
   var self = this;
   var debug = options && options.debug;
   var notifyElement;
-  var messageElement;
   var explanationElement;
   var entertainTimeoutId;
   var entertaining;
@@ -21715,14 +21715,15 @@ var Notifier = function Notifier(visuals, options) {
   }
   function setMessage(message, messageOptions) {
     var problem = messageOptions.problem ? messageOptions.problem : false;
-    if (messageElement) {
+    var notifierMessage = getNotifierMessage();
+    if (notifierMessage) {
       if (message.length > 0) {
-        messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+        notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
       } else {
-        options.logger.warn("Not going to update messageElement because message is empty", message);
+        options.logger.warn("Not going to update notifierMessage element because message is empty", message);
       }
     } else {
-      options.logger.warn("Unable to update messageElement because none is defined", message);
+      options.logger.warn("Unable to update notifierMessage element because none is defined", message);
     }
   }
   this.error = function (err) {
@@ -21768,9 +21769,10 @@ var Notifier = function Notifier(visuals, options) {
     built = true;
   };
   function hideMessage() {
-    if (messageElement) {
-      messageElement.innerHTML = null;
-      (0, _hidden.default)(messageElement, true);
+    var notifierMessage = getNotifierMessage();
+    if (notifierMessage) {
+      notifierMessage.innerHTML = null;
+      (0, _hidden.default)(notifierMessage, true);
     }
   }
   function hideExplanation() {
@@ -21797,6 +21799,9 @@ var Notifier = function Notifier(visuals, options) {
   this.isBuilt = function () {
     return built;
   };
+  function getNotifierMessage() {
+    return document.getElementById(NOTIFIER_MESSAGE_ID);
+  }
   this.notify = function (message, explanation) {
     var notifyOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     options.debug("Notifier: notify()", message, explanation);
@@ -21806,15 +21811,16 @@ var Notifier = function Notifier(visuals, options) {
     var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     var classList = notifyOptions.classList ? notifyOptions.classList : false;
     var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false;
-    var notifierMessage = document.getElementById("notifierMessage");
+    var notifierMessage = getNotifierMessage();
     if (!notifierMessage && notifyElement) {
-      messageElement = (0, _hyperscript.default)("h2", {
-        id: "notifierMessage"
+      var messageElement = (0, _hyperscript.default)("h2", {
+        id: NOTIFIER_MESSAGE_ID
       });
       notifyElement.appendChild(messageElement);
     }
-    if (notifyElement && messageElement && explanationElement) {
-      notifyElement.insertBefore(messageElement, explanationElement);
+    notifierMessage = getNotifierMessage();
+    if (notifyElement && notifierMessage && explanationElement) {
+      notifyElement.insertBefore(notifierMessage, explanationElement);
     }
     if (notifyElement) {
       // reset

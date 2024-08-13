@@ -5,6 +5,8 @@ import inherits from "inherits";
 import Events from "../../events";
 import EventEmitter from "../../util/eventEmitter";
 
+const NOTIFIER_MESSAGE_ID = "notifierMessage";
+
 const Notifier = function (visuals, options) {
   EventEmitter.call(this, options, "Notifier");
 
@@ -12,7 +14,6 @@ const Notifier = function (visuals, options) {
   const debug = options && options.debug;
 
   let notifyElement;
-  let messageElement;
   let explanationElement;
   let entertainTimeoutId;
   let entertaining;
@@ -160,19 +161,20 @@ const Notifier = function (visuals, options) {
 
   function setMessage(message, messageOptions) {
     const problem = messageOptions.problem ? messageOptions.problem : false;
+    const notifierMessage = getNotifierMessage();
 
-    if (messageElement) {
+    if (notifierMessage) {
       if (message.length > 0) {
-        messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+        notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
       } else {
         options.logger.warn(
-          "Not going to update messageElement because message is empty",
+          "Not going to update notifierMessage element because message is empty",
           message,
         );
       }
     } else {
       options.logger.warn(
-        "Unable to update messageElement because none is defined",
+        "Unable to update notifierMessage element because none is defined",
         message,
       );
     }
@@ -235,9 +237,10 @@ const Notifier = function (visuals, options) {
   };
 
   function hideMessage() {
-    if (messageElement) {
-      messageElement.innerHTML = null;
-      hidden(messageElement, true);
+    const notifierMessage = getNotifierMessage();
+    if (notifierMessage) {
+      notifierMessage.innerHTML = null;
+      hidden(notifierMessage, true);
     }
   }
 
@@ -272,6 +275,10 @@ const Notifier = function (visuals, options) {
     return built;
   };
 
+  function getNotifierMessage() {
+    return document.getElementById(NOTIFIER_MESSAGE_ID);
+  }
+
   this.notify = function (message, explanation, notifyOptions = {}) {
     options.debug("Notifier: notify()", message, explanation);
 
@@ -284,18 +291,20 @@ const Notifier = function (visuals, options) {
       ? notifyOptions.removeDimensions
       : false;
 
-    const notifierMessage = document.getElementById("notifierMessage");
+    let notifierMessage = getNotifierMessage();
 
     if (!notifierMessage && notifyElement) {
-      messageElement = h("h2", {
-        id: "notifierMessage",
+      const messageElement = h("h2", {
+        id: NOTIFIER_MESSAGE_ID,
       });
 
       notifyElement.appendChild(messageElement);
     }
 
-    if (notifyElement && messageElement && explanationElement) {
-      notifyElement.insertBefore(messageElement, explanationElement);
+    notifierMessage = getNotifierMessage();
+
+    if (notifyElement && notifierMessage && explanationElement) {
+      notifyElement.insertBefore(notifierMessage, explanationElement);
     }
 
     if (notifyElement) {
