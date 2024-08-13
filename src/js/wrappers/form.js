@@ -164,7 +164,7 @@ const Form = function (container, formElement, options) {
           });
         } else {
           inputElement.addEventListener("input", function () {
-            // let angular validate first, e.g. remove the custom error
+            // let any UI framework validate first, e.g. remove the custom error
             setTimeout(function () {
               container.validate();
             }, 0);
@@ -219,6 +219,14 @@ const Form = function (container, formElement, options) {
     // fixes https://github.com/binarykitchen/videomail-client/issues/91
     this.on(Events.GOING_BACK, () => {
       keyInput.value = null;
+    });
+
+    this.on(Events.INVALID, () => {
+      formElement.classList.add("invalid");
+    });
+
+    this.on(Events.VALID, () => {
+      formElement.classList.remove("invalid");
     });
 
     this.on(Events.ERROR, function (err) {
