@@ -161,11 +161,18 @@ const Notifier = function (visuals, options) {
   function setMessage(message, messageOptions) {
     const problem = messageOptions.problem ? messageOptions.problem : false;
 
-    if (messageElement && messageElement.length > 0) {
-      messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+    if (messageElement) {
+      if (message.length > 0) {
+        messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+      } else {
+        options.logger.warn(
+          "Not going to update messageElement because message is empty",
+          message,
+        );
+      }
     } else {
       options.logger.warn(
-        "Unable to show following because messageElement is empty:",
+        "Unable to update messageElement because none is defined",
         message,
       );
     }
@@ -243,7 +250,10 @@ const Notifier = function (visuals, options) {
     }
 
     if (messageElement) {
+      notifyElement.removeChild(messageElement);
+
       messageElement.innerHTML = null;
+      messageElement = undefined;
     }
 
     hideExplanation();
