@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.11",
+  "version": "8.3.12",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21737,7 +21737,9 @@ var Notifier = function Notifier(visuals, options) {
   };
   this.setExplanation = function (explanation) {
     if (!explanationElement) {
-      explanationElement = (0, _hyperscript.default)("p");
+      explanationElement = (0, _hyperscript.default)("p", {
+        className: "explanation"
+      });
       if (notifyElement) {
         notifyElement.appendChild(explanationElement);
       } else {
@@ -21806,7 +21808,7 @@ var Notifier = function Notifier(visuals, options) {
         if (explanationElement) {
           notifyElement.insertBefore(messageElement, explanationElement);
         } else {
-          notifyElement.replaceChildren(messageElement);
+          notifyElement.appendChild(messageElement);
         }
       }
     }
