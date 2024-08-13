@@ -241,6 +241,14 @@ const Notifier = function (visuals, options) {
     }
   }
 
+  function removeMessageElement() {
+    if (!messageElement) return; // skip
+    notifyElement.removeChild(messageElement);
+
+    messageElement.innerHTML = null;
+    messageElement = undefined;
+  }
+
   this.hide = function () {
     cancelEntertainment();
 
@@ -250,10 +258,7 @@ const Notifier = function (visuals, options) {
     }
 
     if (messageElement) {
-      notifyElement.removeChild(messageElement);
-
-      messageElement.innerHTML = null;
-      messageElement = undefined;
+      removeMessageElement();
     }
 
     hideExplanation();
@@ -286,6 +291,11 @@ const Notifier = function (visuals, options) {
     const removeDimensions = notifyOptions.removeDimensions
       ? notifyOptions.removeDimensions
       : false;
+
+    if (notifyElement) {
+      // Always remove previous one before setting a new one
+      removeMessageElement();
+    }
 
     if (!messageElement) {
       if (notifyElement) {

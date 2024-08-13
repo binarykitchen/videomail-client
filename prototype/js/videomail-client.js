@@ -21773,6 +21773,12 @@ var Notifier = function Notifier(visuals, options) {
       (0, _hidden.default)(explanationElement, true);
     }
   }
+  function removeMessageElement() {
+    if (!messageElement) return; // skip
+    notifyElement.removeChild(messageElement);
+    messageElement.innerHTML = null;
+    messageElement = undefined;
+  }
   this.hide = function () {
     cancelEntertainment();
     if (notifyElement) {
@@ -21780,9 +21786,7 @@ var Notifier = function Notifier(visuals, options) {
       notifyElement.classList.remove("blocking");
     }
     if (messageElement) {
-      notifyElement.removeChild(messageElement);
-      messageElement.innerHTML = null;
-      messageElement = undefined;
+      removeMessageElement();
     }
     hideExplanation();
   };
@@ -21806,6 +21810,10 @@ var Notifier = function Notifier(visuals, options) {
     var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     var classList = notifyOptions.classList ? notifyOptions.classList : false;
     var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false;
+    if (notifyElement) {
+      // Always remove previous one before setting a new one
+      removeMessageElement();
+    }
     if (!messageElement) {
       if (notifyElement) {
         messageElement = (0, _hyperscript.default)("h2", {
