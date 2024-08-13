@@ -190,7 +190,7 @@ const Notifier = function (visuals, options) {
 
   this.setExplanation = function (explanation) {
     if (!explanationElement) {
-      explanationElement = h("p");
+      explanationElement = h("p", { className: "explanation" });
 
       if (notifyElement) {
         notifyElement.appendChild(explanationElement);
@@ -286,7 +286,7 @@ const Notifier = function (visuals, options) {
         if (explanationElement) {
           notifyElement.insertBefore(messageElement, explanationElement);
         } else {
-          notifyElement.replaceChildren(messageElement);
+          notifyElement.appendChild(messageElement);
         }
       }
     }

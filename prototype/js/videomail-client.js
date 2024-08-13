@@ -21737,7 +21737,9 @@ var Notifier = function Notifier(visuals, options) {
   };
   this.setExplanation = function (explanation) {
     if (!explanationElement) {
-      explanationElement = (0, _hyperscript.default)("p");
+      explanationElement = (0, _hyperscript.default)("p", {
+        className: "explanation"
+      });
       if (notifyElement) {
         notifyElement.appendChild(explanationElement);
       } else {
@@ -21806,7 +21808,7 @@ var Notifier = function Notifier(visuals, options) {
         if (explanationElement) {
           notifyElement.insertBefore(messageElement, explanationElement);
         } else {
-          notifyElement.replaceChildren(messageElement);
+          notifyElement.appendChild(messageElement);
         }
       }
     }
