@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.9",
+  "version": "8.3.10",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -21670,6 +21670,8 @@ var Notifier = function Notifier(visuals, options) {
       onProgress(frameProgress, sampleProgress);
     }).on(_events.default.BEGIN_VIDEO_ENCODING, function () {
       onBeginVideoEncoding();
+    }).on(_events.default.DISCONNECTED, function () {
+      self.notify("Disconnected.");
     }).on(_events.default.CONNECTED, function () {
       self.notify("Connected.");
       if (options.loadUserMediaOnRecord) {
@@ -21999,13 +22001,6 @@ var Recorder = function Recorder(visuals, replay) {
     retryTimeout && clearTimeout(retryTimeout);
     retryTimeout = null;
   }
-  function clearUserMediaTimeout() {
-    if (userMediaTimeout) {
-      debug("Recorder: clearUserMediaTimeout()");
-      userMediaTimeout && clearTimeout(userMediaTimeout);
-      userMediaTimeout = null;
-    }
-  }
   function calculateFrameProgress() {
     return "".concat((confirmedFrameNumber / (framesCount || 1) * 100).toFixed(2), "%");
   }
@@ -22100,7 +22095,7 @@ var Recorder = function Recorder(visuals, replay) {
         self.emit(_events.default.ERROR, err);
       }
       if (stream) {
-        // // useful for debugging streams
+        // useful for debugging streams
 
         /*
          * if (!stream.originalEmit) {
@@ -22132,7 +22127,8 @@ var Recorder = function Recorder(visuals, replay) {
         });
         stream.on("connect", function () {
           debug("".concat(PIPE_SYMBOL, "Stream *connect* event emitted"));
-          if (!connected) {
+          var isClosing = this.socket.readyState === WebSocket.CLOSING;
+          if (!connected && !isClosing) {
             connected = true;
             connecting = unloaded = false;
             self.emit(_events.default.CONNECTED);
@@ -22460,26 +22456,6 @@ var Recorder = function Recorder(visuals, replay) {
       }
     }
   }
-  function disconnect() {
-    if (connected) {
-      debug("Recorder: disconnect()");
-      if (userMedia) {
-        // prevents https://github.com/binarykitchen/videomail-client/issues/114
-        userMedia.unloadRemainingEventListeners();
-      }
-      if (submitting) {
-        // server will disconnect socket automatically after submitting
-        connecting = connected = false;
-      } else if (stream) {
-        /*
-         * force to disconnect socket right now to clean temp files on server
-         * event listeners will do the rest
-         */
-        stream.end();
-        stream = undefined;
-      }
-    }
-  }
   function cancelAnimationFrame() {
     loop && loop.dispose();
   }
@@ -22563,9 +22539,23 @@ var Recorder = function Recorder(visuals, replay) {
       debug("Recorder: unload()".concat(cause ? ", cause: ".concat(cause) : ""));
       this.reset();
       clearUserMediaTimeout();
-      disconnect();
+      if (userMedia) {
+        // prevents https://github.com/binarykitchen/videomail-client/issues/114
+        userMedia.unloadRemainingEventListeners();
+      }
+      if (submitting) {
+        // server will disconnect socket automatically after submitting
+      } else if (stream) {
+        /*
+         * force to disconnect socket right now to clean temp files on server
+         * event listeners will do the rest
+         */
+        debug("Recorder: ending stream ...");
+        stream.destroy();
+        stream = undefined;
+      }
       unloaded = true;
-      built = false;
+      built = connecting = connected = false;
     }
   };
   this.reset = function () {
@@ -22581,6 +22571,13 @@ var Recorder = function Recorder(visuals, replay) {
       userMediaLoaded = key = canvas = ctx = recordingBuffer = recordingBufferLength = null;
     }
   };
+  function clearUserMediaTimeout() {
+    if (userMediaTimeout) {
+      debug("Recorder: clearUserMediaTimeout()");
+      userMediaTimeout && clearTimeout(userMediaTimeout);
+      userMediaTimeout = null;
+    }
+  }
   this.validate = function () {
     return connected && framesCount > 0 && canvas === null;
   };

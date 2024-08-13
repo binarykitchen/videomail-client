@@ -191,15 +191,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     retryTimeout = null;
   }
 
-  function clearUserMediaTimeout() {
-    if (userMediaTimeout) {
-      debug("Recorder: clearUserMediaTimeout()");
-
-      userMediaTimeout && clearTimeout(userMediaTimeout);
-      userMediaTimeout = null;
-    }
-  }
-
   function calculateFrameProgress() {
     return `${((confirmedFrameNumber / (framesCount || 1)) * 100).toFixed(2)}%`;
   }
@@ -342,7 +333,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       }
 
       if (stream) {
-        // // useful for debugging streams
+        // useful for debugging streams
 
         /*
          * if (!stream.originalEmit) {
@@ -378,7 +369,9 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         stream.on("connect", function () {
           debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
 
-          if (!connected) {
+          const isClosing = this.socket.readyState === WebSocket.CLOSING;
+
+          if (!connected && !isClosing) {
             connected = true;
             connecting = unloaded = false;
 
@@ -818,29 +811,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
   }
 
-  function disconnect() {
-    if (connected) {
-      debug("Recorder: disconnect()");
-
-      if (userMedia) {
-        // prevents https://github.com/binarykitchen/videomail-client/issues/114
-        userMedia.unloadRemainingEventListeners();
-      }
-
-      if (submitting) {
-        // server will disconnect socket automatically after submitting
-        connecting = connected = false;
-      } else if (stream) {
-        /*
-         * force to disconnect socket right now to clean temp files on server
-         * event listeners will do the rest
-         */
-        stream.end();
-        stream = undefined;
-      }
-    }
-  }
-
   function cancelAnimationFrame() {
     loop && loop.dispose();
   }
@@ -949,11 +919,25 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
       clearUserMediaTimeout();
 
-      disconnect();
+      if (userMedia) {
+        // prevents https://github.com/binarykitchen/videomail-client/issues/114
+        userMedia.unloadRemainingEventListeners();
+      }
+
+      if (submitting) {
+        // server will disconnect socket automatically after submitting
+      } else if (stream) {
+        /*
+         * force to disconnect socket right now to clean temp files on server
+         * event listeners will do the rest
+         */
+        debug(`Recorder: ending stream ...`);
+        stream.destroy();
+        stream = undefined;
+      }
 
       unloaded = true;
-
-      built = false;
+      built = connecting = connected = false;
     }
   };
 
@@ -980,6 +964,15 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           null;
     }
   };
+
+  function clearUserMediaTimeout() {
+    if (userMediaTimeout) {
+      debug("Recorder: clearUserMediaTimeout()");
+
+      userMediaTimeout && clearTimeout(userMediaTimeout);
+      userMediaTimeout = null;
+    }
+  }
 
   this.validate = function () {
     return connected && framesCount > 0 && canvas === null;
