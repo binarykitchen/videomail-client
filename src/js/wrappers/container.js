@@ -115,9 +115,11 @@ const Container = function (options) {
   function initEvents() {
     debug("Container: initEvents()");
 
-    window.addEventListener("beforeunload", (e) => {
-      self.unload(e);
-    });
+    if (options.enableAutoUnload) {
+      window.addEventListener("beforeunload", (e) => {
+        self.unload(e);
+      });
+    }
 
     if (!options.playerOnly) {
       visibility.onChange(function (visible) {

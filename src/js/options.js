@@ -19,6 +19,7 @@ export default {
   disableSubmit: false, // set this to true if you do not want to submit videos,
   // but just want to record and replay these temporarily
   enableAutoValidation: true, // automatically validates all form inputs if any exist and
+  enableAutoUnload: true, // automatically unloads VC when navigating away
   /*
    * does not /enable disable submit button after recording
    * when something else seems invalid.
