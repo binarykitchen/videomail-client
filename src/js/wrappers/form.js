@@ -98,7 +98,7 @@ const Form = function (container, formElement, options) {
       if (videomail[name]) {
         input.value = videomail[name];
         // Important so that any other JS framework can detect changes
-        input.dispatchEvent(new Event("change", { bubbles: true }));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
       }
 
       if (
@@ -212,7 +212,7 @@ const Form = function (container, formElement, options) {
       } else if (videomailKey) {
         keyInput.value = videomailKey;
         // Important so that any other JS framework can detect changes
-        keyInput.dispatchEvent(new Event("change", { bubbles: true }));
+        keyInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       /*
        * else leave as it and use existing keyInput.value
@@ -222,7 +222,7 @@ const Form = function (container, formElement, options) {
     // fixes https://github.com/binarykitchen/videomail-client/issues/91
     this.on(Events.GOING_BACK, () => {
       keyInput.value = null;
-      keyInput.dispatchEvent(new Event("change", { bubbles: true }));
+      keyInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     this.on(Events.INVALID, () => {
