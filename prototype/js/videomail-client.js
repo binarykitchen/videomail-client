@@ -17722,6 +17722,8 @@ var _default = exports.default = {
   // but just want to record and replay these temporarily
   enableAutoValidation: true,
   // automatically validates all form inputs if any exist and
+  enableAutoUnload: true,
+  // automatically unloads VC when navigating away
   /*
    * does not /enable disable submit button after recording
    * when something else seems invalid.
@@ -19809,9 +19811,11 @@ var Container = function Container(options) {
   }
   function initEvents() {
     debug("Container: initEvents()");
-    window.addEventListener("beforeunload", function (e) {
-      self.unload(e);
-    });
+    if (options.enableAutoUnload) {
+      window.addEventListener("beforeunload", function (e) {
+        self.unload(e);
+      });
+    }
     if (!options.playerOnly) {
       visibility.onChange(function (visible) {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
