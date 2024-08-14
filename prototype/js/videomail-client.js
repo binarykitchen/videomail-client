@@ -20568,6 +20568,10 @@ var Form = function Form(container, formElement, options) {
       name = input.name;
       if (videomail[name]) {
         input.value = videomail[name];
+        // Important so that any other JS framework can detect changes
+        input.dispatchEvent(new Event("change", {
+          bubbles: true
+        }));
       }
       if (name === options.selectors.subjectInputName || name === options.selectors.bodyInputName) {
         input.disabled = true;
@@ -20651,16 +20655,22 @@ var Form = function Form(container, formElement, options) {
         self.emit(_events.default.ERROR, _videomailError.default.create("Videomail key for preview is missing!", options));
       } else if (videomailKey) {
         keyInput.value = videomailKey;
+        // Important so that any other JS framework can detect changes
+        keyInput.dispatchEvent(new Event("change", {
+          bubbles: true
+        }));
       }
       /*
-       * else
-       * leave as it and use existing keyInput.value
+       * else leave as it and use existing keyInput.value
        */
     });
 
     // fixes https://github.com/binarykitchen/videomail-client/issues/91
     this.on(_events.default.GOING_BACK, function () {
       keyInput.value = null;
+      keyInput.dispatchEvent(new Event("change", {
+        bubbles: true
+      }));
     });
     this.on(_events.default.INVALID, function () {
       formElement.classList.add("invalid");
