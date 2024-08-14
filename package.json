@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "8.4.0",
+  "version": "9.0.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -33,7 +33,7 @@
   },
   "engines": {
     "node": "^20.16.0",
-    "npm": "^10.8.1"
+    "npm": "^10.8.2"
   },
   "keywords": [
     "webcam",
