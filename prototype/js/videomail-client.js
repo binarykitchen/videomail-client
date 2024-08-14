@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "8.3.22",
+  "version": "8.3.23",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
   "contributors": [
@@ -20569,7 +20569,7 @@ var Form = function Form(container, formElement, options) {
       if (videomail[name]) {
         input.value = videomail[name];
         // Important so that any other JS framework can detect changes
-        input.dispatchEvent(new Event("change", {
+        input.dispatchEvent(new Event("input", {
           bubbles: true
         }));
       }
@@ -20656,7 +20656,7 @@ var Form = function Form(container, formElement, options) {
       } else if (videomailKey) {
         keyInput.value = videomailKey;
         // Important so that any other JS framework can detect changes
-        keyInput.dispatchEvent(new Event("change", {
+        keyInput.dispatchEvent(new Event("input", {
           bubbles: true
         }));
       }
@@ -20668,7 +20668,7 @@ var Form = function Form(container, formElement, options) {
     // fixes https://github.com/binarykitchen/videomail-client/issues/91
     this.on(_events.default.GOING_BACK, function () {
       keyInput.value = null;
-      keyInput.dispatchEvent(new Event("change", {
+      keyInput.dispatchEvent(new Event("input", {
         bubbles: true
       }));
     });
