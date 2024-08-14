@@ -174,14 +174,14 @@ const Notifier = function (visuals, options) {
           message,
         );
       }
+
+      hidden(notifierMessage, false);
     } else {
       options.logger.warn(
-        "Unable to update notifierMessage element because none is defined",
+        "Unable to update notifierMessage element because no element is defined",
         message,
       );
     }
-
-    hidden(notifierMessage, false);
   }
 
   this.error = function (err) {
