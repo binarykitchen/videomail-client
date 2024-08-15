@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.10",
+  "version": "9.0.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -20550,7 +20550,12 @@ var Form = function Form(container, formElement, options) {
     Object.keys(FORM_FIELDS).forEach(function (key) {
       var formFieldValue = FORM_FIELDS[key];
       if (formFieldValue in formData) {
-        transformedFormData[key] = formData[formFieldValue];
+        var value = formData[formFieldValue];
+        if (value === "" || value === undefined) {
+          // skip empty strings and undefined
+        } else {
+          transformedFormData[key] = value;
+        }
       }
     });
     if (transformedFormData.from) {
