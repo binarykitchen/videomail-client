@@ -692,6 +692,8 @@ const Container = function (options) {
   }
 
   this.submitAll = function (formData, method, url) {
+    debug("Container: submitAll()");
+
     const post = isPost(method);
     const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
 

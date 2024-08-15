@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.5",
+  "version": "9.0.6",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19550,6 +19550,7 @@ var Buttons = function Buttons(container, options) {
     disable(audioOnRadioPair);
   }
   function onSubmitting() {
+    debug("Buttons: onSubmitting()");
     disable(submitButton);
     disable(recordAgainButton);
   }
@@ -20287,6 +20288,7 @@ var Container = function Container(options) {
     return method && method.toUpperCase() === "PUT";
   }
   this.submitAll = function (formData, method, url) {
+    debug("Container: submitAll()");
     var post = isPost(method);
     var hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
     function startSubmission() {
