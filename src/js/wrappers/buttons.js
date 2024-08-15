@@ -646,6 +646,8 @@ const Buttons = function (container, options) {
   };
 
   this.unload = function () {
+    debug("Buttons: unload()");
+
     built = false;
   };
 

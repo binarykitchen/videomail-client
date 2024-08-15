@@ -19695,6 +19695,7 @@ var Buttons = function Buttons(container, options) {
     built = true;
   };
   this.unload = function () {
+    debug("Buttons: unload()");
     built = false;
   };
   this.hide = function (params) {
@@ -19910,6 +19911,9 @@ var Container = function Container(options) {
   function unloadChildren(e) {
     visuals.unload(e);
     buttons.unload();
+    if (form) {
+      form.unload();
+    }
     self.endWaiting();
   }
   function hideMySelf() {
@@ -20515,6 +20519,7 @@ function trimEmail(email) {
 }
 var Form = function Form(container, formElement, options) {
   _eventEmitter.default.call(this, options, "Form");
+  var debug = options.debug;
   var self = this;
   var keyInput;
   function getData() {
@@ -20708,9 +20713,19 @@ var Form = function Form(container, formElement, options) {
     var submitButton = self.findSubmitButton();
     (0, _hidden.default)(submitButton, true);
   }
+
+  // TODO CONTINUE FROM HERE, PUBLISH THIS CHANGE
+  this.unload = function () {
+    debug("Form: unload()");
+    stopListeningToSubmitEvents();
+  };
   function startListeningToSubmitEvents() {
     var submitButton = container.getSubmitButton();
     submitButton.addEventListener("click", self.doTheSubmit.bind(self));
+  }
+  function stopListeningToSubmitEvents() {
+    var submitButton = container.getSubmitButton();
+    submitButton.removeEventListener("click", self.doTheSubmit.bind(self));
   }
   this.doTheSubmit = function (e) {
     if (e) {
@@ -21017,6 +21032,7 @@ var Visuals = function Visuals(container, options) {
     });
   };
   this.unload = function (e) {
+    debug("Visuals: unload()", e);
     try {
       recorder.unload(e);
       recorderInsides.unload(e);
