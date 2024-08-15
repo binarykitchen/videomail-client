@@ -168,10 +168,7 @@ const Form = function (container, formElement, options) {
           });
         } else {
           inputElement.addEventListener("input", function () {
-            // let any UI framework validate first, e.g. remove the custom error
-            setTimeout(function () {
-              container.validate();
-            }, 0);
+            container.validate();
           });
         }
       }
