@@ -259,9 +259,10 @@ const Form = function (container, formElement, options) {
     hidden(submitButton, true);
   }
 
-  // TODO CONTINUE FROM HERE, PUBLISH THIS CHANGE
   this.unload = function () {
     debug("Form: unload()");
+
+    this.removeAllListeners();
     stopListeningToSubmitEvents();
   };
 
@@ -276,6 +277,8 @@ const Form = function (container, formElement, options) {
   }
 
   this.doTheSubmit = (e) => {
+    debug("Form: doTheSubmit()", e);
+
     if (e) {
       e.preventDefault();
     }
