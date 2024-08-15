@@ -223,6 +223,8 @@ const Visuals = function (container, options) {
   };
 
   this.unload = function (e) {
+    debug("Visuals: unload()", e);
+
     try {
       recorder.unload(e);
       recorderInsides.unload(e);

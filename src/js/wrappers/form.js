@@ -15,6 +15,8 @@ function trimEmail(email) {
 const Form = function (container, formElement, options) {
   EventEmitter.call(this, options, "Form");
 
+  const { debug } = options;
+
   const self = this;
 
   let keyInput;
@@ -260,9 +262,20 @@ const Form = function (container, formElement, options) {
     hidden(submitButton, true);
   }
 
+  // TODO CONTINUE FROM HERE, PUBLISH THIS CHANGE
+  this.unload = function () {
+    debug("Form: unload()");
+    stopListeningToSubmitEvents();
+  };
+
   function startListeningToSubmitEvents() {
     const submitButton = container.getSubmitButton();
     submitButton.addEventListener("click", self.doTheSubmit.bind(self));
+  }
+
+  function stopListeningToSubmitEvents() {
+    const submitButton = container.getSubmitButton();
+    submitButton.removeEventListener("click", self.doTheSubmit.bind(self));
   }
 
   this.doTheSubmit = (e) => {

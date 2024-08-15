@@ -227,6 +227,11 @@ const Container = function (options) {
   function unloadChildren(e) {
     visuals.unload(e);
     buttons.unload();
+
+    if (form) {
+      form.unload();
+    }
+
     self.endWaiting();
   }
 
