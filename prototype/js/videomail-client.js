@@ -20722,11 +20722,11 @@ var Form = function Form(container, formElement, options) {
   };
   function startListeningToSubmitEvents() {
     var submitButton = container.getSubmitButton();
-    submitButton.addEventListener("click", self.doTheSubmit.bind(self));
+    submitButton.onclick = self.doTheSubmit.bind(self);
   }
   function stopListeningToSubmitEvents() {
     var submitButton = container.getSubmitButton();
-    submitButton.removeEventListener("click", self.doTheSubmit.bind(self));
+    submitButton.onclick = null;
   }
   this.doTheSubmit = function (e) {
     debug("Form: doTheSubmit()", e);

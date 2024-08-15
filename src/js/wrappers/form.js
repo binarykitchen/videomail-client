@@ -268,12 +268,12 @@ const Form = function (container, formElement, options) {
 
   function startListeningToSubmitEvents() {
     const submitButton = container.getSubmitButton();
-    submitButton.addEventListener("click", self.doTheSubmit.bind(self));
+    submitButton.onclick = self.doTheSubmit.bind(self);
   }
 
   function stopListeningToSubmitEvents() {
     const submitButton = container.getSubmitButton();
-    submitButton.removeEventListener("click", self.doTheSubmit.bind(self));
+    submitButton.onclick = null;
   }
 
   this.doTheSubmit = (e) => {
