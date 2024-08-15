@@ -167,7 +167,7 @@ const VideomailClient = function (options) {
     return getBrowser(localOptions).canRecord();
   };
 
-  // return true when a video has been recorded but is not sent yet
+  // Returns true when a video has been recorded but is not submitted yet
   this.isDirty = function () {
     return container.isDirty();
   };

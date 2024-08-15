@@ -754,6 +754,8 @@ const Container = function (options) {
     if (form) {
       if (visuals.isRecorderUnloaded()) {
         isDirty = false;
+      } else if (submitted) {
+        isDirty = false;
       } else if (this.isReplayShown() || this.isPaused()) {
         isDirty = true;
       }
