@@ -452,6 +452,7 @@ const Buttons = function (container, options) {
   }
 
   function onSubmitting() {
+    debug("Buttons: onSubmitting()");
     disable(submitButton);
     disable(recordAgainButton);
   }
