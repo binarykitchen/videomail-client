@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.9",
+  "version": "9.0.10",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -22595,32 +22595,33 @@ var Recorder = function Recorder(visuals, replay) {
     loadUserMedia();
   }
   this.unload = function (e) {
-    if (!unloaded) {
-      var cause;
-      if (e) {
-        cause = e.name || e.statusText || e.toString();
-      }
-      debug("Recorder: unload()".concat(cause ? ", cause: ".concat(cause) : ""));
-      this.reset();
-      clearUserMediaTimeout();
-      if (userMedia) {
-        // prevents https://github.com/binarykitchen/videomail-client/issues/114
-        userMedia.unloadRemainingEventListeners();
-      }
-      if (submitting) {
-        // server will disconnect socket automatically after submitting
-      } else if (stream) {
-        /*
-         * force to disconnect socket right now to clean temp files on server
-         * event listeners will do the rest
-         */
-        debug("Recorder: ending stream ...");
-        stream.destroy();
-        stream = undefined;
-      }
-      unloaded = true;
-      built = connecting = connected = false;
+    if (unloaded) {
+      return; // already unloaded
     }
+    var cause;
+    if (e) {
+      cause = e.name || e.statusText || e.toString();
+    }
+    debug("Recorder: unload()".concat(cause ? ", cause: ".concat(cause) : ""));
+    this.reset();
+    clearUserMediaTimeout();
+    if (userMedia) {
+      // prevents https://github.com/binarykitchen/videomail-client/issues/114
+      userMedia.unloadRemainingEventListeners();
+    }
+    if (submitting) {
+      // server will disconnect socket automatically after submitting
+    } else if (stream) {
+      /*
+       * force to disconnect socket right now to clean temp files on server
+       * event listeners will do the rest
+       */
+      debug("Recorder: ending stream ...");
+      stream.destroy();
+      stream = undefined;
+    }
+    unloaded = true;
+    built = connecting = connected = false;
   };
   this.reset = function () {
     // no need to reset when already unloaded
@@ -22855,7 +22856,6 @@ var Recorder = function Recorder(visuals, replay) {
       submitting = true;
     }).on(_events.default.SUBMITTED, function () {
       submitting = false;
-      self.unload();
     }).on(_events.default.BLOCKING, function () {
       blocking = true;
       clearUserMediaTimeout();
