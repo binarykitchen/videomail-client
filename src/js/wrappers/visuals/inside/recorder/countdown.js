@@ -1,5 +1,5 @@
-import h from "hyperscript";
 import hidden from "hidden";
+import h from "hyperscript";
 
 export default function (visuals, options) {
   const self = this;

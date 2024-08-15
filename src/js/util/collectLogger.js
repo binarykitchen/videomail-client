@@ -1,5 +1,5 @@
-import Browser from "./browser";
 import formatUtil from "format-util";
+import Browser from "./browser";
 
 export default function (localOptions = {}) {
   const browser = new Browser(localOptions);

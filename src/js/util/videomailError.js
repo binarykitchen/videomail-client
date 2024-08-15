@@ -1,8 +1,8 @@
 import Resource from "./../resource";
 // https://github.com/tgriesser/create-error
 import createError from "create-error";
-import originalPretty from "./pretty";
 import stringify from "safe-json-stringify";
+import originalPretty from "./pretty";
 
 const VIDEOMAIL_ERR_NAME = "Videomail Error";
 

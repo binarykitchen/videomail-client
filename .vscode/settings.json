@@ -1,9 +1,26 @@
 {
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.configPath": "./prettier.config.cjs",
+  "editor.codeActionsOnSave": [
+    // Sort package.json keys with
+    // https://marketplace.visualstudio.com/items?itemName=unional.vscode-sort-package-json
+    "source.sortPackageJson"
+  ],
   "cSpell.words": [
+    "bytediff",
+    "classlist",
+    "cssnano",
     "deepmerge",
+    "derequire",
+    "getusermedia",
     "gulpfile",
     "hyperscript",
     "keymirror",
+    "packagejson",
+    "plusplus",
     "preend",
     "rubberband",
     "styl",

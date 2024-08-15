@@ -1,7 +1,7 @@
 import AudioSample from "audio-sample";
+import isPOT from "is-power-of-two";
 import Browser from "./browser";
 import VideomailError from "./videomailError";
-import isPOT from "is-power-of-two";
 
 const CHANNELS = 1;
 

@@ -17273,41 +17273,8 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
-  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
-  "contributors": [
-    {
-      "name": "Michael Heuberger",
-      "email": "michael.heuberger@binarykitchen.com"
-    }
-  ],
-  "homepage": "https://videomail.io",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/binarykitchen/videomail-client.git"
-  },
-  "license": "CC0-1.0",
-  "readmeFilename": "README.md",
-  "main": "prototype/js/videomail-client.js",
-  "scripts": {
-    "build": "gulp build",
-    "clean": "rm -rf node_modules && rm -rf package-lock.json",
-    "test": "gulp test",
-    "watch": "NODE_NO_HTTP2=1 gulp watch",
-    "audit": "npx audit-ci --config audit-ci.json",
-    "patch": "./env/dev/release.sh --importance=patch",
-    "minor": "./env/dev/release.sh --importance=minor",
-    "major": "./env/dev/release.sh --importance=major",
-    "lint": "eslint --color ./src ./test ./gulpfile.js",
-    "lint:fix": "npm --silent run lint -- --fix",
-    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
-    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js"
-  },
-  "engines": {
-    "node": "^20.16.0",
-    "npm": "^10.8.2"
-  },
   "keywords": [
     "webcam",
     "video",
@@ -17317,7 +17284,35 @@ module.exports={
     "audio",
     "recorder"
   ],
-  "prettier": "./prettier.config.js",
+  "homepage": "https://videomail.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binarykitchen/videomail-client.git"
+  },
+  "license": "CC0-1.0",
+  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
+  "contributors": [
+    {
+      "name": "Michael Heuberger",
+      "email": "michael.heuberger@binarykitchen.com"
+    }
+  ],
+  "main": "prototype/js/videomail-client.js",
+  "scripts": {
+    "audit": "npx audit-ci --config audit-ci.json",
+    "build": "gulp build",
+    "clean": "rm -rf node_modules && rm -rf package-lock.json",
+    "lint": "eslint --color ./src ./test ./gulpfile.js",
+    "lint:fix": "npm --silent run lint -- --fix",
+    "major": "./env/dev/release.sh --importance=major",
+    "minor": "./env/dev/release.sh --importance=minor",
+    "patch": "./env/dev/release.sh --importance=patch",
+    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
+    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js",
+    "test": "gulp test",
+    "watch": "NODE_NO_HTTP2=1 gulp watch"
+  },
+  "prettier": "./prettier.config.cjs",
   "dependencies": {
     "@babel/core": "7.25.2",
     "add-eventlistener-with-options": "1.25.5",
@@ -17389,6 +17384,10 @@ module.exports={
     "nib": "1.2.0",
     "postcss": "8.4.41",
     "prettier": "3.3.3",
+    "prettier-plugin-curly": "0.2.2",
+    "prettier-plugin-organize-imports": "4.0.0",
+    "prettier-plugin-packagejson": "2.5.1",
+    "prettier-plugin-sh": "0.14.0",
     "router": "1.3.8",
     "tape": "5.8.1",
     "tape-catch": "1.0.6",
@@ -17396,7 +17395,12 @@ module.exports={
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "4.0.0"
-  }
+  },
+  "engines": {
+    "node": "^20.16.0",
+    "npm": "^10.8.2"
+  },
+  "readmeFilename": "README.md"
 }
 
 },{}],115:[function(_dereq_,module,exports){
@@ -17409,16 +17413,16 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
-var _options = _interopRequireDefault(_dereq_("./options"));
 var _constants = _interopRequireDefault(_dereq_("./constants"));
 var _events = _interopRequireDefault(_dereq_("./events"));
+var _options = _interopRequireDefault(_dereq_("./options"));
+var _resource = _interopRequireDefault(_dereq_("./resource"));
+var _browser = _interopRequireDefault(_dereq_("./util/browser"));
 var _collectLogger = _interopRequireDefault(_dereq_("./util/collectLogger"));
 var _eventEmitter = _interopRequireDefault(_dereq_("./util/eventEmitter"));
 var _container = _interopRequireDefault(_dereq_("./wrappers/container"));
-var _replay = _interopRequireDefault(_dereq_("./wrappers/visuals/replay"));
 var _optionsWrapper = _interopRequireDefault(_dereq_("./wrappers/optionsWrapper"));
-var _browser = _interopRequireDefault(_dereq_("./util/browser"));
-var _resource = _interopRequireDefault(_dereq_("./resource"));
+var _replay = _interopRequireDefault(_dereq_("./wrappers/visuals/replay"));
 var collectLogger;
 var browser;
 function adjustOptions() {
@@ -17936,7 +17940,9 @@ function _default(options) {
     return err;
   }
   function fetch(alias, cb) {
-    _superagent.default.get("/videomail/".concat(alias, "/snapshot")).set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
+    var url = "".concat(options.baseUrl, "/videomail/").concat(alias, "/snapshot");
+    var request = (0, _superagent.default)("get", url);
+    request.set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
       err = packError(err, res);
       if (err) {
         cb(err);
@@ -18058,9 +18064,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 var _audioSample = _interopRequireDefault(_dereq_("audio-sample"));
+var _isPowerOfTwo = _interopRequireDefault(_dereq_("is-power-of-two"));
 var _browser = _interopRequireDefault(_dereq_("./browser"));
 var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
-var _isPowerOfTwo = _interopRequireDefault(_dereq_("is-power-of-two"));
 var CHANNELS = 1;
 
 /*
@@ -18421,8 +18427,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 var _toConsumableArray2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/toConsumableArray"));
-var _browser = _interopRequireDefault(_dereq_("./browser"));
 var _formatUtil = _interopRequireDefault(_dereq_("format-util"));
+var _browser = _interopRequireDefault(_dereq_("./browser"));
 function _default() {
   var localOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var browser = new _browser.default(localOptions);
@@ -18489,8 +18495,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 var _despot = _interopRequireDefault(_dereq_("despot"));
-var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
 var _events = _interopRequireDefault(_dereq_("./../events"));
+var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
 // TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 
 function _default(options, name) {
@@ -18842,8 +18848,8 @@ exports.default = void 0;
 var _typeof2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/typeof"));
 var _resource = _interopRequireDefault(_dereq_("./../resource"));
 var _createError = _interopRequireDefault(_dereq_("create-error"));
-var _pretty = _interopRequireDefault(_dereq_("./pretty"));
 var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
+var _pretty = _interopRequireDefault(_dereq_("./pretty"));
 // https://github.com/tgriesser/create-error
 
 var VIDEOMAIL_ERR_NAME = "Videomail Error";
@@ -21168,8 +21174,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 function _default(visuals, options) {
   var self = this;
   var countdownElement;
@@ -21242,8 +21248,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _events = _interopRequireDefault(_dereq_("./../../../../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("./../../../../util/eventEmitter"));
 function _default(visuals, options) {
@@ -21291,8 +21297,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _videomailError = _interopRequireDefault(_dereq_("./../../../../util/videomailError"));
 function _default(visuals, options) {
   if (!options.text.pausedHeader) {
@@ -21344,8 +21350,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 function _default(visuals) {
   var recordNoteElement;
   this.build = function () {
@@ -21385,8 +21391,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 function _default(visuals, recordNote, options) {
   var recordTimerElement;
   var nearComputed = false;
@@ -21507,13 +21513,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _events = _interopRequireDefault(_dereq_("./../../../events"));
-var _eventEmitter = _interopRequireDefault(_dereq_("./../../../util/eventEmitter"));
 var _browser = _interopRequireDefault(_dereq_("./../../../util/browser"));
+var _eventEmitter = _interopRequireDefault(_dereq_("./../../../util/eventEmitter"));
 var _countdown = _interopRequireDefault(_dereq_("./recorder/countdown"));
+var _facingMode = _interopRequireDefault(_dereq_("./recorder/facingMode"));
 var _pausedNote = _interopRequireDefault(_dereq_("./recorder/pausedNote"));
 var _recordNote = _interopRequireDefault(_dereq_("./recorder/recordNote"));
 var _recordTimer = _interopRequireDefault(_dereq_("./recorder/recordTimer"));
-var _facingMode = _interopRequireDefault(_dereq_("./recorder/facingMode"));
 var RecorderInsides = function RecorderInsides(visuals, options) {
   _eventEmitter.default.call(this, options, "RecorderInsides");
   var self = this;
@@ -21903,8 +21909,8 @@ var _canvasToBuffer = _interopRequireDefault(_dereq_("canvas-to-buffer"));
 var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _websocketStream = _interopRequireDefault(_dereq_("websocket-stream"));
 var _constants = _interopRequireDefault(_dereq_("../../constants"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
@@ -23019,8 +23025,8 @@ exports.default = void 0;
 var _addEventlistenerWithOptions = _interopRequireDefault(_dereq_("add-eventlistener-with-options"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
-var _iphoneInlineVideo = _interopRequireDefault(_dereq_("iphone-inline-video"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
+var _iphoneInlineVideo = _interopRequireDefault(_dereq_("iphone-inline-video"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
 var _browser = _interopRequireDefault(_dereq_("../../util/browser"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../../util/eventEmitter"));
@@ -23320,15 +23326,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = _default;
+var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
+var _events = _interopRequireDefault(_dereq_("./../../events"));
 var _audioRecorder = _interopRequireDefault(_dereq_("./../../util/audioRecorder"));
 var _browser = _interopRequireDefault(_dereq_("./../../util/browser"));
 var _eventEmitter = _interopRequireDefault(_dereq_("./../../util/eventEmitter"));
-var _events = _interopRequireDefault(_dereq_("./../../events"));
 var _mediaEvents = _interopRequireDefault(_dereq_("./../../util/mediaEvents"));
-var _videomailError = _interopRequireDefault(_dereq_("./../../util/videomailError"));
-var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
-var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _pretty = _interopRequireDefault(_dereq_("./../../util/pretty"));
+var _videomailError = _interopRequireDefault(_dereq_("./../../util/videomailError"));
 var EVENT_ASCII = "|—O—|";
 function _default(recorder, options) {
   _eventEmitter.default.call(this, options, "UserMedia");
@@ -23740,8 +23746,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _standardize = _interopRequireDefault(_dereq_("./util/standardize"));
 var _client = _interopRequireDefault(_dereq_("./client"));
+var _standardize = _interopRequireDefault(_dereq_("./util/standardize"));
 if (!navigator) {
   throw new Error("Navigator is missing!");
 } else {

@@ -1,12 +1,12 @@
+import h from "hyperscript";
+import stringify from "safe-json-stringify";
+import Events from "./../../events";
 import AudioRecorder from "./../../util/audioRecorder";
 import Browser from "./../../util/browser";
 import EventEmitter from "./../../util/eventEmitter";
-import Events from "./../../events";
 import MEDIA_EVENTS from "./../../util/mediaEvents";
-import VideomailError from "./../../util/videomailError";
-import stringify from "safe-json-stringify";
-import h from "hyperscript";
 import pretty from "./../../util/pretty";
+import VideomailError from "./../../util/videomailError";
 
 const EVENT_ASCII = "|—O—|";
 
