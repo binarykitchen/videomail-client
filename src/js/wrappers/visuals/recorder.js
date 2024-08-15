@@ -906,39 +906,41 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.unload = function (e) {
-    if (!unloaded) {
-      let cause;
-
-      if (e) {
-        cause = e.name || e.statusText || e.toString();
-      }
-
-      debug(`Recorder: unload()${cause ? `, cause: ${cause}` : ""}`);
-
-      this.reset();
-
-      clearUserMediaTimeout();
-
-      if (userMedia) {
-        // prevents https://github.com/binarykitchen/videomail-client/issues/114
-        userMedia.unloadRemainingEventListeners();
-      }
-
-      if (submitting) {
-        // server will disconnect socket automatically after submitting
-      } else if (stream) {
-        /*
-         * force to disconnect socket right now to clean temp files on server
-         * event listeners will do the rest
-         */
-        debug(`Recorder: ending stream ...`);
-        stream.destroy();
-        stream = undefined;
-      }
-
-      unloaded = true;
-      built = connecting = connected = false;
+    if (unloaded) {
+      return; // already unloaded
     }
+
+    let cause;
+
+    if (e) {
+      cause = e.name || e.statusText || e.toString();
+    }
+
+    debug(`Recorder: unload()${cause ? `, cause: ${cause}` : ""}`);
+
+    this.reset();
+
+    clearUserMediaTimeout();
+
+    if (userMedia) {
+      // prevents https://github.com/binarykitchen/videomail-client/issues/114
+      userMedia.unloadRemainingEventListeners();
+    }
+
+    if (submitting) {
+      // server will disconnect socket automatically after submitting
+    } else if (stream) {
+      /*
+       * force to disconnect socket right now to clean temp files on server
+       * event listeners will do the rest
+       */
+      debug(`Recorder: ending stream ...`);
+      stream.destroy();
+      stream = undefined;
+    }
+
+    unloaded = true;
+    built = connecting = connected = false;
   };
 
   this.reset = function () {
@@ -1251,7 +1253,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       })
       .on(Events.SUBMITTED, function () {
         submitting = false;
-        self.unload();
       })
       .on(Events.BLOCKING, function () {
         blocking = true;
