@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.8",
+  "version": "9.0.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17545,7 +17545,7 @@ var VideomailClient = function VideomailClient(options) {
     return getBrowser(localOptions).canRecord();
   };
 
-  // return true when a video has been recorded but is not sent yet
+  // Returns true when a video has been recorded but is not submitted yet
   this.isDirty = function () {
     return container.isDirty();
   };
@@ -20343,6 +20343,8 @@ var Container = function Container(options) {
     var isDirty = false;
     if (form) {
       if (visuals.isRecorderUnloaded()) {
+        isDirty = false;
+      } else if (submitted) {
         isDirty = false;
       } else if (this.isReplayShown() || this.isPaused()) {
         isDirty = true;
