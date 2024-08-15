@@ -1,40 +1,7 @@
 {
   "name": "videomail-client",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
-  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
-  "contributors": [
-    {
-      "name": "Michael Heuberger",
-      "email": "michael.heuberger@binarykitchen.com"
-    }
-  ],
-  "homepage": "https://videomail.io",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/binarykitchen/videomail-client.git"
-  },
-  "license": "CC0-1.0",
-  "readmeFilename": "README.md",
-  "main": "prototype/js/videomail-client.js",
-  "scripts": {
-    "build": "gulp build",
-    "clean": "rm -rf node_modules && rm -rf package-lock.json",
-    "test": "gulp test",
-    "watch": "NODE_NO_HTTP2=1 gulp watch",
-    "audit": "npx audit-ci --config audit-ci.json",
-    "patch": "./env/dev/release.sh --importance=patch",
-    "minor": "./env/dev/release.sh --importance=minor",
-    "major": "./env/dev/release.sh --importance=major",
-    "lint": "eslint --color ./src ./test ./gulpfile.js",
-    "lint:fix": "npm --silent run lint -- --fix",
-    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
-    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js"
-  },
-  "engines": {
-    "node": "^20.16.0",
-    "npm": "^10.8.2"
-  },
   "keywords": [
     "webcam",
     "video",
@@ -44,7 +11,35 @@
     "audio",
     "recorder"
   ],
-  "prettier": "./prettier.config.js",
+  "homepage": "https://videomail.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binarykitchen/videomail-client.git"
+  },
+  "license": "CC0-1.0",
+  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
+  "contributors": [
+    {
+      "name": "Michael Heuberger",
+      "email": "michael.heuberger@binarykitchen.com"
+    }
+  ],
+  "main": "prototype/js/videomail-client.js",
+  "scripts": {
+    "audit": "npx audit-ci --config audit-ci.json",
+    "build": "gulp build",
+    "clean": "rm -rf node_modules && rm -rf package-lock.json",
+    "lint": "eslint --color ./src ./test ./gulpfile.js",
+    "lint:fix": "npm --silent run lint -- --fix",
+    "major": "./env/dev/release.sh --importance=major",
+    "minor": "./env/dev/release.sh --importance=minor",
+    "patch": "./env/dev/release.sh --importance=patch",
+    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
+    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js",
+    "test": "gulp test",
+    "watch": "NODE_NO_HTTP2=1 gulp watch"
+  },
+  "prettier": "./prettier.config.cjs",
   "dependencies": {
     "@babel/core": "7.25.2",
     "add-eventlistener-with-options": "1.25.5",
@@ -116,6 +111,10 @@
     "nib": "1.2.0",
     "postcss": "8.4.41",
     "prettier": "3.3.3",
+    "prettier-plugin-curly": "0.2.2",
+    "prettier-plugin-organize-imports": "4.0.0",
+    "prettier-plugin-packagejson": "2.5.1",
+    "prettier-plugin-sh": "0.14.0",
     "router": "1.3.8",
     "tape": "5.8.1",
     "tape-catch": "1.0.6",
@@ -123,5 +122,10 @@
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "4.0.0"
-  }
+  },
+  "engines": {
+    "node": "^20.16.0",
+    "npm": "^10.8.2"
+  },
+  "readmeFilename": "README.md"
 }

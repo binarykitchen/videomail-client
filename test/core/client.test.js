@@ -1,5 +1,5 @@
-import test from "tape-catch";
 import h from "hyperscript";
+import test from "tape-catch";
 
 import VideomailClient from "./../../src/js/client";
 

@@ -1,14 +1,14 @@
 import inherits from "inherits";
 
 import Events from "./../../../events";
-import EventEmitter from "./../../../util/eventEmitter";
 import Browser from "./../../../util/browser";
+import EventEmitter from "./../../../util/eventEmitter";
 
 import Countdown from "./recorder/countdown";
+import FacingMode from "./recorder/facingMode";
 import PausedNote from "./recorder/pausedNote";
 import RecordNote from "./recorder/recordNote";
 import RecordTimer from "./recorder/recordTimer";
-import FacingMode from "./recorder/facingMode";
 
 const RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, "RecorderInsides");

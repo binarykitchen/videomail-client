@@ -1,16 +1,16 @@
 import deepmerge from "deepmerge";
 import inherits from "inherits";
 
-import defaultOptions from "./options";
 import Constants from "./constants";
 import Events from "./events";
+import defaultOptions from "./options";
+import Resource from "./resource";
+import Browser from "./util/browser";
 import CollectLogger from "./util/collectLogger";
 import EventEmitter from "./util/eventEmitter";
 import Container from "./wrappers/container";
-import Replay from "./wrappers/visuals/replay";
 import OptionsWrapper from "./wrappers/optionsWrapper";
-import Browser from "./util/browser";
-import Resource from "./resource";
+import Replay from "./wrappers/visuals/replay";
 
 let collectLogger;
 let browser;

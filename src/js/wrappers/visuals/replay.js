@@ -1,8 +1,8 @@
 import addEventListenerWithOptions from "add-eventlistener-with-options";
 import hidden from "hidden";
 import h from "hyperscript";
-import enableInlineVideo from "iphone-inline-video";
 import inherits from "inherits";
+import enableInlineVideo from "iphone-inline-video";
 
 import Events from "../../events";
 import Browser from "../../util/browser";

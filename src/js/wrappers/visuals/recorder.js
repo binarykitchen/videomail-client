@@ -3,8 +3,8 @@ import Frame from "canvas-to-buffer";
 import deepmerge from "deepmerge";
 import hidden from "hidden";
 import h from "hyperscript";
-import stringify from "safe-json-stringify";
 import inherits from "inherits";
+import stringify from "safe-json-stringify";
 
 import websocket from "websocket-stream";
 

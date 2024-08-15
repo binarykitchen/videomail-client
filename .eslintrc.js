@@ -6,11 +6,13 @@ module.exports = {
     node: true,
     es6: true,
   },
+  plugins: ["import"],
   settings: {
     "import/resolver": {
       node: true,
     },
   },
+  reportUnusedDisableDirectives: true,
   rules: {
     // Turns on errors for missing imports which is great
     "import/no-unresolved": "error",

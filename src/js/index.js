@@ -1,5 +1,5 @@
-import standardize from "./util/standardize";
 import Client from "./client";
+import standardize from "./util/standardize";
 
 if (!navigator) {
   throw new Error("Navigator is missing!");

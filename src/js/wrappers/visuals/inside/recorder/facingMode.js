@@ -1,5 +1,5 @@
-import h from "hyperscript";
 import hidden from "hidden";
+import h from "hyperscript";
 
 import Events from "./../../../../events";
 import EventEmitter from "./../../../../util/eventEmitter";

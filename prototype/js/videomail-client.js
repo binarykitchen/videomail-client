@@ -17275,39 +17275,6 @@ module.exports={
   "name": "videomail-client",
   "version": "9.0.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
-  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
-  "contributors": [
-    {
-      "name": "Michael Heuberger",
-      "email": "michael.heuberger@binarykitchen.com"
-    }
-  ],
-  "homepage": "https://videomail.io",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/binarykitchen/videomail-client.git"
-  },
-  "license": "CC0-1.0",
-  "readmeFilename": "README.md",
-  "main": "prototype/js/videomail-client.js",
-  "scripts": {
-    "build": "gulp build",
-    "clean": "rm -rf node_modules && rm -rf package-lock.json",
-    "test": "gulp test",
-    "watch": "NODE_NO_HTTP2=1 gulp watch",
-    "audit": "npx audit-ci --config audit-ci.json",
-    "patch": "./env/dev/release.sh --importance=patch",
-    "minor": "./env/dev/release.sh --importance=minor",
-    "major": "./env/dev/release.sh --importance=major",
-    "lint": "eslint --color ./src ./test ./gulpfile.js",
-    "lint:fix": "npm --silent run lint -- --fix",
-    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
-    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js"
-  },
-  "engines": {
-    "node": "^20.16.0",
-    "npm": "^10.8.2"
-  },
   "keywords": [
     "webcam",
     "video",
@@ -17317,7 +17284,35 @@ module.exports={
     "audio",
     "recorder"
   ],
-  "prettier": "./prettier.config.js",
+  "homepage": "https://videomail.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binarykitchen/videomail-client.git"
+  },
+  "license": "CC0-1.0",
+  "author": "Michael Heuberger <michael.heuberger@binarykitchen.com>",
+  "contributors": [
+    {
+      "name": "Michael Heuberger",
+      "email": "michael.heuberger@binarykitchen.com"
+    }
+  ],
+  "main": "prototype/js/videomail-client.js",
+  "scripts": {
+    "audit": "npx audit-ci --config audit-ci.json",
+    "build": "gulp build",
+    "clean": "rm -rf node_modules && rm -rf package-lock.json",
+    "lint": "eslint --color ./src ./test ./gulpfile.js",
+    "lint:fix": "npm --silent run lint -- --fix",
+    "major": "./env/dev/release.sh --importance=major",
+    "minor": "./env/dev/release.sh --importance=minor",
+    "patch": "./env/dev/release.sh --importance=patch",
+    "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
+    "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js",
+    "test": "gulp test",
+    "watch": "NODE_NO_HTTP2=1 gulp watch"
+  },
+  "prettier": "./prettier.config.cjs",
   "dependencies": {
     "@babel/core": "7.25.2",
     "add-eventlistener-with-options": "1.25.5",
@@ -17396,7 +17391,12 @@ module.exports={
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "4.0.0"
-  }
+  },
+  "engines": {
+    "node": "^20.16.0",
+    "npm": "^10.8.2"
+  },
+  "readmeFilename": "README.md"
 }
 
 },{}],115:[function(_dereq_,module,exports){
@@ -17936,7 +17936,9 @@ function _default(options) {
     return err;
   }
   function fetch(alias, cb) {
-    _superagent.default.get("/videomail/".concat(alias, "/snapshot")).set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
+    var url = "".concat(options.baseUrl, "/videomail/").concat(alias, "/snapshot");
+    var request = (0, _superagent.default)("get", url);
+    request.set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
       err = packError(err, res);
       if (err) {
         cb(err);

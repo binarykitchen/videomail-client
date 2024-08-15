@@ -1,7 +1,7 @@
 import despot from "despot";
 
-import VideomailError from "./videomailError";
 import Events from "./../events";
+import VideomailError from "./videomailError";
 
 // TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 

@@ -43,8 +43,10 @@ export default function (options) {
   }
 
   function fetch(alias, cb) {
-    superagent
-      .get(`/videomail/${alias}/snapshot`)
+    const url = `${options.baseUrl}/videomail/${alias}/snapshot`;
+    const request = superagent("get", url);
+
+    request
       .set("Accept", "application/json")
       .set("Timezone-Id", timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
