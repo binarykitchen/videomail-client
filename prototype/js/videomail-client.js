@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.4",
+  "version": "9.0.5",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19787,7 +19787,9 @@ var Container = function Container(options) {
       debug("Container: buildForm()");
       form = new _form.default(self, formElement, options);
       var submitButton = form.findSubmitButton();
-      submitButton && buttons.setSubmitButton(submitButton);
+      if (submitButton) {
+        buttons.setSubmitButton(submitButton);
+      }
       form.build();
     }
   }
@@ -20372,6 +20374,7 @@ var Container = function Container(options) {
     this.emit(_events.default.DISABLING_AUDIO);
   };
   this.submit = function () {
+    debug("Container: submit()");
     lastValidation && form && form.doTheSubmit();
   };
   this.isCountingDown = visuals.isCountingDown.bind(visuals);
@@ -20710,10 +20713,9 @@ var Form = function Form(container, formElement, options) {
     var submitButton = self.findSubmitButton();
     (0, _hidden.default)(submitButton, true);
   }
-
-  // TODO CONTINUE FROM HERE, PUBLISH THIS CHANGE
   this.unload = function () {
     debug("Form: unload()");
+    this.removeAllListeners();
     stopListeningToSubmitEvents();
   };
   function startListeningToSubmitEvents() {
@@ -20725,6 +20727,7 @@ var Form = function Form(container, formElement, options) {
     submitButton.removeEventListener("click", self.doTheSubmit.bind(self));
   }
   this.doTheSubmit = function (e) {
+    debug("Form: doTheSubmit()", e);
     if (e) {
       e.preventDefault();
     }

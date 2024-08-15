@@ -71,7 +71,10 @@ const Container = function (options) {
       form = new Form(self, formElement, options);
 
       const submitButton = form.findSubmitButton();
-      submitButton && buttons.setSubmitButton(submitButton);
+
+      if (submitButton) {
+        buttons.setSubmitButton(submitButton);
+      }
 
       form.build();
     }
@@ -789,6 +792,7 @@ const Container = function (options) {
   };
 
   this.submit = function () {
+    debug("Container: submit()");
     lastValidation && form && form.doTheSubmit();
   };
 
