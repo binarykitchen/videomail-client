@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.0.3",
+  "version": "9.0.4",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -20636,10 +20636,7 @@ var Form = function Form(container, formElement, options) {
           });
         } else {
           inputElement.addEventListener("input", function () {
-            // let any UI framework validate first, e.g. remove the custom error
-            setTimeout(function () {
-              container.validate();
-            }, 0);
+            container.validate();
           });
         }
       }
