@@ -44,7 +44,13 @@ const Form = function (container, formElement, options) {
       const formFieldValue = FORM_FIELDS[key];
 
       if (formFieldValue in formData) {
-        transformedFormData[key] = formData[formFieldValue];
+        const value = formData[formFieldValue];
+
+        if (value === "" || value === undefined) {
+          // skip empty strings and undefined
+        } else {
+          transformedFormData[key] = value;
+        }
       }
     });
 
