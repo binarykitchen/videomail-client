@@ -19688,8 +19688,10 @@ var Buttons = function Buttons(container, options) {
     built = true;
   };
   this.unload = function () {
-    debug("Buttons: unload()");
-    built = false;
+    if (built) {
+      debug("Buttons: unload()");
+      built = false;
+    }
   };
   this.hide = function (params) {
     hide(buttonsElement);
@@ -22610,7 +22612,7 @@ var Recorder = function Recorder(visuals, replay) {
     loadUserMedia();
   }
   this.unload = function (e) {
-    if (unloaded) {
+    if (unloaded || !built) {
       return; // already unloaded
     }
     var cause;
