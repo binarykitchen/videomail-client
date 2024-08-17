@@ -38,12 +38,12 @@ const Visuals = function (container, options) {
     }
   }
 
-  function buildChildren() {
-    debug("Visuals: buildChildren()");
+  function buildChildren(playerOnly = false) {
+    debug(`Visuals: buildChildren(playerOnly = ${playerOnly})`);
 
     buildNoScriptTag();
 
-    if (!options.playerOnly) {
+    if (!playerOnly) {
       notifier.build();
       recorderInsides.build();
     }
@@ -53,9 +53,9 @@ const Visuals = function (container, options) {
     debug("Visuals: built.");
   }
 
-  function initEvents() {
-    if (!options.playerOnly) {
-      debug("Visuals: initEvents()");
+  function initEvents(playerOnly = false) {
+    if (!playerOnly) {
+      debug(`Visuals: initEvents(playerOnly = ${playerOnly})`);
 
       self
         .on(Events.USER_MEDIA_READY, function () {
@@ -122,7 +122,7 @@ const Visuals = function (container, options) {
     return recorderInsides.isCountingDown();
   };
 
-  this.build = function () {
+  this.build = function (playerOnly = false) {
     visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
     if (!visualsElement) {
@@ -152,8 +152,8 @@ const Visuals = function (container, options) {
 
     correctDimensions();
 
-    !built && initEvents();
-    buildChildren();
+    !built && initEvents(playerOnly);
+    buildChildren(playerOnly);
 
     // needed for replay handling and container.isOutsideElementOf()
     self.parentNode = visualsElement.parentNode;

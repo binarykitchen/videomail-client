@@ -94,7 +94,7 @@ const VideomailClient = function (options) {
       if (!parentElement) {
         if (!container.isBuilt()) {
           // this will try build all over again
-          container.build();
+          container.build(true);
         }
 
         if (!container.hasElement()) {
@@ -126,11 +126,8 @@ const VideomailClient = function (options) {
         container.loadForm(videomail);
       }
 
-      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-      setTimeout(function () {
-        replay.setVideomail(videomail);
-        container.showReplayOnly();
-      }, 10e2); // not sure, but probably can be reduced a bit
+      replay.setVideomail(videomail);
+      container.showReplayOnly();
     }
 
     buildReplay();

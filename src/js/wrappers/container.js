@@ -80,8 +80,8 @@ const Container = function (options) {
     }
   }
 
-  function buildChildren() {
-    debug("Container: buildChildren()");
+  function buildChildren(playerOnly = false) {
+    debug(`Container: buildChildren(playerOnly = ${playerOnly})`);
 
     if (!containerElement.classList) {
       self.emit(
@@ -91,11 +91,11 @@ const Container = function (options) {
     } else {
       containerElement.classList.add("videomail");
 
-      if (!options.playerOnly) {
+      if (!playerOnly) {
         buttons.build();
       }
 
-      visuals.build();
+      visuals.build(playerOnly);
     }
   }
 
@@ -115,8 +115,8 @@ const Container = function (options) {
     }
   }
 
-  function initEvents() {
-    debug("Container: initEvents()");
+  function initEvents(playerOnly = false) {
+    debug(`Container: initEvents(playerOnly = ${playerOnly})`);
 
     if (options.enableAutoUnload) {
       window.addEventListener("beforeunload", (e) => {
@@ -124,7 +124,7 @@ const Container = function (options) {
       });
     }
 
-    if (!options.playerOnly) {
+    if (!playerOnly) {
       visibility.onChange(function (visible) {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (built) {
@@ -149,7 +149,7 @@ const Container = function (options) {
     }
 
     if (options.enableSpace) {
-      if (!options.playerOnly) {
+      if (!playerOnly) {
         window.addEventListener("keypress", function (e) {
           const { tagName } = e.target;
           const isEditable =
@@ -188,7 +188,7 @@ const Container = function (options) {
       }
     });
 
-    if (!options.playerOnly) {
+    if (!playerOnly) {
       self.on(Events.LOADED_META_DATA, function () {
         correctDimensions();
       });
@@ -381,7 +381,9 @@ const Container = function (options) {
     return Boolean(containerElement);
   };
 
-  this.build = function () {
+  this.build = function (playerOnly = false) {
+    debug(`Container: build(playerOnly = ${playerOnly})`);
+
     try {
       containerElement = document.getElementById(options.selectors.containerId);
 
@@ -392,15 +394,15 @@ const Container = function (options) {
       if (containerElement) {
         options.insertCss && prependDefaultCss();
 
-        !built && initEvents();
+        !built && initEvents(playerOnly);
         validateOptions();
         correctDimensions();
 
-        if (!options.playerOnly) {
+        if (!playerOnly) {
           buildForm();
         }
 
-        buildChildren();
+        buildChildren(playerOnly);
 
         if (!hasError) {
           debug("Container: built.");

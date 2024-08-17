@@ -673,7 +673,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       return false;
     }
 
-    debug("Recorder: loadUserMedia()", params);
+    debug(`Recorder: loadUserMedia(${stringify(params)})`);
 
     self.emit(Events.LOADING_USER_MEDIA);
 
@@ -705,11 +705,11 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   function executeCommand(command) {
     try {
-      debug(
-        "Server commanded: %s",
-        command.command,
-        command.args ? `, ${stringify(command.args)}` : "",
-      );
+      if (command.args) {
+        debug(`Server commanded: ${command.command} with ${stringify(command.args)}`);
+      } else {
+        debug(`Server commanded: ${command.command}`);
+      }
 
       switch (command.command) {
         case "ready":
@@ -780,7 +780,11 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         cb && cb();
       });
     } else if (stream) {
-      debug("$ %s", command, args);
+      if (args) {
+        debug(`$ ${command} with ${stringify(args)}`);
+      } else {
+        debug(`$ ${command}`);
+      }
 
       const commandObj = {
         command,
@@ -836,7 +840,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   };
 
   this.stop = function (params) {
-    debug("stop()", params);
+    debug(`stop(${stringify(params)})`);
 
     const { limitReached } = params;
 
@@ -977,7 +981,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.validate = function () {
-    return connected && framesCount > 0 && canvas === null;
+    return connected && canvas === null;
   };
 
   this.isReady = function () {
@@ -991,7 +995,11 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       params.eventType = e.type;
     }
 
-    debug(`pause() at frame ${framesCount}`, params);
+    if (params) {
+      debug(`pause() at frame ${framesCount} with ${stringify(params)}`);
+    } else {
+      debug(`pause() at frame ${framesCount}`);
+    }
 
     userMedia.pause();
     loop.stop();
