@@ -153,12 +153,6 @@ export default {
     body: null, // define default body content
   },
 
-  /*
-   * a special flag to indicate that everything to be initialized
-   * serves only for playing existing videomails with the replay function
-   */
-  playerOnly: false,
-
   // show errors inside the container?
   displayErrors: true,
 

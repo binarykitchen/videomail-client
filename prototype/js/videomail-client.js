@@ -17484,7 +17484,7 @@ var VideomailClient = function VideomailClient(options) {
       if (!parentElement) {
         if (!container.isBuilt()) {
           // this will try build all over again
-          container.build();
+          container.build(true);
         }
         if (!container.hasElement()) {
           throw new Error("Unable to replay video without a container nor parent element.");
@@ -17510,12 +17510,8 @@ var VideomailClient = function VideomailClient(options) {
       } else {
         container.loadForm(videomail);
       }
-
-      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-      setTimeout(function () {
-        replay.setVideomail(videomail);
-        container.showReplayOnly();
-      }, 10e2); // not sure, but probably can be reduced a bit
+      replay.setVideomail(videomail);
+      container.showReplayOnly();
     }
     buildReplay();
   };
@@ -17878,11 +17874,6 @@ var _default = exports.default = {
     // define default subject line
     body: null // define default body content
   },
-  /*
-   * a special flag to indicate that everything to be initialized
-   * serves only for playing existing videomails with the replay function
-   */
-  playerOnly: false,
   // show errors inside the container?
   displayErrors: true,
   // true = all form inputs get disabled and disappear when browser can't record
@@ -18495,6 +18486,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 var _despot = _interopRequireDefault(_dereq_("despot"));
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _events = _interopRequireDefault(_dereq_("./../events"));
 var _videomailError = _interopRequireDefault(_dereq_("./videomailError"));
 // TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
@@ -18519,9 +18511,9 @@ function _default(options, name) {
           moreArguments = args.slice(1);
         }
         if (moreArguments) {
-          options.debug("%s emits: %s", name, event, moreArguments);
+          options.debug("".concat(name, " emits ").concat(event, " with ").concat((0, _safeJsonStringify.default)(moreArguments)));
         } else {
-          options.debug("%s emits: %s", name, event);
+          options.debug("".concat(name, " emits ").concat(event));
         }
       }
     }
@@ -18552,7 +18544,7 @@ function _default(options, name) {
   };
 }
 
-},{"./../events":117,"./videomailError":128,"@babel/runtime/helpers/interopRequireDefault":3,"despot":28}],124:[function(_dereq_,module,exports){
+},{"./../events":117,"./videomailError":128,"@babel/runtime/helpers/interopRequireDefault":3,"despot":28,"safe-json-stringify":97}],124:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -19795,15 +19787,16 @@ var Container = function Container(options) {
     }
   }
   function buildChildren() {
-    debug("Container: buildChildren()");
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    debug("Container: buildChildren(playerOnly = ".concat(playerOnly, ")"));
     if (!containerElement.classList) {
       self.emit(_events.default.ERROR, _videomailError.default.create("Sorry, your browser is too old!", options));
     } else {
       containerElement.classList.add("videomail");
-      if (!options.playerOnly) {
+      if (!playerOnly) {
         buttons.build();
       }
-      visuals.build();
+      visuals.build(playerOnly);
     }
   }
   function processError(err) {
@@ -19820,13 +19813,14 @@ var Container = function Container(options) {
     }
   }
   function initEvents() {
-    debug("Container: initEvents()");
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    debug("Container: initEvents(playerOnly = ".concat(playerOnly, ")"));
     if (options.enableAutoUnload) {
       window.addEventListener("beforeunload", function (e) {
         self.unload(e);
       });
     }
-    if (!options.playerOnly) {
+    if (!playerOnly) {
       visibility.onChange(function (visible) {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (built) {
@@ -19845,7 +19839,7 @@ var Container = function Container(options) {
       });
     }
     if (options.enableSpace) {
-      if (!options.playerOnly) {
+      if (!playerOnly) {
         window.addEventListener("keypress", function (e) {
           var tagName = e.target.tagName;
           var isEditable = e.target.isContentEditable || e.target.contentEditable === "true" || e.target.contentEditable === true;
@@ -19877,7 +19871,7 @@ var Container = function Container(options) {
         removeDimensions();
       }
     });
-    if (!options.playerOnly) {
+    if (!playerOnly) {
       self.on(_events.default.LOADED_META_DATA, function () {
         correctDimensions();
       });
@@ -20037,6 +20031,8 @@ var Container = function Container(options) {
     return Boolean(containerElement);
   };
   this.build = function () {
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    debug("Container: build(playerOnly = ".concat(playerOnly, ")"));
     try {
       containerElement = document.getElementById(options.selectors.containerId);
 
@@ -20046,13 +20042,13 @@ var Container = function Container(options) {
        */
       if (containerElement) {
         options.insertCss && prependDefaultCss();
-        !built && initEvents();
+        !built && initEvents(playerOnly);
         validateOptions();
         correctDimensions();
-        if (!options.playerOnly) {
+        if (!playerOnly) {
           buildForm();
         }
-        buildChildren();
+        buildChildren(playerOnly);
         if (!hasError) {
           debug("Container: built.");
           built = true;
@@ -20517,6 +20513,7 @@ var _getFormData = _interopRequireDefault(_dereq_("get-form-data"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var _videomailError = _interopRequireDefault(_dereq_("../util/videomailError"));
@@ -20736,9 +20733,11 @@ var Form = function Form(container, formElement, options) {
     submitButton.onclick = null;
   }
   this.doTheSubmit = function (e) {
-    debug("Form: doTheSubmit()", e);
     if (e) {
+      debug("Form: doTheSubmit(".concat((0, _safeJsonStringify.default)(e), ")"));
       e.preventDefault();
+    } else {
+      debug("Form: doTheSubmit()");
     }
 
     /*
@@ -20784,7 +20783,7 @@ var Form = function Form(container, formElement, options) {
 (0, _inherits.default)(Form, _eventEmitter.default);
 var _default = exports.default = Form;
 
-},{"../events":117,"../util/eventEmitter":123,"../util/videomailError":128,"@babel/runtime/helpers/interopRequireDefault":3,"get-form-data":48,"hidden":59,"hyperscript":61,"inherits":64}],133:[function(_dereq_,module,exports){
+},{"../events":117,"../util/eventEmitter":123,"../util/videomailError":128,"@babel/runtime/helpers/interopRequireDefault":3,"get-form-data":48,"hidden":59,"hyperscript":61,"inherits":64,"safe-json-stringify":97}],133:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20895,9 +20894,10 @@ var Visuals = function Visuals(container, options) {
     }
   }
   function buildChildren() {
-    debug("Visuals: buildChildren()");
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    debug("Visuals: buildChildren(playerOnly = ".concat(playerOnly, ")"));
     buildNoScriptTag();
-    if (!options.playerOnly) {
+    if (!playerOnly) {
       notifier.build();
       recorderInsides.build();
     }
@@ -20905,8 +20905,9 @@ var Visuals = function Visuals(container, options) {
     debug("Visuals: built.");
   }
   function initEvents() {
-    if (!options.playerOnly) {
-      debug("Visuals: initEvents()");
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    if (!playerOnly) {
+      debug("Visuals: initEvents(playerOnly = ".concat(playerOnly, ")"));
       self.on(_events.default.USER_MEDIA_READY, function () {
         built = true;
         self.endWaiting();
@@ -20960,6 +20961,7 @@ var Visuals = function Visuals(container, options) {
     return recorderInsides.isCountingDown();
   };
   this.build = function () {
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
     if (!visualsElement) {
       visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
@@ -20983,8 +20985,8 @@ var Visuals = function Visuals(container, options) {
 
     visualsElement.classList.add("visuals");
     correctDimensions();
-    !built && initEvents();
-    buildChildren();
+    !built && initEvents(playerOnly);
+    buildChildren(playerOnly);
 
     // needed for replay handling and container.isOutsideElementOf()
     self.parentNode = visualsElement.parentNode;
@@ -22416,7 +22418,7 @@ var Recorder = function Recorder(visuals, replay) {
       debug("Recorder: skipping loadUserMedia() because it is already asking for permission");
       return false;
     }
-    debug("Recorder: loadUserMedia()", params);
+    debug("Recorder: loadUserMedia(".concat((0, _safeJsonStringify.default)(params), ")"));
     self.emit(_events.default.LOADING_USER_MEDIA);
     try {
       userMediaTimeout = setTimeout(function () {
@@ -22440,7 +22442,11 @@ var Recorder = function Recorder(visuals, replay) {
   }
   function executeCommand(command) {
     try {
-      debug("Server commanded: %s", command.command, command.args ? ", ".concat((0, _safeJsonStringify.default)(command.args)) : "");
+      if (command.args) {
+        debug("Server commanded: ".concat(command.command, " with ").concat((0, _safeJsonStringify.default)(command.args)));
+      } else {
+        debug("Server commanded: ".concat(command.command));
+      }
       switch (command.command) {
         case "ready":
           this.emit(_events.default.SERVER_READY);
@@ -22497,7 +22503,11 @@ var Recorder = function Recorder(visuals, replay) {
         cb && cb();
       });
     } else if (stream) {
-      debug("$ %s", command, args);
+      if (args) {
+        debug("$ ".concat(command, " with ").concat((0, _safeJsonStringify.default)(args)));
+      } else {
+        debug("$ ".concat(command));
+      }
       var commandObj = {
         command: command,
         args: args
@@ -22544,7 +22554,7 @@ var Recorder = function Recorder(visuals, replay) {
     return userMedia.getAudioSampleRate();
   };
   this.stop = function (params) {
-    debug("stop()", params);
+    debug("stop(".concat((0, _safeJsonStringify.default)(params), ")"));
     var limitReached = params.limitReached;
     this.emit(_events.default.STOPPING, limitReached);
     loop.complete();
@@ -22649,7 +22659,7 @@ var Recorder = function Recorder(visuals, replay) {
     }
   }
   this.validate = function () {
-    return connected && framesCount > 0 && canvas === null;
+    return connected && canvas === null;
   };
   this.isReady = function () {
     return userMedia.isReady();
@@ -22659,7 +22669,11 @@ var Recorder = function Recorder(visuals, replay) {
     if (e instanceof window.Event) {
       params.eventType = e.type;
     }
-    debug("pause() at frame ".concat(framesCount), params);
+    if (params) {
+      debug("pause() at frame ".concat(framesCount, " with ").concat((0, _safeJsonStringify.default)(params)));
+    } else {
+      debug("pause() at frame ".concat(framesCount));
+    }
     userMedia.pause();
     loop.stop();
     this.emit(_events.default.PAUSED);

@@ -3,6 +3,7 @@ import hidden from "hidden";
 import h from "hyperscript";
 import inherits from "inherits";
 
+import stringify from "safe-json-stringify";
 import Events from "../events";
 import EventEmitter from "../util/eventEmitter";
 import VideomailError from "../util/videomailError";
@@ -283,10 +284,11 @@ const Form = function (container, formElement, options) {
   }
 
   this.doTheSubmit = (e) => {
-    debug("Form: doTheSubmit()", e);
-
     if (e) {
+      debug(`Form: doTheSubmit(${stringify(e)})`);
       e.preventDefault();
+    } else {
+      debug("Form: doTheSubmit()");
     }
 
     /*
