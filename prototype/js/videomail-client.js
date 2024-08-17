@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.0",
+  "version": "9.1.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19688,8 +19688,10 @@ var Buttons = function Buttons(container, options) {
     built = true;
   };
   this.unload = function () {
-    debug("Buttons: unload()");
-    built = false;
+    if (built) {
+      debug("Buttons: unload()");
+      built = false;
+    }
   };
   this.hide = function (params) {
     hide(buttonsElement);
@@ -22610,7 +22612,7 @@ var Recorder = function Recorder(visuals, replay) {
     loadUserMedia();
   }
   this.unload = function (e) {
-    if (unloaded) {
+    if (unloaded || !built) {
       return; // already unloaded
     }
     var cause;

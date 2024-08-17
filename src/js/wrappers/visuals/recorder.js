@@ -910,7 +910,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   this.unload = function (e) {
-    if (unloaded) {
+    if (unloaded || !built) {
       return; // already unloaded
     }
 
