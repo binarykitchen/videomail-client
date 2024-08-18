@@ -20243,17 +20243,20 @@ var Container = function Container(options) {
                   valid = false;
                 }
               } else {
-                whyInvalid = "Please configure the form to have at least one recipient.";
+                valid = false;
               }
             }
           } else if (ccIsConfigured) {
             if (!hasCc) {
-              if (bccIsConfigured) {
-                if (!hasBcc) {
-                  valid = false;
-                }
+              if (bccIsConfigured && !hasBcc) {
+                valid = false;
               }
             }
+          } else if (bccIsConfigured) {
+            // Skip as it's hidden
+          } else {
+            whyInvalid = "Please configure the form to have at least one recipient.";
+            valid = false;
           }
           if (!valid) {
             whyInvalid = "Please enter at least one recipient.";
