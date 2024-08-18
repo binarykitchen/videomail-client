@@ -126,8 +126,11 @@ const VideomailClient = function (options) {
         container.loadForm(videomail);
       }
 
-      replay.setVideomail(videomail);
-      container.showReplayOnly();
+      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+      setTimeout(function () {
+        replay.setVideomail(videomail);
+        container.showReplayOnly();
+      }, 10e2); // not sure, but probably can be reduced a bit
     }
 
     buildReplay();

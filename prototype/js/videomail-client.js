@@ -17273,7 +17273,7 @@ function wrappy (fn, cb) {
 },{}],114:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.2",
+  "version": "9.1.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17510,8 +17510,12 @@ var VideomailClient = function VideomailClient(options) {
       } else {
         container.loadForm(videomail);
       }
-      replay.setVideomail(videomail);
-      container.showReplayOnly();
+
+      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+      setTimeout(function () {
+        replay.setVideomail(videomail);
+        container.showReplayOnly();
+      }, 10e2); // not sure, but probably can be reduced a bit
     }
     buildReplay();
   };
@@ -20550,8 +20554,8 @@ var Form = function Form(container, formElement, options) {
       var formFieldValue = FORM_FIELDS[key];
       if (formFieldValue in formData) {
         var value = formData[formFieldValue];
-        if (value === "" || value === undefined) {
-          // skip empty strings and undefined
+        if (value === undefined) {
+          // skip
         } else {
           transformedFormData[key] = value;
         }

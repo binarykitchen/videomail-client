@@ -47,8 +47,8 @@ const Form = function (container, formElement, options) {
       if (formFieldValue in formData) {
         const value = formData[formFieldValue];
 
-        if (value === "" || value === undefined) {
-          // skip empty strings and undefined
+        if (value === undefined) {
+          // skip
         } else {
           transformedFormData[key] = value;
         }
