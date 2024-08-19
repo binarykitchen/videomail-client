@@ -26,7 +26,7 @@ export default keymirror({
   VALID: null, // form is valid
   SUBMITTING: null, // form is being submitted
   SUBMITTED: null, // form has been successfully submitted
-  ERROR: null, // an error occured
+  ERROR: null, // an error occurred
   BLOCKING: null, // something serious, most likely an error, is shown and blocks
   SENDING_FIRST_FRAME: null, // emitted before the first frame is being computed
   FIRST_FRAME_SENT: null, // emitted once when fist frame has been sent to server
@@ -37,10 +37,10 @@ export default keymirror({
   LOADED_META_DATA: null, // raised when webcam knows its dimensions
   EVENT_EMITTED: null, // for debugging only, is emitted when an event is emitted lol,
   GOING_BACK: null, // switch from replaying back to recording
-  STARTING_OVER: null, // starting all over again back to its inital state
+  STARTING_OVER: null, // starting all over again back to its initial state
   ASKING_WEBCAM_PERMISSION: null, // when about to ask for webcam permissions
   VISIBLE: null, // document just became visible
   INVISIBLE: null, // document just became INvisible
-  SWITCH_FACING_MODE: null, // to switch camera on mobiles between fron and back
+  SWITCH_FACING_MODE: null, // to switch camera on mobiles between front and back
   SERVER_READY: null, // Gets emitted when the ready command is sent through sockets from the server for recording
 });

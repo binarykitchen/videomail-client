@@ -574,6 +574,7 @@ const Container = function (options) {
 
       const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
       let whyInvalid;
+      let invalidData;
 
       if (form) {
         valid = form.validate();
@@ -591,18 +592,17 @@ const Container = function (options) {
             }
 
             if (!valid) {
-              whyInvalid = "Video is not recorded";
+              whyInvalid = "Don't forget to record a video ;)";
             }
           }
         } else {
           const invalidInput = form.getInvalidElement();
 
           if (invalidInput) {
-            whyInvalid = `Form input named ${
-              invalidInput.name
-            } is invalid. It has the value: "${invalidInput.value}"`;
+            whyInvalid = `Input ${invalidInput.name} seems wrong`;
+            invalidData = { [invalidInput.name]: invalidInput.value };
           } else {
-            whyInvalid = "Form input(s) are invalid";
+            whyInvalid = "Unknown form input(s) are invalid";
           }
         }
 
@@ -648,12 +648,12 @@ const Container = function (options) {
           } else if (bccIsConfigured) {
             // Skip as it's hidden
           } else {
-            whyInvalid = "Please configure the form to have at least one recipient.";
+            whyInvalid = "Please configure form to have at least one recipient";
             valid = false;
           }
 
           if (!valid) {
-            whyInvalid = "Please enter at least one recipient.";
+            whyInvalid = "Please enter at least one recipient";
           }
         }
       } else {
@@ -663,7 +663,7 @@ const Container = function (options) {
       if (valid) {
         this.emit(Events.VALID);
       } else {
-        this.emit(Events.INVALID, whyInvalid);
+        this.emit(Events.INVALID, whyInvalid, invalidData);
       }
 
       lastValidation = valid;
