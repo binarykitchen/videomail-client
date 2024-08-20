@@ -17305,7 +17305,7 @@ function wrappy (fn, cb) {
 },{}],117:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.7",
+  "version": "9.1.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19704,6 +19704,13 @@ var Buttons = function Buttons(container, options) {
   this.isRecordAgainButtonEnabled = function () {
     return !recordAgainButton.disabled;
   };
+  this.isReady = function () {
+    if (!recordButton) {
+      // No recordButton? Ok, must be in playerOnly mode. So we are ready anyway.
+      return true;
+    }
+    return this.isRecordButtonEnabled();
+  };
   this.isRecordButtonEnabled = function () {
     return !recordButton.disabled;
   };
@@ -20319,7 +20326,7 @@ var Container = function Container(options) {
     return Boolean(form);
   };
   this.isReady = function () {
-    return buttons.isRecordButtonEnabled();
+    return buttons.isReady();
   };
   function isPost(method) {
     return method && method.toUpperCase() === "POST";
