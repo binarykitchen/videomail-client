@@ -81,7 +81,7 @@ const Container = function (options) {
   }
 
   function buildChildren(playerOnly = false) {
-    debug(`Container: buildChildren(playerOnly = ${playerOnly})`);
+    debug(`Container: buildChildren (playerOnly = ${playerOnly})`);
 
     if (!containerElement.classList) {
       self.emit(
@@ -116,7 +116,7 @@ const Container = function (options) {
   }
 
   function initEvents(playerOnly = false) {
-    debug(`Container: initEvents(playerOnly = ${playerOnly})`);
+    debug(`Container: initEvents (playerOnly = ${playerOnly})`);
 
     if (options.enableAutoUnload) {
       window.addEventListener("beforeunload", (e) => {
@@ -397,9 +397,9 @@ const Container = function (options) {
         validateOptions();
         correctDimensions();
 
-        if (!playerOnly) {
-          buildForm();
-        }
+        // Building form also applies for when `playerOnly` because of
+        // correcting mode on Videomail. This function will skip if there is no form. Easy.
+        buildForm();
 
         buildChildren(playerOnly);
 

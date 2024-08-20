@@ -17305,7 +17305,7 @@ function wrappy (fn, cb) {
 },{}],117:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.6",
+  "version": "9.1.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19827,7 +19827,7 @@ var Container = function Container(options) {
   }
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Container: buildChildren(playerOnly = ".concat(playerOnly, ")"));
+    debug("Container: buildChildren (playerOnly = ".concat(playerOnly, ")"));
     if (!containerElement.classList) {
       self.emit(_events.default.ERROR, _videomailError.default.create("Sorry, your browser is too old!", options));
     } else {
@@ -19853,7 +19853,7 @@ var Container = function Container(options) {
   }
   function initEvents() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Container: initEvents(playerOnly = ".concat(playerOnly, ")"));
+    debug("Container: initEvents (playerOnly = ".concat(playerOnly, ")"));
     if (options.enableAutoUnload) {
       window.addEventListener("beforeunload", function (e) {
         self.unload(e);
@@ -20083,9 +20083,10 @@ var Container = function Container(options) {
         !built && initEvents(playerOnly);
         validateOptions();
         correctDimensions();
-        if (!playerOnly) {
-          buildForm();
-        }
+
+        // Building form also applies for when `playerOnly` because of
+        // correcting mode on Videomail. This function will skip if there is no form. Easy.
+        buildForm();
         buildChildren(playerOnly);
         if (!hasError) {
           debug("Container: built.");
@@ -20938,7 +20939,7 @@ var Visuals = function Visuals(container, options) {
   }
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Visuals: buildChildren(playerOnly = ".concat(playerOnly, ")"));
+    debug("Visuals: buildChildren (playerOnly = ".concat(playerOnly, ")"));
     buildNoScriptTag();
     if (!playerOnly) {
       notifier.build();
@@ -20950,7 +20951,7 @@ var Visuals = function Visuals(container, options) {
   function initEvents() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     if (!playerOnly) {
-      debug("Visuals: initEvents(playerOnly = ".concat(playerOnly, ")"));
+      debug("Visuals: initEvents (playerOnly = ".concat(playerOnly, ")"));
       self.on(_events.default.USER_MEDIA_READY, function () {
         built = true;
         self.endWaiting();

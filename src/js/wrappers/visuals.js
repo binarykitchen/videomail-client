@@ -39,7 +39,7 @@ const Visuals = function (container, options) {
   }
 
   function buildChildren(playerOnly = false) {
-    debug(`Visuals: buildChildren(playerOnly = ${playerOnly})`);
+    debug(`Visuals: buildChildren (playerOnly = ${playerOnly})`);
 
     buildNoScriptTag();
 
@@ -55,7 +55,7 @@ const Visuals = function (container, options) {
 
   function initEvents(playerOnly = false) {
     if (!playerOnly) {
-      debug(`Visuals: initEvents(playerOnly = ${playerOnly})`);
+      debug(`Visuals: initEvents (playerOnly = ${playerOnly})`);
 
       self
         .on(Events.USER_MEDIA_READY, function () {
