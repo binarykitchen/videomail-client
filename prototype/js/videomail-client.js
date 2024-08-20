@@ -19983,8 +19983,7 @@ var Container = function Container(options) {
      */
 
     if (!url || url === "") {
-      // figure out URL automatically then
-      url = document.baseURI;
+      url = options.baseUrl;
     }
 
     // can be missing when no videomail was recorded and is not required
@@ -20238,13 +20237,13 @@ var Container = function Container(options) {
               valid = false;
             }
             if (!valid) {
-              whyInvalid = "Don't forget to record a video ;)";
+              whyInvalid = "Don't forget to record a video 😉";
             }
           }
         } else {
           var invalidInput = form.getInvalidElement();
           if (invalidInput) {
-            whyInvalid = "Input ".concat(invalidInput.name, " seems wrong");
+            whyInvalid = "Input \"".concat(invalidInput.name, "\" seems wrong \uD83E\uDD14");
             invalidData = (0, _defineProperty2.default)({}, invalidInput.name, invalidInput.value);
           } else {
             whyInvalid = "Unknown form input(s) are invalid";
@@ -20328,7 +20327,7 @@ var Container = function Container(options) {
     return method && method.toUpperCase() === "PUT";
   }
   this.submitAll = function (formData, method, url) {
-    debug("Container: submitAll()");
+    debug("Container: submitAll(".concat(method, " ").concat(url, ")"));
     var post = isPost(method);
     var hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
     function startSubmission() {
