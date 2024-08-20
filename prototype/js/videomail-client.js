@@ -17305,7 +17305,7 @@ function wrappy (fn, cb) {
 },{}],117:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.8",
+  "version": "9.1.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17353,7 +17353,7 @@ module.exports={
     "canvas-to-buffer": "4.0.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.38.0",
+    "core-js": "3.38.1",
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",
@@ -19706,8 +19706,8 @@ var Buttons = function Buttons(container, options) {
   };
   this.isReady = function () {
     if (!recordButton) {
-      // No recordButton? Ok, must be in playerOnly mode. So we are ready anyway.
-      return true;
+      // No recordButton? Ok, must be in playerOnly mode. So, not ready for recording
+      return false;
     }
     return this.isRecordButtonEnabled();
   };
@@ -20069,9 +20069,9 @@ var Container = function Container(options) {
     }
     return _dimension.default.calculateHeight(element, _optionsWrapper.default.merge(options, fnOptions, true));
   };
-  this.areVisualsHidden = function () {
+  function areVisualsHidden() {
     return visuals.isHidden();
-  };
+  }
   this.hasElement = function () {
     return Boolean(containerElement);
   };
@@ -20240,8 +20240,8 @@ var Container = function Container(options) {
       if (form) {
         valid = form.validate();
         if (valid) {
-          if (!this.areVisualsHidden() && !visualsValid) {
-            if (submitted || this.isReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
+          if (!areVisualsHidden() && !visualsValid) {
+            if (submitted || buttonsAreReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
               valid = false;
             }
             if (!valid) {
@@ -20325,9 +20325,9 @@ var Container = function Container(options) {
   this.hasForm = function () {
     return Boolean(form);
   };
-  this.isReady = function () {
+  function buttonsAreReady() {
     return buttons.isReady();
-  };
+  }
   function isPost(method) {
     return method && method.toUpperCase() === "POST";
   }
