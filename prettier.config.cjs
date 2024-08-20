@@ -4,10 +4,10 @@
 const config = {
   printWidth: 90,
   plugins: [
+    "prettier-plugin-organize-imports",
     "prettier-plugin-curly",
     "prettier-plugin-sh",
     "prettier-plugin-packagejson",
-    "prettier-plugin-organize-imports",
   ],
   organizeImportsSkipDestructiveCodeActions: true,
 };

@@ -620,8 +620,8 @@ const Buttons = function (container, options) {
 
   this.isReady = function () {
     if (!recordButton) {
-      // No recordButton? Ok, must be in playerOnly mode. So we are ready anyway.
-      return true;
+      // No recordButton? Ok, must be in playerOnly mode. So, not ready for recording
+      return false;
     }
 
     return this.isRecordButtonEnabled();

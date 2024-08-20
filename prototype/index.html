@@ -334,7 +334,9 @@
         links.each(function (link) {
           var text = link.textContent.toLowerCase();
 
-          if (".." == text) return;
+          if (".." == text) {
+            return;
+          }
           if (str.length && ~text.indexOf(str)) {
             link.addClass("highlight");
           } else {

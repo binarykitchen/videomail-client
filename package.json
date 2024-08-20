@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "9.1.1",
+  "version": "9.1.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -48,7 +48,7 @@
     "canvas-to-buffer": "4.0.1",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
-    "core-js": "3.38.0",
+    "core-js": "3.38.1",
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",

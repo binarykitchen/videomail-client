@@ -372,9 +372,9 @@ const Container = function (options) {
     );
   };
 
-  this.areVisualsHidden = function () {
+  function areVisualsHidden() {
     return visuals.isHidden();
-  };
+  }
 
   this.hasElement = function () {
     return Boolean(containerElement);
@@ -579,10 +579,10 @@ const Container = function (options) {
         valid = form.validate();
 
         if (valid) {
-          if (!this.areVisualsHidden() && !visualsValid) {
+          if (!areVisualsHidden() && !visualsValid) {
             if (
               submitted ||
-              this.isReady() ||
+              buttonsAreReady() ||
               this.isRecording() ||
               this.isPaused() ||
               this.isCountingDown()
@@ -683,9 +683,9 @@ const Container = function (options) {
     return Boolean(form);
   };
 
-  this.isReady = function () {
+  function buttonsAreReady() {
     return buttons.isReady();
-  };
+  }
 
   function isPost(method) {
     return method && method.toUpperCase() === "POST";
