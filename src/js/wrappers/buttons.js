@@ -618,6 +618,15 @@ const Buttons = function (container, options) {
     return !recordAgainButton.disabled;
   };
 
+  this.isReady = function () {
+    if (!recordButton) {
+      // No recordButton? Ok, must be in playerOnly mode. So we are ready anyway.
+      return true;
+    }
+
+    return this.isRecordButtonEnabled();
+  };
+
   this.isRecordButtonEnabled = function () {
     return !recordButton.disabled;
   };

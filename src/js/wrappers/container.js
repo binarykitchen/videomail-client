@@ -684,7 +684,7 @@ const Container = function (options) {
   };
 
   this.isReady = function () {
-    return buttons.isRecordButtonEnabled();
+    return buttons.isReady();
   };
 
   function isPost(method) {
