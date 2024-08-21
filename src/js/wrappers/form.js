@@ -95,6 +95,8 @@ const Form = function (container, formElement, options) {
   };
 
   this.loadVideomail = function (videomail) {
+    debug("Form: loadVideomail()");
+
     const limit = formElement.elements.length;
 
     let input;
@@ -106,8 +108,6 @@ const Form = function (container, formElement, options) {
 
       if (videomail[name]) {
         input.value = videomail[name];
-        // Important so that any other JS framework can detect changes
-        input.dispatchEvent(new Event("input", { bubbles: true }));
       }
 
       if (
@@ -162,6 +162,8 @@ const Form = function (container, formElement, options) {
   };
 
   this.build = function () {
+    debug("Form: build()");
+
     if (options.enableAutoValidation) {
       const inputElements = getInputElements();
       let inputElement;
@@ -174,7 +176,8 @@ const Form = function (container, formElement, options) {
             container.validate();
           });
         } else {
-          inputElement.addEventListener("input", function () {
+          inputElement.addEventListener("input", function (event) {
+            console.log({ event });
             container.validate();
           });
         }
