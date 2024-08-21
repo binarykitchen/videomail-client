@@ -52,7 +52,7 @@ const Container = function (options) {
   function getFormElement() {
     let formElement;
 
-    if (containerElement.tagName === "FORM") {
+    if (containerElement && containerElement.tagName === "FORM") {
       formElement = containerElement;
     } else if (options.selectors.formId) {
       formElement = document.getElementById(options.selectors.formId);
@@ -63,7 +63,11 @@ const Container = function (options) {
     return formElement;
   }
 
-  function buildForm() {
+  this.buildForm = function () {
+    if (form) {
+      return; // already built
+    }
+
     const formElement = getFormElement();
 
     if (formElement) {
@@ -78,7 +82,7 @@ const Container = function (options) {
 
       form.build();
     }
-  }
+  };
 
   function buildChildren(playerOnly = false) {
     debug(`Container: buildChildren (playerOnly = ${playerOnly})`);
@@ -159,7 +163,7 @@ const Container = function (options) {
 
           // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
           if (!isEditable && tagName !== "INPUT" && tagName !== "TEXTAREA") {
-            const code = e.keyCode ? e.keyCode : e.which;
+            const code = e.code;
 
             if (code === 32) {
               e.preventDefault();
@@ -381,7 +385,7 @@ const Container = function (options) {
   };
 
   this.build = function (playerOnly = false) {
-    debug(`Container: build(playerOnly = ${playerOnly})`);
+    debug(`Container: build (playerOnly = ${playerOnly})`);
 
     try {
       containerElement = document.getElementById(options.selectors.containerId);
@@ -399,7 +403,7 @@ const Container = function (options) {
 
         // Building form also applies for when `playerOnly` because of
         // correcting mode on Videomail. This function will skip if there is no form. Easy.
-        buildForm();
+        this.buildForm();
 
         buildChildren(playerOnly);
 
@@ -652,7 +656,7 @@ const Container = function (options) {
           }
 
           if (!valid) {
-            whyInvalid = "Please enter at least one recipient";
+            whyInvalid = "At least one recipient is required";
           }
         }
       } else {

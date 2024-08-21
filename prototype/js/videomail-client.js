@@ -17534,14 +17534,8 @@ var VideomailClient = function VideomailClient(options) {
       if (videomail) {
         videomail = container.addPlayerDimensions(videomail, parentElement);
       }
-      if (container.isOutsideElementOf(parentElement)) {
-        // replay element must be outside of the container
-        container.hideForm({
-          deep: true
-        });
-      } else {
-        container.loadForm(videomail);
-      }
+      container.buildForm(videomail);
+      container.loadForm(videomail);
 
       // slight delay needed to avoid HTTP 416 errors (request range unavailable)
       setTimeout(function () {
@@ -19811,7 +19805,7 @@ var Container = function Container(options) {
   }
   function getFormElement() {
     var formElement;
-    if (containerElement.tagName === "FORM") {
+    if (containerElement && containerElement.tagName === "FORM") {
       formElement = containerElement;
     } else if (options.selectors.formId) {
       formElement = document.getElementById(options.selectors.formId);
@@ -19820,7 +19814,10 @@ var Container = function Container(options) {
     }
     return formElement;
   }
-  function buildForm() {
+  this.buildForm = function () {
+    if (form) {
+      return; // already built
+    }
     var formElement = getFormElement();
     if (formElement) {
       debug("Container: buildForm()");
@@ -19831,7 +19828,7 @@ var Container = function Container(options) {
       }
       form.build();
     }
-  }
+  };
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     debug("Container: buildChildren (playerOnly = ".concat(playerOnly, ")"));
@@ -19892,7 +19889,7 @@ var Container = function Container(options) {
 
           // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
           if (!isEditable && tagName !== "INPUT" && tagName !== "TEXTAREA") {
-            var code = e.keyCode ? e.keyCode : e.which;
+            var code = e.code;
             if (code === 32) {
               e.preventDefault();
               if (options.enablePause) {
@@ -20077,7 +20074,7 @@ var Container = function Container(options) {
   };
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Container: build(playerOnly = ".concat(playerOnly, ")"));
+    debug("Container: build (playerOnly = ".concat(playerOnly, ")"));
     try {
       containerElement = document.getElementById(options.selectors.containerId);
 
@@ -20093,7 +20090,7 @@ var Container = function Container(options) {
 
         // Building form also applies for when `playerOnly` because of
         // correcting mode on Videomail. This function will skip if there is no form. Easy.
-        buildForm();
+        this.buildForm();
         buildChildren(playerOnly);
         if (!hasError) {
           debug("Container: built.");
@@ -20301,7 +20298,7 @@ var Container = function Container(options) {
             valid = false;
           }
           if (!valid) {
-            whyInvalid = "Please enter at least one recipient";
+            whyInvalid = "At least one recipient is required";
           }
         }
       } else {
@@ -20635,6 +20632,7 @@ var Form = function Form(container, formElement, options) {
     return recipients;
   };
   this.loadVideomail = function (videomail) {
+    debug("Form: loadVideomail()");
     var limit = formElement.elements.length;
     var input;
     var name;
@@ -20643,10 +20641,6 @@ var Form = function Form(container, formElement, options) {
       name = input.name;
       if (videomail[name]) {
         input.value = videomail[name];
-        // Important so that any other JS framework can detect changes
-        input.dispatchEvent(new Event("input", {
-          bubbles: true
-        }));
       }
       if (name === options.selectors.subjectInputName || name === options.selectors.bodyInputName) {
         input.disabled = true;
@@ -20685,6 +20679,7 @@ var Form = function Form(container, formElement, options) {
     setDisabled(false, buttonsToo);
   };
   this.build = function () {
+    debug("Form: build()");
     if (options.enableAutoValidation) {
       var inputElements = getInputElements();
       var inputElement;
@@ -20695,7 +20690,10 @@ var Form = function Form(container, formElement, options) {
             container.validate();
           });
         } else {
-          inputElement.addEventListener("input", function () {
+          inputElement.addEventListener("input", function (event) {
+            console.log({
+              event: event
+            });
             container.validate();
           });
         }
