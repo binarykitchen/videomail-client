@@ -78,7 +78,7 @@ const Visuals = function (container, options) {
           }
         })
         .on(Events.PREVIEW_SHOWN, function () {
-          container.validate(true);
+          container.validate(undefined, true);
         })
         .on(Events.LOADED_META_DATA, function () {
           correctDimensions();
