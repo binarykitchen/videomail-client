@@ -17305,7 +17305,7 @@ function wrappy (fn, cb) {
 },{}],117:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.10",
+  "version": "9.1.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -20683,14 +20683,14 @@ var Form = function Form(container, formElement, options) {
     for (var i = 0, len = inputElements.length; i < len; i++) {
       var inputElement = inputElements[i];
       if (inputElement.type === "radio") {
-        inputElement.removeEventListener("change", container.validate);
+        inputElement.removeEventListener("change", container.validate.bind(container));
       } else {
-        inputElement.removeEventListener("input", container.validate);
+        inputElement.removeEventListener("input", container.validate.bind(container));
       }
     }
     var selectElements = getSelectElements();
     for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate);
+      selectElements[j].removeEventListener("change", container.validate.bind(container));
     }
   }
   this.build = function () {
