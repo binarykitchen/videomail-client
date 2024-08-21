@@ -651,8 +651,8 @@ const Container = function (options) {
           } else if (bccIsConfigured) {
             // Skip as it's hidden
           } else {
-            whyInvalid = "Please configure form to have at least one recipient";
-            valid = false;
+            // Form has no input fields for recipients, so don't validate
+            // recipients at all
           }
 
           if (!valid) {

@@ -17305,7 +17305,7 @@ function wrappy (fn, cb) {
 },{}],117:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.10",
+  "version": "9.1.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17485,13 +17485,13 @@ var VideomailClient = function VideomailClient(options) {
   _eventEmitter.default.call(this, localOptions, "VideomailClient");
   this.build = function () {
     var building = false;
-    debug("Client: build(),", "!building =", "".concat(!building, ","), "!isBuilt() =", !container.isBuilt());
 
     /*
      * it can happen that it gets called twice, i.E. when an error is thrown
      * in the middle of the build() fn
      */
     if (!building && !container.isBuilt()) {
+      debug("Client: build()");
       building = true;
       container.build();
       building = false;
@@ -20294,8 +20294,8 @@ var Container = function Container(options) {
           } else if (bccIsConfigured) {
             // Skip as it's hidden
           } else {
-            whyInvalid = "Please configure form to have at least one recipient";
-            valid = false;
+            // Form has no input fields for recipients, so don't validate
+            // recipients at all
           }
           if (!valid) {
             whyInvalid = "At least one recipient is required";
@@ -20678,31 +20678,36 @@ var Form = function Form(container, formElement, options) {
   this.enable = function (buttonsToo) {
     setDisabled(false, buttonsToo);
   };
+  function removeAllInputListeners() {
+    var inputElements = getInputElements();
+    for (var i = 0, len = inputElements.length; i < len; i++) {
+      var inputElement = inputElements[i];
+      if (inputElement.type === "radio") {
+        inputElement.removeEventListener("change", container.validate.bind(container));
+      } else {
+        inputElement.removeEventListener("input", container.validate.bind(container));
+      }
+    }
+    var selectElements = getSelectElements();
+    for (var j = 0, len2 = selectElements.length; j < len2; j++) {
+      selectElements[j].removeEventListener("change", container.validate.bind(container));
+    }
+  }
   this.build = function () {
     debug("Form: build()");
     if (options.enableAutoValidation) {
       var inputElements = getInputElements();
-      var inputElement;
       for (var i = 0, len = inputElements.length; i < len; i++) {
-        inputElement = inputElements[i];
+        var inputElement = inputElements[i];
         if (inputElement.type === "radio") {
-          inputElement.addEventListener("change", function () {
-            container.validate();
-          });
+          inputElement.addEventListener("change", container.validate.bind(container));
         } else {
-          inputElement.addEventListener("input", function (event) {
-            console.log({
-              event: event
-            });
-            container.validate();
-          });
+          inputElement.addEventListener("input", container.validate.bind(container));
         }
       }
       var selectElements = getSelectElements();
       for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-        selectElements[j].addEventListener("change", function () {
-          container.validate();
-        });
+        selectElements[j].addEventListener("change", container.validate.bind(container));
       }
     }
     keyInput = formElement.querySelector("input[name=\"".concat(options.selectors.keyInputName, "\"]"));
@@ -20770,6 +20775,7 @@ var Form = function Form(container, formElement, options) {
   }
   this.unload = function () {
     debug("Form: unload()");
+    removeAllInputListeners();
     this.removeAllListeners();
     stopListeningToSubmitEvents();
   };

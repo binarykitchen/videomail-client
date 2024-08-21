@@ -54,19 +54,13 @@ const VideomailClient = function (options) {
   this.build = function () {
     let building = false;
 
-    debug(
-      "Client: build(),",
-      "!building =",
-      `${!building},`,
-      "!isBuilt() =",
-      !container.isBuilt(),
-    );
-
     /*
      * it can happen that it gets called twice, i.E. when an error is thrown
      * in the middle of the build() fn
      */
     if (!building && !container.isBuilt()) {
+      debug("Client: build()");
+
       building = true;
       container.build();
       building = false;

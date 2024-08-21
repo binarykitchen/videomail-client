@@ -161,34 +161,46 @@ const Form = function (container, formElement, options) {
     setDisabled(false, buttonsToo);
   };
 
+  function removeAllInputListeners() {
+    const inputElements = getInputElements();
+
+    for (let i = 0, len = inputElements.length; i < len; i++) {
+      const inputElement = inputElements[i];
+
+      if (inputElement.type === "radio") {
+        inputElement.removeEventListener("change", container.validate.bind(container));
+      } else {
+        inputElement.removeEventListener("input", container.validate.bind(container));
+      }
+    }
+
+    const selectElements = getSelectElements();
+
+    for (let j = 0, len2 = selectElements.length; j < len2; j++) {
+      selectElements[j].removeEventListener("change", container.validate.bind(container));
+    }
+  }
+
   this.build = function () {
     debug("Form: build()");
 
     if (options.enableAutoValidation) {
       const inputElements = getInputElements();
-      let inputElement;
 
       for (let i = 0, len = inputElements.length; i < len; i++) {
-        inputElement = inputElements[i];
+        const inputElement = inputElements[i];
 
         if (inputElement.type === "radio") {
-          inputElement.addEventListener("change", function () {
-            container.validate();
-          });
+          inputElement.addEventListener("change", container.validate.bind(container));
         } else {
-          inputElement.addEventListener("input", function (event) {
-            console.log({ event });
-            container.validate();
-          });
+          inputElement.addEventListener("input", container.validate.bind(container));
         }
       }
 
       const selectElements = getSelectElements();
 
       for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-        selectElements[j].addEventListener("change", function () {
-          container.validate();
-        });
+        selectElements[j].addEventListener("change", container.validate.bind(container));
       }
     }
 
@@ -271,6 +283,8 @@ const Form = function (container, formElement, options) {
 
   this.unload = function () {
     debug("Form: unload()");
+
+    removeAllInputListeners();
 
     this.removeAllListeners();
     stopListeningToSubmitEvents();
