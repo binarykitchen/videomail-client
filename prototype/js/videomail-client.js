@@ -17305,7 +17305,7 @@ function wrappy (fn, cb) {
 },{}],117:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.11",
+  "version": "9.1.12",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -20238,11 +20238,15 @@ var Container = function Container(options) {
         valid = form.validate();
         if (valid) {
           if (!areVisualsHidden() && !visualsValid) {
+            // TODO Improve this check to have this based on `key`
             if (submitted || buttonsAreReady() || this.isRecording() || this.isPaused() || this.isCountingDown()) {
               valid = false;
             }
             if (!valid) {
               whyInvalid = "Don't forget to record a video 😉";
+              invalidData = {
+                key: undefined
+              };
             }
           }
         } else {
