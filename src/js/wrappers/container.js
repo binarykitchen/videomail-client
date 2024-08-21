@@ -1,6 +1,4 @@
 import Visibility from "document-visibility";
-// needed for IE 11
-import elementClosest from "element-closest";
 import hidden from "hidden";
 import insertCss from "insert-css";
 
@@ -16,8 +14,6 @@ import Dimension from "./dimension";
 import Form from "./form";
 import OptionsWrapper from "./optionsWrapper";
 import Visuals from "./visuals";
-
-elementClosest(window);
 
 const Container = function (options) {
   EventEmitter.call(this, options, "Container");
@@ -327,7 +323,7 @@ const Container = function (options) {
 
   this.addPlayerDimensions = function (videomail, element) {
     try {
-      videomail.playerHeight = this.calculateHeight(
+      videomail.playerHeight = self.calculateHeight(
         {
           responsive: true,
           videoWidth: videomail.width,
@@ -336,7 +332,7 @@ const Container = function (options) {
         element,
       );
 
-      videomail.playerWidth = this.calculateWidth({
+      videomail.playerWidth = self.calculateWidth({
         responsive: true,
         videoHeight: videomail.playerHeight,
         ratio: videomail.height / videomail.width,
@@ -403,7 +399,7 @@ const Container = function (options) {
 
         // Building form also applies for when `playerOnly` because of
         // correcting mode on Videomail. This function will skip if there is no form. Easy.
-        this.buildForm();
+        self.buildForm();
 
         buildChildren(playerOnly);
 
@@ -458,7 +454,7 @@ const Container = function (options) {
 
     try {
       unloadChildren(e);
-      this.removeAllListeners();
+      self.removeAllListeners();
 
       built = submitted = false;
     } catch (exc) {
@@ -499,7 +495,7 @@ const Container = function (options) {
 
     hasError = false;
 
-    this.isRecording() && this.pause();
+    self.isRecording() && self.pause();
 
     visuals.hide();
 
@@ -535,7 +531,7 @@ const Container = function (options) {
   this.showReplayOnly = function () {
     hasError = false;
 
-    this.isRecording() && this.pause();
+    self.isRecording() && self.pause();
 
     visuals.showReplayOnly();
 
@@ -555,7 +551,7 @@ const Container = function (options) {
   };
 
   // this code needs a good rewrite :(
-  this.validate = function (force) {
+  this.validate = function (event, force) {
     let runValidation = true;
     let valid;
 
@@ -573,7 +569,7 @@ const Container = function (options) {
     }
 
     if (runValidation) {
-      this.emit(Events.VALIDATING);
+      self.emit(Events.VALIDATING);
 
       const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
       let whyInvalid;
@@ -588,9 +584,9 @@ const Container = function (options) {
             if (
               submitted ||
               buttonsAreReady() ||
-              this.isRecording() ||
-              this.isPaused() ||
-              this.isCountingDown()
+              self.isRecording() ||
+              self.isPaused() ||
+              self.isCountingDown()
             ) {
               valid = false;
             }
@@ -666,9 +662,9 @@ const Container = function (options) {
       }
 
       if (valid) {
-        this.emit(Events.VALID);
+        self.emit(Events.VALID);
       } else {
-        this.emit(Events.INVALID, whyInvalid, invalidData);
+        self.emit(Events.INVALID, whyInvalid, invalidData);
       }
 
       lastValidation = valid;
@@ -766,7 +762,7 @@ const Container = function (options) {
         isDirty = false;
       } else if (submitted) {
         isDirty = false;
-      } else if (this.isReplayShown() || this.isPaused()) {
+      } else if (self.isReplayShown() || self.isPaused()) {
         isDirty = true;
       }
     }
@@ -791,18 +787,18 @@ const Container = function (options) {
   this.loadForm = function (videomail) {
     if (form) {
       form.loadVideomail(videomail);
-      this.validate();
+      self.validate();
     }
   };
 
   this.enableAudio = function () {
     options.setAudioEnabled(true);
-    this.emit(Events.ENABLING_AUDIO);
+    self.emit(Events.ENABLING_AUDIO);
   };
 
   this.disableAudio = function () {
     options.setAudioEnabled(false);
-    this.emit(Events.DISABLING_AUDIO);
+    self.emit(Events.DISABLING_AUDIO);
   };
 
   this.submit = function () {
