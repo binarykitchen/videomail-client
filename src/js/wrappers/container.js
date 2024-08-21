@@ -584,6 +584,7 @@ const Container = function (options) {
 
         if (valid) {
           if (!areVisualsHidden() && !visualsValid) {
+            // TODO Improve this check to have this based on `key`
             if (
               submitted ||
               buttonsAreReady() ||
@@ -596,6 +597,7 @@ const Container = function (options) {
 
             if (!valid) {
               whyInvalid = "Don't forget to record a video 😉";
+              invalidData = { key: undefined };
             }
           }
         } else {

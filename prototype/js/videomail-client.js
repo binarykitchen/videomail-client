@@ -20243,6 +20243,9 @@ var Container = function Container(options) {
             }
             if (!valid) {
               whyInvalid = "Don't forget to record a video 😉";
+              invalidData = {
+                key: undefined
+              };
             }
           }
         } else {
