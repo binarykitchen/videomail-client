@@ -17341,8 +17341,8 @@ module.exports={
   },
   "devDependencies": {
     "@babel/eslint-parser": "7.25.1",
-    "@babel/plugin-transform-runtime": "7.24.7",
-    "@babel/preset-env": "7.25.3",
+    "@babel/plugin-transform-runtime": "7.25.4",
+    "@babel/preset-env": "7.25.4",
     "audit-ci": "7.1.0",
     "autoprefixer": "10.4.20",
     "babelify": "10.0.0",
@@ -17502,7 +17502,7 @@ var VideomailClient = function VideomailClient(options) {
       setTimeout(function () {
         replay.setVideomail(videomail);
         container.showReplayOnly();
-      }, 10e2); // not sure, but probably can be reduced a bit
+      }, 10e1); // not sure, but probably can be reduced a bit
     }
     buildReplay();
   };
@@ -21796,9 +21796,9 @@ var Notifier = function Notifier(visuals, options) {
     entertaining = false;
   }
   function setMessage(message, messageOptions) {
-    options.debug("Notifier: setMessage(".concat(message, ")"));
     var notifierMessage = getNotifierMessage();
     if (notifierMessage) {
+      options.debug("Notifier: setMessage(".concat(message, ")"));
       if (message.length > 0) {
         var problem = messageOptions.problem ? messageOptions.problem : false;
         notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
@@ -21807,7 +21807,7 @@ var Notifier = function Notifier(visuals, options) {
       }
       (0, _hidden.default)(notifierMessage, false);
     } else {
-      options.logger.warn("Unable to update notifierMessage element because no element is defined", message);
+      // Must be unloaded, do nothing further
     }
   }
   this.error = function (err) {
@@ -23128,7 +23128,13 @@ var Replay = function Replay(parentElement, options) {
     Object.keys(newVideomail).forEach(function (attribute) {
       attributeContainer = parentElement.querySelector(".".concat(attribute));
       if (attributeContainer) {
-        attributeContainer.innerHTML = newVideomail[attribute];
+        var empty = !attributeContainer.innerHTML || attributeContainer.innerHTML.length < 1;
+
+        // Do not overwrite when already set before, e
+        // e.g. with a React component adding links to the body
+        if (empty) {
+          attributeContainer.innerHTML = newVideomail[attribute];
+        }
       }
     });
   }

@@ -43,7 +43,14 @@ const Replay = function (parentElement, options) {
       attributeContainer = parentElement.querySelector(`.${attribute}`);
 
       if (attributeContainer) {
-        attributeContainer.innerHTML = newVideomail[attribute];
+        const empty =
+          !attributeContainer.innerHTML || attributeContainer.innerHTML.length < 1;
+
+        // Do not overwrite when already set before, e
+        // e.g. with a React component adding links to the body
+        if (empty) {
+          attributeContainer.innerHTML = newVideomail[attribute];
+        }
       }
     });
   }
