@@ -120,7 +120,7 @@ const VideomailClient = function (options) {
       setTimeout(function () {
         replay.setVideomail(videomail);
         container.showReplayOnly();
-      }, 10e2); // not sure, but probably can be reduced a bit
+      }, 10e1); // not sure, but probably can be reduced a bit
     }
 
     buildReplay();

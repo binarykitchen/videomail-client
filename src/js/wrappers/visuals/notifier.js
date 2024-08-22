@@ -163,11 +163,11 @@ const Notifier = function (visuals, options) {
   }
 
   function setMessage(message, messageOptions) {
-    options.debug(`Notifier: setMessage(${message})`);
-
     const notifierMessage = getNotifierMessage();
 
     if (notifierMessage) {
+      options.debug(`Notifier: setMessage(${message})`);
+
       if (message.length > 0) {
         const problem = messageOptions.problem ? messageOptions.problem : false;
         notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
@@ -180,10 +180,7 @@ const Notifier = function (visuals, options) {
 
       hidden(notifierMessage, false);
     } else {
-      options.logger.warn(
-        "Unable to update notifierMessage element because no element is defined",
-        message,
-      );
+      // Must be unloaded, do nothing further
     }
   }
 
