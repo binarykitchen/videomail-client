@@ -371,7 +371,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
           const isClosing = this.socket.readyState === WebSocket.CLOSING;
 
-          if (!connected && !isClosing) {
+          if (!connected && !isClosing && !unloaded) {
             connected = true;
             connecting = unloaded = false;
 
@@ -415,7 +415,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           if (browser.isIOS()) {
             /*
              * setting custom text since that err object isn't really an error
-             * on iphones when locked, and unlocked, this err is actually
+             * on iPhones when locked, and unlocked, this err is actually
              * an event object with stuff we can't use at all (an external bug)
              */
             videomailError = VideomailError.create(
@@ -704,6 +704,11 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function executeCommand(command) {
+    if (unloaded) {
+      // Skip
+      return;
+    }
+
     try {
       if (command.args) {
         debug(`Server commanded: ${command.command} with ${stringify(command.args)}`);

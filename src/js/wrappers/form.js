@@ -168,16 +168,16 @@ const Form = function (container, formElement, options) {
       const inputElement = inputElements[i];
 
       if (inputElement.type === "radio") {
-        inputElement.removeEventListener("change", container.validate.bind(container));
+        inputElement.removeEventListener("change", container.validate);
       } else {
-        inputElement.removeEventListener("input", container.validate.bind(container));
+        inputElement.removeEventListener("input", container.validate);
       }
     }
 
     const selectElements = getSelectElements();
 
     for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate.bind(container));
+      selectElements[j].removeEventListener("change", container.validate);
     }
   }
 
@@ -191,16 +191,16 @@ const Form = function (container, formElement, options) {
         const inputElement = inputElements[i];
 
         if (inputElement.type === "radio") {
-          inputElement.addEventListener("change", container.validate.bind(container));
+          inputElement.addEventListener("change", container.validate);
         } else {
-          inputElement.addEventListener("input", container.validate.bind(container));
+          inputElement.addEventListener("input", container.validate);
         }
       }
 
       const selectElements = getSelectElements();
 
       for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-        selectElements[j].addEventListener("change", container.validate.bind(container));
+        selectElements[j].addEventListener("change", container.validate);
       }
     }
 

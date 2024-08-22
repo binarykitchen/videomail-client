@@ -103,11 +103,14 @@ const Notifier = function (visuals, options) {
       .on(Events.BEGIN_VIDEO_ENCODING, function () {
         onBeginVideoEncoding();
       })
+      .on(Events.UNLOADING, function () {
+        self.notify("Unloading …");
+      })
       .on(Events.DISCONNECTED, function () {
-        self.notify("Disconnected.");
+        self.notify("Disconnected");
       })
       .on(Events.CONNECTED, function () {
-        self.notify("Connected.");
+        self.notify("Connected");
 
         if (options.loadUserMediaOnRecord) {
           self.hide();
@@ -160,7 +163,7 @@ const Notifier = function (visuals, options) {
   }
 
   function setMessage(message, messageOptions) {
-    options.debug("Notifier: setMessage()", message);
+    options.debug(`Notifier: setMessage(${message})`);
 
     const notifierMessage = getNotifierMessage();
 
@@ -283,7 +286,8 @@ const Notifier = function (visuals, options) {
   }
 
   this.notify = function (message, explanation, notifyOptions = {}) {
-    options.debug("Notifier: notify()", message, explanation);
+    const params = [message, explanation].filter(Boolean);
+    options.debug(`Notifier: notify(${params.join(", ")})`);
 
     const stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false;
     const entertain = notifyOptions.entertain ? notifyOptions.entertain : false;

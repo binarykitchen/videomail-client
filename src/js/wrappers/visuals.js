@@ -1,6 +1,7 @@
 import hidden from "hidden";
 import h from "hyperscript";
 import inherits from "inherits";
+import stringify from "safe-json-stringify";
 
 import Events from "../events";
 import EventEmitter from "../util/eventEmitter";
@@ -49,8 +50,6 @@ const Visuals = function (container, options) {
     }
 
     replay.build();
-
-    debug("Visuals: built.");
   }
 
   function initEvents(playerOnly = false) {
@@ -223,9 +222,13 @@ const Visuals = function (container, options) {
   };
 
   this.unload = function (e) {
-    debug("Visuals: unload()", e);
-
     try {
+      if (!built) {
+        return;
+      }
+
+      debug(`Visuals: unload(${e ? stringify(e) : ""})`);
+
       recorder.unload(e);
       recorderInsides.unload(e);
       replay.unload(e);

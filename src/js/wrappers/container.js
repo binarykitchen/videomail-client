@@ -1,6 +1,7 @@
 import Visibility from "document-visibility";
 import hidden from "hidden";
 import insertCss from "insert-css";
+import stringify from "safe-json-stringify";
 
 import inherits from "inherits";
 
@@ -233,6 +234,7 @@ const Container = function (options) {
 
     if (form) {
       form.unload();
+      form = undefined;
     }
 
     self.endWaiting();
@@ -450,9 +452,14 @@ const Container = function (options) {
   };
 
   this.unload = function (e) {
-    debug("Container: unload()", e);
-
     try {
+      if (!built) {
+        return;
+      }
+
+      debug(`Container: unload(${e ? stringify(e) : ""})`);
+      self.emit(Events.UNLOADING);
+
       unloadChildren(e);
       self.removeAllListeners();
 

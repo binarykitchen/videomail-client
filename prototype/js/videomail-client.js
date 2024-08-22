@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.1.13",
+  "version": "9.1.14",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17669,7 +17669,9 @@ var _default = exports.default = (0, _keymirror.default)({
   // document just became INvisible
   SWITCH_FACING_MODE: null,
   // to switch camera on mobiles between front and back
-  SERVER_READY: null // Gets emitted when the ready command is sent through sockets from the server for recording
+  SERVER_READY: null,
+  // Gets emitted when the ready command is sent through sockets from the server for recording
+  UNLOADING: null
 });
 
 },{"@babel/runtime/helpers/interopRequireDefault":4,"keymirror":73}],120:[function(_dereq_,module,exports){
@@ -19724,6 +19726,7 @@ var _defineProperty2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/de
 var _documentVisibility = _interopRequireDefault(_dereq_("document-visibility"));
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _insertCss = _interopRequireDefault(_dereq_("insert-css"));
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _mainMinCss = _interopRequireDefault(_dereq_("../../styles/css/main.min.css.js"));
 var _events = _interopRequireDefault(_dereq_("../events"));
@@ -19910,6 +19913,7 @@ var Container = function Container(options) {
     buttons.unload();
     if (form) {
       form.unload();
+      form = undefined;
     }
     self.endWaiting();
   }
@@ -20089,8 +20093,12 @@ var Container = function Container(options) {
     containerElement.insertBefore(child, reference);
   };
   this.unload = function (e) {
-    debug("Container: unload()", e);
     try {
+      if (!built) {
+        return;
+      }
+      debug("Container: unload(".concat(e ? (0, _safeJsonStringify.default)(e) : "", ")"));
+      self.emit(_events.default.UNLOADING);
       unloadChildren(e);
       self.removeAllListeners();
       built = submitted = false;
@@ -20396,7 +20404,7 @@ var Container = function Container(options) {
 (0, _inherits.default)(Container, _eventEmitter.default);
 var _default = exports.default = Container;
 
-},{"../../styles/css/main.min.css.js":147,"../events":119,"../resource":121,"../util/eventEmitter":125,"../util/videomailError":130,"./buttons":131,"./dimension":133,"./form":134,"./optionsWrapper":135,"./visuals":136,"@babel/runtime/helpers/defineProperty":3,"@babel/runtime/helpers/interopRequireDefault":4,"document-visibility":32,"hidden":61,"inherits":66,"insert-css":67}],133:[function(_dereq_,module,exports){
+},{"../../styles/css/main.min.css.js":147,"../events":119,"../resource":121,"../util/eventEmitter":125,"../util/videomailError":130,"./buttons":131,"./dimension":133,"./form":134,"./optionsWrapper":135,"./visuals":136,"@babel/runtime/helpers/defineProperty":3,"@babel/runtime/helpers/interopRequireDefault":4,"document-visibility":32,"hidden":61,"inherits":66,"insert-css":67,"safe-json-stringify":99}],133:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20644,14 +20652,14 @@ var Form = function Form(container, formElement, options) {
     for (var i = 0, len = inputElements.length; i < len; i++) {
       var inputElement = inputElements[i];
       if (inputElement.type === "radio") {
-        inputElement.removeEventListener("change", container.validate.bind(container));
+        inputElement.removeEventListener("change", container.validate);
       } else {
-        inputElement.removeEventListener("input", container.validate.bind(container));
+        inputElement.removeEventListener("input", container.validate);
       }
     }
     var selectElements = getSelectElements();
     for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate.bind(container));
+      selectElements[j].removeEventListener("change", container.validate);
     }
   }
   this.build = function () {
@@ -20661,14 +20669,14 @@ var Form = function Form(container, formElement, options) {
       for (var i = 0, len = inputElements.length; i < len; i++) {
         var inputElement = inputElements[i];
         if (inputElement.type === "radio") {
-          inputElement.addEventListener("change", container.validate.bind(container));
+          inputElement.addEventListener("change", container.validate);
         } else {
-          inputElement.addEventListener("input", container.validate.bind(container));
+          inputElement.addEventListener("input", container.validate);
         }
       }
       var selectElements = getSelectElements();
       for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-        selectElements[j].addEventListener("change", container.validate.bind(container));
+        selectElements[j].addEventListener("change", container.validate);
       }
     }
     keyInput = formElement.querySelector("input[name=\"".concat(options.selectors.keyInputName, "\"]"));
@@ -20883,6 +20891,7 @@ exports.default = void 0;
 var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _hyperscript = _interopRequireDefault(_dereq_("hyperscript"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
+var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
 var _recorderInsides = _interopRequireDefault(_dereq_("./visuals/inside/recorderInsides"));
@@ -20918,7 +20927,6 @@ var Visuals = function Visuals(container, options) {
       recorderInsides.build();
     }
     replay.build();
-    debug("Visuals: built.");
   }
   function initEvents() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
@@ -21059,8 +21067,11 @@ var Visuals = function Visuals(container, options) {
     });
   };
   this.unload = function (e) {
-    debug("Visuals: unload()", e);
     try {
+      if (!built) {
+        return;
+      }
+      debug("Visuals: unload(".concat(e ? (0, _safeJsonStringify.default)(e) : "", ")"));
       recorder.unload(e);
       recorderInsides.unload(e);
       replay.unload(e);
@@ -21209,7 +21220,7 @@ var Visuals = function Visuals(container, options) {
 (0, _inherits.default)(Visuals, _eventEmitter.default);
 var _default = exports.default = Visuals;
 
-},{"../events":119,"../util/eventEmitter":125,"./visuals/inside/recorderInsides":142,"./visuals/notifier":143,"./visuals/recorder":144,"./visuals/replay":145,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63,"inherits":66}],137:[function(_dereq_,module,exports){
+},{"../events":119,"../util/eventEmitter":125,"./visuals/inside/recorderInsides":142,"./visuals/notifier":143,"./visuals/recorder":144,"./visuals/replay":145,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":99}],137:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21741,10 +21752,12 @@ var Notifier = function Notifier(visuals, options) {
       onProgress(frameProgress, sampleProgress);
     }).on(_events.default.BEGIN_VIDEO_ENCODING, function () {
       onBeginVideoEncoding();
+    }).on(_events.default.UNLOADING, function () {
+      self.notify("Unloading …");
     }).on(_events.default.DISCONNECTED, function () {
-      self.notify("Disconnected.");
+      self.notify("Disconnected");
     }).on(_events.default.CONNECTED, function () {
-      self.notify("Connected.");
+      self.notify("Connected");
       if (options.loadUserMediaOnRecord) {
         self.hide();
       }
@@ -21783,7 +21796,7 @@ var Notifier = function Notifier(visuals, options) {
     entertaining = false;
   }
   function setMessage(message, messageOptions) {
-    options.debug("Notifier: setMessage()", message);
+    options.debug("Notifier: setMessage(".concat(message, ")"));
     var notifierMessage = getNotifierMessage();
     if (notifierMessage) {
       if (message.length > 0) {
@@ -21873,7 +21886,8 @@ var Notifier = function Notifier(visuals, options) {
   }
   this.notify = function (message, explanation) {
     var notifyOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    options.debug("Notifier: notify()", message, explanation);
+    var params = [message, explanation].filter(Boolean);
+    options.debug("Notifier: notify(".concat(params.join(", "), ")"));
     var stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false;
     var entertain = notifyOptions.entertain ? notifyOptions.entertain : false;
     var blocking = notifyOptions.blocking ? notifyOptions.blocking : false;
@@ -22215,7 +22229,7 @@ var Recorder = function Recorder(visuals, replay) {
         stream.on("connect", function () {
           debug("".concat(PIPE_SYMBOL, "Stream *connect* event emitted"));
           var isClosing = this.socket.readyState === WebSocket.CLOSING;
-          if (!connected && !isClosing) {
+          if (!connected && !isClosing && !unloaded) {
             connected = true;
             connecting = unloaded = false;
             self.emit(_events.default.CONNECTED);
@@ -22242,7 +22256,7 @@ var Recorder = function Recorder(visuals, replay) {
           if (browser.isIOS()) {
             /*
              * setting custom text since that err object isn't really an error
-             * on iphones when locked, and unlocked, this err is actually
+             * on iPhones when locked, and unlocked, this err is actually
              * an event object with stuff we can't use at all (an external bug)
              */
             videomailError = _videomailError.default.create(err, "iPhones cannot maintain a live connection for too long. Original error message is: ".concat(err.toString()), options);
@@ -22457,6 +22471,10 @@ var Recorder = function Recorder(visuals, replay) {
     }
   }
   function executeCommand(command) {
+    if (unloaded) {
+      // Skip
+      return;
+    }
     try {
       if (command.args) {
         debug("Server commanded: ".concat(command.command, " with ").concat((0, _safeJsonStringify.default)(command.args)));
@@ -23500,10 +23518,10 @@ function _default(recorder, options) {
     }
     function unloadAllEventListeners() {
       options.debug("UserMedia: unloadAllEventListeners()");
+      self.unloadRemainingEventListeners();
       self.removeListener(_events.default.SENDING_FIRST_FRAME, audioRecord);
       rawVisualUserMedia.removeEventListener && rawVisualUserMedia.removeEventListener("play", onPlay);
       rawVisualUserMedia.removeEventListener && rawVisualUserMedia.removeEventListener("loadedmetadata", onLoadedMetaData);
-      self.unloadRemainingEventListeners();
     }
     function play() {
       // Resets the media element and restarts the media resource. Any pending events are discarded.

@@ -162,6 +162,8 @@ export default function (recorder, options) {
     function unloadAllEventListeners() {
       options.debug("UserMedia: unloadAllEventListeners()");
 
+      self.unloadRemainingEventListeners();
+
       self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord);
 
       rawVisualUserMedia.removeEventListener &&
@@ -169,8 +171,6 @@ export default function (recorder, options) {
 
       rawVisualUserMedia.removeEventListener &&
         rawVisualUserMedia.removeEventListener("loadedmetadata", onLoadedMetaData);
-
-      self.unloadRemainingEventListeners();
     }
 
     function play() {

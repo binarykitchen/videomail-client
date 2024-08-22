@@ -43,4 +43,5 @@ export default keymirror({
   INVISIBLE: null, // document just became INvisible
   SWITCH_FACING_MODE: null, // to switch camera on mobiles between front and back
   SERVER_READY: null, // Gets emitted when the ready command is sent through sockets from the server for recording
+  UNLOADING: null,
 });
