@@ -587,7 +587,6 @@ const Container = function (options) {
           if (!areVisualsHidden() && !visualsValid) {
             // TODO Improve this check to have this based on `key`
             if (
-              submitted ||
               buttonsAreReady() ||
               self.isRecording() ||
               self.isPaused() ||
@@ -703,7 +702,7 @@ const Container = function (options) {
   }
 
   this.submitAll = function (formData, method, url) {
-    debug(`Container: submitAll(${method} ${url})`);
+    debug(`Container: submitAll(${method}: ${url})`);
 
     const post = isPost(method);
     const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);

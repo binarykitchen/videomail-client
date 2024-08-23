@@ -17519,8 +17519,22 @@ var VideomailClient = function VideomailClient(options) {
   this.hide = function () {
     container.hide();
   };
-  this.get = function (alias, cb) {
-    new _resource.default(localOptions).get(alias, function (err, videomail) {
+  this.getByAlias = function (alias, cb) {
+    var resource = new _resource.default(localOptions);
+    resource.getByAlias(alias, function (err, videomail) {
+      if (err) {
+        cb(err);
+      } else {
+        cb(null, container.addPlayerDimensions(videomail));
+      }
+    });
+  };
+
+  // Shim, backward compat
+  this.get = this.getByAlias;
+  this.getByKey = function (key, cb) {
+    var resource = new _resource.default(localOptions);
+    resource.getByKey(key, function (err, videomail) {
       if (err) {
         cb(err);
       } else {
@@ -17697,8 +17711,6 @@ var _default = exports.default = {
   // leave as it, permanent websocket url to send frames
   siteName: "videomail-client-demo",
   // Required for API, use https://videomail.io/whitelist
-  cache: true,
-  // reduces GET queries when loading videos
   insertCss: true,
   // inserts predefined CSS, see examples
   enablePause: true,
@@ -17763,8 +17775,6 @@ var _default = exports.default = {
     // the form checkbox name for sending myself a copy
 
     keyInputName: "videomail_key",
-    parentKeyInputName: "videomail_parent_key",
-    aliasInputName: "videomail_alias",
     formId: null,
     // automatically detects form if any
     submitButtonId: null,
@@ -17892,10 +17902,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = _default;
 var _superagent = _interopRequireDefault(_dereq_("superagent"));
 var _constants = _interopRequireDefault(_dereq_("./constants"));
-var CACHE_KEY = "alias";
 var timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
 function _default(options) {
-  var cache = {};
   function applyDefaultValue(videomail, name) {
     if (options.defaults[name] && !videomail[name]) {
       videomail[name] = options.defaults[name];
@@ -17923,8 +17931,8 @@ function _default(options) {
     }
     return err;
   }
-  function fetch(alias, cb) {
-    var url = "".concat(options.baseUrl, "/videomail/").concat(alias, "/snapshot");
+  function fetch(identifierName, identifierValue, cb) {
+    var url = "".concat(options.baseUrl, "/videomail/").concat(identifierName, "/").concat(identifierValue, "/snapshot");
     var request = (0, _superagent.default)("get", url);
     request.set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
       err = packError(err, res);
@@ -17932,9 +17940,6 @@ function _default(options) {
         cb(err);
       } else {
         var videomail = res.body ? res.body : null;
-        if (options.cache) {
-          cache[CACHE_KEY] = videomail;
-        }
         cb(null, videomail);
       }
     });
@@ -17957,22 +17962,15 @@ function _default(options) {
         cb(err);
       } else {
         var returnedVideomail = res.body && res.body.videomail ? res.body.videomail : null;
-        if (options.cache && videomail[CACHE_KEY]) {
-          cache[videomail[CACHE_KEY]] = returnedVideomail;
-        }
         cb(null, returnedVideomail, res.body);
       }
     });
   }
-  this.get = function (alias, cb) {
-    if (options.cache && cache[alias]) {
-      // keep all callbacks async
-      setTimeout(function () {
-        cb(null, cache[alias]);
-      }, 0);
-    } else {
-      fetch(alias, cb);
-    }
+  this.getByAlias = function (alias, cb) {
+    fetch("alias", alias, cb);
+  };
+  this.getByKey = function (key, cb) {
+    fetch("key", key, cb);
   };
   this.reportError = function (err, cb) {
     var queryParams = {};
@@ -19953,8 +19951,6 @@ var Container = function Container(options) {
 
     // can be missing when no videomail was recorded and is not required
     if (videomailResponse) {
-      formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias;
-
       /*
        * this in case if user wants all videomail metadata to be posted
        * altogether with the remaining form
@@ -20204,7 +20200,7 @@ var Container = function Container(options) {
         if (valid) {
           if (!areVisualsHidden() && !visualsValid) {
             // TODO Improve this check to have this based on `key`
-            if (submitted || buttonsAreReady() || self.isRecording() || self.isPaused() || self.isCountingDown()) {
+            if (buttonsAreReady() || self.isRecording() || self.isPaused() || self.isCountingDown()) {
               valid = false;
             }
             if (!valid) {
@@ -20301,7 +20297,7 @@ var Container = function Container(options) {
     return method && method.toUpperCase() === "PUT";
   }
   this.submitAll = function (formData, method, url) {
-    debug("Container: submitAll(".concat(method, " ").concat(url, ")"));
+    debug("Container: submitAll(".concat(method, ": ").concat(url, ")"));
     var post = isPost(method);
     var hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
     function startSubmission() {
@@ -20557,7 +20553,6 @@ var Form = function Form(container, formElement, options) {
       bcc: options.selectors.bccInputName,
       body: options.selectors.bodyInputName,
       key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
       sendCopy: options.selectors.sendCopyInputName
     };
     var transformedFormData = {};

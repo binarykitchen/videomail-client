@@ -9,7 +9,6 @@ export default {
   baseUrl: "https://videomail.io", // leave as it, permanent API url to post videos
   socketUrl: "wss://videomail.io", // leave as it, permanent websocket url to send frames
   siteName: "videomail-client-demo", // Required for API, use https://videomail.io/whitelist
-  cache: true, // reduces GET queries when loading videos
   insertCss: true, // inserts predefined CSS, see examples
   enablePause: true, // enable pause/resume button
   enableAutoPause: true, // automatically pauses when window becomes inactive

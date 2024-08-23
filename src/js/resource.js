@@ -2,12 +2,9 @@ import superagent from "superagent";
 
 import Constants from "./constants";
 
-const CACHE_KEY = "alias";
 const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export default function (options) {
-  const cache = {};
-
   function applyDefaultValue(videomail, name) {
     if (options.defaults[name] && !videomail[name]) {
       videomail[name] = options.defaults[name];
@@ -42,8 +39,8 @@ export default function (options) {
     return err;
   }
 
-  function fetch(alias, cb) {
-    const url = `${options.baseUrl}/videomail/${alias}/snapshot`;
+  function fetch(identifierName, identifierValue, cb) {
+    const url = `${options.baseUrl}/videomail/${identifierName}/${identifierValue}/snapshot`;
     const request = superagent("get", url);
 
     request
@@ -58,11 +55,6 @@ export default function (options) {
           cb(err);
         } else {
           const videomail = res.body ? res.body : null;
-
-          if (options.cache) {
-            cache[CACHE_KEY] = videomail;
-          }
-
           cb(null, videomail);
         }
       });
@@ -100,24 +92,17 @@ export default function (options) {
           const returnedVideomail =
             res.body && res.body.videomail ? res.body.videomail : null;
 
-          if (options.cache && videomail[CACHE_KEY]) {
-            cache[videomail[CACHE_KEY]] = returnedVideomail;
-          }
-
           cb(null, returnedVideomail, res.body);
         }
       });
   }
 
-  this.get = function (alias, cb) {
-    if (options.cache && cache[alias]) {
-      // keep all callbacks async
-      setTimeout(() => {
-        cb(null, cache[alias]);
-      }, 0);
-    } else {
-      fetch(alias, cb);
-    }
+  this.getByAlias = function (alias, cb) {
+    fetch("alias", alias, cb);
+  };
+
+  this.getByKey = function (key, cb) {
+    fetch("key", key, cb);
   };
 
   this.reportError = function (err, cb) {
