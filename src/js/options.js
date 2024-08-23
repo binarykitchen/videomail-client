@@ -58,7 +58,6 @@ export default {
     sendCopyInputName: "sendCopy", // the form checkbox name for sending myself a copy
 
     keyInputName: "videomail_key",
-    parentKeyInputName: "videomail_parent_key",
     aliasInputName: "videomail_alias",
 
     formId: null, // automatically detects form if any
