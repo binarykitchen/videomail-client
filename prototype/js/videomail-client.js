@@ -17775,6 +17775,7 @@ var _default = exports.default = {
     // the form checkbox name for sending myself a copy
 
     keyInputName: "videomail_key",
+    parentKeyInputName: "videomail_parent_key",
     formId: null,
     // automatically detects form if any
     submitButtonId: null,
@@ -20553,6 +20554,7 @@ var Form = function Form(container, formElement, options) {
       bcc: options.selectors.bccInputName,
       body: options.selectors.bodyInputName,
       key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
       sendCopy: options.selectors.sendCopyInputName
     };
     var transformedFormData = {};
