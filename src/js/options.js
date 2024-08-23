@@ -9,7 +9,6 @@ export default {
   baseUrl: "https://videomail.io", // leave as it, permanent API url to post videos
   socketUrl: "wss://videomail.io", // leave as it, permanent websocket url to send frames
   siteName: "videomail-client-demo", // Required for API, use https://videomail.io/whitelist
-  cache: true, // reduces GET queries when loading videos
   insertCss: true, // inserts predefined CSS, see examples
   enablePause: true, // enable pause/resume button
   enableAutoPause: true, // automatically pauses when window becomes inactive
@@ -58,8 +57,6 @@ export default {
     sendCopyInputName: "sendCopy", // the form checkbox name for sending myself a copy
 
     keyInputName: "videomail_key",
-    parentKeyInputName: "videomail_parent_key",
-    aliasInputName: "videomail_alias",
 
     formId: null, // automatically detects form if any
     submitButtonId: null, // semi-automatically detects submit button in the form

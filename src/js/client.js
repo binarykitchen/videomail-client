@@ -143,8 +143,25 @@ const VideomailClient = function (options) {
     container.hide();
   };
 
-  this.get = function (alias, cb) {
-    new Resource(localOptions).get(alias, function (err, videomail) {
+  this.getByAlias = function (alias, cb) {
+    const resource = new Resource(localOptions);
+
+    resource.getByAlias(alias, function (err, videomail) {
+      if (err) {
+        cb(err);
+      } else {
+        cb(null, container.addPlayerDimensions(videomail));
+      }
+    });
+  };
+
+  // Shim, backward compat
+  this.get = this.getByAlias;
+
+  this.getByKey = function (key, cb) {
+    const resource = new Resource(localOptions);
+
+    resource.getByKey(key, function (err, videomail) {
       if (err) {
         cb(err);
       } else {

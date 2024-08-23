@@ -280,8 +280,6 @@ const Container = function (options) {
 
     // can be missing when no videomail was recorded and is not required
     if (videomailResponse) {
-      formData[options.selectors.aliasInputName] = videomailResponse.videomail.alias;
-
       /*
        * this in case if user wants all videomail metadata to be posted
        * altogether with the remaining form
@@ -589,7 +587,6 @@ const Container = function (options) {
           if (!areVisualsHidden() && !visualsValid) {
             // TODO Improve this check to have this based on `key`
             if (
-              submitted ||
               buttonsAreReady() ||
               self.isRecording() ||
               self.isPaused() ||
@@ -705,7 +702,7 @@ const Container = function (options) {
   }
 
   this.submitAll = function (formData, method, url) {
-    debug(`Container: submitAll(${method} ${url})`);
+    debug(`Container: submitAll(${method}: ${url})`);
 
     const post = isPost(method);
     const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);

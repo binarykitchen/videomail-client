@@ -35,7 +35,6 @@ const Form = function (container, formElement, options) {
       bcc: options.selectors.bccInputName,
       body: options.selectors.bodyInputName,
       key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
       sendCopy: options.selectors.sendCopyInputName,
     };
 
