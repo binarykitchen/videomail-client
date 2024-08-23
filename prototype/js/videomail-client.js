@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.0",
+  "version": "9.2.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17775,6 +17775,7 @@ var _default = exports.default = {
     // the form checkbox name for sending myself a copy
 
     keyInputName: "videomail_key",
+    parentKeyInputName: "videomail_parent_key",
     formId: null,
     // automatically detects form if any
     submitButtonId: null,
@@ -20553,6 +20554,7 @@ var Form = function Form(container, formElement, options) {
       bcc: options.selectors.bccInputName,
       body: options.selectors.bodyInputName,
       key: options.selectors.keyInputName,
+      parentKey: options.selectors.parentKeyInputName,
       sendCopy: options.selectors.sendCopyInputName
     };
     var transformedFormData = {};
