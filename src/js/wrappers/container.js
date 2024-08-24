@@ -323,6 +323,10 @@ const Container = function (options) {
 
   this.addPlayerDimensions = function (videomail, element) {
     try {
+      if (!videomail) {
+        throw new Error("Videomail data is missing for attaching player dimensions");
+      }
+
       videomail.playerHeight = self.calculateHeight(
         {
           responsive: true,

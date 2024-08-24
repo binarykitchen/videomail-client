@@ -44,15 +44,15 @@ export default function (options) {
     const request = superagent("get", url);
 
     request
+      .type("json")
       .set("Accept", "application/json")
       .set("Timezone-Id", timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
       .timeout(options.timeouts.connection)
       .end(function (err, res) {
-        err = packError(err, res);
-
         if (err) {
-          cb(err);
+          const prettyError = packError(err, res);
+          cb(prettyError);
         } else {
           const videomail = res.body ? res.body : null;
           cb(null, videomail);
@@ -84,10 +84,9 @@ export default function (options) {
       .send(videomail)
       .timeout(options.timeout)
       .end(function (err, res) {
-        err = packError(err, res);
-
         if (err) {
-          cb(err);
+          const prettyError = packError(err, res);
+          cb(prettyError);
         } else {
           const returnedVideomail =
             res.body && res.body.videomail ? res.body.videomail : null;
@@ -117,9 +116,9 @@ export default function (options) {
       .send(err)
       .timeout(options.timeout)
       .end(function (err, res) {
-        err = packError(err, res);
         if (err) {
-          cb && cb(err);
+          const prettyError = packError(err, res);
+          cb && cb(prettyError);
         } else {
           cb && cb();
         }
@@ -180,10 +179,9 @@ export default function (options) {
         .send(formData)
         .timeout(options.timeout)
         .end(function (err, res) {
-          err = packError(err, res);
-
           if (err) {
-            cb(err);
+            const prettyError = packError(err, res);
+            cb(prettyError);
           } else {
             cb(null, res);
           }
