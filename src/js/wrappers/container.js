@@ -212,7 +212,7 @@ const Container = function (options) {
   function correctDimensions() {
     if (options.video.stretch) {
       removeDimensions();
-    } else {
+    } else if (containerElement) {
       const width = visuals.getRecorderWidth(true);
 
       if (width < 1) {
@@ -224,6 +224,10 @@ const Container = function (options) {
   }
 
   function removeDimensions() {
+    if (!containerElement) {
+      return;
+    }
+
     containerElement.style.width = "auto";
   }
 

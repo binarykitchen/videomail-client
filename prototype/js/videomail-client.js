@@ -17471,9 +17471,6 @@ var VideomailClient = function VideomailClient(options) {
     if (!container.isBuilt()) {
       container.build(true, replayParentElement);
     }
-    if (!container.hasElement()) {
-      throw new Error("Unable to replay video without a container nor parent element.");
-    }
     if (videomail) {
       videomail = container.addPlayerDimensions(videomail);
     }
@@ -19887,7 +19884,7 @@ var Container = function Container(options) {
   function correctDimensions() {
     if (options.video.stretch) {
       removeDimensions();
-    } else {
+    } else if (containerElement) {
       var width = visuals.getRecorderWidth(true);
       if (width < 1) {
         throw _videomailError.default.create("Recorder width cannot be less than 1!", options);
@@ -19897,6 +19894,9 @@ var Container = function Container(options) {
     }
   }
   function removeDimensions() {
+    if (!containerElement) {
+      return;
+    }
     containerElement.style.width = "auto";
   }
   function unloadChildren(e) {
