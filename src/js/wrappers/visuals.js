@@ -128,7 +128,7 @@ const Visuals = function (container, options) {
   };
 
   this.build = function (playerOnly = false, replayParentElement) {
-    if (container) {
+    if (container && !playerOnly) {
       visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
       if (!visualsElement) {
@@ -139,7 +139,7 @@ const Visuals = function (container, options) {
         );
 
         /*
-         * make sure it's placed before the buttons, but only if it's a child
+         * Make sure it's placed before the buttons, but only if it's a child
          * element of the container = inside the container
          */
         if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
@@ -150,7 +150,7 @@ const Visuals = function (container, options) {
       }
 
       /*
-       * do not hide visuals element so that apps can give it a predefined
+       * Do not hide visuals element so that apps can give it a predefined
        * width or height through css but hide all children
        */
       visualsElement.classList.add("visuals");

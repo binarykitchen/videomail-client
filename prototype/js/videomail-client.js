@@ -20988,14 +20988,14 @@ var Visuals = function Visuals(container, options) {
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
-    if (container) {
+    if (container && !playerOnly) {
       visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
       if (!visualsElement) {
         visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
         var buttonsElement = container.querySelector(".".concat(options.selectors.buttonsClass));
 
         /*
-         * make sure it's placed before the buttons, but only if it's a child
+         * Make sure it's placed before the buttons, but only if it's a child
          * element of the container = inside the container
          */
         if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
@@ -21006,7 +21006,7 @@ var Visuals = function Visuals(container, options) {
       }
 
       /*
-       * do not hide visuals element so that apps can give it a predefined
+       * Do not hide visuals element so that apps can give it a predefined
        * width or height through css but hide all children
        */
       visualsElement.classList.add("visuals");
