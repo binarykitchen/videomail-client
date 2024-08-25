@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.7",
+  "version": "9.2.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19810,6 +19810,10 @@ var Container = function Container(options) {
 
   // since https://github.com/binarykitchen/videomail-client/issues/87
   function findParentFormElement() {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
     return containerElement.closest("form");
   }
   function getFormElement() {
@@ -20122,6 +20126,10 @@ var Container = function Container(options) {
     return buttons.getSubmitButton();
   };
   this.querySelector = function (selector) {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
     return containerElement.querySelector(selector);
   };
   this.beginWaiting = function () {
