@@ -7,7 +7,6 @@ import enableInlineVideo from "iphone-inline-video";
 import Events from "../../events";
 import Browser from "../../util/browser";
 import EventEmitter from "../../util/eventEmitter";
-import VideomailError from "../../util/videomailError";
 
 const Replay = function (parentElement, options) {
   EventEmitter.call(this, options, "Replay");
@@ -23,12 +22,14 @@ const Replay = function (parentElement, options) {
   function buildElement(replayParentElement = parentElement) {
     replayElement = h(`video.${options.selectors.replayClass}`);
 
-    if (!replayElement.setAttribute) {
-      throw VideomailError.create("Please upgrade browser", options);
-    }
-
     if (typeof replayParentElement === "string") {
       replayParentElement = document.getElementById(replayParentElement);
+
+      if (!replayParentElement) {
+        throw new Error(
+          `No replay parent element container with ID ${replayParentElement} found.`,
+        );
+      }
     }
 
     replayParentElement.appendChild(replayElement);
@@ -229,6 +230,13 @@ const Replay = function (parentElement, options) {
   };
 
   this.unload = function () {
+    debug("Replay: unload()");
+
+    replayElement.remove();
+
+    replayElement = undefined;
+    videomail = undefined;
+
     built = false;
   };
 

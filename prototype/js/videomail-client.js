@@ -20996,7 +20996,7 @@ var Visuals = function Visuals(container, options) {
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
-    if (container && !playerOnly) {
+    if (container) {
       visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
       if (!visualsElement) {
         visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
@@ -23111,7 +23111,6 @@ var _iphoneInlineVideo = _interopRequireDefault(_dereq_("iphone-inline-video"));
 var _events = _interopRequireDefault(_dereq_("../../events"));
 var _browser = _interopRequireDefault(_dereq_("../../util/browser"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../../util/eventEmitter"));
-var _videomailError = _interopRequireDefault(_dereq_("../../util/videomailError"));
 var Replay = function Replay(parentElement, options) {
   _eventEmitter.default.call(this, options, "Replay");
   var self = this;
@@ -23123,11 +23122,11 @@ var Replay = function Replay(parentElement, options) {
   function buildElement() {
     var replayParentElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : parentElement;
     replayElement = (0, _hyperscript.default)("video.".concat(options.selectors.replayClass));
-    if (!replayElement.setAttribute) {
-      throw _videomailError.default.create("Please upgrade browser", options);
-    }
     if (typeof replayParentElement === "string") {
       replayParentElement = document.getElementById(replayParentElement);
+      if (!replayParentElement) {
+        throw new Error("No replay parent element container with ID ".concat(replayParentElement, " found."));
+      }
     }
     replayParentElement.appendChild(replayElement);
   }
@@ -23292,6 +23291,10 @@ var Replay = function Replay(parentElement, options) {
     debug("Replay: built.");
   };
   this.unload = function () {
+    debug("Replay: unload()");
+    replayElement.remove();
+    replayElement = undefined;
+    videomail = undefined;
     built = false;
   };
   this.getVideoSource = function (type) {
@@ -23408,7 +23411,7 @@ var Replay = function Replay(parentElement, options) {
 (0, _inherits.default)(Replay, _eventEmitter.default);
 var _default = exports.default = Replay;
 
-},{"../../events":119,"../../util/browser":124,"../../util/eventEmitter":126,"../../util/videomailError":131,"@babel/runtime/helpers/interopRequireDefault":4,"add-eventlistener-with-options":12,"hidden":61,"hyperscript":63,"inherits":66,"iphone-inline-video":69}],147:[function(_dereq_,module,exports){
+},{"../../events":119,"../../util/browser":124,"../../util/eventEmitter":126,"@babel/runtime/helpers/interopRequireDefault":4,"add-eventlistener-with-options":12,"hidden":61,"hyperscript":63,"inherits":66,"iphone-inline-video":69}],147:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
