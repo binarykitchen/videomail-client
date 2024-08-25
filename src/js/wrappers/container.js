@@ -41,6 +41,11 @@ const Container = function (options) {
 
   // since https://github.com/binarykitchen/videomail-client/issues/87
   function findParentFormElement() {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
+
     return containerElement.closest("form");
   }
 
@@ -424,6 +429,11 @@ const Container = function (options) {
   };
 
   this.querySelector = function (selector) {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
+
     return containerElement.querySelector(selector);
   };
 
