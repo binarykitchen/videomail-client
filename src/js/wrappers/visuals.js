@@ -31,7 +31,7 @@ const Visuals = function (container, options) {
   function buildNoScriptTag() {
     let noScriptElement = container.querySelector("noscript");
 
-    if (!noScriptElement) {
+    if (noScriptElement) {
       noScriptElement = h("noscript");
       noScriptElement.innerHTML = "Please enable Javascript";
 

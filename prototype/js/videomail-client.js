@@ -20917,7 +20917,7 @@ var Visuals = function Visuals(container, options) {
   var built;
   function buildNoScriptTag() {
     var noScriptElement = container.querySelector("noscript");
-    if (!noScriptElement) {
+    if (noScriptElement) {
       noScriptElement = (0, _hyperscript.default)("noscript");
       noScriptElement.innerHTML = "Please enable Javascript";
       visualsElement.appendChild(noScriptElement);
