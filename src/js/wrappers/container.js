@@ -39,10 +39,6 @@ const Container = function (options) {
 
   validateOptions();
 
-  function prependDefaultCss() {
-    insertCss(css, { prepend: true });
-  }
-
   // since https://github.com/binarykitchen/videomail-client/issues/87
   function findParentFormElement() {
     return containerElement.closest("form");
@@ -390,43 +386,37 @@ const Container = function (options) {
     return Boolean(containerElement);
   };
 
+  function prependDefaultCss() {
+    insertCss(css, { prepend: true });
+  }
+
   this.build = function (playerOnly = false, replayParentElement) {
     debug(
       `Container: build (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
     );
 
     try {
+      options.insertCss && prependDefaultCss();
+
+      // Note, it can be undefined when e.g. just replaying a videomail
       containerElement = document.getElementById(options.selectors.containerId);
 
-      /*
-       * Only build when a container element hast been found,
-       * otherwise be silent and do nothing
-       */
-      if (containerElement) {
-        options.insertCss && prependDefaultCss();
+      !built && initEvents(playerOnly);
 
-        !built && initEvents(playerOnly);
+      correctDimensions();
 
-        correctDimensions();
+      // Building form also applies for when `playerOnly` because of
+      // correcting mode on Videomail. This function will skip if there is no form. Easy.
+      self.buildForm();
 
-        // Building form also applies for when `playerOnly` because of
-        // correcting mode on Videomail. This function will skip if there is no form. Easy.
-        self.buildForm();
+      buildChildren(playerOnly, replayParentElement);
 
-        buildChildren(playerOnly, replayParentElement);
-
-        if (!hasError) {
-          debug("Container: built.");
-          built = true;
-          self.emit(Events.BUILT);
-        } else {
-          debug("Container: building failed due to an error.");
-        }
+      if (!hasError) {
+        debug("Container: built.");
+        built = true;
+        self.emit(Events.BUILT);
       } else {
-        /*
-         * Commented out since it does too much noise on videomail's view page which is fine
-         * debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
-         */
+        debug("Container: building failed due to an error.");
       }
     } catch (exc) {
       self.emit(Events.ERROR, exc);
