@@ -26,14 +26,31 @@ export default function (options) {
     return videomail;
   }
 
+  function setProperty(packedError, property, value) {
+    Object.defineProperty(packedError, property, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+  }
+
   function packError(err, res) {
     if (res && res.body && res.body.error) {
-      // use the server generated text instead of the superagent's default text
-      err = res.body.error;
+      const originalError = res.body.error;
 
-      if (!err.message && res.text) {
-        err.message = res.text;
-      }
+      const packedError = new Error();
+
+      setProperty(packedError, "name", originalError.name);
+      setProperty(packedError, "message", originalError.message || res.statusText);
+      setProperty(packedError, "cause", originalError.cause);
+      setProperty(packedError, "status", originalError.status);
+      setProperty(packedError, "code", originalError.code);
+      setProperty(packedError, "errno", originalError.errno);
+      setProperty(packedError, "details", originalError.details);
+      setProperty(packedError, "stack", originalError.stack);
+
+      return packedError;
     }
 
     return err;
@@ -44,15 +61,15 @@ export default function (options) {
     const request = superagent("get", url);
 
     request
+      .type("json")
       .set("Accept", "application/json")
       .set("Timezone-Id", timezoneId)
       .set(Constants.SITE_NAME_LABEL, options.siteName)
       .timeout(options.timeouts.connection)
       .end(function (err, res) {
-        err = packError(err, res);
-
         if (err) {
-          cb(err);
+          const prettyError = packError(err, res);
+          cb(prettyError);
         } else {
           const videomail = res.body ? res.body : null;
           cb(null, videomail);
@@ -84,10 +101,9 @@ export default function (options) {
       .send(videomail)
       .timeout(options.timeout)
       .end(function (err, res) {
-        err = packError(err, res);
-
         if (err) {
-          cb(err);
+          const prettyError = packError(err, res);
+          cb(prettyError);
         } else {
           const returnedVideomail =
             res.body && res.body.videomail ? res.body.videomail : null;
@@ -117,9 +133,9 @@ export default function (options) {
       .send(err)
       .timeout(options.timeout)
       .end(function (err, res) {
-        err = packError(err, res);
         if (err) {
-          cb && cb(err);
+          const prettyError = packError(err, res);
+          cb && cb(prettyError);
         } else {
           cb && cb();
         }
@@ -180,10 +196,9 @@ export default function (options) {
         .send(formData)
         .timeout(options.timeout)
         .end(function (err, res) {
-          err = packError(err, res);
-
           if (err) {
-            cb(err);
+            const prettyError = packError(err, res);
+            cb(prettyError);
           } else {
             cb(null, res);
           }

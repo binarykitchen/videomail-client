@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.1",
+  "version": "9.2.2",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17379,7 +17379,7 @@ module.exports={
     "prettier": "3.3.3",
     "prettier-plugin-curly": "0.2.2",
     "prettier-plugin-organize-imports": "4.0.0",
-    "prettier-plugin-packagejson": "2.5.1",
+    "prettier-plugin-packagejson": "2.5.2",
     "prettier-plugin-sh": "0.14.0",
     "router": "1.3.8",
     "tape": "5.8.1",
@@ -17922,23 +17922,37 @@ function _default(options) {
     }
     return videomail;
   }
+  function setProperty(packedError, property, value) {
+    Object.defineProperty(packedError, property, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  }
   function packError(err, res) {
     if (res && res.body && res.body.error) {
-      // use the server generated text instead of the superagent's default text
-      err = res.body.error;
-      if (!err.message && res.text) {
-        err.message = res.text;
-      }
+      var originalError = res.body.error;
+      var packedError = new Error();
+      setProperty(packedError, "name", originalError.name);
+      setProperty(packedError, "message", originalError.message || res.statusText);
+      setProperty(packedError, "cause", originalError.cause);
+      setProperty(packedError, "status", originalError.status);
+      setProperty(packedError, "code", originalError.code);
+      setProperty(packedError, "errno", originalError.errno);
+      setProperty(packedError, "details", originalError.details);
+      setProperty(packedError, "stack", originalError.stack);
+      return packedError;
     }
     return err;
   }
   function fetch(identifierName, identifierValue, cb) {
     var url = "".concat(options.baseUrl, "/videomail/").concat(identifierName, "/").concat(identifierValue, "/snapshot");
     var request = (0, _superagent.default)("get", url);
-    request.set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
-      err = packError(err, res);
+    request.type("json").set("Accept", "application/json").set("Timezone-Id", timezoneId).set(_constants.default.SITE_NAME_LABEL, options.siteName).timeout(options.timeouts.connection).end(function (err, res) {
       if (err) {
-        cb(err);
+        var prettyError = packError(err, res);
+        cb(prettyError);
       } else {
         var videomail = res.body ? res.body : null;
         cb(null, videomail);
@@ -17958,9 +17972,9 @@ function _default(options) {
     var request = (0, _superagent.default)(method, url);
     queryParams[_constants.default.SITE_NAME_LABEL] = options.siteName;
     request.query(queryParams).set("Timezone-Id", timezoneId).send(videomail).timeout(options.timeout).end(function (err, res) {
-      err = packError(err, res);
       if (err) {
-        cb(err);
+        var prettyError = packError(err, res);
+        cb(prettyError);
       } else {
         var returnedVideomail = res.body && res.body.videomail ? res.body.videomail : null;
         cb(null, returnedVideomail, res.body);
@@ -17979,9 +17993,9 @@ function _default(options) {
     var request = (0, _superagent.default)("post", url);
     queryParams[_constants.default.SITE_NAME_LABEL] = options.siteName;
     request.query(queryParams).send(err).timeout(options.timeout).end(function (err, res) {
-      err = packError(err, res);
       if (err) {
-        cb && cb(err);
+        var prettyError = packError(err, res);
+        cb && cb(prettyError);
       } else {
         cb && cb();
       }
@@ -18027,9 +18041,9 @@ function _default(options) {
     }
     if (formType) {
       _superagent.default.post(url).type(formType).set("Timezone-Id", timezoneId).send(formData).timeout(options.timeout).end(function (err, res) {
-        err = packError(err, res);
         if (err) {
-          cb(err);
+          var prettyError = packError(err, res);
+          cb(prettyError);
         } else {
           cb(null, res);
         }
@@ -19989,6 +20003,9 @@ var Container = function Container(options) {
   }
   this.addPlayerDimensions = function (videomail, element) {
     try {
+      if (!videomail) {
+        throw new Error("Videomail data is missing for attaching player dimensions");
+      }
       videomail.playerHeight = self.calculateHeight({
         responsive: true,
         videoWidth: videomail.width,
