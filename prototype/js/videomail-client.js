@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.12",
+  "version": "9.2.13",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17493,7 +17493,7 @@ var VideomailClient = function VideomailClient(options) {
     container.startOver(params);
   };
   this.unload = function (e) {
-    self.removeAllListeners();
+    this.removeAllListeners();
     container.unload(e);
   };
   this.hide = function () {
