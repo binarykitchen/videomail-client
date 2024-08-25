@@ -128,7 +128,7 @@ const Visuals = function (container, options) {
   };
 
   this.build = function (playerOnly = false, replayParentElement) {
-    if (container && !playerOnly) {
+    if (container) {
       visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
       if (!visualsElement) {
