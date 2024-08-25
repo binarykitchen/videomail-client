@@ -10,7 +10,6 @@ import CollectLogger from "./util/collectLogger";
 import EventEmitter from "./util/eventEmitter";
 import Container from "./wrappers/container";
 import OptionsWrapper from "./wrappers/optionsWrapper";
-import Replay from "./wrappers/visuals/replay";
 
 let collectLogger;
 let browser;
@@ -43,9 +42,8 @@ function getBrowser(localOptions) {
 const VideomailClient = function (options) {
   const localOptions = adjustOptions(options);
   const container = new Container(localOptions);
-  const { debug } = localOptions;
 
-  let replay;
+  const { debug } = localOptions;
 
   this.events = Events;
 
@@ -76,57 +74,37 @@ const VideomailClient = function (options) {
   };
 
   /*
-   * automatically adds a <video> element inside the given parentElement and loads
-   * it with the videomail
+   * Automatically adds a <video> element inside the given parentElement and
+   * loads it with the videomail
    */
-  this.replay = function (videomail, parentElement) {
-    function buildReplay() {
-      if (typeof parentElement === "string") {
-        parentElement = document.getElementById(parentElement);
-      }
-
-      if (!parentElement) {
-        if (!container.isBuilt()) {
-          // this will try build all over again
-          container.build(true);
-        }
-
-        if (!container.hasElement()) {
-          throw new Error(
-            "Unable to replay video without a container nor parent element.",
-          );
-        }
-      } else if (container.isOutsideElementOf(parentElement)) {
-        replay = new Replay(parentElement, localOptions);
-        replay.build();
-      }
-
-      if (!replay) {
-        replay = container.getReplay();
-      }
-
-      if (!parentElement) {
-        parentElement = replay.getParentElement();
-      }
-
-      if (videomail) {
-        videomail = container.addPlayerDimensions(videomail, parentElement);
-      }
-
-      container.buildForm(videomail);
-      container.loadForm(videomail);
-
-      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-      setTimeout(function () {
-        replay.setVideomail(videomail);
-        container.showReplayOnly();
-      }, 10e1); // not sure, but probably can be reduced a bit
+  this.replay = function (videomail, replayParentElement) {
+    if (!container.isBuilt()) {
+      container.build(true, replayParentElement);
     }
 
-    buildReplay();
+    if (!container.hasElement()) {
+      throw new Error("Unable to replay video without a container nor parent element.");
+    }
+
+    if (videomail) {
+      videomail = container.addPlayerDimensions(videomail);
+    }
+
+    container.buildForm();
+    container.loadForm(videomail);
+
+    // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+    setTimeout(function () {
+      const replay = container.getReplay();
+
+      replay.setVideomail(videomail);
+      container.showReplayOnly();
+    }, 50); // not sure, but probably can be reduced a bit
   };
 
   this.startOver = function (params) {
+    const replay = container.getReplay();
+
     if (replay) {
       replay.hide();
       replay.reset();

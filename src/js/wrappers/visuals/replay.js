@@ -20,16 +20,18 @@ const Replay = function (parentElement, options) {
   let replayElement;
   let videomail;
 
-  function buildElement() {
-    debug("Replay: buildElement()");
-
+  function buildElement(replayParentElement = parentElement) {
     replayElement = h(`video.${options.selectors.replayClass}`);
 
     if (!replayElement.setAttribute) {
       throw VideomailError.create("Please upgrade browser", options);
     }
 
-    parentElement.appendChild(replayElement);
+    if (typeof replayParentElement === "string") {
+      replayParentElement = document.getElementById(replayParentElement);
+    }
+
+    replayParentElement.appendChild(replayElement);
   }
 
   function isStandalone() {
@@ -161,13 +163,15 @@ const Replay = function (parentElement, options) {
     }
   };
 
-  this.build = function () {
-    debug("Replay: build()");
+  this.build = function (replayParentElement) {
+    debug(
+      `Replay: build (${replayParentElement ? `replayParentElement="${replayParentElement}"` : ""})`,
+    );
 
     replayElement = parentElement.querySelector(`video.${options.selectors.replayClass}`);
 
     if (!replayElement) {
-      buildElement();
+      buildElement(replayParentElement);
     }
 
     this.hide();
