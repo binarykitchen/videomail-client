@@ -233,6 +233,8 @@ const Visuals = function (container, options) {
 
       debug(`Visuals: unload(${e ? stringify(e) : ""})`);
 
+      self.removeAllListeners();
+
       recorder.unload(e);
       recorderInsides.unload(e);
       replay.unload();
@@ -350,9 +352,10 @@ const Visuals = function (container, options) {
   };
 
   this.showReplayOnly = function () {
-    !this.isReplayShown() && replay.show();
+    replay.show();
 
     this.show();
+
     recorder.hide();
     notifier.hide();
   };

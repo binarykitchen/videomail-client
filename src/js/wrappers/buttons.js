@@ -659,6 +659,8 @@ const Buttons = function (container, options) {
     if (built) {
       debug("Buttons: unload()");
 
+      self.removeAllListeners();
+
       built = false;
     }
   };
