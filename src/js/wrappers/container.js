@@ -89,7 +89,7 @@ const Container = function (options) {
     );
 
     if (containerElement) {
-      containerElement.classList.add("videomail");
+      containerElement.classList.add(options.selectors.containerClass);
     }
 
     if (!playerOnly) {
@@ -402,6 +402,19 @@ const Container = function (options) {
       // Note, it can be undefined when e.g. just replaying a videomail
       containerElement = document.getElementById(options.selectors.containerId);
 
+      // Check if the replayParentElement could act as the container element perhaps?
+      if (!containerElement && replayParentElement) {
+        if (typeof replayParentElement === "string") {
+          replayParentElement = document.getElementById(replayParentElement);
+        }
+
+        if (
+          replayParentElement?.classList.contains(options.selectors.containerCssClass)
+        ) {
+          containerElement = replayParentElement;
+        }
+      }
+
       !built && initEvents(playerOnly);
 
       correctDimensions();
@@ -410,7 +423,8 @@ const Container = function (options) {
       // correcting mode on Videomail. This function will skip if there is no form. Easy.
       self.buildForm();
 
-      buildChildren(playerOnly, replayParentElement);
+      // If a container element has been found, no need to pass on replayParentElement further
+      buildChildren(playerOnly, containerElement ? undefined : replayParentElement);
 
       if (!hasError) {
         debug("Container: built.");
@@ -446,10 +460,20 @@ const Container = function (options) {
   };
 
   this.appendChild = function (child) {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
+
     containerElement.appendChild(child);
   };
 
   this.insertBefore = function (child, reference) {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
+
     containerElement.insertBefore(child, reference);
   };
 

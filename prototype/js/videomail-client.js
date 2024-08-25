@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.10",
+  "version": "9.2.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17728,6 +17728,7 @@ var options = {
   // default CSS selectors you can alter, see examples
   selectors: {
     containerId: "videomail",
+    containerClass: "videomail",
     replayClass: "replay",
     userMediaClass: "userMedia",
     visualsClass: "visuals",
@@ -19846,7 +19847,7 @@ var Container = function Container(options) {
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
     debug("Container: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
     if (containerElement) {
-      containerElement.classList.add("videomail");
+      containerElement.classList.add(options.selectors.containerClass);
     }
     if (!playerOnly) {
       buttons.build();
@@ -20104,13 +20105,26 @@ var Container = function Container(options) {
 
       // Note, it can be undefined when e.g. just replaying a videomail
       containerElement = document.getElementById(options.selectors.containerId);
+
+      // Check if the replayParentElement could act as the container element perhaps?
+      if (!containerElement && replayParentElement) {
+        var _replayParentElement;
+        if (typeof replayParentElement === "string") {
+          replayParentElement = document.getElementById(replayParentElement);
+        }
+        if ((_replayParentElement = replayParentElement) !== null && _replayParentElement !== void 0 && _replayParentElement.classList.contains(options.selectors.containerCssClass)) {
+          containerElement = replayParentElement;
+        }
+      }
       !built && initEvents(playerOnly);
       correctDimensions();
 
       // Building form also applies for when `playerOnly` because of
       // correcting mode on Videomail. This function will skip if there is no form. Easy.
       self.buildForm();
-      buildChildren(playerOnly, replayParentElement);
+
+      // If a container element has been found, no need to pass on replayParentElement further
+      buildChildren(playerOnly, containerElement ? undefined : replayParentElement);
       if (!hasError) {
         debug("Container: built.");
         built = true;
@@ -20139,9 +20153,17 @@ var Container = function Container(options) {
     htmlElement.classList && htmlElement.classList.remove("wait");
   };
   this.appendChild = function (child) {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
     containerElement.appendChild(child);
   };
   this.insertBefore = function (child, reference) {
+    if (!containerElement) {
+      // Must be in player only mode
+      return;
+    }
     containerElement.insertBefore(child, reference);
   };
   this.unload = function (e) {
