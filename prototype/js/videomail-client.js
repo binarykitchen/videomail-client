@@ -19749,11 +19749,6 @@ var Container = function Container(options) {
   var built;
   var form;
   validateOptions();
-  function prependDefaultCss() {
-    (0, _insertCss.default)(_mainMinCss.default, {
-      prepend: true
-    });
-  }
 
   // since https://github.com/binarykitchen/videomail-client/issues/87
   function findParentFormElement() {
@@ -20032,38 +20027,33 @@ var Container = function Container(options) {
   this.hasElement = function () {
     return Boolean(containerElement);
   };
+  function prependDefaultCss() {
+    (0, _insertCss.default)(_mainMinCss.default, {
+      prepend: true
+    });
+  }
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
     debug("Container: build (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
     try {
+      options.insertCss && prependDefaultCss();
+
+      // Note, it can be undefined when e.g. just replaying a videomail
       containerElement = document.getElementById(options.selectors.containerId);
+      !built && initEvents(playerOnly);
+      correctDimensions();
 
-      /*
-       * Only build when a container element hast been found,
-       * otherwise be silent and do nothing
-       */
-      if (containerElement) {
-        options.insertCss && prependDefaultCss();
-        !built && initEvents(playerOnly);
-        correctDimensions();
-
-        // Building form also applies for when `playerOnly` because of
-        // correcting mode on Videomail. This function will skip if there is no form. Easy.
-        self.buildForm();
-        buildChildren(playerOnly, replayParentElement);
-        if (!hasError) {
-          debug("Container: built.");
-          built = true;
-          self.emit(_events.default.BUILT);
-        } else {
-          debug("Container: building failed due to an error.");
-        }
+      // Building form also applies for when `playerOnly` because of
+      // correcting mode on Videomail. This function will skip if there is no form. Easy.
+      self.buildForm();
+      buildChildren(playerOnly, replayParentElement);
+      if (!hasError) {
+        debug("Container: built.");
+        built = true;
+        self.emit(_events.default.BUILT);
       } else {
-        /*
-         * Commented out since it does too much noise on videomail's view page which is fine
-         * debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
-         */
+        debug("Container: building failed due to an error.");
       }
     } catch (exc) {
       self.emit(_events.default.ERROR, exc);
