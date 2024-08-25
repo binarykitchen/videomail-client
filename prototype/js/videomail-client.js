@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.8",
+  "version": "9.2.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -20917,7 +20917,7 @@ var Visuals = function Visuals(container, options) {
   var built;
   function buildNoScriptTag() {
     var noScriptElement = container.querySelector("noscript");
-    if (!noScriptElement) {
+    if (noScriptElement) {
       noScriptElement = (0, _hyperscript.default)("noscript");
       noScriptElement.innerHTML = "Please enable Javascript";
       visualsElement.appendChild(noScriptElement);
