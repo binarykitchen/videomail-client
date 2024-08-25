@@ -36,6 +36,7 @@ const options = {
   // default CSS selectors you can alter, see examples
   selectors: {
     containerId: "videomail",
+    containerClass: "videomail",
     replayClass: "replay",
     userMediaClass: "userMedia",
     visualsClass: "visuals",
