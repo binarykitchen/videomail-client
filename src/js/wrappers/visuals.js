@@ -95,7 +95,7 @@ const Visuals = function (container, options) {
   function correctDimensions() {
     if (options.video.stretch) {
       removeDimensions();
-    } else if (visualsElement) {
+    } else if (visualsElement && recorder) {
       visualsElement.style.width = `${self.getRecorderWidth(true)}px`;
       visualsElement.style.height = `${self.getRecorderHeight(true)}px`;
     }

@@ -241,6 +241,10 @@ const Replay = function (parentElement, options) {
   };
 
   this.getVideoSource = function (type) {
+    if (!replayElement) {
+      return;
+    }
+
     const sources = replayElement.getElementsByTagName("source");
     const l = sources && sources.length;
     const videoType = `video/${type}`;

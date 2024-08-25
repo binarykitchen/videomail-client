@@ -20112,7 +20112,7 @@ var Container = function Container(options) {
         if (typeof replayParentElement === "string") {
           replayParentElement = document.getElementById(replayParentElement);
         }
-        if ((_replayParentElement = replayParentElement) !== null && _replayParentElement !== void 0 && _replayParentElement.classList.contains(options.selectors.containerCssClass)) {
+        if ((_replayParentElement = replayParentElement) !== null && _replayParentElement !== void 0 && _replayParentElement.classList.contains(options.selectors.containerClass)) {
           containerElement = replayParentElement;
         }
       }
@@ -20990,7 +20990,7 @@ var Visuals = function Visuals(container, options) {
   function correctDimensions() {
     if (options.video.stretch) {
       removeDimensions();
-    } else if (visualsElement) {
+    } else if (visualsElement && recorder) {
       visualsElement.style.width = "".concat(self.getRecorderWidth(true), "px");
       visualsElement.style.height = "".concat(self.getRecorderHeight(true), "px");
     }
@@ -23320,6 +23320,9 @@ var Replay = function Replay(parentElement, options) {
     built = false;
   };
   this.getVideoSource = function (type) {
+    if (!replayElement) {
+      return;
+    }
     var sources = replayElement.getElementsByTagName("source");
     var l = sources && sources.length;
     var videoType = "video/".concat(type);

@@ -408,9 +408,7 @@ const Container = function (options) {
           replayParentElement = document.getElementById(replayParentElement);
         }
 
-        if (
-          replayParentElement?.classList.contains(options.selectors.containerCssClass)
-        ) {
+        if (replayParentElement?.classList.contains(options.selectors.containerClass)) {
           containerElement = replayParentElement;
         }
       }
