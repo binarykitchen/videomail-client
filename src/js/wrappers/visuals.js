@@ -39,8 +39,10 @@ const Visuals = function (container, options) {
     }
   }
 
-  function buildChildren(playerOnly = false) {
-    debug(`Visuals: buildChildren (playerOnly = ${playerOnly})`);
+  function buildChildren(playerOnly = false, replayParentElement) {
+    debug(
+      `Visuals: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
+    );
 
     buildNoScriptTag();
 
@@ -49,7 +51,7 @@ const Visuals = function (container, options) {
       recorderInsides.build();
     }
 
-    replay.build();
+    replay.build(replayParentElement);
   }
 
   function initEvents(playerOnly = false) {
@@ -121,7 +123,7 @@ const Visuals = function (container, options) {
     return recorderInsides.isCountingDown();
   };
 
-  this.build = function (playerOnly = false) {
+  this.build = function (playerOnly = false, replayParentElement) {
     visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
     if (!visualsElement) {
@@ -152,7 +154,7 @@ const Visuals = function (container, options) {
     correctDimensions();
 
     !built && initEvents(playerOnly);
-    buildChildren(playerOnly);
+    buildChildren(playerOnly, replayParentElement);
 
     // needed for replay handling and container.isOutsideElementOf()
     self.parentNode = visualsElement.parentNode;
@@ -231,7 +233,7 @@ const Visuals = function (container, options) {
 
       recorder.unload(e);
       recorderInsides.unload(e);
-      replay.unload(e);
+      replay.unload();
 
       built = false;
     } catch (exc) {

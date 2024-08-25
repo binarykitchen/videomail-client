@@ -37,6 +37,8 @@ const Container = function (options) {
   let built;
   let form;
 
+  validateOptions();
+
   function prependDefaultCss() {
     insertCss(css, { prepend: true });
   }
@@ -68,7 +70,6 @@ const Container = function (options) {
     const formElement = getFormElement();
 
     if (formElement) {
-      debug("Container: buildForm()");
       form = new Form(self, formElement, options);
 
       const submitButton = form.findSubmitButton();
@@ -81,8 +82,10 @@ const Container = function (options) {
     }
   };
 
-  function buildChildren(playerOnly = false) {
-    debug(`Container: buildChildren (playerOnly = ${playerOnly})`);
+  function buildChildren(playerOnly = false, replayParentElement) {
+    debug(
+      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
+    );
 
     if (!containerElement.classList) {
       self.emit(
@@ -96,7 +99,7 @@ const Container = function (options) {
         buttons.build();
       }
 
-      visuals.build(playerOnly);
+      visuals.build(playerOnly, replayParentElement);
     }
   }
 
@@ -207,7 +210,7 @@ const Container = function (options) {
   }
 
   /*
-   * this will just set the width but not the height because
+   * This will just set the width but not the height because
    * it can be a form with more inputs elements
    */
   function correctDimensions() {
@@ -321,11 +324,14 @@ const Container = function (options) {
     }
   }
 
-  this.addPlayerDimensions = function (videomail, element) {
+  this.addPlayerDimensions = function (videomail) {
     try {
       if (!videomail) {
         throw new Error("Videomail data is missing for attaching player dimensions");
       }
+
+      const replay = self.getReplay();
+      const replayParentElement = replay.getParentElement();
 
       videomail.playerHeight = self.calculateHeight(
         {
@@ -333,7 +339,7 @@ const Container = function (options) {
           videoWidth: videomail.width,
           ratio: videomail.height / videomail.width,
         },
-        element,
+        replayParentElement,
       );
 
       videomail.playerWidth = self.calculateWidth({
@@ -384,28 +390,30 @@ const Container = function (options) {
     return Boolean(containerElement);
   };
 
-  this.build = function (playerOnly = false) {
-    debug(`Container: build (playerOnly = ${playerOnly})`);
+  this.build = function (playerOnly = false, replayParentElement) {
+    debug(
+      `Container: build (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
+    );
 
     try {
       containerElement = document.getElementById(options.selectors.containerId);
 
       /*
-       * only build when a container element hast been found, otherwise
-       * be silent and do nothing
+       * Only build when a container element hast been found,
+       * otherwise be silent and do nothing
        */
       if (containerElement) {
         options.insertCss && prependDefaultCss();
 
         !built && initEvents(playerOnly);
-        validateOptions();
+
         correctDimensions();
 
         // Building form also applies for when `playerOnly` because of
         // correcting mode on Videomail. This function will skip if there is no form. Easy.
         self.buildForm();
 
-        buildChildren(playerOnly);
+        buildChildren(playerOnly, replayParentElement);
 
         if (!hasError) {
           debug("Container: built.");
@@ -416,16 +424,12 @@ const Container = function (options) {
         }
       } else {
         /*
-         * commented out since it does too much noise on videomail's view page which is fine
+         * Commented out since it does too much noise on videomail's view page which is fine
          * debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
          */
       }
     } catch (exc) {
-      if (visuals.isNotifierBuilt()) {
-        self.emit(Events.ERROR, exc);
-      } else {
-        throw exc;
-      }
+      self.emit(Events.ERROR, exc);
     }
   };
 
@@ -601,7 +605,6 @@ const Container = function (options) {
 
             if (!valid) {
               whyInvalid = "Don't forget to record a video 😉";
-              invalidData = { key: undefined };
             }
           }
         } else {
@@ -671,8 +674,10 @@ const Container = function (options) {
 
       if (valid) {
         self.emit(Events.VALID);
-      } else {
+      } else if (invalidData) {
         self.emit(Events.INVALID, whyInvalid, invalidData);
+      } else {
+        self.emit(Events.INVALID, whyInvalid);
       }
 
       lastValidation = valid;
@@ -706,7 +711,7 @@ const Container = function (options) {
   }
 
   this.submitAll = function (formData, method, url) {
-    debug(`Container: submitAll(${method}: ${url})`);
+    debug(`Container: submitAll(${method}: "${url}")`);
 
     const post = isPost(method);
     const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);

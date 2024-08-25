@@ -17415,7 +17415,6 @@ var _collectLogger = _interopRequireDefault(_dereq_("./util/collectLogger"));
 var _eventEmitter = _interopRequireDefault(_dereq_("./util/eventEmitter"));
 var _container = _interopRequireDefault(_dereq_("./wrappers/container"));
 var _optionsWrapper = _interopRequireDefault(_dereq_("./wrappers/optionsWrapper"));
-var _replay = _interopRequireDefault(_dereq_("./wrappers/visuals/replay"));
 var collectLogger;
 var browser;
 function adjustOptions() {
@@ -17441,7 +17440,6 @@ var VideomailClient = function VideomailClient(options) {
   var localOptions = adjustOptions(options);
   var container = new _container.default(localOptions);
   var debug = localOptions.debug;
-  var replay;
   this.events = _events.default;
   _eventEmitter.default.call(this, localOptions, "VideomailClient");
   this.build = function () {
@@ -17466,47 +17464,31 @@ var VideomailClient = function VideomailClient(options) {
   };
 
   /*
-   * automatically adds a <video> element inside the given parentElement and loads
-   * it with the videomail
+   * Automatically adds a <video> element inside the given parentElement and
+   * loads it with the videomail
    */
-  this.replay = function (videomail, parentElement) {
-    function buildReplay() {
-      if (typeof parentElement === "string") {
-        parentElement = document.getElementById(parentElement);
-      }
-      if (!parentElement) {
-        if (!container.isBuilt()) {
-          // this will try build all over again
-          container.build(true);
-        }
-        if (!container.hasElement()) {
-          throw new Error("Unable to replay video without a container nor parent element.");
-        }
-      } else if (container.isOutsideElementOf(parentElement)) {
-        replay = new _replay.default(parentElement, localOptions);
-        replay.build();
-      }
-      if (!replay) {
-        replay = container.getReplay();
-      }
-      if (!parentElement) {
-        parentElement = replay.getParentElement();
-      }
-      if (videomail) {
-        videomail = container.addPlayerDimensions(videomail, parentElement);
-      }
-      container.buildForm(videomail);
-      container.loadForm(videomail);
-
-      // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-      setTimeout(function () {
-        replay.setVideomail(videomail);
-        container.showReplayOnly();
-      }, 10e1); // not sure, but probably can be reduced a bit
+  this.replay = function (videomail, replayParentElement) {
+    if (!container.isBuilt()) {
+      container.build(true, replayParentElement);
     }
-    buildReplay();
+    if (!container.hasElement()) {
+      throw new Error("Unable to replay video without a container nor parent element.");
+    }
+    if (videomail) {
+      videomail = container.addPlayerDimensions(videomail);
+    }
+    container.buildForm();
+    container.loadForm(videomail);
+
+    // slight delay needed to avoid HTTP 416 errors (request range unavailable)
+    setTimeout(function () {
+      var replay = container.getReplay();
+      replay.setVideomail(videomail);
+      container.showReplayOnly();
+    }, 50); // not sure, but probably can be reduced a bit
   };
   this.startOver = function (params) {
+    var replay = container.getReplay();
     if (replay) {
       replay.hide();
       replay.reset();
@@ -17574,7 +17556,7 @@ Object.keys(_constants.default.public).forEach(function (name) {
 VideomailClient.Events = _events.default;
 var _default = exports.default = VideomailClient;
 
-},{"./constants":118,"./events":119,"./options":120,"./resource":121,"./util/browser":123,"./util/collectLogger":124,"./util/eventEmitter":125,"./wrappers/container":132,"./wrappers/optionsWrapper":135,"./wrappers/visuals/replay":145,"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":28,"inherits":66}],118:[function(_dereq_,module,exports){
+},{"./constants":118,"./events":119,"./options":120,"./resource":121,"./util/browser":123,"./util/collectLogger":124,"./util/eventEmitter":125,"./wrappers/container":132,"./wrappers/optionsWrapper":135,"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":28,"inherits":66}],118:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19766,6 +19748,7 @@ var Container = function Container(options) {
   var containerElement;
   var built;
   var form;
+  validateOptions();
   function prependDefaultCss() {
     (0, _insertCss.default)(_mainMinCss.default, {
       prepend: true
@@ -19793,7 +19776,6 @@ var Container = function Container(options) {
     }
     var formElement = getFormElement();
     if (formElement) {
-      debug("Container: buildForm()");
       form = new _form.default(self, formElement, options);
       var submitButton = form.findSubmitButton();
       if (submitButton) {
@@ -19804,7 +19786,8 @@ var Container = function Container(options) {
   };
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Container: buildChildren (playerOnly = ".concat(playerOnly, ")"));
+    var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
+    debug("Container: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
     if (!containerElement.classList) {
       self.emit(_events.default.ERROR, _videomailError.default.create("Sorry, your browser is too old!", options));
     } else {
@@ -19812,7 +19795,7 @@ var Container = function Container(options) {
       if (!playerOnly) {
         buttons.build();
       }
-      visuals.build(playerOnly);
+      visuals.build(playerOnly, replayParentElement);
     }
   }
   function processError(err) {
@@ -19903,7 +19886,7 @@ var Container = function Container(options) {
   }
 
   /*
-   * this will just set the width but not the height because
+   * This will just set the width but not the height because
    * it can be a form with more inputs elements
    */
   function correctDimensions() {
@@ -20001,16 +19984,18 @@ var Container = function Container(options) {
       }
     }
   }
-  this.addPlayerDimensions = function (videomail, element) {
+  this.addPlayerDimensions = function (videomail) {
     try {
       if (!videomail) {
         throw new Error("Videomail data is missing for attaching player dimensions");
       }
+      var replay = self.getReplay();
+      var replayParentElement = replay.getParentElement();
       videomail.playerHeight = self.calculateHeight({
         responsive: true,
         videoWidth: videomail.width,
         ratio: videomail.height / videomail.width
-      }, element);
+      }, replayParentElement);
       videomail.playerWidth = self.calculateWidth({
         responsive: true,
         videoHeight: videomail.playerHeight,
@@ -20049,24 +20034,24 @@ var Container = function Container(options) {
   };
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Container: build (playerOnly = ".concat(playerOnly, ")"));
+    var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
+    debug("Container: build (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
     try {
       containerElement = document.getElementById(options.selectors.containerId);
 
       /*
-       * only build when a container element hast been found, otherwise
-       * be silent and do nothing
+       * Only build when a container element hast been found,
+       * otherwise be silent and do nothing
        */
       if (containerElement) {
         options.insertCss && prependDefaultCss();
         !built && initEvents(playerOnly);
-        validateOptions();
         correctDimensions();
 
         // Building form also applies for when `playerOnly` because of
         // correcting mode on Videomail. This function will skip if there is no form. Easy.
         self.buildForm();
-        buildChildren(playerOnly);
+        buildChildren(playerOnly, replayParentElement);
         if (!hasError) {
           debug("Container: built.");
           built = true;
@@ -20076,16 +20061,12 @@ var Container = function Container(options) {
         }
       } else {
         /*
-         * commented out since it does too much noise on videomail's view page which is fine
+         * Commented out since it does too much noise on videomail's view page which is fine
          * debug('Container: no container element with ID ' + options.selectors.containerId + ' found. Do nothing.')
          */
       }
     } catch (exc) {
-      if (visuals.isNotifierBuilt()) {
-        self.emit(_events.default.ERROR, exc);
-      } else {
-        throw exc;
-      }
+      self.emit(_events.default.ERROR, exc);
     }
   };
   this.getSubmitButton = function () {
@@ -20223,9 +20204,6 @@ var Container = function Container(options) {
             }
             if (!valid) {
               whyInvalid = "Don't forget to record a video 😉";
-              invalidData = {
-                key: undefined
-              };
             }
           }
         } else {
@@ -20289,8 +20267,10 @@ var Container = function Container(options) {
       }
       if (valid) {
         self.emit(_events.default.VALID);
-      } else {
+      } else if (invalidData) {
         self.emit(_events.default.INVALID, whyInvalid, invalidData);
+      } else {
+        self.emit(_events.default.INVALID, whyInvalid);
       }
       lastValidation = valid;
     }
@@ -20315,7 +20295,7 @@ var Container = function Container(options) {
     return method && method.toUpperCase() === "PUT";
   }
   this.submitAll = function (formData, method, url) {
-    debug("Container: submitAll(".concat(method, ": ").concat(url, ")"));
+    debug("Container: submitAll(".concat(method, ": \"").concat(url, "\")"));
     var post = isPost(method);
     var hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
     function startSubmission() {
@@ -20934,13 +20914,14 @@ var Visuals = function Visuals(container, options) {
   }
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    debug("Visuals: buildChildren (playerOnly = ".concat(playerOnly, ")"));
+    var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
+    debug("Visuals: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
     buildNoScriptTag();
     if (!playerOnly) {
       notifier.build();
       recorderInsides.build();
     }
-    replay.build();
+    replay.build(replayParentElement);
   }
   function initEvents() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
@@ -21000,6 +20981,7 @@ var Visuals = function Visuals(container, options) {
   };
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
     visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
     if (!visualsElement) {
       visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
@@ -21024,7 +21006,7 @@ var Visuals = function Visuals(container, options) {
     visualsElement.classList.add("visuals");
     correctDimensions();
     !built && initEvents(playerOnly);
-    buildChildren(playerOnly);
+    buildChildren(playerOnly, replayParentElement);
 
     // needed for replay handling and container.isOutsideElementOf()
     self.parentNode = visualsElement.parentNode;
@@ -21088,7 +21070,7 @@ var Visuals = function Visuals(container, options) {
       debug("Visuals: unload(".concat(e ? (0, _safeJsonStringify.default)(e) : "", ")"));
       recorder.unload(e);
       recorderInsides.unload(e);
-      replay.unload(e);
+      replay.unload();
       built = false;
     } catch (exc) {
       this.emit(_events.default.ERROR, exc);
@@ -23127,12 +23109,15 @@ var Replay = function Replay(parentElement, options) {
   var replayElement;
   var videomail;
   function buildElement() {
-    debug("Replay: buildElement()");
+    var replayParentElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : parentElement;
     replayElement = (0, _hyperscript.default)("video.".concat(options.selectors.replayClass));
     if (!replayElement.setAttribute) {
       throw _videomailError.default.create("Please upgrade browser", options);
     }
-    parentElement.appendChild(replayElement);
+    if (typeof replayParentElement === "string") {
+      replayParentElement = document.getElementById(replayParentElement);
+    }
+    replayParentElement.appendChild(replayElement);
   }
   function isStandalone() {
     return parentElement.constructor.name === "HTMLDivElement";
@@ -23242,11 +23227,11 @@ var Replay = function Replay(parentElement, options) {
       self.emit(_events.default.REPLAY_SHOWN);
     }
   };
-  this.build = function () {
-    debug("Replay: build()");
+  this.build = function (replayParentElement) {
+    debug("Replay: build (".concat(replayParentElement ? "replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
     replayElement = parentElement.querySelector("video.".concat(options.selectors.replayClass));
     if (!replayElement) {
-      buildElement();
+      buildElement(replayParentElement);
     }
     this.hide();
     replayElement.setAttribute("autoplay", true);
