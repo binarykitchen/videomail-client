@@ -25,8 +25,8 @@ const Container = function (options) {
   const visuals = new Visuals(this, options);
   const buttons = new Buttons(this, options);
   const resource = new Resource(options);
-  const htmlElement =
-    document && document.querySelector && document.querySelector("html");
+  const htmlElement = document.querySelector("html");
+
   const { debug } = options;
 
   let hasError = false;
@@ -83,20 +83,15 @@ const Container = function (options) {
       `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
     );
 
-    if (!containerElement.classList) {
-      self.emit(
-        Events.ERROR,
-        VideomailError.create("Sorry, your browser is too old!", options),
-      );
-    } else {
+    if (containerElement) {
       containerElement.classList.add("videomail");
-
-      if (!playerOnly) {
-        buttons.build();
-      }
-
-      visuals.build(playerOnly, replayParentElement);
     }
+
+    if (!playerOnly) {
+      buttons.build();
+    }
+
+    visuals.build(playerOnly, replayParentElement);
   }
 
   function processError(err) {
@@ -363,7 +358,7 @@ const Container = function (options) {
   };
 
   this.calculateWidth = function (fnOptions) {
-    return Dimension.calculateWidth(OptionsWrapper.merge(options, fnOptions, true));
+    return Dimension.calculateWidth(OptionsWrapper.merge(options, fnOptions));
   };
 
   this.calculateHeight = function (fnOptions, element) {
@@ -376,10 +371,7 @@ const Container = function (options) {
       }
     }
 
-    return Dimension.calculateHeight(
-      element,
-      OptionsWrapper.merge(options, fnOptions, true),
-    );
+    return Dimension.calculateHeight(element, OptionsWrapper.merge(options, fnOptions));
   };
 
   function areVisualsHidden() {
