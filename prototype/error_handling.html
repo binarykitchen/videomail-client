@@ -11,19 +11,12 @@
     <pre><code id="error"></code></pre>
     <script src="/js/videomail-client.js"></script>
     <script>
-      var videomailClient = new VideomailClient.default({
-        verbose: true,
-        disableSubmit: true,
-      });
+      var videomailClient = new VideomailClient.default();
 
-      // TODO continue from here fix proper error response *superagent* huh?
-      // BECAUSE ON VM SIDE, WE WANT TO SEE THE FULL ERROR MESSAGE WHICH GETS SWALLOWED ...
-      // YOU CAN SEE THE MESSAGE IS BLURRIED, THE DETAILS SHOULD BE UNDER
-      // THE DETAILS KEY IN THE JSON OBJECT
+      // This showcases how the packError fn works
       videomailClient.get("i do not exist", function (err, videomail) {
         var errorEl = document.getElementById("error");
         errorEl.innerHTML = JSON.stringify(err, null, 4);
-        console.error({ err });
       });
     </script>
   </body>

@@ -17922,13 +17922,27 @@ function _default(options) {
     }
     return videomail;
   }
+  function setProperty(packedError, property, value) {
+    Object.defineProperty(packedError, property, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  }
   function packError(err, res) {
     if (res && res.body && res.body.error) {
-      // use the server generated text instead of the superagent's default text
-      err = res.body.error;
-      if (!err.message && res.text) {
-        err.message = res.text;
-      }
+      var originalError = res.body.error;
+      var packedError = new Error();
+      setProperty(packedError, "name", originalError.name);
+      setProperty(packedError, "message", originalError.message || res.statusText);
+      setProperty(packedError, "cause", originalError.cause);
+      setProperty(packedError, "status", originalError.status);
+      setProperty(packedError, "code", originalError.code);
+      setProperty(packedError, "errno", originalError.errno);
+      setProperty(packedError, "details", originalError.details);
+      setProperty(packedError, "stack", originalError.stack);
+      return packedError;
     }
     return err;
   }
