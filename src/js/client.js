@@ -82,10 +82,6 @@ const VideomailClient = function (options) {
       container.build(true, replayParentElement);
     }
 
-    if (!container.hasElement()) {
-      throw new Error("Unable to replay video without a container nor parent element.");
-    }
-
     if (videomail) {
       videomail = container.addPlayerDimensions(videomail);
     }
