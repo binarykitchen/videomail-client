@@ -9,14 +9,14 @@ import Browser from "./util/browser";
 import CollectLogger from "./util/collectLogger";
 import EventEmitter from "./util/eventEmitter";
 import Container from "./wrappers/container";
-import OptionsWrapper from "./wrappers/optionsWrapper";
+import addOptionsFunctions from "./util/addOptionsFunctions";
 
 let collectLogger;
 let browser;
 
 function adjustOptions(options = {}) {
   const localOptions = deepmerge(defaultOptions, options, {
-    arrayMerge(destination, source) {
+    arrayMerge(_destination, source) {
       return source;
     },
   });
@@ -26,9 +26,9 @@ function adjustOptions(options = {}) {
   localOptions.logger = collectLogger;
   localOptions.debug = localOptions.logger.debug;
 
-  OptionsWrapper.addFunctions(localOptions);
+  const localOptionsWithFunctions = addOptionsFunctions(localOptions);
 
-  return localOptions;
+  return localOptionsWithFunctions;
 }
 
 function getBrowser(localOptions) {

@@ -1,8 +1,9 @@
 import { version } from "../../package.json";
+import addOptionsFunctions from "./util/addOptionsFunctions";
 
 const PRODUCTION = process.env.NODE_ENV === "production";
 
-export default {
+const options = {
   logger: null, // define logging instance. leave null for default, console.
   logStackSize: 30, // limits the stack size of log outputs to collect
   verbose: !PRODUCTION, // set true to log more info
@@ -168,3 +169,8 @@ export default {
 
   version,
 };
+
+// Add some helper functions to options
+const optionsWithFunctions = addOptionsFunctions(options);
+
+export default optionsWithFunctions;

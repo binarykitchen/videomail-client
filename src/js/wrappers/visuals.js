@@ -95,13 +95,17 @@ const Visuals = function (container, options) {
   function correctDimensions() {
     if (options.video.stretch) {
       removeDimensions();
-    } else {
+    } else if (visualsElement) {
       visualsElement.style.width = `${self.getRecorderWidth(true)}px`;
       visualsElement.style.height = `${self.getRecorderHeight(true)}px`;
     }
   }
 
   function removeDimensions() {
+    if (!visualsElement) {
+      return;
+    }
+
     visualsElement.style.width = "auto";
     visualsElement.style.height = "auto";
   }
@@ -124,40 +128,38 @@ const Visuals = function (container, options) {
   };
 
   this.build = function (playerOnly = false, replayParentElement) {
-    visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
+    if (container) {
+      visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
-    if (!visualsElement) {
-      visualsElement = h(`div.${options.selectors.visualsClass}`);
+      if (!visualsElement) {
+        visualsElement = h(`div.${options.selectors.visualsClass}`);
 
-      const buttonsElement = container.querySelector(
-        `.${options.selectors.buttonsClass}`,
-      );
+        const buttonsElement = container.querySelector(
+          `.${options.selectors.buttonsClass}`,
+        );
+
+        /*
+         * make sure it's placed before the buttons, but only if it's a child
+         * element of the container = inside the container
+         */
+        if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
+          container.insertBefore(visualsElement, buttonsElement);
+        } else {
+          container.appendChild(visualsElement);
+        }
+      }
 
       /*
-       * make sure it's placed before the buttons, but only if it's a child
-       * element of the container = inside the container
+       * do not hide visuals element so that apps can give it a predefined
+       * width or height through css but hide all children
        */
-      if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
-        container.insertBefore(visualsElement, buttonsElement);
-      } else {
-        container.appendChild(visualsElement);
-      }
+      visualsElement.classList.add("visuals");
     }
-
-    /*
-     * do not hide visuals element so that apps can give it a predefined
-     * width or height through css but hide all children
-     */
-
-    visualsElement.classList.add("visuals");
 
     correctDimensions();
 
     !built && initEvents(playerOnly);
     buildChildren(playerOnly, replayParentElement);
-
-    // needed for replay handling and container.isOutsideElementOf()
-    self.parentNode = visualsElement.parentNode;
 
     built = true;
   };
