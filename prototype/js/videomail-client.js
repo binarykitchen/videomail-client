@@ -17477,12 +17477,12 @@ var VideomailClient = function VideomailClient(options) {
     container.buildForm();
     container.loadForm(videomail);
 
-    // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-    setTimeout(function () {
-      var replay = container.getReplay();
-      replay.setVideomail(videomail);
+    // Wait until ready to avoid HTTP 416 errors (request range unavailable)
+    this.once(_events.default.REPLAY_SHOWN, function () {
       container.showReplayOnly();
-    }, 50); // not sure, but probably can be reduced a bit
+    });
+    var replay = container.getReplay();
+    replay.setVideomail(videomail);
   };
   this.startOver = function (params) {
     var replay = container.getReplay();
@@ -17493,6 +17493,7 @@ var VideomailClient = function VideomailClient(options) {
     container.startOver(params);
   };
   this.unload = function (e) {
+    self.removeAllListeners();
     container.unload(e);
   };
   this.hide = function () {
@@ -19744,6 +19745,7 @@ var Buttons = function Buttons(container, options) {
   this.unload = function () {
     if (built) {
       debug("Buttons: unload()");
+      self.removeAllListeners();
       built = false;
     }
   };
@@ -21102,6 +21104,7 @@ var Visuals = function Visuals(container, options) {
         return;
       }
       debug("Visuals: unload(".concat(e ? (0, _safeJsonStringify.default)(e) : "", ")"));
+      self.removeAllListeners();
       recorder.unload(e);
       recorderInsides.unload(e);
       replay.unload();
@@ -21198,7 +21201,7 @@ var Visuals = function Visuals(container, options) {
     this.showVisuals();
   };
   this.showReplayOnly = function () {
-    !this.isReplayShown() && replay.show();
+    replay.show();
     this.show();
     recorder.hide();
     notifier.hide();
@@ -23211,7 +23214,14 @@ var Replay = function Replay(parentElement, options) {
     this.show(videomail && videomail.width, videomail && videomail.height, hasAudio);
   };
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
-    var _replayElement3;
+    if (!replayElement) {
+      return;
+    }
+    if (self.isShown()) {
+      // Skip, already shown
+      return;
+    }
+    debug("Replay: show()");
     if (videomail) {
       correctDimensions({
         responsive: true,
@@ -23220,9 +23230,7 @@ var Replay = function Replay(parentElement, options) {
         videoHeight: recorderHeight || replayElement.videoHeight
       });
     }
-    if (replayElement) {
-      (0, _hidden.default)(replayElement, false);
-    }
+    (0, _hidden.default)(replayElement, false);
 
     // parent element can be any object, be careful!
     if (parentElement) {
@@ -23233,31 +23241,33 @@ var Replay = function Replay(parentElement, options) {
       }
     }
     if (hasAudio) {
-      var _replayElement;
       /*
        * https://github.com/binarykitchen/videomail-client/issues/115
        * do not set mute to false as this will mess up. just do not mention this attribute at all
        */
-      (_replayElement = replayElement) === null || _replayElement === void 0 || _replayElement.setAttribute("volume", 1);
+      replayElement.setAttribute("volume", 1);
     } else if (!options.isAudioEnabled()) {
-      var _replayElement2;
-      (_replayElement2 = replayElement) === null || _replayElement2 === void 0 || _replayElement2.setAttribute("muted", true);
+      replayElement.setAttribute("muted", true);
     }
 
     /*
      * this must be called after setting the sources and when becoming visible
      * see https://github.com/bfred-it/iphone-inline-video/issues/16
      */
-    _iphoneInlineVideo.default && replayElement && (0, _iphoneInlineVideo.default)(replayElement, {
+    _iphoneInlineVideo.default && (0, _iphoneInlineVideo.default)(replayElement, {
       iPad: true
     });
 
     // this forces to actually fetch the videos from the server
-    (_replayElement3 = replayElement) === null || _replayElement3 === void 0 || _replayElement3.load();
+    replayElement.load();
     if (!videomail) {
-      self.emit(_events.default.PREVIEW_SHOWN);
+      replayElement.addEventListener("canplaythrough", function (event) {
+        self.emit(_events.default.PREVIEW_SHOWN, event);
+      });
     } else {
-      self.emit(_events.default.REPLAY_SHOWN);
+      replayElement.addEventListener("canplaythrough", function (event) {
+        self.emit(_events.default.REPLAY_SHOWN, event);
+      });
     }
   };
   this.build = function (replayParentElement) {
@@ -23276,7 +23286,7 @@ var Replay = function Replay(parentElement, options) {
     replayElement.setAttribute("preload", "auto");
     if (!built) {
       if (!isStandalone()) {
-        this.on(_events.default.PREVIEW, function (key, recorderWidth, recorderHeight) {
+        this.on(_events.default.PREVIEW, function (_key, recorderWidth, recorderHeight) {
           self.show(recorderWidth, recorderHeight);
         });
       }
@@ -23314,6 +23324,7 @@ var Replay = function Replay(parentElement, options) {
   };
   this.unload = function () {
     debug("Replay: unload()");
+    self.removeAllListeners();
     replayElement.remove();
     replayElement = undefined;
     videomail = undefined;

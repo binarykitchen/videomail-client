@@ -89,13 +89,13 @@ const VideomailClient = function (options) {
     container.buildForm();
     container.loadForm(videomail);
 
-    // slight delay needed to avoid HTTP 416 errors (request range unavailable)
-    setTimeout(function () {
-      const replay = container.getReplay();
-
-      replay.setVideomail(videomail);
+    // Wait until ready to avoid HTTP 416 errors (request range unavailable)
+    this.once(Events.REPLAY_SHOWN, function () {
       container.showReplayOnly();
-    }, 50); // not sure, but probably can be reduced a bit
+    });
+
+    const replay = container.getReplay();
+    replay.setVideomail(videomail);
   };
 
   this.startOver = function (params) {
@@ -110,6 +110,8 @@ const VideomailClient = function (options) {
   };
 
   this.unload = function (e) {
+    this.removeAllListeners();
+
     container.unload(e);
   };
 
