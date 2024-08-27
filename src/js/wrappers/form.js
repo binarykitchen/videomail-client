@@ -342,12 +342,6 @@ const Form = function (container, formElement, options) {
     return null;
   };
 
-  this.validate = function () {
-    const formIsValid = formElement.checkValidity();
-
-    return formIsValid;
-  };
-
   this.findSubmitButton = function () {
     return formElement.querySelector("[type='submit']");
   };

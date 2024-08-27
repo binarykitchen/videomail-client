@@ -185,9 +185,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function clearRetryTimeout() {
+    if (!retryTimeout) {
+      return;
+    }
+
     debug("Recorder: clearRetryTimeout()");
 
-    retryTimeout && clearTimeout(retryTimeout);
+    clearTimeout(retryTimeout);
     retryTimeout = null;
   }
 
