@@ -611,32 +611,23 @@ const Container = function (options) {
       let invalidData;
 
       if (form) {
-        valid = form.validate();
+        const invalidInput = form.getInvalidElement();
 
-        if (valid) {
-          if (!areVisualsHidden() && !visualsValid) {
-            // TODO Improve this check to have this based on `key`
-            if (
-              buttonsAreReady() ||
-              self.isRecording() ||
-              self.isPaused() ||
-              self.isCountingDown()
-            ) {
-              valid = false;
-            }
+        if (invalidInput) {
+          valid = false;
 
-            if (!valid) {
-              whyInvalid = "Don't forget to record a video 😉";
-            }
-          }
-        } else {
-          const invalidInput = form.getInvalidElement();
-
-          if (invalidInput) {
-            whyInvalid = `Input "${invalidInput.name}" seems wrong 🤔`;
-            invalidData = { [invalidInput.name]: invalidInput.value };
-          } else {
-            whyInvalid = "Unknown form input(s) are invalid";
+          whyInvalid = `Input "${invalidInput.name}" seems wrong 🤔`;
+          invalidData = { [invalidInput.name]: invalidInput.value };
+        } else if (!areVisualsHidden() && !visualsValid) {
+          // TODO Improve this check to have this based on `key`
+          if (
+            buttonsAreReady() ||
+            self.isRecording() ||
+            self.isPaused() ||
+            self.isCountingDown()
+          ) {
+            valid = false;
+            whyInvalid = "Don't forget to record a video 😉";
           }
         }
 

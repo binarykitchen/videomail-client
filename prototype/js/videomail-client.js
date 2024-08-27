@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.15",
+  "version": "9.2.16",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -20275,24 +20275,16 @@ var Container = function Container(options) {
       var whyInvalid;
       var invalidData;
       if (form) {
-        valid = form.validate();
-        if (valid) {
-          if (!areVisualsHidden() && !visualsValid) {
-            // TODO Improve this check to have this based on `key`
-            if (buttonsAreReady() || self.isRecording() || self.isPaused() || self.isCountingDown()) {
-              valid = false;
-            }
-            if (!valid) {
-              whyInvalid = "Don't forget to record a video 😉";
-            }
-          }
-        } else {
-          var invalidInput = form.getInvalidElement();
-          if (invalidInput) {
-            whyInvalid = "Input \"".concat(invalidInput.name, "\" seems wrong \uD83E\uDD14");
-            invalidData = (0, _defineProperty2.default)({}, invalidInput.name, invalidInput.value);
-          } else {
-            whyInvalid = "Unknown form input(s) are invalid";
+        var invalidInput = form.getInvalidElement();
+        if (invalidInput) {
+          valid = false;
+          whyInvalid = "Input \"".concat(invalidInput.name, "\" seems wrong \uD83E\uDD14");
+          invalidData = (0, _defineProperty2.default)({}, invalidInput.name, invalidInput.value);
+        } else if (!areVisualsHidden() && !visualsValid) {
+          // TODO Improve this check to have this based on `key`
+          if (buttonsAreReady() || self.isRecording() || self.isPaused() || self.isCountingDown()) {
+            valid = false;
+            whyInvalid = "Don't forget to record a video 😉";
           }
         }
         if (valid) {
@@ -20861,10 +20853,6 @@ var Form = function Form(container, formElement, options) {
       }
     }
     return null;
-  };
-  this.validate = function () {
-    var formIsValid = formElement.checkValidity();
-    return formIsValid;
   };
   this.findSubmitButton = function () {
     return formElement.querySelector("[type='submit']");
@@ -22128,8 +22116,11 @@ var Recorder = function Recorder(visuals, replay) {
     }
   }
   function clearRetryTimeout() {
+    if (!retryTimeout) {
+      return;
+    }
     debug("Recorder: clearRetryTimeout()");
-    retryTimeout && clearTimeout(retryTimeout);
+    clearTimeout(retryTimeout);
     retryTimeout = null;
   }
   function calculateFrameProgress() {
