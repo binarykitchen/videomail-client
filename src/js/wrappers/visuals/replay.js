@@ -166,13 +166,21 @@ const Replay = function (parentElement, options) {
     replayElement.load();
 
     if (!videomail) {
-      replayElement.addEventListener("canplaythrough", function (event) {
-        self.emit(Events.PREVIEW_SHOWN, event);
-      });
+      replayElement.addEventListener(
+        "canplaythrough",
+        function () {
+          self.emit(Events.PREVIEW_SHOWN);
+        },
+        { once: true },
+      );
     } else {
-      replayElement.addEventListener("canplaythrough", function (event) {
-        self.emit(Events.REPLAY_SHOWN, event);
-      });
+      replayElement.addEventListener(
+        "canplaythrough",
+        function () {
+          self.emit(Events.REPLAY_SHOWN);
+        },
+        { once: true },
+      );
     }
   };
 

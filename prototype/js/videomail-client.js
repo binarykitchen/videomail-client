@@ -19875,6 +19875,8 @@ var Container = function Container(options) {
     if (options.enableAutoUnload) {
       window.addEventListener("beforeunload", function (e) {
         self.unload(e);
+      }, {
+        once: true
       });
     }
     if (!playerOnly) {
@@ -20617,6 +20619,17 @@ var Form = function Form(container, formElement, options) {
   _eventEmitter.default.call(this, options, "Form");
   var debug = options.debug;
   var self = this;
+  var FORM_FIELDS = {
+    subject: options.selectors.subjectInputName,
+    from: options.selectors.fromInputName,
+    to: options.selectors.toInputName,
+    cc: options.selectors.ccInputName,
+    bcc: options.selectors.bccInputName,
+    body: options.selectors.bodyInputName,
+    key: options.selectors.keyInputName,
+    parentKey: options.selectors.parentKeyInputName,
+    sendCopy: options.selectors.sendCopyInputName
+  };
   var keyInput;
   function getData() {
     return (0, _getFormData.default)(formElement, {
@@ -20624,17 +20637,6 @@ var Form = function Form(container, formElement, options) {
     });
   }
   this.transformFormData = function (formData) {
-    var FORM_FIELDS = {
-      subject: options.selectors.subjectInputName,
-      from: options.selectors.fromInputName,
-      to: options.selectors.toInputName,
-      cc: options.selectors.ccInputName,
-      bcc: options.selectors.bccInputName,
-      body: options.selectors.bodyInputName,
-      key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
-      sendCopy: options.selectors.sendCopyInputName
-    };
     var transformedFormData = {};
     Object.keys(FORM_FIELDS).forEach(function (key) {
       var formFieldValue = FORM_FIELDS[key];
@@ -20722,38 +20724,14 @@ var Form = function Form(container, formElement, options) {
   this.enable = function (buttonsToo) {
     setDisabled(false, buttonsToo);
   };
-  function removeAllInputListeners() {
-    var inputElements = getInputElements();
-    for (var i = 0, len = inputElements.length; i < len; i++) {
-      var inputElement = inputElements[i];
-      if (inputElement.type === "radio") {
-        inputElement.removeEventListener("change", container.validate);
-      } else {
-        inputElement.removeEventListener("input", container.validate);
-      }
-    }
-    var selectElements = getSelectElements();
-    for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate);
-    }
+  function isRegisteredFormField(formElement) {
+    var formElementName = formElement.name;
+    var registeredFormFieldNames = Object.values(FORM_FIELDS);
+    var isRegistered = registeredFormFieldNames.includes(formElementName);
+    return isRegistered;
   }
   this.build = function () {
     debug("Form: build()");
-    if (options.enableAutoValidation) {
-      var inputElements = getInputElements();
-      for (var i = 0, len = inputElements.length; i < len; i++) {
-        var inputElement = inputElements[i];
-        if (inputElement.type === "radio") {
-          inputElement.addEventListener("change", container.validate);
-        } else {
-          inputElement.addEventListener("input", container.validate);
-        }
-      }
-      var selectElements = getSelectElements();
-      for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-        selectElements[j].addEventListener("change", container.validate);
-      }
-    }
     keyInput = formElement.querySelector("input[name=\"".concat(options.selectors.keyInputName, "\"]"));
     if (!keyInput) {
       keyInput = (0, _hyperscript.default)("input", {
@@ -20761,6 +20739,31 @@ var Form = function Form(container, formElement, options) {
         type: "hidden"
       });
       formElement.appendChild(keyInput);
+    }
+    if (options.enableAutoValidation) {
+      var inputElements = getInputElements();
+      for (var i = 0, len = inputElements.length; i < len; i++) {
+        var inputElement = inputElements[i];
+
+        // Only listen to form inputs we are interested in,
+        // ignore the others, like multi email input in videomail
+        if (isRegisteredFormField(inputElement)) {
+          if (inputElement.type === "radio") {
+            inputElement.addEventListener("change", container.validate);
+          } else {
+            inputElement.addEventListener("input", container.validate);
+          }
+        }
+      }
+      var selectElements = getSelectElements();
+      for (var j = 0, len2 = selectElements.length; j < len2; j++) {
+        var selectElement = selectElements[j];
+
+        // Only listen to form selects we are interested in, ignore the others
+        if (isRegisteredFormField(selectElement)) {
+          selectElement.addEventListener("change", container.validate);
+        }
+      }
     }
     this.on(_events.default.PREVIEW, function (videomailKey) {
       /*
@@ -20813,6 +20816,21 @@ var Form = function Form(container, formElement, options) {
       startListeningToSubmitEvents();
     });
   };
+  function removeAllInputListeners() {
+    var inputElements = getInputElements();
+    for (var i = 0, len = inputElements.length; i < len; i++) {
+      var inputElement = inputElements[i];
+      if (inputElement.type === "radio") {
+        inputElement.removeEventListener("change", container.validate);
+      } else {
+        inputElement.removeEventListener("input", container.validate);
+      }
+    }
+    var selectElements = getSelectElements();
+    for (var j = 0, len2 = selectElements.length; j < len2; j++) {
+      selectElements[j].removeEventListener("change", container.validate);
+    }
+  }
   function hideSubmitButton() {
     var submitButton = self.findSubmitButton();
     (0, _hidden.default)(submitButton, true);
@@ -23261,12 +23279,16 @@ var Replay = function Replay(parentElement, options) {
     // this forces to actually fetch the videos from the server
     replayElement.load();
     if (!videomail) {
-      replayElement.addEventListener("canplaythrough", function (event) {
-        self.emit(_events.default.PREVIEW_SHOWN, event);
+      replayElement.addEventListener("canplaythrough", function () {
+        self.emit(_events.default.PREVIEW_SHOWN);
+      }, {
+        once: true
       });
     } else {
-      replayElement.addEventListener("canplaythrough", function (event) {
-        self.emit(_events.default.REPLAY_SHOWN, event);
+      replayElement.addEventListener("canplaythrough", function () {
+        self.emit(_events.default.REPLAY_SHOWN);
+      }, {
+        once: true
       });
     }
   };

@@ -119,9 +119,13 @@ const Container = function (options) {
     debug(`Container: initEvents (playerOnly = ${playerOnly})`);
 
     if (options.enableAutoUnload) {
-      window.addEventListener("beforeunload", (e) => {
-        self.unload(e);
-      });
+      window.addEventListener(
+        "beforeunload",
+        (e) => {
+          self.unload(e);
+        },
+        { once: true },
+      );
     }
 
     if (!playerOnly) {

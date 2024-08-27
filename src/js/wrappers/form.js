@@ -20,6 +20,18 @@ const Form = function (container, formElement, options) {
 
   const self = this;
 
+  const FORM_FIELDS = {
+    subject: options.selectors.subjectInputName,
+    from: options.selectors.fromInputName,
+    to: options.selectors.toInputName,
+    cc: options.selectors.ccInputName,
+    bcc: options.selectors.bccInputName,
+    body: options.selectors.bodyInputName,
+    key: options.selectors.keyInputName,
+    parentKey: options.selectors.parentKeyInputName,
+    sendCopy: options.selectors.sendCopyInputName,
+  };
+
   let keyInput;
 
   function getData() {
@@ -27,18 +39,6 @@ const Form = function (container, formElement, options) {
   }
 
   this.transformFormData = function (formData) {
-    const FORM_FIELDS = {
-      subject: options.selectors.subjectInputName,
-      from: options.selectors.fromInputName,
-      to: options.selectors.toInputName,
-      cc: options.selectors.ccInputName,
-      bcc: options.selectors.bccInputName,
-      body: options.selectors.bodyInputName,
-      key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
-      sendCopy: options.selectors.sendCopyInputName,
-    };
-
     const transformedFormData = {};
 
     Object.keys(FORM_FIELDS).forEach(function (key) {
@@ -161,48 +161,17 @@ const Form = function (container, formElement, options) {
     setDisabled(false, buttonsToo);
   };
 
-  function removeAllInputListeners() {
-    const inputElements = getInputElements();
+  function isRegisteredFormField(formElement) {
+    const formElementName = formElement.name;
 
-    for (let i = 0, len = inputElements.length; i < len; i++) {
-      const inputElement = inputElements[i];
+    const registeredFormFieldNames = Object.values(FORM_FIELDS);
+    const isRegistered = registeredFormFieldNames.includes(formElementName);
 
-      if (inputElement.type === "radio") {
-        inputElement.removeEventListener("change", container.validate);
-      } else {
-        inputElement.removeEventListener("input", container.validate);
-      }
-    }
-
-    const selectElements = getSelectElements();
-
-    for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate);
-    }
+    return isRegistered;
   }
 
   this.build = function () {
     debug("Form: build()");
-
-    if (options.enableAutoValidation) {
-      const inputElements = getInputElements();
-
-      for (let i = 0, len = inputElements.length; i < len; i++) {
-        const inputElement = inputElements[i];
-
-        if (inputElement.type === "radio") {
-          inputElement.addEventListener("change", container.validate);
-        } else {
-          inputElement.addEventListener("input", container.validate);
-        }
-      }
-
-      const selectElements = getSelectElements();
-
-      for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-        selectElements[j].addEventListener("change", container.validate);
-      }
-    }
 
     keyInput = formElement.querySelector(
       `input[name="${options.selectors.keyInputName}"]`,
@@ -215,6 +184,35 @@ const Form = function (container, formElement, options) {
       });
 
       formElement.appendChild(keyInput);
+    }
+
+    if (options.enableAutoValidation) {
+      const inputElements = getInputElements();
+
+      for (let i = 0, len = inputElements.length; i < len; i++) {
+        const inputElement = inputElements[i];
+
+        // Only listen to form inputs we are interested in,
+        // ignore the others, like multi email input in videomail
+        if (isRegisteredFormField(inputElement)) {
+          if (inputElement.type === "radio") {
+            inputElement.addEventListener("change", container.validate);
+          } else {
+            inputElement.addEventListener("input", container.validate);
+          }
+        }
+      }
+
+      const selectElements = getSelectElements();
+
+      for (let j = 0, len2 = selectElements.length; j < len2; j++) {
+        const selectElement = selectElements[j];
+
+        // Only listen to form selects we are interested in, ignore the others
+        if (isRegisteredFormField(selectElement)) {
+          selectElement.addEventListener("change", container.validate);
+        }
+      }
     }
 
     this.on(Events.PREVIEW, function (videomailKey) {
@@ -275,6 +273,26 @@ const Form = function (container, formElement, options) {
       startListeningToSubmitEvents();
     });
   };
+
+  function removeAllInputListeners() {
+    const inputElements = getInputElements();
+
+    for (let i = 0, len = inputElements.length; i < len; i++) {
+      const inputElement = inputElements[i];
+
+      if (inputElement.type === "radio") {
+        inputElement.removeEventListener("change", container.validate);
+      } else {
+        inputElement.removeEventListener("input", container.validate);
+      }
+    }
+
+    const selectElements = getSelectElements();
+
+    for (let j = 0, len2 = selectElements.length; j < len2; j++) {
+      selectElements[j].removeEventListener("change", container.validate);
+    }
+  }
 
   function hideSubmitButton() {
     const submitButton = self.findSubmitButton();
