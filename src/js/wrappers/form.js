@@ -145,12 +145,28 @@ const Form = function (container, formElement, options) {
     hidden(formElement, true);
   }
 
-  function getInputElements() {
-    return formElement.querySelectorAll("input, textarea");
+  function isRegisteredFormField(formElement) {
+    const formElementName = formElement.name;
+
+    const registeredFormFieldNames = Object.values(FORM_FIELDS);
+    const isRegistered = registeredFormFieldNames.includes(formElementName);
+
+    return isRegistered;
   }
 
-  function getSelectElements() {
-    return formElement.querySelectorAll("select");
+  function getRegisteredFormElements() {
+    const elements = formElement.querySelectorAll("input, textarea, select");
+    const registeredElements = [];
+
+    for (let i = 0; i < elements.length; i++) {
+      let element = elements[i];
+
+      if (isRegisteredFormField(element)) {
+        registeredElements.push(element);
+      }
+    }
+
+    return registeredElements;
   }
 
   this.disable = function (buttonsToo) {
@@ -160,15 +176,6 @@ const Form = function (container, formElement, options) {
   this.enable = function (buttonsToo) {
     setDisabled(false, buttonsToo);
   };
-
-  function isRegisteredFormField(formElement) {
-    const formElementName = formElement.name;
-
-    const registeredFormFieldNames = Object.values(FORM_FIELDS);
-    const isRegistered = registeredFormFieldNames.includes(formElementName);
-
-    return isRegistered;
-  }
 
   this.build = function () {
     debug("Form: build()");
@@ -187,30 +194,16 @@ const Form = function (container, formElement, options) {
     }
 
     if (options.enableAutoValidation) {
-      const inputElements = getInputElements();
+      const inputElements = getRegisteredFormElements();
 
       for (let i = 0, len = inputElements.length; i < len; i++) {
         const inputElement = inputElements[i];
+        const type = inputElement.type;
 
-        // Only listen to form inputs we are interested in,
-        // ignore the others, like multi email input in videomail
-        if (isRegisteredFormField(inputElement)) {
-          if (inputElement.type === "radio") {
-            inputElement.addEventListener("change", container.validate);
-          } else {
-            inputElement.addEventListener("input", container.validate);
-          }
-        }
-      }
-
-      const selectElements = getSelectElements();
-
-      for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-        const selectElement = selectElements[j];
-
-        // Only listen to form selects we are interested in, ignore the others
-        if (isRegisteredFormField(selectElement)) {
-          selectElement.addEventListener("change", container.validate);
+        if (type === "radio" || type === "select") {
+          inputElement.addEventListener("change", container.validate);
+        } else {
+          inputElement.addEventListener("input", container.validate);
         }
       }
     }
@@ -275,22 +268,17 @@ const Form = function (container, formElement, options) {
   };
 
   function removeAllInputListeners() {
-    const inputElements = getInputElements();
+    const inputElements = getRegisteredFormElements();
 
     for (let i = 0, len = inputElements.length; i < len; i++) {
       const inputElement = inputElements[i];
+      const type = inputElement.type;
 
-      if (inputElement.type === "radio") {
+      if (type === "radio" || type === "select") {
         inputElement.removeEventListener("change", container.validate);
       } else {
         inputElement.removeEventListener("input", container.validate);
       }
-    }
-
-    const selectElements = getSelectElements();
-
-    for (let j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate);
     }
   }
 
@@ -342,21 +330,12 @@ const Form = function (container, formElement, options) {
   };
 
   this.getInvalidElement = () => {
-    const inputElements = getInputElements();
+    const inputElements = getRegisteredFormElements();
     let i = 0;
 
     for (const len = inputElements.length; i < len; i++) {
       if (!inputElements[i].validity.valid) {
         return inputElements[i];
-      }
-    }
-
-    const selectElements = getSelectElements();
-    let j = 0;
-
-    for (const len2 = selectElements.length; j < len2; j++) {
-      if (!selectElements[j].validity.valid) {
-        return selectElements[j];
       }
     }
 

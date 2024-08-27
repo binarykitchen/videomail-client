@@ -77,40 +77,6 @@ test("Browser:", { timeout: 2000 }, function (t) {
     tt.equal(browser.isEdge(), false);
   });
 
-  t.test("fake old IE", function (tt) {
-    tt.plan(9);
-
-    const options = {
-      fakeUaString:
-        "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; Media Center PC 4.0; SLCC1; .NET CLR 3.0.04320)",
-      fakeHttps: true,
-      debug() {},
-    };
-
-    const browser = new Browser(options);
-    let err = browser.checkRecordingCapabilities();
-    tt.equal(err.message, "Sorry, your browser is unable to use webcams.");
-    tt.ok(
-      err.explanation.indexOf("Instead of Internet Explorer you need to upgrade") >= 0,
-    );
-
-    err = browser.checkBufferTypes();
-    tt.equal(err, undefined);
-
-    tt.equal(browser.getVideoType(), "mp4");
-
-    err = browser.getNoAccessIssue();
-    tt.equal(err.message, "Unable to access webcam");
-    tt.equal(
-      err.explanation,
-      "Your system does not let your browser access your webcam.",
-    );
-
-    tt.equal(browser.isChromeBased(), false);
-    tt.equal(browser.isFirefox(), false);
-    tt.equal(browser.isEdge(), false);
-  });
-
   t.test("fake old Safari", function (tt) {
     tt.plan(7);
 

@@ -29,7 +29,6 @@ const Browser = function (options) {
   const osVersion = parseFloat(uaParser.os.version);
   const isWindows = uaParser.os.name === "Windows";
   const isEdge = uaParser.browser.name === "Edge" || (isWindows && osVersion >= 10);
-  const isIE = /IE/.test(uaParser.browser.name);
   const isSafari = /Safari/.test(uaParser.browser.name);
   const isOpera = /Opera/.test(uaParser.browser.name);
   const isAndroid = /Android/.test(uaParser.os.name);
@@ -82,10 +81,6 @@ const Browser = function (options) {
       warning =
         `Probably you need to <a href="${chromiumDownload}" target="_blank">` +
         `upgrade Chromium</a> to fix this.`;
-    } else if (isIE) {
-      warning =
-        `Instead of Internet Explorer you need to upgrade to` +
-        ` <a href="${edgeDownload}" target="_blank">Edge</a>.`;
     } else if (isOkSafari) {
       warning =
         "Probably you need to shut down Safari and restart it, this for correct webcam access.";

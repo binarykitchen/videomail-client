@@ -18257,7 +18257,6 @@ var Browser = function Browser(options) {
   var osVersion = parseFloat(uaParser.os.version);
   var isWindows = uaParser.os.name === "Windows";
   var isEdge = uaParser.browser.name === "Edge" || isWindows && osVersion >= 10;
-  var isIE = /IE/.test(uaParser.browser.name);
   var isSafari = /Safari/.test(uaParser.browser.name);
   var isOpera = /Opera/.test(uaParser.browser.name);
   var isAndroid = /Android/.test(uaParser.os.name);
@@ -18289,8 +18288,6 @@ var Browser = function Browser(options) {
       }
     } else if (isChromium) {
       warning = "Probably you need to <a href=\"".concat(chromiumDownload, "\" target=\"_blank\">") + "upgrade Chromium</a> to fix this.";
-    } else if (isIE) {
-      warning = "Instead of Internet Explorer you need to upgrade to" + " <a href=\"".concat(edgeDownload, "\" target=\"_blank\">Edge</a>.");
     } else if (isOkSafari) {
       warning = "Probably you need to shut down Safari and restart it, this for correct webcam access.";
     } else if (isSafari) {
@@ -20712,11 +20709,22 @@ var Form = function Form(container, formElement, options) {
     }
     (0, _hidden.default)(formElement, true);
   }
-  function getInputElements() {
-    return formElement.querySelectorAll("input, textarea");
+  function isRegisteredFormField(formElement) {
+    var formElementName = formElement.name;
+    var registeredFormFieldNames = Object.values(FORM_FIELDS);
+    var isRegistered = registeredFormFieldNames.includes(formElementName);
+    return isRegistered;
   }
-  function getSelectElements() {
-    return formElement.querySelectorAll("select");
+  function getRegisteredFormElements() {
+    var elements = formElement.querySelectorAll("input, textarea, select");
+    var registeredElements = [];
+    for (var i = 0; i < elements.length; i++) {
+      var element = elements[i];
+      if (isRegisteredFormField(element)) {
+        registeredElements.push(element);
+      }
+    }
+    return registeredElements;
   }
   this.disable = function (buttonsToo) {
     setDisabled(true, buttonsToo);
@@ -20724,12 +20732,6 @@ var Form = function Form(container, formElement, options) {
   this.enable = function (buttonsToo) {
     setDisabled(false, buttonsToo);
   };
-  function isRegisteredFormField(formElement) {
-    var formElementName = formElement.name;
-    var registeredFormFieldNames = Object.values(FORM_FIELDS);
-    var isRegistered = registeredFormFieldNames.includes(formElementName);
-    return isRegistered;
-  }
   this.build = function () {
     debug("Form: build()");
     keyInput = formElement.querySelector("input[name=\"".concat(options.selectors.keyInputName, "\"]"));
@@ -20741,27 +20743,14 @@ var Form = function Form(container, formElement, options) {
       formElement.appendChild(keyInput);
     }
     if (options.enableAutoValidation) {
-      var inputElements = getInputElements();
+      var inputElements = getRegisteredFormElements();
       for (var i = 0, len = inputElements.length; i < len; i++) {
         var inputElement = inputElements[i];
-
-        // Only listen to form inputs we are interested in,
-        // ignore the others, like multi email input in videomail
-        if (isRegisteredFormField(inputElement)) {
-          if (inputElement.type === "radio") {
-            inputElement.addEventListener("change", container.validate);
-          } else {
-            inputElement.addEventListener("input", container.validate);
-          }
-        }
-      }
-      var selectElements = getSelectElements();
-      for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-        var selectElement = selectElements[j];
-
-        // Only listen to form selects we are interested in, ignore the others
-        if (isRegisteredFormField(selectElement)) {
-          selectElement.addEventListener("change", container.validate);
+        var type = inputElement.type;
+        if (type === "radio" || type === "select") {
+          inputElement.addEventListener("change", container.validate);
+        } else {
+          inputElement.addEventListener("input", container.validate);
         }
       }
     }
@@ -20817,18 +20806,15 @@ var Form = function Form(container, formElement, options) {
     });
   };
   function removeAllInputListeners() {
-    var inputElements = getInputElements();
+    var inputElements = getRegisteredFormElements();
     for (var i = 0, len = inputElements.length; i < len; i++) {
       var inputElement = inputElements[i];
-      if (inputElement.type === "radio") {
+      var type = inputElement.type;
+      if (type === "radio" || type === "select") {
         inputElement.removeEventListener("change", container.validate);
       } else {
         inputElement.removeEventListener("input", container.validate);
       }
-    }
-    var selectElements = getSelectElements();
-    for (var j = 0, len2 = selectElements.length; j < len2; j++) {
-      selectElements[j].removeEventListener("change", container.validate);
     }
   }
   function hideSubmitButton() {
@@ -20867,18 +20853,11 @@ var Form = function Form(container, formElement, options) {
     return false; // important to stop submission
   };
   this.getInvalidElement = function () {
-    var inputElements = getInputElements();
+    var inputElements = getRegisteredFormElements();
     var i = 0;
     for (var len = inputElements.length; i < len; i++) {
       if (!inputElements[i].validity.valid) {
         return inputElements[i];
-      }
-    }
-    var selectElements = getSelectElements();
-    var j = 0;
-    for (var len2 = selectElements.length; j < len2; j++) {
-      if (!selectElements[j].validity.valid) {
-        return selectElements[j];
       }
     }
     return null;
