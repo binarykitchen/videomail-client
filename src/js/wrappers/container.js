@@ -588,7 +588,7 @@ const Container = function (options) {
   // this code needs a good rewrite :(
   this.validate = function (event, force) {
     let runValidation = true;
-    let valid;
+    let valid = true;
 
     if (!options.enableAutoValidation) {
       runValidation = false;
@@ -604,9 +604,10 @@ const Container = function (options) {
     }
 
     if (runValidation) {
-      self.emit(Events.VALIDATING);
+      self.emit(Events.VALIDATING, event);
 
       const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
+
       let whyInvalid;
       let invalidData;
 
