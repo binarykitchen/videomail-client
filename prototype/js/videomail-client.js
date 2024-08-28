@@ -20256,7 +20256,7 @@ var Container = function Container(options) {
   // this code needs a good rewrite :(
   this.validate = function (event, force) {
     var runValidation = true;
-    var valid;
+    var valid = true;
     if (!options.enableAutoValidation) {
       runValidation = false;
       lastValidation = true; // needed so that it can be submitted anyway, see submit()
@@ -20270,7 +20270,7 @@ var Container = function Container(options) {
       runValidation = false;
     }
     if (runValidation) {
-      self.emit(_events.default.VALIDATING);
+      self.emit(_events.default.VALIDATING, event);
       var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
       var whyInvalid;
       var invalidData;
