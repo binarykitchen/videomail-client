@@ -604,7 +604,13 @@ const Container = function (options) {
     }
 
     if (runValidation) {
-      self.emit(Events.VALIDATING, event);
+      const targetName = event?.target?.name;
+
+      if (targetName) {
+        self.emit(Events.VALIDATING, { targetName });
+      } else {
+        self.emit(Events.VALIDATING, event);
+      }
 
       const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
 

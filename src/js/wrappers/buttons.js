@@ -481,6 +481,8 @@ const Buttons = function (container, options) {
     hide(previewButton);
     hide(recordAgainButton);
     hide(resumeButton);
+    hide(audioOnRadioPair);
+    hide(audioOffRadioPair);
   }
 
   function onEnablingAudio() {
@@ -591,6 +593,11 @@ const Buttons = function (container, options) {
           }
         }
       })
+      .on(Events.DISCONNECTED, function () {
+        disable(recordButton);
+        disable(audioOnRadioPair);
+        disable(audioOffRadioPair);
+      })
       .on(Events.ERROR, function (err) {
         /*
          * since https://github.com/binarykitchen/videomail-client/issues/60
@@ -675,6 +682,8 @@ const Buttons = function (container, options) {
       hide(previewButton);
       hide(recordAgainButton);
       hide(submitButton);
+      hide(audioOnRadioPair);
+      hide(audioOffRadioPair);
     }
   };
 
