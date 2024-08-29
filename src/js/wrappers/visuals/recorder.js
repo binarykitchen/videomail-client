@@ -410,7 +410,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         });
 
         stream.on("error", function (err) {
-          debug(`${PIPE_SYMBOL}Stream *error* event emitted`, err);
+          debug(`${PIPE_SYMBOL}Stream *error* event emitted: ${err.message}`);
 
           connecting = connected = false;
 

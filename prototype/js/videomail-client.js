@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.17",
+  "version": "9.2.18",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17391,7 +17391,7 @@ module.exports={
   },
   "engines": {
     "node": "^20.16.0",
-    "npm": "^10.8.2"
+    "npm": "^10.8.1"
   },
   "readmeFilename": "README.md"
 }
@@ -19612,6 +19612,8 @@ var Buttons = function Buttons(container, options) {
     hide(previewButton);
     hide(recordAgainButton);
     hide(resumeButton);
+    hide(audioOnRadioPair);
+    hide(audioOffRadioPair);
   }
   function onEnablingAudio() {
     debug("Buttons: onEnablingAudio()");
@@ -19690,6 +19692,10 @@ var Buttons = function Buttons(container, options) {
           enable(recordButton);
         }
       }
+    }).on(_events.default.DISCONNECTED, function () {
+      disable(recordButton);
+      disable(audioOnRadioPair);
+      disable(audioOffRadioPair);
     }).on(_events.default.ERROR, function (err) {
       /*
        * since https://github.com/binarykitchen/videomail-client/issues/60
@@ -19755,6 +19761,8 @@ var Buttons = function Buttons(container, options) {
       hide(previewButton);
       hide(recordAgainButton);
       hide(submitButton);
+      hide(audioOnRadioPair);
+      hide(audioOffRadioPair);
     }
   };
   this.show = function () {
@@ -20270,7 +20278,15 @@ var Container = function Container(options) {
       runValidation = false;
     }
     if (runValidation) {
-      self.emit(_events.default.VALIDATING, event);
+      var _event$target;
+      var targetName = event === null || event === void 0 || (_event$target = event.target) === null || _event$target === void 0 ? void 0 : _event$target.name;
+      if (targetName) {
+        self.emit(_events.default.VALIDATING, {
+          targetName: targetName
+        });
+      } else {
+        self.emit(_events.default.VALIDATING, event);
+      }
       var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
       var whyInvalid;
       var invalidData;
@@ -22271,7 +22287,7 @@ var Recorder = function Recorder(visuals, replay) {
           }
         });
         stream.on("error", function (err) {
-          debug("".concat(PIPE_SYMBOL, "Stream *error* event emitted"), err);
+          debug("".concat(PIPE_SYMBOL, "Stream *error* event emitted: ").concat(err.message));
           connecting = connected = false;
           var videomailError;
           if (browser.isIOS()) {
