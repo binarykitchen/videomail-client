@@ -20301,6 +20301,9 @@ var Container = function Container(options) {
           if (buttonsAreReady() || self.isRecording() || self.isPaused() || self.isCountingDown()) {
             valid = false;
             whyInvalid = "Don't forget to record a video 😉";
+            invalidData = {
+              key: undefined
+            };
           }
         }
         if (valid) {

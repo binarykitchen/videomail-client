@@ -635,6 +635,7 @@ const Container = function (options) {
           ) {
             valid = false;
             whyInvalid = "Don't forget to record a video 😉";
+            invalidData = { key: undefined };
           }
         }
 
