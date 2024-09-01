@@ -83,6 +83,7 @@ const RecorderInsides = function (visuals, options) {
       .on(Events.PAUSED, function () {
         pauseRecording();
       })
+      .on(Events.ERROR, onResetting)
       .on(Events.RESETTING, onResetting)
       .on(Events.HIDE, function () {
         self.hideCountdown();

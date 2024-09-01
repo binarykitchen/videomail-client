@@ -17375,7 +17375,7 @@ module.exports={
     "gulp-terser": "2.1.0",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.41",
+    "postcss": "8.4.43",
     "prettier": "3.3.3",
     "prettier-plugin-curly": "0.2.2",
     "prettier-plugin-organize-imports": "4.0.0",
@@ -18342,18 +18342,18 @@ var Browser = function Browser(options) {
       // good to be able to distinguish between two reasons why and what sort of camera it is
       if (!okBrowser) {
         if (isMobile) {
-          message = "Sorry, your browser is unable to use your mobile camera.";
+          message = "Sorry, your browser is unable to use your mobile camera";
         } else {
-          message = "Sorry, your browser is unable to use webcams.";
+          message = "Sorry, your browser is unable to use webcams";
         }
       } else if (isMobile) {
         if (isFacebook) {
-          message = "Sorry, the Facebook app cannot record from your mobile camera.";
+          message = "Sorry, the Facebook app cannot record from your mobile camera";
         } else {
-          message = "Sorry, your browser cannot record from your mobile camera.";
+          message = "Sorry, your browser cannot record from your mobile camera";
         }
       } else {
-        message = "Sorry, your browser cannot record from webcams.";
+        message = "Sorry, your browser cannot record from webcams";
       }
       if (isBadIOS) {
         /*
@@ -18413,11 +18413,11 @@ var Browser = function Browser(options) {
     var message = "Unable to access webcam";
     var explanation;
     if (this.isChromeBased()) {
-      explanation = "Click on the allow button to grant access to your webcam.";
+      explanation = "Click on the allow button to grant access to your webcam";
     } else if (this.isFirefox()) {
-      explanation = "Please grant Firefox access to your webcam.";
+      explanation = "Please grant Firefox access to your webcam";
     } else {
-      explanation = "Your system does not let your browser access your webcam.";
+      explanation = "Your system does not let your browser access your webcam";
     }
     return _videomailError.default.create(message, explanation, options);
   };
@@ -18445,10 +18445,10 @@ var Browser = function Browser(options) {
   this.getUsefulData = function () {
     return {
       browser: uaParser.browser,
+      cpu: uaParser.cpu.architecture ? uaParser.cpu : undefined,
       device: uaParser.device.type ? uaParser.device : undefined,
-      os: uaParser.os,
       engine: uaParser.engine,
-      cpu: uaParser.cpu
+      os: uaParser.os.name && uaParser.os.version ? uaParser.os : undefined
     };
   };
 };
@@ -18892,11 +18892,16 @@ var _pretty = _interopRequireDefault(_dereq_("./pretty"));
 var VIDEOMAIL_ERR_NAME = "Videomail Error";
 var VideomailError = (0, _createError.default)(Error, VIDEOMAIL_ERR_NAME, {
   title: undefined,
+  message: undefined,
   explanation: undefined,
   logLines: undefined,
+  siteName: undefined,
   cookie: undefined,
   location: undefined,
   err: undefined,
+  promise: undefined,
+  cause: undefined,
+  reason: undefined,
   browser: undefined,
   cpu: undefined,
   device: undefined,
@@ -19189,22 +19194,24 @@ VideomailError.create = function (err, explanation, options, parameters) {
   var debug = options && options.debug || console.log;
   debug("VideomailError: create()", message, explanation || "(no explanation set)");
   var usefulClientData = browser.getUsefulData();
-  var videomailError = new VideomailError(message, {
+  var cookies = global.document.cookie.split("; ");
+  var errData = {
     title: "videomail-client error",
+    message: message,
     explanation: explanation,
     logLines: logLines,
-    location: window.location.href,
-    cookie: global.document.cookie.split("; ").join(",\n"),
     siteName: options.siteName,
-    err: err instanceof Error ? err : undefined,
     browser: usefulClientData.browser,
     cpu: usefulClientData.cpu,
     device: usefulClientData.device,
     engine: usefulClientData.engine,
     os: usefulClientData.os,
+    location: window.location.href,
+    cookie: cookies.length > 0 ? cookies.join(",\n") : undefined,
     screen: [screen.width, screen.height, screen.colorDepth].join("×"),
     orientation: typeof screen.orientation === "string" ? screen.orientation : screen.orientation.type.toString()
-  });
+  };
+  var videomailError = new VideomailError(err instanceof Error ? err : message, errData);
   var resource;
   var reportErrors = false;
   if (options.reportErrors) {
@@ -19489,14 +19496,6 @@ var Buttons = function Buttons(container, options) {
     if (!options.enableAutoValidation) {
       enable(submitButton);
     }
-    if (!params.recordWhenReady) {
-      if (isShown(audioOnRadioPair)) {
-        enable(audioOnRadioPair);
-      }
-      if (isShown(audioOffRadioPair)) {
-        enable(audioOffRadioPair);
-      }
-    }
   }
   function onGoingBack() {
     hide(recordAgainButton);
@@ -19513,6 +19512,14 @@ var Buttons = function Buttons(container, options) {
     }
     if (options.enableAutoValidation) {
       disable(submitButton);
+    }
+    if (!params.recordWhenReady) {
+      if (isShown(audioOnRadioPair)) {
+        enable(audioOnRadioPair);
+      }
+      if (isShown(audioOffRadioPair)) {
+        enable(audioOffRadioPair);
+      }
     }
   }
   function onResetting() {
@@ -19747,6 +19754,8 @@ var Buttons = function Buttons(container, options) {
   };
   this.unload = function () {
     if (built) {
+      // Disables all buttons
+      self.reset();
       debug("Buttons: unload()");
       self.removeAllListeners();
       built = false;
@@ -21665,7 +21674,7 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
       stopRecording();
     }).on(_events.default.PAUSED, function () {
       pauseRecording();
-    }).on(_events.default.RESETTING, onResetting).on(_events.default.HIDE, function () {
+    }).on(_events.default.ERROR, onResetting).on(_events.default.RESETTING, onResetting).on(_events.default.HIDE, function () {
       self.hideCountdown();
     });
   }
@@ -22077,7 +22086,14 @@ var Recorder = function Recorder(visuals, replay) {
         var onFlushedCallback = opts && opts.onFlushedCallback;
         try {
           stream.write(buffer, function () {
-            onFlushedCallback && onFlushedCallback(opts);
+            if (!onFlushedCallback) {
+              return;
+            }
+            try {
+              onFlushedCallback(opts);
+            } catch (exc) {
+              self.emit(_events.default.ERROR, _videomailError.default.create("Failed to write stream buffer", "stream.write() failed because of ".concat((0, _pretty.default)(exc)), options));
+            }
           });
         } catch (exc) {
           self.emit(_events.default.ERROR, _videomailError.default.create("Failed writing to server", "stream.write() failed because of ".concat((0, _pretty.default)(exc)), options));
@@ -22311,7 +22327,7 @@ var Recorder = function Recorder(visuals, replay) {
              */
           } else {
             // or else it could be a poor wifi connection...
-            videomailError = _videomailError.default.create("Data exchange interrupted", "Please check your network connection and reload.", options);
+            videomailError = _videomailError.default.create("Data exchange interrupted", "Please check your network connection and reload", options);
           }
           self.emit(_events.default.ERROR, videomailError);
         });
@@ -22865,10 +22881,10 @@ var Recorder = function Recorder(visuals, replay) {
     self.emit(_events.default.RECORDING, framesCount);
 
     // see https://github.com/hapticdata/animitter/issues/3
-    loop.on("update", function (deltaTime, elapsedTime) {
+    loop.on("update", function (_deltaTime, elapsedTime) {
       // x1000 because of milliseconds
       var avgFPS = framesCount / elapsedTime * 1000;
-      debug("Recorder: avgFps =", Math.round(avgFPS));
+      debug("Recorder: avgFps = ".concat(Math.round(avgFPS), ", framesCount = ").concat(framesCount));
     });
     loop.start();
   };
@@ -23888,16 +23904,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _client = _interopRequireDefault(_dereq_("./client"));
 var _standardize = _interopRequireDefault(_dereq_("./util/standardize"));
-if (!navigator) {
-  throw new Error("Navigator is missing!");
-} else {
-  // Ensures Videomail functionality is not broken on exotic browsers with shims.
-  (0, _standardize.default)(window, navigator);
-}
-
-// Provide both ways
-
-// export { Client };
+// Ensures Videomail functionality is not broken on exotic browsers with shims.
+(0, _standardize.default)(window, navigator);
 var _default = exports.default = _client.default;
 
 },{"./client":117,"./util/standardize":130,"@babel/runtime/helpers/interopRequireDefault":4}]},{},["videomail-client"])("videomail-client")
