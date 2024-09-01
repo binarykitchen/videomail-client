@@ -330,16 +330,6 @@ const Buttons = function (container, options) {
     if (!options.enableAutoValidation) {
       enable(submitButton);
     }
-
-    if (!params.recordWhenReady) {
-      if (isShown(audioOnRadioPair)) {
-        enable(audioOnRadioPair);
-      }
-
-      if (isShown(audioOffRadioPair)) {
-        enable(audioOffRadioPair);
-      }
-    }
   }
 
   function onGoingBack() {
@@ -361,6 +351,16 @@ const Buttons = function (container, options) {
 
     if (options.enableAutoValidation) {
       disable(submitButton);
+    }
+
+    if (!params.recordWhenReady) {
+      if (isShown(audioOnRadioPair)) {
+        enable(audioOnRadioPair);
+      }
+
+      if (isShown(audioOffRadioPair)) {
+        enable(audioOffRadioPair);
+      }
     }
   }
 
@@ -664,8 +664,10 @@ const Buttons = function (container, options) {
 
   this.unload = function () {
     if (built) {
-      debug("Buttons: unload()");
+      // Disables all buttons
+      self.reset();
 
+      debug("Buttons: unload()");
       self.removeAllListeners();
 
       built = false;

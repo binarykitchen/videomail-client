@@ -8,11 +8,16 @@ const VIDEOMAIL_ERR_NAME = "Videomail Error";
 
 const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   title: undefined,
+  message: undefined,
   explanation: undefined,
   logLines: undefined,
+  siteName: undefined,
   cookie: undefined,
   location: undefined,
   err: undefined,
+  promise: undefined,
+  cause: undefined,
+  reason: undefined,
   browser: undefined,
   cpu: undefined,
   device: undefined,
@@ -353,26 +358,32 @@ VideomailError.create = function (err, explanation, options, parameters) {
   debug("VideomailError: create()", message, explanation || "(no explanation set)");
 
   const usefulClientData = browser.getUsefulData();
+  const cookies = global.document.cookie.split("; ");
 
-  const videomailError = new VideomailError(message, {
+  const errData = {
     title: "videomail-client error",
+    message,
     explanation,
     logLines,
-    location: window.location.href,
-    cookie: global.document.cookie.split("; ").join(",\n"),
     siteName: options.siteName,
-    err: err instanceof Error ? err : undefined,
     browser: usefulClientData.browser,
     cpu: usefulClientData.cpu,
     device: usefulClientData.device,
     engine: usefulClientData.engine,
     os: usefulClientData.os,
+    location: window.location.href,
+    cookie: cookies.length > 0 ? cookies.join(",\n") : undefined,
     screen: [screen.width, screen.height, screen.colorDepth].join("×"),
     orientation:
       typeof screen.orientation === "string"
         ? screen.orientation
         : screen.orientation.type.toString(),
-  });
+  };
+
+  const videomailError = new VideomailError(
+    err instanceof Error ? err : message,
+    errData,
+  );
 
   let resource;
   let reportErrors = false;

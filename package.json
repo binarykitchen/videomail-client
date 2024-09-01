@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "9.2.17",
+  "version": "9.2.19",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -108,7 +108,7 @@
     "gulp-terser": "2.1.0",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.41",
+    "postcss": "8.4.43",
     "prettier": "3.3.3",
     "prettier-plugin-curly": "0.2.2",
     "prettier-plugin-organize-imports": "4.0.0",

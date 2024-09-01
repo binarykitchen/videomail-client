@@ -108,7 +108,22 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         try {
           stream.write(buffer, function () {
-            onFlushedCallback && onFlushedCallback(opts);
+            if (!onFlushedCallback) {
+              return;
+            }
+
+            try {
+              onFlushedCallback(opts);
+            } catch (exc) {
+              self.emit(
+                Events.ERROR,
+                VideomailError.create(
+                  "Failed to write stream buffer",
+                  `stream.write() failed because of ${pretty(exc)}`,
+                  options,
+                ),
+              );
+            }
           });
         } catch (exc) {
           self.emit(
@@ -440,7 +455,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             // or else it could be a poor wifi connection...
             videomailError = VideomailError.create(
               "Data exchange interrupted",
-              "Please check your network connection and reload.",
+              "Please check your network connection and reload",
               options,
             );
           }
@@ -1163,10 +1178,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     self.emit(Events.RECORDING, framesCount);
 
     // see https://github.com/hapticdata/animitter/issues/3
-    loop.on("update", function (deltaTime, elapsedTime) {
+    loop.on("update", function (_deltaTime, elapsedTime) {
       // x1000 because of milliseconds
       const avgFPS = (framesCount / elapsedTime) * 1000;
-      debug("Recorder: avgFps =", Math.round(avgFPS));
+      debug(`Recorder: avgFps = ${Math.round(avgFPS)}, framesCount = ${framesCount}`);
     });
 
     loop.start();
