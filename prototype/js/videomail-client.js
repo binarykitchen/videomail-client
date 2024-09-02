@@ -17922,6 +17922,7 @@ function _default(options) {
       var originalError = res.body.error;
       var packedError = new Error();
       setProperty(packedError, "name", originalError.name);
+      setProperty(packedError, "type", originalError.type);
       setProperty(packedError, "message", originalError.message || res.statusText);
       setProperty(packedError, "cause", originalError.cause);
       setProperty(packedError, "status", originalError.status);
@@ -18937,6 +18938,7 @@ VideomailError.INVALID_STATE_ERROR = "InvalidStateError";
 
 // static function to convert an error into a videomail error
 VideomailError.create = function (err, explanation, options, parameters) {
+  var _err$constructor;
   if (err && err.name === VIDEOMAIL_ERR_NAME) {
     return err;
   }
@@ -19086,7 +19088,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       switch (err.code) {
         case 8:
           message = "Requested webcam not found";
-          explanation = "A webcam is needed but could not be found.";
+          explanation = "A webcam is needed but could not be found";
           classList.push(VideomailError.WEBCAM_PROBLEM);
           break;
         case 9:
@@ -19143,10 +19145,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
         }
         if (err) {
           if (typeof err === "string") {
-            message = err;
+            message = "".concat(err, " (default)");
           } else {
             if (err.message) {
-              message = pretty(err.message);
+              message = pretty(err.message) + " (pretty)";
             }
             if (err.explanation) {
               if (!explanation) {
@@ -19169,7 +19171,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
         // for weird, undefined cases
         if (!message) {
           if (errType) {
-            message = errType;
+            message = errType + " (weird)";
           }
           if (!explanation && err) {
             explanation = pretty(err, {
@@ -19209,7 +19211,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
     location: window.location.href,
     cookie: cookies.length > 0 ? cookies.join(",\n") : undefined,
     screen: [screen.width, screen.height, screen.colorDepth].join("×"),
-    orientation: typeof screen.orientation === "string" ? screen.orientation : screen.orientation.type.toString()
+    orientation: typeof screen.orientation === "string" ? screen.orientation : screen.orientation.type.toString(),
+    // Consider removing later once sorted
+    errNo: err.errno,
+    errCode: err.code,
+    errName: err.name,
+    errType: err.type,
+    errConstraint: err.constraint,
+    errConstructorName: (_err$constructor = err.constructor) === null || _err$constructor === void 0 ? void 0 : _err$constructor.name
   };
   var videomailError = new VideomailError(err instanceof Error ? err : message, errData);
   var resource;
@@ -22218,7 +22227,7 @@ var Recorder = function Recorder(visuals, replay) {
   function initSocket(cb) {
     if (!connected) {
       connecting = true;
-      debug("Recorder: initialising web socket to %s", options.socketUrl);
+      debug("Recorder: initializing web socket to %s", options.socketUrl);
       self.emit(_events.default.CONNECTING);
 
       // https://github.com/maxogden/websocket-stream#binary-sockets
@@ -22377,12 +22386,10 @@ var Recorder = function Recorder(visuals, replay) {
      */
     return connected && (isNotifying() || !isHidden() || blocking);
   }
-  function userMediaErrorCallback(err, extraA, extraB) {
+  function userMediaErrorCallback(err) {
     userMediaLoading = false;
     clearUserMediaTimeout();
-    debug("Recorder: userMediaErrorCallback()", ", name:", err.name, ", message:", err.message, ", Webcam characteristics:", userMedia.getCharacteristics(),
-    // added recently in the hope to investigate weird webcam issues
-    ", extraA arguments:", extraA ? extraA.toString() : undefined, ", extraB arguments:", extraB ? extraB.toString() : undefined);
+    debug("Recorder: userMediaErrorCallback(), name: ".concat(err.name, ", message: ").concat(err.message, " and Webcam characteristics: ").concat((0, _safeJsonStringify.default)(userMedia.getCharacteristics())));
     var errorListeners = self.listeners(_events.default.ERROR);
     if (errorListeners && errorListeners.length) {
       if (err.name !== _videomailError.default.MEDIA_DEVICE_NOT_SUPPORTED) {
@@ -22690,8 +22697,8 @@ var Recorder = function Recorder(visuals, replay) {
     this.reset();
     writeCommand("back", cb);
   };
-  function reInitialiseAudio() {
-    debug("Recorder: reInitialiseAudio()");
+  function reInitializeAudio() {
+    debug("Recorder: reInitializeAudio()");
     clearUserMediaTimeout();
 
     // important to free memory
@@ -22973,9 +22980,9 @@ var Recorder = function Recorder(visuals, replay) {
     }).on(_events.default.LOADED_META_DATA, function () {
       correctDimensions();
     }).on(_events.default.DISABLING_AUDIO, function () {
-      reInitialiseAudio();
+      reInitializeAudio();
     }).on(_events.default.ENABLING_AUDIO, function () {
-      reInitialiseAudio();
+      reInitializeAudio();
     }).on(_events.default.INVISIBLE, function () {
       loopWithTimeouts();
     }).on(_events.default.VISIBLE, function () {
