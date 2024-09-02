@@ -380,12 +380,12 @@ VideomailError.create = function (err, explanation, options, parameters) {
         : screen.orientation.type.toString(),
 
     // Consider removing later once sorted
-    errNo: err.errno,
-    errCode: err.code,
-    errName: err.name,
-    errType: err.type,
-    errConstraint: err.constraint,
-    errConstructorName: err.constructor?.name,
+    errNo: err?.errno,
+    errCode: err?.code,
+    errName: err?.name,
+    errType: err?.type,
+    errConstraint: err?.constraint,
+    errConstructorName: err?.constructor?.name,
   };
 
   const videomailError = new VideomailError(
