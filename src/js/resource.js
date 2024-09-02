@@ -42,6 +42,7 @@ export default function (options) {
       const packedError = new Error();
 
       setProperty(packedError, "name", originalError.name);
+      setProperty(packedError, "type", originalError.type);
       setProperty(packedError, "message", originalError.message || res.statusText);
       setProperty(packedError, "cause", originalError.cause);
       setProperty(packedError, "status", originalError.status);

@@ -301,7 +301,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     if (!connected) {
       connecting = true;
 
-      debug("Recorder: initialising web socket to %s", options.socketUrl);
+      debug("Recorder: initializing web socket to %s", options.socketUrl);
 
       self.emit(Events.CONNECTING);
 
@@ -520,23 +520,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     return connected && (isNotifying() || !isHidden() || blocking);
   }
 
-  function userMediaErrorCallback(err, extraA, extraB) {
+  function userMediaErrorCallback(err) {
     userMediaLoading = false;
     clearUserMediaTimeout();
 
     debug(
-      "Recorder: userMediaErrorCallback()",
-      ", name:",
-      err.name,
-      ", message:",
-      err.message,
-      ", Webcam characteristics:",
-      userMedia.getCharacteristics(),
-      // added recently in the hope to investigate weird webcam issues
-      ", extraA arguments:",
-      extraA ? extraA.toString() : undefined,
-      ", extraB arguments:",
-      extraB ? extraB.toString() : undefined,
+      `Recorder: userMediaErrorCallback(), name: ${err.name}, message: ${err.message} and Webcam characteristics: ${stringify(userMedia.getCharacteristics())}`,
     );
 
     const errorListeners = self.listeners(Events.ERROR);
@@ -920,8 +909,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     writeCommand("back", cb);
   };
 
-  function reInitialiseAudio() {
-    debug("Recorder: reInitialiseAudio()");
+  function reInitializeAudio() {
+    debug("Recorder: reInitializeAudio()");
 
     clearUserMediaTimeout();
 
@@ -1297,10 +1286,10 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         correctDimensions();
       })
       .on(Events.DISABLING_AUDIO, function () {
-        reInitialiseAudio();
+        reInitializeAudio();
       })
       .on(Events.ENABLING_AUDIO, function () {
-        reInitialiseAudio();
+        reInitializeAudio();
       })
       .on(Events.INVISIBLE, function () {
         loopWithTimeouts();

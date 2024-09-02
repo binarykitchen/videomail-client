@@ -241,7 +241,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       switch (err.code) {
         case 8:
           message = "Requested webcam not found";
-          explanation = "A webcam is needed but could not be found.";
+          explanation = "A webcam is needed but could not be found";
           classList.push(VideomailError.WEBCAM_PROBLEM);
           break;
         case 9: {
@@ -301,10 +301,10 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
       if (err) {
         if (typeof err === "string") {
-          message = err;
+          message = `${err} (default)`;
         } else {
           if (err.message) {
-            message = pretty(err.message);
+            message = pretty(err.message) + " (pretty)";
           }
 
           if (err.explanation) {
@@ -330,7 +330,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       // for weird, undefined cases
       if (!message) {
         if (errType) {
-          message = errType;
+          message = errType + " (weird)";
         }
 
         if (!explanation && err) {
@@ -378,6 +378,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
       typeof screen.orientation === "string"
         ? screen.orientation
         : screen.orientation.type.toString(),
+
+    // Consider removing later once sorted
+    errNo: err?.errno,
+    errCode: err?.code,
+    errName: err?.name,
+    errType: err?.type,
+    errConstraint: err?.constraint,
+    errConstructorName: err?.constructor?.name,
   };
 
   const videomailError = new VideomailError(

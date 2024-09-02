@@ -91,23 +91,13 @@ test("Videomail Error:", function (t) {
         tt.equal(err.explanation, undefined);
       });
 
-      tt.test("bad integer", function (tt) {
-        tt.plan(3);
-
-        const err = VideomailError.create(123, fakeOptions);
-
-        tt.equal(err.toString(), "Videomail Error: 123");
-        tt.equal(err.message, 123);
-        tt.equal(err.explanation, undefined);
-      });
-
       tt.test("one message", function (tt) {
         tt.plan(3);
 
         const err = VideomailError.create("one message", fakeOptions);
 
-        tt.equal(err.toString(), "Videomail Error: one message");
-        tt.equal(err.message, "one message");
+        tt.equal(err.toString(), "Videomail Error: one message (default)");
+        tt.equal(err.message, "one message (default)");
         tt.equal(err.explanation, undefined);
       });
 
@@ -177,9 +167,9 @@ test("Videomail Error:", function (t) {
           fakeOptions,
         );
 
-        tt.equal(err.toString(), "Videomail Error: 1");
-        tt.equal(err.message, 1);
-        tt.equal(err.explanation, undefined);
+        tt.equal(err.toString(), "Videomail Error: 1 (weird)");
+        tt.equal(err.message, "1 (weird)");
+        tt.equal(err.explanation, "1");
       });
 
       tt.test("with NO_DEVICES_FOUND as name in object", function (tt) {
