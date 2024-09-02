@@ -17267,7 +17267,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.20",
+  "version": "9.2.21",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19213,12 +19213,12 @@ VideomailError.create = function (err, explanation, options, parameters) {
     screen: [screen.width, screen.height, screen.colorDepth].join("×"),
     orientation: typeof screen.orientation === "string" ? screen.orientation : screen.orientation.type.toString(),
     // Consider removing later once sorted
-    errNo: err.errno,
-    errCode: err.code,
-    errName: err.name,
-    errType: err.type,
-    errConstraint: err.constraint,
-    errConstructorName: (_err$constructor = err.constructor) === null || _err$constructor === void 0 ? void 0 : _err$constructor.name
+    errNo: err === null || err === void 0 ? void 0 : err.errno,
+    errCode: err === null || err === void 0 ? void 0 : err.code,
+    errName: err === null || err === void 0 ? void 0 : err.name,
+    errType: err === null || err === void 0 ? void 0 : err.type,
+    errConstraint: err === null || err === void 0 ? void 0 : err.constraint,
+    errConstructorName: err === null || err === void 0 || (_err$constructor = err.constructor) === null || _err$constructor === void 0 ? void 0 : _err$constructor.name
   };
   var videomailError = new VideomailError(err instanceof Error ? err : message, errData);
   var resource;
