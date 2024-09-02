@@ -131,7 +131,7 @@ const options = {
   timeouts: {
     userMedia: 20e3, // in milliseconds, increase if you want user give more time to enable webcam
     connection: 1e4, // in seconds, increase if api is slow
-    pingInterval: 35e3, // in milliseconds, keeps web stream (connection) alive when pausing
+    pingInterval: 30e3, // in milliseconds, keeps web stream (connection) alive when pausing
   },
 
   loadUserMediaOnRecord: false, // when true, user media is loaded only when record button is pressed
