@@ -96,8 +96,8 @@ test("Videomail Error:", function (t) {
 
         const err = VideomailError.create("one message", fakeOptions);
 
-        tt.equal(err.toString(), "Videomail Error: one message (default)");
-        tt.equal(err.message, "one message (default)");
+        tt.equal(err.toString(), "Videomail Error: one message");
+        tt.equal(err.message, "one message");
         tt.equal(err.explanation, undefined);
       });
 

@@ -1,0 +1,42 @@
+name: Test Runner for videomail-client
+
+on:
+  push:
+    branches:
+      - develop
+
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build-test-lint-check:
+    name: Build, Test, Prettier, Lint and Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js via nvm
+        shell: bash --login {0}
+        run: |
+          nvm install --no-progress
+          echo "$(dirname $(nvm which node))" >> $GITHUB_PATH
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      # Electron issues, to fix later:
+      # https://github.com/marketplace/actions/run-with-xvfb
+      # - name: Run tests
+      #   run: npm run test
+
+      - name: Run prettier
+        run: npm run prettier
+
+      - name: Run linter
+        run: npm run lint

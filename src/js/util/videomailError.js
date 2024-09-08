@@ -301,7 +301,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
       if (err) {
         if (typeof err === "string") {
-          message = `${err} (default)`;
+          message = err;
         } else {
           if (err.message) {
             message = pretty(err.message) + " (pretty)";
