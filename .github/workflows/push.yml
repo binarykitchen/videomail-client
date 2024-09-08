@@ -3,11 +3,11 @@ name: Test Runner for videomail-client
 on:
   push:
     branches:
-      - dev
+      - develop
 
   pull_request:
     branches:
-      - dev
+      - develop
 
 jobs:
   build-test-lint-check:
