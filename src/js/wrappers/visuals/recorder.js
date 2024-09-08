@@ -373,15 +373,15 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         stream.on("close", function (err) {
           debug(`${PIPE_SYMBOL}Stream has closed`);
 
-          connecting = connected = false;
-
           if (err) {
+            connecting = connected = false;
             self.emit(Events.ERROR, err || "Unhandled websocket error");
           } else {
-            self.emit(Events.DISCONNECTED);
-
-            // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
-            cancelAnimationFrame();
+            // COMMENTED OUT TEMPORARILY, PROBABLY OLD CODE TOO
+            // UPON CLOSE IT SHOULD TRY TO RECONNECT INSTEAD OF DISCONNECT.
+            // self.emit(Events.DISCONNECTED);
+            // // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
+            // cancelAnimationFrame();
           }
         });
 

@@ -17268,7 +17268,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.2.22",
+  "version": "9.2.23",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -22282,14 +22282,15 @@ var Recorder = function Recorder(visuals, replay) {
 
         stream.on("close", function (err) {
           debug("".concat(PIPE_SYMBOL, "Stream has closed"));
-          connecting = connected = false;
           if (err) {
+            connecting = connected = false;
             self.emit(_events.default.ERROR, err || "Unhandled websocket error");
           } else {
-            self.emit(_events.default.DISCONNECTED);
-
-            // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
-            cancelAnimationFrame();
+            // COMMENTED OUT TEMPORARILY, PROBABLY OLD CODE TOO
+            // UPON CLOSE IT SHOULD TRY TO RECONNECT INSTEAD OF DISCONNECT.
+            // self.emit(Events.DISCONNECTED);
+            // // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
+            // cancelAnimationFrame();
           }
         });
         stream.on("connect", function () {
