@@ -15,7 +15,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     tt.equal(videoType, "mp4");
 
     err = browser.getNoAccessIssue();
-    tt.equal(err.message, "Unable to access webcam (default)");
+    tt.equal(err.message, "Unable to access webcam");
     tt.equal(err.explanation, "Your system does not let your browser access your webcam");
 
     tt.equal(browser.isChromeBased(), false);
@@ -39,7 +39,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     tt.equal(browser.getVideoType(), "mp4");
 
     err = browser.getNoAccessIssue();
-    tt.equal(err.message, "Unable to access webcam (default)");
+    tt.equal(err.message, "Unable to access webcam");
     tt.equal(err.explanation, "Please grant Firefox access to your webcam");
 
     tt.equal(browser.isChromeBased(), false);
@@ -63,7 +63,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     tt.equal(browser.getVideoType(), "mp4");
 
     err = browser.getNoAccessIssue();
-    tt.equal(err.message, "Unable to access webcam (default)");
+    tt.equal(err.message, "Unable to access webcam");
     tt.equal(err.explanation, "Click on the allow button to grant access to your webcam");
 
     tt.equal(browser.isChromeBased(), true);
@@ -88,7 +88,7 @@ test("Browser:", { timeout: 2000 }, function (t) {
     tt.equal(browser.getVideoType(), "mp4");
 
     err = browser.getNoAccessIssue();
-    tt.equal(err.message, "Unable to access webcam (default)");
+    tt.equal(err.message, "Unable to access webcam");
     tt.equal(err.explanation, "Your system does not let your browser access your webcam");
 
     tt.equal(browser.isChromeBased(), false);
