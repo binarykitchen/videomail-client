@@ -4732,7 +4732,7 @@ function replaceGetterValues (replacer) {
  *
  * @copyright 2024 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.1.4
+ * @version 10.1.6
  */
 'use strict';
 
@@ -4900,9 +4900,10 @@ function filesize (arg, {
 		result[0] = result[0].toString().replace(PERIOD, separator);
 	}
 
-	if (pad && Number.isInteger(result[0]) === false && round > 0) {
-		const x = separator || PERIOD,
-			tmp = result[0].toString().split(x),
+	if (pad && round > 0) {
+		const i =  result[0].toString(),
+			x = separator || ((i.match(/(\D)/g) || []).pop() || PERIOD),
+			tmp = i.toString().split(x),
 			s = tmp[1] || EMPTY,
 			l = s.length,
 			n = round - l;
@@ -17321,7 +17322,7 @@ module.exports={
     "defined": "1.0.1",
     "despot": "2.0.0",
     "document-visibility": "1.0.1",
-    "filesize": "10.1.4",
+    "filesize": "10.1.6",
     "format-util": "1.0.5",
     "get-form-data": "3.0.0",
     "hidden": "1.1.1",
@@ -17353,7 +17354,7 @@ module.exports={
     "del": "6.1.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-import": "2.30.0",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.2.0",
     "fancy-log": "2.0.0",
@@ -17375,7 +17376,7 @@ module.exports={
     "gulp-terser": "2.1.0",
     "minimist": "1.2.8",
     "nib": "1.2.0",
-    "postcss": "8.4.43",
+    "postcss": "8.4.45",
     "prettier": "3.3.3",
     "prettier-plugin-curly": "0.2.2",
     "prettier-plugin-organize-imports": "4.0.0",
@@ -19145,7 +19146,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
         }
         if (err) {
           if (typeof err === "string") {
-            message = "".concat(err, " (default)");
+            message = err;
           } else {
             if (err.message) {
               message = pretty(err.message) + " (pretty)";
@@ -22316,29 +22317,44 @@ var Recorder = function Recorder(visuals, replay) {
         });
         stream.on("error", function (err) {
           debug("".concat(PIPE_SYMBOL, "Stream *error* event emitted: ").concat(err.message));
-          connecting = connected = false;
-          var videomailError;
-          if (browser.isIOS()) {
-            /*
-             * setting custom text since that err object isn't really an error
-             * on iPhones when locked, and unlocked, this err is actually
-             * an event object with stuff we can't use at all (an external bug)
-             */
-            videomailError = _videomailError.default.create(err, "iPhones cannot maintain a live connection for too long. Original error message is: ".concat(err.toString()), options);
 
-            /*
-             * Changed to the above temporarily for better investigations
-             * videomailError = VideomailError.create(
-             *   'Sorry, connection has timed out',
-             *   'iPhones cannot maintain a live connection for too long,
-             *   options
-             * )
-             */
-          } else {
-            // or else it could be a poor wifi connection...
-            videomailError = _videomailError.default.create("Data exchange interrupted", "Please check your network connection and reload", options);
-          }
-          self.emit(_events.default.ERROR, videomailError);
+          // OLD CODE, COMMENTED OUT TEMPORARILY FOR INVESTIGATIONS
+          // IT SHOULD RECONNECT INSTEAD OF CLOSING THE CONNECTION
+
+          // connecting = connected = false;
+
+          // let videomailError;
+
+          // if (browser.isIOS()) {
+          //   /*
+          //    * setting custom text since that err object isn't really an error
+          //    * on iPhones when locked, and unlocked, this err is actually
+          //    * an event object with stuff we can't use at all (an external bug)
+          //    */
+          //   videomailError = VideomailError.create(
+          //     err,
+          //     `iPhones cannot maintain a live connection for too long. Original error message is: ${err.toString()}`,
+          //     options,
+          //   );
+
+          //   /*
+          //    * Changed to the above temporarily for better investigations
+          //    * videomailError = VideomailError.create(
+          //    *   'Sorry, connection has timed out',
+          //    *   'iPhones cannot maintain a live connection for too long,
+          //    *   options
+          //    * )
+          //    */
+          // } else {
+          //   // or else it could be a poor wifi connection...
+          //   videomailError = VideomailError.create(
+          //     "Data exchange interrupted",
+          //     "Please check your network connection and reload",
+          //     options,
+          //   );
+          // }
+
+          // self.emit(Events.ERROR, videomailError);
         });
 
         // just experimental
