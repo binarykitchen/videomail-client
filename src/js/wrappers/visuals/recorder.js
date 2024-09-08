@@ -427,40 +427,43 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         stream.on("error", function (err) {
           debug(`${PIPE_SYMBOL}Stream *error* event emitted: ${err.message}`);
 
-          connecting = connected = false;
+          // OLD CODE, COMMENTED OUT TEMPORARILY FOR INVESTIGATIONS
+          // IT SHOULD RECONNECT INSTEAD OF CLOSING THE CONNECTION
 
-          let videomailError;
+          // connecting = connected = false;
 
-          if (browser.isIOS()) {
-            /*
-             * setting custom text since that err object isn't really an error
-             * on iPhones when locked, and unlocked, this err is actually
-             * an event object with stuff we can't use at all (an external bug)
-             */
-            videomailError = VideomailError.create(
-              err,
-              `iPhones cannot maintain a live connection for too long. Original error message is: ${err.toString()}`,
-              options,
-            );
+          // let videomailError;
 
-            /*
-             * Changed to the above temporarily for better investigations
-             * videomailError = VideomailError.create(
-             *   'Sorry, connection has timed out',
-             *   'iPhones cannot maintain a live connection for too long,
-             *   options
-             * )
-             */
-          } else {
-            // or else it could be a poor wifi connection...
-            videomailError = VideomailError.create(
-              "Data exchange interrupted",
-              "Please check your network connection and reload",
-              options,
-            );
-          }
+          // if (browser.isIOS()) {
+          //   /*
+          //    * setting custom text since that err object isn't really an error
+          //    * on iPhones when locked, and unlocked, this err is actually
+          //    * an event object with stuff we can't use at all (an external bug)
+          //    */
+          //   videomailError = VideomailError.create(
+          //     err,
+          //     `iPhones cannot maintain a live connection for too long. Original error message is: ${err.toString()}`,
+          //     options,
+          //   );
 
-          self.emit(Events.ERROR, videomailError);
+          //   /*
+          //    * Changed to the above temporarily for better investigations
+          //    * videomailError = VideomailError.create(
+          //    *   'Sorry, connection has timed out',
+          //    *   'iPhones cannot maintain a live connection for too long,
+          //    *   options
+          //    * )
+          //    */
+          // } else {
+          //   // or else it could be a poor wifi connection...
+          //   videomailError = VideomailError.create(
+          //     "Data exchange interrupted",
+          //     "Please check your network connection and reload",
+          //     options,
+          //   );
+          // }
+
+          // self.emit(Events.ERROR, videomailError);
         });
 
         // just experimental
