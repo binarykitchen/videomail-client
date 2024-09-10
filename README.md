@@ -1,6 +1,7 @@
 # videomail-client ✉
 
-[![Build Status](https://travis-ci.org/binarykitchen/videomail-client.svg?branch=master)](https://travis-ci.org/binarykitchen/videomail-client)
+[![Test Runner for videomail-client](https://github.com/binarykitchen/videomail-client/actions/workflows/push.yml/badge.svg)](https://github.com/binarykitchen/videomail-client/actions/workflows/push.yml)
+
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
 [![browserstack][browserstack-image]][browserstack-url]
@@ -58,16 +59,16 @@ That's it. Easy as apple pie.
     <div id="videomail"></div>
     <script src="/js/videomail-client.js"></script>
     <script>
-      var VideomailClient = require('videomail-client'), // load videomail client package
+      var VideomailClient = require("videomail-client"), // load videomail client package
         videomailClient = new VideomailClient({
           // instantiate with some options
           verbose: true, // prints additional info to console
-          disableSubmit: true // disable submissions to keep example simple
-        })
+          disableSubmit: true, // disable submissions to keep example simple
+        });
 
       // this will load your webcam, fill the placeholder containing
       // the `id="videomail"` with HTML and CSS code, place buttons and much more.
-      videomailClient.show()
+      videomailClient.show();
     </script>
   </body>
 </html>
@@ -126,7 +127,7 @@ Looking at the examples in the `/prototype` folder should give you some ideas ho
 The constructor accepts a JSON with optional <a href="#options">options</a>. Example:
 
 ```js
-var videomailClient = new VideomailClient({ siteName: 'my site name' })
+var videomailClient = new VideomailClient({ siteName: "my site name" });
 ```
 
 <a name="on"></a>
@@ -136,11 +137,11 @@ var videomailClient = new VideomailClient({ siteName: 'my site name' })
 The VideomailClient class is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
 ```js
-videomailClient.on('FORM_READY', function () {
+videomailClient.on("FORM_READY", function () {
   // form is ready for recording
-})
+});
 
-videomailClient.on('SUBMITTED', function (videomail, response) {
+videomailClient.on("SUBMITTED", function (videomail, response) {
   // continue with your own app logic in your javascript code if you want to process
   // something else further after form submission.
   //
@@ -151,7 +152,7 @@ videomailClient.on('SUBMITTED', function (videomail, response) {
   //
   // but if you want all that videomail meta data to be submitted in the form already,
   // enable the `submitWithVideomail` option.
-})
+});
 ```
 
 #### Supported events:
@@ -216,7 +217,7 @@ An utility function which returns true if the current browser is capable of webc
 Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with single page apps, for example with AngularJS' destroy event:
 
 ```js
-$scope.$on('$destroy', videomailClient.unload.bind(videomailClient))
+$scope.$on("$destroy", videomailClient.unload.bind(videomailClient));
 ```
 
 <a name="hide"></a>

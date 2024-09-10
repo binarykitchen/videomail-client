@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "9.2.21",
+  "version": "9.3.0",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -44,15 +44,15 @@
     "@babel/core": "7.25.2",
     "add-eventlistener-with-options": "1.25.5",
     "animitter": "3.0.0",
-    "audio-sample": "4.0.1",
-    "canvas-to-buffer": "4.0.1",
+    "audio-sample": "4.1.0",
+    "canvas-to-buffer": "4.1.0",
     "classlist.js": "1.1.20150312",
     "contains": "0.1.1",
     "core-js": "3.38.1",
     "create-error": "0.3.1",
     "deepmerge": "4.3.1",
     "defined": "1.0.1",
-    "despot": "2.0.0",
+    "despot": "2.1.0",
     "document-visibility": "1.0.1",
     "filesize": "10.1.6",
     "format-util": "1.0.5",
@@ -79,7 +79,7 @@
     "audit-ci": "7.1.0",
     "autoprefixer": "10.4.20",
     "babelify": "10.0.0",
-    "body-parser": "1.20.2",
+    "body-parser": "1.20.3",
     "browserify": "17.0.0",
     "connect-send-json": "1.0.0",
     "cssnano": "6.0.5",
@@ -123,8 +123,8 @@
     "watchify": "4.0.0"
   },
   "engines": {
-    "node": "^20.16.0",
-    "npm": "^10.8.1"
+    "node": ">=20.16.0",
+    "npm": ">=10.8.1"
   },
   "readmeFilename": "README.md"
 }
