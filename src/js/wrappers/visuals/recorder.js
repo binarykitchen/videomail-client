@@ -430,7 +430,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         });
 
         stream.on("error", function (err) {
-          debug(`${PIPE_SYMBOL}Stream *error* event emitted: ${err.message}`);
+          debug(`${PIPE_SYMBOL}Stream *error* event emitted: ${stringify(err)}`);
 
           // OLD CODE, COMMENTED OUT TEMPORARILY FOR INVESTIGATIONS
           // IT SHOULD RECONNECT INSTEAD OF CLOSING THE CONNECTION

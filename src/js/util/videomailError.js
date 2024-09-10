@@ -212,7 +212,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.STARTING_FAILED:
       message = "Starting video failed";
       explanation =
-        "Most likely this happens when the webcam is already active in another browser.";
+        "Most likely this happens when the webcam is already active in another browser";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
@@ -227,13 +227,13 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.NOT_READABLE_ERROR:
     case VideomailError.TRACK_START_ERROR:
       message = "No access to webcam";
-      explanation = "A hardware error occurred which prevented access to your webcam.";
+      explanation = "A hardware error occurred which prevented access to your webcam";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
     case VideomailError.INVALID_STATE_ERROR:
       message = "Invalid state";
-      explanation = "Video recording stream from your webcam already has finished.";
+      explanation = "Video recording stream from your webcam already has finished";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
@@ -255,7 +255,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
         }
         case 11:
           message = "Invalid State";
-          explanation = "The object is in an invalid, unusable state.";
+          explanation = "The object is in an invalid, unusable state";
           classList.push(VideomailError.BROWSER_PROBLEM);
           break;
         default:

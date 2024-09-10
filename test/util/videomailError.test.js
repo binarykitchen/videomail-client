@@ -283,7 +283,7 @@ test("Videomail Error:", function (t) {
         tt.equal(err.message, "Starting video failed");
         tt.equal(
           err.explanation,
-          "Most likely this happens when the webcam is already active in another browser.",
+          "Most likely this happens when the webcam is already active in another browser",
         );
       });
 
