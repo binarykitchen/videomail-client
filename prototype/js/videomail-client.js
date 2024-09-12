@@ -20619,6 +20619,9 @@ function figureMinHeight(height, options) {
 }
 var _default = exports.default = {
   limitWidth: function limitWidth(element, width, options) {
+    if (!element) {
+      return width;
+    }
     var limitedWidth;
     var outerWidth = getOuterWidth(element);
     if (width) {
@@ -23168,7 +23171,7 @@ var Recorder = function Recorder(visuals, replay) {
     }
   };
   this.getRecorderHeight = function (responsive, useBoundingClientRect) {
-    if (userMedia && useBoundingClientRect) {
+    if (recorderElement && useBoundingClientRect) {
       return recorderElement.getBoundingClientRect().height;
     } else if (userMedia) {
       return userMedia.getRawHeight(responsive);

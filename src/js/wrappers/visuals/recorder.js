@@ -1420,7 +1420,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   };
 
   this.getRecorderHeight = function (responsive, useBoundingClientRect) {
-    if (userMedia && useBoundingClientRect) {
+    if (recorderElement && useBoundingClientRect) {
       return recorderElement.getBoundingClientRect().height;
     } else if (userMedia) {
       return userMedia.getRawHeight(responsive);
