@@ -41,6 +41,10 @@ function figureMinHeight(height, options) {
 
 export default {
   limitWidth(element, width, options) {
+    if (!element) {
+      return width;
+    }
+
     let limitedWidth;
 
     const outerWidth = getOuterWidth(element);
