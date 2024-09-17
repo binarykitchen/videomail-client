@@ -849,6 +849,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function getAvgFps() {
+    const intervalSum = getIntervalSum();
+
+    if (intervalSum === 0) {
+      return undefined;
+    }
+
     return (framesCount / getIntervalSum()) * 1000;
   }
 
@@ -1176,9 +1182,16 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     // see https://github.com/hapticdata/animitter/issues/3
     loop.on("update", function (_deltaTime, elapsedTime) {
-      // x1000 because of milliseconds
-      const avgFPS = (framesCount / elapsedTime) * 1000;
-      debug(`Recorder: avgFps = ${Math.round(avgFPS)}, framesCount = ${framesCount}`);
+      let avgFPS = undefined;
+
+      if (elapsedTime !== 0) {
+        // x1000 because of milliseconds
+        avgFPS = Math.round((framesCount / elapsedTime) * 1000);
+      } else {
+        avgFPS = undefined;
+      }
+
+      debug(`Recorder: avgFps = ${avgFPS}, framesCount = ${framesCount}`);
     });
 
     loop.start();
