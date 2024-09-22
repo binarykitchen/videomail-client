@@ -13762,14 +13762,18 @@ function getStateLength (state) {
 },{}],103:[function(_dereq_,module,exports){
 "use strict";
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
-function Agent() {
-  this._defaults = [];
+const defaults = ['use', 'on', 'once', 'set', 'query', 'type', 'accept', 'auth', 'withCredentials', 'sortQuery', 'retry', 'ok', 'redirects', 'timeout', 'buffer', 'serialize', 'parse', 'ca', 'key', 'pfx', 'cert', 'disableTLSCerts'];
+class Agent {
+  constructor() {
+    this._defaults = [];
+  }
+  _setDefaults(request) {
+    for (const def of this._defaults) {
+      request[def.fn](...def.args);
+    }
+  }
 }
-for (var _i = 0, _arr = ['use', 'on', 'once', 'set', 'query', 'type', 'accept', 'auth', 'withCredentials', 'sortQuery', 'retry', 'ok', 'redirects', 'timeout', 'buffer', 'serialize', 'parse', 'ca', 'key', 'pfx', 'cert', 'disableTLSCerts']; _i < _arr.length; _i++) {
-  const fn = _arr[_i];
+for (const fn of defaults) {
   // Default setting for all requests from this agent
   Agent.prototype[fn] = function () {
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -13782,28 +13786,11 @@ for (var _i = 0, _arr = ['use', 'on', 'once', 'set', 'query', 'type', 'accept', 
     return this;
   };
 }
-Agent.prototype._setDefaults = function (request) {
-  var _iterator = _createForOfIteratorHelper(this._defaults),
-    _step;
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      const def = _step.value;
-      request[def.fn](...def.args);
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-};
 module.exports = Agent;
 
 },{}],104:[function(_dereq_,module,exports){
 "use strict";
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 /**
  * Root reference for iframes.
  */
@@ -13824,10 +13811,11 @@ const Emitter = _dereq_('component-emitter');
 const safeStringify = _dereq_('fast-safe-stringify');
 const qs = _dereq_('qs');
 const RequestBase = _dereq_('./request-base');
-const _require = _dereq_('./utils'),
-  isObject = _require.isObject,
-  mixin = _require.mixin,
-  hasOwn = _require.hasOwn;
+const {
+  isObject,
+  mixin,
+  hasOwn
+} = _dereq_('./utils');
 const ResponseBase = _dereq_('./response-base');
 const Agent = _dereq_('./agent-base');
 
@@ -13911,17 +13899,8 @@ function pushEncodedKeyValuePair(pairs, key, value) {
     return;
   }
   if (Array.isArray(value)) {
-    var _iterator = _createForOfIteratorHelper(value),
-      _step;
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        const v = _step.value;
-        pushEncodedKeyValuePair(pairs, key, v);
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
+    for (const v of value) {
+      pushEncodedKeyValuePair(pairs, key, v);
     }
   } else if (isObject(value)) {
     for (const subkey in value) {
@@ -13995,7 +13974,12 @@ request.types = {
  */
 
 request.serialize = {
-  'application/x-www-form-urlencoded': qs.stringify,
+  'application/x-www-form-urlencoded': obj => {
+    return qs.stringify(obj, {
+      indices: false,
+      strictNullHandling: true
+    });
+  },
   'application/json': safeStringify
 };
 
@@ -14109,7 +14093,9 @@ function Response(request_) {
   // responseText is accessible only if responseType is '' or 'text' and on older browsers
   this.text = this.req.method !== 'HEAD' && (this.xhr.responseType === '' || this.xhr.responseType === 'text') || typeof this.xhr.responseType === 'undefined' ? this.xhr.responseText : null;
   this.statusText = this.req.xhr.statusText;
-  let status = this.xhr.status;
+  let {
+    status
+  } = this.xhr;
   // handle IE9 bug: http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
   if (status === 1223) {
     status = 204;
@@ -14160,9 +14146,15 @@ Response.prototype._parseBody = function (string_) {
  */
 
 Response.prototype.toError = function () {
-  const req = this.req;
-  const method = req.method;
-  const url = req.url;
+  const {
+    req
+  } = this;
+  const {
+    method
+  } = req;
+  const {
+    url
+  } = req;
   const message = `cannot ${method} ${url} (${this.status})`;
   const error = new Error(message);
   error.status = this.status;
@@ -14482,13 +14474,17 @@ Request.prototype._end = function () {
   if (this._aborted) return this.callback(new Error('The request has been aborted even before .end() was called'));
   const self = this;
   this.xhr = request.getXHR();
-  const xhr = this.xhr;
+  const {
+    xhr
+  } = this;
   let data = this._formData || this._data;
   this._setTimeouts();
 
   // state change
   xhr.addEventListener('readystatechange', () => {
-    const readyState = xhr.readyState;
+    const {
+      readyState
+    } = xhr;
     if (readyState >= 2 && self._responseTimeoutTimer) {
       clearTimeout(self._responseTimeoutTimer);
     }
@@ -14581,8 +14577,7 @@ Request.prototype._end = function () {
   xhr.send(typeof data === 'undefined' ? null : data);
 };
 request.agent = () => new Agent();
-for (var _i = 0, _arr = ['GET', 'POST', 'OPTIONS', 'PATCH', 'PUT', 'DELETE']; _i < _arr.length; _i++) {
-  const method = _arr[_i];
+for (const method of ['GET', 'POST', 'OPTIONS', 'PATCH', 'PUT', 'DELETE']) {
   Agent.prototype[method.toLowerCase()] = function (url, fn) {
     const request_ = new request.Request(method, url);
     this._setDefaults(request_);
@@ -14744,17 +14739,15 @@ request.put = (url, data, fn) => {
 };
 
 },{"./agent-base":103,"./request-base":105,"./response-base":106,"./utils":107,"component-emitter":24,"fast-safe-stringify":45,"qs":81}],105:[function(_dereq_,module,exports){
-(function (process){(function (){
 "use strict";
-
-const semver = _dereq_('semver');
 
 /**
  * Module of mixed-in functions shared between node and client code
  */
-const _require = _dereq_('./utils'),
-  isObject = _require.isObject,
-  hasOwn = _require.hasOwn;
+const {
+  isObject,
+  hasOwn
+} = _dereq_('./utils');
 
 /**
  * Expose `RequestBase`.
@@ -15189,25 +15182,8 @@ RequestBase.prototype.abort = function () {
   this._aborted = true;
   if (this.xhr) this.xhr.abort(); // browser
   if (this.req) {
-    // Node v13 has major differences in `abort()`
-    // https://github.com/nodejs/node/blob/v12.x/lib/internal/streams/end-of-stream.js
-    // https://github.com/nodejs/node/blob/v13.x/lib/internal/streams/end-of-stream.js
-    // https://github.com/nodejs/node/blob/v14.x/lib/internal/streams/end-of-stream.js
-    // (if you run a diff across these you will see the differences)
-    //
-    // References:
-    // <https://github.com/nodejs/node/issues/31630>
-    // <https://github.com/ladjs/superagent/pull/1084/commits/dc18679a7c5ccfc6046d882015e5126888973bc8>
-    //
-    // Thanks to @shadowgate15 and @niftylettuce
-    if (semver.gte(process.version, 'v13.0.0') && semver.lt(process.version, 'v14.0.0')) {
-      // Note that the reason this doesn't work is because in v13 as compared to v14
-      // there is no `callback = nop` set in end-of-stream.js above
-      throw new Error('Superagent does not work in v13 properly with abort() due to Node.js core changes');
-    }
     this.req.abort(); // node
   }
-
   this.clearTimeout();
   this.emit('abort');
   return this;
@@ -15483,8 +15459,7 @@ RequestBase.prototype._setTimeouts = function () {
   }
 };
 
-}).call(this)}).call(this,_dereq_('_process'))
-},{"./utils":107,"_process":79,"semver":16}],106:[function(_dereq_,module,exports){
+},{"./utils":107}],106:[function(_dereq_,module,exports){
 "use strict";
 
 /**
@@ -15608,9 +15583,6 @@ ResponseBase.prototype._setStatusProperties = function (status) {
 },{"./utils":107}],107:[function(_dereq_,module,exports){
 "use strict";
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 /**
  * Return the mime type for the given `str`.
  *
@@ -15631,20 +15603,11 @@ exports.type = string_ => string_.split(/ *; */).shift();
 
 exports.params = value => {
   const object = {};
-  var _iterator = _createForOfIteratorHelper(value.split(/ *; */)),
-    _step;
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      const string_ = _step.value;
-      const parts = string_.split(/ *= */);
-      const key = parts.shift();
-      const value = parts.shift();
-      if (key && value) object[key] = value;
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
+  for (const string_ of value.split(/ *; */)) {
+    const parts = string_.split(/ *= */);
+    const key = parts.shift();
+    const value = parts.shift();
+    if (key && value) object[key] = value;
   }
   return object;
 };
@@ -15659,20 +15622,11 @@ exports.params = value => {
 
 exports.parseLinks = value => {
   const object = {};
-  var _iterator2 = _createForOfIteratorHelper(value.split(/ *, */)),
-    _step2;
-  try {
-    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-      const string_ = _step2.value;
-      const parts = string_.split(/ *; */);
-      const url = parts[0].slice(1, -1);
-      const rel = parts[1].split(/ *= */)[1].slice(1, -1);
-      object[rel] = url;
-    }
-  } catch (err) {
-    _iterator2.e(err);
-  } finally {
-    _iterator2.f();
+  for (const string_ of value.split(/ *, */)) {
+    const parts = string_.split(/ *; */);
+    const url = parts[0].slice(1, -1);
+    const rel = parts[1].split(/ *= */)[1].slice(1, -1);
+    object[rel] = url;
   }
   return object;
 };
@@ -15727,6 +15681,26 @@ exports.mixin = (target, source) => {
       target[key] = source[key];
     }
   }
+};
+
+/**
+ * Check if the response is compressed using Gzip or Deflate.
+ * @param {Object} res
+ * @return {Boolean}
+ */
+
+exports.isGzipOrDeflateEncoding = res => {
+  return new RegExp(/^\s*(?:deflate|gzip)\s*$/).test(res.headers['content-encoding']);
+};
+
+/**
+ * Check if the response is compressed using Brotli.
+ * @param {Object} res
+ * @return {Boolean}
+ */
+
+exports.isBrotliEncoding = res => {
+  return new RegExp(/^\s*(?:br)\s*$/).test(res.headers['content-encoding']);
 };
 
 },{}],108:[function(_dereq_,module,exports){
@@ -17360,7 +17334,7 @@ function wrappy (fn, cb) {
 },{}],116:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.3.2",
+  "version": "9.3.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17428,7 +17402,7 @@ module.exports={
     "number-is-integer": "2.0.0",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
-    "superagent": "8.1.2",
+    "superagent": "10.1.0",
     "ua-parser-js": "1.0.39",
     "websocket-stream": "5.5.2"
   },
@@ -17471,7 +17445,7 @@ module.exports={
     "postcss": "8.4.47",
     "prettier": "3.3.3",
     "prettier-plugin-curly": "0.2.2",
-    "prettier-plugin-organize-imports": "4.0.0",
+    "prettier-plugin-organize-imports": "4.1.0",
     "prettier-plugin-packagejson": "2.5.2",
     "prettier-plugin-sh": "0.14.0",
     "router": "1.3.8",

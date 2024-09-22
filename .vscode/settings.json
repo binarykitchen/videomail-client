@@ -3,12 +3,10 @@
   "files.trimTrailingWhitespace": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
   "prettier.configPath": "./prettier.config.cjs",
-  "editor.codeActionsOnSave": [
-    // Sort package.json keys with
-    // https://marketplace.visualstudio.com/items?itemName=unional.vscode-sort-package-json
-    "source.sortPackageJson"
-  ],
   "cSpell.words": [
     "animitter",
     "autobuffer",
