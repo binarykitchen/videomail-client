@@ -2,7 +2,6 @@ import addEventListenerWithOptions from "add-eventlistener-with-options";
 import hidden from "hidden";
 import h from "hyperscript";
 import inherits from "inherits";
-import enableInlineVideo from "iphone-inline-video";
 
 import Events from "../../events";
 import Browser from "../../util/browser";
@@ -152,15 +151,6 @@ const Replay = function (parentElement, options) {
     } else if (!options.isAudioEnabled()) {
       replayElement.setAttribute("muted", true);
     }
-
-    /*
-     * this must be called after setting the sources and when becoming visible
-     * see https://github.com/bfred-it/iphone-inline-video/issues/16
-     */
-    enableInlineVideo &&
-      enableInlineVideo(replayElement, {
-        iPad: true,
-      });
 
     // this forces to actually fetch the videos from the server
     replayElement.load();
