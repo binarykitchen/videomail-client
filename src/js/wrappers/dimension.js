@@ -1,5 +1,3 @@
-import numberIsInteger from "number-is-integer";
-
 import VideomailError from "./../util/videomailError";
 
 function getOuterWidth(element) {
@@ -28,7 +26,7 @@ function figureMinHeight(height, options) {
     }
   }
 
-  if (numberIsInteger(height) && height < 1) {
+  if (Number.isInteger(height) && height < 1) {
     throw VideomailError.create(
       `Got a video height less than 1 (${height}) while figuring out the minimum!`,
       options,
@@ -57,7 +55,7 @@ export default {
       limitedWidth = outerWidth;
     }
 
-    if (numberIsInteger(limitedWidth) && limitedWidth < 1) {
+    if (Number.isInteger(limitedWidth) && limitedWidth < 1) {
       throw VideomailError.create("Limited width cannot be less than 1!", options);
     } else {
       return limitedWidth;
@@ -69,7 +67,7 @@ export default {
    * but good enough for now to ensure some stability.
    */
   limitHeight(height, options) {
-    if (numberIsInteger(height) && height < 1) {
+    if (Number.isInteger(height) && height < 1) {
       throw VideomailError.create(
         "Passed limit-height argument cannot be less than 1!",
         options,
@@ -99,7 +97,7 @@ export default {
       height = this.limitHeight(height, options);
     }
 
-    if (numberIsInteger(height) && height < 1) {
+    if (Number.isInteger(height) && height < 1) {
       throw VideomailError.create(
         "Height cannot be smaller than 1 when calculating width.",
         options,
@@ -128,7 +126,7 @@ export default {
       width = options.video.width;
     }
 
-    if (numberIsInteger(width) && width < 1) {
+    if (Number.isInteger(width) && width < 1) {
       throw VideomailError.create(
         "Unable to calculate height when width is less than 1.",
         options,
@@ -141,7 +139,7 @@ export default {
       height = parseInt(width * ratio);
     }
 
-    if (numberIsInteger(height) && height < 1) {
+    if (Number.isInteger(height) && height < 1) {
       throw VideomailError.create(
         "Just calculated a height less than 1 which is wrong.",
         options,

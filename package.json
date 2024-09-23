@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "9.3.2",
+  "version": "9.3.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -62,10 +62,8 @@
     "hyperscript": "2.0.2",
     "inherits": "2.0.4",
     "insert-css": "2.0.0",
-    "iphone-inline-video": "2.2.2",
     "is-power-of-two": "1.0.0",
     "keymirror": "0.1.1",
-    "number-is-integer": "2.0.0",
     "request-frame": "1.5.3",
     "safe-json-stringify": "1.2.0",
     "superagent": "10.1.0",
