@@ -22903,6 +22903,9 @@ var Replay = function Replay(parentElement, options) {
       if (videomail.webm) {
         this.setWebMSource(videomail.webm);
       }
+      if (videomail.vtt) {
+        setTrackSource(videomail.vtt);
+      }
       if (videomail.poster) {
         replayElement.setAttribute("poster", videomail.poster);
       }
@@ -23042,6 +23045,31 @@ var Replay = function Replay(parentElement, options) {
     }
     return source;
   };
+  function setTrackSource(src) {
+    if (!replayElement) {
+      return;
+    }
+    var tracks = replayElement.getElementsByTagName("track");
+    var firstTrack = tracks && tracks[0];
+    if (firstTrack) {
+      if (src) {
+        firstTrack.setAttribute("src", src);
+      } else {
+        // Remove when no captions available
+        replayElement.removeChild(firstTrack);
+      }
+    } else {
+      // Insert one then
+      var track = (0, _hyperscript.default)("track", {
+        src: src,
+        // It's captions, not subtitles. Because for subtitles you must define the language, see
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
+        kind: "captions",
+        default: true
+      });
+      replayElement.appendChild(track);
+    }
+  }
   function setVideoSource(type, src, bustCache) {
     var source = self.getVideoSource(type);
     if (src && bustCache) {
