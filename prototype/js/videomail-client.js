@@ -16907,7 +16907,7 @@ function wrappy (fn, cb) {
 },{}],112:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.4.0",
+  "version": "9.4.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -21924,15 +21924,7 @@ var Recorder = function Recorder(visuals, replay) {
           connecting = connected = false;
           if (err) {
             self.emit(_events.default.ERROR, err || "Unhandled websocket error");
-          } else {
-            // COMMENTED OUT TEMPORARILY, PROBABLY OLD CODE TOO
-            // UPON CLOSE IT SHOULD TRY TO RECONNECT INSTEAD OF DISCONNECT.
-
-            // self.emit(Events.DISCONNECTED);
-            // // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
-            // cancelAnimationFrame();
-
-            // New: try to reconnect
+          } else if (userMediaLoaded) {
             initSocket();
           }
         });
@@ -23068,6 +23060,10 @@ var Replay = function Replay(parentElement, options) {
         default: true
       });
       replayElement.appendChild(track);
+
+      // Because the local videomail server for development uses a different port, see
+      // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
+      replayElement.setAttribute("crossorigin", "anonymous");
     }
   }
   function setVideoSource(type, src, bustCache) {

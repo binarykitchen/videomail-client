@@ -377,15 +377,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
           if (err) {
             self.emit(Events.ERROR, err || "Unhandled websocket error");
-          } else {
-            // COMMENTED OUT TEMPORARILY, PROBABLY OLD CODE TOO
-            // UPON CLOSE IT SHOULD TRY TO RECONNECT INSTEAD OF DISCONNECT.
-
-            // self.emit(Events.DISCONNECTED);
-            // // prevents from https://github.com/binarykitchen/videomail.io/issues/297 happening
-            // cancelAnimationFrame();
-
-            // New: try to reconnect
+          } else if (userMediaLoaded) {
             initSocket();
           }
         });

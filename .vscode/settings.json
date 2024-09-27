@@ -13,6 +13,7 @@
     "browserstack",
     "bytediff",
     "classlist",
+    "crossorigin",
     "cssnano",
     "deepmerge",
     "derequire",

@@ -306,6 +306,10 @@ const Replay = function (parentElement, options) {
       });
 
       replayElement.appendChild(track);
+
+      // Because the local videomail server for development uses a different port, see
+      // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
+      replayElement.setAttribute("crossorigin", "anonymous");
     }
   }
 
