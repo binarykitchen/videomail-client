@@ -1,6 +1,6 @@
 # videomail-client ✉
 
-[![Test Runner for videomail-client](https://github.com/binarykitchen/videomail-client/actions/workflows/push.yml/badge.svg)](https://github.com/binarykitchen/videomail-client/actions/workflows/push.yml)
+[![Test Runner for videomail-client](https://github.com/binarykitchen/videomail-client/actions/workflows/push.yml/badge.svg)](https://github.com/binarykitchen/videomail-client/actions/workflows/ci.yml)
 
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
@@ -13,9 +13,10 @@
 
 Record videos in contact forms!
 
-Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds. This without the need for Flash, Java nor any other plugins / addons. Just JavaScript written in ES6.
+Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds.
+This without the need for Flash, Java nor any other plugins / addons. Just JavaScript written in ES6.
 
-- <a href="#prototype">Prototype (examples)</a>
+- <a href="#storybook">Storybook (examples)</a>
 - <a href="#demo">Demo / Fully working version</a>
 - <a href="#options">Options</a>
 - <a href="#api">API</a>
@@ -23,57 +24,19 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 - <a href="#whatisstored">What gets stored on the videomail server?</a>
 - <a href="#whitelist">Whitelist</a>
 - <a href="#compatibility">Backward compatibility</a>
-- <a href="#super-fast-cdn">Super fast global CDN</a>
 - <a href="#addons">Addons</a>
 - <a href="#notes">Notes</a>
 
-<a name="prototype"></a>
+<a name="storybook"></a>
 
-## Prototype (examples)
+## Storybook (examples)
 
-To run the prototype full of examples in your browser, just do:
+To check out some examples in your browser, just do:
 
 1. `npm install`
-2. `npm run watch` to ignite a static server and
-3. open `https://localhost:8443` in your browser
-
-Best is to study `/prototype/contact_form.html` which demonstrates how easy it is to integrate the videomail client into your own contact form.
-
-Beware that all _must run over HTTPs_. Google Chrome and soon other browsers won't allow the use of `getUserMedia()` on insecure origins.
-
-If you haven't installed the local CA in your system trust store yet, you will have to run those commands only once before starting the prototype:
-
-1. Install mkcert, see https://github.com/FiloSottile/mkcert#installation
-2. Run command `mkcert -install`
+2. `npm run storybook`
 
 That's it. Easy as apple pie.
-
-## Dead simple example (just record and replay)
-
-```html
-<html>
-  <body>
-    <div id="videomail"></div>
-    <script src="/js/videomail-client.js"></script>
-    <script>
-      var VideomailClient = require("videomail-client"), // load videomail client package
-        videomailClient = new VideomailClient({
-          // instantiate with some options
-          verbose: true, // prints additional info to console
-          disableSubmit: true, // disable submissions to keep example simple
-        });
-
-      // this will load your webcam, fill the placeholder containing
-      // the `id="videomail"` with HTML and CSS code, place buttons and much more.
-      videomailClient.show();
-    </script>
-  </body>
-</html>
-```
-
-The included JS file `/prototype/js/videomail-client.js` is already browserified and lies in the `js` folder.
-
-If you remove `disableSubmit`, then you will see a submit button to post the video and make it persistent. This requires a bit more code, see prototype directory.
 
 <a name="demo"></a>
 
@@ -85,19 +48,20 @@ A mirror of latest videomail-client can be seen on [videomail-client.netlify.com
 
 Check out the full version with all its features on [videomail.io](https://videomail.io) itself. Aim is to turn this into a stable product in the near future with some external assistance.
 
-On that site I just include `require('videomail-client')` in the app logic.
+On that site I just include `import VideomailClient from "videomail-client"` in the app logic.
 
-Another live example would be https://seeflow.co.nz/contact/ or https://www.deaf.org.nz/contact/. There are plenty if you just ask us. And way more will follow, we are rolling ...
+Another live example would be https://seeflow.co.nz/contact or https://www.deaf.org.nz/contact
+There are plenty if you just ask us. And way more will follow, we are rolling ...
 
 <a name="options"></a>
 
 ## Options
 
-There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at [src/options.js](https://github.com/binarykitchen/videomail-client/blob/master/src/options.js)
+There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at [src/options.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/options.ts)
 
 In most cases, these defaults are good enough. But `siteName` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
-Looking at the examples in the `/prototype` folder should give you some ideas how to use these options.
+Looking at the examples in the `/src/stories` folder should give you some ideas how to use these options.
 
 <a name="api"></a>
 
@@ -123,8 +87,8 @@ Looking at the examples in the `/prototype` folder should give you some ideas ho
 
 The constructor accepts a JSON with optional <a href="#options">options</a>. Example:
 
-```js
-var videomailClient = new VideomailClient({ siteName: "my site name" });
+```ts
+const videomailClient = new VideomailClient({ siteName: "my site name" });
 ```
 
 <a name="on"></a>
@@ -133,7 +97,7 @@ var videomailClient = new VideomailClient({ siteName: "my site name" });
 
 The VideomailClient class is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
-```js
+```ts
 videomailClient.on("FORM_READY", function () {
   // form is ready for recording
 });
@@ -141,20 +105,12 @@ videomailClient.on("FORM_READY", function () {
 videomailClient.on("SUBMITTED", function (videomail, response) {
   // continue with your own app logic in your javascript code if you want to process
   // something else further after form submission.
-  //
-  // check out /prototype/contact_form.html on how to integrate into your contact form
-  // that videomail object has plenty of useful information,
-  // i.E. the url or even the average fps it was recorded with.
-  // for more info on videomail meta data, see chapter "What is stored on the server?" below
-  //
-  // but if you want all that videomail meta data to be submitted in the form already,
-  // enable the `submitWithVideomail` option.
 });
 ```
 
 #### Supported events:
 
-Check them out at [src/events.js](https://github.com/binarykitchen/videomail-client/blob/master/src/events.js)
+Check them out at [src/events.js](https://github.com/binarykitchen/videomail-client/blob/master/src/events.ts)
 
 They should be self-explanatory. If not, ask for better documentation. Then, some of these events may come with parameters.
 
@@ -172,7 +128,7 @@ Automatically fills the DOM with a form for video recording. By default the HTML
 
 ### videomailClient.replay(videomail[, parentElementId])
 
-Manually adds a video container for the given videomail inside the parent element. This is mostly called after a successful submission. See `/prototype/direct_submit.html` or `/prototype/contact_form.html` for some inspiration.
+Manually adds a video container for the given videomail inside the parent element. See stories for some inspiration.
 
 If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally. If no parent element is given, then a replay container within the containerId is automatically generated.
 
@@ -183,8 +139,6 @@ Also note that, when the parent element already contains a video container like 
 ```
 
 then this will be used instead of adding a new dom element.
-
-Furthermore the `replay()` method also detects whether the parent element has placeholders to fill with form data. To understand this better, check out how the subject in the `/prototype/direct_submit.html` example is being displayed upon replay.
 
 <a name="startOver"></a>
 
@@ -211,11 +165,7 @@ An utility function which returns true if the current browser is capable of webc
 
 ### videomailClient.unload()
 
-Manually unloads the webcam and all other internal event listeners. Can be used in conjunction with single page apps, for example with AngularJS' destroy event:
-
-```js
-$scope.$on("$destroy", videomailClient.unload.bind(videomailClient));
-```
+Manually unloads the webcam and all other internal event listeners.
 
 <a name="hide"></a>
 
@@ -240,7 +190,6 @@ Returns true when a video is currently being recorded.
 ### videomailClient.submit()
 
 For advanced use only: especially when the submit button is covered with other HTML layers and the videomail client fails to process the click event.
-
 Calling this function will manually trigger a submission of the recorded videomail. But only when everything else is valid. Nothing will happen when invalid.
 
 <a name="getLogLines"></a>
@@ -253,7 +202,8 @@ For advanced use only: returns you a collection of log lines that show what code
 
 ## What gets stored on the videomail server?
 
-Here is an example JSON showing what videomail meta data exists, gets stored on the server and you can grab yourself for further use. It's emitted in the SUBMITTED event under the videomail object:
+Here is an example JSON showing what videomail meta data exists, gets stored on the server and you can grab yourself for further use.
+It's emitted in the SUBMITTED event under the videomail object:
 
 ```json
 {
@@ -299,7 +249,7 @@ By default the videomail-client interrupts the form submission with `e.preventDe
 
 If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
 
-```json
+```js
 selectors: {
   "formId": null,
   "submitButtonId": null,
@@ -308,8 +258,6 @@ selectors: {
 ```
 
 When these are null (defaults), the videomail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
-
-Here is a [working example](https://github.com/binarykitchen/videomail-client/blob/develop/prototype/contact_form.html#L55).
 
 ### Include videomail meta data in Form Submissions
 
@@ -343,22 +291,6 @@ Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=get
 
 PS: On Safari and iPhones/iPads you can play the videomails fine without any issues. Repeating: there is just no recording functionality for them yet until Apple made a move.
 
-<a name="super-fast-cdn"></a>
-
-## Super fast global CDN
-
-You can grab the already browserified videomail-client JS file through GitHub's rawgit server which is proxied by [MaxCDN's](http://www.maxcdn.com/) super fast global CDN:
-
-```
-https://cdn.rawgit.com/binarykitchen/videomail-client/<version number>/prototype/js/videomail-client.js
-```
-
-For example for version x.y.z, use this in your production site:
-https://cdn.rawgit.com/binarykitchen/videomail-client/x.y.z/prototype/js/videomail-client.min.js
-
-If for whatever reason that GitHub CDN doesn't meet your standard, here's another CDN to try:
-https://cdnjs.com/libraries/videomail-client
-
 <a name="addons"></a>
 
 ## Addons
@@ -376,16 +308,6 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 
 Too hard to maintain. Just do `git log` or look here
 https://github.com/binarykitchen/videomail-client/commits/master
-
-## Regenerate certificates
-
-Should be already included, but if they have expired, can regenerate with this bash command:
-
-```bash
-$ mkcert --cert-file ./env/dev/cert.pem --key-file ./env/dev/key.pem local.videomail-client.io localhost 127.0.0.1
-```
-
-This will require the native mkcert program you can get from https://github.com/FiloSottile/mkcert
 
 ### Noise
 
@@ -417,8 +339,6 @@ They all deserve lots of beer and love. That order is irrelevant.
 ### Code quality
 
 I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bug fixes come first before perfection otherwise you'll loose users. Reality you know.
-
-Anyway, on the next rewrite I'd probably pick [React](https://facebook.github.io/react/) or better [re-frame](https://github.com/Day8/re-frame) because the videomail-client depends heavily on application states.
 
 ### Final philosophy
 

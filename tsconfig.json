@@ -14,9 +14,6 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
 
-    // TODO To be removed once all is ported to TS
-    "allowJs": true,
-
     // This option can help you avoid using certain syntax that cannot be correctly compiled by SWC and Babel, see:
     // https://rsbuild.dev/guide/basic/typescript#isolatedmodules
     "isolatedModules": true,
