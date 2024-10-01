@@ -2,11 +2,14 @@
   "editor.tabSize": 2,
   "files.trimTrailingWhitespace": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
+  "eslint.options": {
+    "overrideConfigFile": "./.eslintrc.js"
+  },
   "prettier.configPath": "./prettier.config.cjs",
+  "stylelint.validate": ["stylus"],
   "cSpell.words": [
     "animitter",
     "autobuffer",
