@@ -1,0 +1,34 @@
+{
+  "include": ["etc", "src", ".storybook", ".eslintrc.js", "prettier.config.cjs"],
+  "extends": [
+    "./node_modules/@tsconfig/strictest/tsconfig.json",
+    "./node_modules/@tsconfig/node22/tsconfig.json"
+  ],
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+
+    "lib": ["dom", "dom.iterable", "esnext"],
+
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+
+    // TODO To be removed once all is ported to TS
+    "allowJs": true,
+
+    // This option can help you avoid using certain syntax that cannot be correctly compiled by SWC and Babel, see:
+    // https://rsbuild.dev/guide/basic/typescript#isolatedmodules
+    "isolatedModules": true,
+
+    // Strips all comments from TypeScript files when converting into JavaScript,
+    // you rarely read compiled code so this saves space
+    "removeComments": true,
+
+    "noEmit": true,
+
+    // TODO Remove these exceptions and fix more errors one day
+    "noImplicitAny": false,
+    "noPropertyAccessFromIndexSignature": false
+  }
+}
