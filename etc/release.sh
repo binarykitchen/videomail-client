@@ -50,7 +50,7 @@ fi
 # Ensures master is up to date
 git checkout master
 git pull
-git checkout develop
+git checkout dev
 
 info "Figuring next version for importance ${IMPORTANCE}...\n"
 read VERSION <<<$(gulp bumpVersion --importance=$IMPORTANCE | awk '/to/ {print $5}')
@@ -58,7 +58,7 @@ info "It's version ${VERSION}\n"
 
 git checkout master
 git push
-git checkout develop
+git checkout dev
 git push
 
 # Start a new release
@@ -85,8 +85,8 @@ git flow release finish $VERSION -p -m "Completing release of $VERSION"
 git checkout master
 git push --follow-tags
 
-# Prepare the develop branch for the new cycle
-git checkout develop
+# Prepare the dev branch for the new cycle
+git checkout dev
 
 # Strange bug, have to bump it again
 gulp bumpVersion --write --version=$VERSION

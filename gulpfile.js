@@ -153,14 +153,14 @@ const connectOptions = {
 };
 
 function connectHttps(done) {
-  const SSL_CERTS_PATH = path.join(__dirname, "env", "dev");
+  const SSL_CERTS_PATH = path.join(__dirname, "etc", "ssl-certs");
 
   plugins.connect.server({
     ...connectOptions,
     port: 8443,
     https: {
-      key: fs.readFileSync(path.join(SSL_CERTS_PATH, "key.pem")),
-      cert: fs.readFileSync(path.join(SSL_CERTS_PATH, "cert.pem")),
+      key: fs.readFileSync(path.join(SSL_CERTS_PATH, "localhost.key")),
+      cert: fs.readFileSync(path.join(SSL_CERTS_PATH, "localhost.crt")),
     },
   });
 
