@@ -16935,12 +16935,11 @@ module.exports={
   "scripts": {
     "audit": "npx audit-ci --config audit-ci.json",
     "build": "gulp build",
-    "clean": "rm -rf node_modules && rm -rf package-lock.json",
     "lint": "eslint --color ./src ./test ./gulpfile.js",
     "lint:fix": "npm --silent run lint -- --fix",
-    "major": "./env/dev/release.sh --importance=major",
-    "minor": "./env/dev/release.sh --importance=minor",
-    "patch": "./env/dev/release.sh --importance=patch",
+    "major": "./etc/release.sh --importance=major",
+    "minor": "./etc/release.sh --importance=minor",
+    "patch": "./etc/release.sh --importance=patch",
     "prettier": "prettier --check ./src ./test ./prototype/*.html gulpfile.js",
     "prettier:fix": "prettier --write ./src ./test ./prototype/*.html gulpfile.js",
     "test": "gulp test",
@@ -17016,7 +17015,6 @@ module.exports={
     "postcss": "8.4.47",
     "prettier": "3.3.3",
     "prettier-plugin-curly": "0.2.2",
-    "prettier-plugin-organize-imports": "4.1.0",
     "prettier-plugin-packagejson": "2.5.2",
     "prettier-plugin-sh": "0.14.0",
     "router": "1.3.8",
@@ -17028,8 +17026,8 @@ module.exports={
     "watchify": "4.0.0"
   },
   "engines": {
-    "node": ">=20.16.0",
-    "npm": ">=10.8.1"
+    "node": "^22.8.0",
+    "npm": "^10.8.2"
   },
   "readmeFilename": "README.md"
 }
