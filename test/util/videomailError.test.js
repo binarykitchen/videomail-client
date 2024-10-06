@@ -1,5 +1,5 @@
 import test from "tape-catch";
-import VideomailError from "./../../src/js/util/videomailError";
+import VideomailError from "./../../src/util/videomailError";
 
 const fakeOptions = {
   debug() {},

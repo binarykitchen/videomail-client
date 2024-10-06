@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import Visuals from "./../../src/js/wrappers/visuals";
+import Visuals from "./../../src/wrappers/visuals";
 
 test("Visuals:", function (t) {
   t.test("can be instantiated", function (tt) {

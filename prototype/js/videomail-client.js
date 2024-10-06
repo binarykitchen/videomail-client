@@ -16907,7 +16907,7 @@ function wrappy (fn, cb) {
 },{}],112:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.4.2",
+  "version": "9.5.1",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17190,7 +17190,7 @@ Object.keys(_constants.default.public).forEach(function (name) {
 VideomailClient.Events = _events.default;
 var _default = exports.default = VideomailClient;
 
-},{"./constants":114,"./events":115,"./options":116,"./resource":117,"./util/addOptionsFunctions":118,"./util/browser":120,"./util/collectLogger":121,"./util/eventEmitter":122,"./wrappers/container":129,"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":28,"inherits":66}],114:[function(_dereq_,module,exports){
+},{"./constants":114,"./events":115,"./options":116,"./resource":117,"./util/addOptionsFunctions":119,"./util/browser":121,"./util/collectLogger":122,"./util/eventEmitter":123,"./wrappers/container":130,"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":28,"inherits":66}],114:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17313,7 +17313,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _package = _dereq_("../../package.json");
+var _package = _dereq_("../package.json");
 var _addOptionsFunctions = _interopRequireDefault(_dereq_("./util/addOptionsFunctions"));
 var PRODUCTION = process.env.NODE_ENV === "production";
 var options = {
@@ -17516,7 +17516,7 @@ var optionsWithFunctions = (0, _addOptionsFunctions.default)(options);
 var _default = exports.default = optionsWithFunctions;
 
 }).call(this)}).call(this,_dereq_('_process'))
-},{"../../package.json":112,"./util/addOptionsFunctions":118,"@babel/runtime/helpers/interopRequireDefault":4,"_process":75}],117:[function(_dereq_,module,exports){
+},{"../package.json":112,"./util/addOptionsFunctions":119,"@babel/runtime/helpers/interopRequireDefault":4,"_process":75}],117:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17679,6 +17679,11 @@ function _default(options) {
 },{"./constants":114,"@babel/runtime/helpers/interopRequireDefault":4,"superagent":100}],118:[function(_dereq_,module,exports){
 "use strict";
 
+module.exports = '@-webkit-keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.videomail .visuals{position:relative}.videomail .visuals video.replay{height:100%;width:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{height:auto;margin:0}.videomail .countdown,.videomail .facingMode,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute;z-index:100}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%);width:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{letter-spacing:4px;text-align:center;text-shadow:-2px 0 #fff,0 2px #fff,2px 0 #fff,0 -2px #fff}.videomail .countdown,.videomail .pausedHeader{font-size:460%;opacity:.9}.videomail .pausedHint{font-size:150%}.videomail .facingMode{background:rgba(30,30,30,.5);border:none;bottom:.6em;color:hsla(0,0%,96%,.9);font-family:monospace;font-size:1.2em;outline:none;padding:.1em .3em;right:.7em;-webkit-transition:all .2s ease;transition:all .2s ease;z-index:10}.videomail .facingMode:hover{background:rgba(50,50,50,.7);cursor:pointer}.videomail .recordNote,.videomail .recordTimer{background:hsla(0,0%,4%,.8);color:#00d814;font-family:monospace;opacity:.9;padding:.3em .4em;right:.7em;-webkit-transition:all 1s ease;transition:all 1s ease}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{-webkit-animation:blink 1s infinite;animation:blink 1s infinite;content:"REC"}.videomail .notifier{-webkit-box-sizing:border-box;box-sizing:border-box;height:100%;overflow:hidden}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}.videomail video.userMedia{background-color:rgba(50,50,50,.1)}';
+
+},{}],119:[function(_dereq_,module,exports){
+"use strict";
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -17731,7 +17736,7 @@ function addOptionsFunctions(options) {
 }
 var _default = exports.default = addOptionsFunctions;
 
-},{}],119:[function(_dereq_,module,exports){
+},{}],120:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17864,7 +17869,7 @@ function _default(userMedia, options) {
   };
 }
 
-},{"./browser":120,"./videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4,"audio-sample":14,"is-power-of-two":68}],120:[function(_dereq_,module,exports){
+},{"./browser":121,"./videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4,"audio-sample":14,"is-power-of-two":68}],121:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18091,7 +18096,7 @@ var Browser = function Browser(options) {
 };
 var _default = exports.default = Browser;
 
-},{"./videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"defined":30,"ua-parser-js":106}],121:[function(_dereq_,module,exports){
+},{"./videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"defined":30,"ua-parser-js":106}],122:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18159,7 +18164,7 @@ function _default() {
   };
 }
 
-},{"./browser":120,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/toConsumableArray":7,"format-util":47}],122:[function(_dereq_,module,exports){
+},{"./browser":121,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/toConsumableArray":7,"format-util":47}],123:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18226,7 +18231,7 @@ function _default(options, name) {
   };
 }
 
-},{"./../events":115,"./videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4,"despot":31,"safe-json-stringify":95}],123:[function(_dereq_,module,exports){
+},{"./../events":115,"./videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4,"despot":31,"safe-json-stringify":95}],124:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18248,7 +18253,7 @@ var _default = exports.default = {
   }
 };
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"filesize":46,"humanize-duration":62}],124:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"filesize":46,"humanize-duration":62}],125:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18385,7 +18390,7 @@ var _default = exports.default = [
  * 'timeupdate'
  */];
 
-},{}],125:[function(_dereq_,module,exports){
+},{}],126:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18453,7 +18458,7 @@ function _default(anything, options) {
   return anything.toString();
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"safe-json-stringify":95}],126:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"safe-json-stringify":95}],127:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18510,7 +18515,7 @@ function _default() {
   }
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"classlist.js":23,"request-frame":93}],127:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"classlist.js":23,"request-frame":93}],128:[function(_dereq_,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -18903,7 +18908,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 var _default = exports.default = VideomailError;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./../resource":117,"./browser":120,"./pretty":125,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"create-error":27,"safe-json-stringify":95}],128:[function(_dereq_,module,exports){
+},{"./../resource":117,"./browser":121,"./pretty":126,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"create-error":27,"safe-json-stringify":95}],129:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -19429,7 +19434,7 @@ var Buttons = function Buttons(container, options) {
 (0, _inherits.default)(Buttons, _eventEmitter.default);
 var _default = exports.default = Buttons;
 
-},{"../events":115,"../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"contains":25,"hidden":61,"hyperscript":63,"inherits":66}],129:[function(_dereq_,module,exports){
+},{"../events":115,"../util/eventEmitter":123,"@babel/runtime/helpers/interopRequireDefault":4,"contains":25,"hidden":61,"hyperscript":63,"inherits":66}],130:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -19443,7 +19448,7 @@ var _hidden = _interopRequireDefault(_dereq_("hidden"));
 var _insertCss = _interopRequireDefault(_dereq_("insert-css"));
 var _safeJsonStringify = _interopRequireDefault(_dereq_("safe-json-stringify"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
-var _mainMinCss = _interopRequireDefault(_dereq_("../../styles/css/main.min.css.js"));
+var _mainMinCss = _interopRequireDefault(_dereq_("../styles/css/main.min.css.js"));
 var _events = _interopRequireDefault(_dereq_("../events"));
 var _resource = _interopRequireDefault(_dereq_("../resource"));
 var _eventEmitter = _interopRequireDefault(_dereq_("../util/eventEmitter"));
@@ -20143,7 +20148,7 @@ var Container = function Container(options) {
 (0, _inherits.default)(Container, _eventEmitter.default);
 var _default = exports.default = Container;
 
-},{"../../styles/css/main.min.css.js":144,"../events":115,"../resource":117,"../util/eventEmitter":122,"../util/videomailError":127,"./buttons":128,"./dimension":130,"./form":131,"./optionsWrapper":132,"./visuals":133,"@babel/runtime/helpers/defineProperty":3,"@babel/runtime/helpers/interopRequireDefault":4,"document-visibility":32,"hidden":61,"inherits":66,"insert-css":67,"safe-json-stringify":95}],130:[function(_dereq_,module,exports){
+},{"../events":115,"../resource":117,"../styles/css/main.min.css.js":118,"../util/eventEmitter":123,"../util/videomailError":128,"./buttons":129,"./dimension":131,"./form":132,"./optionsWrapper":133,"./visuals":134,"@babel/runtime/helpers/defineProperty":3,"@babel/runtime/helpers/interopRequireDefault":4,"document-visibility":32,"hidden":61,"inherits":66,"insert-css":67,"safe-json-stringify":95}],131:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20259,7 +20264,7 @@ var _default = exports.default = {
   }
 };
 
-},{"./../util/videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4}],131:[function(_dereq_,module,exports){
+},{"./../util/videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4}],132:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20542,7 +20547,7 @@ var Form = function Form(container, formElement, options) {
 (0, _inherits.default)(Form, _eventEmitter.default);
 var _default = exports.default = Form;
 
-},{"../events":115,"../util/eventEmitter":122,"../util/videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4,"get-form-data":50,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":95}],132:[function(_dereq_,module,exports){
+},{"../events":115,"../util/eventEmitter":123,"../util/videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4,"get-form-data":50,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":95}],133:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20569,7 +20574,7 @@ var _default = exports.default = {
   }
 };
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":28}],133:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":28}],134:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20913,7 +20918,7 @@ var Visuals = function Visuals(container, options) {
 (0, _inherits.default)(Visuals, _eventEmitter.default);
 var _default = exports.default = Visuals;
 
-},{"../events":115,"../util/eventEmitter":122,"./visuals/inside/recorderInsides":139,"./visuals/notifier":140,"./visuals/recorder":141,"./visuals/replay":142,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":95}],134:[function(_dereq_,module,exports){
+},{"../events":115,"../util/eventEmitter":123,"./visuals/inside/recorderInsides":140,"./visuals/notifier":141,"./visuals/recorder":142,"./visuals/replay":143,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":95}],135:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20987,7 +20992,7 @@ function _default(visuals, options) {
   };
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],135:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],136:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21036,7 +21041,7 @@ function _default(visuals, options) {
   };
 }
 
-},{"./../../../../events":115,"./../../../../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],136:[function(_dereq_,module,exports){
+},{"./../../../../events":115,"./../../../../util/eventEmitter":123,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],137:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21089,7 +21094,7 @@ function _default(visuals, options) {
   };
 }
 
-},{"./../../../../util/videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],137:[function(_dereq_,module,exports){
+},{"./../../../../util/videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],138:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21130,7 +21135,7 @@ function _default(visuals) {
   };
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],138:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],139:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21250,7 +21255,7 @@ function _default(visuals, recordNote, options) {
   };
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],139:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63}],140:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21364,7 +21369,7 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
 (0, _inherits.default)(RecorderInsides, _eventEmitter.default);
 var _default = exports.default = RecorderInsides;
 
-},{"./../../../events":115,"./../../../util/browser":120,"./../../../util/eventEmitter":122,"./recorder/countdown":134,"./recorder/facingMode":135,"./recorder/pausedNote":136,"./recorder/recordNote":137,"./recorder/recordTimer":138,"@babel/runtime/helpers/interopRequireDefault":4,"inherits":66}],140:[function(_dereq_,module,exports){
+},{"./../../../events":115,"./../../../util/browser":121,"./../../../util/eventEmitter":123,"./recorder/countdown":135,"./recorder/facingMode":136,"./recorder/pausedNote":137,"./recorder/recordNote":138,"./recorder/recordTimer":139,"@babel/runtime/helpers/interopRequireDefault":4,"inherits":66}],141:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21645,7 +21650,7 @@ var Notifier = function Notifier(visuals, options) {
 (0, _inherits.default)(Notifier, _eventEmitter.default);
 var _default = exports.default = Notifier;
 
-},{"../../events":115,"../../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63,"inherits":66}],141:[function(_dereq_,module,exports){
+},{"../../events":115,"../../util/eventEmitter":123,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":61,"hyperscript":63,"inherits":66}],142:[function(_dereq_,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -22809,7 +22814,7 @@ var Recorder = function Recorder(visuals, replay) {
 var _default = exports.default = Recorder;
 
 }).call(this)}).call(this,_dereq_("buffer").Buffer)
-},{"../../constants":114,"../../events":115,"../../util/browser":120,"../../util/eventEmitter":122,"../../util/humanize":123,"../../util/pretty":125,"../../util/videomailError":127,"./userMedia":143,"@babel/runtime/helpers/interopRequireDefault":4,"animitter":13,"buffer":18,"canvas-to-buffer":21,"deepmerge":28,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":95,"websocket-stream":109}],142:[function(_dereq_,module,exports){
+},{"../../constants":114,"../../events":115,"../../util/browser":121,"../../util/eventEmitter":123,"../../util/humanize":124,"../../util/pretty":126,"../../util/videomailError":128,"./userMedia":144,"@babel/runtime/helpers/interopRequireDefault":4,"animitter":13,"buffer":18,"canvas-to-buffer":21,"deepmerge":28,"hidden":61,"hyperscript":63,"inherits":66,"safe-json-stringify":95,"websocket-stream":109}],143:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22841,15 +22846,24 @@ var Replay = function Replay(parentElement, options) {
         throw new Error("No replay parent element container with ID ".concat(replayParentElement, " found."));
       }
     }
-    replayParentElement.appendChild(replayElement);
+    var videoSelector = "video.".concat(options.selectors.replayClass);
+    replayElement = replayParentElement.querySelector(videoSelector);
+
+    // If none exists, create one then
+    if (!replayElement) {
+      replayElement = (0, _hyperscript.default)(videoSelector);
+      replayParentElement.appendChild(replayElement);
+    }
   }
+
+  // Questionable, does not make sense
   function isStandalone() {
     return parentElement.constructor.name === "HTMLDivElement";
   }
   function copyAttributes(newVideomail) {
     var attributeContainer;
     Object.keys(newVideomail).forEach(function (attribute) {
-      attributeContainer = parentElement.querySelector(".".concat(attribute));
+      attributeContainer = replayElement.parentNode.querySelector(".".concat(attribute));
       if (attributeContainer) {
         var empty = !attributeContainer.innerHTML || attributeContainer.innerHTML.length < 1;
 
@@ -22885,6 +22899,7 @@ var Replay = function Replay(parentElement, options) {
     }
   }
   this.setVideomail = function (newVideomail) {
+    var playerOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     videomail = newVideomail;
     if (videomail) {
       if (videomail.mp4) {
@@ -22901,10 +22916,13 @@ var Replay = function Replay(parentElement, options) {
       }
       copyAttributes(videomail);
     }
+    var width = videomail && videomail.width;
+    var height = videomail && videomail.height;
     var hasAudio = videomail && videomail.recordingStats && videomail.recordingStats.sampleRate > 0;
-    this.show(videomail && videomail.width, videomail && videomail.height, hasAudio);
+    this.show(width, height, hasAudio, playerOnly);
   };
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
+    var playerOnly = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     if (!replayElement) {
       return;
     }
@@ -22912,7 +22930,7 @@ var Replay = function Replay(parentElement, options) {
       // Skip, already shown
       return;
     }
-    debug("Replay: show()");
+    debug("Replay: show(playerOnly=".concat(playerOnly, ")"));
     if (videomail) {
       correctDimensions({
         responsive: true,
@@ -22922,9 +22940,10 @@ var Replay = function Replay(parentElement, options) {
       });
     }
     (0, _hidden.default)(replayElement, false);
-
-    // parent element can be any object, be careful!
-    if (parentElement) {
+    if (playerOnly) {
+      (0, _hidden.default)(replayElement.parentNode, false);
+    } else if (parentElement) {
+      // parent element can be any object, be careful!
       if (parentElement.style) {
         (0, _hidden.default)(parentElement, false);
       } else if (parentElement.show) {
@@ -22958,7 +22977,7 @@ var Replay = function Replay(parentElement, options) {
     }
   };
   this.build = function (replayParentElement) {
-    debug("Replay: build (".concat(replayParentElement ? "replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
+    debug("Replay: build (".concat(replayParentElement ? "replayParentElement=\"".concat(replayParentElement.id, "\"") : "", ")"));
     replayElement = parentElement.querySelector("video.".concat(options.selectors.replayClass));
     if (!replayElement) {
       buildElement(replayParentElement);
@@ -23143,27 +23162,38 @@ var Replay = function Replay(parentElement, options) {
         self.setMp4Source(null);
         self.setWebMSource(null);
       }
+      videomail = undefined;
       cb && cb();
     });
   };
   this.hide = function () {
     if (isStandalone()) {
       (0, _hidden.default)(parentElement, true);
-    } else {
-      replayElement && (0, _hidden.default)(replayElement, true);
+    } else if (replayElement) {
+      (0, _hidden.default)(replayElement, true);
+      (0, _hidden.default)(replayElement.parentNode, true);
     }
   };
   this.isShown = function () {
-    return replayElement && !(0, _hidden.default)(replayElement);
+    if (!replayElement) {
+      return false;
+    }
+    if (!parentElement) {
+      return false;
+    }
+    return !(0, _hidden.default)(replayElement) && !parentElement.isHidden();
   };
   this.getParentElement = function () {
     return parentElement;
+  };
+  this.getElement = function () {
+    return replayElement;
   };
 };
 (0, _inherits.default)(Replay, _eventEmitter.default);
 var _default = exports.default = Replay;
 
-},{"../../events":115,"../../util/browser":120,"../../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"add-eventlistener-with-options":12,"hidden":61,"hyperscript":63,"inherits":66}],143:[function(_dereq_,module,exports){
+},{"../../events":115,"../../util/browser":121,"../../util/eventEmitter":123,"@babel/runtime/helpers/interopRequireDefault":4,"add-eventlistener-with-options":12,"hidden":61,"hyperscript":63,"inherits":66}],144:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -23578,12 +23608,7 @@ function _default(recorder, options) {
   };
 }
 
-},{"./../../events":115,"./../../util/audioRecorder":119,"./../../util/browser":120,"./../../util/eventEmitter":122,"./../../util/mediaEvents":124,"./../../util/pretty":125,"./../../util/videomailError":127,"@babel/runtime/helpers/interopRequireDefault":4,"hyperscript":63,"safe-json-stringify":95}],144:[function(_dereq_,module,exports){
-"use strict";
-
-module.exports = '@-webkit-keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}@keyframes blink{0%{opacity:.9}35%{opacity:.9}50%{opacity:.1}85%{opacity:.1}to{opacity:.9}}.videomail .visuals{position:relative}.videomail .visuals video.replay{height:100%;width:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer{height:auto;margin:0}.videomail .countdown,.videomail .facingMode,.videomail .paused,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{position:absolute;z-index:100}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint,.videomail .recordNote,.videomail .recordTimer,.videomail noscript{font-weight:700}.videomail .countdown,.videomail .paused,.videomail noscript{top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%);width:100%}.videomail .countdown,.videomail .pausedHeader,.videomail .pausedHint{letter-spacing:4px;text-align:center;text-shadow:-2px 0 #fff,0 2px #fff,2px 0 #fff,0 -2px #fff}.videomail .countdown,.videomail .pausedHeader{font-size:460%;opacity:.9}.videomail .pausedHint{font-size:150%}.videomail .facingMode{background:rgba(30,30,30,.5);border:none;bottom:.6em;color:hsla(0,0%,96%,.9);font-family:monospace;font-size:1.2em;outline:none;padding:.1em .3em;right:.7em;-webkit-transition:all .2s ease;transition:all .2s ease;z-index:10}.videomail .facingMode:hover{background:rgba(50,50,50,.7);cursor:pointer}.videomail .recordNote,.videomail .recordTimer{background:hsla(0,0%,4%,.8);color:#00d814;font-family:monospace;opacity:.9;padding:.3em .4em;right:.7em;-webkit-transition:all 1s ease;transition:all 1s ease}.videomail .recordNote.near,.videomail .recordTimer.near{color:#eb9369}.videomail .recordNote.nigh,.videomail .recordTimer.nigh{color:#ea4b2a}.videomail .recordTimer{top:.7em}.videomail .recordNote{top:3.6em}.videomail .recordNote:before{-webkit-animation:blink 1s infinite;animation:blink 1s infinite;content:"REC"}.videomail .notifier{-webkit-box-sizing:border-box;box-sizing:border-box;height:100%;overflow:hidden}.videomail .radioGroup{display:block}.videomail video{margin-bottom:0}.videomail video.userMedia{background-color:rgba(50,50,50,.1)}';
-
-},{}],"videomail-client":[function(_dereq_,module,exports){
+},{"./../../events":115,"./../../util/audioRecorder":120,"./../../util/browser":121,"./../../util/eventEmitter":123,"./../../util/mediaEvents":125,"./../../util/pretty":126,"./../../util/videomailError":128,"@babel/runtime/helpers/interopRequireDefault":4,"hyperscript":63,"safe-json-stringify":95}],"videomail-client":[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -23597,5 +23622,5 @@ var _standardize = _interopRequireDefault(_dereq_("./util/standardize"));
 (0, _standardize.default)(window, navigator);
 var _default = exports.default = _client.default;
 
-},{"./client":113,"./util/standardize":126,"@babel/runtime/helpers/interopRequireDefault":4}]},{},["videomail-client"])("videomail-client")
+},{"./client":113,"./util/standardize":127,"@babel/runtime/helpers/interopRequireDefault":4}]},{},["videomail-client"])("videomail-client")
 });

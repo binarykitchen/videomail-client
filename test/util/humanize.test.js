@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import humanize from "./../../src/js/util/humanize";
+import humanize from "./../../src/util/humanize";
 
 test("humanize:", function (t) {
   t.test("filesize throws error on missing params", function (tt) {

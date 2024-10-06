@@ -72,7 +72,7 @@ const cache = {};
 const packageCache = {};
 
 function bundle(done, watching) {
-  const entry = path.join(__dirname, "src/js/index.js");
+  const entry = path.join(__dirname, "src/index.js");
   const bundler = browserify({
     entries: [entry],
     cache,
