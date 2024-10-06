@@ -249,7 +249,12 @@ const Visuals = function (container, options) {
       recorderInsides.unload(e);
       replay.unload();
 
-      this.hide();
+      if (e instanceof Error) {
+        // Don't hide when e is an error so that the error can be still
+        // displayed under visuals > notifier
+      } else {
+        this.hide();
+      }
 
       built = false;
     } catch (exc) {

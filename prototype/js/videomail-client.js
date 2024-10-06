@@ -20615,7 +20615,7 @@ var Visuals = function Visuals(container, options) {
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
-    debug("Visuals: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
+    debug("Visuals: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement.id, "\"") : "", ")"));
     buildNoScriptTag();
     if (!playerOnly) {
       notifier.build();
@@ -20685,20 +20685,27 @@ var Visuals = function Visuals(container, options) {
   this.build = function () {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
+    debug("Visuals: build (playerOnly=".concat(playerOnly, ")"));
     if (container) {
       visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
       if (!visualsElement) {
-        visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
-        var buttonsElement = container.querySelector(".".concat(options.selectors.buttonsClass));
-
-        /*
-         * Make sure it's placed before the buttons, but only if it's a child
-         * element of the container = inside the container
-         */
-        if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
-          container.insertBefore(visualsElement, buttonsElement);
+        if (playerOnly && replayParentElement) {
+          visualsElement = replayParentElement;
         } else {
-          container.appendChild(visualsElement);
+          visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
+        }
+        if (!playerOnly) {
+          var buttonsElement = container.querySelector(".".concat(options.selectors.buttonsClass));
+
+          /*
+           * Make sure it's placed before the buttons, but only if it's a child
+           * element of the container = inside the container
+           */
+          if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
+            container.insertBefore(visualsElement, buttonsElement);
+          } else {
+            container.appendChild(visualsElement);
+          }
         }
       }
 
@@ -20741,6 +20748,7 @@ var Visuals = function Visuals(container, options) {
       cb = params;
       params = {};
     }
+    debug("Visuals: back(".concat(params ? (0, _safeJsonStringify.default)(params) : "", ")"));
     replay.hide();
     notifier.hide();
     if (params && params.keepHidden) {
@@ -20773,6 +20781,12 @@ var Visuals = function Visuals(container, options) {
       recorder.unload(e);
       recorderInsides.unload(e);
       replay.unload();
+      if (e instanceof Error) {
+        // Don't hide when e is an error so that the error can be still
+        // displayed under visuals > notifier
+      } else {
+        this.hide();
+      }
       built = false;
     } catch (exc) {
       this.emit(_events.default.ERROR, exc);
@@ -20859,15 +20873,17 @@ var Visuals = function Visuals(container, options) {
     }
   };
   this.showVisuals = function () {
-    visualsElement && (0, _hidden.default)(visualsElement, false);
+    (0, _hidden.default)(visualsElement, false);
   };
   this.show = function () {
-    !this.isReplayShown() && visualsElement && recorder.build();
+    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    if (!playerOnly && !this.isReplayShown()) {
+      recorder.build();
+    }
     this.showVisuals();
   };
   this.showReplayOnly = function () {
-    replay.show();
-    this.show();
+    this.show(true);
     recorder.hide();
     notifier.hide();
   };
@@ -21510,12 +21526,17 @@ var Notifier = function Notifier(visuals, options) {
   };
   function setMessage(message, messageOptions) {
     options.debug("Notifier: setMessage(".concat(message, ")"));
-    if (!messageElement && notifyElement) {
+    if (!messageElement) {
       messageElement = (0, _hyperscript.default)("h2", {
         id: NOTIFIER_MESSAGE_ID
       });
       if (notifyElement) {
-        notifyElement.appendChild(messageElement);
+        if (messageElement && explanationElement) {
+          // For rare cases, shouldn't happen to set an explanation without a message
+          notifyElement.insertBefore(messageElement, explanationElement);
+        } else {
+          notifyElement.appendChild(messageElement);
+        }
       } else {
         options.logger.warn("Unable to show message ".concat(message, " because notifyElement is empty"));
       }
@@ -21596,10 +21617,6 @@ var Notifier = function Notifier(visuals, options) {
     var classList = notifyOptions.classList ? notifyOptions.classList : false;
     var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false;
     if (notifyElement) {
-      if (messageElement && explanationElement) {
-        notifyElement.insertBefore(messageElement, explanationElement);
-      }
-
       // reset
       if (!entertain) {
         notifyElement.className = "notifier";
