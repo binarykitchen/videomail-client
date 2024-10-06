@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import Recorder from "./../../src/js/wrappers/visuals/recorder";
+import Recorder from "./../../src/wrappers/visuals/recorder";
 
 test("Recorder:", function (t) {
   t.test("can be instantiated", function (tt) {

@@ -1,7 +1,7 @@
 import h from "hyperscript";
 import test from "tape-catch";
 
-import VideomailClient from "./../../src/js/client";
+import VideomailClient from "./../../src/client";
 
 const SILENT = true;
 

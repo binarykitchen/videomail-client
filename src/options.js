@@ -1,4 +1,4 @@
-import { version } from "../../package.json";
+import { version } from "../package.json";
 import addOptionsFunctions from "./util/addOptionsFunctions";
 
 const PRODUCTION = process.env.NODE_ENV === "production";

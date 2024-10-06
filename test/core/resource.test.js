@@ -1,5 +1,5 @@
 import test from "tape-catch";
-import Resource from "./../../src/js/resource";
+import Resource from "./../../src/resource";
 
 test("Resource:", function (t) {
   t.test("can be instantiated", function (tt) {

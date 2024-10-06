@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import Replay from "./../../src/js/wrappers/visuals/replay";
+import Replay from "./../../src/wrappers/visuals/replay";
 
 test("Replay:", function (t) {
   t.test("can be instantiated", function (tt) {

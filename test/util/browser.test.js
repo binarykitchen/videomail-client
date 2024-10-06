@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import Browser from "../../src/js/util/browser";
+import Browser from "../../src/util/browser";
 
 test("Browser:", { timeout: 2000 }, function (t) {
   t.test("without arguments", function (tt) {

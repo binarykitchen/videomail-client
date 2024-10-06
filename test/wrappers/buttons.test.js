@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import Buttons from "./../../src/js/wrappers/buttons";
+import Buttons from "./../../src/wrappers/buttons";
 
 test("Buttons:", function (t) {
   t.test("can be instantiated", function (tt) {

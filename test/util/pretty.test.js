@@ -1,6 +1,6 @@
 import test from "tape-catch";
 
-import pretty from "./../../src/js/util/pretty";
+import pretty from "./../../src/util/pretty";
 
 test("pretty:", function (t) {
   t.test("prettifies undefined fine", function (tt) {

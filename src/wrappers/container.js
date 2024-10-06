@@ -5,7 +5,7 @@ import stringify from "safe-json-stringify";
 
 import inherits from "inherits";
 
-import css from "../../styles/css/main.min.css.js";
+import css from "../styles/css/main.min.css.js";
 import Events from "../events";
 import Resource from "../resource";
 import EventEmitter from "../util/eventEmitter";
