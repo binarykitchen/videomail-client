@@ -41,7 +41,7 @@ const Visuals = function (container, options) {
 
   function buildChildren(playerOnly = false, replayParentElement) {
     debug(
-      `Visuals: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
+      `Visuals: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement.id}"` : ""})`,
     );
 
     buildNoScriptTag();
@@ -128,24 +128,32 @@ const Visuals = function (container, options) {
   };
 
   this.build = function (playerOnly = false, replayParentElement) {
+    debug(`Visuals: build (playerOnly=${playerOnly})`);
+
     if (container) {
       visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
 
       if (!visualsElement) {
-        visualsElement = h(`div.${options.selectors.visualsClass}`);
-
-        const buttonsElement = container.querySelector(
-          `.${options.selectors.buttonsClass}`,
-        );
-
-        /*
-         * Make sure it's placed before the buttons, but only if it's a child
-         * element of the container = inside the container
-         */
-        if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
-          container.insertBefore(visualsElement, buttonsElement);
+        if (playerOnly && replayParentElement) {
+          visualsElement = replayParentElement;
         } else {
-          container.appendChild(visualsElement);
+          visualsElement = h(`div.${options.selectors.visualsClass}`);
+        }
+
+        if (!playerOnly) {
+          const buttonsElement = container.querySelector(
+            `.${options.selectors.buttonsClass}`,
+          );
+
+          /*
+           * Make sure it's placed before the buttons, but only if it's a child
+           * element of the container = inside the container
+           */
+          if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
+            container.insertBefore(visualsElement, buttonsElement);
+          } else {
+            container.appendChild(visualsElement);
+          }
         }
       }
 
@@ -200,6 +208,8 @@ const Visuals = function (container, options) {
       params = {};
     }
 
+    debug(`Visuals: back(${params ? stringify(params) : ""})`);
+
     replay.hide();
     notifier.hide();
 
@@ -238,6 +248,13 @@ const Visuals = function (container, options) {
       recorder.unload(e);
       recorderInsides.unload(e);
       replay.unload();
+
+      if (e instanceof Error) {
+        // Don't hide when e is an error so that the error can be still
+        // displayed under visuals > notifier
+      } else {
+        this.hide();
+      }
 
       built = false;
     } catch (exc) {
@@ -343,18 +360,19 @@ const Visuals = function (container, options) {
   };
 
   this.showVisuals = function () {
-    visualsElement && hidden(visualsElement, false);
+    hidden(visualsElement, false);
   };
 
-  this.show = function () {
-    !this.isReplayShown() && visualsElement && recorder.build();
+  this.show = function (playerOnly = false) {
+    if (!playerOnly && !this.isReplayShown()) {
+      recorder.build();
+    }
+
     this.showVisuals();
   };
 
   this.showReplayOnly = function () {
-    replay.show();
-
-    this.show();
+    this.show(true);
 
     recorder.hide();
     notifier.hide();
