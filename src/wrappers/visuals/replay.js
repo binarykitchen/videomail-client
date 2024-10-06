@@ -19,8 +19,6 @@ const Replay = function (parentElement, options) {
   let videomail;
 
   function buildElement(replayParentElement = parentElement) {
-    replayElement = h(`video.${options.selectors.replayClass}`);
-
     if (typeof replayParentElement === "string") {
       replayParentElement = document.getElementById(replayParentElement);
 

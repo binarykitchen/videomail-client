@@ -14,6 +14,7 @@ const Notifier = function (visuals, options) {
   const debug = options && options.debug;
 
   let notifyElement;
+  let messageElement;
   let explanationElement;
   let entertainTimeoutId;
   let entertaining;
@@ -58,7 +59,7 @@ const Notifier = function (visuals, options) {
       overallProgress = frameProgress;
     }
 
-    self.setExplanation(overallProgress);
+    setExplanation(overallProgress);
   }
 
   function onBeginVideoEncoding() {
@@ -162,28 +163,6 @@ const Notifier = function (visuals, options) {
     entertaining = false;
   }
 
-  function setMessage(message, messageOptions) {
-    const notifierMessage = getNotifierMessage();
-
-    if (notifierMessage) {
-      options.debug(`Notifier: setMessage(${message})`);
-
-      if (message.length > 0) {
-        const problem = messageOptions.problem ? messageOptions.problem : false;
-        notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
-      } else {
-        options.logger.warn(
-          "Not going to update notifierMessage element because message is empty",
-          message,
-        );
-      }
-
-      hidden(notifierMessage, false);
-    } else {
-      // Must be unloaded, do nothing further
-    }
-  }
-
   this.error = function (err) {
     const message = err.message ? err.message.toString() : err.toString();
     const explanation = err.explanation ? err.explanation.toString() : null;
@@ -201,7 +180,38 @@ const Notifier = function (visuals, options) {
     });
   };
 
-  this.setExplanation = function (explanation) {
+  function setMessage(message, messageOptions) {
+    options.debug(`Notifier: setMessage(${message})`);
+
+    if (!messageElement && notifyElement) {
+      messageElement = h("h2", {
+        id: NOTIFIER_MESSAGE_ID,
+      });
+
+      if (notifyElement) {
+        notifyElement.appendChild(messageElement);
+      } else {
+        options.logger.warn(
+          `Unable to show message ${message} because notifyElement is empty`,
+        );
+      }
+    }
+
+    if (message.length > 0) {
+      const problem = messageOptions.problem ? messageOptions.problem : false;
+      messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+    } else {
+      options.logger.warn(
+        "Not going to update notifierMessage element because message is empty",
+      );
+    }
+
+    hidden(messageElement, false);
+  }
+
+  function setExplanation(explanation) {
+    options.debug(`Notifier: setExplanation(${explanation})`);
+
     if (!explanationElement) {
       explanationElement = h("p", { className: "explanation" });
 
@@ -218,7 +228,7 @@ const Notifier = function (visuals, options) {
     explanationElement.innerHTML = explanation;
 
     hidden(explanationElement, false);
-  };
+  }
 
   this.build = function () {
     options.debug("Notifier: build()");
@@ -241,10 +251,8 @@ const Notifier = function (visuals, options) {
   };
 
   function hideMessage() {
-    const notifierMessage = getNotifierMessage();
-
-    if (notifierMessage) {
-      hidden(notifierMessage, true);
+    if (messageElement) {
+      hidden(messageElement, true);
     }
   }
 
@@ -278,10 +286,6 @@ const Notifier = function (visuals, options) {
     return built;
   };
 
-  function getNotifierMessage() {
-    return document.getElementById(NOTIFIER_MESSAGE_ID);
-  }
-
   this.notify = function (message, explanation, notifyOptions = {}) {
     const params = [message, explanation].filter(Boolean);
     options.debug(`Notifier: notify(${params.join(", ")})`);
@@ -295,23 +299,11 @@ const Notifier = function (visuals, options) {
       ? notifyOptions.removeDimensions
       : false;
 
-    let notifierMessage = getNotifierMessage();
-
-    if (!notifierMessage && notifyElement) {
-      const messageElement = h("h2", {
-        id: NOTIFIER_MESSAGE_ID,
-      });
-
-      notifyElement.appendChild(messageElement);
-    }
-
-    notifierMessage = getNotifierMessage();
-
-    if (notifyElement && notifierMessage && explanationElement) {
-      notifyElement.insertBefore(notifierMessage, explanationElement);
-    }
-
     if (notifyElement) {
+      if (messageElement && explanationElement) {
+        notifyElement.insertBefore(messageElement, explanationElement);
+      }
+
       // reset
       if (!entertain) {
         notifyElement.className = "notifier";
@@ -342,7 +334,7 @@ const Notifier = function (visuals, options) {
     setMessage(message, notifyOptions);
 
     if (explanation && explanation.length > 0) {
-      this.setExplanation(explanation);
+      setExplanation(explanation);
     }
 
     if (entertain) {
