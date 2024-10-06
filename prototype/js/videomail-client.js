@@ -22846,15 +22846,24 @@ var Replay = function Replay(parentElement, options) {
         throw new Error("No replay parent element container with ID ".concat(replayParentElement, " found."));
       }
     }
-    replayParentElement.appendChild(replayElement);
+    var videoSelector = "video.".concat(options.selectors.replayClass);
+    replayElement = replayParentElement.querySelector(videoSelector);
+
+    // If none exists, create one then
+    if (!replayElement) {
+      replayElement = (0, _hyperscript.default)(videoSelector);
+      replayParentElement.appendChild(replayElement);
+    }
   }
+
+  // Questionable, does not make sense
   function isStandalone() {
     return parentElement.constructor.name === "HTMLDivElement";
   }
   function copyAttributes(newVideomail) {
     var attributeContainer;
     Object.keys(newVideomail).forEach(function (attribute) {
-      attributeContainer = parentElement.querySelector(".".concat(attribute));
+      attributeContainer = replayElement.parentNode.querySelector(".".concat(attribute));
       if (attributeContainer) {
         var empty = !attributeContainer.innerHTML || attributeContainer.innerHTML.length < 1;
 
@@ -22890,6 +22899,7 @@ var Replay = function Replay(parentElement, options) {
     }
   }
   this.setVideomail = function (newVideomail) {
+    var playerOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     videomail = newVideomail;
     if (videomail) {
       if (videomail.mp4) {
@@ -22906,10 +22916,13 @@ var Replay = function Replay(parentElement, options) {
       }
       copyAttributes(videomail);
     }
+    var width = videomail && videomail.width;
+    var height = videomail && videomail.height;
     var hasAudio = videomail && videomail.recordingStats && videomail.recordingStats.sampleRate > 0;
-    this.show(videomail && videomail.width, videomail && videomail.height, hasAudio);
+    this.show(width, height, hasAudio, playerOnly);
   };
   this.show = function (recorderWidth, recorderHeight, hasAudio) {
+    var playerOnly = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     if (!replayElement) {
       return;
     }
@@ -22917,7 +22930,7 @@ var Replay = function Replay(parentElement, options) {
       // Skip, already shown
       return;
     }
-    debug("Replay: show()");
+    debug("Replay: show(playerOnly=".concat(playerOnly, ")"));
     if (videomail) {
       correctDimensions({
         responsive: true,
@@ -22927,9 +22940,10 @@ var Replay = function Replay(parentElement, options) {
       });
     }
     (0, _hidden.default)(replayElement, false);
-
-    // parent element can be any object, be careful!
-    if (parentElement) {
+    if (playerOnly) {
+      (0, _hidden.default)(replayElement.parentNode, false);
+    } else if (parentElement) {
+      // parent element can be any object, be careful!
       if (parentElement.style) {
         (0, _hidden.default)(parentElement, false);
       } else if (parentElement.show) {
@@ -22963,7 +22977,7 @@ var Replay = function Replay(parentElement, options) {
     }
   };
   this.build = function (replayParentElement) {
-    debug("Replay: build (".concat(replayParentElement ? "replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
+    debug("Replay: build (".concat(replayParentElement ? "replayParentElement=\"".concat(replayParentElement.id, "\"") : "", ")"));
     replayElement = parentElement.querySelector("video.".concat(options.selectors.replayClass));
     if (!replayElement) {
       buildElement(replayParentElement);
@@ -23148,21 +23162,32 @@ var Replay = function Replay(parentElement, options) {
         self.setMp4Source(null);
         self.setWebMSource(null);
       }
+      videomail = undefined;
       cb && cb();
     });
   };
   this.hide = function () {
     if (isStandalone()) {
       (0, _hidden.default)(parentElement, true);
-    } else {
-      replayElement && (0, _hidden.default)(replayElement, true);
+    } else if (replayElement) {
+      (0, _hidden.default)(replayElement, true);
+      (0, _hidden.default)(replayElement.parentNode, true);
     }
   };
   this.isShown = function () {
-    return replayElement && !(0, _hidden.default)(replayElement);
+    if (!replayElement) {
+      return false;
+    }
+    if (!parentElement) {
+      return false;
+    }
+    return !(0, _hidden.default)(replayElement) && !parentElement.isHidden();
   };
   this.getParentElement = function () {
     return parentElement;
+  };
+  this.getElement = function () {
+    return replayElement;
   };
 };
 (0, _inherits.default)(Replay, _eventEmitter.default);
