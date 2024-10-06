@@ -909,8 +909,9 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   this.back = function (cb) {
     this.emit(Events.GOING_BACK);
 
+    unloaded = false;
+
     show();
-    this.reset();
 
     writeCommand("back", cb);
   };

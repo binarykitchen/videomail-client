@@ -95,7 +95,7 @@ const VideomailClient = function (options) {
     });
 
     const replay = container.getReplay();
-    replay.setVideomail(videomail);
+    replay.setVideomail(videomail, true);
   };
 
   this.startOver = function (params) {

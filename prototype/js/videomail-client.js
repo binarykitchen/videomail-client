@@ -16907,7 +16907,7 @@ function wrappy (fn, cb) {
 },{}],112:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.1",
+  "version": "9.5.3",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -17118,7 +17118,7 @@ var VideomailClient = function VideomailClient(options) {
       container.showReplayOnly();
     });
     var replay = container.getReplay();
-    replay.setVideomail(videomail);
+    replay.setVideomail(videomail, true);
   };
   this.startOver = function (params) {
     var replay = container.getReplay();
@@ -21388,6 +21388,7 @@ var Notifier = function Notifier(visuals, options) {
   var self = this;
   var debug = options && options.debug;
   var notifyElement;
+  var messageElement;
   var explanationElement;
   var entertainTimeoutId;
   var entertaining;
@@ -21421,7 +21422,7 @@ var Notifier = function Notifier(visuals, options) {
     } else {
       overallProgress = frameProgress;
     }
-    self.setExplanation(overallProgress);
+    setExplanation(overallProgress);
   }
   function onBeginVideoEncoding() {
     visuals.beginWaiting();
@@ -21493,21 +21494,6 @@ var Notifier = function Notifier(visuals, options) {
     entertainTimeoutId = null;
     entertaining = false;
   }
-  function setMessage(message, messageOptions) {
-    var notifierMessage = getNotifierMessage();
-    if (notifierMessage) {
-      options.debug("Notifier: setMessage(".concat(message, ")"));
-      if (message.length > 0) {
-        var problem = messageOptions.problem ? messageOptions.problem : false;
-        notifierMessage.innerHTML = (problem ? "&#x2639; " : "") + message;
-      } else {
-        options.logger.warn("Not going to update notifierMessage element because message is empty", message);
-      }
-      (0, _hidden.default)(notifierMessage, false);
-    } else {
-      // Must be unloaded, do nothing further
-    }
-  }
   this.error = function (err) {
     var message = err.message ? err.message.toString() : err.toString();
     var explanation = err.explanation ? err.explanation.toString() : null;
@@ -21522,7 +21508,28 @@ var Notifier = function Notifier(visuals, options) {
       removeDimensions: err.removeDimensions && err.removeDimensions()
     });
   };
-  this.setExplanation = function (explanation) {
+  function setMessage(message, messageOptions) {
+    options.debug("Notifier: setMessage(".concat(message, ")"));
+    if (!messageElement && notifyElement) {
+      messageElement = (0, _hyperscript.default)("h2", {
+        id: NOTIFIER_MESSAGE_ID
+      });
+      if (notifyElement) {
+        notifyElement.appendChild(messageElement);
+      } else {
+        options.logger.warn("Unable to show message ".concat(message, " because notifyElement is empty"));
+      }
+    }
+    if (message.length > 0) {
+      var problem = messageOptions.problem ? messageOptions.problem : false;
+      messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+    } else {
+      options.logger.warn("Not going to update notifierMessage element because message is empty");
+    }
+    (0, _hidden.default)(messageElement, false);
+  }
+  function setExplanation(explanation) {
+    options.debug("Notifier: setExplanation(".concat(explanation, ")"));
     if (!explanationElement) {
       explanationElement = (0, _hyperscript.default)("p", {
         className: "explanation"
@@ -21535,7 +21542,7 @@ var Notifier = function Notifier(visuals, options) {
     }
     explanationElement.innerHTML = explanation;
     (0, _hidden.default)(explanationElement, false);
-  };
+  }
   this.build = function () {
     options.debug("Notifier: build()");
     notifyElement = visuals.querySelector(".notifier");
@@ -21551,9 +21558,8 @@ var Notifier = function Notifier(visuals, options) {
     built = true;
   };
   function hideMessage() {
-    var notifierMessage = getNotifierMessage();
-    if (notifierMessage) {
-      (0, _hidden.default)(notifierMessage, true);
+    if (messageElement) {
+      (0, _hidden.default)(messageElement, true);
     }
   }
   function hideExplanation() {
@@ -21579,9 +21585,6 @@ var Notifier = function Notifier(visuals, options) {
   this.isBuilt = function () {
     return built;
   };
-  function getNotifierMessage() {
-    return document.getElementById(NOTIFIER_MESSAGE_ID);
-  }
   this.notify = function (message, explanation) {
     var notifyOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var params = [message, explanation].filter(Boolean);
@@ -21592,18 +21595,11 @@ var Notifier = function Notifier(visuals, options) {
     var hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     var classList = notifyOptions.classList ? notifyOptions.classList : false;
     var removeDimensions = notifyOptions.removeDimensions ? notifyOptions.removeDimensions : false;
-    var notifierMessage = getNotifierMessage();
-    if (!notifierMessage && notifyElement) {
-      var messageElement = (0, _hyperscript.default)("h2", {
-        id: NOTIFIER_MESSAGE_ID
-      });
-      notifyElement.appendChild(messageElement);
-    }
-    notifierMessage = getNotifierMessage();
-    if (notifyElement && notifierMessage && explanationElement) {
-      notifyElement.insertBefore(notifierMessage, explanationElement);
-    }
     if (notifyElement) {
+      if (messageElement && explanationElement) {
+        notifyElement.insertBefore(messageElement, explanationElement);
+      }
+
       // reset
       if (!entertain) {
         notifyElement.className = "notifier";
@@ -21630,7 +21626,7 @@ var Notifier = function Notifier(visuals, options) {
     visuals.hideRecorder();
     setMessage(message, notifyOptions);
     if (explanation && explanation.length > 0) {
-      this.setExplanation(explanation);
+      setExplanation(explanation);
     }
     if (entertain) {
       runEntertainment();
@@ -22352,8 +22348,8 @@ var Recorder = function Recorder(visuals, replay) {
   };
   this.back = function (cb) {
     this.emit(_events.default.GOING_BACK);
+    unloaded = false;
     show();
-    this.reset();
     writeCommand("back", cb);
   };
   function reInitializeAudio() {
@@ -22839,7 +22835,6 @@ var Replay = function Replay(parentElement, options) {
   var videomail;
   function buildElement() {
     var replayParentElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : parentElement;
-    replayElement = (0, _hyperscript.default)("video.".concat(options.selectors.replayClass));
     if (typeof replayParentElement === "string") {
       replayParentElement = document.getElementById(replayParentElement);
       if (!replayParentElement) {
