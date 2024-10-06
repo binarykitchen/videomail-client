@@ -1,5 +1,7 @@
 import "@storybook/addon-console";
+
 import type { Preview } from "@storybook/html";
+
 const preview: Preview = {
   parameters: {
     options: {
@@ -10,4 +12,5 @@ const preview: Preview = {
     },
   },
 };
+
 export default preview;

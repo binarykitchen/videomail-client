@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "storybook-html-rsbuild";
+
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
@@ -20,4 +21,5 @@ const config: StorybookConfig = {
     disableTelemetry: true,
   },
 };
+
 export default config;

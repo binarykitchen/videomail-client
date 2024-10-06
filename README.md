@@ -4,15 +4,12 @@
 
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
-[![browserstack][browserstack-image]][browserstack-url]
 [![Netlify Status](https://api.netlify.com/api/v1/badges/3c9df5b4-8b85-4081-950a-d5df2dbd9926/deploy-status)](https://app.netlify.com/sites/videomail-client/deploys)
 
 [npm-image]: https://img.shields.io/npm/v/videomail-client.svg?style=flat
 [npm-url]: https://npmjs.org/package/videomail-client
 [downloads-image]: https://img.shields.io/npm/dm/videomail-client.svg?style=flat
 [downloads-url]: https://npmjs.org/package/videomail-client
-[browserstack-url]: https://www.browserstack.com
-[browserstack-image]: https://raw.githubusercontent.com/binarykitchen/videomail-client/develop/browserstack.png
 
 Record videos in contact forms!
 
@@ -34,7 +31,7 @@ Finally you can encode any webcam recordings from modern browsers and mobiles in
 
 ## Prototype (examples)
 
-To run the prototype full of examples in your browser with Gulp, just do:
+To run the prototype full of examples in your browser, just do:
 
 1. `npm install`
 2. `npm run watch` to ignite a static server and
@@ -416,8 +413,6 @@ These guys helped and/or inspired me for this mad project:
 - Kelvin Wong
 
 They all deserve lots of beer and love. That order is irrelevant.
-
-And yes, one more thing: because it is very crucial to make videomail-client work on all browsers, I cannot emphasize enough how important it is to have [Browserstack](https://www.browserstack.com/) - for instant, live end-to-end tests on any browser or mobile device. Thanks guys!
 
 ### Code quality
 
