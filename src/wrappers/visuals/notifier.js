@@ -183,13 +183,18 @@ const Notifier = function (visuals, options) {
   function setMessage(message, messageOptions) {
     options.debug(`Notifier: setMessage(${message})`);
 
-    if (!messageElement && notifyElement) {
+    if (!messageElement) {
       messageElement = h("h2", {
         id: NOTIFIER_MESSAGE_ID,
       });
 
       if (notifyElement) {
-        notifyElement.appendChild(messageElement);
+        if (messageElement && explanationElement) {
+          // For rare cases, shouldn't happen to set an explanation without a message
+          notifyElement.insertBefore(messageElement, explanationElement);
+        } else {
+          notifyElement.appendChild(messageElement);
+        }
       } else {
         options.logger.warn(
           `Unable to show message ${message} because notifyElement is empty`,
@@ -300,10 +305,6 @@ const Notifier = function (visuals, options) {
       : false;
 
     if (notifyElement) {
-      if (messageElement && explanationElement) {
-        notifyElement.insertBefore(messageElement, explanationElement);
-      }
-
       // reset
       if (!entertain) {
         notifyElement.className = "notifier";
