@@ -347,6 +347,8 @@ const Buttons = function (container, options) {
 
     if (isShown(recordButton) && !params.recordWhenReady) {
       enable(recordButton);
+    } else if (isShown(recordAgainButton) && !params.recordWhenReady) {
+      enable(recordAgainButton);
     }
 
     if (options.enableAutoValidation) {
@@ -669,6 +671,8 @@ const Buttons = function (container, options) {
 
       debug("Buttons: unload()");
       self.removeAllListeners();
+
+      self.hide();
 
       built = false;
     }
