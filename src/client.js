@@ -56,9 +56,9 @@ const VideomailClient = function (options) {
    * Automatically adds a <video> element inside the given parentElement and
    * loads it with the videomail
    */
-  this.replay = function (videomail, replayParentElement) {
+  this.replay = function (videomail, replayParentElementId) {
     if (!container.isBuilt()) {
-      container.build(true, replayParentElement);
+      container.build({ playerOnly: true, replayParentElementId });
     }
 
     if (videomail) {
