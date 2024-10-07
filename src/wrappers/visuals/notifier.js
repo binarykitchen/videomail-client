@@ -14,7 +14,7 @@ const Notifier = function (visuals, options) {
   const debug = options && options.debug;
 
   let notifyElement;
-  let messageElement;
+  let messageElement = document.getElementById(NOTIFIER_MESSAGE_ID);
   let explanationElement;
   let entertainTimeoutId;
   let entertaining;
@@ -180,16 +180,27 @@ const Notifier = function (visuals, options) {
     });
   };
 
+  // Special treatment to deal with race conditions
+  function getMessageElement() {
+    if (messageElement) {
+      return messageElement;
+    }
+
+    messageElement = document.getElementById(NOTIFIER_MESSAGE_ID);
+
+    return messageElement;
+  }
+
   function setMessage(message, messageOptions) {
     options.debug(`Notifier: setMessage(${message})`);
 
-    if (!messageElement) {
+    if (!getMessageElement()) {
       messageElement = h("h2", {
         id: NOTIFIER_MESSAGE_ID,
       });
 
       if (notifyElement) {
-        if (messageElement && explanationElement) {
+        if (explanationElement) {
           // For rare cases, shouldn't happen to set an explanation without a message
           notifyElement.insertBefore(messageElement, explanationElement);
         } else {
@@ -256,7 +267,7 @@ const Notifier = function (visuals, options) {
   };
 
   function hideMessage() {
-    if (messageElement) {
+    if (getMessageElement()) {
       hidden(messageElement, true);
     }
   }
