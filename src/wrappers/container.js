@@ -542,18 +542,24 @@ const Container = function (options) {
 
   this.startOver = function (params) {
     try {
-      self.emit(Events.STARTING_OVER);
+      debug(`Container: startOver(${params ? stringify(params) : ""})`);
 
       submitted = false;
-      form.show();
+
+      // Rebuild all again and initialise events again
+      self.build();
+
+      self.emit(Events.STARTING_OVER);
+
       visuals.back(params, function () {
+        self.enableForm();
+
         if (params && params.keepHidden) {
           /*
            * just enable form, do nothing else.
            * see example contact_form.html when you submit without videomail
            * and go back
            */
-          self.enableForm();
         } else {
           self.show(params);
         }
@@ -723,18 +729,25 @@ const Container = function (options) {
     return buttons.isReady();
   }
 
+  // when method is undefined, treat it as a post
   function isPost(method) {
-    return method && method.toUpperCase() === "POST";
+    if (!method) {
+      return true;
+    }
+    return method.toUpperCase() === "POST";
   }
 
   function isPut(method) {
-    return method && method.toUpperCase() === "PUT";
+    if (!method) {
+      return false;
+    }
+    return method.toUpperCase() === "PUT";
   }
 
   this.submitAll = function (formData, method, url) {
-    debug(`Container: submitAll(${method}: "${url}")`);
+    const output = [method, url].filter(Boolean).join(": ");
+    debug(`Container: submitAll(${output})`);
 
-    const post = isPost(method);
     const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
 
     function startSubmission() {
@@ -747,12 +760,7 @@ const Container = function (options) {
     const submitVideomailCallback = function (err1, videomail, videomailResponse) {
       if (err1) {
         finalizeSubmissions(err1, method, videomail, videomailResponse);
-      } else if (post) {
-        submitForm(formData, videomailResponse, url, function (err2, formResponse) {
-          finalizeSubmissions(err2, method, videomail, videomailResponse, formResponse);
-        });
       } else {
-        // it's a direct submission
         finalizeSubmissions(null, method, videomail, videomailResponse);
       }
     };
@@ -818,6 +826,7 @@ const Container = function (options) {
     buttons && buttons.hide(params);
   };
 
+  // Only used for replays
   this.loadForm = function (videomail) {
     if (form) {
       form.loadVideomail(videomail);
