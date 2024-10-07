@@ -85,7 +85,7 @@ const Container = function (options) {
 
   function buildChildren(playerOnly = false, replayParentElement) {
     debug(
-      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
+      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement.id}"` : ""})`,
     );
 
     if (containerElement) {
@@ -105,7 +105,7 @@ const Container = function (options) {
     if (err.stack) {
       options.logger.error(err.stack);
     } else {
-      options.logger.error(err);
+      options.logger.error(err.message);
     }
 
     if (options.displayErrors) {
@@ -155,7 +155,8 @@ const Container = function (options) {
     if (options.enableSpace) {
       if (!playerOnly) {
         window.addEventListener("keypress", function (e) {
-          const { tagName } = e.target;
+          const tagName = e.target?.tagName;
+
           const isEditable =
             e.target.isContentEditable ||
             e.target.contentEditable === "true" ||
@@ -185,7 +186,8 @@ const Container = function (options) {
      */
     self.on(Events.ERROR, function (err) {
       processError(err);
-      unloadChildren(err);
+
+      self.endWaiting();
 
       if (err.removeDimensions && err.removeDimensions()) {
         removeDimensions();
@@ -254,8 +256,7 @@ const Container = function (options) {
   function submitVideomail(formData, method, cb) {
     const videomailFormData = form.transformFormData(formData);
 
-    // when method is undefined, treat it as a post
-    if (isPost(method) || !method) {
+    if (isPost(method)) {
       videomailFormData.recordingStats = visuals.getRecordingStats();
       videomailFormData.width = visuals.getRecorderWidth(true);
       videomailFormData.height = visuals.getRecorderHeight(true);
