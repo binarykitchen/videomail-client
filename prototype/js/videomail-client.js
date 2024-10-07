@@ -16434,7 +16434,7 @@ function wrappy (fn, cb) {
 },{}],110:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.8",
+  "version": "9.5.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
