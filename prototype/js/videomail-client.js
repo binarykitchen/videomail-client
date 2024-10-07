@@ -16434,7 +16434,7 @@ function wrappy (fn, cb) {
 },{}],110:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.6",
+  "version": "9.5.7",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -16565,32 +16565,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
 var _inherits = _interopRequireDefault(_dereq_("inherits"));
 var _constants = _interopRequireDefault(_dereq_("./constants"));
 var _events = _interopRequireDefault(_dereq_("./events"));
-var _options = _interopRequireDefault(_dereq_("./options"));
 var _resource = _interopRequireDefault(_dereq_("./resource"));
 var _browser = _interopRequireDefault(_dereq_("./util/browser"));
-var _collectLogger = _interopRequireDefault(_dereq_("./util/collectLogger"));
+var _adjustOptions = _interopRequireDefault(_dereq_("./util/adjustOptions"));
 var _eventEmitter = _interopRequireDefault(_dereq_("./util/eventEmitter"));
 var _container = _interopRequireDefault(_dereq_("./wrappers/container"));
-var _addOptionsFunctions = _interopRequireDefault(_dereq_("./util/addOptionsFunctions"));
-var collectLogger;
 var browser;
-function adjustOptions() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var localOptions = (0, _deepmerge.default)(_options.default, options, {
-    arrayMerge: function arrayMerge(_destination, source) {
-      return source;
-    }
-  });
-  collectLogger || (collectLogger = new _collectLogger.default(localOptions));
-  localOptions.logger = collectLogger;
-  localOptions.debug = localOptions.logger.debug;
-  var localOptionsWithFunctions = (0, _addOptionsFunctions.default)(localOptions);
-  return localOptionsWithFunctions;
-}
 function getBrowser(localOptions) {
   if (!browser) {
     browser = new _browser.default(localOptions);
@@ -16598,7 +16581,7 @@ function getBrowser(localOptions) {
   return browser;
 }
 var VideomailClient = function VideomailClient(options) {
-  var localOptions = adjustOptions(options);
+  var localOptions = (0, _adjustOptions.default)(options);
   var container = new _container.default(localOptions);
   var debug = localOptions.debug;
   this.events = _events.default;
@@ -16715,7 +16698,7 @@ Object.keys(_constants.default.public).forEach(function (name) {
 VideomailClient.Events = _events.default;
 var _default = exports.default = VideomailClient;
 
-},{"./constants":112,"./events":113,"./options":114,"./resource":115,"./util/addOptionsFunctions":117,"./util/browser":119,"./util/collectLogger":120,"./util/eventEmitter":121,"./wrappers/container":127,"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":27,"inherits":65}],112:[function(_dereq_,module,exports){
+},{"./constants":112,"./events":113,"./resource":115,"./util/adjustOptions":118,"./util/browser":120,"./util/eventEmitter":122,"./wrappers/container":128,"@babel/runtime/helpers/interopRequireDefault":4,"inherits":65}],112:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17268,6 +17251,33 @@ var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
+var _deepmerge = _interopRequireDefault(_dereq_("deepmerge"));
+var _collectLogger = _interopRequireDefault(_dereq_("./collectLogger"));
+var _options = _interopRequireDefault(_dereq_("./../options"));
+var _addOptionsFunctions = _interopRequireDefault(_dereq_("./addOptionsFunctions"));
+function adjustOptions() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var localOptions = (0, _deepmerge.default)(_options.default, options, {
+    arrayMerge: function arrayMerge(_destination, source) {
+      return source;
+    }
+  });
+  var collectLogger = new _collectLogger.default(localOptions);
+  localOptions.logger = collectLogger;
+  localOptions.debug = localOptions.logger.debug;
+  var localOptionsWithFunctions = (0, _addOptionsFunctions.default)(localOptions);
+  return localOptionsWithFunctions;
+}
+var _default = exports.default = adjustOptions;
+
+},{"./../options":114,"./addOptionsFunctions":117,"./collectLogger":121,"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":27}],119:[function(_dereq_,module,exports){
+"use strict";
+
+var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.default = _default;
 var _audioSample = _interopRequireDefault(_dereq_("audio-sample"));
 var _isPowerOfTwo = _interopRequireDefault(_dereq_("is-power-of-two"));
@@ -17394,7 +17404,7 @@ function _default(userMedia, options) {
   };
 }
 
-},{"./browser":119,"./videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4,"audio-sample":14,"is-power-of-two":67}],119:[function(_dereq_,module,exports){
+},{"./browser":120,"./videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4,"audio-sample":14,"is-power-of-two":67}],120:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17621,7 +17631,7 @@ var Browser = function Browser(options) {
 };
 var _default = exports.default = Browser;
 
-},{"./videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"defined":29,"ua-parser-js":104}],120:[function(_dereq_,module,exports){
+},{"./videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"defined":29,"ua-parser-js":104}],121:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17636,7 +17646,6 @@ function _default() {
   var localOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var browser = new _browser.default(localOptions);
   var logger = localOptions.logger || console;
-  var containerId = localOptions.selectors && localOptions.selectors.containerId || "undefined container id";
   var stack = [];
   function lifo(level, parameters) {
     var line = _formatUtil.default.apply(void 0, (0, _toConsumableArray2.default)(parameters));
@@ -17646,18 +17655,13 @@ function _default() {
     stack.push("[".concat(level, "] ").concat(line));
     return line;
   }
-  function addContainerId(firstArgument) {
-    return "#".concat(containerId, " [").concat(new Date().toLocaleTimeString(), "] > ").concat(firstArgument);
-  }
 
   /*
    * workaround: since we cannot overwrite console.log without having the correct file and line number
    * we'll use groupCollapsed() and trace() instead to get these.
    */
   this.debug = function () {
-    // always add it for better client error reports
     var args = [].slice.call(arguments, 0);
-    args[0] = addContainerId(args[0]);
     var output = lifo("debug", args);
     if (localOptions.verbose) {
       if (browser.isFirefox()) {
@@ -17676,12 +17680,10 @@ function _default() {
   };
   this.error = function () {
     var args = [].slice.call(arguments, 0);
-    args[0] = addContainerId(args[0]);
     logger.error(lifo("error", args));
   };
   this.warn = function () {
     var args = [].slice.call(arguments, 0);
-    args[0] = addContainerId(args[0]);
     logger.warn(lifo("warn", args));
   };
   this.getLines = function () {
@@ -17689,7 +17691,7 @@ function _default() {
   };
 }
 
-},{"./browser":119,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/toConsumableArray":7,"format-util":46}],121:[function(_dereq_,module,exports){
+},{"./browser":120,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/toConsumableArray":7,"format-util":46}],122:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17756,7 +17758,7 @@ function _default(options, name) {
   };
 }
 
-},{"./../events":113,"./videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4,"despot":30,"safe-json-stringify":93}],122:[function(_dereq_,module,exports){
+},{"./../events":113,"./videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4,"despot":30,"safe-json-stringify":93}],123:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17778,7 +17780,7 @@ var _default = exports.default = {
   }
 };
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"filesize":45,"humanize-duration":61}],123:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"filesize":45,"humanize-duration":61}],124:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17915,7 +17917,7 @@ var _default = exports.default = [
  * 'timeupdate'
  */];
 
-},{}],124:[function(_dereq_,module,exports){
+},{}],125:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -17983,7 +17985,7 @@ function _default(anything, options) {
   return anything.toString();
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"safe-json-stringify":93}],125:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"safe-json-stringify":93}],126:[function(_dereq_,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -18376,7 +18378,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
 var _default = exports.default = VideomailError;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./../resource":115,"./browser":119,"./pretty":124,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"create-error":26,"safe-json-stringify":93}],126:[function(_dereq_,module,exports){
+},{"./../resource":115,"./browser":120,"./pretty":125,"@babel/runtime/helpers/interopRequireDefault":4,"@babel/runtime/helpers/typeof":10,"create-error":26,"safe-json-stringify":93}],127:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -18905,7 +18907,7 @@ var Buttons = function Buttons(container, options) {
 (0, _inherits.default)(Buttons, _eventEmitter.default);
 var _default = exports.default = Buttons;
 
-},{"../events":113,"../util/eventEmitter":121,"@babel/runtime/helpers/interopRequireDefault":4,"contains":24,"hidden":60,"hyperscript":62,"inherits":65}],127:[function(_dereq_,module,exports){
+},{"../events":113,"../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"contains":24,"hidden":60,"hyperscript":62,"inherits":65}],128:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -19627,7 +19629,7 @@ var Container = function Container(options) {
 (0, _inherits.default)(Container, _eventEmitter.default);
 var _default = exports.default = Container;
 
-},{"../events":113,"../resource":115,"../styles/css/main.min.css.js":116,"../util/eventEmitter":121,"../util/videomailError":125,"./buttons":126,"./dimension":128,"./form":129,"./optionsWrapper":130,"./visuals":131,"@babel/runtime/helpers/defineProperty":3,"@babel/runtime/helpers/interopRequireDefault":4,"document-visibility":31,"hidden":60,"inherits":65,"insert-css":66,"safe-json-stringify":93}],128:[function(_dereq_,module,exports){
+},{"../events":113,"../resource":115,"../styles/css/main.min.css.js":116,"../util/eventEmitter":122,"../util/videomailError":126,"./buttons":127,"./dimension":129,"./form":130,"./optionsWrapper":131,"./visuals":132,"@babel/runtime/helpers/defineProperty":3,"@babel/runtime/helpers/interopRequireDefault":4,"document-visibility":31,"hidden":60,"inherits":65,"insert-css":66,"safe-json-stringify":93}],129:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -19743,7 +19745,7 @@ var _default = exports.default = {
   }
 };
 
-},{"./../util/videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4}],129:[function(_dereq_,module,exports){
+},{"./../util/videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4}],130:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20037,7 +20039,7 @@ var Form = function Form(container, formElement, options) {
 (0, _inherits.default)(Form, _eventEmitter.default);
 var _default = exports.default = Form;
 
-},{"../events":113,"../util/eventEmitter":121,"../util/videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4,"get-form-data":49,"hidden":60,"hyperscript":62,"inherits":65,"safe-json-stringify":93}],130:[function(_dereq_,module,exports){
+},{"../events":113,"../util/eventEmitter":122,"../util/videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4,"get-form-data":49,"hidden":60,"hyperscript":62,"inherits":65,"safe-json-stringify":93}],131:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20064,7 +20066,7 @@ var _default = exports.default = {
   }
 };
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":27}],131:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"deepmerge":27}],132:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20184,18 +20186,16 @@ var Visuals = function Visuals(container, options) {
         } else {
           visualsElement = (0, _hyperscript.default)("div.".concat(options.selectors.visualsClass));
         }
-        if (!playerOnly) {
-          var buttonsElement = container.querySelector(".".concat(options.selectors.buttonsClass));
+        var buttonsElement = container.querySelector(".".concat(options.selectors.buttonsClass));
 
-          /*
-           * Make sure it's placed before the buttons, but only if it's a child
-           * element of the container = inside the container
-           */
-          if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
-            container.insertBefore(visualsElement, buttonsElement);
-          } else {
-            container.appendChild(visualsElement);
-          }
+        /*
+         * Make sure it's placed before the buttons, but only if it's a child
+         * element of the container = inside the container
+         */
+        if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
+          container.insertBefore(visualsElement, buttonsElement);
+        } else {
+          container.appendChild(visualsElement);
         }
       }
 
@@ -20424,7 +20424,7 @@ var Visuals = function Visuals(container, options) {
 (0, _inherits.default)(Visuals, _eventEmitter.default);
 var _default = exports.default = Visuals;
 
-},{"../events":113,"../util/eventEmitter":121,"./visuals/inside/recorderInsides":137,"./visuals/notifier":138,"./visuals/recorder":139,"./visuals/replay":140,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62,"inherits":65,"safe-json-stringify":93}],132:[function(_dereq_,module,exports){
+},{"../events":113,"../util/eventEmitter":122,"./visuals/inside/recorderInsides":138,"./visuals/notifier":139,"./visuals/recorder":140,"./visuals/replay":141,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62,"inherits":65,"safe-json-stringify":93}],133:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20498,7 +20498,7 @@ function _default(visuals, options) {
   };
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],133:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],134:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20547,7 +20547,7 @@ function _default(visuals, options) {
   };
 }
 
-},{"./../../../../events":113,"./../../../../util/eventEmitter":121,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],134:[function(_dereq_,module,exports){
+},{"./../../../../events":113,"./../../../../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],135:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20600,7 +20600,7 @@ function _default(visuals, options) {
   };
 }
 
-},{"./../../../../util/videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],135:[function(_dereq_,module,exports){
+},{"./../../../../util/videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],136:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20641,7 +20641,7 @@ function _default(visuals) {
   };
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],136:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],137:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20761,7 +20761,7 @@ function _default(visuals, recordNote, options) {
   };
 }
 
-},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],137:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62}],138:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -20875,7 +20875,7 @@ var RecorderInsides = function RecorderInsides(visuals, options) {
 (0, _inherits.default)(RecorderInsides, _eventEmitter.default);
 var _default = exports.default = RecorderInsides;
 
-},{"./../../../events":113,"./../../../util/browser":119,"./../../../util/eventEmitter":121,"./recorder/countdown":132,"./recorder/facingMode":133,"./recorder/pausedNote":134,"./recorder/recordNote":135,"./recorder/recordTimer":136,"@babel/runtime/helpers/interopRequireDefault":4,"inherits":65}],138:[function(_dereq_,module,exports){
+},{"./../../../events":113,"./../../../util/browser":120,"./../../../util/eventEmitter":122,"./recorder/countdown":133,"./recorder/facingMode":134,"./recorder/pausedNote":135,"./recorder/recordNote":136,"./recorder/recordTimer":137,"@babel/runtime/helpers/interopRequireDefault":4,"inherits":65}],139:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -21162,7 +21162,7 @@ var Notifier = function Notifier(visuals, options) {
 (0, _inherits.default)(Notifier, _eventEmitter.default);
 var _default = exports.default = Notifier;
 
-},{"../../events":113,"../../util/eventEmitter":121,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62,"inherits":65}],139:[function(_dereq_,module,exports){
+},{"../../events":113,"../../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"hidden":60,"hyperscript":62,"inherits":65}],140:[function(_dereq_,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -22326,7 +22326,7 @@ var Recorder = function Recorder(visuals, replay) {
 var _default = exports.default = Recorder;
 
 }).call(this)}).call(this,_dereq_("buffer").Buffer)
-},{"../../constants":112,"../../events":113,"../../util/browser":119,"../../util/eventEmitter":121,"../../util/humanize":122,"../../util/pretty":124,"../../util/videomailError":125,"./userMedia":141,"@babel/runtime/helpers/interopRequireDefault":4,"animitter":13,"buffer":18,"canvas-to-buffer":21,"deepmerge":27,"hidden":60,"hyperscript":62,"inherits":65,"safe-json-stringify":93,"websocket-stream":107}],140:[function(_dereq_,module,exports){
+},{"../../constants":112,"../../events":113,"../../util/browser":120,"../../util/eventEmitter":122,"../../util/humanize":123,"../../util/pretty":125,"../../util/videomailError":126,"./userMedia":142,"@babel/runtime/helpers/interopRequireDefault":4,"animitter":13,"buffer":18,"canvas-to-buffer":21,"deepmerge":27,"hidden":60,"hyperscript":62,"inherits":65,"safe-json-stringify":93,"websocket-stream":107}],141:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -22704,7 +22704,7 @@ var Replay = function Replay(parentElement, options) {
 (0, _inherits.default)(Replay, _eventEmitter.default);
 var _default = exports.default = Replay;
 
-},{"../../events":113,"../../util/browser":119,"../../util/eventEmitter":121,"@babel/runtime/helpers/interopRequireDefault":4,"add-eventlistener-with-options":12,"hidden":60,"hyperscript":62,"inherits":65}],141:[function(_dereq_,module,exports){
+},{"../../events":113,"../../util/browser":120,"../../util/eventEmitter":122,"@babel/runtime/helpers/interopRequireDefault":4,"add-eventlistener-with-options":12,"hidden":60,"hyperscript":62,"inherits":65}],142:[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
@@ -23119,7 +23119,7 @@ function _default(recorder, options) {
   };
 }
 
-},{"./../../events":113,"./../../util/audioRecorder":118,"./../../util/browser":119,"./../../util/eventEmitter":121,"./../../util/mediaEvents":123,"./../../util/pretty":124,"./../../util/videomailError":125,"@babel/runtime/helpers/interopRequireDefault":4,"hyperscript":62,"safe-json-stringify":93}],"videomail-client":[function(_dereq_,module,exports){
+},{"./../../events":113,"./../../util/audioRecorder":119,"./../../util/browser":120,"./../../util/eventEmitter":122,"./../../util/mediaEvents":124,"./../../util/pretty":125,"./../../util/videomailError":126,"@babel/runtime/helpers/interopRequireDefault":4,"hyperscript":62,"safe-json-stringify":93}],"videomail-client":[function(_dereq_,module,exports){
 "use strict";
 
 var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");

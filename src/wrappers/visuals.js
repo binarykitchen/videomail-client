@@ -140,20 +140,18 @@ const Visuals = function (container, options) {
           visualsElement = h(`div.${options.selectors.visualsClass}`);
         }
 
-        if (!playerOnly) {
-          const buttonsElement = container.querySelector(
-            `.${options.selectors.buttonsClass}`,
-          );
+        const buttonsElement = container.querySelector(
+          `.${options.selectors.buttonsClass}`,
+        );
 
-          /*
-           * Make sure it's placed before the buttons, but only if it's a child
-           * element of the container = inside the container
-           */
-          if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
-            container.insertBefore(visualsElement, buttonsElement);
-          } else {
-            container.appendChild(visualsElement);
-          }
+        /*
+         * Make sure it's placed before the buttons, but only if it's a child
+         * element of the container = inside the container
+         */
+        if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
+          container.insertBefore(visualsElement, buttonsElement);
+        } else {
+          container.appendChild(visualsElement);
         }
       }
 

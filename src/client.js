@@ -1,35 +1,14 @@
-import deepmerge from "deepmerge";
 import inherits from "inherits";
 
 import Constants from "./constants";
 import Events from "./events";
-import defaultOptions from "./options";
 import Resource from "./resource";
 import Browser from "./util/browser";
-import CollectLogger from "./util/collectLogger";
+import adjustOptions from "./util/adjustOptions";
 import EventEmitter from "./util/eventEmitter";
 import Container from "./wrappers/container";
-import addOptionsFunctions from "./util/addOptionsFunctions";
 
-let collectLogger;
 let browser;
-
-function adjustOptions(options = {}) {
-  const localOptions = deepmerge(defaultOptions, options, {
-    arrayMerge(_destination, source) {
-      return source;
-    },
-  });
-
-  collectLogger ||= new CollectLogger(localOptions);
-
-  localOptions.logger = collectLogger;
-  localOptions.debug = localOptions.logger.debug;
-
-  const localOptionsWithFunctions = addOptionsFunctions(localOptions);
-
-  return localOptionsWithFunctions;
-}
 
 function getBrowser(localOptions) {
   if (!browser) {
