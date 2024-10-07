@@ -85,7 +85,7 @@ const Container = function (options) {
 
   function buildChildren(playerOnly = false, replayParentElement) {
     debug(
-      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
+      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement.id}"` : ""})`,
     );
 
     if (containerElement) {
@@ -105,7 +105,7 @@ const Container = function (options) {
     if (err.stack) {
       options.logger.error(err.stack);
     } else {
-      options.logger.error(err);
+      options.logger.error(err.message);
     }
 
     if (options.displayErrors) {
@@ -155,7 +155,8 @@ const Container = function (options) {
     if (options.enableSpace) {
       if (!playerOnly) {
         window.addEventListener("keypress", function (e) {
-          const { tagName } = e.target;
+          const tagName = e.target?.tagName;
+
           const isEditable =
             e.target.isContentEditable ||
             e.target.contentEditable === "true" ||
@@ -185,7 +186,8 @@ const Container = function (options) {
      */
     self.on(Events.ERROR, function (err) {
       processError(err);
-      unloadChildren(err);
+
+      self.endWaiting();
 
       if (err.removeDimensions && err.removeDimensions()) {
         removeDimensions();
@@ -254,8 +256,7 @@ const Container = function (options) {
   function submitVideomail(formData, method, cb) {
     const videomailFormData = form.transformFormData(formData);
 
-    // when method is undefined, treat it as a post
-    if (isPost(method) || !method) {
+    if (isPost(method)) {
       videomailFormData.recordingStats = visuals.getRecordingStats();
       videomailFormData.width = visuals.getRecorderWidth(true);
       videomailFormData.height = visuals.getRecorderHeight(true);
@@ -395,29 +396,43 @@ const Container = function (options) {
     insertCss(css, { prepend: true });
   }
 
-  this.build = function (playerOnly = false, replayParentElement) {
-    debug(
-      `Container: build (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement}"` : ""})`,
-    );
+  this.build = function (
+    buildOptions = {
+      playerOnly: false,
+      replayParentElementId: undefined,
+      replayParentElement: undefined,
+    },
+  ) {
+    debug(`Container: build (${stringify(buildOptions)})`);
 
     try {
       options.insertCss && prependDefaultCss();
 
-      // Note, it can be undefined when e.g. just replaying a videomail
-      containerElement = document.getElementById(options.selectors.containerId);
+      const containerId = options.selectors.containerId;
+
+      if (containerId) {
+        // Note, it can be undefined when e.g. just replaying a videomail or for storybooks
+        containerElement = document.getElementById(options.selectors.containerId);
+      } else {
+        containerElement = document.createElement("div");
+      }
+
+      let replayParentElement;
+
+      if (buildOptions.replayParentElement) {
+        replayParentElement = buildOptions.replayParentElement;
+      } else if (buildOptions.replayParentElementId) {
+        replayParentElement = document.getElementById(buildOptions.replayParentElementId);
+      }
 
       // Check if the replayParentElement could act as the container element perhaps?
       if (!containerElement && replayParentElement) {
-        if (typeof replayParentElement === "string") {
-          replayParentElement = document.getElementById(replayParentElement);
-        }
-
         if (replayParentElement?.classList.contains(options.selectors.containerClass)) {
           containerElement = replayParentElement;
         }
       }
 
-      !built && initEvents(playerOnly);
+      !built && initEvents(buildOptions.playerOnly);
 
       correctDimensions();
 
@@ -425,8 +440,10 @@ const Container = function (options) {
       // correcting mode on Videomail. This function will skip if there is no form. Easy.
       self.buildForm();
 
-      // If a container element has been found, no need to pass on replayParentElement further
-      buildChildren(playerOnly, containerElement ? undefined : replayParentElement);
+      buildChildren(
+        buildOptions.playerOnly,
+        buildOptions.playerOnly ? replayParentElement || containerElement : undefined,
+      );
 
       if (!hasError) {
         debug("Container: built.");
@@ -438,6 +455,8 @@ const Container = function (options) {
     } catch (exc) {
       self.emit(Events.ERROR, exc);
     }
+
+    return containerElement;
   };
 
   this.getSubmitButton = function () {
@@ -462,7 +481,7 @@ const Container = function (options) {
   };
 
   this.appendChild = function (child) {
-    if (!containerElement) {
+    if (!containerElement || containerElement === child) {
       // Must be in player only mode
       return;
     }
@@ -491,6 +510,8 @@ const Container = function (options) {
       unloadChildren(e);
       self.removeAllListeners();
 
+      self.hide();
+
       built = submitted = false;
     } catch (exc) {
       self.emit(Events.ERROR, exc);
@@ -498,31 +519,35 @@ const Container = function (options) {
   };
 
   this.show = function () {
-    if (containerElement) {
-      hidden(containerElement, false);
+    if (!containerElement) {
+      throw new Error("No container element exists.");
+    }
 
-      visuals.show();
+    hidden(containerElement, false);
 
-      if (!hasError) {
-        const paused = self.isPaused();
+    visuals.show();
 
-        if (paused) {
-          buttons.adjustButtonsForPause();
-        }
+    if (!hasError) {
+      const paused = self.isPaused();
 
-        /*
-         * since https://github.com/binarykitchen/videomail-client/issues/60
-         * we hide areas to make it easier for the user
-         */
-        buttons.show();
+      if (paused) {
+        buttons.adjustButtonsForPause();
+      }
 
-        if (self.isReplayShown()) {
-          self.emit(Events.PREVIEW);
-        } else {
-          self.emit(Events.FORM_READY, { paused });
-        }
+      /*
+       * since https://github.com/binarykitchen/videomail-client/issues/60
+       * we hide areas to make it easier for the user
+       */
+      buttons.show();
+
+      if (self.isReplayShown()) {
+        self.emit(Events.PREVIEW);
+      } else {
+        self.emit(Events.FORM_READY, { paused });
       }
     }
+
+    return containerElement;
   };
 
   this.hide = function () {

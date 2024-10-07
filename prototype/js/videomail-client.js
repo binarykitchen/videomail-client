@@ -16434,7 +16434,7 @@ function wrappy (fn, cb) {
 },{}],110:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.7",
+  "version": "9.5.9",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -16505,6 +16505,8 @@ module.exports={
     "@babel/eslint-parser": "7.25.1",
     "@babel/plugin-transform-runtime": "7.25.4",
     "@babel/preset-env": "7.25.4",
+    "@tsconfig/node22": "22.0.0",
+    "@tsconfig/strictest": "2.0.5",
     "audit-ci": "7.1.0",
     "autoprefixer": "10.4.20",
     "babelify": "10.0.0",
@@ -16546,6 +16548,7 @@ module.exports={
     "tape": "5.9.0",
     "tape-catch": "1.0.6",
     "tape-run": "11.0.0",
+    "typescript": "5.6.2",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "4.0.0"
@@ -16604,17 +16607,22 @@ var VideomailClient = function VideomailClient(options) {
     if (!container.isBuilt()) {
       this.build();
     }
-    container.show();
+    return container.show();
   };
 
   /*
    * Automatically adds a <video> element inside the given parentElement and
    * loads it with the videomail
    */
-  this.replay = function (videomail, replayParentElement) {
-    if (!container.isBuilt()) {
-      container.build(true, replayParentElement);
+  this.replay = function (videomail, replayParentElementId) {
+    if (container.isBuilt()) {
+      // Auto unload
+      this.unload();
     }
+    container.build({
+      playerOnly: true,
+      replayParentElementId: replayParentElementId
+    });
     if (videomail) {
       videomail = container.addPlayerDimensions(videomail);
     }
@@ -16627,6 +16635,7 @@ var VideomailClient = function VideomailClient(options) {
     });
     var replay = container.getReplay();
     replay.setVideomail(videomail, true);
+    return replay.getElement();
   };
   this.startOver = function (params) {
     var replay = container.getReplay();
@@ -18984,7 +18993,7 @@ var Container = function Container(options) {
   function buildChildren() {
     var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
-    debug("Container: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
+    debug("Container: buildChildren (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement.id, "\"") : "", ")"));
     if (containerElement) {
       containerElement.classList.add(options.selectors.containerClass);
     }
@@ -18998,7 +19007,7 @@ var Container = function Container(options) {
     if (err.stack) {
       options.logger.error(err.stack);
     } else {
-      options.logger.error(err);
+      options.logger.error(err.message);
     }
     if (options.displayErrors) {
       visuals.error(err);
@@ -19037,7 +19046,8 @@ var Container = function Container(options) {
     if (options.enableSpace) {
       if (!playerOnly) {
         window.addEventListener("keypress", function (e) {
-          var tagName = e.target.tagName;
+          var _e$target;
+          var tagName = (_e$target = e.target) === null || _e$target === void 0 ? void 0 : _e$target.tagName;
           var isEditable = e.target.isContentEditable || e.target.contentEditable === "true" || e.target.contentEditable === true;
 
           // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
@@ -19062,7 +19072,7 @@ var Container = function Container(options) {
      */
     self.on(_events.default.ERROR, function (err) {
       processError(err);
-      unloadChildren(err);
+      self.endWaiting();
       if (err.removeDimensions && err.removeDimensions()) {
         removeDimensions();
       }
@@ -19118,9 +19128,7 @@ var Container = function Container(options) {
   }
   function submitVideomail(formData, method, cb) {
     var videomailFormData = form.transformFormData(formData);
-
-    // when method is undefined, treat it as a post
-    if (isPost(method) || !method) {
+    if (isPost(method)) {
       videomailFormData.recordingStats = visuals.getRecordingStats();
       videomailFormData.width = visuals.getRecorderWidth(true);
       videomailFormData.height = visuals.getRecorderHeight(true);
@@ -19238,34 +19246,42 @@ var Container = function Container(options) {
     });
   }
   this.build = function () {
-    var playerOnly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
-    debug("Container: build (playerOnly = ".concat(playerOnly).concat(replayParentElement ? ", replayParentElement=\"".concat(replayParentElement, "\"") : "", ")"));
+    var buildOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+      playerOnly: false,
+      replayParentElementId: undefined,
+      replayParentElement: undefined
+    };
+    debug("Container: build (".concat((0, _safeJsonStringify.default)(buildOptions), ")"));
     try {
       options.insertCss && prependDefaultCss();
-
-      // Note, it can be undefined when e.g. just replaying a videomail
-      containerElement = document.getElementById(options.selectors.containerId);
+      var containerId = options.selectors.containerId;
+      if (containerId) {
+        // Note, it can be undefined when e.g. just replaying a videomail or for storybooks
+        containerElement = document.getElementById(options.selectors.containerId);
+      } else {
+        containerElement = document.createElement("div");
+      }
+      var replayParentElement;
+      if (buildOptions.replayParentElement) {
+        replayParentElement = buildOptions.replayParentElement;
+      } else if (buildOptions.replayParentElementId) {
+        replayParentElement = document.getElementById(buildOptions.replayParentElementId);
+      }
 
       // Check if the replayParentElement could act as the container element perhaps?
       if (!containerElement && replayParentElement) {
         var _replayParentElement;
-        if (typeof replayParentElement === "string") {
-          replayParentElement = document.getElementById(replayParentElement);
-        }
         if ((_replayParentElement = replayParentElement) !== null && _replayParentElement !== void 0 && _replayParentElement.classList.contains(options.selectors.containerClass)) {
           containerElement = replayParentElement;
         }
       }
-      !built && initEvents(playerOnly);
+      !built && initEvents(buildOptions.playerOnly);
       correctDimensions();
 
       // Building form also applies for when `playerOnly` because of
       // correcting mode on Videomail. This function will skip if there is no form. Easy.
       self.buildForm();
-
-      // If a container element has been found, no need to pass on replayParentElement further
-      buildChildren(playerOnly, containerElement ? undefined : replayParentElement);
+      buildChildren(buildOptions.playerOnly, buildOptions.playerOnly ? replayParentElement || containerElement : undefined);
       if (!hasError) {
         debug("Container: built.");
         built = true;
@@ -19276,6 +19292,7 @@ var Container = function Container(options) {
     } catch (exc) {
       self.emit(_events.default.ERROR, exc);
     }
+    return containerElement;
   };
   this.getSubmitButton = function () {
     return buttons.getSubmitButton();
@@ -19294,7 +19311,7 @@ var Container = function Container(options) {
     htmlElement.classList && htmlElement.classList.remove("wait");
   };
   this.appendChild = function (child) {
-    if (!containerElement) {
+    if (!containerElement || containerElement === child) {
       // Must be in player only mode
       return;
     }
@@ -19316,35 +19333,38 @@ var Container = function Container(options) {
       self.emit(_events.default.UNLOADING);
       unloadChildren(e);
       self.removeAllListeners();
+      self.hide();
       built = submitted = false;
     } catch (exc) {
       self.emit(_events.default.ERROR, exc);
     }
   };
   this.show = function () {
-    if (containerElement) {
-      (0, _hidden.default)(containerElement, false);
-      visuals.show();
-      if (!hasError) {
-        var paused = self.isPaused();
-        if (paused) {
-          buttons.adjustButtonsForPause();
-        }
+    if (!containerElement) {
+      throw new Error("No container element exists.");
+    }
+    (0, _hidden.default)(containerElement, false);
+    visuals.show();
+    if (!hasError) {
+      var paused = self.isPaused();
+      if (paused) {
+        buttons.adjustButtonsForPause();
+      }
 
-        /*
-         * since https://github.com/binarykitchen/videomail-client/issues/60
-         * we hide areas to make it easier for the user
-         */
-        buttons.show();
-        if (self.isReplayShown()) {
-          self.emit(_events.default.PREVIEW);
-        } else {
-          self.emit(_events.default.FORM_READY, {
-            paused: paused
-          });
-        }
+      /*
+       * since https://github.com/binarykitchen/videomail-client/issues/60
+       * we hide areas to make it easier for the user
+       */
+      buttons.show();
+      if (self.isReplayShown()) {
+        self.emit(_events.default.PREVIEW);
+      } else {
+        self.emit(_events.default.FORM_READY, {
+          paused: paused
+        });
       }
     }
+    return containerElement;
   };
   this.hide = function () {
     debug("Container: hide()");
