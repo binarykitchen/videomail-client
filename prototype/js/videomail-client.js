@@ -16434,7 +16434,7 @@ function wrappy (fn, cb) {
 },{}],110:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.7",
+  "version": "9.5.8",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -16505,6 +16505,8 @@ module.exports={
     "@babel/eslint-parser": "7.25.1",
     "@babel/plugin-transform-runtime": "7.25.4",
     "@babel/preset-env": "7.25.4",
+    "@tsconfig/node22": "22.0.0",
+    "@tsconfig/strictest": "2.0.5",
     "audit-ci": "7.1.0",
     "autoprefixer": "10.4.20",
     "babelify": "10.0.0",
@@ -16546,6 +16548,7 @@ module.exports={
     "tape": "5.9.0",
     "tape-catch": "1.0.6",
     "tape-run": "11.0.0",
+    "typescript": "5.6.2",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "4.0.0"
@@ -16604,7 +16607,7 @@ var VideomailClient = function VideomailClient(options) {
     if (!container.isBuilt()) {
       this.build();
     }
-    container.show();
+    return container.show();
   };
 
   /*
@@ -16612,12 +16615,14 @@ var VideomailClient = function VideomailClient(options) {
    * loads it with the videomail
    */
   this.replay = function (videomail, replayParentElementId) {
-    if (!container.isBuilt()) {
-      container.build({
-        playerOnly: true,
-        replayParentElementId: replayParentElementId
-      });
+    if (container.isBuilt()) {
+      // Auto unload
+      this.unload();
     }
+    container.build({
+      playerOnly: true,
+      replayParentElementId: replayParentElementId
+    });
     if (videomail) {
       videomail = container.addPlayerDimensions(videomail);
     }
@@ -16630,6 +16635,7 @@ var VideomailClient = function VideomailClient(options) {
     });
     var replay = container.getReplay();
     replay.setVideomail(videomail, true);
+    return replay.getElement();
   };
   this.startOver = function (params) {
     var replay = container.getReplay();

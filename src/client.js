@@ -49,7 +49,7 @@ const VideomailClient = function (options) {
       this.build();
     }
 
-    container.show();
+    return container.show();
   };
 
   /*
@@ -57,9 +57,15 @@ const VideomailClient = function (options) {
    * loads it with the videomail
    */
   this.replay = function (videomail, replayParentElementId) {
-    if (!container.isBuilt()) {
-      container.build({ playerOnly: true, replayParentElementId });
+    if (container.isBuilt()) {
+      // Auto unload
+      this.unload();
     }
+
+    container.build({
+      playerOnly: true,
+      replayParentElementId: replayParentElementId,
+    });
 
     if (videomail) {
       videomail = container.addPlayerDimensions(videomail);
@@ -75,6 +81,8 @@ const VideomailClient = function (options) {
 
     const replay = container.getReplay();
     replay.setVideomail(videomail, true);
+
+    return replay.getElement();
   };
 
   this.startOver = function (params) {
