@@ -434,7 +434,9 @@ const Container = function (options) {
 
       !built && initEvents(buildOptions.playerOnly);
 
-      correctDimensions();
+      if (!buildOptions.playerOnly) {
+        correctDimensions();
+      }
 
       // Building form also applies for when `playerOnly` because of
       // correcting mode on Videomail. This function will skip if there is no form. Easy.
