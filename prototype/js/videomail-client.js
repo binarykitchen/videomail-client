@@ -16907,7 +16907,7 @@ function wrappy (fn, cb) {
 },{}],112:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.4",
+  "version": "9.5.5",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -21404,7 +21404,7 @@ var Notifier = function Notifier(visuals, options) {
   var self = this;
   var debug = options && options.debug;
   var notifyElement;
-  var messageElement;
+  var messageElement = document.getElementById(NOTIFIER_MESSAGE_ID);
   var explanationElement;
   var entertainTimeoutId;
   var entertaining;
@@ -21524,14 +21524,23 @@ var Notifier = function Notifier(visuals, options) {
       removeDimensions: err.removeDimensions && err.removeDimensions()
     });
   };
+
+  // Special treatment to deal with race conditions
+  function getMessageElement() {
+    if (messageElement) {
+      return messageElement;
+    }
+    messageElement = document.getElementById(NOTIFIER_MESSAGE_ID);
+    return messageElement;
+  }
   function setMessage(message, messageOptions) {
     options.debug("Notifier: setMessage(".concat(message, ")"));
-    if (!messageElement) {
+    if (!getMessageElement()) {
       messageElement = (0, _hyperscript.default)("h2", {
         id: NOTIFIER_MESSAGE_ID
       });
       if (notifyElement) {
-        if (messageElement && explanationElement) {
+        if (explanationElement) {
           // For rare cases, shouldn't happen to set an explanation without a message
           notifyElement.insertBefore(messageElement, explanationElement);
         } else {
@@ -21579,7 +21588,7 @@ var Notifier = function Notifier(visuals, options) {
     built = true;
   };
   function hideMessage() {
-    if (messageElement) {
+    if (getMessageElement()) {
       (0, _hidden.default)(messageElement, true);
     }
   }
