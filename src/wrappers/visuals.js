@@ -131,7 +131,13 @@ const Visuals = function (container, options) {
     debug(`Visuals: build (playerOnly=${playerOnly})`);
 
     if (container) {
-      visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
+      if (replayParentElement) {
+        visualsElement = replayParentElement.querySelector(
+          `.${options.selectors.visualsClass}`,
+        );
+      } else {
+        visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
+      }
 
       if (!visualsElement) {
         if (playerOnly && replayParentElement) {
@@ -165,7 +171,7 @@ const Visuals = function (container, options) {
     correctDimensions();
 
     !built && initEvents(playerOnly);
-    buildChildren(playerOnly, replayParentElement);
+    buildChildren(playerOnly, visualsElement || replayParentElement);
 
     built = true;
   };

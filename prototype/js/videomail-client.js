@@ -16434,7 +16434,7 @@ function wrappy (fn, cb) {
 },{}],110:[function(_dereq_,module,exports){
 module.exports={
   "name": "videomail-client",
-  "version": "9.5.9",
+  "version": "9.5.11",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
@@ -19276,7 +19276,9 @@ var Container = function Container(options) {
         }
       }
       !built && initEvents(buildOptions.playerOnly);
-      correctDimensions();
+      if (!buildOptions.playerOnly) {
+        correctDimensions();
+      }
 
       // Building form also applies for when `playerOnly` because of
       // correcting mode on Videomail. This function will skip if there is no form. Easy.
@@ -20199,7 +20201,11 @@ var Visuals = function Visuals(container, options) {
     var replayParentElement = arguments.length > 1 ? arguments[1] : undefined;
     debug("Visuals: build (playerOnly=".concat(playerOnly, ")"));
     if (container) {
-      visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
+      if (replayParentElement) {
+        visualsElement = replayParentElement.querySelector(".".concat(options.selectors.visualsClass));
+      } else {
+        visualsElement = container.querySelector(".".concat(options.selectors.visualsClass));
+      }
       if (!visualsElement) {
         if (playerOnly && replayParentElement) {
           visualsElement = replayParentElement;
@@ -20227,7 +20233,7 @@ var Visuals = function Visuals(container, options) {
     }
     correctDimensions();
     !built && initEvents(playerOnly);
-    buildChildren(playerOnly, replayParentElement);
+    buildChildren(playerOnly, visualsElement || replayParentElement);
     built = true;
   };
   this.querySelector = function (selector) {
