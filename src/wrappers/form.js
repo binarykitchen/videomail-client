@@ -231,10 +231,8 @@ const Form = function (container, formElement, options) {
        */
     });
 
-    // fixes https://github.com/binarykitchen/videomail-client/issues/91
-    this.on(Events.GOING_BACK, () => {
-      keyInput.value = null;
-      keyInput.dispatchEvent(new Event("input", { bubbles: true }));
+    this.on(Events.STARTING_OVER, () => {
+      resetForm();
     });
 
     this.on(Events.INVALID, () => {
@@ -294,7 +292,28 @@ const Form = function (container, formElement, options) {
 
     this.removeAllListeners();
     stopListeningToSubmitEvents();
+
+    resetForm();
   };
+
+  function resetForm() {
+    // It can be set to put before when e.g. correcting, so revert to default
+    formElement.setAttribute("method", "");
+
+    // This resets all except hidden inputs
+    formElement.reset();
+
+    const inputElements = getRegisteredFormElements();
+
+    for (let i = 0, len = inputElements.length; i < len; i++) {
+      const inputElement = inputElements[i];
+      const type = inputElement.type.toLowerCase();
+
+      if (type === "hidden") {
+        inputElement.value = "";
+      }
+    }
+  }
 
   function startListeningToSubmitEvents() {
     const submitButton = container.getSubmitButton();
