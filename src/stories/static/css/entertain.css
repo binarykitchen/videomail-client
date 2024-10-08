@@ -1,0 +1,30 @@
+.entertain {
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-color: transparent;
+  vertical-align: top;
+  padding: 1em;
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+.bg1 {
+  background-image: url("../img/wait1.gif");
+}
+
+.bg2 {
+  background-image: url("../img/wait2.gif");
+}
+
+.bg3 {
+  background-image: url("../img/wait3.gif");
+}
+
+.bg4 {
+  background-image: url("../img/wait4.gif");
+}

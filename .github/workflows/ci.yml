@@ -1,0 +1,56 @@
+name: Test Runner for videomail-client (CI)
+
+on:
+  workflow_call:
+  push:
+  pull_request:
+  release:
+    types: [published]
+
+jobs:
+  build-test-lint-check:
+    name: Build, Test, Prettier, Lint and Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🪛 Install Node.js via nvm
+        shell: bash --login {0}
+        run: |
+          nvm install --no-progress
+          echo "$(dirname $(nvm which node))" >> $GITHUB_PATH
+
+      - name: 📦 Install npm dependencies
+        run: npm install
+
+      - name: 🔎 Run prettier
+        run: npm run prettier
+
+      # TODO Restore later
+      # - name: 🔎 Run linter
+      #   run: npm run lint
+
+      # TODO Enable once implemented
+      # - name: 🔎 Check types
+      #   run: npm run types-check
+
+      - name: 🔨 Build
+        run: npm run build-prod
+
+      - name: 🔎 Audit (detect vulnerabilities)
+        run: npm run audit
+
+      # TODO Restore later
+      # - name: 🔎 Run tests
+      #   uses: coactions/setup-xvfb@v1
+      #   with:
+      #     run: npm run test
+
+      - name: 🔎 Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
