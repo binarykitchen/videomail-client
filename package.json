@@ -37,7 +37,7 @@
     "lint-fix": "eslint --color --fix .",
     "prettier": "prettier --check ./etc ./src ./.storybook",
     "prettier-fix": "prettier --write ./etc ./src ./.storybook",
-    "release": "release-it",
+    "release": "release-it --config ./etc/release-it.ts",
     "storybook": "cross-env BROWSER=chromium storybook dev -p 8443 --https --ssl-cert ./etc/ssl-certs/localhost.crt --ssl-key ./etc/ssl-certs/localhost.key"
   },
   "prettier": "./prettier.config.cjs",
