@@ -3,7 +3,7 @@
 .vscode
 etc
 node_modules
-src
+src/stories
 test
 .gitignore
 .nvmrc
@@ -13,3 +13,4 @@ eslint.config.mjs
 prettier.config.cjs
 tsconfig.json
 package-lock.json
+*.code-workspace

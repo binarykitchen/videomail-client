@@ -6,9 +6,10 @@ const config: Config = {
     tag: true,
     push: true,
   },
-  github: {
-    release: true,
-  },
+  // TODO Consider later once all is stable
+  // github: {
+  //   release: true,
+  // },
   npm: {
     publish: true,
   },
