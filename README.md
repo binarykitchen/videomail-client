@@ -1,6 +1,6 @@
 # videomail-client ✉
 
-[![Test Runner for videomail-client](https://github.com/binarykitchen/videomail-client/actions/workflows/push.yml/badge.svg)](https://github.com/binarykitchen/videomail-client/actions/workflows/ci.yml)
+[![Test Runner for videomail-client](https://github.com/binarykitchen/videomail-client/actions/workflows/ci.yml/badge.svg)](https://github.com/binarykitchen/videomail-client/actions/workflows/ci.yml)
 
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
