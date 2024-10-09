@@ -5,8 +5,9 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
+  "eslint.useFlatConfig": true,
   "eslint.options": {
-    "overrideConfigFile": "./.eslintrc.js"
+    "overrideConfigFile": "./eslint.config.mjs"
   },
   "prettier.configPath": "./prettier.config.cjs",
   "stylelint.validate": ["stylus"],
@@ -22,18 +23,23 @@
     "derequire",
     "filesize",
     "getusermedia",
-    "hyperscript",
-    "keymirror",
+    "ICPU",
+    "initialise",
     "KHTML",
     "Mbit",
     "mofo",
     "MSIE",
+    "nanoevents",
+    "Ooops",
     "packagejson",
     "Pivac",
     "playsinline",
     "plusplus",
     "preend",
+    "prefinish",
     "rsbuild",
+    "RSDOCTOR",
+    "rspack",
     "rubberband",
     "Sadler",
     "Seeflow's",

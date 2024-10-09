@@ -1,181 +1,146 @@
 import superagent from "superagent";
 
 import Constants from "./constants";
+import { VideomailClientOptions } from "./types/options";
+import { PartialVideomail } from "./types/Videomail";
+import createError from "./util/error/createError";
+import Response from "superagent/lib/node/response";
+import VideomailError from "./util/error/VideomailError";
+import { FormInputs, FormMethod } from "./wrappers/form";
 
-const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const timezoneId = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-export default function (options) {
-  function applyDefaultValue(videomail, name) {
-    if (options.defaults[name] && !videomail[name]) {
-      videomail[name] = options.defaults[name];
+class Resource {
+  private readonly options: VideomailClientOptions;
+
+  constructor(options: VideomailClientOptions) {
+    this.options = options;
+  }
+
+  private applyDefaultValue(videomail: PartialVideomail, name: string) {
+    if (this.options.defaults[name] && !videomail[name]) {
+      videomail[name] = this.options.defaults[name];
     }
 
     return videomail;
   }
 
-  function applyDefaultValues(videomail) {
-    if (options.defaults) {
-      videomail = applyDefaultValue(videomail, "from");
-      videomail = applyDefaultValue(videomail, "to");
-      videomail = applyDefaultValue(videomail, "cc");
-      videomail = applyDefaultValue(videomail, "bcc");
-      videomail = applyDefaultValue(videomail, "subject");
-      videomail = applyDefaultValue(videomail, "body");
+  private applyDefaultValues(videomail: PartialVideomail) {
+    let newVideomail = { ...videomail };
+
+    newVideomail = this.applyDefaultValue(newVideomail, "from");
+    newVideomail = this.applyDefaultValue(newVideomail, "to");
+    newVideomail = this.applyDefaultValue(newVideomail, "cc");
+    newVideomail = this.applyDefaultValue(newVideomail, "bcc");
+    newVideomail = this.applyDefaultValue(newVideomail, "subject");
+    newVideomail = this.applyDefaultValue(newVideomail, "body");
+
+    return newVideomail;
+  }
+
+  private async get(identifierName: string, identifierValue: string) {
+    const url = `${this.options.baseUrl}/videomail/${identifierName}/${identifierValue}/snapshot`;
+
+    try {
+      const request = await superagent("get", url)
+        .type("json")
+        .set("Accept", "application/json")
+        .set("Timezone-Id", timezoneId)
+        .set(Constants.SITE_NAME_LABEL, this.options.siteName)
+        .timeout(this.options.timeouts.connection);
+
+      return request;
+    } catch (exc) {
+      throw createError({ exc, options: this.options });
+    }
+  }
+
+  private async write(method: FormMethod, videomail: PartialVideomail) {
+    const queryParams = {
+      [Constants.SITE_NAME_LABEL]: this.options.siteName,
+    };
+
+    let url = `${this.options.baseUrl}/videomail/`;
+
+    if (method === FormMethod.PUT && videomail.key) {
+      url += videomail.key;
     }
 
-    return videomail;
-  }
+    try {
+      const request = await superagent(method, url)
+        .query(queryParams)
+        .set("Timezone-Id", timezoneId)
+        .send(videomail)
+        .timeout(this.options.timeouts.connection);
 
-  function setProperty(packedError, property, value) {
-    Object.defineProperty(packedError, property, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true,
-    });
-  }
-
-  function packError(err, res) {
-    if (res && res.body && res.body.error) {
-      const originalError = res.body.error;
-
-      const packedError = new Error();
-
-      setProperty(packedError, "name", originalError.name);
-      setProperty(packedError, "type", originalError.type);
-      setProperty(packedError, "message", originalError.message || res.statusText);
-      setProperty(packedError, "cause", originalError.cause);
-      setProperty(packedError, "status", originalError.status);
-      setProperty(packedError, "code", originalError.code);
-      setProperty(packedError, "errno", originalError.errno);
-      setProperty(packedError, "details", originalError.details);
-      setProperty(packedError, "stack", originalError.stack);
-
-      return packedError;
+      return request;
+    } catch (exc) {
+      throw createError({ exc, options: this.options });
     }
-
-    return err;
   }
 
-  function fetch(identifierName, identifierValue, cb) {
-    const url = `${options.baseUrl}/videomail/${identifierName}/${identifierValue}/snapshot`;
-    const request = superagent("get", url);
-
-    request
-      .type("json")
-      .set("Accept", "application/json")
-      .set("Timezone-Id", timezoneId)
-      .set(Constants.SITE_NAME_LABEL, options.siteName)
-      .timeout(options.timeouts.connection)
-      .end(function (err, res) {
-        if (err) {
-          const prettyError = packError(err, res);
-          cb(prettyError);
-        } else {
-          const videomail = res.body ? res.body : null;
-          cb(null, videomail);
-        }
-      });
+  public async getByAlias(alias: string) {
+    return await this.get("alias", alias);
   }
 
-  function write(method, videomail, identifier, cb) {
-    if (!cb) {
-      cb = identifier;
-      identifier = null;
+  public async getByKey(key: string) {
+    return await this.get("key", key);
+  }
+
+  public async reportError(err: VideomailError) {
+    const queryParams = {
+      [Constants.SITE_NAME_LABEL]: this.options.siteName,
+    };
+
+    const url = `${this.options.baseUrl}/client-error/`;
+
+    try {
+      const request = await superagent(FormMethod.POST, url)
+        .query(queryParams)
+        .send(err)
+        .timeout(this.options.timeouts.connection);
+
+      return request;
+    } catch (exc) {
+      throw createError({ exc, options: this.options });
     }
-
-    const queryParams = {};
-
-    let url = `${options.baseUrl}/videomail/`;
-
-    if (identifier) {
-      url += identifier;
-    }
-
-    const request = superagent(method, url);
-
-    queryParams[Constants.SITE_NAME_LABEL] = options.siteName;
-
-    request
-      .query(queryParams)
-      .set("Timezone-Id", timezoneId)
-      .send(videomail)
-      .timeout(options.timeout)
-      .end(function (err, res) {
-        if (err) {
-          const prettyError = packError(err, res);
-          cb(prettyError);
-        } else {
-          const returnedVideomail =
-            res.body && res.body.videomail ? res.body.videomail : null;
-
-          cb(null, returnedVideomail, res.body);
-        }
-      });
   }
 
-  this.getByAlias = function (alias, cb) {
-    fetch("alias", alias, cb);
-  };
-
-  this.getByKey = function (key, cb) {
-    fetch("key", key, cb);
-  };
-
-  this.reportError = function (err, cb) {
-    const queryParams = {};
-    const url = `${options.baseUrl}/client-error/`;
-    const request = superagent("post", url);
-
-    queryParams[Constants.SITE_NAME_LABEL] = options.siteName;
-
-    request
-      .query(queryParams)
-      .send(err)
-      .timeout(options.timeout)
-      .end(function (err, res) {
-        if (err) {
-          const prettyError = packError(err, res);
-          cb && cb(prettyError);
-        } else {
-          cb && cb();
-        }
-      });
-  };
-
-  this.post = function (videomail, cb) {
-    videomail = applyDefaultValues(videomail);
+  public async post(videomail: PartialVideomail) {
+    const newVideomail: PartialVideomail = this.applyDefaultValues(videomail);
 
     /*
      * always good to know the version of the client
      * the videomail was submitted with
      */
-    videomail[Constants.VERSION_LABEL] = options.version;
+    newVideomail[Constants.VERSION_LABEL] = this.options.version;
 
-    if (options.callbacks.adjustFormDataBeforePosting) {
-      options.callbacks.adjustFormDataBeforePosting(
-        videomail,
-        function (err, adjustedVideomail) {
-          if (err) {
-            cb(err);
-          } else {
-            write("post", adjustedVideomail, cb);
-          }
-        },
-      );
-    } else {
-      write("post", videomail, cb);
+    try {
+      let res: Response;
+
+      if (this.options.callbacks.adjustFormDataBeforePosting) {
+        const adjustedVideomail =
+          this.options.callbacks.adjustFormDataBeforePosting(newVideomail);
+
+        res = await this.write(FormMethod.POST, adjustedVideomail);
+      } else {
+        res = await this.write(FormMethod.POST, newVideomail);
+      }
+
+      return res;
+    } catch (exc) {
+      throw createError({ exc, options: this.options });
     }
-  };
+  }
 
-  this.put = function (videomail, cb) {
-    write("put", videomail, videomail.key, cb);
-  };
+  public async put(videomail: PartialVideomail) {
+    return await this.write(FormMethod.PUT, videomail);
+  }
 
-  this.form = function (formData, url, cb) {
-    let formType;
+  public async form(formData: FormInputs, url: string) {
+    let formType: string;
 
-    switch (options.enctype) {
+    switch (this.options.enctype) {
       case Constants.public.ENC_TYPE_APP_JSON:
         formType = "json";
         break;
@@ -183,27 +148,25 @@ export default function (options) {
         formType = "form";
         break;
       default:
-        // keep all callbacks async
-        setTimeout(() => {
-          cb(new Error(`Invalid enctype given: ${options.enctype}`));
-        }, 0);
+        throw createError({
+          err: new Error(`Invalid enctype given: ${this.options.enctype}`),
+          options: this.options,
+        });
     }
 
-    if (formType) {
-      superagent
+    try {
+      const res = await superagent
         .post(url)
         .type(formType)
         .set("Timezone-Id", timezoneId)
         .send(formData)
-        .timeout(options.timeout)
-        .end(function (err, res) {
-          if (err) {
-            const prettyError = packError(err, res);
-            cb(prettyError);
-          } else {
-            cb(null, res);
-          }
-        });
+        .timeout(this.options.timeouts.connection);
+
+      return res;
+    } catch (exc) {
+      throw createError({ exc, options: this.options });
     }
-  };
+  }
 }
+
+export default Resource;

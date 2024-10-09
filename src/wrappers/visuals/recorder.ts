@@ -1,113 +1,133 @@
 import animitter from "animitter";
 import Frame from "canvas-to-buffer";
-import deepmerge from "deepmerge";
 import hidden from "hidden";
-import h from "hyperscript";
-import inherits from "inherits";
-import stringify from "safe-json-stringify";
 
 import websocket from "websocket-stream";
 
 import Constants from "../../constants";
-import Events from "../../events";
-import Browser from "../../util/browser";
-import EventEmitter from "../../util/eventEmitter";
-import Humanize from "../../util/humanize";
 import pretty from "../../util/pretty";
-import VideomailError from "../../util/videomailError";
 import UserMedia from "./userMedia";
+
+import { isAudioEnabled } from "../../util/options/audio";
+import { filesize } from "filesize";
+import calculateWidth from "../../util/html/dimensions/calculateWidth";
+import calculateHeight from "../../util/html/dimensions/calculateHeight";
+import Visuals from "../visuals";
+import { VideomailClientOptions } from "../../types/options";
+import createError from "../../util/error/createError";
+import humanizeDuration from "humanize-duration";
+import VideomailError from "../../util/error/VideomailError";
+import getBrowser from "../../util/getBrowser";
+import getRatio from "../../util/html/dimensions/getRatio";
+import AudioSample from "audio-sample";
+import RecordingStats from "../../types/RecordingStats";
+import Replay from "./replay";
+import Despot from "../../util/Despot";
+import { UserMediaReadyParams } from "../../types/events";
+import { UnloadParams } from "../container";
 
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";
 
-const Recorder = function (visuals, replay, defaultOptions = {}) {
-  EventEmitter.call(this, defaultOptions, "Recorder");
+interface PreviewArgs {
+  key: string;
+  mp4?: string;
+  webm?: string;
+}
 
-  const browser = new Browser(defaultOptions);
+interface WriteStreamParams {
+  frameNumber?: number;
+  onFlushedCallback?: (params: WriteStreamParams) => void;
+}
 
-  const options = deepmerge(defaultOptions, {
-    image: {
-      // automatically lower quality when on mobile
-      quality: browser.isMobile()
-        ? defaultOptions.image.quality - 0.05
-        : defaultOptions.image.quality,
-    },
-  });
+interface Command {
+  command: string;
+  args: any;
+}
 
-  // validate some options this class needs
-  if (!options.video || !options.video.fps) {
-    throw VideomailError.create("FPS must be defined", options);
+interface StopParams {
+  limitReached?: boolean;
+}
+
+interface PauseParams {
+  event?: MouseEvent;
+}
+
+class Recorder extends Despot {
+  private readonly visuals: Visuals;
+  private readonly replay: Replay;
+
+  private loop?: any;
+
+  private originalAnimationFrameObject;
+
+  private samplesCount = 0;
+  private framesCount = 0;
+
+  private recordingStats?: RecordingStats;
+
+  private confirmedFrameNumber = 0;
+  private confirmedSampleNumber = 0;
+
+  private recorderElement?: HTMLVideoElement | undefined | null;
+  private userMedia?: UserMedia;
+
+  private userMediaTimeout?: number | undefined;
+  private retryTimeout?: number | undefined;
+
+  private bytesSum?: number | undefined;
+
+  private frameProgress?: string | undefined;
+  private sampleProgress?: string | undefined;
+
+  private canvas?: HTMLCanvasElement | undefined;
+  private ctx?: CanvasRenderingContext2D | undefined | null;
+
+  private userMediaLoaded?: boolean | undefined;
+  private userMediaLoading = false;
+  private submitting = false;
+  private unloaded?: boolean;
+  private stopTime?: number | undefined;
+  private stream?: websocket.WebSocketDuplex | undefined;
+  private connecting = false;
+  private connected = false;
+  private blocking = false;
+  private built = false;
+  private key?: string | undefined;
+  private waitingTime?: number | undefined;
+
+  private pingInterval?: number | undefined;
+
+  private frame?: Frame;
+
+  private recordingBuffer?: Buffer | undefined;
+
+  constructor(visuals: Visuals, replay: Replay, options: VideomailClientOptions) {
+    super("Recorder", options);
+
+    this.visuals = visuals;
+    this.replay = replay;
   }
 
-  const self = this;
-  const { debug } = options;
-
-  let loop = null;
-
-  let originalAnimationFrameObject;
-
-  let samplesCount = 0;
-  let framesCount = 0;
-  let { facingMode } = options.video; // default is 'user'
-
-  let recordingStats = {};
-
-  let confirmedFrameNumber = 0;
-  let confirmedSampleNumber = 0;
-
-  let recorderElement;
-  let userMedia;
-
-  let userMediaTimeout;
-  let retryTimeout;
-
-  let bytesSum;
-
-  let frameProgress;
-  let sampleProgress;
-
-  let canvas;
-  let ctx;
-
-  let userMediaLoaded;
-  let userMediaLoading;
-  let submitting;
-  let unloaded;
-  let stopTime;
-  let stream;
-  let connecting;
-  let connected;
-  let blocking;
-  let built;
-  let key;
-  let waitingTime;
-
-  let pingInterval;
-
-  let frame;
-
-  let recordingBufferLength;
-  let recordingBuffer;
-
-  function writeStream(buffer, opts) {
-    if (stream) {
-      if (stream.destroyed) {
+  private writeStream(buffer: Buffer, opts?: WriteStreamParams) {
+    if (this.stream) {
+      if (this.stream.destroyed) {
         // prevents https://github.com/binarykitchen/videomail.io/issues/393
-        stopPings();
+        this.stopPings();
 
-        self.emit(
-          Events.ERROR,
-          VideomailError.create(
-            "Already disconnected",
+        const err = createError({
+          message: "Already disconnected",
+          explanation:
             "Sorry, connection to the server has been destroyed. Please reload.",
-            options,
-          ),
-        );
+          options: this.options,
+        });
+
+        this.emit("ERROR", { err });
       } else {
-        const onFlushedCallback = opts && opts.onFlushedCallback;
+        const onFlushedCallback = opts?.onFlushedCallback;
 
         try {
-          stream.write(buffer, function () {
+          this.stream.write(buffer, () => {
             if (!onFlushedCallback) {
               return;
             }
@@ -115,195 +135,213 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             try {
               onFlushedCallback(opts);
             } catch (exc) {
-              self.emit(
-                Events.ERROR,
-                VideomailError.create(
-                  "Failed to write stream buffer",
-                  `stream.write() failed because of ${pretty(exc)}`,
-                  options,
-                ),
-              );
+              const err = createError({
+                message: "Failed to write stream buffer",
+                explanation: `stream.write() failed because of ${pretty(exc)}`,
+                options: this.options,
+                exc,
+              });
+
+              this.emit("ERROR", { err });
             }
           });
         } catch (exc) {
-          self.emit(
-            Events.ERROR,
-            VideomailError.create(
-              "Failed writing to server",
-              `stream.write() failed because of ${pretty(exc)}`,
-              options,
-            ),
-          );
+          const err = createError({
+            message: "Failed writing to server",
+            explanation: `stream.write() failed because of ${pretty(exc)}`,
+            options: this.options,
+            exc,
+          });
+
+          this.emit("ERROR", { err });
         }
       }
     }
   }
 
-  function sendPings() {
-    pingInterval = window.setInterval(function () {
-      debug("Recorder: pinging...");
-      writeStream(Buffer.from(""));
-    }, options.timeouts.pingInterval);
+  private sendPings() {
+    this.pingInterval = window.setInterval(() => {
+      this.options.logger.debug("Recorder: pinging...");
+      this.writeStream(Buffer.from(""));
+    }, this.options.timeouts.pingInterval);
   }
 
-  function stopPings() {
-    clearInterval(pingInterval);
+  private stopPings() {
+    clearInterval(this.pingInterval);
   }
 
-  function onAudioSample(audioSample) {
-    samplesCount++;
+  private onAudioSample(audioSample: AudioSample) {
+    this.samplesCount++;
 
     const audioBuffer = audioSample.toBuffer();
 
     /*
-     * if (options.verbose) {
-     *     debug(
+     * if (this.options.verbose) {
+     *     this.options.logger.debug(
      *         'Sample #' + samplesCount + ' (' + audioBuffer.length + ' bytes):'
      *     )
      * }
      */
 
-    writeStream(audioBuffer);
+    this.writeStream(audioBuffer);
   }
 
-  function show() {
-    recorderElement && hidden(recorderElement, false);
-  }
-
-  function onUserMediaReady(params = {}) {
-    try {
-      debug("Recorder: onUserMediaReady()", stringify(params));
-
-      const { switchingFacingMode } = params;
-
-      userMediaLoading = blocking = unloaded = submitting = false;
-      userMediaLoaded = true;
-
-      if (!switchingFacingMode) {
-        loop = createLoop();
-      }
-
-      show();
-
-      if (params.recordWhenReady) {
-        self.record();
-      }
-
-      self.emit(Events.USER_MEDIA_READY, {
-        switchingFacingMode: params.switchingFacingMode,
-        paused: self.isPaused(),
-        recordWhenReady: params.recordWhenReady,
-      });
-    } catch (exc) {
-      self.emit(Events.ERROR, exc);
+  public show() {
+    if (this.recorderElement) {
+      hidden(this.recorderElement, false);
     }
   }
 
-  function clearRetryTimeout() {
-    if (!retryTimeout) {
+  private onUserMediaReady(params?: UserMediaReadyParams) {
+    try {
+      this.options.logger.debug(
+        `Recorder: onUserMediaReady(${params ? pretty(params) : ""})`,
+      );
+
+      const switchingFacingMode = params?.switchingFacingMode;
+
+      this.userMediaLoading = this.blocking = this.unloaded = this.submitting = false;
+      this.userMediaLoaded = true;
+
+      if (!switchingFacingMode) {
+        this.loop = this.createLoop();
+      }
+
+      this.show();
+
+      if (params?.recordWhenReady) {
+        this.record();
+      }
+
+      this.emit("USER_MEDIA_READY", {
+        switchingFacingMode: params?.switchingFacingMode,
+        paused: this.isPaused(),
+        recordWhenReady: params?.recordWhenReady,
+      });
+    } catch (exc) {
+      this.emit("ERROR", { exc });
+    }
+  }
+
+  private clearRetryTimeout() {
+    if (!this.retryTimeout) {
       return;
     }
 
-    debug("Recorder: clearRetryTimeout()");
+    this.options.logger.debug("Recorder: clearRetryTimeout()");
 
-    clearTimeout(retryTimeout);
-    retryTimeout = null;
+    window.clearTimeout(this.retryTimeout);
+    this.retryTimeout = undefined;
   }
 
-  function calculateFrameProgress() {
-    return `${((confirmedFrameNumber / (framesCount || 1)) * 100).toFixed(2)}%`;
+  private calculateFrameProgress() {
+    return `${((this.confirmedFrameNumber / (this.framesCount || 1)) * 100).toFixed(2)}%`;
   }
 
-  function calculateSampleProgress() {
-    return `${((confirmedSampleNumber / (samplesCount || 1)) * 100).toFixed(2)}%`;
+  private calculateSampleProgress() {
+    return `${((this.confirmedSampleNumber / (this.samplesCount || 1)) * 100).toFixed(2)}%`;
   }
 
-  function updateOverallProgress() {
+  private updateOverallProgress() {
     /*
      * when progresses aren't initialized,
      * then do a first calculation to avoid `infinite` or `null` displays
      */
 
-    if (!frameProgress) {
-      frameProgress = calculateFrameProgress();
+    this.frameProgress = this.calculateFrameProgress();
+
+    if (isAudioEnabled(this.options)) {
+      this.sampleProgress = this.calculateSampleProgress();
     }
 
-    if (!sampleProgress) {
-      sampleProgress = calculateSampleProgress();
-    }
-
-    self.emit(Events.PROGRESS, frameProgress, sampleProgress);
+    this.emit("PROGRESS", {
+      frameProgress: this.frameProgress,
+      sampleProgress: this.sampleProgress,
+    });
   }
 
-  function updateFrameProgress(args) {
-    confirmedFrameNumber = args.frame ? args.frame : confirmedFrameNumber;
+  private updateFrameProgress(args: { frame: number }) {
+    this.confirmedFrameNumber = args.frame;
 
-    frameProgress = calculateFrameProgress();
+    this.frameProgress = this.calculateFrameProgress();
 
-    updateOverallProgress();
+    this.updateOverallProgress();
   }
 
-  function updateSampleProgress(args) {
-    confirmedSampleNumber = args.sample ? args.sample : confirmedSampleNumber;
+  private updateSampleProgress(args: { sample: number }) {
+    this.confirmedSampleNumber = args.sample;
 
-    sampleProgress = calculateSampleProgress();
+    this.sampleProgress = this.calculateSampleProgress();
 
-    updateOverallProgress();
+    this.updateOverallProgress();
   }
 
-  function preview(args) {
-    confirmedFrameNumber = confirmedSampleNumber = samplesCount = framesCount = 0;
+  private preview(args: PreviewArgs) {
+    const hasAudio = this.samplesCount > 0;
 
-    sampleProgress = frameProgress = null;
+    this.confirmedFrameNumber =
+      this.confirmedSampleNumber =
+      this.samplesCount =
+      this.framesCount =
+        0;
 
-    key = args.key;
+    this.sampleProgress = this.frameProgress = undefined;
+
+    this.key = args.key;
 
     /*
      * We are not serving MP4 videos anymore due to licensing but are keeping code
      * for compatibility and documentation
      */
     if (args.mp4) {
-      replay.setMp4Source(
-        `${args.mp4 + Constants.SITE_NAME_LABEL}/${options.siteName}/videomail.mp4`,
+      this.replay.setMp4Source(
+        `${args.mp4 + Constants.SITE_NAME_LABEL}/${this.options.siteName}/videomail.mp4`,
         true,
       );
     }
 
     if (args.webm) {
-      replay.setWebMSource(
-        `${args.webm + Constants.SITE_NAME_LABEL}/${options.siteName}/videomail.webm`,
+      this.replay.setWebMSource(
+        `${args.webm + Constants.SITE_NAME_LABEL}/${this.options.siteName}/videomail.webm`,
         true,
       );
     }
 
-    self.hide();
+    this.hide();
 
-    const width = self.getRecorderWidth(true);
-    const height = self.getRecorderHeight(true);
+    const width = this.getRecorderWidth(true);
+    const height = this.getRecorderHeight(true);
 
-    self.emit(Events.PREVIEW, key, width, height);
+    this.emit("PREVIEW", { key: this.key, width, height, hasAudio });
 
     // keep it for recording stats
-    waitingTime = Date.now() - stopTime;
-
-    recordingStats.waitingTime = waitingTime;
-
-    if (options.debug) {
-      debug(
-        "While recording, %s have been transferred and waiting time was %s",
-        Humanize.filesize(bytesSum, 2),
-        Humanize.toTime(waitingTime),
-      );
+    if (this.stopTime) {
+      this.waitingTime = Date.now() - this.stopTime;
     }
+
+    if (!this.recordingStats) {
+      this.recordingStats = {};
+    }
+
+    this.recordingStats.waitingTime = this.waitingTime;
+
+    const bytes = filesize(this.bytesSum ? this.bytesSum : -1, { round: 2 });
+    const waitingTime = humanizeDuration(this.waitingTime);
+
+    this.options.logger.debug(
+      `While recording, ${bytes} have been transferred and waiting time was ${waitingTime}`,
+    );
   }
 
-  function initSocket(cb) {
-    if (!connected) {
-      connecting = true;
+  private initSocket(cb?: () => void) {
+    if (!this.connected) {
+      this.connecting = true;
 
-      debug("Recorder: initializing web socket to %s", options.socketUrl);
+      this.options.logger.debug(
+        `Recorder: initializing web socket to ${this.options.socketUrl}`,
+      );
 
-      self.emit(Events.CONNECTING);
+      this.emit("CONNECTING");
 
       // https://github.com/maxogden/websocket-stream#binary-sockets
 
@@ -312,46 +350,35 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
        * see https://github.com/websockets/ws/issues/467
        */
 
-      const url2Connect = `${options.socketUrl}?${encodeURIComponent(
+      const url2Connect = `${this.options.socketUrl}?${encodeURIComponent(
         Constants.SITE_NAME_LABEL,
-      )}=${encodeURIComponent(options.siteName)}`;
+      )}=${encodeURIComponent(this.options.siteName)}`;
 
       try {
         /*
          * websocket options cannot be set on client side, only on server, see
          * https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
          */
-        stream = websocket(url2Connect, {
+        this.stream = websocket(url2Connect, {
           perMessageDeflate: false,
           // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
           objectMode: true,
         });
       } catch (exc) {
-        connecting = connected = false;
+        this.connecting = this.connected = false;
 
-        let err;
-
-        if (typeof websocket === "undefined") {
-          err = VideomailError.create(
-            "There is no websocket",
-            `Cause: ${pretty(exc)}`,
-            options,
-          );
-        } else {
-          err = VideomailError.create(
-            "Failed to connect to server",
+        const err = createError({
+          message: "Failed to connect to server",
+          explanation:
             "Please upgrade your browser. Your current version does not seem to support websockets.",
-            options,
-            {
-              browserProblem: true,
-            },
-          );
-        }
+          options: this.options,
+          exc,
+        });
 
-        self.emit(Events.ERROR, err);
+        this.emit("ERROR", { err });
       }
 
-      if (stream) {
+      if (this.stream) {
         // useful for debugging streams
 
         /*
@@ -363,443 +390,430 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         /*
          * stream.emit = function (type) {
          *   if (stream) {
-         *     debug(PIPE_SYMBOL + 'Debugging stream event:', type)
+         *     this.options.logger.debug(PIPE_SYMBOL + 'Debugging stream event:', type)
          *     var args = Array.prototype.slice.call(arguments, 0)
          *     return stream.originalEmit.apply(stream, args)
          *   }
          * }
          */
 
-        stream.on("close", function (err) {
-          debug(`${PIPE_SYMBOL}Stream has closed`);
+        this.stream.on("close", (err) => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream has closed`);
 
-          connecting = connected = false;
+          this.connecting = this.connected = false;
 
           if (err) {
-            self.emit(Events.ERROR, err || "Unhandled websocket error");
-          } else if (userMediaLoaded) {
-            initSocket();
+            this.emit("ERROR", { err });
+          } else if (this.userMediaLoaded) {
+            this.initSocket();
           }
         });
 
-        stream.on("connect", function () {
-          debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
+        this.stream.on("connect", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
 
-          const isClosing = this.socket.readyState === WebSocket.CLOSING;
+          const isClosing = this.stream?.socket.readyState === WebSocket.CLOSING;
 
-          if (!connected && !isClosing && !unloaded) {
-            connected = true;
-            connecting = unloaded = false;
+          if (!this.connected && !isClosing && !this.unloaded) {
+            this.connected = true;
+            this.connecting = this.unloaded = false;
 
-            self.emit(Events.CONNECTED);
+            this.emit("CONNECTED");
 
-            cb && cb();
+            cb?.();
           }
         });
 
-        stream.on("data", function (data) {
-          debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
+        this.stream.on("data", (data) => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
           let command;
 
           try {
             command = JSON.parse(data.toString());
           } catch (exc) {
-            debug("Failed to parse command:", exc);
+            this.options.logger.debug(`Failed to parse command: ${exc}`);
 
-            self.emit(
-              Events.ERROR,
-              VideomailError.create(
-                "Invalid server command",
-                // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-                `Contact us asap. Bad command was ${data.toString()}. `,
-                options,
-              ),
-            );
+            const err = createError({
+              message: "Invalid server command",
+              // toString() since https://github.com/binarykitchen/videomail.io/issues/288
+              explanation: `Contact us asap. Bad command was ${data.toString()}. `,
+              options: this.options,
+              exc,
+            });
+
+            this.emit("ERROR", { err });
           } finally {
-            executeCommand.call(self, command);
+            this.executeCommand(command);
           }
         });
 
-        stream.on("error", function (err) {
-          debug(`${PIPE_SYMBOL}Stream *error* event emitted: ${stringify(err)}`);
-
-          // OLD CODE, COMMENTED OUT TEMPORARILY FOR INVESTIGATIONS
-          // IT SHOULD RECONNECT INSTEAD OF CLOSING THE CONNECTION
-
-          // connecting = connected = false;
-
-          // let videomailError;
-
-          // if (browser.isIOS()) {
-          //   /*
-          //    * setting custom text since that err object isn't really an error
-          //    * on iPhones when locked, and unlocked, this err is actually
-          //    * an event object with stuff we can't use at all (an external bug)
-          //    */
-          //   videomailError = VideomailError.create(
-          //     err,
-          //     `iPhones cannot maintain a live connection for too long. Original error message is: ${err.toString()}`,
-          //     options,
-          //   );
-
-          //   /*
-          //    * Changed to the above temporarily for better investigations
-          //    * videomailError = VideomailError.create(
-          //    *   'Sorry, connection has timed out',
-          //    *   'iPhones cannot maintain a live connection for too long,
-          //    *   options
-          //    * )
-          //    */
-          // } else {
-          //   // or else it could be a poor wifi connection...
-          //   videomailError = VideomailError.create(
-          //     "Data exchange interrupted",
-          //     "Please check your network connection and reload",
-          //     options,
-          //   );
-          // }
-
-          // self.emit(Events.ERROR, videomailError);
+        this.stream.on("error", (err) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *error* event emitted: ${pretty(err)}`,
+          );
         });
 
         // just experimental
 
-        stream.on("drain", function () {
-          debug(`${PIPE_SYMBOL}Stream *drain* event emitted (should not happen!)`);
+        this.stream.on("drain", () => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *drain* event emitted (should not happen!)`,
+          );
         });
 
-        stream.on("preend", function () {
-          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("preend", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
 
-        stream.on("end", function () {
-          debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
+        this.stream.on("end", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
         });
 
-        stream.on("drain", function () {
-          debug(`${PIPE_SYMBOL}Stream *drain* event emitted`);
+        this.stream.on("drain", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *drain* event emitted`);
         });
 
-        stream.on("pipe", function () {
-          debug(`${PIPE_SYMBOL}Stream *pipe* event emitted`);
+        this.stream.on("pipe", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *pipe* event emitted`);
         });
 
-        stream.on("unpipe", function () {
-          debug(`${PIPE_SYMBOL}Stream *unpipe* event emitted`);
+        this.stream.on("unpipe", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *unpipe* event emitted`);
         });
 
-        stream.on("resume", function () {
-          debug(`${PIPE_SYMBOL}Stream *resume* event emitted`);
+        this.stream.on("resume", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *resume* event emitted`);
         });
 
-        stream.on("uncork", function () {
-          debug(`${PIPE_SYMBOL}Stream *uncork* event emitted`);
+        this.stream.on("uncork", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *uncork* event emitted`);
         });
 
-        stream.on("readable", function () {
-          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("readable", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
 
-        stream.on("prefinish", function () {
-          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("prefinish", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
 
-        stream.on("finish", function () {
-          debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("finish", () => {
+          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
         });
       }
     }
   }
 
-  function showUserMedia() {
+  private showUserMedia() {
     /*
      * use connected flag to prevent this from happening
      * https://github.com/binarykitchen/videomail.io/issues/323
      */
-    return connected && (isNotifying() || !isHidden() || blocking);
+    if (!this.connected) {
+      return false;
+    }
+
+    const hidden = this.isHidden();
+
+    if (!hidden) {
+      return true;
+    }
+
+    const notifying = this.isNotifying();
+
+    if (notifying) {
+      return true;
+    }
+
+    return this.blocking;
   }
 
-  function userMediaErrorCallback(err) {
-    userMediaLoading = false;
-    clearUserMediaTimeout();
+  private userMediaErrorCallback(err) {
+    this.userMediaLoading = false;
+    this.clearUserMediaTimeout();
 
-    debug(
-      `Recorder: userMediaErrorCallback(), name: ${err.name}, message: ${err.message} and Webcam characteristics: ${stringify(userMedia.getCharacteristics())}`,
+    const characteristics = this.userMedia?.getCharacteristics();
+
+    this.options.logger.debug(
+      `Recorder: userMediaErrorCallback(), name: ${err.name}, message: ${err.message} and Webcam characteristics: ${characteristics ? pretty(characteristics) : "none"}`,
     );
 
-    const errorListeners = self.listeners(Events.ERROR);
+    const errorListeners = Despot.getListeners("ERROR");
 
-    if (errorListeners && errorListeners.length) {
+    if (errorListeners?.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
-        self.emit(Events.ERROR, VideomailError.create(err, options));
+        const videomailError = createError({ err, options: this.options });
+        this.emit("ERROR", { err: videomailError });
       } else {
         // do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
-        debug("Recorder: ignore user media error", err);
+        this.options.logger.debug(`Recorder: ignore user media error ${pretty(err)}`);
       }
 
       // retry after a while
-      retryTimeout = setTimeout(initSocket, options.timeouts.userMedia);
-    } else if (unloaded) {
+      this.retryTimeout = window.setTimeout(
+        this.initSocket.bind(this),
+        this.options.timeouts.userMedia,
+      );
+    } else if (this.unloaded) {
       /*
        * This can happen when a container is unloaded but some user media related callbacks
        * are still in process. In that case ignore error.
        */
-      debug("Recorder: already unloaded. Not going to throw error", err);
+      this.options.logger.debug(
+        `Recorder: already unloaded. Not going to throw error ${pretty(err)}`,
+      );
     } else {
-      debug("Recorder: no error listeners attached but throwing error", err);
+      this.options.logger.debug(
+        `Recorder: no error listeners attached but throwing error ${pretty(err)}`,
+      );
 
       // weird situation, throw it instead of emitting since there are no error listeners
-      throw VideomailError.create(
+      throw createError({
         err,
-        "Unable to process this error since there are no error listeners anymore.",
-        options,
-      );
+        message:
+          "Unable to process this error since there are no error listeners anymore.",
+        options: this.options,
+      });
     }
   }
 
-  function getUserMediaCallback(localStream, params) {
-    debug("Recorder: getUserMediaCallback()", stringify(params));
+  private getUserMediaCallback(localStream: MediaStream, params?: UserMediaReadyParams) {
+    if (!this.userMedia) {
+      throw new Error("No user media is defined");
+    }
 
-    if (showUserMedia()) {
+    this.options.logger.debug(
+      `Recorder: getUserMediaCallback(${params ? pretty(params) : ""})`,
+    );
+
+    if (this.showUserMedia()) {
       try {
-        clearUserMediaTimeout();
+        this.clearUserMediaTimeout();
 
-        userMedia.init(
+        this.userMedia.init(
           localStream,
-          function () {
-            onUserMediaReady(params);
+          () => {
+            this.onUserMediaReady(params);
           },
-          onAudioSample.bind(self),
-          function (err) {
-            self.emit(Events.ERROR, err);
+          this.onAudioSample.bind(this),
+          (err) => {
+            this.emit("ERROR", { err });
           },
-          params,
+          params?.switchingFacingMode,
         );
       } catch (exc) {
-        self.emit(Events.ERROR, exc);
+        this.emit("ERROR", { exc });
       }
     }
   }
 
-  function loadGenuineUserMedia(params) {
-    if (!navigator) {
-      throw new Error("Navigator is missing!");
+  private loadGenuineUserMedia(params?: UserMediaReadyParams) {
+    this.options.logger.debug(
+      `Recorder: loadGenuineUserMedia(${params ? pretty(params) : ""})`,
+    );
+
+    this.emit("ASKING_WEBCAM_PERMISSION");
+
+    const constraints: MediaStreamConstraints = {
+      video: {
+        frameRate: { ideal: this.options.video.fps },
+      },
+      audio: isAudioEnabled(this.options),
+    };
+
+    // TODO Improve typings or add an external library for that
+    if (params?.switchingFacingMode && constraints.video && constraints.video !== true) {
+      constraints.video.facingMode = params.switchingFacingMode;
     }
 
-    debug("Recorder: loadGenuineUserMedia()");
+    if (this.options.video.width && constraints.video && constraints.video !== true) {
+      const idealWidth = this.options.video.width;
 
-    self.emit(Events.ASKING_WEBCAM_PERMISSION);
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      // prefer the front camera (if one is available) over the rear one
-      const constraints = {
-        video: {
-          facingMode,
-          frameRate: { ideal: options.video.fps },
-        },
-        audio: options.isAudioEnabled(),
-      };
-
-      if (browser.isOkSafari()) {
-        /*
-         * do not use those width/height constraints yet,
-         * current safari would throw an error
-         * todo in https://github.com/binarykitchen/videomail-client/issues/142
-         */
-      } else {
-        if (options.hasDefinedWidth()) {
-          constraints.video.width = { ideal: options.video.width };
-        } else {
-          /*
-           * otherwise try to apply the same width as the element is having
-           * but there is no 100% guarantee that this will happen. not
-           * all webcam drivers behave the same way
-           */
-          constraints.video.width = { ideal: self.limitWidth() };
-        }
-
-        if (options.hasDefinedHeight()) {
-          constraints.video.height = { ideal: options.video.height };
-        }
+      if (idealWidth) {
+        constraints.video.width = { ideal: idealWidth };
       }
+    } else if (constraints.video && constraints.video !== true) {
+      /*
+       * otherwise try to apply the same width as the element is having
+       * but there is no 100% guarantee that this will happen. not
+       * all webcam drivers behave the same way
+       */
+      const limitedWidth = this.limitWidth();
 
-      debug("Recorder: navigator.mediaDevices.getUserMedia()", stringify(constraints));
-
-      if (navigator.mediaDevices.getSupportedConstraints) {
-        debug(
-          "Recorder: navigator.mediaDevices.getSupportedConstraints()",
-          stringify(navigator.mediaDevices.getSupportedConstraints()),
-        );
+      if (limitedWidth) {
+        constraints.video.width = { ideal: limitedWidth };
       }
+    }
 
-      const genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints);
+    if (this.options.video.height && constraints.video && constraints.video !== true) {
+      const idealHeight = this.options.video.height;
 
-      if (genuineUserMediaRequest) {
-        genuineUserMediaRequest
-          .then(function (localStream) {
-            getUserMediaCallback(localStream, params);
-          })
-          .catch(userMediaErrorCallback);
-      } else {
-        /*
-         * this to trap errors like these
-         * Cannot read property 'then' of undefined
-         */
-
-        // todo retry with navigator.getUserMedia_() maybe?
-        throw VideomailError.create(
-          "Sorry, your browser is unable to use cameras.",
-          "Try a different browser with better user media functionalities.",
-          options,
-        );
+      if (idealHeight) {
+        constraints.video.height = { ideal: idealHeight };
       }
-    } else {
-      debug("Recorder: navigator.getUserMedia()");
+    }
 
-      navigator.getUserMedia_(
-        {
-          video: true,
-          audio: options.isAudioEnabled(),
-        },
-        getUserMediaCallback,
-        userMediaErrorCallback,
+    this.options.logger.debug(
+      `Recorder: navigator.mediaDevices.getUserMedia() ${pretty(constraints)}`,
+    );
+
+    this.options.logger.debug(
+      `Recorder: navigator.mediaDevices.getSupportedConstraints() ${pretty(navigator.mediaDevices.getSupportedConstraints())}`,
+    );
+
+    const genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints);
+
+    genuineUserMediaRequest
+      .then((localStream) => {
+        this.getUserMediaCallback(localStream, params);
+      })
+      .catch((reason: unknown) => {
+        this.userMediaErrorCallback(reason);
+      });
+  }
+
+  private loadUserMedia(params?: UserMediaReadyParams) {
+    if (this.userMediaLoaded) {
+      this.options.logger.debug(
+        "Recorder: skipping loadUserMedia() because it is already loaded",
       );
-    }
-  }
-
-  function loadUserMedia(params = {}) {
-    if (userMediaLoaded) {
-      debug("Recorder: skipping loadUserMedia() because it is already loaded");
-      onUserMediaReady(params);
-      return false;
-    } else if (userMediaLoading) {
-      debug(
+      this.onUserMediaReady(params);
+      return;
+    } else if (this.userMediaLoading) {
+      this.options.logger.debug(
         "Recorder: skipping loadUserMedia() because it is already asking for permission",
       );
-      return false;
+      return;
     }
 
-    debug(`Recorder: loadUserMedia(${stringify(params)})`);
+    this.options.logger.debug(`Recorder: loadUserMedia(${params ? pretty(params) : ""})`);
 
-    self.emit(Events.LOADING_USER_MEDIA);
+    this.emit("LOADING_USER_MEDIA");
 
     try {
-      userMediaTimeout = setTimeout(function () {
-        if (!self.isReady()) {
-          self.emit(Events.ERROR, browser.getNoAccessIssue());
+      this.userMediaTimeout = window.setTimeout(() => {
+        if (!this.isReady()) {
+          const err = getBrowser(this.options).getNoAccessIssue();
+          this.emit("ERROR", { err });
         }
-      }, options.timeouts.userMedia);
+      }, this.options.timeouts.userMedia);
 
-      userMediaLoading = true;
+      this.userMediaLoading = true;
 
-      loadGenuineUserMedia(params);
+      this.loadGenuineUserMedia(params);
     } catch (exc) {
-      debug("Recorder: failed to load genuine user media");
+      this.options.logger.debug("Recorder: failed to load genuine user media");
 
-      userMediaLoading = false;
+      this.userMediaLoading = false;
 
-      const errorListeners = self.listeners(Events.ERROR);
+      const errorListeners = Despot.getListeners("ERROR");
 
-      if (errorListeners.length) {
-        self.emit(Events.ERROR, exc);
+      if (errorListeners?.length) {
+        this.emit("ERROR", { exc });
       } else {
-        debug("Recorder: no error listeners attached but throwing exception", exc);
+        this.options.logger.debug(
+          `Recorder: no error listeners attached but throwing exception further`,
+        );
         throw exc; // throw it further
       }
     }
   }
 
-  function executeCommand(command) {
-    if (unloaded) {
+  private executeCommand(command: Command) {
+    if (this.unloaded) {
       // Skip
       return;
     }
 
     try {
       if (command.args) {
-        debug(`Server commanded: ${command.command} with ${stringify(command.args)}`);
+        this.options.logger.debug(
+          `Server commanded: ${command.command} with ${pretty(command.args)}`,
+        );
       } else {
-        debug(`Server commanded: ${command.command}`);
+        this.options.logger.debug(`Server commanded: ${command.command}`);
       }
 
       switch (command.command) {
         case "ready":
-          this.emit(Events.SERVER_READY);
+          this.emit("SERVER_READY");
 
-          if (!userMediaTimeout) {
-            if (options.loadUserMediaOnRecord) {
+          if (!this.userMediaTimeout) {
+            if (this.options.loadUserMediaOnRecord) {
               // Still show it but have it blank
-              show();
+              this.show();
             } else {
-              loadUserMedia();
+              this.loadUserMedia();
             }
           }
           break;
         case "preview":
-          preview(command.args);
+          this.preview(command.args);
           break;
-        case "error":
-          this.emit(
-            Events.ERROR,
-            VideomailError.create(
-              "Oh no, server error!",
-              command.args.err.toString() || "(No message given)",
-              options,
-            ),
-          );
+        case "error": {
+          const err = createError({
+            message: "Oh no, server error!",
+            explanation: command.args.err.toString() || "(No message given)",
+            options: this.options,
+          });
+          this.emit("ERROR", { err });
           break;
+        }
         case "confirmFrame":
-          updateFrameProgress(command.args);
+          this.updateFrameProgress(command.args);
           break;
         case "confirmSample":
-          updateSampleProgress(command.args);
+          this.updateSampleProgress(command.args);
           break;
         case "beginAudioEncoding":
-          this.emit(Events.BEGIN_AUDIO_ENCODING);
+          this.emit("BEGIN_AUDIO_ENCODING");
           break;
         case "beginVideoEncoding":
-          this.emit(Events.BEGIN_VIDEO_ENCODING);
+          this.emit("BEGIN_VIDEO_ENCODING");
           break;
-        default:
-          this.emit(Events.ERROR, `Unknown server command: ${command.command}`);
+        default: {
+          const err = createError({
+            message: `Unknown server command: ${command.command}`,
+            options: this.options,
+          });
+
+          this.emit("ERROR", {
+            err,
+          });
+
           break;
+        }
       }
     } catch (exc) {
-      self.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
   }
 
-  function isNotifying() {
-    return visuals.isNotifying();
+  private isNotifying() {
+    return this.visuals.isNotifying();
   }
 
-  function isHidden() {
-    return !recorderElement || hidden(recorderElement);
+  private isHidden() {
+    return !this.recorderElement || hidden(this.recorderElement);
   }
 
-  function writeCommand(command, args, cb) {
-    if (!cb && args && args.constructor === Function) {
-      cb = args;
-      args = null;
-    }
+  private writeCommand(command: string, args: any, cb?: () => void) {
+    if (!this.connected) {
+      this.options.logger.debug(`Reconnecting for the command ${command} …`);
 
-    if (!connected) {
-      debug("Reconnecting for the command", command, "…");
-
-      initSocket(function () {
-        writeCommand(command, args);
-        cb && cb();
+      this.initSocket(() => {
+        this.writeCommand(command, args);
+        cb?.();
       });
-    } else if (stream) {
+    } else if (this.stream) {
       if (args) {
-        debug(`$ ${command} with ${stringify(args)}`);
+        this.options.logger.debug(`$ ${command} with ${pretty(args)}`);
       } else {
-        debug(`$ ${command}`);
+        this.options.logger.debug(`$ ${command}`);
       }
 
-      const commandObj = {
+      const commandObj: Command = {
         command,
         args,
       };
@@ -812,12 +826,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
        * UnprocessableError: Unable to encode a video with FPS near zero.
        * todo consider removing this later or have it for debug=1 only?
        *
-       * if (options.logger && options.logger.getLines) {
+       * if (this.options.logger && options.logger.getLines) {
        *   commandObj.logLines = options.logger.getLines()
        * }
        */
 
-      writeStream(Buffer.from(stringify(commandObj)));
+      this.writeStream(Buffer.from(JSON.stringify(commandObj)));
 
       if (cb) {
         // keep all callbacks async
@@ -828,402 +842,437 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     }
   }
 
-  function cancelAnimationFrame() {
-    loop && loop.dispose();
+  private cancelAnimationFrame() {
+    this.loop?.dispose();
   }
 
-  function getIntervalSum() {
-    return loop.getElapsedTime();
+  private getIntervalSum() {
+    return this.loop.getElapsedTime();
   }
 
-  function getAvgInterval() {
-    return getIntervalSum() / framesCount;
+  private getAvgInterval() {
+    return this.getIntervalSum() / this.framesCount;
   }
 
-  function getAvgFps() {
-    const intervalSum = getIntervalSum();
+  private getAvgFps() {
+    const intervalSum = this.getIntervalSum();
 
     if (intervalSum === 0) {
       return undefined;
     }
 
-    return (framesCount / getIntervalSum()) * 1000;
+    return (this.framesCount / this.getIntervalSum()) * 1000;
   }
 
-  this.getRecordingStats = function () {
-    return recordingStats;
-  };
+  public getRecordingStats() {
+    return this.recordingStats;
+  }
 
-  this.getAudioSampleRate = function () {
-    return userMedia.getAudioSampleRate();
-  };
+  public getAudioSampleRate() {
+    return this.userMedia?.getAudioSampleRate();
+  }
 
-  this.stop = function (params) {
-    debug(`stop(${stringify(params)})`);
+  public stop(params?: StopParams) {
+    if (!this.userMedia) {
+      throw new Error("No user media defined, unable to stop");
+    }
 
-    const { limitReached } = params;
+    this.options.logger.debug(`Recorder: stop(${params ? pretty(params) : ""})`);
 
-    this.emit(Events.STOPPING, limitReached);
+    const limitReached = params?.limitReached;
 
-    loop.complete();
+    this.emit("STOPPING", { limitReached });
 
-    const self = this;
+    this.loop?.complete();
 
     /*
      * needed to give dom enough time to prepare the replay element
      * to show up upon the STOPPING event so that we can evaluate
      * the right video type
      */
-    setTimeout(function () {
-      stopTime = Date.now();
+    setTimeout(() => {
+      this.stopTime = Date.now();
 
-      recordingStats = {
+      const videoType = this.replay.getVideoType();
+
+      if (!videoType) {
+        throw new Error("Unable to video record when no video type is defined.");
+      }
+
+      this.recordingStats = {
         /*
          * do not use loop.getFPS() as this will only return the fps from the last delta,
          * not the average. see https://github.com/hapticdata/animitter/issues/3
          */
-        avgFps: getAvgFps(),
-        wantedFps: options.video.fps,
-        avgInterval: getAvgInterval(),
-        wantedInterval: 1e3 / options.video.fps,
+        avgFps: this.getAvgFps(),
+        wantedFps: this.options.video.fps,
+        avgInterval: this.getAvgInterval(),
+        wantedInterval: 1e3 / this.options.video.fps,
 
-        intervalSum: getIntervalSum(),
-        framesCount,
-        videoType: replay.getVideoType(),
+        intervalSum: this.getIntervalSum(),
+        framesCount: this.framesCount,
+        videoType,
       };
 
-      if (options.isAudioEnabled()) {
-        recordingStats.samplesCount = samplesCount;
-        recordingStats.sampleRate = userMedia.getAudioSampleRate();
+      if (isAudioEnabled(this.options) && this.userMedia) {
+        this.recordingStats.samplesCount = this.samplesCount;
+        this.recordingStats.sampleRate = this.userMedia.getAudioSampleRate();
       }
 
-      writeCommand("stop", recordingStats, function () {
-        self.emit(Events.STOPPED, { recordingStats });
+      this.writeCommand("stop", this.recordingStats, () => {
+        this.emit("STOPPED", { recordingStats: this.recordingStats });
       });
 
       // beware, resetting will set framesCount to zero, so leave this here
-      self.reset();
+      this.reset();
     }, 60);
-  };
-
-  this.back = function (cb) {
-    this.emit(Events.GOING_BACK);
-
-    unloaded = false;
-
-    show();
-
-    writeCommand("back", cb);
-  };
-
-  function reInitializeAudio() {
-    debug("Recorder: reInitializeAudio()");
-
-    clearUserMediaTimeout();
-
-    // important to free memory
-    userMedia && userMedia.stop();
-
-    userMediaLoaded = key = canvas = ctx = null;
-
-    loadUserMedia();
   }
 
-  this.unload = function (e) {
-    if (unloaded || !built) {
+  public back(cb: () => void) {
+    this.emit("GOING_BACK");
+
+    this.unloaded = false;
+
+    this.show();
+
+    this.writeCommand("back", undefined, cb);
+  }
+
+  private reInitializeAudio() {
+    this.options.logger.debug("Recorder: reInitializeAudio()");
+
+    this.clearUserMediaTimeout();
+
+    // important to free memory
+    this.userMedia?.stop();
+
+    this.userMediaLoaded = this.key = this.canvas = this.ctx = undefined;
+
+    this.loadUserMedia();
+  }
+
+  public unload(params?: UnloadParams) {
+    if (this.unloaded || !this.built) {
       return; // already unloaded
     }
+
+    const e = params?.e;
 
     let cause;
 
     if (e) {
-      cause = e.name || e.statusText || e.toString();
+      cause = e.type;
     }
 
-    debug(`Recorder: unload()${cause ? `, cause: ${cause}` : ""}`);
+    this.options.logger.debug(`Recorder: unload()${cause ? `, cause: ${cause}` : ""}`);
 
     this.reset();
 
-    clearUserMediaTimeout();
+    this.clearUserMediaTimeout();
 
-    if (userMedia) {
+    if (this.userMedia) {
       // prevents https://github.com/binarykitchen/videomail-client/issues/114
-      userMedia.unloadRemainingEventListeners();
+      this.userMedia.unloadRemainingEventListeners();
     }
 
-    if (submitting) {
+    if (this.submitting) {
       // server will disconnect socket automatically after submitting
-    } else if (stream) {
+    } else if (this.stream) {
       /*
        * force to disconnect socket right now to clean temp files on server
        * event listeners will do the rest
        */
-      debug(`Recorder: ending stream ...`);
-      stream.destroy();
-      stream = undefined;
+      this.options.logger.debug(`Recorder: ending stream ...`);
+      this.stream.destroy();
+      this.stream = undefined;
     }
 
-    unloaded = true;
-    built = connecting = connected = false;
-  };
+    this.unloaded = true;
+    this.built = this.connecting = this.connected = false;
+  }
 
-  this.reset = function () {
+  public reset() {
     // no need to reset when already unloaded
-    if (!unloaded) {
-      debug("Recorder: reset()");
+    if (!this.unloaded) {
+      this.options.logger.debug("Recorder: reset()");
 
-      this.emit(Events.RESETTING);
+      this.emit("RESETTING");
 
-      cancelAnimationFrame();
+      this.cancelAnimationFrame();
 
       // important to free memory
-      userMedia && userMedia.stop();
+      this.userMedia?.stop();
 
-      replay.reset();
+      this.replay.reset();
 
-      userMediaLoaded =
-        key =
-        canvas =
-        ctx =
-        recordingBuffer =
-        recordingBufferLength =
-          null;
-    }
-  };
-
-  function clearUserMediaTimeout() {
-    if (userMediaTimeout) {
-      debug("Recorder: clearUserMediaTimeout()");
-
-      userMediaTimeout && clearTimeout(userMediaTimeout);
-      userMediaTimeout = null;
+      this.userMediaLoaded =
+        this.key =
+        this.canvas =
+        this.ctx =
+        this.recordingBuffer =
+          undefined;
     }
   }
 
-  this.validate = function () {
-    return connected && canvas === null;
-  };
+  private clearUserMediaTimeout() {
+    if (this.userMediaTimeout) {
+      this.options.logger.debug("Recorder: clearUserMediaTimeout()");
 
-  this.isReady = function () {
-    return userMedia.isReady();
-  };
-
-  this.pause = function (params) {
-    const e = params && params.event;
-
-    if (e instanceof window.Event) {
-      params.eventType = e.type;
+      window.clearTimeout(this.userMediaTimeout);
+      this.userMediaTimeout = undefined;
     }
+  }
 
+  public validate() {
+    return this.connected && this.canvas === undefined;
+  }
+
+  public isReady() {
+    return this.userMedia?.isReady();
+  }
+
+  public pause(params?: PauseParams) {
     if (params) {
-      debug(`pause() at frame ${framesCount} with ${stringify(params)}`);
+      this.options.logger.debug(
+        `pause() at frame ${this.framesCount} with ${pretty(params)}`,
+      );
     } else {
-      debug(`pause() at frame ${framesCount}`);
+      this.options.logger.debug(`pause() at frame ${this.framesCount}`);
     }
 
-    userMedia.pause();
-    loop.stop();
+    this.userMedia?.pause();
+    this.loop.stop();
 
-    this.emit(Events.PAUSED);
+    this.emit("PAUSED");
 
-    sendPings();
-  };
+    this.sendPings();
+  }
 
-  this.isPaused = function () {
-    return userMedia && userMedia.isPaused();
-  };
+  public resume() {
+    this.options.logger.debug(`Recorder: resume() with frame ${this.framesCount}`);
 
-  this.resume = function () {
-    debug(`Recorder: resume() with frame ${framesCount}`);
+    this.stopPings();
 
-    stopPings();
+    this.emit("RESUMING");
 
-    this.emit(Events.RESUMING);
+    this.userMedia?.resume();
+    this.loop.start();
+  }
 
-    userMedia.resume();
-    loop.start();
-  };
-
-  function onFlushed(opts) {
-    const frameNumber = opts && opts.frameNumber;
+  private onFlushed(opts: WriteStreamParams) {
+    const frameNumber = opts.frameNumber;
 
     if (frameNumber === 1) {
-      self.emit(Events.FIRST_FRAME_SENT);
+      this.emit("FIRST_FRAME_SENT");
     }
   }
 
-  function draw(deltaTime, elapsedTime) {
+  private draw(_deltaTime, elapsedTime: number) {
+    if (!this.userMedia) {
+      throw new Error("No user media defined, unable to draw on canvas");
+    }
+
     try {
       // ctx and stream might become null while unloading
-      if (!self.isPaused() && stream && ctx) {
-        if (framesCount === 0) {
-          self.emit(Events.SENDING_FIRST_FRAME);
+      if (!this.isPaused() && this.stream && this.ctx) {
+        if (this.framesCount === 0) {
+          this.emit("SENDING_FIRST_FRAME");
         }
 
-        framesCount++;
+        this.framesCount++;
 
-        ctx.drawImage(userMedia.getRawVisuals(), 0, 0, canvas.width, canvas.height);
+        const imageSource = this.userMedia.getRawVisuals();
 
-        recordingBuffer = frame.toBuffer();
-        recordingBufferLength = recordingBuffer.length;
-
-        if (recordingBufferLength < 1) {
-          throw VideomailError.create("Failed to extract webcam data.", options);
+        if (this.canvas && imageSource) {
+          this.ctx.drawImage(imageSource, 0, 0, this.canvas.width, this.canvas.height);
+        } else {
+          throw new Error("Unable to draw an image without a defined canvas");
         }
 
-        bytesSum += recordingBufferLength;
+        this.recordingBuffer = this.frame?.toBuffer();
+        const recordingBufferLength = this.recordingBuffer?.length;
 
-        const frameControlBuffer = Buffer.from(stringify({ frameNumber: framesCount }));
-        const frameBuffer = Buffer.concat([recordingBuffer, frameControlBuffer]);
+        if (!recordingBufferLength) {
+          throw createError({
+            message: "Failed to extract webcam data.",
+            options: this.options,
+          });
+        } else if (this.recordingBuffer) {
+          if (this.bytesSum !== undefined) {
+            this.bytesSum += recordingBufferLength;
+          } else {
+            this.bytesSum = recordingBufferLength;
+          }
 
-        writeStream(frameBuffer, {
-          frameNumber: framesCount,
-          onFlushedCallback: onFlushed,
-        });
+          const frameControlBuffer = Buffer.from(
+            JSON.stringify({ frameNumber: this.framesCount }),
+          );
 
-        /*
-         * if (options.verbose) {
-         *   debug(
-         *     'Frame #' + framesCount + ' (' + recordingBufferLength + ' bytes):',
-         *     ' delta=' + deltaTime + 'ms, ' +
-         *     ' elapsed=' + elapsedTime + 'ms'
-         *   )
-         * }
-         */
+          const frameBuffer = Buffer.concat([this.recordingBuffer, frameControlBuffer]);
 
-        visuals.checkTimer({ intervalSum: elapsedTime });
+          this.writeStream(frameBuffer, {
+            frameNumber: this.framesCount,
+            onFlushedCallback: this.onFlushed.bind(this),
+          });
+
+          /*
+           * if (this.options.verbose) {
+           *   this.options.logger.debug(
+           *     'Frame #' + framesCount + ' (' + recordingBufferLength + ' bytes):',
+           *     ' delta=' + deltaTime + 'ms, ' +
+           *     ' elapsed=' + elapsedTime + 'ms'
+           *   )
+           * }
+           */
+
+          this.visuals.checkTimer(elapsedTime);
+        }
       }
     } catch (exc) {
-      self.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
   }
 
-  function createLoop() {
-    const newLoop = animitter({ fps: options.video.fps }, draw);
+  private createLoop() {
+    const newLoop = animitter({ fps: this.options.video.fps }, this.draw.bind(this));
 
     // remember it first
-    originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject();
+    this.originalAnimationFrameObject = newLoop.getRequestAnimationFrameObject();
 
     return newLoop;
   }
 
-  this.record = function () {
-    if (unloaded) {
-      return false;
+  public record() {
+    if (this.unloaded) {
+      return;
     }
 
     // reconnect when needed
-    if (!connected) {
-      debug("Recorder: reconnecting before recording ...");
+    if (!this.connected) {
+      this.options.logger.debug("Recorder: reconnecting before recording ...");
 
-      initSocket(function () {
-        self.once(Events.USER_MEDIA_READY, self.record);
+      this.initSocket(() => {
+        this.once("USER_MEDIA_READY", this.record.bind(this));
       });
 
-      return false;
+      return;
     }
 
-    if (!userMediaLoaded) {
-      if (options.loadUserMediaOnRecord) {
-        loadUserMedia({ recordWhenReady: true });
+    if (!this.userMediaLoaded) {
+      if (this.options.loadUserMediaOnRecord) {
+        this.loadUserMedia({ recordWhenReady: true });
       } else {
-        self.emit(
-          Events.ERROR,
-          VideomailError.create("Load and enable your camera first", options),
-        );
+        const err = createError({
+          message: "Load and enable your camera first",
+          options: this.options,
+        });
+        this.emit("ERROR", { err });
       }
 
-      return false; // do nothing further
+      // do nothing further
+      return;
     }
 
     try {
-      canvas = userMedia.createCanvas();
+      if (!this.userMedia) {
+        throw new Error("No user media defined, unable to create canvas");
+      }
+      this.canvas = this.userMedia.createCanvas();
     } catch (exc) {
-      self.emit(Events.ERROR, VideomailError.create(exc, options));
+      const err = createError({ exc, options: this.options });
+      this.emit("ERROR", { err });
 
-      return false;
+      return;
     }
 
-    ctx = canvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d");
 
-    if (!canvas.width) {
-      self.emit(
-        Events.ERROR,
-        VideomailError.create("Canvas has an invalid width.", options),
-      );
+    if (!this.canvas.width) {
+      const err = createError({
+        message: "Canvas has an invalid width.",
+        options: this.options,
+      });
+      this.emit("ERROR", { err });
 
-      return false;
+      return;
     }
 
-    if (!canvas.height) {
-      self.emit(
-        Events.ERROR,
-        VideomailError.create("Canvas has an invalid height.", options),
-      );
+    if (!this.canvas.height) {
+      const err = createError({
+        message: "Canvas has an invalid height.",
+        options: this.options,
+      });
+      this.emit("ERROR", { err });
 
-      return false;
+      return;
     }
 
-    bytesSum = 0;
+    this.bytesSum = 0;
 
-    frame = new Frame(canvas, options.image.types, options.image.quality);
+    this.frame = new Frame(
+      this.canvas,
+      this.options.image.types,
+      this.options.image.quality,
+    );
 
-    debug("Recorder: record()");
-    userMedia.record();
+    this.options.logger.debug("Recorder: record()");
+    this.userMedia.record();
 
-    self.emit(Events.RECORDING, framesCount);
+    this.emit("RECORDING", { framesCount: this.framesCount });
 
     // see https://github.com/hapticdata/animitter/issues/3
-    loop.on("update", function (_deltaTime, elapsedTime) {
-      let avgFPS = undefined;
+    this.loop.on("update", (_deltaTime, elapsedTime) => {
+      let avgFPS: number | undefined;
 
       if (elapsedTime !== 0) {
         // x1000 because of milliseconds
-        avgFPS = Math.round((framesCount / elapsedTime) * 1000);
+        avgFPS = Math.round((this.framesCount / elapsedTime) * 1000);
       } else {
         avgFPS = undefined;
       }
 
-      debug(`Recorder: avgFps = ${avgFPS}, framesCount = ${framesCount}`);
+      this.options.logger.debug(
+        `Recorder: avgFps = ${avgFPS}, framesCount = ${this.framesCount}`,
+      );
     });
 
-    loop.start();
-  };
+    this.loop.start();
+  }
 
-  function setAnimationFrameObject(newObj) {
+  private setAnimationFrameObject(newObj) {
     /*
      * must stop and then start to make it become effective, see
      * https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
      */
-    if (loop) {
-      const isRecording = self.isRecording();
+    if (this.loop) {
+      const isRecording = this.isRecording();
 
-      loop.stop();
-      loop.setRequestAnimationFrameObject(newObj);
+      this.loop.stop();
+      this.loop.setRequestAnimationFrameObject(newObj);
 
       if (isRecording) {
-        loop.start();
+        this.loop.start();
       }
     }
   }
 
-  function restoreAnimationFrameObject() {
-    debug("Recorder: restoreAnimationFrameObject()");
+  private restoreAnimationFrameObject() {
+    this.options.logger.debug("Recorder: restoreAnimationFrameObject()");
 
-    setAnimationFrameObject(originalAnimationFrameObject);
+    this.setAnimationFrameObject(this.originalAnimationFrameObject);
   }
 
-  function loopWithTimeouts() {
-    debug("Recorder: loopWithTimeouts()");
+  private loopWithTimeouts() {
+    this.options.logger.debug("Recorder: loopWithTimeouts()");
 
-    const wantedInterval = 1e3 / options.video.fps;
+    const wantedInterval = 1e3 / this.options.video.fps;
 
     let processingTime = 0;
     let start;
 
-    function raf(fn) {
-      return setTimeout(
-        function () {
+    const raf = (fn) =>
+      setTimeout(
+        () => {
           start = Date.now();
           fn();
           processingTime = Date.now() - start;
@@ -1235,283 +1284,306 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
          */
         wantedInterval - processingTime,
       );
-    }
 
-    function cancel(id) {
-      clearTimeout(id);
-    }
+    const cancel = (id?: number) => {
+      window.clearTimeout(id);
+    };
 
-    setAnimationFrameObject({
+    this.setAnimationFrameObject({
       requestAnimationFrame: raf,
       cancelAnimationFrame: cancel,
     });
   }
 
-  function buildElement() {
-    recorderElement = h(`video.${options.selectors.userMediaClass}`);
+  private correctDimensions() {
+    if (!this.recorderElement) {
+      return;
+    }
 
-    visuals.appendChild(recorderElement);
+    if (this.options.video.width) {
+      const recorderWidth = this.getRecorderWidth(true);
+
+      if (recorderWidth) {
+        this.recorderElement.width = recorderWidth;
+      }
+    }
+
+    if (this.options.video.height) {
+      const recorderHeight = this.getRecorderHeight(true);
+
+      if (recorderHeight) {
+        this.recorderElement.height = recorderHeight;
+      }
+    }
   }
 
-  function correctDimensions() {
-    if (options.hasDefinedWidth()) {
-      recorderElement.width = self.getRecorderWidth(true);
+  private switchFacingMode(facingMode?: ConstrainDOMString) {
+    if (!getBrowser(this.options).isMobile()) {
+      return;
     }
 
-    if (options.hasDefinedHeight()) {
-      recorderElement.height = self.getRecorderHeight(true);
-    }
-  }
-
-  function switchFacingMode() {
-    if (!browser.isMobile()) {
-      return false;
-    }
+    let newFacingMode: ConstrainDOMString | undefined;
 
     if (facingMode === "user") {
-      facingMode = "environment";
+      newFacingMode = "environment";
     } else if (facingMode === "environment") {
-      facingMode = "user";
+      newFacingMode = "user";
     } else {
-      debug("Recorder: unsupported facing mode", facingMode);
+      this.options.logger.debug(`Recorder: unsupported facing mode ${facingMode}`);
     }
 
-    loadGenuineUserMedia({ switchingFacingMode: true });
+    this.loadGenuineUserMedia({ switchingFacingMode: newFacingMode });
   }
 
-  function initEvents() {
-    debug("Recorder: initEvents()");
+  private initEvents() {
+    this.options.logger.debug("Recorder: initEvents()");
 
-    self
-      .on(Events.SUBMITTING, function () {
-        submitting = true;
-      })
-      .on(Events.SUBMITTED, function () {
-        submitting = false;
-      })
-      .on(Events.BLOCKING, function () {
-        blocking = true;
-        clearUserMediaTimeout();
-      })
-      .on(Events.HIDE, function () {
-        self.hide();
-      })
-      .on(Events.LOADED_META_DATA, function () {
-        correctDimensions();
-      })
-      .on(Events.DISABLING_AUDIO, function () {
-        reInitializeAudio();
-      })
-      .on(Events.ENABLING_AUDIO, function () {
-        reInitializeAudio();
-      })
-      .on(Events.INVISIBLE, function () {
-        loopWithTimeouts();
-      })
-      .on(Events.VISIBLE, function () {
-        restoreAnimationFrameObject();
-      })
-      .on(Events.SWITCH_FACING_MODE, function () {
-        switchFacingMode();
-      });
+    this.on("SUBMITTING", () => {
+      this.submitting = true;
+    });
+
+    this.on("SUBMITTED", () => {
+      this.submitting = false;
+    });
+
+    this.on("BLOCKING", () => {
+      this.blocking = true;
+      this.clearUserMediaTimeout();
+    });
+
+    this.on("PREVIEW", () => {
+      this.hide();
+    });
+
+    this.on("HIDE", () => {
+      this.hide();
+    });
+
+    this.on("LOADED_META_DATA", () => {
+      this.correctDimensions();
+    });
+
+    this.on("DISABLING_AUDIO", () => {
+      this.reInitializeAudio();
+    });
+
+    this.on("ENABLING_AUDIO", () => {
+      this.reInitializeAudio();
+    });
+
+    this.on("INVISIBLE", () => {
+      this.loopWithTimeouts();
+    });
+
+    this.on("VISIBLE", () => {
+      this.restoreAnimationFrameObject();
+    });
+
+    this.on("SWITCH_FACING_MODE", () => {
+      this.switchFacingMode();
+    });
   }
 
-  this.build = function () {
-    let err = browser.checkRecordingCapabilities();
+  private buildElement() {
+    this.recorderElement = document.createElement("video");
+    this.recorderElement.classList.add(this.options.selectors.userMediaClass);
 
-    if (!err) {
-      err = browser.checkBufferTypes();
+    this.visuals.appendChild(this.recorderElement);
+  }
+
+  public build() {
+    this.recorderElement = this.visuals
+      .getElement()
+      ?.querySelector(`video.${this.options.selectors.userMediaClass}`);
+
+    if (!this.recorderElement) {
+      this.buildElement();
     }
 
-    if (err) {
-      this.emit(Events.ERROR, err);
-    } else {
-      recorderElement = visuals.querySelector(
-        `video.${options.selectors.userMediaClass}`,
+    if (!this.recorderElement) {
+      throw new Error(
+        `There is still no video element with class ${this.options.selectors.userMediaClass}`,
       );
-
-      if (!recorderElement) {
-        buildElement();
-      }
-
-      correctDimensions();
-
-      /*
-       * prevent audio feedback, see
-       * https://github.com/binarykitchen/videomail-client/issues/35
-       */
-      recorderElement.muted = true;
-
-      // for iphones, see https://github.com/webrtc/samples/issues/929
-      recorderElement.setAttribute("playsinline", true);
-      recorderElement.setAttribute("webkit-playsinline", "webkit-playsinline");
-
-      /*
-       * add these here, not in CSS because users can configure custom
-       * class names
-       */
-      recorderElement.style.transform = "rotateY(180deg)";
-      recorderElement.style["-webkit-transform"] = "rotateY(180deg)";
-      recorderElement.style["-moz-transform"] = "rotateY(180deg)";
-
-      if (options.video.stretch) {
-        recorderElement.style.width = "100%";
-      }
-
-      if (!userMedia) {
-        userMedia = new UserMedia(this, options);
-      }
-
-      show();
-
-      if (!built) {
-        initEvents();
-
-        if (!connected) {
-          initSocket();
-        } else if (!options.loadUserMediaOnRecord) {
-          loadUserMedia();
-        }
-      } else if (options.loadUserMediaOnRecord) {
-        loadUserMedia();
-      }
-
-      built = true;
     }
-  };
 
-  this.isPaused = function () {
-    return userMedia && userMedia.isPaused() && !loop.isRunning();
-  };
+    this.correctDimensions();
 
-  this.isRecording = function () {
+    /*
+     * prevent audio feedback, see
+     * https://github.com/binarykitchen/videomail-client/issues/35
+     */
+    this.recorderElement.muted = true;
+
+    // for iPhones, see https://github.com/webrtc/samples/issues/929
+    this.recorderElement.setAttribute("playsinline", "true");
+    this.recorderElement.setAttribute("webkit-playsinline", "webkit-playsinline");
+
+    /*
+     * add these here, not in CSS because users can configure custom
+     * class names
+     */
+    this.recorderElement.style.transform = "rotateY(180deg)";
+    this.recorderElement.style["-webkit-transform"] = "rotateY(180deg)";
+    this.recorderElement.style["-moz-transform"] = "rotateY(180deg)";
+
+    if (this.options.video.stretch) {
+      this.recorderElement.style.width = "100%";
+    }
+
+    if (!this.userMedia) {
+      this.userMedia = new UserMedia(this, this.options);
+    }
+
+    this.show();
+
+    if (!this.built) {
+      this.initEvents();
+
+      if (!this.connected) {
+        this.initSocket();
+      } else if (!this.options.loadUserMediaOnRecord) {
+        this.loadUserMedia();
+      }
+    } else if (this.options.loadUserMediaOnRecord) {
+      this.loadUserMedia();
+    }
+
+    this.built = true;
+  }
+
+  public isPaused() {
+    return this.userMedia?.isPaused() && !this.loop.isRunning();
+  }
+
+  public isRecording() {
     /*
      * checking for stream.destroyed needed since
      * https://github.com/binarykitchen/videomail.io/issues/296
      */
     return (
-      loop &&
-      loop.isRunning() &&
+      this.loop?.isRunning() &&
       !this.isPaused() &&
-      !isNotifying() &&
-      stream &&
-      !stream.destroyed
+      !this.isNotifying() &&
+      this.stream &&
+      !this.stream.destroyed
     );
-  };
+  }
 
-  this.hide = function () {
-    if (!isHidden()) {
-      recorderElement && hidden(recorderElement, true);
+  public hide() {
+    if (!this.isHidden()) {
+      if (this.recorderElement) {
+        hidden(this.recorderElement, true);
+      }
 
-      clearUserMediaTimeout();
-      clearRetryTimeout();
+      this.clearUserMediaTimeout();
+      this.clearRetryTimeout();
     }
-  };
+  }
 
-  this.isUnloaded = function () {
-    return unloaded;
-  };
+  public isUnloaded() {
+    return this.unloaded;
+  }
 
   /*
    * these two return the true dimensions of the webcam area.
    * needed because on mobiles they might be different.
    */
-
-  this.getRecorderWidth = function (responsive) {
-    if (userMedia && userMedia.hasVideoWidth()) {
-      return userMedia.getRawWidth(responsive);
-    } else if (responsive && options.hasDefinedWidth()) {
-      return this.limitWidth(options.video.width);
+  public getRecorderWidth(responsive: boolean) {
+    if (this.userMedia?.hasVideoWidth()) {
+      return this.userMedia.getRawWidth(responsive);
+    } else if (responsive && this.options.video.width) {
+      return this.limitWidth(this.options.video.width);
     }
-  };
 
-  this.getRecorderHeight = function (responsive, useBoundingClientRect) {
-    if (recorderElement && useBoundingClientRect) {
-      return recorderElement.getBoundingClientRect().height;
-    } else if (userMedia) {
-      return userMedia.getRawHeight(responsive);
-    } else if (responsive && options.hasDefinedHeight()) {
+    return this.options.video.width;
+  }
+
+  public getRecorderHeight(responsive: boolean, useBoundingClientRect?: boolean) {
+    if (this.recorderElement && useBoundingClientRect) {
+      return this.recorderElement.getBoundingClientRect().height;
+    } else if (this.userMedia) {
+      return this.userMedia.getRawHeight(responsive);
+    } else if (responsive && this.options.video.height) {
       return this.calculateHeight(responsive);
     }
-  };
 
-  function getRatio() {
-    let ratio;
+    return this.options.video.height;
+  }
 
-    if (userMedia) {
-      const userMediaVideoWidth = userMedia.getVideoWidth();
+  private getRatio() {
+    let ratio: number | undefined;
+
+    if (this.userMedia) {
+      const userMediaVideoWidth = this.userMedia.getVideoWidth();
+      const userMediaVideoHeight = this.userMedia.getVideoHeight();
 
       // avoid division by zero
-      if (userMediaVideoWidth < 1) {
+      if (!userMediaVideoWidth || userMediaVideoWidth < 1) {
         // use as a last resort fallback computation (needed for safari 11)
-        ratio = visuals.getRatio();
-      } else {
-        ratio = userMedia.getVideoHeight() / userMediaVideoWidth;
+        ratio = this.visuals.getRatio();
+      } else if (userMediaVideoHeight) {
+        ratio = userMediaVideoHeight / userMediaVideoWidth;
       }
     } else {
-      ratio = options.getRatio();
+      ratio = getRatio(this.options);
     }
 
     return ratio;
   }
 
-  this.calculateWidth = function (responsive) {
+  public calculateWidth(responsive: boolean) {
     let videoHeight;
 
-    if (userMedia) {
-      videoHeight = userMedia.getVideoHeight();
-    } else if (recorderElement) {
-      videoHeight = recorderElement.videoHeight || recorderElement.height;
+    if (this.userMedia) {
+      videoHeight = this.userMedia.getVideoHeight();
+    } else if (this.recorderElement) {
+      videoHeight = this.recorderElement.videoHeight || this.recorderElement.height;
     }
 
-    return visuals.calculateWidth({
-      responsive,
-      ratio: getRatio(),
-      videoHeight,
-    });
-  };
+    return calculateWidth(responsive, videoHeight, this.options, this.getRatio());
+  }
 
-  this.calculateHeight = function (responsive) {
+  public calculateHeight(responsive: boolean) {
     let videoWidth;
 
-    if (userMedia) {
-      videoWidth = userMedia.getVideoWidth();
-    } else if (recorderElement) {
-      videoWidth = recorderElement.videoWidth || recorderElement.width;
+    if (this.userMedia) {
+      videoWidth = this.userMedia.getVideoWidth();
+    } else if (this.recorderElement) {
+      videoWidth = this.recorderElement.videoWidth || this.recorderElement.width;
     }
 
-    return visuals.calculateHeight({
+    return calculateHeight(
       responsive,
-      ratio: getRatio(),
       videoWidth,
-    });
-  };
+      this.options,
+      this.getRatio(),
+      this.recorderElement,
+    );
+  }
 
-  this.getRawVisualUserMedia = function () {
-    return recorderElement;
-  };
+  public getRawVisualUserMedia() {
+    return this.recorderElement;
+  }
 
-  this.isConnected = function () {
-    return connected;
-  };
+  public isConnected() {
+    return this.connected;
+  }
 
-  this.isConnecting = function () {
-    return connecting;
-  };
+  public isConnecting() {
+    return this.connecting;
+  }
 
-  this.limitWidth = function (width) {
-    return visuals.limitWidth(width);
-  };
+  public limitWidth(width?: number) {
+    return this.visuals.limitWidth(width);
+  }
 
-  this.limitHeight = function (height) {
-    return visuals.limitHeight(height);
-  };
+  public limitHeight(height: number) {
+    return this.visuals.limitHeight(height);
+  }
 
-  this.isUserMediaLoaded = function () {
-    return userMediaLoaded;
-  };
-};
-
-inherits(Recorder, EventEmitter);
+  public isUserMediaLoaded() {
+    return this.userMediaLoaded;
+  }
+}
 
 export default Recorder;

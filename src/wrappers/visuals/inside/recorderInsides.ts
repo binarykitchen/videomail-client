@@ -1,145 +1,153 @@
-import inherits from "inherits";
-
-import Events from "../../../events";
-import Browser from "./../../../util/browser";
-import EventEmitter from "./../../../util/eventEmitter";
+import Despot from "../../../util/Despot";
 
 import Countdown from "./recorder/countdown";
 import FacingMode from "./recorder/facingMode";
 import PausedNote from "./recorder/pausedNote";
 import RecordNote from "./recorder/recordNote";
 import RecordTimer from "./recorder/recordTimer";
+import getBrowser from "../../../util/getBrowser";
+import Visuals from "../../visuals";
+import { VideomailClientOptions } from "../../../types/options";
 
-const RecorderInsides = function (visuals, options) {
-  EventEmitter.call(this, options, "RecorderInsides");
+class RecorderInsides extends Despot {
+  private recordNote: RecordNote;
+  private recordTimer: RecordTimer;
 
-  const self = this;
-  const { debug } = options;
+  private countdown?: Countdown;
+  private facingMode?: FacingMode;
+  private pausedNote?: PausedNote;
 
-  const recordNote = new RecordNote(visuals);
-  const recordTimer = new RecordTimer(visuals, recordNote, options);
-  const browser = new Browser(options);
+  private built = false;
 
-  let countdown;
-  let pausedNote;
-  let built;
-  let facingMode;
+  constructor(visuals: Visuals, options: VideomailClientOptions) {
+    super("RecorderInsides", options);
 
-  if (options.video.countdown) {
-    countdown = new Countdown(visuals, options);
-  }
+    this.recordNote = new RecordNote(visuals);
+    this.recordTimer = new RecordTimer(visuals, this.recordNote, options);
 
-  if (options.video.facingModeButton && browser.isMobile()) {
-    facingMode = new FacingMode(visuals, options);
-  }
+    const browser = getBrowser(options);
 
-  if (options.enablePause) {
-    pausedNote = new PausedNote(visuals, options);
-  }
+    if (options.video.countdown) {
+      this.countdown = new Countdown(visuals, options);
+    }
 
-  function startRecording() {
-    recordTimer.start();
-  }
+    if (options.video.facingModeButton && browser.isMobile()) {
+      this.facingMode = new FacingMode(visuals, options);
+    }
 
-  function resumeRecording() {
-    recordTimer.resume();
-  }
-
-  function stopRecording() {
-    recordTimer.stop();
-  }
-
-  function pauseRecording() {
-    if (self.isCountingDown()) {
-      countdown.pause();
-    } else {
-      recordTimer.pause();
+    if (options.enablePause) {
+      this.pausedNote = new PausedNote(visuals, options);
     }
   }
 
-  function onResetting() {
-    self.hidePause();
-    self.hideCountdown();
-    recordTimer.stop();
-    facingMode && facingMode.hide();
+  private startRecording() {
+    this.recordTimer.start();
   }
 
-  function initEvents() {
-    debug("RecorderInsides: initEvents()");
-
-    self
-      .on(Events.USER_MEDIA_READY, function () {
-        facingMode && facingMode.show();
-      })
-      .on(Events.RECORDING, function () {
-        startRecording();
-      })
-      .on(Events.RESUMING, function () {
-        resumeRecording();
-      })
-      .on(Events.STOPPING, function () {
-        stopRecording();
-      })
-      .on(Events.PAUSED, function () {
-        pauseRecording();
-      })
-      .on(Events.ERROR, onResetting)
-      .on(Events.RESETTING, onResetting)
-      .on(Events.HIDE, function () {
-        self.hideCountdown();
-      });
+  private resumeRecording() {
+    this.recordTimer.resume();
   }
 
-  this.build = function () {
-    debug("RecorderInsides: build()");
+  private stopRecording() {
+    this.recordTimer.stop();
+  }
 
-    countdown && countdown.build();
-    pausedNote && pausedNote.build();
-    facingMode && facingMode.build();
+  private pauseRecording() {
+    if (this.isCountingDown()) {
+      this.countdown?.pause();
+    } else {
+      this.recordTimer.pause();
+    }
+  }
 
-    recordNote.build();
-    recordTimer.build();
+  private onResetting() {
+    this.hidePause();
+    this.hideCountdown();
 
-    !built && initEvents();
+    this.recordTimer.stop();
+    this.facingMode?.hide();
+  }
 
-    built = true;
-  };
+  private initEvents() {
+    this.options.logger.debug("RecorderInsides: initEvents()");
 
-  this.unload = function () {
-    countdown && countdown.unload();
+    this.on("USER_MEDIA_READY", () => {
+      this.facingMode?.show();
+    });
 
-    built = false;
-  };
+    this.on("RECORDING", () => {
+      this.startRecording();
+    });
 
-  this.showPause = function () {
-    pausedNote && pausedNote.show();
-  };
+    this.on("RESUMING", () => {
+      this.resumeRecording();
+    });
 
-  this.hidePause = function () {
-    pausedNote && pausedNote.hide();
-  };
+    this.on("STOPPING", () => {
+      this.stopRecording();
+    });
 
-  this.hideCountdown = function () {
-    countdown && countdown.hide();
-  };
+    this.on("PAUSED", () => {
+      this.pauseRecording();
+    });
 
-  this.startCountdown = function (cb) {
-    countdown && countdown.start(cb);
-  };
+    this.on("ERROR", this.onResetting.bind(this));
+    this.on("RESETTING", this.onResetting.bind(this));
+    this.on("HIDE", () => {
+      this.hideCountdown();
+    });
+  }
 
-  this.resumeCountdown = function () {
-    countdown && countdown.resume();
-  };
+  public build() {
+    this.options.logger.debug("RecorderInsides: build()");
 
-  this.isCountingDown = function () {
-    return countdown && countdown.isCountingDown();
-  };
+    this.countdown?.build();
+    this.pausedNote?.build();
+    this.facingMode?.build();
 
-  this.checkTimer = function (intervalSum) {
-    recordTimer.check(intervalSum);
-  };
-};
+    this.recordNote.build();
+    this.recordTimer.build();
 
-inherits(RecorderInsides, EventEmitter);
+    if (!this.built) {
+      this.initEvents();
+    }
+
+    this.built = true;
+  }
+
+  public unload() {
+    this.countdown?.unload();
+
+    this.built = false;
+  }
+
+  public showPause() {
+    this.pausedNote?.show();
+  }
+
+  public hidePause() {
+    this.pausedNote?.hide();
+  }
+
+  public hideCountdown() {
+    this.countdown?.hide();
+  }
+
+  public startCountdown(cb) {
+    this.countdown?.start(cb);
+  }
+
+  public resumeCountdown() {
+    this.countdown?.resume();
+  }
+
+  public isCountingDown() {
+    return this.countdown?.isCountingDown();
+  }
+
+  public checkTimer(elapsedTime: number) {
+    this.recordTimer.check(elapsedTime);
+  }
+}
 
 export default RecorderInsides;

@@ -1,8 +1,9 @@
-import Browser from "./browser";
+import { VideomailClientOptions } from "../types/options";
+import Browser from "./Browser";
 
-let browser;
+let browser: Browser | undefined;
 
-function getBrowser(localOptions) {
+function getBrowser(localOptions: VideomailClientOptions) {
   if (!browser) {
     browser = new Browser(localOptions);
   }

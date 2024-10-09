@@ -189,8 +189,7 @@ export const Inject: Story = {
       limitSeconds: 600,
     },
   },
-  render: () => {
-    return `<div id="videomail2" class="videomail">
+  render: () => `<div id="videomail2" class="videomail">
               <div class="da_window">
                 <noscript>Please enable Javascript</noscript>
                 <p class="recordNote" style="display: none"></p>
@@ -210,8 +209,7 @@ export const Inject: Story = {
                 <button class="preview" style="display: none">&#x25ba; Preview</button>
                 <button class="recordAgain" style="display: none">&#x25c0; Record again</button>
               </div>
-            </div>`;
-  },
+            </div>`,
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
     videomailClient.show();

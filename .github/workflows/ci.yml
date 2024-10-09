@@ -31,13 +31,11 @@ jobs:
       - name: 🔎 Run prettier
         run: npm run prettier
 
-      # TODO Restore later
-      # - name: 🔎 Run linter
-      #   run: npm run lint
+      - name: 🔎 Run linter
+        run: npm run lint
 
-      # TODO Enable once implemented
-      # - name: 🔎 Check types
-      #   run: npm run types-check
+      - name: 🔎 Check types
+        run: npm run types:check
 
       - name: 🔨 Build
         run: npm run build:prod
@@ -45,14 +43,13 @@ jobs:
       - name: 🔎 Audit (detect vulnerabilities)
         run: npm run audit
 
-      # TODO Restore later
-      # - name: 🔎 Run tests
-      #   uses: coactions/setup-xvfb@v1
-      #   with:
-      #     run: npm run test
-
-      - name: 🔎 Run Chromatic
-        uses: chromaui/action@latest
+      - name: 🔎 Run tests
+        uses: coactions/setup-xvfb@v1
         with:
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          buildScriptName: build:storybook
+          run: npm run test
+
+      # - name: 🔎 Run Chromatic
+      #   uses: chromaui/action@latest
+      #   with:
+      #     projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      #     buildScriptName: build:storybook

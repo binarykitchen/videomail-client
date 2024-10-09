@@ -3,22 +3,21 @@
 import eslint from "@eslint/js";
 import * as depend from "eslint-plugin-depend";
 import eslintPluginImportX from "eslint-plugin-import-x";
+import vitest from "@vitest/eslint-plugin";
 import pluginPromise from "eslint-plugin-promise";
 import * as regexpPlugin from "eslint-plugin-regexp";
 import pluginSecurity from "eslint-plugin-security";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-// TODO Enable once this is merged https://github.com/storybookjs/eslint-plugin-storybook/pull/156
-// import storybook from "eslint-plugin-storybook";
+import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
 export default tseslint.config(
-  // TODO change to .all later
-  eslint.configs.recommended,
+  eslint.configs.all,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  // ...storybook.configs["flat/recommended"],
+  ...storybook.configs["flat/recommended"],
   eslintPluginImportX.flatConfigs.recommended,
   eslintPluginImportX.flatConfigs.typescript,
   pluginSecurity.configs.recommended,
@@ -26,7 +25,16 @@ export default tseslint.config(
   pluginPromise.configs["flat/recommended"],
   depend.configs["flat/recommended"],
   {
-    ignores: [".github", ".vscode", "**/node_modules/", ".git", "test"],
+    ignores: [
+      ".github",
+      ".vscode",
+      "**/node_modules/",
+      ".git",
+      "test",
+      "dist",
+      ".storybook/public",
+      "storybook-static",
+    ],
     name: "Ignore files",
   },
   {
@@ -52,9 +60,8 @@ export default tseslint.config(
     // TODO Consider removing some of these OFF-rules over time
     rules: {
       "@typescript-eslint/no-dynamic-delete": "off",
-      "@typescript-eslint/no-empty-function": "off",
-
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-empty-function": "off",
 
       // See https://github.com/orgs/react-hook-form/discussions/8622#discussioncomment-4060570
       "@typescript-eslint/no-misused-promises": [
@@ -72,7 +79,7 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
       // Prepend "_" in the names of unused function arguments to silence
-      // our linter for some useful parameters we want to still display
+      // Our linter for some useful parameters we want to still display
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
@@ -88,19 +95,11 @@ export default tseslint.config(
       "@typescript-eslint/restrict-template-expressions": "off",
       camelcase: "off",
       "capitalized-comments": "off",
-      "class-methods-use-this": "off",
       complexity: "off",
       "consistent-return": "off",
       "default-param-last": "off",
-      "depend/ban-dependencies": [
-        "error",
-        {
-          allowed: ["lodash"],
-        },
-      ],
       "func-names": "off",
       "func-style": "off",
-      "guard-for-in": "off",
       "id-length": "off",
       "import-x/no-named-as-default-member": "off",
       "init-declarations": "off",
@@ -109,11 +108,10 @@ export default tseslint.config(
       "max-lines-per-function": "off",
       "max-params": "off",
       "max-statements": "off",
-      "no-alert": "off",
+      "new-cap": "off",
       "no-console": "off",
       "no-debugger": "warn",
       "no-duplicate-imports": "off",
-      "no-empty-function": "off",
       "no-inline-comments": "off",
       "no-lonely-if": "off",
       "no-magic-numbers": "off",
@@ -124,9 +122,9 @@ export default tseslint.config(
       "no-shadow": "off",
       "no-ternary": "off",
       "no-undefined": "off",
-
       "no-use-before-define": "off",
       "no-void": "off",
+      "no-new": "off",
       "no-warning-comments": "off",
       "one-var": "off",
       "prefer-arrow-callback": "off",
@@ -147,5 +145,13 @@ export default tseslint.config(
       "sort-imports": "off",
       "sort-keys": "off",
     },
+  },
+  {
+    files: ["__tests__/**"],
+    plugins: {
+      vitest,
+    },
+    name: "Vitest",
+    ...vitest.configs.recommended.rules,
   },
 );

@@ -1,257 +1,267 @@
 import hidden from "hidden";
-import h from "hyperscript";
-import inherits from "inherits";
-import stringify from "safe-json-stringify";
 
-import Events from "../events";
-import EventEmitter from "../util/eventEmitter";
+import Despot from "../util/Despot";
 import RecorderInsides from "./visuals/inside/recorderInsides";
 import Notifier from "./visuals/notifier";
 import Recorder from "./visuals/recorder";
 import Replay from "./visuals/replay";
+import Container, { UnloadParams } from "./container";
+import { VideomailClientOptions } from "../types/options";
+import getBrowser from "../util/getBrowser";
+import pretty from "../util/pretty";
+import VideomailError from "../util/error/VideomailError";
+import { ShowParams } from "../client";
 
-const Visuals = function (container, options) {
-  EventEmitter.call(this, options, "Visuals");
+class Visuals extends Despot {
+  private readonly container: Container;
 
-  const self = this;
+  private replay: Replay;
+  private recorder: Recorder;
+  private recorderInsides: RecorderInsides;
+  private notifier: Notifier;
 
-  // can be overwritten with setter fn
-  const replay = new Replay(this, options);
+  private visualsElement?: HTMLElement | null | undefined;
+  private built = false;
 
-  const recorder = new Recorder(this, replay, options);
-  const recorderInsides = new RecorderInsides(this, options);
+  constructor(container, options: VideomailClientOptions) {
+    super("Visuals", options);
 
-  const notifier = new Notifier(this, options);
+    this.container = container;
 
-  const { debug } = options;
+    // can be overwritten with setter fn
+    this.replay = new Replay(this, options);
 
-  let visualsElement;
-  let built;
+    this.recorder = new Recorder(this, this.replay, options);
+    this.recorderInsides = new RecorderInsides(this, options);
+    this.notifier = new Notifier(this, options);
+  }
 
-  function buildNoScriptTag() {
-    let noScriptElement = container.querySelector("noscript");
+  private buildNoScriptTag() {
+    let noScriptElement = this.container.querySelector("noscript");
 
     if (noScriptElement) {
-      noScriptElement = h("noscript");
+      noScriptElement = document.createElement("noscript");
       noScriptElement.innerHTML = "Please enable Javascript";
 
-      visualsElement.appendChild(noScriptElement);
+      this.visualsElement?.appendChild(noScriptElement);
     }
   }
 
-  function buildChildren(playerOnly = false, replayParentElement) {
-    debug(
-      `Visuals: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement.id}"` : ""})`,
+  private buildChildren(playerOnly = false, visualsElement?: HTMLElement | null) {
+    if (!visualsElement) {
+      throw new Error("Unable to build children without a visuals element");
+    }
+
+    this.options.logger.debug(
+      `Visuals: buildChildren (playerOnly = ${playerOnly}, visualsElement="${pretty(visualsElement)}"})`,
     );
 
-    buildNoScriptTag();
+    this.buildNoScriptTag();
 
     if (!playerOnly) {
-      notifier.build();
-      recorderInsides.build();
+      this.notifier.build();
+      this.recorderInsides.build();
     }
 
-    replay.build(replayParentElement);
+    this.replay.build(visualsElement);
   }
 
-  function initEvents(playerOnly = false) {
+  private initEvents(playerOnly = false) {
     if (!playerOnly) {
-      debug(`Visuals: initEvents (playerOnly = ${playerOnly})`);
+      this.options.logger.debug(`Visuals: initEvents (playerOnly = ${playerOnly})`);
 
-      self
-        .on(Events.USER_MEDIA_READY, function () {
-          built = true;
-          self.endWaiting();
-          container.enableForm(false);
-        })
-        .on(Events.PREVIEW, () => {
-          self.endWaiting();
-        })
-        .on(Events.BLOCKING, function (blockingOptions) {
-          if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
-            /*
-             * do nothing, user still can enter form inputs
-             * can be useful when you are on i.E. Seeflow's contact page and
-             * still want to tick off the webcam option
-             */
-          } else {
-            container.disableForm(true);
-          }
-        })
-        .on(Events.PREVIEW_SHOWN, function () {
-          container.validate(undefined, true);
-        })
-        .on(Events.LOADED_META_DATA, function () {
-          correctDimensions();
-        })
-        .on(Events.ERROR, function (err) {
-          if (err.removeDimensions && err.removeDimensions()) {
-            removeDimensions();
-          }
-        });
+      this.on("USER_MEDIA_READY", () => {
+        this.built = true;
+        this.endWaiting();
+        this.container.enableForm(false);
+      });
+
+      this.on("PREVIEW", () => {
+        this.endWaiting();
+      });
+
+      this.on("BLOCKING", () => {
+        if (!this.options.adjustFormOnBrowserError) {
+          /*
+           * do nothing, user still can enter form inputs
+           * can be useful when you are on i.E. Seeflow's contact page and
+           * still want to tick off the webcam option
+           */
+        } else {
+          this.container.disableForm(true);
+        }
+      });
+
+      this.on("PREVIEW_SHOWN", () => {
+        this.container.validate(undefined, true);
+      });
+
+      this.on("LOADED_META_DATA", () => {
+        this.correctDimensions();
+      });
+
+      this.on("ERROR", () => {
+        if (getBrowser(this.options).isMobile()) {
+          this.removeDimensions();
+        }
+      });
     }
   }
 
-  function correctDimensions() {
-    if (options.video.stretch) {
-      removeDimensions();
-    } else if (visualsElement && recorder) {
-      visualsElement.style.width = `${self.getRecorderWidth(true)}px`;
-      visualsElement.style.height = `${self.getRecorderHeight(true)}px`;
+  private correctDimensions() {
+    if (this.options.video.stretch) {
+      this.removeDimensions();
+    } else if (this.visualsElement) {
+      this.visualsElement.style.width = `${this.getRecorderWidth(true)}px`;
+      this.visualsElement.style.height = `${this.getRecorderHeight(true)}px`;
     }
   }
 
-  function removeDimensions() {
-    if (!visualsElement) {
+  private removeDimensions() {
+    if (!this.visualsElement) {
       return;
     }
 
-    visualsElement.style.width = "auto";
-    visualsElement.style.height = "auto";
+    this.visualsElement.style.width = "auto";
+    this.visualsElement.style.height = "auto";
   }
 
-  this.getRatio = function () {
-    if (visualsElement.clientWidth) {
+  public getRatio() {
+    if (this.visualsElement?.clientWidth) {
       // special case for safari, see getRatio() in recorder
-      return visualsElement.clientHeight / visualsElement.clientWidth;
+      return this.visualsElement.clientHeight / this.visualsElement.clientWidth;
     }
 
     return 0;
-  };
-
-  function isRecordable() {
-    return !self.isNotifying() && !replay.isShown() && !self.isCountingDown();
   }
 
-  this.isCountingDown = function () {
-    return recorderInsides.isCountingDown();
-  };
+  private isRecordable() {
+    return !this.isNotifying() && !this.replay.isShown() && !this.isCountingDown();
+  }
 
-  this.build = function (playerOnly = false, replayParentElement) {
-    debug(`Visuals: build (playerOnly=${playerOnly})`);
+  public isCountingDown() {
+    return this.recorderInsides.isCountingDown();
+  }
 
-    if (container) {
-      if (replayParentElement) {
-        visualsElement = replayParentElement.querySelector(
-          `.${options.selectors.visualsClass}`,
-        );
+  public build(playerOnly = false, parentElement?: HTMLElement | null) {
+    this.options.logger.debug(
+      `Visuals: build (playerOnly = ${playerOnly}${parentElement ? `, parentElement="${pretty(parentElement)}"` : ""})`,
+    );
+
+    if (parentElement) {
+      this.visualsElement = parentElement.querySelector<HTMLElement>(
+        `.${this.options.selectors.visualsClass}`,
+      );
+    } else {
+      this.visualsElement = this.container.querySelector(
+        `.${this.options.selectors.visualsClass}`,
+      );
+    }
+
+    if (!this.visualsElement) {
+      if (playerOnly && parentElement) {
+        this.visualsElement = parentElement;
       } else {
-        visualsElement = container.querySelector(`.${options.selectors.visualsClass}`);
-      }
+        this.visualsElement = document.createElement("div");
+        this.visualsElement.classList.add(this.options.selectors.visualsClass);
 
-      if (!visualsElement) {
-        if (playerOnly && replayParentElement) {
-          visualsElement = replayParentElement;
-        } else {
-          visualsElement = h(`div.${options.selectors.visualsClass}`);
-        }
-
-        const buttonsElement = container.querySelector(
-          `.${options.selectors.buttonsClass}`,
+        const buttonsElement = this.container.querySelector(
+          `.${this.options.selectors.buttonsClass}`,
         );
 
         /*
          * Make sure it's placed before the buttons, but only if it's a child
          * element of the container = inside the container
          */
-        if (buttonsElement && !container.isOutsideElementOf(buttonsElement)) {
-          container.insertBefore(visualsElement, buttonsElement);
+        if (buttonsElement && !this.container.isOutsideElementOf(buttonsElement)) {
+          this.container.insertBefore(this.visualsElement, buttonsElement);
         } else {
-          container.appendChild(visualsElement);
+          this.container.appendChild(this.visualsElement);
         }
       }
-
-      /*
-       * Do not hide visuals element so that apps can give it a predefined
-       * width or height through css but hide all children
-       */
-      visualsElement.classList.add("visuals");
     }
 
-    correctDimensions();
+    this.visualsElement.classList.add("visuals");
 
-    !built && initEvents(playerOnly);
-    buildChildren(playerOnly, visualsElement || replayParentElement);
+    this.correctDimensions();
 
-    built = true;
-  };
+    if (!this.built) {
+      this.initEvents(playerOnly);
+    }
 
-  this.querySelector = function (selector) {
-    return visualsElement && visualsElement.querySelector(selector);
-  };
+    this.buildChildren(playerOnly, this.visualsElement);
 
-  this.appendChild = function (child) {
-    visualsElement && visualsElement.appendChild(child);
-  };
+    this.built = true;
+  }
 
-  this.removeChild = function (child) {
-    visualsElement.removeChild(child);
-  };
+  public appendChild(child: HTMLElement) {
+    this.visualsElement?.appendChild(child);
+  }
 
-  this.reset = function () {
+  public removeChild(child: HTMLElement) {
+    this.visualsElement?.removeChild(child);
+  }
+
+  public reset() {
     this.endWaiting();
-    recorder.reset();
-  };
+    this.recorder.reset();
+  }
 
-  this.beginWaiting = function () {
-    container.beginWaiting();
-  };
+  public beginWaiting() {
+    this.container.beginWaiting();
+  }
 
-  this.endWaiting = function () {
-    container.endWaiting();
-  };
+  public endWaiting() {
+    this.container.endWaiting();
+  }
 
-  this.stop = function (params) {
-    recorder.stop(params);
-    recorderInsides.hidePause();
-  };
+  public stop(params?) {
+    this.recorder.stop(params);
+    this.recorderInsides.hidePause();
+  }
 
-  this.back = function (params, cb) {
-    if (!cb && params) {
-      cb = params;
-      params = {};
-    }
+  public back(keepHidden = false, cb?) {
+    this.options.logger.debug(`Visuals: back(keepHidden = ${keepHidden})`);
 
-    debug(`Visuals: back(${params ? stringify(params) : ""})`);
+    this.replay.hide();
+    this.notifier.hide();
 
-    replay.hide();
-    notifier.hide();
-
-    if (params && params.keepHidden) {
-      recorder.hide();
-      cb && cb();
+    if (keepHidden) {
+      this.recorder.hide();
+      cb?.();
     } else {
-      recorder.back(cb);
+      this.recorder.back(cb);
     }
-  };
+  }
 
-  this.recordAgain = function () {
-    this.back(function () {
-      if (options.loadUserMediaOnRecord) {
-        self.once(Events.SERVER_READY, function () {
-          self.record();
+  public recordAgain() {
+    this.back(false, () => {
+      if (this.options.loadUserMediaOnRecord) {
+        this.once("SERVER_READY", () => {
+          this.recorder.record();
         });
       } else {
-        self.once(Events.USER_MEDIA_READY, function () {
-          self.record();
+        this.once("USER_MEDIA_READY", () => {
+          this.recorder.record();
         });
       }
     });
-  };
+  }
 
-  this.unload = function (e) {
+  public unload(params?: UnloadParams) {
     try {
-      if (!built) {
+      if (!this.built) {
         return;
       }
 
-      debug(`Visuals: unload(${e ? stringify(e) : ""})`);
+      const e = params?.e;
 
-      self.removeAllListeners();
+      this.options.logger.debug(`Visuals: unload(${e ? pretty(e) : ""})`);
 
-      recorder.unload(e);
-      recorderInsides.unload(e);
-      replay.unload();
+      Despot.removeAllListeners();
+      this.recorder.unload(params);
+      this.recorderInsides.unload();
+      this.replay.unload(params);
 
       if (e instanceof Error) {
         // Don't hide when e is an error so that the error can be still
@@ -260,185 +270,196 @@ const Visuals = function (container, options) {
         this.hide();
       }
 
-      built = false;
+      this.built = false;
     } catch (exc) {
-      this.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
-  };
+  }
 
-  this.isNotifying = function () {
-    return notifier.isVisible();
-  };
+  public isNotifying() {
+    return this.notifier.isVisible();
+  }
 
-  this.isReplayShown = function () {
-    return replay.isShown();
-  };
+  public pause(params?: { event: MouseEvent }) {
+    this.recorder.pause(params);
+    this.recorderInsides.showPause();
+  }
 
-  this.pause = function (params) {
-    recorder.pause(params);
-    recorderInsides.showPause();
-  };
-
-  this.resume = function () {
-    if (recorderInsides.isCountingDown()) {
-      recorderInsides.resumeCountdown();
+  public resume() {
+    if (this.recorderInsides.isCountingDown()) {
+      this.recorderInsides.resumeCountdown();
     } else {
-      recorder.resume();
+      this.recorder.resume();
     }
 
-    recorderInsides.hidePause();
-  };
+    this.recorderInsides.hidePause();
+  }
 
-  this.pauseOrResume = function () {
-    if (isRecordable.call(this)) {
+  public pauseOrResume() {
+    if (this.isRecordable()) {
       if (this.isRecording()) {
         this.pause();
-      } else if (recorder.isPaused()) {
+      } else if (this.recorder.isPaused()) {
         this.resume();
-      } else if (recorder.isReady()) {
-        this.record();
+      } else if (this.recorder.isReady()) {
+        this.recorder.record();
       }
     }
-  };
+  }
 
-  this.recordOrStop = function () {
-    if (isRecordable()) {
+  public recordOrStop() {
+    if (this.isRecordable()) {
       if (this.isRecording()) {
         this.stop();
-      } else if (recorder.isReady()) {
-        this.record();
+      } else if (this.recorder.isReady()) {
+        this.recorder.record();
       }
     }
-  };
+  }
 
-  this.record = function () {
-    if (options.video.countdown) {
-      this.emit(Events.COUNTDOWN);
-      recorderInsides.startCountdown(recorder.record.bind(recorder));
+  public() {
+    if (this.options.video.countdown) {
+      this.emit("COUNTDOWN");
+      this.recorderInsides.startCountdown(this.recorder.record.bind(this.recorder));
     } else {
-      recorder.record();
+      this.recorder.record();
     }
-  };
+  }
 
-  this.getRecorder = function () {
-    return recorder;
-  };
+  public getRecorder() {
+    return this.recorder;
+  }
 
-  this.getReplay = function () {
-    return replay;
-  };
+  public validate() {
+    return this.recorder.validate() && this.isReplayShown();
+  }
 
-  this.validate = function () {
-    return recorder.validate() && this.isReplayShown();
-  };
+  public getRecordingStats() {
+    return this.recorder.getRecordingStats();
+  }
 
-  this.getRecordingStats = function () {
-    return recorder.getRecordingStats();
-  };
+  public getAudioSampleRate() {
+    return this.recorder.getAudioSampleRate();
+  }
 
-  this.getAudioSampleRate = function () {
-    return recorder.getAudioSampleRate();
-  };
+  public isPaused() {
+    return this.recorder.isPaused();
+  }
 
-  this.isPaused = function () {
-    return recorder.isPaused();
-  };
+  public error(err: VideomailError) {
+    this.notifier.error(err);
+  }
 
-  this.error = function (err) {
-    notifier.error(err);
-  };
-
-  this.hide = function () {
-    if (visualsElement) {
-      hidden(visualsElement, true);
-      this.emit(Events.HIDE);
+  public hide() {
+    if (this.visualsElement) {
+      hidden(this.visualsElement, true);
+      this.emit("HIDE");
     }
-  };
+  }
 
-  this.isHidden = function () {
-    if (!built) {
+  public isHidden() {
+    if (!this.built) {
       return true;
-    } else if (visualsElement) {
-      return hidden(visualsElement);
+    } else if (this.visualsElement) {
+      return hidden(this.visualsElement);
     }
-  };
+  }
 
-  this.showVisuals = function () {
-    hidden(visualsElement, false);
-  };
+  public showVisuals() {
+    hidden(this.visualsElement, false);
+  }
 
-  this.show = function (playerOnly = false) {
-    if (!playerOnly && !this.isReplayShown()) {
-      recorder.build();
+  public show(params?: ShowParams) {
+    if (!params?.playerOnly) {
+      if (!this.isReplayShown()) {
+        this.recorder.build();
+      } else if (params?.goBack) {
+        this.recorder.show();
+      }
     }
 
     this.showVisuals();
-  };
+  }
 
-  this.showReplayOnly = function () {
-    this.show(true);
+  public showReplayOnly() {
+    this.show({ playerOnly: true });
 
-    recorder.hide();
-    notifier.hide();
-  };
+    this.recorder.hide();
+    this.notifier.hide();
+  }
 
-  this.isRecorderUnloaded = function () {
-    return recorder.isUnloaded();
-  };
+  public isRecorderUnloaded() {
+    return this.recorder.isUnloaded();
+  }
 
-  this.isConnecting = function () {
-    return recorder.isConnecting();
-  };
+  public isConnecting() {
+    return this.recorder.isConnecting();
+  }
 
-  this.getRecorderWidth = function (responsive) {
-    return recorder.getRecorderWidth(responsive);
-  };
+  public getRecorderWidth(responsive: boolean) {
+    return this.recorder.getRecorderWidth(responsive);
+  }
 
-  this.getRecorderHeight = function (responsive, useBoundingClientRect) {
-    return recorder.getRecorderHeight(responsive, useBoundingClientRect);
-  };
+  public getRecorderHeight(responsive: boolean, useBoundingClientRect = false) {
+    return this.recorder.getRecorderHeight(responsive, useBoundingClientRect);
+  }
 
-  this.limitWidth = function (width) {
-    return container.limitWidth(width, options);
-  };
+  public limitWidth(width?: number) {
+    return this.container.limitWidth(width);
+  }
 
-  this.limitHeight = function (height) {
-    return container.limitHeight(height);
-  };
+  public limitHeight(height: number) {
+    return this.container.limitHeight(height);
+  }
 
-  this.calculateWidth = function (options) {
-    return container.calculateWidth(options);
-  };
+  public getReplay() {
+    return this.replay;
+  }
 
-  this.calculateHeight = function (options) {
-    return container.calculateHeight(options);
-  };
-
-  this.getReplay = function () {
-    return replay;
-  };
-
-  this.getBoundingClientRect = function () {
+  public getBoundingClientRect() {
     // fixes https://github.com/binarykitchen/videomail-client/issues/126
-    return visualsElement && visualsElement.getBoundingClientRect();
-  };
+    return this.visualsElement?.getBoundingClientRect();
+  }
 
-  this.checkTimer = function (intervalSum) {
-    recorderInsides.checkTimer(intervalSum);
-  };
+  public checkTimer(elapsedTime: number) {
+    this.recorderInsides.checkTimer(elapsedTime);
+  }
 
-  this.isNotifierBuilt = function () {
-    return notifier && notifier.isBuilt();
-  };
+  public isNotifierBuilt() {
+    return this.notifier.isBuilt();
+  }
 
-  this.isReplayShown = replay.isShown.bind(replay);
-  this.hideReplay = replay.hide.bind(replay);
-  this.hideRecorder = recorder.hide.bind(recorder);
-  this.isRecording = recorder.isRecording.bind(recorder);
-  this.isUserMediaLoaded = recorder.isUserMediaLoaded.bind(recorder);
-  this.isConnected = recorder.isConnected.bind(recorder);
-};
+  public isReplayShown() {
+    return this.replay.isShown();
+  }
 
-inherits(Visuals, EventEmitter);
+  public hideReplay() {
+    this.replay.hide();
+  }
+
+  public hideRecorder() {
+    this.recorder.hide();
+  }
+
+  public isRecording() {
+    return this.recorder.isRecording();
+  }
+
+  public isUserMediaLoaded() {
+    return this.recorder.isUserMediaLoaded();
+  }
+
+  public isConnected() {
+    return this.recorder.isConnected();
+  }
+
+  public record() {
+    this.recorder.record();
+  }
+
+  public getElement() {
+    return this.visualsElement;
+  }
+}
 
 export default Visuals;

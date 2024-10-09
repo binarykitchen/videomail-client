@@ -1,206 +1,178 @@
-import h from "hyperscript";
-import stringify from "safe-json-stringify";
-import Events from "../../events";
-import AudioRecorder from "./../../util/audioRecorder";
-import Browser from "./../../util/browser";
-import EventEmitter from "./../../util/eventEmitter";
-import MEDIA_EVENTS from "./../../util/mediaEvents";
+import Despot from "../../util/Despot";
 import pretty from "./../../util/pretty";
-import VideomailError from "./../../util/videomailError";
+import { isAudioEnabled } from "../../util/options/audio";
+import Recorder from "./recorder";
+import { VideomailClientOptions } from "../../types/options";
+import createError from "../../util/error/createError";
+import isPromise from "../../util/isPromise";
+import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
+import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
+import getFirstVideoTrack from "../../util/html/media/getFirstVideoTrack";
 
 const EVENT_ASCII = "|—O—|";
 
-export default function (recorder, options) {
-  EventEmitter.call(this, options, "UserMedia");
+interface StopParams {
+  aboutToInitialize: boolean;
+  switchingFacingMode: any;
+}
 
-  const rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia();
-  const browser = new Browser(options);
-  const self = this;
+class UserMedia extends Despot {
+  private recorder: Recorder;
+  private rawVisualUserMedia: HTMLVideoElement | undefined | null;
 
-  let paused = false;
-  let record = false;
+  private paused = false;
+  private recording = false;
 
-  let audioRecorder;
-  let currentVisualStream;
+  private audioRecorder?: AudioRecorder | undefined;
+  private currentVisualStream?: MediaStream | undefined;
 
-  function attachMediaStream(stream) {
-    currentVisualStream = stream;
+  private onPlayReached = false;
+  private onLoadedMetaDataReached = false;
+  private playingPromiseReached = false;
 
-    if (typeof rawVisualUserMedia.srcObject !== "undefined") {
-      rawVisualUserMedia.srcObject = stream;
-    } else if (typeof rawVisualUserMedia.src !== "undefined") {
-      const URL = window.URL || window.webkitURL;
-      rawVisualUserMedia.src = URL.createObjectURL(stream) || stream;
-    } else {
-      throw VideomailError.create(
-        "Error attaching stream to element.",
-        "Contact the developer about this",
-        options,
+  constructor(recorder: Recorder, options: VideomailClientOptions) {
+    super("UserMedia", options);
+
+    this.recorder = recorder;
+    this.rawVisualUserMedia = recorder.getRawVisualUserMedia();
+
+    MEDIA_EVENTS.forEach((eventName) => {
+      this.rawVisualUserMedia?.addEventListener(
+        eventName,
+        this.outputEvent.bind(this),
+        false,
       );
-    }
+    });
   }
 
-  function setVisualStream(localMediaStream) {
-    if (localMediaStream) {
-      attachMediaStream(localMediaStream);
+  private attachMediaStream(stream: MediaStream) {
+    this.currentVisualStream = stream;
+
+    if (this.rawVisualUserMedia) {
+      this.rawVisualUserMedia.srcObject = stream;
     } else {
-      rawVisualUserMedia.removeAttribute("srcObject");
-      rawVisualUserMedia.removeAttribute("src");
-
-      currentVisualStream = null;
+      throw createError({
+        message: "Error attaching stream to element.",
+        explanation: "Contact the developer about this",
+        options: this.options,
+      });
     }
   }
 
-  function getVisualStream() {
-    if (rawVisualUserMedia.mozSrcObject) {
-      return rawVisualUserMedia.mozSrcObject;
-    } else if (rawVisualUserMedia.srcObject) {
-      return rawVisualUserMedia.srcObject;
-    }
+  private setVisualStream(localMediaStream?: MediaStream) {
+    if (localMediaStream) {
+      this.attachMediaStream(localMediaStream);
+    } else {
+      this.rawVisualUserMedia?.removeAttribute("srcObject");
+      this.rawVisualUserMedia?.removeAttribute("src");
 
-    return currentVisualStream;
+      this.currentVisualStream = undefined;
+    }
   }
 
-  function hasEnded() {
-    if (rawVisualUserMedia.ended) {
-      return rawVisualUserMedia.ended;
+  private hasEnded() {
+    if (this.rawVisualUserMedia?.ended) {
+      return this.rawVisualUserMedia.ended;
     }
 
-    const visualStream = getVisualStream();
-    return visualStream && visualStream.ended;
+    return !this.currentVisualStream?.active;
   }
 
-  function hasInvalidDimensions() {
+  private hasInvalidDimensions() {
     if (
-      (rawVisualUserMedia.videoWidth && rawVisualUserMedia.videoWidth < 3) ||
-      (rawVisualUserMedia.height && rawVisualUserMedia.height < 3)
+      (this.rawVisualUserMedia?.videoWidth && this.rawVisualUserMedia.videoWidth < 3) ||
+      (this.rawVisualUserMedia?.height && this.rawVisualUserMedia.height < 3)
     ) {
       return true;
     }
+
+    return false;
   }
 
-  function getTracks(localMediaStream) {
-    let tracks;
-
-    if (localMediaStream && localMediaStream.getTracks) {
-      tracks = localMediaStream.getTracks();
-    }
-
-    return tracks;
+  private logEvent(eventType: string, params) {
+    this.options.logger.debug(
+      `UserMedia: ... ${EVENT_ASCII} event ${eventType}: ${pretty(params)}`,
+    );
   }
 
-  function getVideoTracks(localMediaStream) {
-    let videoTracks;
-
-    if (localMediaStream && localMediaStream.getVideoTracks) {
-      videoTracks = localMediaStream.getVideoTracks();
-    }
-
-    return videoTracks;
-  }
-
-  function getFirstVideoTrack(localMediaStream) {
-    const videoTracks = getVideoTracks(localMediaStream);
-    let videoTrack;
-
-    if (videoTracks && videoTracks[0]) {
-      videoTrack = videoTracks[0];
-    }
-
-    return videoTrack;
-  }
-
-  function logEvent(event, params) {
-    options.debug("UserMedia: ...", EVENT_ASCII, "event", event, stringify(params));
-  }
-
-  function isPromise(anything) {
-    return anything && typeof Promise !== "undefined" && anything instanceof Promise;
-  }
-
-  function outputEvent(e) {
-    logEvent(e.type, { readyState: rawVisualUserMedia.readyState });
+  private outputEvent(e: Event) {
+    this.logEvent(e.type, { readyState: this.rawVisualUserMedia?.readyState });
 
     // remove myself
-    rawVisualUserMedia.removeEventListener &&
-      rawVisualUserMedia.removeEventListener(e.type, outputEvent);
+    this.rawVisualUserMedia?.removeEventListener(e.type, this.outputEvent.bind(this));
   }
 
-  this.unloadRemainingEventListeners = function () {
-    options.debug("UserMedia: unloadRemainingEventListeners()");
+  public unloadRemainingEventListeners() {
+    this.options.logger.debug("UserMedia: unloadRemainingEventListeners()");
 
-    MEDIA_EVENTS.forEach(function (eventName) {
-      rawVisualUserMedia.removeEventListener(eventName, outputEvent);
+    MEDIA_EVENTS.forEach((eventName) => {
+      this.rawVisualUserMedia?.removeEventListener(
+        eventName,
+        this.outputEvent.bind(this),
+      );
     });
-  };
+  }
 
-  this.init = function (
-    localMediaStream,
-    videoCallback,
-    audioCallback,
-    endedEarlyCallback,
-    params = {},
+  private audioRecord(audioCallback: AudioProcessCB) {
+    Despot.removeListener("SENDING_FIRST_FRAME");
+    this.audioRecorder?.record(audioCallback);
+  }
+
+  public init(
+    localMediaStream: MediaStream,
+    videoCallback: () => void,
+    audioCallback: AudioProcessCB,
+    endedEarlyCallback: (err) => void,
+    switchingFacingMode?: ConstrainDOMString,
   ) {
     this.stop(localMediaStream, {
       aboutToInitialize: true,
-      switchingFacingMode: params.switchingFacingMode,
+      switchingFacingMode,
     });
 
-    let onPlayReached = false;
-    let onLoadedMetaDataReached = false;
-    let playingPromiseReached = false;
+    // Reset states
+    this.onPlayReached = false;
+    this.onLoadedMetaDataReached = false;
+    this.playingPromiseReached = false;
 
-    if (options && options.isAudioEnabled()) {
-      audioRecorder ||= new AudioRecorder(this, options);
+    if (isAudioEnabled(this.options)) {
+      this.audioRecorder ??= new AudioRecorder(this, this.options);
     }
 
-    function audioRecord() {
-      self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord);
-      audioRecorder && audioRecorder.record(audioCallback);
-    }
+    const unloadAllEventListeners = () => {
+      this.options.logger.debug("UserMedia: unloadAllEventListeners()");
 
-    function unloadAllEventListeners() {
-      options.debug("UserMedia: unloadAllEventListeners()");
+      this.unloadRemainingEventListeners();
+      Despot.removeListener("SENDING_FIRST_FRAME");
 
-      self.unloadRemainingEventListeners();
+      this.rawVisualUserMedia?.removeEventListener("play", onPlay);
+      this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
+    };
 
-      self.removeListener(Events.SENDING_FIRST_FRAME, audioRecord);
-
-      rawVisualUserMedia.removeEventListener &&
-        rawVisualUserMedia.removeEventListener("play", onPlay);
-
-      rawVisualUserMedia.removeEventListener &&
-        rawVisualUserMedia.removeEventListener("loadedmetadata", onLoadedMetaData);
-    }
-
-    function play() {
+    const play = () => {
       // Resets the media element and restarts the media resource. Any pending events are discarded.
       try {
-        rawVisualUserMedia.load();
+        this.rawVisualUserMedia?.load();
 
         /*
          * fixes https://github.com/binarykitchen/videomail.io/issues/401
          * see https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
          */
-        if (rawVisualUserMedia.paused) {
-          options.debug(
-            "UserMedia: play()",
-            `media.readyState=${rawVisualUserMedia.readyState}`,
-            `media.paused=${rawVisualUserMedia.paused}`,
-            `media.ended=${rawVisualUserMedia.ended}`,
-            `media.played=${pretty(rawVisualUserMedia.played)}`,
+        if (this.rawVisualUserMedia?.paused) {
+          this.options.logger.debug(
+            `UserMedia: play(): media.readyState=${this.rawVisualUserMedia.readyState}, media.paused=${this.rawVisualUserMedia.paused}, media.ended=${this.rawVisualUserMedia.ended}, media.played=${pretty(this.rawVisualUserMedia.played)}`,
           );
 
           let p;
 
           try {
-            p = rawVisualUserMedia.play();
+            p = this.rawVisualUserMedia.play();
           } catch (exc) {
             /*
              * this in the hope to catch InvalidStateError, see
              * https://github.com/binarykitchen/videomail-client/issues/149
              */
-            options.logger.warn("Caught raw usermedia play exception:", exc);
+            this.options.logger.warn(`Caught raw user media play exception: ${exc}`);
           }
 
           /*
@@ -208,20 +180,21 @@ export default function (recorder, options) {
            * and this to catch any weird errors early if possible
            */
           if (isPromise(p)) {
-            p.then(function () {
-              if (!playingPromiseReached) {
-                options.debug("UserMedia: play promise successful. Playing now.");
-                playingPromiseReached = true;
+            p.then(() => {
+              if (!this.playingPromiseReached) {
+                this.options.logger.debug(
+                  "UserMedia: play promise successful. Playing now.",
+                );
+                this.playingPromiseReached = true;
               }
-            }).catch(function (reason) {
+            }).catch((reason) => {
               /*
                * promise can be interrupted, i.E. when switching tabs
                * and promise can get resumed when switching back to tab, hence
                * do not treat this like an error
                */
-              options.logger.warn(
-                "Caught pending usermedia promise exception: %s",
-                reason.toString(),
+              this.options.logger.warn(
+                `Caught pending user media promise exception: ${reason.toString()}`,
               );
             });
           }
@@ -230,134 +203,117 @@ export default function (recorder, options) {
         unloadAllEventListeners();
         endedEarlyCallback(exc);
       }
-    }
+    };
 
-    function fireCallbacks() {
-      const { readyState } = rawVisualUserMedia;
+    const fireCallbacks = () => {
+      const readyState = this.rawVisualUserMedia?.readyState;
 
       // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
-      options.debug(
+      this.options.logger.debug(
         `UserMedia: fireCallbacks(` +
           `readyState=${readyState}, ` +
-          `onPlayReached=${onPlayReached}, ` +
-          `onLoadedMetaDataReached=${onLoadedMetaDataReached})`,
+          `onPlayReached=${this.onPlayReached}, ` +
+          `onLoadedMetaDataReached=${this.onLoadedMetaDataReached})`,
       );
 
-      if (onPlayReached && onLoadedMetaDataReached) {
+      if (this.onPlayReached && this.onLoadedMetaDataReached) {
         videoCallback();
 
-        if (audioRecorder && audioCallback) {
+        if (this.audioRecorder) {
           try {
-            audioRecorder.init(localMediaStream);
-            self.on(Events.SENDING_FIRST_FRAME, audioRecord);
+            this.audioRecorder.init(localMediaStream);
+            this.on("SENDING_FIRST_FRAME", () => {
+              this.audioRecord(audioCallback);
+            });
           } catch (exc) {
             unloadAllEventListeners();
             endedEarlyCallback(exc);
           }
         }
       }
-    }
+    };
 
-    function onPlay() {
+    const onPlay = () => {
       try {
-        logEvent("play", {
-          readyState: rawVisualUserMedia.readyState,
-          audio: options.isAudioEnabled(),
-          width: rawVisualUserMedia.width,
-          height: rawVisualUserMedia.height,
-          videoWidth: rawVisualUserMedia.videoWidth,
-          videoHeight: rawVisualUserMedia.videoHeight,
+        this.logEvent("play", {
+          readyState: this.rawVisualUserMedia?.readyState,
+          audio: isAudioEnabled(this.options),
+          width: this.rawVisualUserMedia?.width,
+          height: this.rawVisualUserMedia?.height,
+          videoWidth: this.rawVisualUserMedia?.videoWidth,
+          videoHeight: this.rawVisualUserMedia?.videoHeight,
         });
 
-        rawVisualUserMedia.removeEventListener &&
-          rawVisualUserMedia.removeEventListener("play", onPlay);
+        this.rawVisualUserMedia?.removeEventListener("play", onPlay);
 
-        if (hasEnded() || hasInvalidDimensions()) {
+        if (this.hasEnded() || this.hasInvalidDimensions()) {
           endedEarlyCallback(
-            VideomailError.create(
-              "Already busy",
-              "Probably another browser window is using your webcam?",
-              options,
-            ),
+            createError({
+              message: "Already busy",
+              explanation: "Probably another browser window is using your webcam?",
+              options: this.options,
+            }),
           );
         } else {
-          onPlayReached = true;
+          this.onPlayReached = true;
           fireCallbacks();
         }
       } catch (exc) {
         unloadAllEventListeners();
         endedEarlyCallback(exc);
       }
-    }
+    };
 
     // player modifications to perform that must wait until `loadedmetadata` has been triggered
-    function onLoadedMetaData() {
-      logEvent("loadedmetadata", {
-        readyState: rawVisualUserMedia.readyState,
-        paused: rawVisualUserMedia.paused,
-        width: rawVisualUserMedia.width,
-        height: rawVisualUserMedia.height,
-        videoWidth: rawVisualUserMedia.videoWidth,
-        videoHeight: rawVisualUserMedia.videoHeight,
+    const onLoadedMetaData = () => {
+      this.logEvent("loadedmetadata", {
+        readyState: this.rawVisualUserMedia?.readyState,
+        paused: this.rawVisualUserMedia?.paused,
+        width: this.rawVisualUserMedia?.width,
+        height: this.rawVisualUserMedia?.height,
+        videoWidth: this.rawVisualUserMedia?.videoWidth,
+        videoHeight: this.rawVisualUserMedia?.videoHeight,
       });
 
-      rawVisualUserMedia.removeEventListener &&
-        rawVisualUserMedia.removeEventListener("loadedmetadata", onLoadedMetaData);
+      this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
 
-      if (!hasEnded() && !hasInvalidDimensions()) {
-        self.emit(Events.LOADED_META_DATA);
+      if (!this.hasEnded() && !this.hasInvalidDimensions()) {
+        this.emit("LOADED_META_DATA");
 
-        /*
-         * for android devices, we cannot call play() unless meta data has been loaded!
-         * todo consider removing that if it's not the case anymore (for better performance)
-         */
-        if (browser.isAndroid()) {
-          play();
-        }
-
-        onLoadedMetaDataReached = true;
+        this.onLoadedMetaDataReached = true;
         fireCallbacks();
       }
-    }
+    };
 
     try {
       const videoTrack = getFirstVideoTrack(localMediaStream);
 
       if (!videoTrack) {
-        options.debug("UserMedia: detected (but no video tracks exist");
+        this.options.logger.debug("UserMedia: detected (but no video tracks exist");
       } else if (!videoTrack.enabled) {
-        throw VideomailError.create(
-          "Webcam is disabled",
-          "The video track seems to be disabled. Enable it in your system.",
-          options,
-        );
+        throw createError({
+          message: "Webcam is disabled",
+          explanation: "The video track seems to be disabled. Enable it in your system.",
+          options: this.options,
+        });
       } else {
-        let description;
+        let description = "";
 
         if (videoTrack.label && videoTrack.label.length > 0) {
-          description = videoTrack.label;
+          description = description.concat(videoTrack.label);
         }
 
-        description += ` with enabled=${videoTrack.enabled}`;
-        description += `, muted=${videoTrack.muted}`;
-        description += `, remote=${videoTrack.remote}`;
-        description += `, readyState=${videoTrack.readyState}`;
-        description += `, error=${videoTrack.error}`;
+        description = description.concat(
+          ` with enabled=${videoTrack.enabled}, muted=${videoTrack.muted}, readyState=${videoTrack.readyState}`,
+        );
 
-        options.debug(`UserMedia: ${videoTrack.kind} detected.`, description || "");
+        this.options.logger.debug(
+          `UserMedia: ${videoTrack.kind} detected. ${description}`,
+        );
       }
 
-      // very useful i think, so leave this and just use options.debug()
-      const heavyDebugging = true;
-
-      if (heavyDebugging) {
-        MEDIA_EVENTS.forEach(function (eventName) {
-          rawVisualUserMedia.addEventListener(eventName, outputEvent, false);
-        });
-      }
-
-      rawVisualUserMedia.addEventListener("loadedmetadata", onLoadedMetaData);
-      rawVisualUserMedia.addEventListener("play", onPlay);
+      this.rawVisualUserMedia?.addEventListener("loadedmetadata", onLoadedMetaData);
+      this.rawVisualUserMedia?.addEventListener("play", onPlay);
 
       /*
        * experimental, not sure if this is ever needed/called? since 2 apr 2017
@@ -365,177 +321,181 @@ export default function (recorder, options) {
        * Error can be an object with the code MEDIA_ERR_NETWORK or higher.
        * networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
        */
-      rawVisualUserMedia.addEventListener("error", function (err) {
-        options.logger.warn("Caught video element error event: %s", pretty(err));
+      this.rawVisualUserMedia?.addEventListener("error", (err) => {
+        this.options.logger.warn(`Caught video element error event: ${pretty(err)}`);
       });
 
-      setVisualStream(localMediaStream);
+      this.setVisualStream(localMediaStream);
 
       play();
     } catch (exc) {
-      self.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
-  };
+  }
 
-  this.isReady = function () {
-    return Boolean(rawVisualUserMedia.src);
-  };
+  public isReady() {
+    return Boolean(this.rawVisualUserMedia?.src);
+  }
 
-  this.stop = function (visualStream, params = {}) {
+  public stop(visualStream?: MediaStream, params?: StopParams) {
     try {
-      // do not stop "too much" when going to initialize anyway
-      const { aboutToInitialize } = params;
-      const { switchingFacingMode } = params;
+      let chosenStream = visualStream;
 
-      if (!aboutToInitialize) {
-        if (!visualStream) {
-          visualStream = getVisualStream();
+      // do not stop "too much" when going to initialize anyway
+      if (!params?.aboutToInitialize) {
+        if (!chosenStream) {
+          chosenStream = this.currentVisualStream;
         }
 
-        const tracks = getTracks(visualStream);
-        let newStopApiFound = false;
+        const tracks = chosenStream?.getTracks();
 
         if (tracks) {
-          tracks.forEach(function (track) {
-            if (track.stop) {
-              newStopApiFound = true;
-              track.stop();
-            }
+          tracks.forEach((track) => {
+            track.stop();
           });
         }
 
-        // will probably become obsolete in one year (after june 2017)
-        !newStopApiFound && visualStream && visualStream.stop && visualStream.stop();
+        this.setVisualStream(undefined);
 
-        setVisualStream(null);
-
-        audioRecorder && audioRecorder.stop();
-
-        audioRecorder = null;
+        this.audioRecorder?.stop();
+        this.audioRecorder = undefined;
       }
 
       /*
        * don't have to reset these states when just switching camera
        * while still recording or pausing
        */
-      if (!switchingFacingMode) {
-        paused = record = false;
+      if (!params?.switchingFacingMode) {
+        this.paused = this.recording = false;
       }
     } catch (exc) {
-      self.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
-  };
+  }
 
-  this.createCanvas = function () {
-    return h("canvas", {
-      width: this.getRawWidth(true),
-      height: this.getRawHeight(true),
-    });
-  };
+  public createCanvas() {
+    const canvas = document.createElement("canvas");
+    const rawWidth = this.getRawWidth(true);
 
-  this.getVideoHeight = function () {
-    return rawVisualUserMedia.videoHeight;
-  };
+    if (rawWidth) {
+      canvas.width = rawWidth;
+    }
 
-  this.getVideoWidth = function () {
-    return rawVisualUserMedia.videoWidth;
-  };
+    const rawHeight = this.getRawHeight(true);
 
-  this.hasVideoWidth = function () {
-    return this.getVideoWidth() > 0;
-  };
+    if (rawHeight) {
+      canvas.height = rawHeight;
+    }
 
-  this.getRawWidth = function (responsive) {
+    return canvas;
+  }
+
+  public getVideoHeight() {
+    return this.rawVisualUserMedia?.videoHeight;
+  }
+
+  public getVideoWidth() {
+    return this.rawVisualUserMedia?.videoWidth;
+  }
+
+  public hasVideoWidth() {
+    const videoWidth = this.getVideoWidth();
+
+    return videoWidth && videoWidth > 0;
+  }
+
+  public getRawWidth(responsive: boolean) {
     let rawWidth = this.getVideoWidth();
-    const widthDefined = options.hasDefinedWidth();
 
-    if (widthDefined || options.hasDefinedHeight()) {
-      if (!responsive && widthDefined) {
-        rawWidth = options.video.width;
+    if (this.options.video.width || this.options.video.height) {
+      if (!responsive) {
+        rawWidth = this.options.video.width;
       } else {
-        rawWidth = recorder.calculateWidth(responsive);
+        rawWidth = this.recorder.calculateWidth(responsive);
       }
     }
 
     if (responsive) {
-      rawWidth = recorder.limitWidth(rawWidth);
+      rawWidth = this.recorder.limitWidth(rawWidth);
     }
 
     return rawWidth;
-  };
+  }
 
-  this.getRawHeight = function (responsive) {
-    let rawHeight;
+  public getRawHeight(responsive: boolean) {
+    let rawHeight: number | undefined;
 
-    if (options.hasDefinedDimension()) {
-      rawHeight = recorder.calculateHeight(responsive);
+    if (this.options.video.width || this.options.video.height) {
+      rawHeight = this.recorder.calculateHeight(responsive);
 
-      if (rawHeight < 1) {
-        throw VideomailError.create(
-          "Bad dimensions",
-          "Calculated raw height cannot be less than 1!",
-          options,
-        );
+      if (!rawHeight || rawHeight < 1) {
+        throw createError({
+          message: "Bad dimensions",
+          explanation: "Calculated raw height cannot be less than 1!",
+          options: this.options,
+        });
       }
     } else {
       rawHeight = this.getVideoHeight();
 
-      if (rawHeight < 1) {
-        throw VideomailError.create(
-          "Bad dimensions",
-          "Raw video height from DOM element cannot be less than 1!",
-          options,
-        );
+      if (!rawHeight || rawHeight < 1) {
+        throw createError({
+          message: "Bad dimensions",
+          explanation: "Raw video height from DOM element cannot be less than 1!",
+          options: this.options,
+        });
       }
     }
 
     if (responsive) {
-      rawHeight = recorder.limitHeight(rawHeight);
+      rawHeight = this.recorder.limitHeight(rawHeight);
     }
 
     return rawHeight;
-  };
+  }
 
-  this.getRawVisuals = function () {
-    return rawVisualUserMedia;
-  };
+  public getRawVisuals() {
+    return this.rawVisualUserMedia;
+  }
 
-  this.pause = function () {
-    paused = true;
-  };
+  public pause() {
+    this.paused = true;
+  }
 
-  this.isPaused = function () {
-    return paused;
-  };
+  public isPaused() {
+    return this.paused;
+  }
 
-  this.resume = function () {
-    paused = false;
-  };
+  public resume() {
+    this.paused = false;
+  }
 
-  this.record = function () {
-    record = true;
-  };
+  public record() {
+    this.recording = true;
+  }
 
-  this.isRecording = function () {
-    return record;
-  };
+  public isRecording() {
+    return this.recording;
+  }
 
-  this.getAudioSampleRate = function () {
-    if (audioRecorder) {
-      return audioRecorder.getSampleRate();
+  public getAudioSampleRate() {
+    if (this.audioRecorder) {
+      return this.audioRecorder.getSampleRate();
     }
 
     return -1;
-  };
+  }
 
-  this.getCharacteristics = function () {
+  public getCharacteristics() {
     return {
       audioSampleRate: this.getAudioSampleRate(),
-      muted: rawVisualUserMedia && rawVisualUserMedia.muted,
-      width: rawVisualUserMedia && rawVisualUserMedia.width,
-      height: rawVisualUserMedia && rawVisualUserMedia.height,
-      videoWidth: rawVisualUserMedia && rawVisualUserMedia.videoWidth,
-      videoHeight: rawVisualUserMedia && rawVisualUserMedia.videoHeight,
+      muted: this.rawVisualUserMedia?.muted,
+      width: this.rawVisualUserMedia?.width,
+      height: this.rawVisualUserMedia?.height,
+      videoWidth: this.rawVisualUserMedia?.videoWidth,
+      videoHeight: this.rawVisualUserMedia?.videoHeight,
     };
-  };
+  }
 }
+
+export default UserMedia;

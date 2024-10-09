@@ -14,7 +14,7 @@
 Record videos in contact forms!
 
 Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds.
-This without the need for Flash, Java nor any other plugins / addons. Just JavaScript written in ES6.
+This without the need for Flash, Java nor any other plugins / addons. Just TypeScript, compiled into ES2022 with declarations.
 
 - <a href="#storybook">Storybook (examples)</a>
 - <a href="#demo">Demo / Fully working version</a>
@@ -70,14 +70,16 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 - <a href="#constructor">`new VideomailClient()`</a>
 - <a href="#on">`videomailClient.on()`</a>
 - <a href="#show">`videomailClient.show()`</a>
+- <a href="#hide">`videomailClient.hide()`</a>
 - <a href="#replay">`videomailClient.replay()`</a>
 - <a href="#startOver">`videomailClient.startOver()`</a>
-- <a href="#get">`videomailClient.get()`</a>
-- <a href="#canRecord">`videomailClient.canRecord()`</a>
+- <a href="#getByAlias">`videomailClient.getByAlias()`</a>
+- <a href="#getByKey">`videomailClient.getByKey()`</a>
 - <a href="#unload">`videomailClient.unload()`</a>
 - <a href="#hide">`videomailClient.hide()`</a>
 - <a href="#isDirty">`videomailClient.isDirty()`</a>
 - <a href="#isRecording">`videomailClient.isRecording()`</a>
+- <a href="#isBuilt">`videomailClient.isBuilt()`</a>
 - <a href="#submit">`videomailClient.submit()`</a>
 - <a href="#getLogLines">`videomailClient.getLogLines()`</a>
 
@@ -98,11 +100,11 @@ const videomailClient = new VideomailClient({ siteName: "my site name" });
 The VideomailClient class is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
 
 ```ts
-videomailClient.on("FORM_READY", function () {
+videomailClient.on("FORM_READY", () => {
   // form is ready for recording
 });
 
-videomailClient.on("SUBMITTED", function (videomail, response) {
+videomailClient.on("SUBMITTED", (videomail, response) => {
   // continue with your own app logic in your javascript code if you want to process
   // something else further after form submission.
 });
@@ -110,7 +112,7 @@ videomailClient.on("SUBMITTED", function (videomail, response) {
 
 #### Supported events:
 
-Check them out at [src/events.js](https://github.com/binarykitchen/videomail-client/blob/master/src/events.ts)
+Check them out at [src/types/events/index.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/types/events/index.ts)
 
 They should be self-explanatory. If not, ask for better documentation. Then, some of these events may come with parameters.
 
@@ -146,20 +148,14 @@ then this will be used instead of adding a new dom element.
 
 Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
 
-<a name="get"></a>
+<a name="getByAlias"></a>
 
-### videomailClient.get(alias, cb)
+### videomailClient.getByAlias(alias)
 
-Queries a videomail (JSON) by a given alias for further queries or processing. There are two ways to get the alias:
+Queries a videomail (JSON) asynchronously by a given alias for further queries or processing. There are two ways to get the alias:
 
 1. The form submission to your own server has it under `videomail_alias` in the form body.
 2. Get the alias from the `submitted` event and use it further within your code.
-
-<a name="canRecord"></a>
-
-### videomailClient.canRecord()
-
-An utility function which returns true if the current browser is capable of webcam recording. It returns false for <a href="#compatibility">incompatible</a> browsers.
 
 <a name="unload"></a>
 
@@ -239,7 +235,7 @@ It's emitted in the SUBMITTED event under the videomail object:
 }
 ```
 
-You also can get all the above using the `videomailClient.get()` API call.
+You also can get all the above using the `videomailClient.getByKey()` API call.
 
 <a name="form"></a>
 
@@ -249,7 +245,7 @@ By default the videomail-client interrupts the form submission with `e.preventDe
 
 If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
 
-```js
+```ts
 selectors: {
   "formId": null,
   "submitButtonId": null,

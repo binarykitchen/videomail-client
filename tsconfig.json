@@ -1,5 +1,12 @@
 {
-  "include": ["etc", "src", ".storybook", ".eslintrc.js", "prettier.config.cjs"],
+  "include": [
+    "etc",
+    "src",
+    ".storybook/*.ts",
+    "eslint.config.mjs",
+    "prettier.config.cjs",
+    "vite.config.ts"
+  ],
   "extends": [
     "./node_modules/@tsconfig/strictest/tsconfig.json",
     "./node_modules/@tsconfig/node22/tsconfig.json"
@@ -9,6 +16,7 @@
     "moduleResolution": "bundler",
 
     "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["vitest/globals"],
 
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,

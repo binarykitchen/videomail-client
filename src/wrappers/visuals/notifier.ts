@@ -1,55 +1,76 @@
 import hidden from "hidden";
-import h from "hyperscript";
-import inherits from "inherits";
 
-import Events from "../../events";
-import EventEmitter from "../../util/eventEmitter";
+import Despot from "../../util/Despot";
+import { isAudioEnabled } from "../../util/options/audio";
+import Visuals from "../visuals";
+import { VideomailClientOptions } from "../../types/options";
+import getBrowser from "../../util/getBrowser";
+import VideomailError from "../../util/error/VideomailError";
+import { ProgressParams, StoppingParams } from "../../types/events";
+import pretty from "../../util/pretty";
 
 const NOTIFIER_MESSAGE_ID = "notifierMessage";
 
-const Notifier = function (visuals, options) {
-  EventEmitter.call(this, options, "Notifier");
+interface MessageOptions {
+  problem?: boolean;
+}
 
-  const self = this;
-  const debug = options && options.debug;
+interface NotifyOptions extends MessageOptions {
+  stillWait?: boolean;
+  entertain?: boolean;
+  blocking?: boolean;
+  classList?: string[] | undefined;
+  removeDimensions?: boolean;
+}
 
-  let notifyElement;
-  let messageElement = document.getElementById(NOTIFIER_MESSAGE_ID);
-  let explanationElement;
-  let entertainTimeoutId;
-  let entertaining;
-  let built;
+class Notifier extends Despot {
+  private visuals: Visuals;
 
-  function onStopping(limitReached) {
+  private notifyElement?: HTMLElement | null | undefined;
+  private messageElement?: HTMLHeadingElement | null | undefined;
+
+  private explanationElement?: HTMLElement | null | undefined;
+  private entertainTimeoutId?: number | undefined;
+
+  private entertaining = false;
+  private built = false;
+
+  constructor(visuals: Visuals, options: VideomailClientOptions) {
+    super("Notifier", options);
+
+    this.visuals = visuals;
+  }
+
+  private onStopping(limitReached = false) {
     let lead = "";
 
-    visuals.beginWaiting();
+    this.visuals.beginWaiting();
 
     if (limitReached) {
-      debug("Limit reached");
-      lead += `${options.text.limitReached}.<br/>`;
+      this.options.logger.debug("Limit reached");
+      lead += `${this.options.text.limitReached}.<br/>`;
     }
 
-    lead += `${options.text.sending} …`;
+    lead += `${this.options.text.sending} …`;
 
-    self.notify(lead, null, {
+    this.notify(lead, undefined, {
       stillWait: true,
-      entertain: options.notifier.entertain,
+      entertain: this.options.notifier.entertain,
     });
   }
 
-  function onConnecting() {
-    self.notify("Connecting …");
+  private onConnecting() {
+    this.notify("Connecting …");
   }
 
-  function onLoadingUserMedia() {
-    self.notify("Loading webcam …");
+  private onLoadingUserMedia() {
+    this.notify("Loading webcam …");
   }
 
-  function onProgress(frameProgress, sampleProgress) {
-    let overallProgress;
+  private onProgress(frameProgress: string, sampleProgress?: string) {
+    let overallProgress: string;
 
-    if (options.isAudioEnabled()) {
+    if (isAudioEnabled(this.options)) {
       overallProgress = `Video: ${frameProgress}`;
 
       if (sampleProgress) {
@@ -59,314 +80,342 @@ const Notifier = function (visuals, options) {
       overallProgress = frameProgress;
     }
 
-    setExplanation(overallProgress);
+    this.setExplanation(overallProgress);
   }
 
-  function onBeginVideoEncoding() {
-    visuals.beginWaiting();
+  private onBeginVideoEncoding() {
+    this.visuals.beginWaiting();
 
-    const lead = `${options.text.encoding} …`;
+    const lead = `${this.options.text.encoding} …`;
 
-    self.notify(lead, null, {
+    this.notify(lead, undefined, {
       stillWait: true,
-      entertain: options.notifier.entertain,
+      entertain: this.options.notifier.entertain,
     });
 
-    hideExplanation();
+    this.hideExplanation();
   }
 
-  function initEvents() {
-    debug("Notifier: initEvents()");
+  private initEvents() {
+    this.options.logger.debug("Notifier: initEvents()");
 
-    self
-      .on(Events.CONNECTING, function () {
-        onConnecting();
-      })
-      .on(Events.LOADING_USER_MEDIA, function () {
-        onLoadingUserMedia();
-      })
-      .on(Events.USER_MEDIA_READY, function () {
-        // Ensure notifier has correct dimensions, especially when stretched
-        correctNotifierDimensions();
+    this.on("CONNECTING", () => {
+      this.onConnecting();
+    });
 
-        self.hide();
-      })
-      .on(Events.LOADED_META_DATA, function () {})
-      .on(Events.PREVIEW, function () {
-        self.hide();
-      })
-      .on(Events.STOPPING, function (limitReached) {
-        onStopping(limitReached);
-      })
-      .on(Events.PROGRESS, function (frameProgress, sampleProgress) {
-        onProgress(frameProgress, sampleProgress);
-      })
-      .on(Events.BEGIN_VIDEO_ENCODING, function () {
-        onBeginVideoEncoding();
-      })
-      .on(Events.UNLOADING, function () {
-        self.notify("Unloading …");
-      })
-      .on(Events.DISCONNECTED, function () {
-        self.notify("Disconnected");
-      })
-      .on(Events.CONNECTED, function () {
-        self.notify("Connected");
+    this.on("LOADING_USER_MEDIA", () => {
+      this.onLoadingUserMedia();
+    });
 
-        if (options.loadUserMediaOnRecord) {
-          self.hide();
-        }
-      });
+    this.on("USER_MEDIA_READY", () => {
+      // Ensure notifier has correct dimensions, especially when stretched
+      this.correctNotifierDimensions();
+
+      this.hide();
+    });
+
+    this.on("PREVIEW", () => {
+      this.hide();
+    });
+
+    this.on("STOPPING", (params: StoppingParams) => {
+      this.onStopping(params.limitReached);
+    });
+
+    this.on("PROGRESS", (params: ProgressParams) => {
+      this.onProgress(params.frameProgress, params.sampleProgress);
+    });
+
+    this.on("BEGIN_VIDEO_ENCODING", () => {
+      this.onBeginVideoEncoding();
+    });
+
+    this.on("UNLOADING", () => {
+      this.notify("Unloading …");
+    });
+
+    this.on("DISCONNECTED", () => {
+      this.notify("Disconnected");
+    });
+
+    this.on("CONNECTED", () => {
+      this.notify("Connected");
+
+      if (this.options.loadUserMediaOnRecord) {
+        this.hide();
+      }
+    });
   }
 
-  function correctNotifierDimensions() {
-    if (options.video.stretch) {
-      notifyElement.style.width = "auto";
-      notifyElement.style.height = `${visuals.getRecorderHeight(true, true)}px`;
+  private correctNotifierDimensions() {
+    if (!this.notifyElement) {
+      return;
+    }
+
+    if (this.options.video.stretch) {
+      this.notifyElement.style.width = "auto";
+      this.notifyElement.style.height = `${this.visuals.getRecorderHeight(true, true)}px`;
     } else {
-      notifyElement.style.width = `${visuals.getRecorderWidth(true)}px`;
-      notifyElement.style.height = `${visuals.getRecorderHeight(true)}px`;
+      this.notifyElement.style.width = `${this.visuals.getRecorderWidth(true)}px`;
+      this.notifyElement.style.height = `${this.visuals.getRecorderHeight(true)}px`;
     }
   }
 
-  function show() {
-    notifyElement && hidden(notifyElement, false);
+  private show() {
+    if (this.notifyElement) {
+      hidden(this.notifyElement, false);
+    }
   }
 
-  function runEntertainment() {
-    if (options.notifier.entertain) {
-      if (!entertaining) {
+  private runEntertainment() {
+    if (this.options.notifier.entertain) {
+      if (!this.entertaining) {
         const randomBackgroundClass = Math.floor(
-          Math.random() * options.notifier.entertainLimit + 1,
+          Math.random() * this.options.notifier.entertainLimit + 1,
         );
 
-        notifyElement.className = `notifier entertain ${options.notifier.entertainClass}${randomBackgroundClass}`;
+        if (this.notifyElement) {
+          this.notifyElement.className = `notifier entertain ${this.options.notifier.entertainClass}${randomBackgroundClass}`;
+        }
 
-        entertainTimeoutId = setTimeout(
-          runEntertainment,
-          options.notifier.entertainInterval,
+        this.entertainTimeoutId = window.setTimeout(
+          this.runEntertainment.bind(this),
+          this.options.notifier.entertainInterval,
         );
-        entertaining = true;
+
+        this.entertaining = true;
       }
     } else {
-      cancelEntertainment();
+      this.cancelEntertainment();
     }
   }
 
-  function cancelEntertainment() {
-    if (notifyElement) {
-      notifyElement.classList.remove("entertain");
+  private cancelEntertainment() {
+    if (this.notifyElement) {
+      this.notifyElement.classList.remove("entertain");
     }
 
-    clearTimeout(entertainTimeoutId);
-    entertainTimeoutId = null;
-    entertaining = false;
+    clearTimeout(this.entertainTimeoutId);
+
+    this.entertainTimeoutId = undefined;
+    this.entertaining = false;
   }
 
-  this.error = function (err) {
-    const message = err.message ? err.message.toString() : err.toString();
-    const explanation = err.explanation ? err.explanation.toString() : null;
+  public error(err: VideomailError) {
+    const message = err.message;
+    const explanation = err.explanation ? err.explanation.toString() : undefined;
 
     if (!message) {
-      options.debug("Weird empty error message generated for error", err);
+      this.options.logger.debug(
+        `Weird empty error message generated for error ${pretty(err)}`,
+      );
     }
 
-    self.notify(message, explanation, {
+    this.notify(message, explanation, {
       blocking: true,
       problem: true,
-      hideForm: err.hideForm && err.hideForm(),
-      classList: err.getClassList && err.getClassList(),
-      removeDimensions: err.removeDimensions && err.removeDimensions(),
+      classList: err.getClassList(),
+      removeDimensions: getBrowser(this.options).isMobile(),
     });
-  };
-
-  // Special treatment to deal with race conditions
-  function getMessageElement() {
-    if (messageElement) {
-      return messageElement;
-    }
-
-    messageElement = document.getElementById(NOTIFIER_MESSAGE_ID);
-
-    return messageElement;
   }
 
-  function setMessage(message, messageOptions) {
-    options.debug(`Notifier: setMessage(${message})`);
+  // Special treatment to deal with race conditions
+  private getMessageElement() {
+    if (this.messageElement) {
+      return this.messageElement;
+    }
 
-    if (!getMessageElement()) {
-      messageElement = h("h2", {
-        id: NOTIFIER_MESSAGE_ID,
-      });
+    this.messageElement = document.querySelector<HTMLHeadingElement>(
+      `#${NOTIFIER_MESSAGE_ID}`,
+    );
 
-      if (notifyElement) {
-        if (explanationElement) {
+    return this.messageElement;
+  }
+
+  private setMessage(message: string, messageOptions?: MessageOptions) {
+    this.options.logger.debug(`Notifier: setMessage(${message})`);
+
+    if (!this.getMessageElement()) {
+      this.messageElement = document.createElement("h2");
+      this.messageElement.id = NOTIFIER_MESSAGE_ID;
+
+      if (this.notifyElement) {
+        if (this.explanationElement) {
           // For rare cases, shouldn't happen to set an explanation without a message
-          notifyElement.insertBefore(messageElement, explanationElement);
+          this.notifyElement.insertBefore(this.messageElement, this.explanationElement);
         } else {
-          notifyElement.appendChild(messageElement);
+          this.notifyElement.appendChild(this.messageElement);
         }
       } else {
-        options.logger.warn(
+        this.options.logger.warn(
           `Unable to show message ${message} because notifyElement is empty`,
         );
       }
     }
 
     if (message.length > 0) {
-      const problem = messageOptions.problem ? messageOptions.problem : false;
-      messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+      if (this.messageElement) {
+        const problem = messageOptions?.problem;
+        this.messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+      } else {
+        this.options.logger.warn("There is no message element for displaying a message");
+      }
     } else {
-      options.logger.warn(
+      this.options.logger.warn(
         "Not going to update notifierMessage element because message is empty",
       );
     }
 
-    hidden(messageElement, false);
+    hidden(this.messageElement, false);
   }
 
-  function setExplanation(explanation) {
-    options.debug(`Notifier: setExplanation(${explanation})`);
+  private setExplanation(explanation: string) {
+    this.options.logger.debug(`Notifier: setExplanation(${explanation})`);
 
-    if (!explanationElement) {
-      explanationElement = h("p", { className: "explanation" });
+    if (!this.explanationElement) {
+      this.explanationElement = document.createElement("p");
+      this.explanationElement.classList.add("explanation");
 
-      if (notifyElement) {
-        notifyElement.appendChild(explanationElement);
+      if (this.notifyElement) {
+        this.notifyElement.appendChild(this.explanationElement);
       } else {
-        options.logger.warn(
-          "Unable to show explanation because notifyElement is empty:",
-          explanation,
+        this.options.logger.warn(
+          `Unable to show explanation because notifyElement is empty: ${explanation}`,
         );
       }
     }
 
-    explanationElement.innerHTML = explanation;
+    this.explanationElement.innerHTML = explanation;
 
-    hidden(explanationElement, false);
+    hidden(this.explanationElement, false);
   }
 
-  this.build = function () {
-    options.debug("Notifier: build()");
+  public build() {
+    this.options.logger.debug("Notifier: build()");
 
-    notifyElement = visuals.querySelector(".notifier");
+    this.notifyElement = this.visuals.getElement()?.querySelector(".notifier");
 
-    if (!notifyElement) {
-      notifyElement = h(".notifier"); // defaults to div
+    if (!this.notifyElement) {
+      this.notifyElement = document.createElement("div");
 
       this.hide();
 
-      visuals.appendChild(notifyElement);
+      this.visuals.appendChild(this.notifyElement);
     } else {
       this.hide();
     }
 
-    !built && initEvents();
+    if (!this.built) {
+      this.initEvents();
+    }
 
-    built = true;
-  };
+    this.built = true;
+  }
 
-  function hideMessage() {
-    if (getMessageElement()) {
-      hidden(messageElement, true);
+  private hideMessage() {
+    if (this.getMessageElement()) {
+      hidden(this.messageElement, true);
     }
   }
 
-  function hideExplanation() {
-    if (explanationElement) {
-      hidden(explanationElement, true);
+  private hideExplanation() {
+    if (this.explanationElement) {
+      hidden(this.explanationElement, true);
     }
   }
 
-  this.hide = function () {
-    cancelEntertainment();
+  public hide() {
+    this.cancelEntertainment();
 
-    if (notifyElement) {
-      hidden(notifyElement, true);
-      notifyElement.classList.remove("blocking");
+    if (this.notifyElement) {
+      hidden(this.notifyElement, true);
+      this.notifyElement.classList.remove("blocking");
     }
 
-    hideMessage();
-    hideExplanation();
-  };
+    this.hideMessage();
+    this.hideExplanation();
+  }
 
-  this.isVisible = function () {
-    if (!built) {
+  public isVisible() {
+    if (!this.built) {
       return false;
     }
 
-    return notifyElement && !hidden(notifyElement);
-  };
+    return this.notifyElement && !hidden(this.notifyElement);
+  }
 
-  this.isBuilt = function () {
-    return built;
-  };
+  public isBuilt() {
+    return this.built;
+  }
 
-  this.notify = function (message, explanation, notifyOptions = {}) {
+  public notify(
+    message: string,
+    explanation?: string,
+    notifyOptions: NotifyOptions = {},
+  ) {
     const params = [message, explanation].filter(Boolean);
-    options.debug(`Notifier: notify(${params.join(", ")})`);
+    this.options.logger.debug(`Notifier: notify(${params.join(", ")})`);
 
     const stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false;
     const entertain = notifyOptions.entertain ? notifyOptions.entertain : false;
     const blocking = notifyOptions.blocking ? notifyOptions.blocking : false;
-    const hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     const classList = notifyOptions.classList ? notifyOptions.classList : false;
     const removeDimensions = notifyOptions.removeDimensions
       ? notifyOptions.removeDimensions
       : false;
 
-    if (notifyElement) {
+    if (this.notifyElement) {
       // reset
       if (!entertain) {
-        notifyElement.className = "notifier";
+        this.notifyElement.className = "notifier";
       }
 
       if (classList) {
-        classList.forEach(function (className) {
-          notifyElement.classList.add(className);
+        classList.forEach((className) => {
+          this.notifyElement?.classList.add(className);
         });
       }
 
       if (removeDimensions) {
-        notifyElement.style.width = "auto";
-        notifyElement.style.height = "auto";
+        this.notifyElement.style.width = "auto";
+        this.notifyElement.style.height = "auto";
       }
     }
 
     if (blocking) {
-      notifyElement && notifyElement.classList.add("blocking");
-      this.emit(Events.BLOCKING, { hideForm });
+      this.notifyElement?.classList.add("blocking");
+      this.emit("BLOCKING");
     } else {
-      this.emit(Events.NOTIFYING);
+      this.emit("NOTIFYING");
     }
 
-    visuals.hideReplay();
-    visuals.hideRecorder();
+    this.visuals.hideReplay();
+    this.visuals.hideRecorder();
 
-    setMessage(message, notifyOptions);
+    this.setMessage(message, notifyOptions);
 
     if (explanation && explanation.length > 0) {
-      setExplanation(explanation);
+      this.setExplanation(explanation);
     }
 
     if (entertain) {
-      runEntertainment();
+      this.runEntertainment();
     } else {
-      cancelEntertainment();
+      this.cancelEntertainment();
     }
 
     /*
      * just as a safety in case if an error is thrown in the middle of the build process
      * and visuals aren't built/shown yet.
      */
-    visuals.showVisuals();
+    this.visuals.showVisuals();
 
-    show();
+    this.show();
 
-    !stillWait && visuals.endWaiting();
-  };
-};
-
-inherits(Notifier, EventEmitter);
+    if (!stillWait) {
+      this.visuals.endWaiting();
+    }
+  }
+}
 
 export default Notifier;
