@@ -3,36 +3,40 @@ import stringify from "safe-json-stringify";
 const DASH = "- ";
 const SEPARATOR = `<br/>${DASH}`;
 
-function arrayToString(array) {
-  if (array && array.length > 0) {
-    const lines = [];
-
-    array.forEach(function (element) {
-      if (element) {
-        lines.push(stringify(element));
-      }
-    });
-
-    return DASH + lines.join(SEPARATOR);
+function arrayToString(array?: any[]) {
+  if (!array || array.length === 0) {
+    return;
   }
+
+  const lines: string[] = [];
+
+  array.forEach(function (element) {
+    if (element) {
+      lines.push(stringify(element));
+    }
+  });
+
+  return DASH + lines.join(SEPARATOR);
 }
 
-function objectToString(object, options) {
+interface ObjectToStringOptions {
+  excludes?: string[];
+}
+
+function objectToString(object, options?: ObjectToStringOptions) {
   const propertyNames = Object.getOwnPropertyNames(object);
-  const excludes = (options && options.excludes) || [];
-  const lines = [];
+  const excludes = options?.excludes ?? [];
+  const lines: string[] = [];
   let sLines;
 
   // always ignore these
   excludes.push("stack");
 
-  if (propertyNames && propertyNames.length > 0) {
+  if (propertyNames.length > 0) {
     let exclude = false;
 
     propertyNames.forEach(function (name) {
-      if (excludes) {
-        exclude = excludes.indexOf(name) >= 0;
-      }
+      exclude = excludes.includes(name);
 
       if (!exclude && object[name]) {
         /*
@@ -53,7 +57,7 @@ function objectToString(object, options) {
   return sLines;
 }
 
-export default function (anything, options) {
+export default function (anything: unknown, options?: ObjectToStringOptions) {
   if (anything === null) {
     return "null";
   } else if (typeof anything === "undefined") {
@@ -62,9 +66,16 @@ export default function (anything, options) {
     return anything;
   } else if (Array.isArray(anything)) {
     return arrayToString(anything);
+  } else if (anything instanceof HTMLElement) {
+    if (anything.id) {
+      return `#${anything.id}`;
+    } else if (anything.className) {
+      return `.${anything.className}`;
+    }
+    return "(No HTML identifier available)";
   } else if (typeof anything === "object") {
     return objectToString(anything, options);
   }
 
-  return anything.toString();
+  return anything;
 }

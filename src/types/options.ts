@@ -1,3 +1,5 @@
+import { DeepPartial } from "./DeepPartial";
+
 export interface VideomailClientOptions {
   logger: any;
   logStackSize: number;
@@ -51,16 +53,16 @@ export interface VideomailClientOptions {
     enabled: boolean;
     switch: boolean;
     volume: number;
-    bufferSize: string;
+    bufferSize: number | "auto";
   };
 
   video: {
     fps: number;
-    limitSeconds?: number;
-    countdown: number | boolean;
+    limitSeconds: number;
+    countdown?: number | boolean;
 
-    width: string | number;
-    height: string | number;
+    width?: number | undefined;
+    height?: number | undefined;
     facingMode: string;
     facingModeButton: boolean;
 
@@ -119,7 +121,9 @@ export interface VideomailClientOptions {
 
   displayErrors: boolean;
   adjustFormOnBrowserError: boolean;
-  reportErrors: boolean | (() => boolean);
+  reportErrors: boolean;
   fakeUaString?: string | undefined;
   version: string;
 }
+
+export type PartialVideomailClientOptions = DeepPartial<VideomailClientOptions>;

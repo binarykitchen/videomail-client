@@ -1,116 +1,79 @@
-import Resource from "../resource";
-// https://github.com/tgriesser/create-error
-import createError from "create-error";
+import Resource from "../../resource";
+
 import stringify from "safe-json-stringify";
-import originalPretty from "./pretty";
-
-const VIDEOMAIL_ERR_NAME = "Videomail Error";
-
-const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
-  title: undefined,
-  message: undefined,
-  explanation: undefined,
-  logLines: undefined,
-  siteName: undefined,
-  cookie: undefined,
-  location: undefined,
-  err: undefined,
-  promise: undefined,
-  cause: undefined,
-  reason: undefined,
-  browser: undefined,
-  cpu: undefined,
-  device: undefined,
-  engine: undefined,
-  os: undefined,
-  screen: undefined,
-  orientation: undefined,
-});
+import originalPretty from "../pretty";
+import { isAudioEnabled } from "../options/audio";
+import VideomailError, { ErrData } from "./VideomailError";
+import getBrowser from "../getBrowser";
+import { VideomailClientOptions } from "../../types/options";
 
 // shim pretty to exclude stack always
 const pretty = function (anything) {
   return originalPretty(anything, { excludes: ["stack"] });
 };
 
-// static and public attribute of this class
-VideomailError.PERMISSION_DENIED = "PERMISSION_DENIED";
-VideomailError.NOT_ALLOWED_ERROR = "NotAllowedError";
-VideomailError.NOT_CONNECTED = "Not connected";
-VideomailError.DOM_EXCEPTION = "DOMException";
-VideomailError.STARTING_FAILED = "Starting video failed";
-VideomailError.MEDIA_DEVICE_NOT_SUPPORTED = "MediaDeviceNotSupported";
-VideomailError.BROWSER_PROBLEM = "browser-problem";
-VideomailError.WEBCAM_PROBLEM = "webcam-problem";
-VideomailError.IOS_PROBLEM = "ios-problem";
-VideomailError.OVERCONSTRAINED = "OverconstrainedError";
-VideomailError.NOT_FOUND_ERROR = "NotFoundError";
-VideomailError.NOT_READABLE_ERROR = "NotReadableError";
-VideomailError.SECURITY_ERROR = "SecurityError";
-VideomailError.TRACK_START_ERROR = "TrackStartError";
-VideomailError.INVALID_STATE_ERROR = "InvalidStateError";
+interface ErrorParams {
+  err?: Error;
+  exc?: unknown;
+  message?: string;
+  explanation?: string;
+  options: VideomailClientOptions;
+  classList?: string[];
+}
 
-// static function to convert an error into a videomail error
-VideomailError.create = function (err, explanation, options, parameters) {
-  if (err && err.name === VIDEOMAIL_ERR_NAME) {
+function createError(errorParams: ErrorParams) {
+  const { exc, options } = errorParams;
+
+  let message = errorParams.message ?? "(undefined message)";
+  let explanation = errorParams.explanation;
+
+  let err = errorParams.err;
+  const classList = errorParams.classList ?? [];
+
+  if (exc instanceof Error) {
+    if (!err) {
+      err = exc;
+    }
+  }
+
+  if (err instanceof VideomailError) {
     return err;
   }
 
-  if (!options && explanation) {
-    options = explanation;
-    explanation = undefined;
-  }
+  const audioEnabled = isAudioEnabled(options);
 
-  options ||= {};
-  parameters ||= {};
+  const browser = getBrowser(options);
 
-  const audioEnabled = options && options.isAudioEnabled && options.isAudioEnabled();
-
-  const classList = parameters.classList || [];
-
-  /*
-   * Require Browser here, not at the top of the file to avoid
-   * recursion. Because the Browser class is requiring this file as well.
-   */
-  const Browser = require("./browser").default;
-  const browser = new Browser(options);
-
+  let errorCode;
   let errType;
-  let message;
 
   // whole code is ugly because all browsers behave so differently :(
 
   if (typeof err === "object") {
+    if ("code" in err) {
+      errorCode = err.code;
+    }
+
     if (err.name === VideomailError.TRACK_START_ERROR) {
       errType = VideomailError.TRACK_START_ERROR;
     } else if (err.name === VideomailError.SECURITY_ERROR) {
       errType = VideomailError.SECURITY_ERROR;
-    } else if (err.code === 8 && err.name === VideomailError.NotFoundError) {
-      errType = VideomailError.NotFoundError;
-    } else if (err.code === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
+    } else if (errorCode === 8 && err.name === VideomailError.NOT_FOUND_ERROR) {
+      errType = VideomailError.NOT_FOUND_ERROR;
+    } else if (errorCode === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
       // https://github.com/binarykitchen/videomail.io/issues/411
       errType = VideomailError.NOT_ALLOWED_ERROR;
-    } else if (err.code === 1 && err.PERMISSION_DENIED === 1) {
-      errType = VideomailError.PERMISSION_DENIED;
-    } else if (err.constructor && err.constructor.name === VideomailError.DOM_EXCEPTION) {
+    } else if (err.constructor.name === VideomailError.DOM_EXCEPTION) {
       if (err.name === VideomailError.NOT_READABLE_ERROR) {
         errType = VideomailError.NOT_READABLE_ERROR;
       } else {
         errType = VideomailError.DOM_EXCEPTION;
       }
-    } else if (
-      err.constructor &&
-      err.constructor.name === VideomailError.OVERCONSTRAINED
-    ) {
+    } else if (err.constructor.name === VideomailError.OVERCONSTRAINED) {
       errType = VideomailError.OVERCONSTRAINED;
-    } else if (err.explanation === VideomailError.STARTING_FAILED) {
-      errType = err.explanation;
     } else if (err.name) {
       errType = err.name;
-    } else if (err.type === "error" && err.target.bufferedAmount === 0) {
-      errType = VideomailError.NOT_CONNECTED;
     }
-  } else if (err === VideomailError.NOT_CONNECTED) {
-    errType = VideomailError.NOT_CONNECTED;
   } else {
     errType = err;
   }
@@ -124,14 +87,14 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case VideomailError.OVERCONSTRAINED:
       message = "Invalid webcam constraints";
 
-      if (err.constraint) {
+      if (err && "constraint" in err) {
         if (err.constraint === "width") {
           explanation = "Your webcam does not meet the width requirement.";
         } else {
           explanation = `Unmet constraint: ${err.constraint}`;
         }
       } else {
-        explanation = err.toString();
+        explanation = err?.toString();
       }
       break;
     case "MediaDeviceFailedDueToShutdown":
@@ -142,11 +105,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
     case "SourceUnavailableError":
       message = "Source of your webcam cannot be accessed";
       explanation = "Probably it is locked from another process or has a hardware error.";
-
-      if (err.explanation) {
-        err.explanation += ` Details: ${err.explanation}`;
-      }
-
       break;
     case VideomailError.NOT_FOUND_ERROR:
     case "NO_DEVICES_FOUND":
@@ -196,13 +154,6 @@ VideomailError.create = function (err, explanation, options, parameters) {
 
       break;
 
-    case VideomailError.NOT_CONNECTED:
-      message = "Unable to connect";
-      explanation =
-        "Either the videomail server or your connection is down. " +
-        "Trying to reconnect every few seconds …";
-      break;
-
     case "NO_VIDEO_FEED":
       message = "No video feed found!";
       explanation = "Your webcam is already used in another browser.";
@@ -238,7 +189,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
       break;
 
     case VideomailError.DOM_EXCEPTION:
-      switch (err.code) {
+      switch (errorCode) {
         case 8:
           message = "Requested webcam not found";
           explanation = "A webcam is needed but could not be found";
@@ -291,50 +242,22 @@ VideomailError.create = function (err, explanation, options, parameters) {
        * error objects can be prettified to undefined sometimes
        */
       if (!explanation && originalExplanation) {
-        if (originalExplanation.explanation) {
-          explanation = originalExplanation.explanation;
-        } else {
-          // tried toString before but nah
-          explanation = `Inspected: ${stringify(originalExplanation)}`;
-        }
+        // tried toString before but nah
+        explanation = `Inspected: ${stringify(originalExplanation)}`;
       }
 
-      if (err) {
-        if (typeof err === "string") {
-          message = err;
-        } else {
-          if (err.message) {
-            message = pretty(err.message) + " (pretty)";
-          }
-
-          if (err.explanation) {
-            if (!explanation) {
-              explanation = pretty(err.explanation);
-            } else {
-              explanation += `;<br/>${pretty(err.explanation)}`;
-            }
-          }
-
-          if (err.details) {
-            const details = pretty(err.details);
-
-            if (!explanation) {
-              explanation = details;
-            } else if (details) {
-              explanation += `;<br/>${details}`;
-            }
-          }
-        }
+      if (!message && err?.message) {
+        message = `${pretty(err.message)} (pretty)`;
       }
 
       // for weird, undefined cases
       if (!message) {
         if (errType) {
-          message = errType + " (weird)";
+          message = `${errType} (weird)`;
         }
 
-        if (!explanation && err) {
-          explanation = pretty(err, { excludes: ["stack"] });
+        if (!explanation) {
+          explanation = pretty(err);
         }
 
         // avoid dupes
@@ -347,68 +270,25 @@ VideomailError.create = function (err, explanation, options, parameters) {
     }
   }
 
-  let logLines = null;
+  let logLines;
 
-  if (options.logger && options.logger.getLines) {
+  if (options.logger?.getLines) {
     logLines = options.logger.getLines();
   }
 
-  // be super robust
-  const debug = (options && options.debug) || console.log;
-  debug("VideomailError: create()", message, explanation || "(no explanation set)");
+  options.logger.debug(`VideomailError: create(${message}, ${explanation})`);
 
-  const usefulClientData = browser.getUsefulData();
-  const cookies = global.document.cookie.split("; ");
-
-  const errData = {
-    title: "videomail-client error",
-    message,
+  const errData: ErrData = {
     explanation,
     logLines,
-    siteName: options.siteName,
-    browser: usefulClientData.browser,
-    cpu: usefulClientData.cpu,
-    device: usefulClientData.device,
-    engine: usefulClientData.engine,
-    os: usefulClientData.os,
-    location: window.location.href,
-    cookie: cookies.length > 0 ? cookies.join(",\n") : undefined,
-    screen: [screen.width, screen.height, screen.colorDepth].join("×"),
-    orientation:
-      typeof screen.orientation === "string"
-        ? screen.orientation
-        : screen.orientation.type.toString(),
-
-    // Consider removing later once sorted
-    errNo: err?.errno,
-    errCode: err?.code,
-    errName: err?.name,
-    errType: err?.type,
-    errConstraint: err?.constraint,
-    errConstructorName: err?.constructor?.name,
+    err,
   };
 
-  const videomailError = new VideomailError(
-    err instanceof Error ? err : message,
-    errData,
-  );
-
-  let resource;
-  let reportErrors = false;
+  const videomailError = new VideomailError(message, options, classList, errData);
 
   if (options.reportErrors) {
-    if (typeof options.reportErrors === "function") {
-      reportErrors = options.reportErrors(videomailError);
-    } else {
-      reportErrors = options.reportErrors;
-    }
-  }
+    const resource = new Resource(options);
 
-  if (reportErrors) {
-    resource = new Resource(options);
-  }
-
-  if (resource) {
     resource.reportError(videomailError, function (err2) {
       if (err2) {
         console.error("Unable to report error", err2);
@@ -416,34 +296,7 @@ VideomailError.create = function (err, explanation, options, parameters) {
     });
   }
 
-  function hasClass(name) {
-    return classList.indexOf(name) >= 0;
-  }
-
-  function isBrowserProblem() {
-    return hasClass(VideomailError.BROWSER_PROBLEM) || parameters.browserProblem;
-  }
-
-  // add some public functions
-
-  // this one is useful so that the notifier can have different css classes
-  videomailError.getClassList = function () {
-    return classList;
-  };
-
-  videomailError.removeDimensions = function () {
-    return hasClass(VideomailError.IOS_PROBLEM) || browser.isMobile();
-  };
-
-  videomailError.hideButtons = function () {
-    return isBrowserProblem() || hasClass(VideomailError.IOS_PROBLEM);
-  };
-
-  videomailError.hideForm = function () {
-    return hasClass(VideomailError.IOS_PROBLEM);
-  };
-
   return videomailError;
-};
+}
 
-export default VideomailError;
+export default createError;

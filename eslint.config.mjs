@@ -14,8 +14,7 @@ import tseslint from "typescript-eslint";
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
 export default tseslint.config(
-  // TODO change to .all later
-  eslint.configs.recommended,
+  eslint.configs.all,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   // ...storybook.configs["flat/recommended"],
@@ -26,7 +25,7 @@ export default tseslint.config(
   pluginPromise.configs["flat/recommended"],
   depend.configs["flat/recommended"],
   {
-    ignores: [".github", ".vscode", "**/node_modules/", ".git", "test"],
+    ignores: [".github", ".vscode", "**/node_modules/", ".git", "test", "dist"],
     name: "Ignore files",
   },
   {
@@ -109,6 +108,7 @@ export default tseslint.config(
       "max-lines-per-function": "off",
       "max-params": "off",
       "max-statements": "off",
+      "new-cap": "off",
       "no-alert": "off",
       "no-console": "off",
       "no-debugger": "warn",
@@ -124,7 +124,6 @@ export default tseslint.config(
       "no-shadow": "off",
       "no-ternary": "off",
       "no-undefined": "off",
-
       "no-use-before-define": "off",
       "no-void": "off",
       "no-warning-comments": "off",

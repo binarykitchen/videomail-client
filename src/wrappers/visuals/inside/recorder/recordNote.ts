@@ -1,42 +1,52 @@
 import hidden from "hidden";
-import h from "hyperscript";
 
-export default function (visuals) {
-  let recordNoteElement;
+import Visuals from "../../../visuals";
 
-  this.build = function () {
-    recordNoteElement = visuals.querySelector(".recordNote");
+class RecordNote {
+  private visuals: Visuals;
+  private recordNoteElement: HTMLElement | null | undefined;
 
-    if (!recordNoteElement) {
-      recordNoteElement = h("p.recordNote");
+  constructor(visuals: Visuals) {
+    this.visuals = visuals;
+  }
+
+  public build() {
+    this.recordNoteElement = this.visuals.getElement()?.querySelector(".recordNote");
+
+    if (!this.recordNoteElement) {
+      this.recordNoteElement = document.createElement("p");
+      this.recordNoteElement.classList.add("recordNote");
 
       this.hide();
 
-      visuals.appendChild(recordNoteElement);
+      this.visuals.appendChild(this.recordNoteElement);
     } else {
       this.hide();
     }
-  };
+  }
 
-  this.stop = function () {
+  public stop() {
     this.hide();
-    recordNoteElement.classList.remove("near");
-    recordNoteElement.classList.remove("nigh");
-  };
 
-  this.setNear = function () {
-    recordNoteElement.classList.add("near");
-  };
+    this.recordNoteElement?.classList.remove("near");
+    this.recordNoteElement?.classList.remove("nigh");
+  }
 
-  this.setNigh = function () {
-    recordNoteElement.classList.add("nigh");
-  };
+  public setNear() {
+    this.recordNoteElement?.classList.add("near");
+  }
 
-  this.hide = function () {
-    hidden(recordNoteElement, true);
-  };
+  public setNigh() {
+    this.recordNoteElement?.classList.add("nigh");
+  }
 
-  this.show = function () {
-    hidden(recordNoteElement, false);
-  };
+  public hide() {
+    hidden(this.recordNoteElement, true);
+  }
+
+  public show() {
+    hidden(this.recordNoteElement, false);
+  }
 }
+
+export default RecordNote;

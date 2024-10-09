@@ -1,59 +1,75 @@
 import hidden from "hidden";
-import h from "hyperscript";
 
-import VideomailError from "./../../../../util/videomailError";
+import { VideomailClientOptions } from "../../../../types/options";
+import Visuals from "../../../visuals";
 
-export default function (visuals, options) {
-  if (!options.text.pausedHeader) {
-    throw VideomailError.create("Paused header cannot be empty", options);
+class PausedNote {
+  private visuals: Visuals;
+  private options: VideomailClientOptions;
+
+  private pausedBlockElement?: HTMLElement | null | undefined;
+  private pausedHeaderElement?: HTMLElement | null | undefined;
+  private pausedHintElement?: HTMLElement | null | undefined;
+
+  constructor(visuals: Visuals, options: VideomailClientOptions) {
+    this.visuals = visuals;
+    this.options = options;
   }
 
-  let pausedBlockElement;
-  let pausedHeaderElement;
-  let pausedHintElement;
-
-  function hasPausedHint() {
-    return options.text.pausedHint;
+  private hasPausedHintText() {
+    return this.options.text.pausedHint;
   }
 
-  this.build = function () {
-    pausedBlockElement = visuals.querySelector(".paused");
-    pausedHeaderElement = visuals.querySelector(".pausedHeader");
+  public build() {
+    this.pausedBlockElement = this.visuals.getElement()?.querySelector(".paused");
+    this.pausedHeaderElement = this.visuals.getElement()?.querySelector(".pausedHeader");
 
-    if (!pausedHeaderElement) {
-      pausedBlockElement = h("div.paused");
-      pausedHeaderElement = h("p.pausedHeader");
+    if (!this.pausedHeaderElement) {
+      this.pausedBlockElement = document.createElement("div");
+      this.pausedBlockElement.classList.add("paused");
+
+      this.pausedHeaderElement = document.createElement("p");
+      this.pausedHeaderElement.classList.add("pausedHeader");
 
       this.hide();
 
-      pausedHeaderElement.innerHTML = options.text.pausedHeader;
+      this.pausedHeaderElement.innerHTML = this.options.text.pausedHeader;
 
-      pausedBlockElement.appendChild(pausedHeaderElement);
+      this.pausedBlockElement.appendChild(this.pausedHeaderElement);
 
-      if (hasPausedHint()) {
-        pausedHintElement = visuals.querySelector(".pausedHint");
-        pausedHintElement = h("p.pausedHint");
-        pausedHintElement.innerHTML = options.text.pausedHint;
-        pausedBlockElement.appendChild(pausedHintElement);
+      if (this.hasPausedHintText()) {
+        this.pausedHintElement = this.visuals.getElement()?.querySelector(".pausedHint");
+
+        if (!this.pausedHintElement) {
+          this.pausedHintElement = document.createElement("p");
+          this.pausedHintElement.classList.add("pausedHint");
+          this.pausedBlockElement.appendChild(this.pausedHintElement);
+        }
+
+        if (this.options.text.pausedHint) {
+          this.pausedHintElement.innerHTML = this.options.text.pausedHint;
+        }
       }
 
-      visuals.appendChild(pausedBlockElement);
+      this.visuals.appendChild(this.pausedBlockElement);
     } else {
       this.hide();
 
-      pausedHeaderElement.innerHTML = options.text.pausedHeader;
+      this.pausedHeaderElement.innerHTML = this.options.text.pausedHeader;
 
-      if (hasPausedHint()) {
-        pausedHintElement.innerHTML = options.text.pausedHint;
+      if (this.options.text.pausedHint && this.pausedHintElement) {
+        this.pausedHintElement.innerHTML = this.options.text.pausedHint;
       }
     }
-  };
+  }
 
-  this.hide = function () {
-    hidden(pausedBlockElement, true);
-  };
+  public hide() {
+    hidden(this.pausedBlockElement, true);
+  }
 
-  this.show = function () {
-    hidden(pausedBlockElement, false);
-  };
+  public show() {
+    hidden(this.pausedBlockElement, false);
+  }
 }
+
+export default PausedNote;
