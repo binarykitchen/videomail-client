@@ -1,11 +1,11 @@
 import hidden from "hidden";
 import h from "hyperscript";
 
-import VideomailError from "./../../../../util/videomailError";
+import VideomailError from "../../../../util/error/createError";
 
 export default function (visuals, options) {
   if (!options.text.pausedHeader) {
-    throw VideomailError.create("Paused header cannot be empty", options);
+    throw createError("Paused header cannot be empty", options);
   }
 
   let pausedBlockElement;

@@ -4,14 +4,16 @@ import h from "hyperscript";
 import inherits from "inherits";
 
 import Events from "../../events";
-import Browser from "../../util/browser";
-import EventEmitter from "../../util/eventEmitter";
+import Browser from "../../util/Browser";
+import EventEmitter from "../../util/EventEmitter";
+import { isAudioEnabled } from "../../util/options/audio";
+import getBrowser from "../../util/getBrowser";
 
 const Replay = function (parentElement, options) {
   EventEmitter.call(this, options, "Replay");
 
   const self = this;
-  const browser = new Browser(options);
+  const browser = getBrowser(options);
   const { debug } = options;
 
   let built;
@@ -164,7 +166,7 @@ const Replay = function (parentElement, options) {
        * do not set mute to false as this will mess up. just do not mention this attribute at all
        */
       replayElement.setAttribute("volume", 1);
-    } else if (!options.isAudioEnabled()) {
+    } else if (!isAudioEnabled(options)) {
       replayElement.setAttribute("muted", true);
     }
 

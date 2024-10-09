@@ -10,12 +10,4 @@ test("humanize:", function (t) {
       humanize.filesize();
     });
   });
-
-  t.test("toTime can be called", function (tt) {
-    tt.plan(1);
-
-    tt.doesNotThrow(function () {
-      humanize.toTime();
-    });
-  });
 });

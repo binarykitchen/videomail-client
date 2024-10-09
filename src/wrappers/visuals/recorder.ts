@@ -10,12 +10,16 @@ import websocket from "websocket-stream";
 
 import Constants from "../../constants";
 import Events from "../../events";
-import Browser from "../../util/browser";
-import EventEmitter from "../../util/eventEmitter";
+import Browser from "../../util/Browser";
+import EventEmitter from "../../util/EventEmitter";
 import Humanize from "../../util/humanize";
 import pretty from "../../util/pretty";
-import VideomailError from "../../util/videomailError";
+import VideomailError from "../../util/error/createError";
 import UserMedia from "./userMedia";
+import { hasDefinedHeight, hasDefinedWidth } from "../../util/options/hasDefined";
+import { isAudioEnabled } from "../../util/options/audio";
+import { filesize } from "filesize";
+import getBrowser from "../../util/getBrowser";
 
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";
@@ -23,7 +27,7 @@ const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º
 const Recorder = function (visuals, replay, defaultOptions = {}) {
   EventEmitter.call(this, defaultOptions, "Recorder");
 
-  const browser = new Browser(defaultOptions);
+  const browser = getBrowser(defaultOptions);
 
   const options = deepmerge(defaultOptions, {
     image: {
@@ -36,7 +40,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
   // validate some options this class needs
   if (!options.video || !options.video.fps) {
-    throw VideomailError.create("FPS must be defined", options);
+    throw createError("FPS must be defined", options);
   }
 
   const self = this;
@@ -97,7 +101,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         self.emit(
           Events.ERROR,
-          VideomailError.create(
+          createError(
             "Already disconnected",
             "Sorry, connection to the server has been destroyed. Please reload.",
             options,
@@ -117,7 +121,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
             } catch (exc) {
               self.emit(
                 Events.ERROR,
-                VideomailError.create(
+                createError(
                   "Failed to write stream buffer",
                   `stream.write() failed because of ${pretty(exc)}`,
                   options,
@@ -128,7 +132,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         } catch (exc) {
           self.emit(
             Events.ERROR,
-            VideomailError.create(
+            createError(
               "Failed writing to server",
               `stream.write() failed because of ${pretty(exc)}`,
               options,
@@ -291,8 +295,8 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     if (options.debug) {
       debug(
         "While recording, %s have been transferred and waiting time was %s",
-        Humanize.filesize(bytesSum, 2),
-        Humanize.toTime(waitingTime),
+        filesize(bytesSum, { round: 2 }),
+        humanizeDuration(waitingTime),
       );
     }
   }
@@ -332,19 +336,12 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         let err;
 
         if (typeof websocket === "undefined") {
-          err = VideomailError.create(
-            "There is no websocket",
-            `Cause: ${pretty(exc)}`,
-            options,
-          );
+          err = createError("There is no websocket", `Cause: ${pretty(exc)}`, options);
         } else {
-          err = VideomailError.create(
+          err = createError(
             "Failed to connect to server",
             "Please upgrade your browser. Your current version does not seem to support websockets.",
             options,
-            {
-              browserProblem: true,
-            },
           );
         }
 
@@ -409,7 +406,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
             self.emit(
               Events.ERROR,
-              VideomailError.create(
+              createError(
                 "Invalid server command",
                 // toString() since https://github.com/binarykitchen/videomail.io/issues/288
                 `Contact us asap. Bad command was ${data.toString()}. `,
@@ -423,44 +420,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
         stream.on("error", function (err) {
           debug(`${PIPE_SYMBOL}Stream *error* event emitted: ${stringify(err)}`);
-
-          // OLD CODE, COMMENTED OUT TEMPORARILY FOR INVESTIGATIONS
-          // IT SHOULD RECONNECT INSTEAD OF CLOSING THE CONNECTION
-
-          // connecting = connected = false;
-
-          // let videomailError;
-
-          // if (browser.isIOS()) {
-          //   /*
-          //    * setting custom text since that err object isn't really an error
-          //    * on iPhones when locked, and unlocked, this err is actually
-          //    * an event object with stuff we can't use at all (an external bug)
-          //    */
-          //   videomailError = VideomailError.create(
-          //     err,
-          //     `iPhones cannot maintain a live connection for too long. Original error message is: ${err.toString()}`,
-          //     options,
-          //   );
-
-          //   /*
-          //    * Changed to the above temporarily for better investigations
-          //    * videomailError = VideomailError.create(
-          //    *   'Sorry, connection has timed out',
-          //    *   'iPhones cannot maintain a live connection for too long,
-          //    *   options
-          //    * )
-          //    */
-          // } else {
-          //   // or else it could be a poor wifi connection...
-          //   videomailError = VideomailError.create(
-          //     "Data exchange interrupted",
-          //     "Please check your network connection and reload",
-          //     options,
-          //   );
-          // }
-
-          // self.emit(Events.ERROR, videomailError);
         });
 
         // just experimental
@@ -532,7 +491,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 
     if (errorListeners && errorListeners.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
-        self.emit(Events.ERROR, VideomailError.create(err, options));
+        self.emit(Events.ERROR, createError(err, options));
       } else {
         // do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
         debug("Recorder: ignore user media error", err);
@@ -550,7 +509,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       debug("Recorder: no error listeners attached but throwing error", err);
 
       // weird situation, throw it instead of emitting since there are no error listeners
-      throw VideomailError.create(
+      throw createError(
         err,
         "Unable to process this error since there are no error listeners anymore.",
         options,
@@ -599,7 +558,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
           facingMode,
           frameRate: { ideal: options.video.fps },
         },
-        audio: options.isAudioEnabled(),
+        audio: isAudioEnabled(options),
       };
 
       if (browser.isOkSafari()) {
@@ -609,7 +568,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
          * todo in https://github.com/binarykitchen/videomail-client/issues/142
          */
       } else {
-        if (options.hasDefinedWidth()) {
+        if (hasDefinedWidth(options)) {
           constraints.video.width = { ideal: options.video.width };
         } else {
           /*
@@ -649,7 +608,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
          */
 
         // todo retry with navigator.getUserMedia_() maybe?
-        throw VideomailError.create(
+        throw createError(
           "Sorry, your browser is unable to use cameras.",
           "Try a different browser with better user media functionalities.",
           options,
@@ -661,7 +620,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       navigator.getUserMedia_(
         {
           video: true,
-          audio: options.isAudioEnabled(),
+          audio: isAudioEnabled(options),
         },
         getUserMediaCallback,
         userMediaErrorCallback,
@@ -743,7 +702,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         case "error":
           this.emit(
             Events.ERROR,
-            VideomailError.create(
+            createError(
               "Oh no, server error!",
               command.args.err.toString() || "(No message given)",
               options,
@@ -1068,7 +1027,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
         recordingBufferLength = recordingBuffer.length;
 
         if (recordingBufferLength < 1) {
-          throw VideomailError.create("Failed to extract webcam data.", options);
+          throw createError("Failed to extract webcam data.", options);
         }
 
         bytesSum += recordingBufferLength;
@@ -1129,7 +1088,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       } else {
         self.emit(
           Events.ERROR,
-          VideomailError.create("Load and enable your camera first", options),
+          createError("Load and enable your camera first", options),
         );
       }
 
@@ -1139,7 +1098,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     try {
       canvas = userMedia.createCanvas();
     } catch (exc) {
-      self.emit(Events.ERROR, VideomailError.create(exc, options));
+      self.emit(Events.ERROR, createError(exc, options));
 
       return false;
     }
@@ -1147,19 +1106,13 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
     ctx = canvas.getContext("2d");
 
     if (!canvas.width) {
-      self.emit(
-        Events.ERROR,
-        VideomailError.create("Canvas has an invalid width.", options),
-      );
+      self.emit(Events.ERROR, createError("Canvas has an invalid width.", options));
 
       return false;
     }
 
     if (!canvas.height) {
-      self.emit(
-        Events.ERROR,
-        VideomailError.create("Canvas has an invalid height.", options),
-      );
+      self.emit(Events.ERROR, createError("Canvas has an invalid height.", options));
 
       return false;
     }
@@ -1254,18 +1207,18 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   }
 
   function correctDimensions() {
-    if (options.hasDefinedWidth()) {
+    if (hasDefinedWidth(options)) {
       recorderElement.width = self.getRecorderWidth(true);
     }
 
-    if (options.hasDefinedHeight()) {
+    if (hasDefinedHeight(options)) {
       recorderElement.height = self.getRecorderHeight(true);
     }
   }
 
   function switchFacingMode() {
     if (!browser.isMobile()) {
-      return false;
+      return;
     }
 
     if (facingMode === "user") {
@@ -1420,7 +1373,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
   this.getRecorderWidth = function (responsive) {
     if (userMedia && userMedia.hasVideoWidth()) {
       return userMedia.getRawWidth(responsive);
-    } else if (responsive && options.hasDefinedWidth()) {
+    } else if (responsive && hasDefinedWidth(options)) {
       return this.limitWidth(options.video.width);
     }
   };
@@ -1430,7 +1383,7 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
       return recorderElement.getBoundingClientRect().height;
     } else if (userMedia) {
       return userMedia.getRawHeight(responsive);
-    } else if (responsive && options.hasDefinedHeight()) {
+    } else if (responsive && hasDefinedHeight(options)) {
       return this.calculateHeight(responsive);
     }
   };
@@ -1515,3 +1468,6 @@ const Recorder = function (visuals, replay, defaultOptions = {}) {
 inherits(Recorder, EventEmitter);
 
 export default Recorder;
+function humanizeDuration(waitingTime: any): any {
+  throw new Error("Function not implemented.");
+}

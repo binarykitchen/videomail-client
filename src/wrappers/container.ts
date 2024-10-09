@@ -6,8 +6,8 @@ import inherits from "inherits";
 
 import Events from "../events";
 import Resource from "../resource";
-import EventEmitter from "../util/eventEmitter";
-import VideomailError from "../util/videomailError";
+import EventEmitter from "../util/EventEmitter";
+import VideomailError from "../util/error/createError";
 import Buttons from "./buttons";
 import Dimension from "./dimension";
 import Form from "./form";
@@ -15,6 +15,8 @@ import OptionsWrapper from "./optionsWrapper";
 import Visuals from "./visuals";
 
 import "./../styles/main.styl";
+import { hasDefinedHeight, hasDefinedWidth } from "../util/options/hasDefined";
+import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 
 const Container = function (options) {
   EventEmitter.call(this, options, "Container");
@@ -133,14 +135,14 @@ const Container = function (options) {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (built) {
           if (visible) {
-            if (options.isAutoPauseEnabled() && self.isCountingDown()) {
+            if (isAutoPauseEnabled(options) && self.isCountingDown()) {
               self.resume();
             }
 
             self.emit(Events.VISIBLE);
           } else {
             if (
-              options.isAutoPauseEnabled() &&
+              isAutoPauseEnabled(options) &&
               (self.isCountingDown() || self.isRecording())
             ) {
               self.pause("document invisible");
@@ -189,7 +191,7 @@ const Container = function (options) {
 
       self.endWaiting();
 
-      if (err.removeDimensions && err.removeDimensions()) {
+      if (browser.isMobile()) {
         removeDimensions();
       }
     });
@@ -202,12 +204,12 @@ const Container = function (options) {
   }
 
   function validateOptions() {
-    if (options.hasDefinedWidth() && options.video.width % 2 !== 0) {
-      throw VideomailError.create("Width must be divisible by two.", options);
+    if (hasDefinedWidth(options) && options.video.width % 2 !== 0) {
+      throw createError("Width must be divisible by two.", options);
     }
 
-    if (options.hasDefinedHeight() && options.video.height % 2 !== 0) {
-      throw VideomailError.create("Height must be divisible by two.", options);
+    if (hasDefinedHeight(options) && options.video.height % 2 !== 0) {
+      throw createError("Height must be divisible by two.", options);
     }
   }
 
@@ -222,7 +224,7 @@ const Container = function (options) {
       const width = visuals.getRecorderWidth(true);
 
       if (width < 1) {
-        throw VideomailError.create("Recorder width cannot be less than 1!", options);
+        throw createError("Recorder width cannot be less than 1!", options);
       } else {
         containerElement.style.width = `${width}px`;
       }
@@ -841,12 +843,6 @@ const Container = function (options) {
     return element.parentNode !== containerElement && element !== containerElement;
   };
 
-  this.hideForm = function (params) {
-    // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
-    form && form.hide();
-    buttons && buttons.hide(params);
-  };
-
   // Only used for replays
   this.loadForm = function (videomail) {
     if (form) {
@@ -856,12 +852,12 @@ const Container = function (options) {
   };
 
   this.enableAudio = function () {
-    options.setAudioEnabled(true);
+    options = setAudioEnabled(true, options);
     self.emit(Events.ENABLING_AUDIO);
   };
 
   this.disableAudio = function () {
-    options.setAudioEnabled(false);
+    options = setAudioEnabled(false, options);
     self.emit(Events.DISABLING_AUDIO);
   };
 

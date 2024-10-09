@@ -2,7 +2,7 @@ import hidden from "hidden";
 import h from "hyperscript";
 
 import Events from "../../../../events";
-import EventEmitter from "./../../../../util/eventEmitter";
+import EventEmitter from "../../../../util/EventEmitter";
 
 export default function (visuals, options) {
   EventEmitter.call(this, options, "Facing Mode");

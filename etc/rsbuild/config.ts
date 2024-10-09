@@ -24,7 +24,8 @@ export default defineConfig({
     pluginStylus(),
     pluginNodePolyfill(),
     // Inspired by https://github.com/web-infra-dev/rslib/blob/main/packages/core/src/config.ts#L742
-    // It's still in early stages
+    // It's still in early stages.
+    // Once fixed, get inspired by https://github.com/sindresorhus/yocto-spinner/blob/main/package.json#L14
     // pluginDts({}),
   ],
   tools: {

@@ -3,24 +3,26 @@ import stringify from "safe-json-stringify";
 const DASH = "- ";
 const SEPARATOR = `<br/>${DASH}`;
 
-function arrayToString(array) {
-  if (array && array.length > 0) {
-    const lines = [];
-
-    array.forEach(function (element) {
-      if (element) {
-        lines.push(stringify(element));
-      }
-    });
-
-    return DASH + lines.join(SEPARATOR);
+function arrayToString(array?: any[]) {
+  if (!array || array.length === 0) {
+    return;
   }
+
+  const lines: string[] = [];
+
+  array.forEach(function (element) {
+    if (element) {
+      lines.push(stringify(element));
+    }
+  });
+
+  return DASH + lines.join(SEPARATOR);
 }
 
 function objectToString(object, options) {
   const propertyNames = Object.getOwnPropertyNames(object);
   const excludes = (options && options.excludes) || [];
-  const lines = [];
+  const lines: string[] = [];
   let sLines;
 
   // always ignore these
@@ -53,7 +55,7 @@ function objectToString(object, options) {
   return sLines;
 }
 
-export default function (anything, options) {
+export default function (anything: unknown, options) {
   if (anything === null) {
     return "null";
   } else if (typeof anything === "undefined") {

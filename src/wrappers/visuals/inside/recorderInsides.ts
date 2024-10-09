@@ -1,14 +1,15 @@
 import inherits from "inherits";
 
 import Events from "../../../events";
-import Browser from "./../../../util/browser";
-import EventEmitter from "./../../../util/eventEmitter";
+import Browser from "../../../util/Browser";
+import EventEmitter from "../../../util/EventEmitter";
 
 import Countdown from "./recorder/countdown";
 import FacingMode from "./recorder/facingMode";
 import PausedNote from "./recorder/pausedNote";
 import RecordNote from "./recorder/recordNote";
 import RecordTimer from "./recorder/recordTimer";
+import getBrowser from "../../../util/getBrowser";
 
 const RecorderInsides = function (visuals, options) {
   EventEmitter.call(this, options, "RecorderInsides");
@@ -18,7 +19,7 @@ const RecorderInsides = function (visuals, options) {
 
   const recordNote = new RecordNote(visuals);
   const recordTimer = new RecordTimer(visuals, recordNote, options);
-  const browser = new Browser(options);
+  const browser = getBrowser(options);
 
   let countdown;
   let pausedNote;

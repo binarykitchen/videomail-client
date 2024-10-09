@@ -4,7 +4,7 @@ import inherits from "inherits";
 import stringify from "safe-json-stringify";
 
 import Events from "../events";
-import EventEmitter from "../util/eventEmitter";
+import EventEmitter from "../util/EventEmitter";
 import RecorderInsides from "./visuals/inside/recorderInsides";
 import Notifier from "./visuals/notifier";
 import Recorder from "./visuals/recorder";
@@ -68,7 +68,7 @@ const Visuals = function (container, options) {
           self.endWaiting();
         })
         .on(Events.BLOCKING, function (blockingOptions) {
-          if (!blockingOptions.hideForm && !options.adjustFormOnBrowserError) {
+          if (!options.adjustFormOnBrowserError) {
             /*
              * do nothing, user still can enter form inputs
              * can be useful when you are on i.E. Seeflow's contact page and
@@ -84,8 +84,8 @@ const Visuals = function (container, options) {
         .on(Events.LOADED_META_DATA, function () {
           correctDimensions();
         })
-        .on(Events.ERROR, function (err) {
-          if (err.removeDimensions && err.removeDimensions()) {
+        .on(Events.ERROR, function (_err) {
+          if (browser.isMobile()) {
             removeDimensions();
           }
         });

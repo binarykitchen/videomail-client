@@ -1,12 +1,19 @@
 import h from "hyperscript";
 import stringify from "safe-json-stringify";
 import Events from "../../events";
-import AudioRecorder from "./../../util/audioRecorder";
-import Browser from "./../../util/browser";
-import EventEmitter from "./../../util/eventEmitter";
-import MEDIA_EVENTS from "./../../util/mediaEvents";
+import AudioRecorder from "../../util/media/AudioRecorder";
+import Browser from "../../util/Browser";
+import EventEmitter from "../../util/EventEmitter";
+import MEDIA_EVENTS from "../../util/media/mediaEvents";
 import pretty from "./../../util/pretty";
-import VideomailError from "./../../util/videomailError";
+import VideomailError from "../../util/error/createError";
+import {
+  hasDefinedDimension,
+  hasDefinedHeight,
+  hasDefinedWidth,
+} from "../../util/options/hasDefined";
+import { isAudioEnabled } from "../../util/options/audio";
+import getBrowser from "../../util/getBrowser";
 
 const EVENT_ASCII = "|—O—|";
 
@@ -14,7 +21,7 @@ export default function (recorder, options) {
   EventEmitter.call(this, options, "UserMedia");
 
   const rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia();
-  const browser = new Browser(options);
+  const browser = getBrowser(options);
   const self = this;
 
   let paused = false;
@@ -32,7 +39,7 @@ export default function (recorder, options) {
       const URL = window.URL || window.webkitURL;
       rawVisualUserMedia.src = URL.createObjectURL(stream) || stream;
     } else {
-      throw VideomailError.create(
+      throw createError(
         "Error attaching stream to element.",
         "Contact the developer about this",
         options,
@@ -150,7 +157,7 @@ export default function (recorder, options) {
     let onLoadedMetaDataReached = false;
     let playingPromiseReached = false;
 
-    if (options && options.isAudioEnabled()) {
+    if (isAudioEnabled(options)) {
       audioRecorder ||= new AudioRecorder(this, options);
     }
 
@@ -262,7 +269,7 @@ export default function (recorder, options) {
       try {
         logEvent("play", {
           readyState: rawVisualUserMedia.readyState,
-          audio: options.isAudioEnabled(),
+          audio: isAudioEnabled(options),
           width: rawVisualUserMedia.width,
           height: rawVisualUserMedia.height,
           videoWidth: rawVisualUserMedia.videoWidth,
@@ -274,7 +281,7 @@ export default function (recorder, options) {
 
         if (hasEnded() || hasInvalidDimensions()) {
           endedEarlyCallback(
-            VideomailError.create(
+            createError(
               "Already busy",
               "Probably another browser window is using your webcam?",
               options,
@@ -326,7 +333,7 @@ export default function (recorder, options) {
       if (!videoTrack) {
         options.debug("UserMedia: detected (but no video tracks exist");
       } else if (!videoTrack.enabled) {
-        throw VideomailError.create(
+        throw createError(
           "Webcam is disabled",
           "The video track seems to be disabled. Enable it in your system.",
           options,
@@ -447,9 +454,9 @@ export default function (recorder, options) {
 
   this.getRawWidth = function (responsive) {
     let rawWidth = this.getVideoWidth();
-    const widthDefined = options.hasDefinedWidth();
+    const widthDefined = hasDefinedWidth(options);
 
-    if (widthDefined || options.hasDefinedHeight()) {
+    if (widthDefined || hasDefinedHeight(options)) {
       if (!responsive && widthDefined) {
         rawWidth = options.video.width;
       } else {
@@ -467,11 +474,11 @@ export default function (recorder, options) {
   this.getRawHeight = function (responsive) {
     let rawHeight;
 
-    if (options.hasDefinedDimension()) {
+    if (hasDefinedDimension(options)) {
       rawHeight = recorder.calculateHeight(responsive);
 
       if (rawHeight < 1) {
-        throw VideomailError.create(
+        throw createError(
           "Bad dimensions",
           "Calculated raw height cannot be less than 1!",
           options,
@@ -481,7 +488,7 @@ export default function (recorder, options) {
       rawHeight = this.getVideoHeight();
 
       if (rawHeight < 1) {
-        throw VideomailError.create(
+        throw createError(
           "Bad dimensions",
           "Raw video height from DOM element cannot be less than 1!",
           options,

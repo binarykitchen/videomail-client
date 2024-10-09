@@ -5,8 +5,8 @@ import inherits from "inherits";
 
 import stringify from "safe-json-stringify";
 import Events from "../events";
-import EventEmitter from "../util/eventEmitter";
-import VideomailError from "../util/videomailError";
+import EventEmitter from "../util/EventEmitter";
+import VideomailError from "../util/error/createError";
 
 // fixes https://github.com/binarykitchen/videomail-client/issues/71
 function trimEmail(email) {
@@ -219,7 +219,7 @@ const Form = function (container, formElement, options) {
       if (!videomailKey && !keyInput.value) {
         self.emit(
           Events.ERROR,
-          VideomailError.create("Videomail key for preview is missing!", options),
+          createError("Videomail key for preview is missing!", options),
         );
       } else if (videomailKey) {
         keyInput.value = videomailKey;
@@ -249,13 +249,9 @@ const Form = function (container, formElement, options) {
        * we hide areas to make it easier for the user to process an error
        * (= less distractions)
        */
-      if (err.hideForm && err.hideForm() && options.adjustFormOnBrowserError) {
+      if (options.adjustFormOnBrowserError) {
         hideAll();
-      } else if (
-        err.hideButtons &&
-        err.hideButtons() &&
-        options.adjustFormOnBrowserError
-      ) {
+      } else if (err.isBrowserProblem() && options.adjustFormOnBrowserError) {
         hideSubmitButton();
       }
     });

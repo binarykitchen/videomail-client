@@ -3,7 +3,8 @@ import h from "hyperscript";
 import inherits from "inherits";
 
 import Events from "../../events";
-import EventEmitter from "../../util/eventEmitter";
+import EventEmitter from "../../util/EventEmitter";
+import { isAudioEnabled } from "../../util/options/audio";
 
 const NOTIFIER_MESSAGE_ID = "notifierMessage";
 
@@ -49,7 +50,7 @@ const Notifier = function (visuals, options) {
   function onProgress(frameProgress, sampleProgress) {
     let overallProgress;
 
-    if (options.isAudioEnabled()) {
+    if (isAudioEnabled(options)) {
       overallProgress = `Video: ${frameProgress}`;
 
       if (sampleProgress) {
@@ -174,9 +175,8 @@ const Notifier = function (visuals, options) {
     self.notify(message, explanation, {
       blocking: true,
       problem: true,
-      hideForm: err.hideForm && err.hideForm(),
       classList: err.getClassList && err.getClassList(),
-      removeDimensions: err.removeDimensions && err.removeDimensions(),
+      removeDimensions: browser.isMobile(),
     });
   };
 
@@ -309,7 +309,6 @@ const Notifier = function (visuals, options) {
     const stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false;
     const entertain = notifyOptions.entertain ? notifyOptions.entertain : false;
     const blocking = notifyOptions.blocking ? notifyOptions.blocking : false;
-    const hideForm = notifyOptions.hideForm ? notifyOptions.hideForm : false;
     const classList = notifyOptions.classList ? notifyOptions.classList : false;
     const removeDimensions = notifyOptions.removeDimensions
       ? notifyOptions.removeDimensions
@@ -335,7 +334,7 @@ const Notifier = function (visuals, options) {
 
     if (blocking) {
       notifyElement && notifyElement.classList.add("blocking");
-      this.emit(Events.BLOCKING, { hideForm });
+      this.emit(Events.BLOCKING);
     } else {
       this.emit(Events.NOTIFYING);
     }

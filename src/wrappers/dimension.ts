@@ -1,4 +1,5 @@
-import VideomailError from "./../util/videomailError";
+import { hasDefinedHeight, hasDefinedWidth } from "../util/options/hasDefined";
+import VideomailError from "../util/error/createError";
 
 function getOuterWidth(element) {
   let outerWidth = 0;
@@ -18,7 +19,7 @@ function getOuterWidth(element) {
 }
 
 function figureMinHeight(height, options) {
-  if (options.hasDefinedHeight()) {
+  if (hasDefinedHeight(options)) {
     if (!height) {
       height = options.video.height;
     } else {
@@ -27,7 +28,7 @@ function figureMinHeight(height, options) {
   }
 
   if (Number.isInteger(height) && height < 1) {
-    throw VideomailError.create(
+    throw createError(
       `Got a video height less than 1 (${height}) while figuring out the minimum!`,
       options,
     );
@@ -56,7 +57,7 @@ export default {
     }
 
     if (Number.isInteger(limitedWidth) && limitedWidth < 1) {
-      throw VideomailError.create("Limited width cannot be less than 1!", options);
+      throw createError("Limited width cannot be less than 1!", options);
     } else {
       return limitedWidth;
     }
@@ -68,10 +69,7 @@ export default {
    */
   limitHeight(height, options) {
     if (Number.isInteger(height) && height < 1) {
-      throw VideomailError.create(
-        "Passed limit-height argument cannot be less than 1!",
-        options,
-      );
+      throw createError("Passed limit-height argument cannot be less than 1!", options);
     } else {
       const limitedHeight = Math.min(
         height,
@@ -80,7 +78,7 @@ export default {
       );
 
       if (limitedHeight < 1) {
-        throw VideomailError.create("Limited height cannot be less than 1!", options);
+        throw createError("Limited height cannot be less than 1!", options);
       } else {
         return limitedHeight;
       }
@@ -98,7 +96,7 @@ export default {
     }
 
     if (Number.isInteger(height) && height < 1) {
-      throw VideomailError.create(
+      throw createError(
         "Height cannot be smaller than 1 when calculating width.",
         options,
       );
@@ -106,10 +104,7 @@ export default {
       const calculatedWidth = parseInt(height / ratio);
 
       if (calculatedWidth < 1) {
-        throw VideomailError.create(
-          "Calculated width cannot be smaller than 1!",
-          options,
-        );
+        throw createError("Calculated width cannot be smaller than 1!", options);
       } else {
         return calculatedWidth;
       }
@@ -122,15 +117,12 @@ export default {
 
     const ratio = options.ratio || options.getRatio();
 
-    if (options.hasDefinedWidth()) {
+    if (hasDefinedWidth(options)) {
       width = options.video.width;
     }
 
     if (Number.isInteger(width) && width < 1) {
-      throw VideomailError.create(
-        "Unable to calculate height when width is less than 1.",
-        options,
-      );
+      throw createError("Unable to calculate height when width is less than 1.", options);
     } else if (options.responsive) {
       width = this.limitWidth(element, width, options);
     }
@@ -140,10 +132,7 @@ export default {
     }
 
     if (Number.isInteger(height) && height < 1) {
-      throw VideomailError.create(
-        "Just calculated a height less than 1 which is wrong.",
-        options,
-      );
+      throw createError("Just calculated a height less than 1 which is wrong.", options);
     } else {
       return figureMinHeight(height, options);
     }

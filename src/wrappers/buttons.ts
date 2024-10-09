@@ -4,7 +4,8 @@ import h from "hyperscript";
 import inherits from "inherits";
 
 import Events from "../events";
-import EventEmitter from "../util/eventEmitter";
+import EventEmitter from "../util/EventEmitter";
+import { isAudioEnabled } from "../util/options/audio";
 
 const Buttons = function (container, options) {
   EventEmitter.call(this, options, "Buttons");
@@ -295,7 +296,7 @@ const Buttons = function (container, options) {
         name: "audio",
         value: "off",
         label: options.text.audioOff,
-        checked: !options.isAudioEnabled(),
+        checked: !isAudioEnabled(options),
         changeHandler() {
           container.disableAudio();
         },
@@ -306,7 +307,7 @@ const Buttons = function (container, options) {
         name: "audio",
         value: "on",
         label: options.text.audioOn,
-        checked: options.isAudioEnabled(),
+        checked: isAudioEnabled(options),
         changeHandler() {
           container.enableAudio();
         },
@@ -605,7 +606,7 @@ const Buttons = function (container, options) {
          * since https://github.com/binarykitchen/videomail-client/issues/60
          * we hide areas to make it easier for the user
          */
-        if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
+        if (err.isBrowserProblem() && options.adjustFormOnBrowserError) {
           self.hide();
         }
       });

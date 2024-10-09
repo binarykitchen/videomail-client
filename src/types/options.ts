@@ -119,7 +119,7 @@ export interface VideomailClientOptions {
 
   displayErrors: boolean;
   adjustFormOnBrowserError: boolean;
-  reportErrors: boolean | (() => boolean);
+  reportErrors: boolean;
   fakeUaString?: string | undefined;
   version: string;
 }

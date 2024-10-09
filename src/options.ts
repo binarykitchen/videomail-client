@@ -2,7 +2,6 @@ import { version } from "../package.json";
 
 import { VideomailClientOptions } from "./types/options";
 
-import addOptionsFunctions from "./util/addOptionsFunctions";
 import isProductionMode from "./util/isProductionMode";
 
 const PRODUCTION = isProductionMode();
@@ -174,7 +173,4 @@ const options: VideomailClientOptions = {
   version,
 };
 
-// Add some helper functions to options
-const optionsWithFunctions = addOptionsFunctions(options);
-
-export default optionsWithFunctions;
+export default options;
