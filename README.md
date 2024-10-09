@@ -73,7 +73,6 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 - <a href="#replay">`videomailClient.replay()`</a>
 - <a href="#startOver">`videomailClient.startOver()`</a>
 - <a href="#get">`videomailClient.get()`</a>
-- <a href="#canRecord">`videomailClient.canRecord()`</a>
 - <a href="#unload">`videomailClient.unload()`</a>
 - <a href="#hide">`videomailClient.hide()`</a>
 - <a href="#isDirty">`videomailClient.isDirty()`</a>
@@ -154,12 +153,6 @@ Queries a videomail (JSON) by a given alias for further queries or processing. T
 
 1. The form submission to your own server has it under `videomail_alias` in the form body.
 2. Get the alias from the `submitted` event and use it further within your code.
-
-<a name="canRecord"></a>
-
-### videomailClient.canRecord()
-
-An utility function which returns true if the current browser is capable of webcam recording. It returns false for <a href="#compatibility">incompatible</a> browsers.
 
 <a name="unload"></a>
 

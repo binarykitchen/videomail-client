@@ -1,5 +1,11 @@
 {
-  "include": ["etc", "src", ".storybook", ".eslintrc.js", "prettier.config.cjs"],
+  "include": [
+    "etc",
+    "src",
+    ".storybook/*.ts",
+    "eslint.config.mjs",
+    "prettier.config.cjs"
+  ],
   "extends": [
     "./node_modules/@tsconfig/strictest/tsconfig.json",
     "./node_modules/@tsconfig/node22/tsconfig.json"

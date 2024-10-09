@@ -1,6 +1,6 @@
 import keymirror from "keymirror";
 
-export default keymirror({
+const VideomailEvents = keymirror({
   BUILT: null, // all dom elements are ready, are in the DOM
   FORM_READY: null, // form is ready, available in the DOM
   LOADING_USER_MEDIA: null, // asking for webcam access
@@ -45,3 +45,5 @@ export default keymirror({
   SERVER_READY: null, // Gets emitted when the ready command is sent through sockets from the server for recording
   UNLOADING: null,
 });
+
+export default VideomailEvents;

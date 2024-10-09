@@ -1,165 +1,170 @@
-import inherits from "inherits";
-
 import Constants from "./constants";
 import Events from "./events";
 
 import Resource from "./resource";
 
-import EventEmitter from "./util/eventEmitter";
 import Container from "./wrappers/container";
-import adjustOptions from "./util/adjustOptions";
-import getBrowser from "./util/getBrowser";
+import { PartialVideomailClientOptions } from "./types/options";
+import Videomail from "./types/Videomail";
+import mergeWithDefaultOptions from "./util/options/mergeWithDefaultOptions";
+import createError from "./util/error/createError";
+import Despot from "./util/Despot";
 
-const VideomailClient = function (options) {
-  const localOptions = adjustOptions(options);
-  const container = new Container(localOptions);
+class VideomailClient extends Despot {
+  private container: Container;
 
-  const { debug } = localOptions;
+  public static Events = Events;
 
-  this.events = Events;
+  public static ENC_TYPE_APP_JSON = Constants.public.ENC_TYPE_APP_JSON;
+  public static ENC_TYPE_FORM = Constants.public.ENC_TYPE_FORM;
 
-  EventEmitter.call(this, localOptions, "VideomailClient");
+  public constructor(options: PartialVideomailClientOptions) {
+    super("VideomailClient", mergeWithDefaultOptions(options));
 
-  this.build = function () {
-    let building = false;
+    this.validateOptions();
 
+    this.container = new Container(this.options);
+  }
+
+  private validateOptions() {
+    const width = this.options.video.width;
+
+    if (width !== undefined && width % 2 !== 0) {
+      throw createError({
+        message: "Width must be divisible by two.",
+        options: this.options,
+      });
+    }
+
+    const height = this.options.video.height;
+
+    if (height !== undefined && height % 2 !== 0) {
+      throw createError({
+        message: "Height must be divisible by two.",
+        options: this.options,
+      });
+    }
+  }
+
+  public build() {
     /*
      * it can happen that it gets called twice, i.E. when an error is thrown
      * in the middle of the build() fn
      */
-    if (!building && !container.isBuilt()) {
-      debug("Client: build()");
-
-      building = true;
-      container.build();
-      building = false;
+    if (!this.container.isBuilt()) {
+      this.options.logger.debug("Client: build()");
+      this.container.build();
     }
-  };
+  }
 
-  this.show = function () {
-    if (!container.isBuilt()) {
+  public show() {
+    if (!this.container.isBuilt()) {
       this.build();
     }
 
-    return container.show();
-  };
+    return this.container.show();
+  }
+
+  public unload(e?) {
+    this.removeAllListeners();
+
+    this.container.unload(e);
+  }
 
   /*
    * Automatically adds a <video> element inside the given parentElement and
    * loads it with the videomail
    */
-  this.replay = function (videomail, replayParentElementId) {
-    if (container.isBuilt()) {
+  public replay(videomail: Videomail, replayParentElementId?: string) {
+    if (this.container.isBuilt()) {
       // Auto unload
       this.unload();
     }
 
-    container.build({
+    this.container.build({
       playerOnly: true,
-      replayParentElementId: replayParentElementId,
+      replayParentElementId,
     });
 
-    if (videomail) {
-      videomail = container.addPlayerDimensions(videomail);
-    }
-
-    container.buildForm();
-    container.loadForm(videomail);
+    this.container.buildForm();
+    this.container.loadForm(videomail);
 
     // Wait until ready to avoid HTTP 416 errors (request range unavailable)
-    this.once(Events.REPLAY_SHOWN, function () {
-      container.showReplayOnly();
+    this.once(Events.REPLAY_SHOWN, () => {
+      this.container.showReplayOnly();
     });
 
-    const replay = container.getReplay();
+    const replay = this.container.getReplay();
     replay.setVideomail(videomail, true);
 
-    return replay.getElement();
-  };
+    const playerElement = replay.getElement();
 
-  this.startOver = function (params) {
-    const replay = container.getReplay();
-
-    if (replay) {
-      replay.hide();
-      replay.reset();
+    if (!playerElement) {
+      throw new Error(`Failed to build a player element`);
     }
 
-    container.startOver(params);
-  };
+    return playerElement;
+  }
 
-  this.unload = function (e) {
-    this.removeAllListeners();
+  public startOver(keepHidden = false) {
+    const replay = this.container.getReplay();
 
-    container.unload(e);
-  };
+    replay.hide();
+    replay.reset();
 
-  this.hide = function () {
-    container.hide();
-  };
+    this.container.startOver(keepHidden);
+  }
 
-  this.getByAlias = function (alias, cb) {
-    const resource = new Resource(localOptions);
+  public hide() {
+    this.container.hide();
+  }
 
-    resource.getByAlias(alias, function (err, videomail) {
+  public getByAlias(alias: string, cb) {
+    const resource = new Resource(this.options);
+
+    resource.getByAlias(alias, (err, videomail: Videomail) => {
       if (err) {
         cb(err);
       } else {
-        cb(null, container.addPlayerDimensions(videomail));
+        cb(null, videomail);
       }
     });
-  };
+  }
 
-  // Shim, backward compat
-  this.get = this.getByAlias;
+  public getByKey(key: string, cb) {
+    const resource = new Resource(this.options);
 
-  this.getByKey = function (key, cb) {
-    const resource = new Resource(localOptions);
-
-    resource.getByKey(key, function (err, videomail) {
+    resource.getByKey(key, (err, videomail: Videomail) => {
       if (err) {
         cb(err);
       } else {
-        cb(null, container.addPlayerDimensions(videomail));
+        cb(null, videomail);
       }
     });
-  };
-
-  this.canRecord = function () {
-    return getBrowser(localOptions).canRecord();
-  };
+  }
 
   // Returns true when a video has been recorded but is not submitted yet
-  this.isDirty = function () {
-    return container.isDirty();
-  };
+  public isDirty() {
+    return this.container.isDirty();
+  }
 
-  this.isBuilt = function () {
-    return container.isBuilt();
-  };
+  public isBuilt() {
+    return this.container.isBuilt();
+  }
 
-  this.isRecording = function () {
-    return container.isRecording();
-  };
+  public isRecording() {
+    return this.container.isRecording();
+  }
 
-  this.submit = function () {
-    container.submit();
-  };
+  public submit() {
+    this.container.submit();
+  }
 
-  this.getLogLines = function () {
-    if (localOptions.logger && localOptions.logger.getLines) {
-      return localOptions.logger.getLines();
+  public getLogLines() {
+    if (this.options.logger?.getLines) {
+      return this.options.logger.getLines();
     }
-  };
-};
-
-inherits(VideomailClient, EventEmitter);
-
-Object.keys(Constants.public).forEach(function (name) {
-  VideomailClient[name] = Constants.public[name];
-});
-
-// just another convenient thing
-VideomailClient.Events = Events;
+  }
+}
 
 export default VideomailClient;

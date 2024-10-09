@@ -33,8 +33,7 @@ export const PlayVideomailWithForm: Story = {
       keyInputName: "key",
     },
   },
-  render: () => {
-    return `<style type="text/css">
+  render: () => `<style type="text/css">
               input[type="email"],
               input[type="text"],
               textarea,
@@ -67,8 +66,7 @@ export const PlayVideomailWithForm: Story = {
                 <textarea name="body" rows="4"></textarea>
                 <input id="send" disabled="" type="submit" value="✉ Send" />
               </fieldset>
-            </form>`;
-  },
+            </form>`,
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 

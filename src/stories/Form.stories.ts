@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import VideomailClient from "../index";
+import VideomailClient, { VideomailEvents } from "../index";
 import { VideomailClientOptions } from "../types/options";
 import { DeepPartial } from "../types/DeepPartial";
 
@@ -33,8 +33,7 @@ export const DirectSubmission: Story = {
       containerId: "videomail",
     },
   },
-  render: () => {
-    return `<style type="text/css">
+  render: () => `<style type="text/css">
               input[type="text"],
               .buttons {
                 margin: 1em 0;
@@ -50,8 +49,7 @@ export const DirectSubmission: Story = {
               <h2 class="subject"></h2>
               <video class="replay"></video>
               <button id="startOver">Start over</button>
-            </div>`;
-  },
+            </div>`,
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 
@@ -67,11 +65,7 @@ export const DirectSubmission: Story = {
       }
     };
 
-    // @ts-ignore Fix later
-    videomailClient.on(
-      videomailClient.events.SUBMITTED,
-      onSubmitted.bind(videomailClient),
-    );
+    videomailClient.on(VideomailEvents.SUBMITTED, onSubmitted.bind(videomailClient));
 
     videomailClient.show();
   },
