@@ -31,13 +31,11 @@ jobs:
       - name: 🔎 Run prettier
         run: npm run prettier
 
-      # TODO Restore later
-      # - name: 🔎 Run linter
-      #   run: npm run lint
+      - name: 🔎 Run linter
+        run: npm run lint
 
-      # TODO Enable once implemented
-      # - name: 🔎 Check types
-      #   run: npm run types-check
+      - name: 🔎 Check types
+        run: npm run types:check
 
       - name: 🔨 Build
         run: npm run build:prod

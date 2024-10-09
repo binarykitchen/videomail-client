@@ -1,53 +1,60 @@
 import hidden from "hidden";
-import h from "hyperscript";
 
-import Events from "../../../../events";
-import EventEmitter from "./../../../../util/eventEmitter";
+import Despot from "../../../../util/Despot";
+import Visuals from "../../../visuals";
+import { VideomailClientOptions } from "../../../../types/options";
 
-export default function (visuals, options) {
-  EventEmitter.call(this, options, "Facing Mode");
+class FacingMode extends Despot {
+  private visuals: Visuals;
+  private facingModeElement?: HTMLElement | null | undefined;
 
-  const self = this;
-  let facingModeElement;
+  constructor(visuals: Visuals, options: VideomailClientOptions) {
+    super("Facing Mode", options);
 
-  function initEvents() {
-    self.on(Events.ERROR, function () {
-      self.hide();
+    this.visuals = visuals;
+  }
+
+  private initEvents() {
+    this.on("ERROR", () => {
+      this.hide();
     });
   }
 
-  this.build = function () {
-    facingModeElement = visuals.querySelector(".facingMode");
+  public build() {
+    this.facingModeElement = this.visuals.getElement()?.querySelector(".facingMode");
 
-    if (!facingModeElement) {
-      facingModeElement = h("button.facingMode");
-      facingModeElement.innerHTML = "⤾";
+    if (!this.facingModeElement) {
+      this.facingModeElement = document.createElement("button");
+      this.facingModeElement.classList.add("facingMode");
+      this.facingModeElement.innerHTML = "⤾";
 
-      facingModeElement.onclick = (e) => {
-        e && e.preventDefault();
+      this.facingModeElement.onclick = (e?) => {
+        e?.preventDefault();
 
         try {
-          self.emit(Events.SWITCH_FACING_MODE);
+          this.emit("SWITCH_FACING_MODE");
         } catch (exc) {
-          self.emit(Events.ERROR, exc);
+          this.emit("ERROR", { exc });
         }
       };
 
       this.hide();
 
-      visuals.appendChild(facingModeElement);
+      this.visuals.appendChild(this.facingModeElement);
     } else {
       this.hide();
     }
 
-    initEvents();
-  };
+    this.initEvents();
+  }
 
-  this.hide = function () {
-    hidden(facingModeElement, true);
-  };
+  public hide() {
+    hidden(this.facingModeElement, true);
+  }
 
-  this.show = function () {
-    hidden(facingModeElement, false);
-  };
+  public show() {
+    hidden(this.facingModeElement, false);
+  }
 }
+
+export default FacingMode;

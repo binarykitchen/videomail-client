@@ -1,178 +1,280 @@
 import Visibility from "document-visibility";
 import hidden from "hidden";
-import stringify from "safe-json-stringify";
 
-import inherits from "inherits";
-
-import Events from "../events";
+import { ErrorParams } from "../types/events";
 import Resource from "../resource";
-import EventEmitter from "../util/eventEmitter";
-import VideomailError from "../util/videomailError";
+import Despot from "../util/Despot";
 import Buttons from "./buttons";
-import Dimension from "./dimension";
-import Form from "./form";
-import OptionsWrapper from "./optionsWrapper";
+import Form, { FormInputs } from "./form";
 import Visuals from "./visuals";
 
 import "./../styles/main.styl";
+import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
+import { VideomailClientOptions } from "../types/options";
+import getBrowser from "../util/getBrowser";
+import limitWidth from "../util/dimensions/limitWidth";
+import limitHeight from "../util/dimensions/limitHeight";
+import { PartialVideomail } from "../types/Videomail";
+import pretty from "../util/pretty";
 
-const Container = function (options) {
-  EventEmitter.call(this, options, "Container");
+interface BuildOptions {
+  playerOnly?: boolean;
+  replayParentElementId?: string | undefined;
+  replayParentElement?: HTMLElement | undefined;
+}
 
-  const self = this;
+export interface FormReadyParams {
+  paused?: boolean | undefined;
+}
 
-  const visibility = Visibility();
-  const visuals = new Visuals(this, options);
-  const buttons = new Buttons(this, options);
-  const resource = new Resource(options);
-  const htmlElement = document.querySelector("html");
+class Container extends Despot {
+  private readonly visibility = Visibility();
+  private readonly htmlElement = document.querySelector("html");
 
-  const { debug } = options;
+  private readonly visuals: Visuals;
+  private readonly buttons: Buttons;
+  private readonly resource: Resource;
+  private form: Form | undefined;
 
-  let hasError = false;
-  let submitted = false;
-  let lastValidation = false;
+  private hasError = false;
+  private submitted = false;
+  private lastValidation = false;
 
-  let containerElement;
-  let built;
-  let form;
+  private containerElement?: HTMLElement | null | undefined;
 
-  validateOptions();
+  private built = false;
+
+  public constructor(options: VideomailClientOptions) {
+    super("Container", options);
+
+    this.visuals = new Visuals(this, options);
+    this.buttons = new Buttons(this, options);
+    this.resource = new Resource(options);
+  }
+
+  private buildChildren(playerOnly = false, replayParentElement?: HTMLElement | null) {
+    this.options.logger.debug(
+      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${pretty(replayParentElement)}"` : ""})`,
+    );
+
+    if (this.containerElement) {
+      this.containerElement.classList.add(this.options.selectors.containerClass);
+    }
+
+    if (!playerOnly) {
+      this.buttons.build();
+    }
+
+    this.visuals.build(playerOnly, replayParentElement);
+  }
+
+  public build(buildOptions?: BuildOptions) {
+    this.options.logger.debug(
+      `Container: build (${buildOptions ? pretty(buildOptions) : ""})`,
+    );
+
+    try {
+      const containerId = this.options.selectors.containerId;
+
+      if (containerId) {
+        // Note, it can be undefined when e.g. just replaying a videomail or for storybooks
+        this.containerElement = document.getElementById(containerId);
+      } else {
+        this.containerElement = document.createElement("div");
+      }
+
+      this.containerElement?.classList.add(this.options.selectors.containerClass);
+
+      let replayParentElement: HTMLElement | null = null;
+
+      if (buildOptions?.replayParentElement) {
+        replayParentElement = buildOptions.replayParentElement;
+      } else if (buildOptions?.replayParentElementId) {
+        replayParentElement = document.getElementById(buildOptions.replayParentElementId);
+      }
+
+      // Check if the replayParentElement could act as the container element perhaps?
+      if (!this.containerElement && replayParentElement) {
+        if (
+          replayParentElement.classList.contains(this.options.selectors.containerClass)
+        ) {
+          this.containerElement = replayParentElement;
+        }
+      }
+
+      if (!this.built) {
+        this.initEvents(buildOptions?.playerOnly);
+      }
+
+      if (!buildOptions?.playerOnly) {
+        this.correctDimensions();
+      }
+
+      // Building form also applies for when `playerOnly` because of
+      // correcting mode on Videomail. This function will skip if there is no form. Easy.
+      this.buildForm();
+
+      this.buildChildren(
+        buildOptions?.playerOnly,
+        buildOptions?.playerOnly
+          ? (replayParentElement ?? this.containerElement)
+          : undefined,
+      );
+
+      if (!this.hasError) {
+        this.options.logger.debug("Container: built.");
+        this.built = true;
+        this.emit("BUILT");
+      } else {
+        this.options.logger.debug("Container: building failed due to an error.");
+      }
+    } catch (exc) {
+      this.emit("ERROR", { exc });
+    }
+
+    return this.containerElement;
+  }
 
   // since https://github.com/binarykitchen/videomail-client/issues/87
-  function findParentFormElement() {
-    if (!containerElement) {
+  private findParentFormElement() {
+    if (!this.containerElement) {
       // Must be in player only mode
       return;
     }
 
-    return containerElement.closest("form");
+    return this.containerElement.closest("form");
   }
 
-  function getFormElement() {
-    let formElement;
+  private getFormElement() {
+    let formElement: HTMLFormElement | undefined | null;
 
-    if (containerElement && containerElement.tagName === "FORM") {
-      formElement = containerElement;
-    } else if (options.selectors.formId) {
-      formElement = document.getElementById(options.selectors.formId);
+    if (this.containerElement && this.containerElement.tagName === "FORM") {
+      formElement = this.containerElement as HTMLFormElement;
+    } else if (this.options.selectors.formId) {
+      formElement = document.getElementById(
+        this.options.selectors.formId,
+      ) as HTMLFormElement;
+
+      if (formElement.tagName !== "FORM") {
+        throw new Error(
+          `HTML element with ID ${this.options.selectors.formId} is not a form.`,
+        );
+      }
     } else {
-      formElement = findParentFormElement();
+      formElement = this.findParentFormElement();
     }
 
     return formElement;
   }
 
-  this.buildForm = function () {
-    if (form) {
-      return; // already built
+  public buildForm() {
+    if (this.form) {
+      // already built
+      return;
     }
 
-    const formElement = getFormElement();
+    const formElement = this.getFormElement();
 
     if (formElement) {
-      form = new Form(self, formElement, options);
+      this.form = new Form(this, formElement, this.options);
 
-      const submitButton = form.findSubmitButton();
+      const submitButton = this.form.findSubmitButton();
 
       if (submitButton) {
-        buttons.setSubmitButton(submitButton);
+        this.buttons.setSubmitButton(submitButton);
       }
 
-      form.build();
-    }
-  };
-
-  function buildChildren(playerOnly = false, replayParentElement) {
-    debug(
-      `Container: buildChildren (playerOnly = ${playerOnly}${replayParentElement ? `, replayParentElement="${replayParentElement.id}"` : ""})`,
-    );
-
-    if (containerElement) {
-      containerElement.classList.add(options.selectors.containerClass);
-    }
-
-    if (!playerOnly) {
-      buttons.build();
-    }
-
-    visuals.build(playerOnly, replayParentElement);
-  }
-
-  function processError(err) {
-    hasError = true;
-
-    if (err.stack) {
-      options.logger.error(err.stack);
-    } else {
-      options.logger.error(err.message);
-    }
-
-    if (options.displayErrors) {
-      visuals.error(err);
-    } else {
-      visuals.reset();
+      this.form.build();
     }
   }
 
-  function initEvents(playerOnly = false) {
-    debug(`Container: initEvents (playerOnly = ${playerOnly})`);
+  private processError(params: ErrorParams) {
+    this.hasError = true;
 
-    if (options.enableAutoUnload) {
+    if (params.err?.stack) {
+      this.options.logger.error(params.err.stack);
+    } else if (params.err?.message) {
+      this.options.logger.error(params.err.message);
+    } else if (params.exc) {
+      if (params.exc instanceof Error) {
+        if (params.exc.stack) {
+          this.options.logger.error(params.exc.stack);
+        } else if (params.exc.message) {
+          this.options.logger.error(params.exc.message);
+        }
+      } else {
+        this.options.logger.error(params.exc);
+      }
+    }
+
+    if (this.options.displayErrors && params.err) {
+      this.visuals.error(params.err);
+    } else {
+      this.visuals.reset();
+    }
+  }
+
+  private initEvents(playerOnly = false) {
+    this.options.logger.debug(`Container: initEvents (playerOnly = ${playerOnly})`);
+
+    if (this.options.enableAutoUnload) {
       window.addEventListener(
         "beforeunload",
         (e) => {
-          self.unload(e);
+          this.unload(e);
         },
         { once: true },
       );
     }
 
     if (!playerOnly) {
-      visibility.onChange(function (visible) {
+      this.visibility.onChange((visible) => {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
-        if (built) {
+        if (this.built) {
           if (visible) {
-            if (options.isAutoPauseEnabled() && self.isCountingDown()) {
-              self.resume();
+            if (isAutoPauseEnabled(this.options) && this.isCountingDown()) {
+              this.resume();
             }
 
-            self.emit(Events.VISIBLE);
+            this.emit("VISIBLE");
           } else {
             if (
-              options.isAutoPauseEnabled() &&
-              (self.isCountingDown() || self.isRecording())
+              isAutoPauseEnabled(this.options) &&
+              (this.isCountingDown() || this.isRecording())
             ) {
-              self.pause("document invisible");
+              this.pause();
             }
 
-            self.emit(Events.INVISIBLE);
+            this.emit("INVISIBLE");
           }
         }
       });
     }
 
-    if (options.enableSpace) {
+    if (this.options.enableSpace) {
       if (!playerOnly) {
-        window.addEventListener("keypress", function (e) {
-          const tagName = e.target?.tagName;
+        window.addEventListener("keydown", (e: KeyboardEvent) => {
+          const element = e.target as HTMLElement;
+          const tagName = element.tagName;
 
           const isEditable =
-            e.target.isContentEditable ||
-            e.target.contentEditable === "true" ||
-            e.target.contentEditable === true;
+            element.isContentEditable || element.contentEditable === "true";
 
           // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
-          if (!isEditable && tagName !== "INPUT" && tagName !== "TEXTAREA") {
+          if (
+            !isEditable &&
+            tagName.toUpperCase() !== "INPUT" &&
+            tagName.toUpperCase() !== "TEXTAREA"
+          ) {
             const code = e.code;
 
-            if (code === 32) {
+            if (code === "Space") {
               e.preventDefault();
 
-              if (options.enablePause) {
-                visuals.pauseOrResume();
+              if (this.options.enablePause) {
+                this.visuals.pauseOrResume();
               } else {
-                visuals.recordOrStop();
+                this.visuals.recordOrStop();
               }
             }
           }
@@ -184,30 +286,22 @@ const Container = function (options) {
      * better to keep the one and only error listeners
      * at one spot, here, because unload() will do a removeAllListeners()
      */
-    self.on(Events.ERROR, function (err) {
-      processError(err);
+    this.on("ERROR", (params: ErrorParams) => {
+      this.processError(params);
 
-      self.endWaiting();
+      this.endWaiting();
 
-      if (err.removeDimensions && err.removeDimensions()) {
-        removeDimensions();
+      const browser = getBrowser(this.options);
+
+      if (browser.isMobile()) {
+        this.removeDimensions();
       }
     });
 
     if (!playerOnly) {
-      self.on(Events.LOADED_META_DATA, function () {
-        correctDimensions();
+      this.on("LOADED_META_DATA", () => {
+        this.correctDimensions();
       });
-    }
-  }
-
-  function validateOptions() {
-    if (options.hasDefinedWidth() && options.video.width % 2 !== 0) {
-      throw VideomailError.create("Width must be divisible by two.", options);
-    }
-
-    if (options.hasDefinedHeight() && options.video.height % 2 !== 0) {
-      throw VideomailError.create("Height must be divisible by two.", options);
     }
   }
 
@@ -215,107 +309,92 @@ const Container = function (options) {
    * This will just set the width but not the height because
    * it can be a form with more inputs elements
    */
-  function correctDimensions() {
-    if (options.video.stretch) {
-      removeDimensions();
-    } else if (containerElement) {
-      const width = visuals.getRecorderWidth(true);
+  private correctDimensions() {
+    if (this.options.video.stretch) {
+      this.removeDimensions();
+    } else if (this.containerElement) {
+      const width = this.visuals.getRecorderWidth(true);
 
-      if (width < 1) {
-        throw VideomailError.create("Recorder width cannot be less than 1!", options);
-      } else {
-        containerElement.style.width = `${width}px`;
+      if (width) {
+        this.containerElement.style.width = `${width}px`;
       }
     }
   }
 
-  function removeDimensions() {
-    if (!containerElement) {
+  private removeDimensions() {
+    if (!this.containerElement) {
       return;
     }
 
-    containerElement.style.width = "auto";
+    this.containerElement.style.width = "auto";
   }
 
-  function unloadChildren(e) {
-    visuals.unload(e);
-    buttons.unload();
+  private unloadChildren(e) {
+    this.visuals.unload(e);
+    this.buttons.unload();
 
-    if (form) {
-      form.unload();
-      form = undefined;
+    if (this.form) {
+      this.form.unload();
+      this.form = undefined;
     }
 
-    self.endWaiting();
+    this.endWaiting();
   }
 
-  function hideMySelf() {
-    hidden(containerElement, true);
+  private hideMySelf() {
+    hidden(this.containerElement, true);
   }
 
-  function submitVideomail(formData, method, cb) {
-    const videomailFormData = form.transformFormData(formData);
+  private submitVideomail(videomail: PartialVideomail, cb, method?: string | null) {
+    const videomailFormData = this.form?.transformFormData(videomail);
 
-    if (isPost(method)) {
-      videomailFormData.recordingStats = visuals.getRecordingStats();
-      videomailFormData.width = visuals.getRecorderWidth(true);
-      videomailFormData.height = visuals.getRecorderHeight(true);
+    if (!videomailFormData) {
+      throw new Error("No videomail form data defined");
+    }
 
-      if (navigator.connection) {
-        videomailFormData.connection = {
-          downlink: `${navigator.connection.downlink} Mbit/s`,
-          effectiveType: navigator.connection.effectiveType,
-          rtt: navigator.connection.rtt,
-          type: navigator.connection.type,
-        };
-      }
+    if (this.isPost(method)) {
+      videomailFormData.recordingStats = this.visuals.getRecordingStats();
 
-      resource.post(videomailFormData, cb);
-    } else if (isPut(method)) {
-      resource.put(videomailFormData, cb);
+      videomailFormData.width = this.visuals.getRecorderWidth(true);
+      videomailFormData.height = this.visuals.getRecorderHeight(true);
+
+      this.resource.post(videomailFormData, cb);
+    } else if (this.isPut(method)) {
+      this.resource.put(videomailFormData, cb);
     }
   }
 
-  function submitForm(formData, videomailResponse, url, cb) {
-    /*
-     * for now, accept POSTs only which have an URL unlike null and
-     * treat all other submissions as direct submissions
-     */
-
-    if (!url || url === "") {
-      url = options.baseUrl;
-    }
-
+  private submitForm(formData, videomailResponse, url, cb) {
     // can be missing when no videomail was recorded and is not required
     if (videomailResponse) {
       /*
        * this in case if user wants all videomail metadata to be posted
        * altogether with the remaining form
        */
-      if (options.submitWithVideomail) {
+      if (this.options.submitWithVideomail) {
         formData.videomail = videomailResponse.videomail;
       }
     }
 
-    resource.form(formData, url, cb);
+    this.resource.form(formData, url || this.options.baseUrl, cb);
   }
 
-  function finalizeSubmissions(err, method, videomail, response, formResponse) {
-    self.endWaiting();
+  private finalizeSubmissions(err, videomail, response, formResponse?) {
+    this.endWaiting();
 
     if (err) {
-      self.emit(Events.ERROR, err);
+      this.emit("ERROR", { err });
     } else {
-      submitted = true;
+      this.submitted = true;
 
       // merge two json response bodies to fake as if it were only one request
-      if (response && formResponse && formResponse.body) {
+      if (response && formResponse?.body) {
         Object.keys(formResponse.body).forEach(function (key) {
           response[key] = formResponse.body[key];
         });
       }
 
-      self.emit(Events.SUBMITTED, videomail, response || formResponse);
+      this.emit("SUBMITTED", { videomail, response: response || formResponse });
 
       if (formResponse && formResponse.type === "text/html" && formResponse.text) {
         // server replied with HTML contents - display these
@@ -329,304 +408,204 @@ const Container = function (options) {
     }
   }
 
-  this.addPlayerDimensions = function (videomail) {
-    try {
-      if (!videomail) {
-        throw new Error("Videomail data is missing for attaching player dimensions");
-      }
-
-      const replay = self.getReplay();
-      const replayParentElement = replay.getParentElement();
-
-      videomail.playerHeight = self.calculateHeight(
-        {
-          responsive: true,
-          videoWidth: videomail.width,
-          ratio: videomail.height / videomail.width,
-        },
-        replayParentElement,
-      );
-
-      videomail.playerWidth = self.calculateWidth({
-        responsive: true,
-        videoHeight: videomail.playerHeight,
-        ratio: videomail.height / videomail.width,
-      });
-
-      return videomail;
-    } catch (exc) {
-      self.emit(Events.ERROR, exc);
-    }
-  };
-
-  this.limitWidth = function (width) {
-    return Dimension.limitWidth(containerElement, width, options);
-  };
-
-  this.limitHeight = function (height) {
-    return Dimension.limitHeight(height, options);
-  };
-
-  this.calculateWidth = function (fnOptions) {
-    return Dimension.calculateWidth(OptionsWrapper.merge(options, fnOptions));
-  };
-
-  this.calculateHeight = function (fnOptions, element) {
-    if (!element) {
-      if (containerElement) {
-        element = containerElement;
-      } else {
-        // better than nothing
-        element = document.body;
-      }
+  public limitWidth(width?: number) {
+    if (!this.containerElement) {
+      return;
     }
 
-    return Dimension.calculateHeight(element, OptionsWrapper.merge(options, fnOptions));
-  };
-
-  function areVisualsHidden() {
-    return visuals.isHidden();
+    return limitWidth(this.containerElement, this.options, width);
   }
 
-  this.hasElement = function () {
-    return Boolean(containerElement);
-  };
+  public limitHeight(height: number) {
+    return limitHeight(height, this.options);
+  }
 
-  this.build = function (
-    buildOptions = {
-      playerOnly: false,
-      replayParentElementId: undefined,
-      replayParentElement: undefined,
-    },
-  ) {
-    debug(`Container: build (${stringify(buildOptions)})`);
+  private areVisualsHidden() {
+    return this.visuals.isHidden();
+  }
 
+  public hasElement() {
+    return Boolean(this.containerElement);
+  }
+
+  public getSubmitButton() {
+    return this.buttons.getSubmitButton();
+  }
+
+  public querySelector(selector: string) {
+    if (!this.containerElement) {
+      // Must be in player only mode
+      return;
+    }
+
+    return this.containerElement.querySelector<HTMLElement>(selector);
+  }
+
+  public beginWaiting() {
+    this.htmlElement?.classList.add("wait");
+  }
+
+  public endWaiting() {
+    this.htmlElement?.classList.remove("wait");
+  }
+
+  public appendChild(child) {
+    if (!this.containerElement || this.containerElement === child) {
+      // Must be in player only mode
+      return;
+    }
+
+    this.containerElement.appendChild(child);
+  }
+
+  public insertBefore(child, reference) {
+    if (!this.containerElement) {
+      // Must be in player only mode
+      return;
+    }
+
+    this.containerElement.insertBefore(child, reference);
+  }
+
+  public unload(e?) {
     try {
-      const containerId = options.selectors.containerId;
-
-      if (containerId) {
-        // Note, it can be undefined when e.g. just replaying a videomail or for storybooks
-        containerElement = document.getElementById(options.selectors.containerId);
-      } else {
-        containerElement = document.createElement("div");
-      }
-
-      let replayParentElement;
-
-      if (buildOptions.replayParentElement) {
-        replayParentElement = buildOptions.replayParentElement;
-      } else if (buildOptions.replayParentElementId) {
-        replayParentElement = document.getElementById(buildOptions.replayParentElementId);
-      }
-
-      // Check if the replayParentElement could act as the container element perhaps?
-      if (!containerElement && replayParentElement) {
-        if (replayParentElement?.classList.contains(options.selectors.containerClass)) {
-          containerElement = replayParentElement;
-        }
-      }
-
-      !built && initEvents(buildOptions.playerOnly);
-
-      if (!buildOptions.playerOnly) {
-        correctDimensions();
-      }
-
-      // Building form also applies for when `playerOnly` because of
-      // correcting mode on Videomail. This function will skip if there is no form. Easy.
-      self.buildForm();
-
-      buildChildren(
-        buildOptions.playerOnly,
-        buildOptions.playerOnly ? replayParentElement || containerElement : undefined,
-      );
-
-      if (!hasError) {
-        debug("Container: built.");
-        built = true;
-        self.emit(Events.BUILT);
-      } else {
-        debug("Container: building failed due to an error.");
-      }
-    } catch (exc) {
-      self.emit(Events.ERROR, exc);
-    }
-
-    return containerElement;
-  };
-
-  this.getSubmitButton = function () {
-    return buttons.getSubmitButton();
-  };
-
-  this.querySelector = function (selector) {
-    if (!containerElement) {
-      // Must be in player only mode
-      return;
-    }
-
-    return containerElement.querySelector(selector);
-  };
-
-  this.beginWaiting = function () {
-    htmlElement.classList && htmlElement.classList.add("wait");
-  };
-
-  this.endWaiting = function () {
-    htmlElement.classList && htmlElement.classList.remove("wait");
-  };
-
-  this.appendChild = function (child) {
-    if (!containerElement || containerElement === child) {
-      // Must be in player only mode
-      return;
-    }
-
-    containerElement.appendChild(child);
-  };
-
-  this.insertBefore = function (child, reference) {
-    if (!containerElement) {
-      // Must be in player only mode
-      return;
-    }
-
-    containerElement.insertBefore(child, reference);
-  };
-
-  this.unload = function (e) {
-    try {
-      if (!built) {
+      if (!this.built) {
         return;
       }
 
-      debug(`Container: unload(${e ? stringify(e) : ""})`);
-      self.emit(Events.UNLOADING);
+      this.options.logger.debug(`Container: unload(${e ? pretty(e) : ""})`);
+      this.emit("UNLOADING");
 
-      unloadChildren(e);
-      self.removeAllListeners();
+      this.unloadChildren(e);
+      this.hide();
 
-      self.hide();
+      this.removeAllListeners();
 
-      built = submitted = false;
+      this.built = this.submitted = false;
     } catch (exc) {
-      self.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
-  };
+  }
 
-  this.show = function () {
-    if (!containerElement) {
+  public show() {
+    if (!this.containerElement) {
       throw new Error("No container element exists.");
     }
 
-    hidden(containerElement, false);
+    hidden(this.containerElement, false);
 
-    visuals.show();
+    this.visuals.show();
 
-    if (!hasError) {
-      const paused = self.isPaused();
+    if (!this.hasError) {
+      const paused = this.isPaused();
 
       if (paused) {
-        buttons.adjustButtonsForPause();
+        this.buttons.adjustButtonsForPause();
       }
 
       /*
        * since https://github.com/binarykitchen/videomail-client/issues/60
        * we hide areas to make it easier for the user
        */
-      buttons.show();
+      this.buttons.show();
 
-      if (self.isReplayShown()) {
-        self.emit(Events.PREVIEW);
+      if (this.isReplayShown()) {
+        this.emit("PREVIEW");
       } else {
-        self.emit(Events.FORM_READY, { paused });
+        this.emit("FORM_READY", { paused });
       }
     }
 
-    return containerElement;
-  };
+    return this.containerElement;
+  }
 
-  this.hide = function () {
-    debug("Container: hide()");
+  public hide() {
+    this.options.logger.debug("Container: hide()");
 
-    hasError = false;
+    this.hasError = false;
 
-    self.isRecording() && self.pause();
-
-    visuals.hide();
-
-    if (submitted) {
-      buttons.hide();
-      hideMySelf();
+    if (this.isRecording()) {
+      this.pause();
     }
-  };
 
-  this.startOver = function (params) {
+    this.visuals.hide();
+
+    if (this.submitted) {
+      this.buttons.hide();
+      this.hideMySelf();
+    }
+  }
+
+  public startOver(keepHidden = false) {
     try {
-      debug(`Container: startOver(${params ? stringify(params) : ""})`);
+      this.options.logger.debug(`Container: startOver(keepHidden = ${keepHidden})`);
 
-      submitted = false;
+      this.submitted = false;
 
       // Rebuild all again and initialise events again
-      self.build();
+      this.build();
 
-      self.emit(Events.STARTING_OVER);
+      this.emit("STARTING_OVER");
 
-      visuals.back(params, function () {
-        self.enableForm();
+      this.visuals.back(keepHidden, () => {
+        this.enableForm(true);
 
-        if (params && params.keepHidden) {
+        if (keepHidden) {
           /*
            * just enable form, do nothing else.
            * see example contact_form.html when you submit without videomail
            * and go back
            */
         } else {
-          self.show(params);
+          this.show();
         }
       });
     } catch (exc) {
-      self.emit(Events.ERROR, exc);
+      this.emit("ERROR", { exc });
     }
-  };
+  }
 
-  this.showReplayOnly = function () {
-    hasError = false;
+  public showReplayOnly() {
+    this.hasError = false;
 
-    self.isRecording() && self.pause();
+    if (this.isRecording()) {
+      this.pause();
+    }
 
-    visuals.showReplayOnly();
+    this.visuals.showReplayOnly();
 
-    submitted && buttons.hide();
-  };
+    if (this.submitted) {
+      this.buttons.hide();
+    }
+  }
 
-  this.isNotifying = function () {
-    return visuals.isNotifying();
-  };
+  public isNotifying() {
+    return this.visuals.isNotifying();
+  }
 
-  this.isPaused = function () {
-    return visuals.isPaused();
-  };
+  public isPaused() {
+    return this.visuals.isPaused();
+  }
 
-  this.pause = function (params) {
-    visuals.pause(params);
-  };
+  public pause(params?: { event: MouseEvent }) {
+    this.visuals.pause(params);
+  }
 
   // this code needs a good rewrite :(
-  this.validate = function (event, force) {
+  public validate(event?, force = false) {
     let runValidation = true;
     let valid = true;
 
-    if (!options.enableAutoValidation) {
+    if (!this.options.enableAutoValidation) {
       runValidation = false;
-      lastValidation = true; // needed so that it can be submitted anyway, see submit()
+      this.lastValidation = true; // needed so that it can be submitted anyway, see submit()
     } else if (force) {
       runValidation = force;
-    } else if (self.isNotifying()) {
+    } else if (this.isNotifying()) {
       runValidation = false;
-    } else if (visuals.isConnected()) {
-      runValidation = visuals.isUserMediaLoaded() || visuals.isReplayShown();
-    } else if (visuals.isConnecting()) {
+    } else if (this.visuals.isConnected()) {
+      runValidation = this.visuals.isUserMediaLoaded() ?? this.visuals.isReplayShown();
+    } else if (this.visuals.isConnecting()) {
       runValidation = false;
     }
 
@@ -634,31 +613,34 @@ const Container = function (options) {
       const targetName = event?.target?.name;
 
       if (targetName) {
-        self.emit(Events.VALIDATING, { targetName });
+        this.emit("VALIDATING", { targetName });
+      } else if (event) {
+        this.emit("VALIDATING", { event });
       } else {
-        self.emit(Events.VALIDATING, event);
+        this.emit("VALIDATING");
       }
 
-      const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled();
+      const visualsValid =
+        this.visuals.validate() && this.buttons.isRecordAgainButtonEnabled();
 
       let whyInvalid;
-      let invalidData;
+      let invalidData: Record<string, any> | undefined;
 
-      if (form) {
-        const invalidInput = form.getInvalidElement();
+      if (this.form) {
+        const invalidInput = this.form.getInvalidElement();
 
         if (invalidInput) {
           valid = false;
 
           whyInvalid = `Input "${invalidInput.name}" seems wrong 🤔`;
-          invalidData = { [invalidInput.name]: invalidInput.value };
-        } else if (!areVisualsHidden() && !visualsValid) {
+          invalidData = { [invalidInput.name]: invalidInput.getAttribute("value") };
+        } else if (!this.areVisualsHidden() && !visualsValid) {
           // TODO Improve this check to have this based on `key`
           if (
-            buttonsAreReady() ||
-            self.isRecording() ||
-            self.isPaused() ||
-            self.isCountingDown()
+            this.buttonsAreReady() ||
+            this.isRecording() ||
+            this.isPaused() ||
+            this.isCountingDown()
           ) {
             valid = false;
             whyInvalid = "Don't forget to record a video 😉";
@@ -671,15 +653,15 @@ const Container = function (options) {
            * If CC and/or BCC exist, validate one more time to ensure at least
            * one recipient is given
            */
-          const recipients = form.getRecipients();
+          const recipients = this.form.getRecipients();
 
           const toIsConfigured = "to" in recipients;
           const ccIsConfigured = "cc" in recipients;
           const bccIsConfigured = "bcc" in recipients;
 
-          const hasTo = recipients.to?.length > 0;
-          const hasCc = recipients.cc?.length > 0;
-          const hasBcc = recipients.bcc?.length > 0;
+          const hasTo = recipients.to && recipients.to.length > 0;
+          const hasCc = recipients.cc && recipients.cc.length > 0;
+          const hasBcc = recipients.bcc && recipients.bcc.length > 0;
 
           if (toIsConfigured) {
             if (!hasTo) {
@@ -721,68 +703,70 @@ const Container = function (options) {
       }
 
       if (valid) {
-        self.emit(Events.VALID);
+        this.emit("VALID");
       } else if (invalidData) {
-        self.emit(Events.INVALID, whyInvalid, invalidData);
+        this.emit("INVALID", { whyInvalid, invalidData });
       } else {
-        self.emit(Events.INVALID, whyInvalid);
+        this.emit("INVALID", { whyInvalid });
       }
 
-      lastValidation = valid;
+      this.lastValidation = valid;
     }
 
     return valid;
-  };
+  }
 
-  this.disableForm = function (buttonsToo) {
-    form && form.disable(buttonsToo);
-  };
+  public disableForm(buttonsToo: boolean) {
+    this.form?.disable(buttonsToo);
+  }
 
-  this.enableForm = function (buttonsToo) {
-    form && form.enable(buttonsToo);
-  };
+  public enableForm(buttonsToo: boolean) {
+    this.form?.enable(buttonsToo);
+  }
 
-  this.hasForm = function () {
-    return Boolean(form);
-  };
+  public hasForm() {
+    return Boolean(this.form);
+  }
 
-  function buttonsAreReady() {
-    return buttons.isReady();
+  private buttonsAreReady() {
+    return this.buttons.isReady();
   }
 
   // when method is undefined, treat it as a post
-  function isPost(method) {
+  private isPost(method?: string | null) {
     if (!method) {
       return true;
     }
+
     return method.toUpperCase() === "POST";
   }
 
-  function isPut(method) {
+  private isPut(method?: string | null) {
     if (!method) {
       return false;
     }
+
     return method.toUpperCase() === "PUT";
   }
 
-  this.submitAll = function (formData, method, url) {
+  public submitAll(formData: FormInputs, method?: string | null, url?: string | null) {
     const output = [method, url].filter(Boolean).join(": ");
-    debug(`Container: submitAll(${output})`);
+    this.options.logger.debug(`Container: submitAll(${output})`);
 
-    const hasVideomailKey = Boolean(formData[options.selectors.keyInputName]);
+    const hasVideomailKey = Boolean(formData[this.options.selectors.keyInputName]);
 
-    function startSubmission() {
-      self.beginWaiting();
-      self.disableForm(true);
-      self.emit(Events.SUBMITTING);
-    }
+    const startSubmission = () => {
+      this.beginWaiting();
+      this.disableForm(true);
+      this.emit("SUBMITTING");
+    };
 
     // a closure so that we can access method
-    const submitVideomailCallback = function (err1, videomail, videomailResponse) {
+    const submitVideomailCallback = (err1, videomail, videomailResponse) => {
       if (err1) {
-        finalizeSubmissions(err1, method, videomail, videomailResponse);
+        this.finalizeSubmissions(err1, videomail, videomailResponse);
       } else {
-        finalizeSubmissions(null, method, videomail, videomailResponse);
+        this.finalizeSubmissions(null, videomail, videomailResponse);
       }
     };
 
@@ -791,10 +775,11 @@ const Container = function (options) {
      * is not optional.
      */
     if (!hasVideomailKey) {
-      if (options.enableAutoSubmission) {
+      if (this.options.enableAutoSubmission) {
         startSubmission();
-        submitForm(formData, null, url, function (err2, formResponse) {
-          finalizeSubmissions(err2, method, null, null, formResponse);
+
+        this.submitForm(formData, null, url, (err2, formResponse) => {
+          this.finalizeSubmissions(err2, null, null, formResponse);
         });
       }
       /*
@@ -805,79 +790,93 @@ const Container = function (options) {
        */
     } else {
       startSubmission();
-      submitVideomail(formData, method, submitVideomailCallback);
+      this.submitVideomail(formData, submitVideomailCallback, method);
     }
-  };
+  }
 
-  this.isBuilt = function () {
-    return built;
-  };
+  public isBuilt() {
+    return this.built;
+  }
 
-  this.isReplayShown = function () {
-    return visuals.isReplayShown();
-  };
+  public isReplayShown() {
+    return this.visuals.isReplayShown();
+  }
 
-  this.isDirty = function () {
+  public isDirty() {
     let isDirty = false;
 
-    if (form) {
-      if (visuals.isRecorderUnloaded()) {
+    if (this.form) {
+      if (this.visuals.isRecorderUnloaded()) {
         isDirty = false;
-      } else if (submitted) {
+      } else if (this.submitted) {
         isDirty = false;
-      } else if (self.isReplayShown() || self.isPaused()) {
+      } else if (this.isReplayShown() || this.isPaused()) {
         isDirty = true;
       }
     }
 
     return isDirty;
-  };
+  }
 
-  this.getReplay = function () {
-    return visuals.getReplay();
-  };
+  public getReplay() {
+    return this.visuals.getReplay();
+  }
 
-  this.isOutsideElementOf = function (element) {
-    return element.parentNode !== containerElement && element !== containerElement;
-  };
-
-  this.hideForm = function (params) {
-    // form check needed, see https://github.com/binarykitchen/videomail-client/issues/127
-    form && form.hide();
-    buttons && buttons.hide(params);
-  };
+  public isOutsideElementOf(element: HTMLElement) {
+    return (
+      element.parentNode !== this.containerElement && element !== this.containerElement
+    );
+  }
 
   // Only used for replays
-  this.loadForm = function (videomail) {
-    if (form) {
-      form.loadVideomail(videomail);
-      self.validate();
+  public loadForm(videomail) {
+    if (this.form) {
+      this.form.loadVideomail(videomail);
+      this.validate();
     }
-  };
+  }
 
-  this.enableAudio = function () {
-    options.setAudioEnabled(true);
-    self.emit(Events.ENABLING_AUDIO);
-  };
+  public enableAudio() {
+    this.options = setAudioEnabled(true, this.options);
+    this.emit("ENABLING_AUDIO");
+  }
 
-  this.disableAudio = function () {
-    options.setAudioEnabled(false);
-    self.emit(Events.DISABLING_AUDIO);
-  };
+  public disableAudio() {
+    this.options = setAudioEnabled(false, this.options);
+    this.emit("DISABLING_AUDIO");
+  }
 
-  this.submit = function () {
-    debug("Container: submit()");
-    lastValidation && form && form.doTheSubmit();
-  };
+  public submit() {
+    this.options.logger.debug("Container: submit()");
 
-  this.isCountingDown = visuals.isCountingDown.bind(visuals);
-  this.isRecording = visuals.isRecording.bind(visuals);
-  this.record = visuals.record.bind(visuals);
-  this.resume = visuals.resume.bind(visuals);
-  this.stop = visuals.stop.bind(visuals);
-  this.recordAgain = visuals.recordAgain.bind(visuals);
-};
+    if (this.lastValidation) {
+      this.form?.doTheSubmit();
+    }
+  }
 
-inherits(Container, EventEmitter);
+  public isCountingDown() {
+    return this.visuals.isCountingDown();
+  }
+
+  public isRecording() {
+    return this.visuals.isRecording();
+  }
+
+  public record() {
+    this.visuals.record();
+  }
+
+  public resume() {
+    this.visuals.resume();
+  }
+
+  public stop() {
+    this.visuals.stop();
+  }
+
+  public recordAgain() {
+    this.visuals.recordAgain();
+  }
+}
 
 export default Container;

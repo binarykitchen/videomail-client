@@ -8,17 +8,15 @@ import * as regexpPlugin from "eslint-plugin-regexp";
 import pluginSecurity from "eslint-plugin-security";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-// TODO Enable once this is merged https://github.com/storybookjs/eslint-plugin-storybook/pull/156
-// import storybook from "eslint-plugin-storybook";
+import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
 export default tseslint.config(
-  // TODO change to .all later
-  eslint.configs.recommended,
+  eslint.configs.all,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  // ...storybook.configs["flat/recommended"],
+  ...storybook.configs["flat/recommended"],
   eslintPluginImportX.flatConfigs.recommended,
   eslintPluginImportX.flatConfigs.typescript,
   pluginSecurity.configs.recommended,
@@ -26,7 +24,7 @@ export default tseslint.config(
   pluginPromise.configs["flat/recommended"],
   depend.configs["flat/recommended"],
   {
-    ignores: [".github", ".vscode", "**/node_modules/", ".git", "test"],
+    ignores: [".github", ".vscode", "**/node_modules/", ".git", "test", "dist"],
     name: "Ignore files",
   },
   {
@@ -109,6 +107,7 @@ export default tseslint.config(
       "max-lines-per-function": "off",
       "max-params": "off",
       "max-statements": "off",
+      "new-cap": "off",
       "no-alert": "off",
       "no-console": "off",
       "no-debugger": "warn",
@@ -124,7 +123,6 @@ export default tseslint.config(
       "no-shadow": "off",
       "no-ternary": "off",
       "no-undefined": "off",
-
       "no-use-before-define": "off",
       "no-void": "off",
       "no-warning-comments": "off",

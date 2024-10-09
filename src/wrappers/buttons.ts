@@ -1,272 +1,269 @@
 import contains from "contains";
 import hidden from "hidden";
-import h from "hyperscript";
-import inherits from "inherits";
 
-import Events from "../events";
-import EventEmitter from "../util/eventEmitter";
+import Despot from "../util/Despot";
+import { isAudioEnabled } from "../util/options/audio";
+import Container, { FormReadyParams } from "./container";
+import { VideomailClientOptions } from "../types/options";
+import { ErrorParams, RecordingParams, UserMediaReadyParams } from "../types/events";
 
-const Buttons = function (container, options) {
-  EventEmitter.call(this, options, "Buttons");
+type ButtonType = "submit" | "reset" | "button";
 
-  const self = this;
-  const { debug } = options;
+type ClickHandler = (params: { event: MouseEvent }) => void;
 
-  let buttonsElement;
-  let recordButton;
-  let pauseButton;
-  let resumeButton;
-  let previewButton;
-  let recordAgainButton;
-  let submitButton;
+interface RadioButtonOptions {
+  id: string;
+  name: string;
+  value: string;
+  label: string;
+  checked: boolean;
+  changeHandler: () => void;
+}
 
-  let audioOnRadioPair;
-  let audioOffRadioPair;
+class Buttons extends Despot {
+  private container: Container;
 
-  let built;
+  private buttonsElement?: HTMLElement | null | undefined;
+  private recordButton?: HTMLButtonElement;
+  private pauseButton?: HTMLButtonElement;
+  private resumeButton?: HTMLButtonElement;
+  private previewButton?: HTMLButtonElement;
+  private recordAgainButton?: HTMLButtonElement;
+  private submitButton?: HTMLButtonElement;
 
-  function hide(elements) {
-    if (elements && !Array.isArray(elements)) {
-      elements = [elements];
-    }
+  private audioOnRadioPair;
+  private audioOffRadioPair;
 
-    elements &&
-      elements.forEach(function (element) {
-        hidden(element, true);
-      });
+  private built = false;
+
+  constructor(container: Container, options: VideomailClientOptions) {
+    super("Buttons", options);
+
+    this.container = container;
   }
 
-  function show(elements) {
-    if (elements && !Array.isArray(elements)) {
-      elements = [elements];
+  private hideElement(element?: HTMLElement | null) {
+    if (!element) {
+      return;
     }
 
-    elements &&
-      elements.forEach(function (element) {
-        hidden(element, false);
-      });
+    hidden(element, true);
   }
 
-  function isShown(elements) {
-    let isShown = elements && true;
-
-    if (elements && !Array.isArray(elements)) {
-      elements = [elements];
+  private showElement(element?: HTMLElement | null) {
+    if (!element) {
+      return;
     }
 
-    elements &&
-      elements.forEach(function (element) {
-        isShown &&= element && !hidden(element);
-      });
-
-    return isShown;
+    hidden(element, false);
   }
 
-  function disable(elements) {
-    if (elements && !Array.isArray(elements)) {
-      elements = [elements];
+  private isShown(element?: HTMLElement | null) {
+    if (!element) {
+      return false;
     }
 
-    elements &&
-      elements.forEach(function (element) {
-        // https://github.com/binarykitchen/videomail-client/issues/148
-        if (element) {
-          if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
-            element.disabled = true;
-          } else {
-            element.classList.add("disabled");
-          }
-        }
-      });
+    return !hidden(element);
   }
 
-  function enable(elements) {
-    if (elements && !Array.isArray(elements)) {
-      elements = [elements];
+  private disable(element?: HTMLElement) {
+    if (!element) {
+      return;
     }
 
-    elements &&
-      elements.forEach(function (element) {
-        // https://github.com/binarykitchen/videomail-client/issues/148
-        if (element) {
-          if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
-            element.disabled = false;
-          } else {
-            element.classList.remove("disabled");
-          }
-        }
-      });
+    if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
+      element.setAttribute("disabled", "true");
+    } else {
+      element.classList.add("disabled");
+    }
   }
 
-  function adjustButton(buttonElement, show, type, disabled) {
+  private enable(element?: HTMLElement) {
+    if (!element) {
+      return;
+    }
+
+    if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
+      element.removeAttribute("disabled");
+    } else {
+      element.classList.remove("disabled");
+    }
+  }
+
+  private adjustButton(
+    buttonElement: HTMLButtonElement,
+    show?: boolean,
+    type?: ButtonType,
+    disabled?: boolean,
+  ) {
     if (disabled) {
-      disable(buttonElement);
+      this.disable(buttonElement);
     }
 
     if (type) {
       buttonElement.type = type;
-    } else if (!buttonElement.type) {
-      buttonElement.type = "button";
     }
 
-    !show && hide(buttonElement);
+    if (!show) {
+      this.hideElement(buttonElement);
+    }
 
     return buttonElement;
   }
 
-  function replaceClickHandler(element, clickHandler) {
-    const wrappedClickHandler = (e) => {
-      e && e.preventDefault();
+  private replaceClickHandler(element: HTMLButtonElement, clickHandler: ClickHandler) {
+    const wrappedClickHandler = (ev: MouseEvent) => {
+      ev.preventDefault();
 
       try {
-        clickHandler({ event: e });
+        clickHandler({ event: ev });
       } catch (exc) {
-        self.emit(Events.ERROR, exc);
+        this.emit("ERROR", { exc });
       }
     };
 
     element.onclick = wrappedClickHandler;
   }
 
-  function makeRadioButtonPair(options) {
-    let radioButtonElement;
-    let radioButtonGroup;
+  private makeRadioButtonPair(options: RadioButtonOptions) {
+    let radioButtonElement: HTMLInputElement | null | undefined;
+    let radioButtonGroup: HTMLSpanElement | null;
 
     if (options.id) {
-      radioButtonElement = document.getElementById(options.id);
+      radioButtonElement = document.querySelector<HTMLInputElement>(`#${options.id}`);
     }
 
     if (!radioButtonElement) {
-      radioButtonElement = h(`input#${options.id}`, {
-        type: "radio",
-        name: options.name,
-        value: options.value,
-        checked: options.checked,
-      });
+      radioButtonElement = document.createElement("input");
 
-      radioButtonGroup = h(
-        "span.radioGroup",
-        radioButtonElement,
-        h(
-          "label",
-          {
-            htmlFor: options.id,
-          },
-          options.label,
-        ),
-      );
+      radioButtonElement.id = options.id;
+      radioButtonElement.type = "radio";
+      radioButtonElement.name = options.name;
+      radioButtonElement.value = options.value;
+      radioButtonElement.checked = options.checked;
+
+      radioButtonGroup = document.createElement("span");
+      radioButtonGroup.classList.add("radioGroup");
+
+      radioButtonGroup.appendChild(radioButtonElement);
+
+      const radioLabel = document.createElement("label");
+      radioLabel.htmlFor = options.id;
+      radioLabel.textContent = options.label;
+
+      radioButtonGroup.appendChild(radioLabel);
 
       // double check that submit button is already in the buttonsElement container as a child?
-      if (submitButton && contains(buttonsElement, submitButton)) {
-        buttonsElement.insertBefore(radioButtonGroup, submitButton);
+      if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
+        this.buttonsElement?.insertBefore(radioButtonGroup, this.submitButton);
       } else {
-        buttonsElement.appendChild(radioButtonGroup);
+        this.buttonsElement?.appendChild(radioButtonGroup);
       }
     }
 
-    if (options.changeHandler) {
-      radioButtonElement.onchange = options.changeHandler;
-    }
+    radioButtonElement.onchange = options.changeHandler;
 
-    disable(radioButtonElement);
+    this.disable(radioButtonElement);
 
     return radioButtonElement;
   }
 
-  function makeButton(
-    buttonClass,
-    text,
-    clickHandler,
-    show,
-    id,
-    type,
-    selector,
+  private makeButton(
+    buttonClass: string,
+    text: string,
+    clickHandler?: ClickHandler,
+    show?: boolean,
+    id?: string,
+    type?: ButtonType,
+    selector?,
     disabled = true,
   ) {
-    let buttonElement;
+    let buttonElement: HTMLButtonElement | null | undefined;
 
     if (id) {
-      buttonElement = document.getElementById(id);
+      buttonElement = document.querySelector<HTMLButtonElement>(`#${id}`);
     } else if (selector) {
       buttonElement = document.querySelector(selector);
     } else {
-      buttonElement = buttonsElement.querySelector(`.${buttonClass}`);
+      buttonElement = this.buttonsElement?.querySelector(`.${buttonClass}`);
     }
 
     if (!buttonElement) {
-      if (options.selectors.buttonClass) {
-        buttonClass += `.${options.selectors.buttonClass}`;
+      buttonElement = document.createElement("button");
+      buttonElement.classList.add(buttonClass);
+
+      if (this.options.selectors.buttonClass) {
+        buttonElement.classList.add(this.options.selectors.buttonClass);
       }
 
-      buttonElement = h(`button.${buttonClass}`);
-      buttonElement = adjustButton(buttonElement, show, type, disabled);
+      buttonElement = this.adjustButton(buttonElement, show, type, disabled);
 
       buttonElement.innerHTML = text;
 
       // double check that submit button is already in the buttonsElement container
-      if (submitButton && contains(buttonsElement, submitButton)) {
-        buttonsElement.insertBefore(buttonElement, submitButton);
+      if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
+        this.buttonsElement?.insertBefore(buttonElement, this.submitButton);
       } else {
-        buttonsElement.appendChild(buttonElement);
+        this.buttonsElement?.appendChild(buttonElement);
       }
     } else {
-      buttonElement = adjustButton(buttonElement, show, type, disabled);
+      buttonElement = this.adjustButton(buttonElement, show, type, disabled);
     }
 
     if (clickHandler) {
-      replaceClickHandler(buttonElement, clickHandler);
+      this.replaceClickHandler(buttonElement, clickHandler);
     }
 
     return buttonElement;
   }
 
-  function buildButtons() {
-    if (!options.disableSubmit) {
-      if (!submitButton) {
-        submitButton = makeButton(
-          options.selectors.submitButtonClass,
+  private buildButtons() {
+    if (!this.options.disableSubmit) {
+      if (!this.submitButton) {
+        this.submitButton = this.makeButton(
+          this.options.selectors.submitButtonClass,
           "Submit",
-          null,
+          undefined,
           true,
-          options.selectors.submitButtonId,
+          this.options.selectors.submitButtonId,
           "submit",
-          options.selectors.submitButtonSelector,
-          options.enableAutoValidation,
+          this.options.selectors.submitButtonSelector,
+          this.options.enableAutoValidation,
         );
       } else {
-        disable(submitButton);
+        this.disable(this.submitButton);
       }
 
       /*
        * no need to listen to the submit event when it's already listened
        * within the form element class
        */
-      if (!container.hasForm() && submitButton) {
-        replaceClickHandler(submitButton, submit);
+      if (!this.container.hasForm()) {
+        this.replaceClickHandler(this.submitButton, this.submit.bind(this));
       }
     }
 
-    recordButton = makeButton(
-      options.selectors.recordButtonClass,
-      options.text.buttons.record,
-      record,
+    this.recordButton = this.makeButton(
+      this.options.selectors.recordButtonClass,
+      this.options.text.buttons.record,
+      this.record.bind(this),
       false,
     );
 
-    if (options.enablePause) {
-      pauseButton = makeButton(
-        options.selectors.pauseButtonClass,
-        options.text.buttons.pause,
-        container.pause,
+    if (this.options.enablePause) {
+      this.pauseButton = this.makeButton(
+        this.options.selectors.pauseButtonClass,
+        this.options.text.buttons.pause,
+        this.container.pause.bind(this.container),
         false,
       );
     }
 
-    if (options.enablePause) {
-      resumeButton = makeButton(
-        options.selectors.resumeButtonClass,
-        options.text.buttons.resume,
-        container.resume,
+    if (this.options.enablePause) {
+      this.resumeButton = this.makeButton(
+        this.options.selectors.resumeButtonClass,
+        this.options.text.buttons.resume,
+        this.container.resume.bind(this.container),
         false,
       );
     }
@@ -275,433 +272,460 @@ const Buttons = function (container, options) {
      * show stop only when pause is enabled - looks better that way otherwise button
      * move left and right between record and stop (preview)
      */
-    previewButton = makeButton(
-      options.selectors.previewButtonClass,
-      options.text.buttons.preview,
-      container.stop,
+    this.previewButton = this.makeButton(
+      this.options.selectors.previewButtonClass,
+      this.options.text.buttons.preview,
+      this.container.stop.bind(this.container),
       false,
     );
 
-    recordAgainButton = makeButton(
-      options.selectors.recordAgainButtonClass,
-      options.text.buttons.recordAgain,
-      recordAgain,
+    this.recordAgainButton = this.makeButton(
+      this.options.selectors.recordAgainButtonClass,
+      this.options.text.buttons.recordAgain,
+      this.recordAgain.bind(this),
       false,
     );
 
-    if (options.audio && options.audio.switch) {
-      audioOffRadioPair = makeRadioButtonPair({
+    if (this.options.audio.switch) {
+      this.audioOffRadioPair = this.makeRadioButtonPair({
         id: "audioOffOption",
         name: "audio",
         value: "off",
-        label: options.text.audioOff,
-        checked: !options.isAudioEnabled(),
-        changeHandler() {
-          container.disableAudio();
+        label: this.options.text.audioOff,
+        checked: !isAudioEnabled(this.options),
+        changeHandler: () => {
+          this.container.disableAudio();
         },
       });
 
-      audioOnRadioPair = makeRadioButtonPair({
+      this.audioOnRadioPair = this.makeRadioButtonPair({
         id: "audioOnOption",
         name: "audio",
         value: "on",
-        label: options.text.audioOn,
-        checked: options.isAudioEnabled(),
-        changeHandler() {
-          container.enableAudio();
+        label: this.options.text.audioOn,
+        checked: isAudioEnabled(this.options),
+        changeHandler: () => {
+          this.container.enableAudio();
         },
       });
     }
   }
 
-  function onFormReady(params) {
+  private onFormReady(params?: FormReadyParams) {
     // no need to show record button when doing a record again
-    if (!isShown(recordAgainButton)) {
-      if (!params.paused) {
-        show(recordButton);
+    if (!this.isShown(this.recordAgainButton)) {
+      if (!params?.paused) {
+        this.showElement(this.recordButton);
       }
     }
 
-    if (!params.paused) {
-      disable(previewButton);
-      hide(previewButton);
+    if (!params?.paused) {
+      this.disable(this.previewButton);
+      this.hideElement(this.previewButton);
     }
 
-    if (!options.enableAutoValidation) {
-      enable(submitButton);
+    if (!this.options.enableAutoValidation) {
+      this.enable(this.submitButton);
     }
   }
 
-  function onGoingBack() {
-    hide(recordAgainButton);
-    show(recordButton);
-    show(submitButton);
+  private onGoingBack() {
+    this.hideElement(this.recordAgainButton);
+    this.showElement(this.recordButton);
+    this.showElement(this.submitButton);
   }
 
-  function onReplayShown() {
-    self.hide();
+  private onReplayShown() {
+    this.hide();
   }
 
-  function onUserMediaReady(params) {
-    onFormReady(params);
+  private onUserMediaReady(params: UserMediaReadyParams) {
+    this.onFormReady();
 
-    if (isShown(recordButton) && !params.recordWhenReady) {
-      enable(recordButton);
-    } else if (isShown(recordAgainButton) && !params.recordWhenReady) {
-      enable(recordAgainButton);
+    if (this.isShown(this.recordButton) && !params.recordWhenReady) {
+      this.enable(this.recordButton);
+    } else if (this.isShown(this.recordAgainButton) && !params.recordWhenReady) {
+      this.enable(this.recordAgainButton);
     }
 
-    if (options.enableAutoValidation) {
-      disable(submitButton);
+    if (this.options.enableAutoValidation) {
+      this.disable(this.submitButton);
     }
 
     if (!params.recordWhenReady) {
-      if (isShown(audioOnRadioPair)) {
-        enable(audioOnRadioPair);
+      if (this.isShown(this.audioOnRadioPair)) {
+        this.enable(this.audioOnRadioPair);
       }
 
-      if (isShown(audioOffRadioPair)) {
-        enable(audioOffRadioPair);
+      if (this.isShown(this.audioOffRadioPair)) {
+        this.enable(this.audioOffRadioPair);
       }
     }
   }
 
-  function onResetting() {
-    disable(submitButton);
-
-    self.reset();
+  private onResetting() {
+    this.disable(this.submitButton);
+    this.reset();
   }
 
-  function onPreview() {
-    hide(recordButton);
-    hide(previewButton);
-    disable(audioOnRadioPair);
-    disable(audioOffRadioPair);
+  private onPreview() {
+    this.hideElement(this.recordButton);
+    this.hideElement(this.previewButton);
 
-    show(recordAgainButton);
-    enable(recordAgainButton);
+    this.disable(this.audioOnRadioPair);
+    this.disable(this.audioOffRadioPair);
 
-    if (!options.enableAutoValidation) {
-      enable(submitButton);
+    this.showElement(this.recordAgainButton);
+    this.enable(this.recordAgainButton);
+
+    if (!this.options.enableAutoValidation) {
+      this.enable(this.submitButton);
     }
   }
 
-  this.enableSubmit = function () {
-    enable(submitButton);
-  };
-
-  this.adjustButtonsForPause = function () {
-    if (!self.isCountingDown()) {
-      pauseButton && hide(pauseButton);
-      show(resumeButton);
-      enable(resumeButton);
-      hide(recordButton);
-      show(previewButton);
-      enable(previewButton);
-    }
-  };
-
-  function onFirstFrameSent() {
-    hide(recordButton);
-    hide(recordAgainButton);
-
-    if (pauseButton) {
-      show(pauseButton);
-      enable(pauseButton);
-    }
-
-    enable(previewButton);
-    show(previewButton);
+  public enableSubmit() {
+    this.enable(this.submitButton);
   }
 
-  function onRecording(framesCount) {
+  public adjustButtonsForPause() {
+    if (!this.isCountingDown()) {
+      if (this.pauseButton) {
+        this.hideElement(this.pauseButton);
+      }
+
+      this.showElement(this.resumeButton);
+      this.enable(this.resumeButton);
+      this.hideElement(this.recordButton);
+      this.showElement(this.previewButton);
+      this.enable(this.previewButton);
+    }
+  }
+
+  private onFirstFrameSent() {
+    this.hideElement(this.recordButton);
+    this.hideElement(this.recordAgainButton);
+
+    if (this.pauseButton) {
+      this.showElement(this.pauseButton);
+      this.enable(this.pauseButton);
+    }
+
+    this.enable(this.previewButton);
+    this.showElement(this.previewButton);
+  }
+
+  private onRecording(params: RecordingParams) {
     /*
      * it is possible to hide while recording, hence
      * check framesCount first (coming from recorder)
      */
-    if (framesCount > 1) {
-      onFirstFrameSent();
+    if (params.framesCount > 1) {
+      this.onFirstFrameSent();
     } else {
-      disable(audioOffRadioPair);
-      disable(audioOnRadioPair);
-      disable(recordAgainButton);
-      disable(recordButton);
+      this.disable(this.audioOffRadioPair);
+      this.disable(this.audioOnRadioPair);
+      this.disable(this.recordAgainButton);
+      this.disable(this.recordButton);
     }
   }
 
-  function onResuming() {
-    hide(resumeButton);
-    hide(recordButton);
+  private onResuming() {
+    this.hideElement(this.resumeButton);
+    this.hideElement(this.recordButton);
 
-    if (pauseButton) {
-      enable(pauseButton);
-      show(pauseButton);
+    if (this.pauseButton) {
+      this.enable(this.pauseButton);
+      this.showElement(this.pauseButton);
     }
   }
 
-  function onStopping() {
-    disable(previewButton);
-    disable(recordButton);
+  private onStopping() {
+    this.disable(this.previewButton);
+    this.disable(this.recordButton);
 
-    hide(pauseButton);
-    hide(resumeButton);
+    this.hideElement(this.pauseButton);
+    this.hideElement(this.resumeButton);
   }
 
-  function onCountdown() {
-    disable(recordButton);
-    disable(audioOffRadioPair);
-    disable(audioOnRadioPair);
+  private onCountdown() {
+    this.disable(this.recordButton);
+    this.disable(this.audioOffRadioPair);
+    this.disable(this.audioOnRadioPair);
   }
 
-  function onSubmitting() {
-    debug("Buttons: onSubmitting()");
-    disable(submitButton);
-    disable(recordAgainButton);
+  private onSubmitting() {
+    this.options.logger.debug("Buttons: onSubmitting()");
+    this.disable(this.submitButton);
+    this.disable(this.recordAgainButton);
   }
 
-  function onSubmitted() {
-    disable(previewButton);
-    disable(recordAgainButton);
-    disable(recordButton);
-    disable(submitButton);
+  private onSubmitted() {
+    this.disable(this.previewButton);
+    this.disable(this.recordAgainButton);
+    this.disable(this.recordButton);
+    this.disable(this.submitButton);
   }
 
-  function onInvalid() {
-    if (options.enableAutoValidation) {
-      disable(submitButton);
+  private onInvalid() {
+    if (this.options.enableAutoValidation) {
+      this.disable(this.submitButton);
     }
   }
 
-  function onValid() {
-    if (options.enableAutoValidation) {
-      enable(submitButton);
+  private onValid() {
+    if (this.options.enableAutoValidation) {
+      this.enable(this.submitButton);
     }
   }
 
-  function onHidden() {
-    hide(recordButton);
-    hide(previewButton);
-    hide(recordAgainButton);
-    hide(resumeButton);
-    hide(audioOnRadioPair);
-    hide(audioOffRadioPair);
+  private onHidden() {
+    this.hideElement(this.recordButton);
+    this.hideElement(this.previewButton);
+    this.hideElement(this.recordAgainButton);
+    this.hideElement(this.resumeButton);
+    this.hideElement(this.audioOnRadioPair);
+    this.hideElement(this.audioOffRadioPair);
   }
 
-  function onEnablingAudio() {
-    debug("Buttons: onEnablingAudio()");
+  private onEnablingAudio() {
+    this.options.logger.debug("Buttons: onEnablingAudio()");
 
-    disable(recordButton);
-    disable(audioOnRadioPair);
-    disable(audioOffRadioPair);
+    this.disable(this.recordButton);
+    this.disable(this.audioOnRadioPair);
+    this.disable(this.audioOffRadioPair);
   }
 
-  function onDisablingAudio() {
-    debug("Buttons: onDisablingAudio()");
+  private onDisablingAudio() {
+    this.options.logger.debug("Buttons: onDisablingAudio()");
 
-    disable(recordButton);
-    disable(audioOnRadioPair);
-    disable(audioOffRadioPair);
+    this.disable(this.recordButton);
+    this.disable(this.audioOnRadioPair);
+    this.disable(this.audioOffRadioPair);
   }
 
-  function recordAgain() {
-    disable(recordAgainButton);
-    container.beginWaiting();
-    container.recordAgain();
+  private recordAgain() {
+    this.disable(this.recordAgainButton);
+    this.container.beginWaiting();
+    this.container.recordAgain();
   }
 
-  function onStartingOver() {
-    show(submitButton);
+  private onStartingOver() {
+    this.showElement(this.submitButton);
   }
 
-  function submit() {
-    container.submit();
+  private submit() {
+    this.container.submit();
   }
 
-  function record(params) {
-    disable(recordButton);
-    container.record(params);
+  private record() {
+    this.disable(this.recordButton);
+    this.container.record();
   }
 
-  function initEvents() {
-    debug("Buttons: initEvents()");
+  private initEvents() {
+    this.options.logger.debug("Buttons: initEvents()");
 
-    self
-      .on(Events.USER_MEDIA_READY, function (params) {
-        if (!params.switchingFacingMode) {
-          onUserMediaReady(params);
+    this.on("USER_MEDIA_READY", (params: UserMediaReadyParams) => {
+      if (!params.switchingFacingMode) {
+        this.onUserMediaReady(params);
+      }
+    });
+
+    this.on("PREVIEW", () => {
+      this.onPreview();
+    });
+
+    this.on("PAUSED", () => {
+      this.adjustButtonsForPause();
+    });
+
+    this.on("RECORDING", (params: RecordingParams) => {
+      this.onRecording(params);
+    });
+
+    this.on("FIRST_FRAME_SENT", () => {
+      this.onFirstFrameSent();
+    });
+
+    this.on("RESUMING", () => {
+      this.onResuming();
+    });
+
+    this.on("STOPPING", () => {
+      this.onStopping();
+    });
+
+    this.on("COUNTDOWN", () => {
+      this.onCountdown();
+    });
+
+    this.on("SUBMITTING", () => {
+      this.onSubmitting();
+    });
+
+    this.on("RESETTING", () => {
+      this.onResetting();
+    });
+
+    this.on("INVALID", () => {
+      this.onInvalid();
+    });
+
+    this.on("VALID", () => {
+      this.onValid();
+    });
+
+    this.on("SUBMITTED", () => {
+      this.onSubmitted();
+    });
+
+    this.on("HIDE", () => {
+      this.onHidden();
+    });
+
+    this.on("FORM_READY", (params: FormReadyParams) => {
+      this.onFormReady(params);
+    });
+
+    this.on("REPLAY_SHOWN", () => {
+      this.onReplayShown();
+    });
+
+    this.on("GOING_BACK", () => {
+      this.onGoingBack();
+    });
+
+    this.on("ENABLING_AUDIO", () => {
+      this.onEnablingAudio();
+    });
+
+    this.on("DISABLING_AUDIO", () => {
+      this.onDisablingAudio();
+    });
+
+    this.on("STARTING_OVER", () => {
+      this.onStartingOver();
+    });
+
+    this.on("CONNECTED", () => {
+      if (this.options.loadUserMediaOnRecord) {
+        if (this.isShown(this.recordButton)) {
+          this.enable(this.recordButton);
         }
-      })
-      .on(Events.PREVIEW, function () {
-        onPreview();
-      })
-      .on(Events.PAUSED, function () {
-        self.adjustButtonsForPause();
-      })
-      .on(Events.RECORDING, function (framesCount) {
-        onRecording(framesCount);
-      })
-      .on(Events.FIRST_FRAME_SENT, function () {
-        onFirstFrameSent();
-      })
-      .on(Events.RESUMING, function () {
-        onResuming();
-      })
-      .on(Events.STOPPING, function () {
-        onStopping();
-      })
-      .on(Events.COUNTDOWN, function () {
-        onCountdown();
-      })
-      .on(Events.SUBMITTING, function () {
-        onSubmitting();
-      })
-      .on(Events.RESETTING, function () {
-        onResetting();
-      })
-      .on(Events.INVALID, function () {
-        onInvalid();
-      })
-      .on(Events.VALID, function () {
-        onValid();
-      })
-      .on(Events.SUBMITTED, function () {
-        onSubmitted();
-      })
-      .on(Events.HIDE, function () {
-        onHidden();
-      })
-      .on(Events.FORM_READY, function (params) {
-        onFormReady(params);
-      })
-      .on(Events.REPLAY_SHOWN, function () {
-        onReplayShown();
-      })
-      .on(Events.GOING_BACK, function () {
-        onGoingBack();
-      })
-      .on(Events.ENABLING_AUDIO, function () {
-        onEnablingAudio();
-      })
-      .on(Events.DISABLING_AUDIO, function () {
-        onDisablingAudio();
-      })
-      .on(Events.STARTING_OVER, function () {
-        onStartingOver();
-      })
-      .on(Events.CONNECTED, function () {
-        if (options.loadUserMediaOnRecord) {
-          if (isShown(recordButton)) {
-            enable(recordButton);
-          }
-        }
-      })
-      .on(Events.DISCONNECTED, function () {
-        disable(recordButton);
-        disable(audioOnRadioPair);
-        disable(audioOffRadioPair);
-      })
-      .on(Events.ERROR, function (err) {
-        /*
-         * since https://github.com/binarykitchen/videomail-client/issues/60
-         * we hide areas to make it easier for the user
-         */
-        if (err.hideButtons && err.hideButtons() && options.adjustFormOnBrowserError) {
-          self.hide();
-        }
-      });
+      }
+    });
+
+    this.on("DISCONNECTED", () => {
+      this.disable(this.recordButton);
+      this.disable(this.audioOnRadioPair);
+      this.disable(this.audioOffRadioPair);
+    });
+
+    this.on("ERROR", (params: ErrorParams) => {
+      /*
+       * since https://github.com/binarykitchen/videomail-client/issues/60
+       * we hide areas to make it easier for the user
+       */
+      if (params.err?.isBrowserProblem() && this.options.adjustFormOnBrowserError) {
+        this.hide();
+      }
+    });
   }
 
-  this.reset = function () {
-    options.debug("Buttons: reset()");
+  public reset() {
+    this.options.logger.debug("Buttons: reset()");
 
-    disable(pauseButton);
-    disable(resumeButton);
-    disable(recordButton);
-    disable(previewButton);
-    disable(recordAgainButton);
-    disable(audioOnRadioPair);
-    disable(audioOffRadioPair);
-  };
+    this.disable(this.pauseButton);
+    this.disable(this.resumeButton);
+    this.disable(this.recordButton);
+    this.disable(this.previewButton);
+    this.disable(this.recordAgainButton);
+    this.disable(this.audioOnRadioPair);
+    this.disable(this.audioOffRadioPair);
+  }
 
-  this.isRecordAgainButtonEnabled = function () {
-    return !recordAgainButton.disabled;
-  };
+  public isRecordAgainButtonEnabled() {
+    return !this.recordAgainButton?.disabled;
+  }
 
-  this.isReady = function () {
-    if (!recordButton) {
+  public isReady() {
+    if (!this.recordButton) {
       // No recordButton? Ok, must be in playerOnly mode. So, not ready for recording
       return false;
     }
 
     return this.isRecordButtonEnabled();
-  };
+  }
 
-  this.isRecordButtonEnabled = function () {
-    return !recordButton.disabled;
-  };
+  public isRecordButtonEnabled() {
+    return !this.recordButton?.disabled;
+  }
 
-  this.setSubmitButton = function (newSubmitButton) {
-    submitButton = newSubmitButton;
-  };
+  public setSubmitButton(newSubmitButton) {
+    this.submitButton = newSubmitButton;
+  }
 
-  this.getSubmitButton = function () {
-    return submitButton;
-  };
+  public getSubmitButton() {
+    return this.submitButton;
+  }
 
-  this.build = function () {
-    buttonsElement = container.querySelector(`.${options.selectors.buttonsClass}`);
+  public build() {
+    this.buttonsElement = this.container.querySelector(
+      `.${this.options.selectors.buttonsClass}`,
+    );
 
-    if (!buttonsElement) {
-      buttonsElement = h(`div.${options.selectors.buttonsClass}`);
+    if (!this.buttonsElement) {
+      this.buttonsElement = document.createElement("div");
+      this.buttonsElement.classList.add(this.options.selectors.buttonsClass);
 
-      container.appendChild(buttonsElement);
+      this.container.appendChild(this.buttonsElement);
     }
 
-    buildButtons();
+    this.buildButtons();
 
-    !built && initEvents();
+    if (!this.built) {
+      this.initEvents();
+    }
 
-    built = true;
-  };
+    this.built = true;
+  }
 
-  this.unload = function () {
-    if (built) {
+  public unload() {
+    if (this.built) {
       // Disables all buttons
-      self.reset();
+      this.reset();
 
-      debug("Buttons: unload()");
-      self.removeAllListeners();
+      this.options.logger.debug("Buttons: unload()");
+      this.removeAllListeners();
 
-      self.hide();
+      this.hide();
 
-      built = false;
+      this.built = false;
     }
-  };
+  }
 
-  this.hide = function (params) {
-    hide(buttonsElement);
+  public hide(deep = false) {
+    this.hideElement(this.buttonsElement);
 
-    if (params && params.deep) {
-      hide(recordButton);
-      hide(pauseButton);
-      hide(resumeButton);
-      hide(previewButton);
-      hide(recordAgainButton);
-      hide(submitButton);
-      hide(audioOnRadioPair);
-      hide(audioOffRadioPair);
+    if (deep) {
+      this.hideElement(this.recordButton);
+      this.hideElement(this.pauseButton);
+      this.hideElement(this.resumeButton);
+      this.hideElement(this.previewButton);
+      this.hideElement(this.recordAgainButton);
+      this.hideElement(this.submitButton);
+      this.hideElement(this.audioOnRadioPair);
+      this.hideElement(this.audioOffRadioPair);
     }
-  };
+  }
 
-  this.show = function () {
-    show(buttonsElement);
-  };
+  public show() {
+    this.showElement(this.buttonsElement);
+  }
 
-  this.isCountingDown = function () {
-    return container.isCountingDown();
-  };
-};
-
-inherits(Buttons, EventEmitter);
+  public isCountingDown() {
+    return this.container.isCountingDown();
+  }
+}
 
 export default Buttons;

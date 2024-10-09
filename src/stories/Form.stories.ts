@@ -22,7 +22,6 @@ type Story = StoryObj<DeepPartial<VideomailClientOptions>>;
 // Direct submit forms means, it sends data right away to the videomail.io server.
 // But if you prefer to submit to your own server, look at the other Form examples
 export const DirectSubmission: Story = {
-  name: "Direct Submission",
   args: {
     enablePause: false,
     video: {
@@ -33,8 +32,7 @@ export const DirectSubmission: Story = {
       containerId: "videomail",
     },
   },
-  render: () => {
-    return `<style type="text/css">
+  render: () => `<style type="text/css">
               input[type="text"],
               .buttons {
                 margin: 1em 0;
@@ -50,12 +48,12 @@ export const DirectSubmission: Story = {
               <h2 class="subject"></h2>
               <video class="replay"></video>
               <button id="startOver">Start over</button>
-            </div>`;
-  },
+            </div>`,
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 
-    const onSubmitted = function (videomail) {
+    videomailClient.on("SUBMITTED", ({ videomail }) => {
+      // TODO CONTINUE FROM HERE, REPLAY FN BROKEN, IT OVERWRITES REPLAY ELEMENT
       videomailClient.replay(videomail, "viewVideo");
 
       const startOverButton = document.getElementById("startOver");
@@ -65,13 +63,7 @@ export const DirectSubmission: Story = {
           videomailClient.startOver();
         };
       }
-    };
-
-    // @ts-ignore Fix later
-    videomailClient.on(
-      videomailClient.events.SUBMITTED,
-      onSubmitted.bind(videomailClient),
-    );
+    });
 
     videomailClient.show();
   },

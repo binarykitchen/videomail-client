@@ -2,13 +2,12 @@ import { version } from "../package.json";
 
 import { VideomailClientOptions } from "./types/options";
 
-import addOptionsFunctions from "./util/addOptionsFunctions";
 import isProductionMode from "./util/isProductionMode";
 
 const PRODUCTION = isProductionMode();
 
 const options: VideomailClientOptions = {
-  logger: null, // define logging instance. leave null for default, console.
+  logger: console, // define logging instance. defaults to console.
   logStackSize: 30, // limits the stack size of log outputs to collect
   verbose: !PRODUCTION, // set true to log more info
   baseUrl: "https://videomail.io", // leave as it, permanent API url to post videos
@@ -93,8 +92,8 @@ const options: VideomailClientOptions = {
      * because each webcam has a different aspect ratio
      */
 
-    width: "auto", // or use an integer for exact pixels
-    height: "auto", // or use an integer for exact pixels
+    width: undefined, // or use an integer for exact pixels
+    height: undefined, // or use an integer for exact pixels
     facingMode: "user", // can be 'user', 'environment', 'left' or 'right'. useful for mobiles.
     facingModeButton: false,
 
@@ -174,7 +173,4 @@ const options: VideomailClientOptions = {
   version,
 };
 
-// Add some helper functions to options
-const optionsWithFunctions = addOptionsFunctions(options);
-
-export default optionsWithFunctions;
+export default options;

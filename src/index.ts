@@ -1,13 +1,8 @@
 import Client from "./client";
+import VideomailEvents from "./types/events";
+import Videomail from "./types/Videomail";
 
-/*
-  TODO REALIzE THIS NEED MORE WORK AND CAREFUL MIGRATIONS
-  TODO RECONSIDER REBASING WITH DEV STEP BY STEP, TOO MUCH RISK. FIRST WITH DIRECTORY RENAMES ONLY
-  TODO BECAUSE MOST PROBLEMS COME FROM THE EVENT EMITTER, REFACTOR THIS
-  TODO REBASE MORE
-  TODO RESUME MIGRATING TO TS
-  TODO REBASE MORE
-  TODO CONSIDER MIGRATING REMAINING LEGACY STORIES
-*/
+export type { Videomail };
+export type { VideomailEvents };
 
 export default Client;

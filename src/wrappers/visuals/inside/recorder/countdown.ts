@@ -1,17 +1,24 @@
 import hidden from "hidden";
-import h from "hyperscript";
+import { VideomailClientOptions } from "../../../../types/options";
+import Visuals from "../../../visuals";
 
-export default function (visuals, options) {
-  const self = this;
+class Countdown {
+  private visuals: Visuals;
+  private options: VideomailClientOptions;
 
-  let countdownElement;
-  let intervalId;
-  let countdown;
-  let paused;
+  private countdownElement?: HTMLElement | null | undefined;
+  private intervalId?: number | undefined;
+  private countdown?: number | undefined;
+  private paused = false;
 
-  function fire(cb) {
-    self.unload();
-    self.hide();
+  constructor(visuals: Visuals, options: VideomailClientOptions) {
+    this.visuals = visuals;
+    this.options = options;
+  }
+
+  private fire(cb) {
+    this.unload();
+    this.hide();
 
     // keep all callbacks async
     setTimeout(function () {
@@ -19,65 +26,85 @@ export default function (visuals, options) {
     }, 0);
   }
 
-  function countBackward(cb) {
-    if (!paused) {
-      options.debug("Countdown", countdown);
-      countdown--;
+  private countBackward(cb) {
+    if (!this.paused) {
+      this.options.logger.debug(`Countdown ${this.countdown}`);
 
-      if (countdown < 1) {
-        fire(cb);
-      } else {
-        countdownElement.innerHTML = countdown;
+      if (this.countdown !== undefined) {
+        this.countdown--;
+
+        if (this.countdown < 1) {
+          this.fire(cb);
+        } else if (this.countdownElement) {
+          this.countdownElement.innerHTML = this.countdown.toString();
+        }
       }
     }
   }
 
-  this.start = function (cb) {
-    countdownElement.innerHTML = countdown = options.video.countdown;
+  public start(cb) {
+    if (!this.countdownElement) {
+      throw new Error("Unable to start countdown without an element");
+    }
+
+    if (!(typeof this.options.video.countdown === "number")) {
+      throw new Error(
+        `The defined countdown is not a valid number: ${this.options.video.countdown}`,
+      );
+    }
+
+    this.countdown = this.options.video.countdown;
+    this.countdownElement.innerHTML = this.countdown.toString();
 
     this.show();
 
-    intervalId = setInterval(countBackward.bind(this, cb), 950);
-  };
+    this.intervalId = window.setInterval(this.countBackward.bind(this, cb), 950);
+  }
 
-  this.pause = function () {
-    paused = true;
-  };
+  public pause() {
+    this.paused = true;
+  }
 
-  this.resume = function () {
-    paused = false;
-  };
+  public resume() {
+    this.paused = false;
+  }
 
-  this.build = function () {
-    countdownElement = visuals.querySelector(".countdown");
+  public build() {
+    this.countdownElement = this.visuals
+      .getElement()
+      ?.querySelector<HTMLElement>(".countdown");
 
-    if (!countdownElement) {
-      countdownElement = h("p.countdown");
+    if (!this.countdownElement) {
+      this.countdownElement = document.createElement("p");
+      this.countdownElement.className = "countdown";
 
       this.hide();
 
-      visuals.appendChild(countdownElement);
+      this.visuals.appendChild(this.countdownElement);
     } else {
       this.hide();
     }
-  };
+  }
 
-  this.show = function () {
-    hidden(countdownElement, false);
-  };
+  public show() {
+    hidden(this.countdownElement, false);
+  }
 
-  this.isCountingDown = function () {
-    return Boolean(intervalId);
-  };
+  public isCountingDown() {
+    return Boolean(this.intervalId);
+  }
 
-  this.unload = function () {
-    clearInterval(intervalId);
-    paused = false;
-    intervalId = null;
-  };
+  public unload() {
+    clearInterval(this.intervalId);
 
-  this.hide = function () {
-    hidden(countdownElement, true);
+    this.paused = false;
+    this.intervalId = undefined;
+  }
+
+  public hide() {
+    hidden(this.countdownElement, true);
     this.unload();
-  };
+  }
 }
+
+export default Countdown;
