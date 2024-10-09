@@ -14,7 +14,8 @@ import tseslint from "typescript-eslint";
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
 export default tseslint.config(
-  eslint.configs.all,
+  // TODO change to .all later
+  eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   // ...storybook.configs["flat/recommended"],

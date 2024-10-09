@@ -1,6 +1,7 @@
 import { defineConfig } from "@rsbuild/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginStylus } from "@rsbuild/plugin-stylus";
+// import { pluginDts } from "rsbuild-plugin-dts";
 
 import { tsEntry } from "./paths";
 import { NodeEnvType } from "../../src/types/env";
@@ -19,7 +20,13 @@ export default defineConfig({
       index: tsEntry,
     },
   },
-  plugins: [pluginStylus(), pluginNodePolyfill()],
+  plugins: [
+    pluginStylus(),
+    pluginNodePolyfill(),
+    // Inspired by https://github.com/web-infra-dev/rslib/blob/main/packages/core/src/config.ts#L742
+    // It's still in early stages
+    // pluginDts({}),
+  ],
   tools: {
     htmlPlugin: false,
   },

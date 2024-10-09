@@ -25,18 +25,21 @@
     }
   ],
   "type": "module",
-  "main": "./dist/static/js/index.js",
-  "module": "./src/index.ts",
-  "source": "./src/index.ts",
+  "exports": {
+    "default": "./dist/static/js/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "audit": "npx audit-ci --config audit-ci.json",
-    "build-prod": "cross-env NODE_ENV=production rsbuild build -c ./etc/rsbuild/config.ts",
-    "build-storybook": "storybook build",
+    "build:prod": "cross-env NODE_ENV=production rsbuild build -c ./etc/rsbuild/config.ts",
+    "build:storybook": "storybook build",
     "chromatic": "npx chromatic --project-token=chpt_742ead9ab882938 --build-script-name build:storybook",
     "lint": "eslint --color .",
-    "lint-fix": "eslint --color --fix .",
+    "lint:fix": "eslint --color --fix .",
     "prettier": "prettier --check ./etc ./src ./.storybook",
-    "prettier-fix": "prettier --write ./etc ./src ./.storybook",
+    "prettier:fix": "prettier --write ./etc ./src ./.storybook",
     "release": "release-it --only-version --config ./etc/release-it.ts",
     "storybook": "cross-env BROWSER=chromium storybook dev -p 8443 --https --ssl-cert ./etc/ssl-certs/localhost.crt --ssl-key ./etc/ssl-certs/localhost.key"
   },
@@ -99,6 +102,7 @@
     "prettier-plugin-packagejson": "2.5.3",
     "prettier-plugin-sh": "0.14.0",
     "release-it": "17.7.0",
+    "rsbuild-plugin-dts": "0.0.9",
     "storybook": "8.3.5",
     "storybook-html-rsbuild": "0.1.1",
     "typescript": "5.6.2",
