@@ -44,9 +44,7 @@ jobs:
         run: npm run audit
 
       - name: 🔎 Run tests
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: npm run test
+        run: npm run test
 
       # - name: 🔎 Run Chromatic
       #   uses: chromaui/action@latest
