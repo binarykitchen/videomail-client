@@ -14,7 +14,7 @@
 Record videos in contact forms!
 
 Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds.
-This without the need for Flash, Java nor any other plugins / addons. Just TypeScript, compiled into ES2022 with declarations.
+This without the need for Flash, Java nor any other plugins / addons. Just TypeScript, compiled into ESM (ES2022) with their declarations.
 
 - <a href="#storybook">Storybook (examples)</a>
 - <a href="#demo">Demo / Fully working version</a>
@@ -31,7 +31,7 @@ This without the need for Flash, Java nor any other plugins / addons. Just TypeS
 
 ## Storybook (examples)
 
-To check out some examples in your browser, just do:
+To check out some examples in your browser, just run these two commands:
 
 1. `npm install`
 2. `npm run storybook`
@@ -104,7 +104,7 @@ videomailClient.on("FORM_READY", () => {
   // form is ready for recording
 });
 
-videomailClient.on("SUBMITTED", (videomail, response) => {
+videomailClient.on("SUBMITTED", ({ videomail, response }) => {
   // continue with your own app logic in your javascript code if you want to process
   // something else further after form submission.
 });
@@ -258,7 +258,7 @@ When these are null (defaults), the videomail-client tries to detect these autom
 ### Include videomail meta data in Form Submissions
 
 If you want to include videomail meta data in the form submission to your own server, enable the `submitWithVideomail` option.
-Otherwise only the videomail alias is in the form body and will have to call `videomail.get(alias, cb)` to retrieve these later on.
+Otherwise only the videomail alias is in the form body and will have to call `videomail.getByAlias(alias)` to retrieve these later on.
 
 <a name="whitelist"></a>
 
