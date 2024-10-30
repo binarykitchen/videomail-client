@@ -4,4 +4,3 @@ npm-debug.log
 *.code-workspace
 storybook-static
 dist
-.storybook/public/mockServiceWorker.js
