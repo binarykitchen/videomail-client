@@ -4,4 +4,4 @@ npm-debug.log
 *.code-workspace
 storybook-static
 dist
-.storybook/public
+.storybook/public/mockServiceWorker.js
