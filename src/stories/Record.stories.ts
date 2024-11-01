@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import VideomailClient from "../index";
 import { VideomailClientOptions } from "../types/options";
 import { DeepPartial } from "../types/DeepPartial";
 
 import "./static/css/entertain.css";
+import VideomailClient from "../client";
 
 const meta: Meta<DeepPartial<VideomailClientOptions>> = {
   title: "Record",

@@ -48,7 +48,7 @@ A mirror of latest videomail-client can be seen on [videomail-client.netlify.com
 
 Check out the full version with all its features on [videomail.io](https://videomail.io) itself. Aim is to turn this into a stable product in the near future with some external assistance.
 
-On that site I just include `import VideomailClient from "videomail-client"` in the app logic.
+On that site I just include `import { VideomailClient}  from "videomail-client"` in the app logic.
 
 Another live example would be https://seeflow.co.nz/contact or https://www.deaf.org.nz/contact
 There are plenty if you just ask us. And way more will follow, we are rolling ...

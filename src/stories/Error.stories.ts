@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import VideomailClient from "./../index";
 import { VideomailClientOptions } from "../types/options";
 import { DeepPartial } from "../types/DeepPartial";
+import VideomailClient from "../client";
 
 const meta: Meta<DeepPartial<VideomailClientOptions>> = {
   title: "Error Handling",

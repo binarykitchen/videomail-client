@@ -9,6 +9,4 @@ export type { Videomail };
 export type { VideomailEvents };
 export type { PartialVideomailClientOptions };
 export type { RecordingStats };
-export { VideoType };
-
-export default VideomailClient;
+export { VideoType, VideomailClient };

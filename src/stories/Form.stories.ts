@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/html";
 import { http, HttpResponse } from "msw";
 
-import VideomailClient, { Videomail } from "../index";
+import { Videomail, VideomailClient } from "../index";
 import { VideomailClientOptions } from "../types/options";
 import { DeepPartial } from "../types/DeepPartial";
 

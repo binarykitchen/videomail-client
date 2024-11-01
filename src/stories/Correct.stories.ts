@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import VideomailClient from "../index";
 import { VideomailClientOptions } from "../types/options";
 import { DeepPartial } from "../types/DeepPartial";
 import videomailExample from "./static/json/videomail";
+import VideomailClient from "../client";
 
 // TODO Migrate more from Legacy
 
