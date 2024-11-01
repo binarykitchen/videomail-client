@@ -11,7 +11,7 @@ import Videomail from "../../types/Videomail";
 import pretty from "../../util/pretty";
 import { PreviewParams } from "../../types/events";
 import { UnloadParams } from "../container";
-import { VideoTypes } from "../../types/VideoTypes";
+import { VideoType } from "../../types/VideoType";
 
 class Replay extends Despot {
   private readonly visuals: Visuals;
@@ -392,11 +392,11 @@ class Replay extends Despot {
   }
 
   public setMp4Source(src?: string, bustCache?: boolean) {
-    this.setVideoSource(VideoTypes.MP4, src, bustCache);
+    this.setVideoSource(VideoType.MP4, src, bustCache);
   }
 
   public setWebMSource(src?: string, bustCache?: boolean) {
-    this.setVideoSource(VideoTypes.WebM, src, bustCache);
+    this.setVideoSource(VideoType.WebM, src, bustCache);
   }
 
   public getVideoType() {
