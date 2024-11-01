@@ -5,7 +5,8 @@
     ".storybook/*.ts",
     "eslint.config.mjs",
     "prettier.config.cjs",
-    "vite.config.ts"
+    "vite.config.ts",
+    "rslib.config.ts"
   ],
   "extends": [
     "./node_modules/@tsconfig/strictest/tsconfig.json",

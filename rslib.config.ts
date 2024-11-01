@@ -1,23 +1,39 @@
-import { defineConfig } from "@rsbuild/core";
+import fs from "fs";
+import path from "path";
+
+import { defineConfig } from "@rslib/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginStylus } from "@rsbuild/plugin-stylus";
-import { pluginDts } from "rsbuild-plugin-dts";
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 
-import { tsConfigProd, tsEntry } from "./paths";
-import { NodeEnvType } from "../../src/types/env";
-import isProductionMode from "../../src/util/isProductionMode";
+import { NodeEnvType } from "./src/types/env";
+import isProductionMode from "./src/util/isProductionMode";
+
+const rootDir = fs.realpathSync(process.cwd());
+
+const resolvePath = (relativePath: string) => path.resolve(rootDir, relativePath);
+
+const srcDir = resolvePath("src");
+const tsConfigProd = resolvePath("tsconfig.prod.json");
+const tsEntry = resolvePath(path.join(srcDir, "index.ts"));
 
 export default defineConfig({
+  lib: [
+    {
+      format: "esm",
+      syntax: "es2022",
+      dts: true,
+    },
+    {
+      format: "cjs",
+      syntax: "es2022",
+    },
+  ],
   mode: isProductionMode() ? NodeEnvType.PRODUCTION : NodeEnvType.DEVELOPMENT,
   output: {
     target: "web",
-    filenameHash: false,
     injectStyles: true,
     legalComments: "none",
-    distPath: {
-      js: "",
-    },
   },
   source: {
     entry: {
@@ -25,7 +41,7 @@ export default defineConfig({
     },
     tsconfigPath: tsConfigProd,
   },
-  plugins: [pluginStylus(), pluginNodePolyfill(), pluginDts({})],
+  plugins: [pluginStylus(), pluginNodePolyfill()],
   tools: {
     htmlPlugin: false,
     rspack: (_config, { appendPlugins }) => {
@@ -38,11 +54,6 @@ export default defineConfig({
           }),
         );
       }
-    },
-  },
-  performance: {
-    chunkSplit: {
-      strategy: "all-in-one",
     },
   },
 });

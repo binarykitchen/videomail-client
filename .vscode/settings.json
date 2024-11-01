@@ -39,6 +39,7 @@
     "prefinish",
     "rsbuild",
     "RSDOCTOR",
+    "rslib",
     "rspack",
     "rubberband",
     "Sadler",
