@@ -1,4 +1,4 @@
-import Client from "..";
+import VideomailClient from "../client";
 
 const mock = {
   onHide() {},
@@ -6,18 +6,18 @@ const mock = {
 
 describe("Client", () => {
   test("Constructor with default arguments", () => {
-    const videomailClient = new Client();
+    const videomailClient = new VideomailClient();
     expect(videomailClient.isBuilt()).toBeFalsy();
   });
 
   test("Constructor throws error when width is not divisible by two", () => {
     expect(() => {
-      new Client({ video: { width: 99 } });
+      new VideomailClient({ video: { width: 99 } });
     }).toThrowError(/Width must be divisible by two/u);
   });
 
   test("Showing it sets its built flag to true", () => {
-    const videomailClient = new Client();
+    const videomailClient = new VideomailClient();
 
     videomailClient.show();
 
@@ -25,7 +25,7 @@ describe("Client", () => {
   });
 
   test("Hiding emits hide event", () => {
-    const videomailClient = new Client();
+    const videomailClient = new VideomailClient();
 
     const onHideSpy = vi.spyOn(mock, "onHide");
 
@@ -41,7 +41,7 @@ describe("Client", () => {
   });
 
   test("On unload, hidden and not built", () => {
-    const videomailClient = new Client();
+    const videomailClient = new VideomailClient();
 
     videomailClient.show();
     videomailClient.unload();
@@ -50,14 +50,14 @@ describe("Client", () => {
   });
 
   test("Not dirty when just shown", () => {
-    const videomailClient = new Client();
+    const videomailClient = new VideomailClient();
     videomailClient.show();
 
     expect(videomailClient.isDirty()).toBeFalsy();
   });
 
   test("Not recording when just shown", () => {
-    const videomailClient = new Client();
+    const videomailClient = new VideomailClient();
     videomailClient.show();
 
     expect(videomailClient.isRecording()).toBeFalsy();
