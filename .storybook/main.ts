@@ -13,14 +13,11 @@ const config: StorybookConfig = {
     name: "storybook-html-rsbuild",
     options: {
       builder: {
-        rsbuildConfigPath: "etc/rsbuild/config.ts",
+        rsbuildConfigPath: "rslib.config.ts",
       },
     },
   },
   staticDirs: ["./public"],
-  core: {
-    disableTelemetry: true,
-  },
 };
 
 export default config;
