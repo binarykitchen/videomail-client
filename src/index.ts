@@ -1,4 +1,4 @@
-import Client from "./client";
+import VideomailClient from "./client";
 import VideomailEvents from "./types/events";
 import { PartialVideomailClientOptions } from "./types/options";
 import RecordingStats from "./types/RecordingStats";
@@ -9,4 +9,4 @@ export type { VideomailEvents };
 export type { PartialVideomailClientOptions };
 export type { RecordingStats };
 
-export default Client;
+export default VideomailClient;
