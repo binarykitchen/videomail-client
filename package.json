@@ -89,6 +89,7 @@
     "@storybook/theming": "8.4.1",
     "@tsconfig/node22": "22.0.0",
     "@tsconfig/strictest": "2.0.5",
+    "@types/defined": "1.0.2",
     "@types/node": "22.8.6",
     "@types/superagent": "8.1.9",
     "@types/ua-parser-js": "0.7.39",

@@ -16,11 +16,7 @@ class Browser {
   public constructor(options: VideomailClientOptions) {
     this.options = options;
 
-    const ua = defined(
-      options.fakeUaString,
-      typeof window !== "undefined" && window.navigator.userAgent,
-      "",
-    );
+    const ua = defined(options.fakeUaString, window.navigator.userAgent, "");
 
     const userAgentParser = new UAParser(ua);
 

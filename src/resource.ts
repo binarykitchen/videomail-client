@@ -8,13 +8,14 @@ import Response from "superagent/lib/node/response";
 import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
 
-const timezoneId = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-
 class Resource {
   private readonly options: VideomailClientOptions;
+  private readonly timezoneId: string;
 
   constructor(options: VideomailClientOptions) {
     this.options = options;
+
+    this.timezoneId = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 
   private applyDefaultValue(videomail: PartialVideomail, name: string) {
@@ -45,7 +46,7 @@ class Resource {
       const request = await superagent("get", url)
         .type("json")
         .set("Accept", "application/json")
-        .set("Timezone-Id", timezoneId)
+        .set("Timezone-Id", this.timezoneId)
         .set(Constants.SITE_NAME_LABEL, this.options.siteName)
         .timeout(this.options.timeouts.connection);
 
@@ -69,7 +70,7 @@ class Resource {
     try {
       const request = await superagent(method, url)
         .query(queryParams)
-        .set("Timezone-Id", timezoneId)
+        .set("Timezone-Id", this.timezoneId)
         .send(videomail)
         .timeout(this.options.timeouts.connection);
 
@@ -158,7 +159,7 @@ class Resource {
       const res = await superagent
         .post(url)
         .type(formType)
-        .set("Timezone-Id", timezoneId)
+        .set("Timezone-Id", this.timezoneId)
         .send(formData)
         .timeout(this.options.timeouts.connection);
 
