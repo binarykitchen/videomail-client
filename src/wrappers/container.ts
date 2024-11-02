@@ -742,6 +742,7 @@ class Container extends Despot {
 
       if (!hasVideomailKey) {
         response = await this.resource.form(formData, url);
+        this.submitted = true;
         this.emit("SUBMITTED", { videomail: response.body, response });
 
         /*
@@ -752,6 +753,7 @@ class Container extends Despot {
          */
       } else {
         response = await this.submitVideomail(formData, method);
+        this.submitted = true;
         this.emit("SUBMITTED", { videomail: response.body.videomail, response });
       }
     } catch (exc) {
@@ -764,7 +766,6 @@ class Container extends Despot {
       }
 
       this.endWaiting();
-      this.submitted = true;
     }
   }
 
