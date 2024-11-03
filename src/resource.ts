@@ -96,14 +96,13 @@ class Resource {
     const url = `${this.options.baseUrl}/client-error/`;
 
     try {
-      const request = await superagent(FormMethod.POST, url)
+      await superagent(FormMethod.POST, url)
         .query(queryParams)
         .send(err)
         .timeout(this.options.timeouts.connection);
-
-      return request;
     } catch (exc) {
-      throw createError({ exc, options: this.options });
+      // Can't throw it again, so just print and do nothing else further.
+      console.error(exc);
     }
   }
 
