@@ -2,7 +2,7 @@ import superagent from "superagent";
 
 import Constants from "./constants";
 import { VideomailClientOptions } from "./types/options";
-import { PartialVideomail } from "./types/Videomail";
+import Videomail, { PartialVideomail } from "./types/Videomail";
 import createError from "./util/error/createError";
 import Response from "superagent/lib/node/response";
 import VideomailError from "./util/error/VideomailError";
@@ -50,7 +50,9 @@ class Resource {
         .set(Constants.SITE_NAME_LABEL, this.options.siteName)
         .timeout(this.options.timeouts.connection);
 
-      return request;
+      const videomail = request.body as Videomail;
+
+      return videomail;
     } catch (exc) {
       throw createError({ exc, options: this.options });
     }
