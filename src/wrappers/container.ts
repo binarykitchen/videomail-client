@@ -156,6 +156,7 @@ class Container extends Despot {
   }
 
   private getFormElement() {
+    // It's ok to return no form, especially when in replay mode
     let formElement: HTMLFormElement | undefined | null;
 
     if (this.containerElement && this.containerElement.tagName === "FORM") {
@@ -165,7 +166,7 @@ class Container extends Despot {
         `#${this.options.selectors.formId}`,
       );
 
-      if (!formElement || formElement.tagName !== "FORM") {
+      if (formElement && formElement.tagName !== "FORM") {
         throw new Error(
           `HTML element with ID ${this.options.selectors.formId} is not a form.`,
         );
