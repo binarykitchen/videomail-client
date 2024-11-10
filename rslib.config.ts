@@ -26,7 +26,7 @@ export default defineConfig({
     },
     {
       format: "cjs",
-      syntax: "es2022",
+      syntax: "es2015",
     },
   ],
   mode: isProductionMode() ? NodeEnvType.PRODUCTION : NodeEnvType.DEVELOPMENT,

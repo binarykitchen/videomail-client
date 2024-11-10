@@ -9,13 +9,11 @@ import pretty from "../../util/pretty";
 import UserMedia from "./userMedia";
 
 import { isAudioEnabled } from "../../util/options/audio";
-import { filesize } from "filesize";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import Visuals from "../visuals";
 import { VideomailClientOptions } from "../../types/options";
 import createError from "../../util/error/createError";
-import humanizeDuration from "humanize-duration";
 import VideomailError from "../../util/error/VideomailError";
 import getBrowser from "../../util/getBrowser";
 import getRatio from "../../util/html/dimensions/getRatio";
@@ -74,8 +72,6 @@ class Recorder extends Despot {
 
   private userMediaTimeout?: number | undefined;
   private retryTimeout?: number | undefined;
-
-  private bytesSum?: number | undefined;
 
   private frameProgress?: string | undefined;
   private sampleProgress?: string | undefined;
@@ -324,13 +320,6 @@ class Recorder extends Despot {
     }
 
     this.recordingStats.waitingTime = this.waitingTime;
-
-    const bytes = filesize(this.bytesSum ? this.bytesSum : -1, { round: 2 });
-    const waitingTime = humanizeDuration(this.waitingTime);
-
-    this.options.logger.debug(
-      `While recording, ${bytes} have been transferred and waiting time was ${waitingTime}`,
-    );
   }
 
   private initSocket(cb?: () => void) {
@@ -1098,12 +1087,6 @@ class Recorder extends Despot {
             options: this.options,
           });
         } else if (this.recordingBuffer) {
-          if (this.bytesSum !== undefined) {
-            this.bytesSum += recordingBufferLength;
-          } else {
-            this.bytesSum = recordingBufferLength;
-          }
-
           const frameControlBuffer = Buffer.from(
             JSON.stringify({ frameNumber: this.framesCount }),
           );
@@ -1114,16 +1097,6 @@ class Recorder extends Despot {
             frameNumber: this.framesCount,
             onFlushedCallback: this.onFlushed.bind(this),
           });
-
-          /*
-           * if (this.options.verbose) {
-           *   this.options.logger.debug(
-           *     'Frame #' + framesCount + ' (' + recordingBufferLength + ' bytes):',
-           *     ' delta=' + deltaTime + 'ms, ' +
-           *     ' elapsed=' + elapsedTime + 'ms'
-           *   )
-           * }
-           */
 
           this.visuals.checkTimer(elapsedTime);
         }
@@ -1206,8 +1179,6 @@ class Recorder extends Despot {
 
       return;
     }
-
-    this.bytesSum = 0;
 
     this.frame = new Frame(
       this.canvas,

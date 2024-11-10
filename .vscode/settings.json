@@ -21,7 +21,6 @@
     "crossorigin",
     "deepmerge",
     "derequire",
-    "filesize",
     "getusermedia",
     "ICPU",
     "initialise",

@@ -9,7 +9,7 @@ import * as regexpPlugin from "eslint-plugin-regexp";
 import pluginSecurity from "eslint-plugin-security";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import storybook from "eslint-plugin-storybook";
+// import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
@@ -17,7 +17,7 @@ export default tseslint.config(
   eslint.configs.all,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  ...storybook.configs["flat/recommended"],
+  // ...storybook.configs["flat/recommended"],
   eslintPluginImportX.flatConfigs.recommended,
   eslintPluginImportX.flatConfigs.typescript,
   pluginSecurity.configs.recommended,
