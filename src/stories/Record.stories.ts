@@ -40,7 +40,7 @@ export const SimpleJpegs: Story = {
       types: ["jpeg"],
     },
     video: {
-      countdown: 0,
+      countdown: 3,
       width: 320,
       limitSeconds: 20,
     },

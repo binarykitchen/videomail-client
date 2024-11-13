@@ -317,15 +317,6 @@ class Visuals extends Despot {
     }
   }
 
-  public() {
-    if (this.options.video.countdown) {
-      this.emit("COUNTDOWN");
-      this.recorderInsides.startCountdown(this.recorder.record.bind(this.recorder));
-    } else {
-      this.recorder.record();
-    }
-  }
-
   public getRecorder() {
     return this.recorder;
   }
@@ -454,7 +445,12 @@ class Visuals extends Despot {
   }
 
   public record() {
-    this.recorder.record();
+    if (this.options.video.countdown) {
+      this.emit("COUNTDOWN");
+      this.recorderInsides.startCountdown(this.recorder.record.bind(this.recorder));
+    } else {
+      this.recorder.record();
+    }
   }
 
   public getElement() {
