@@ -14,7 +14,18 @@ function findOriginalExc(exc: unknown) {
     const body = response.body;
 
     if ("error" in body) {
-      return body.error;
+      const message = body.error.message as string;
+      const name = body.error.name as string;
+      const stack = body.error.stack as string;
+
+      const cause = body.error.cause;
+
+      const error = new Error(message, { cause });
+
+      error.name = name;
+      error.stack = stack;
+
+      return error;
     }
   }
 
