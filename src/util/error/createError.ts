@@ -24,10 +24,8 @@ function createError(errorParams: ErrorParams) {
   let err = errorParams.err;
   const classList = errorParams.classList ?? [];
 
-  if (exc instanceof Error) {
-    if (!err) {
-      err = exc;
-    }
+  if (!err && exc instanceof Error) {
+    err = exc;
   }
 
   if (err instanceof VideomailError) {

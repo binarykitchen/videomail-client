@@ -8,6 +8,19 @@ import Response from "superagent/lib/node/response";
 import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
 
+function findOriginalExc(exc: unknown) {
+  if (exc instanceof Error && "response" in exc) {
+    const response = exc.response as Response;
+    const body = response.body;
+
+    if ("error" in body) {
+      return body.error;
+    }
+  }
+
+  return exc;
+}
+
 class Resource {
   private readonly options: VideomailClientOptions;
   private readonly timezoneId: string;
@@ -54,7 +67,7 @@ class Resource {
 
       return videomail;
     } catch (exc) {
-      throw createError({ exc, options: this.options });
+      throw createError({ exc: findOriginalExc(exc), options: this.options });
     }
   }
 
@@ -78,7 +91,7 @@ class Resource {
 
       return request;
     } catch (exc) {
-      throw createError({ exc, options: this.options });
+      throw createError({ exc: findOriginalExc(exc), options: this.options });
     }
   }
 
@@ -131,7 +144,7 @@ class Resource {
 
       return res;
     } catch (exc) {
-      throw createError({ exc, options: this.options });
+      throw createError({ exc: findOriginalExc(exc), options: this.options });
     }
   }
 
@@ -166,7 +179,7 @@ class Resource {
 
       return res;
     } catch (exc) {
-      throw createError({ exc, options: this.options });
+      throw createError({ exc: findOriginalExc(exc), options: this.options });
     }
   }
 }
