@@ -37,7 +37,6 @@ class VideomailError extends Error {
   public static readonly BROWSER_PROBLEM = "browser-problem";
   public static readonly WEBCAM_PROBLEM = "webcam-problem";
   public static readonly OVERCONSTRAINED = "OverconstrainedError";
-  public static readonly NOT_FOUND_ERROR = "NotFoundError";
   public static readonly NOT_READABLE_ERROR = "NotReadableError";
   public static readonly SECURITY_ERROR = "SecurityError";
   public static readonly TRACK_START_ERROR = "TrackStartError";

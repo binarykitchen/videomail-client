@@ -15,15 +15,17 @@ function findOriginalExc(exc: unknown) {
 
     if ("error" in body) {
       const message = body.error.message as string;
-      const name = body.error.name as string;
-      const stack = body.error.stack as string;
-
       const cause = body.error.cause;
 
       const error = new Error(message, { cause });
 
-      error.name = name;
-      error.stack = stack;
+      if (body.error.name) {
+        error.name = body.error.name;
+      }
+
+      if (body.error.stack) {
+        error.stack = body.error.stack;
+      }
 
       return error;
     }

@@ -18,11 +18,7 @@ interface ErrorParams {
 function createError(errorParams: ErrorParams) {
   const { exc, options } = errorParams;
 
-  let message = errorParams.message;
-  let explanation = errorParams.explanation;
-
   let err = errorParams.err;
-  const classList = errorParams.classList ?? [];
 
   if (!err && exc instanceof Error) {
     err = exc;
@@ -32,44 +28,17 @@ function createError(errorParams: ErrorParams) {
     return err;
   }
 
+  let message = errorParams.message;
+  let explanation = errorParams.explanation;
+
+  const classList = errorParams.classList ?? [];
+
   const audioEnabled = isAudioEnabled(options);
   const browser = getBrowser(options);
 
-  let errorCode;
-  let errType;
+  const errName = err?.name ?? err?.constructor.name;
 
-  // whole code is ugly because all browsers behave so differently :(
-
-  if (typeof err === "object") {
-    if ("code" in err) {
-      errorCode = err.code;
-    }
-
-    if (err.name === VideomailError.TRACK_START_ERROR) {
-      errType = VideomailError.TRACK_START_ERROR;
-    } else if (err.name === VideomailError.SECURITY_ERROR) {
-      errType = VideomailError.SECURITY_ERROR;
-    } else if (errorCode === 8 && err.name === VideomailError.NOT_FOUND_ERROR) {
-      errType = VideomailError.NOT_FOUND_ERROR;
-    } else if (errorCode === 35 || err.name === VideomailError.NOT_ALLOWED_ERROR) {
-      // https://github.com/binarykitchen/videomail.io/issues/411
-      errType = VideomailError.NOT_ALLOWED_ERROR;
-    } else if (err.constructor.name === VideomailError.DOM_EXCEPTION) {
-      if (err.name === VideomailError.NOT_READABLE_ERROR) {
-        errType = VideomailError.NOT_READABLE_ERROR;
-      } else {
-        errType = VideomailError.DOM_EXCEPTION;
-      }
-    } else if (err.constructor.name === VideomailError.OVERCONSTRAINED) {
-      errType = VideomailError.OVERCONSTRAINED;
-    } else if (err.name) {
-      errType = err.name;
-    }
-  } else {
-    errType = err;
-  }
-
-  switch (errType) {
+  switch (errName) {
     case VideomailError.SECURITY_ERROR:
       message = "The operation was insecure";
       explanation = "Probably you have disallowed Cookies for this page?";
@@ -97,7 +66,6 @@ function createError(errorParams: ErrorParams) {
       message = "Source of your webcam cannot be accessed";
       explanation = "Probably it is locked from another process or has a hardware error.";
       break;
-    case VideomailError.NOT_FOUND_ERROR:
     case "NO_DEVICES_FOUND":
       if (audioEnabled) {
         message = "No webcam nor microphone found";
@@ -180,32 +148,9 @@ function createError(errorParams: ErrorParams) {
       break;
 
     case VideomailError.DOM_EXCEPTION:
-      switch (errorCode) {
-        case 8:
-          message = "Requested webcam not found";
-          explanation = "A webcam is needed but could not be found";
-          classList.push(VideomailError.WEBCAM_PROBLEM);
-          break;
-        case 9: {
-          const newUrl = `https:${window.location.href.substring(window.location.protocol.length)}`;
-          message = "Security upgrade needed";
-          explanation =
-            `Click <a href="${newUrl}">here</a> to switch to HTTPs which is more safe ` +
-            ` and enables encrypted videomail transfers.`;
-          classList.push(VideomailError.BROWSER_PROBLEM);
-          break;
-        }
-        case 11:
-          message = "Invalid State";
-          explanation = "The object is in an invalid, unusable state";
-          classList.push(VideomailError.BROWSER_PROBLEM);
-          break;
-        default:
-          message = "DOM Exception";
-          explanation = pretty(err);
-          classList.push(VideomailError.BROWSER_PROBLEM);
-          break;
-      }
+      message = "DOM Exception";
+      explanation = pretty(err);
+
       break;
 
     /*
@@ -233,7 +178,6 @@ function createError(errorParams: ErrorParams) {
        * error objects can be prettified to undefined sometimes
        */
       if (!explanation && originalExplanation) {
-        // tried toString before but nah
         explanation = `Inspected: ${originalExplanation}`;
       }
 
@@ -243,8 +187,8 @@ function createError(errorParams: ErrorParams) {
 
       // for weird, undefined cases
       if (!message) {
-        if (errType) {
-          message = `${errType} (weird)`;
+        if (errName) {
+          message = `${errName} (weird)`;
         }
 
         if (!explanation) {
