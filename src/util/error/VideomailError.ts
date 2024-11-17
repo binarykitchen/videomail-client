@@ -1,6 +1,7 @@
 import { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../getBrowser";
+import HTTPError from "./HTTPError";
 
 export interface ErrData extends ErrorOptions {
   explanation: string | undefined;
@@ -8,7 +9,7 @@ export interface ErrData extends ErrorOptions {
   err?: Error | undefined;
 }
 
-class VideomailError extends Error {
+class VideomailError extends HTTPError {
   public readonly title = "videomail-client error";
   public readonly location = window.location.href;
 

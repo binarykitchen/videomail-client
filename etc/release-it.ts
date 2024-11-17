@@ -5,6 +5,16 @@ const config: Config = {
   // github: {
   //   release: true,
   // }
+  // https://github.com/release-it/release-it/tree/main?tab=readme-ov-file#hooks
+  hooks: {
+    "before:init": [
+      "npm run prettier",
+      "npm run lint",
+      "npm run types:check",
+      "npm test",
+    ],
+    "after:bump": "npm run build:prod",
+  },
 };
 
 export default config;

@@ -5,9 +5,10 @@ import { isAudioEnabled } from "../options/audio";
 import VideomailError, { ErrData } from "./VideomailError";
 import getBrowser from "../getBrowser";
 import { VideomailClientOptions } from "../../types/options";
+import HTTPError from "./HTTPError";
 
 interface ErrorParams {
-  err?: Error;
+  err?: HTTPError;
   exc?: unknown;
   message?: string;
   explanation?: string;
@@ -227,6 +228,11 @@ function createError(errorParams: ErrorParams) {
     classList,
     errData,
   );
+
+  if (err) {
+    videomailError.status = err.status;
+    videomailError.code = err.code;
+  }
 
   if (options.reportErrors) {
     const resource = new Resource(options);

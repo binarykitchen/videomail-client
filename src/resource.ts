@@ -7,6 +7,7 @@ import createError from "./util/error/createError";
 import Response from "superagent/lib/node/response";
 import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
+import HTTPError from "./util/error/HTTPError";
 
 function findOriginalExc(exc: unknown) {
   if (exc instanceof Error && "response" in exc) {
@@ -17,7 +18,7 @@ function findOriginalExc(exc: unknown) {
       const message = body.error.message as string;
       const cause = body.error.cause;
 
-      const error = new Error(message, { cause });
+      const error = new HTTPError(message, { cause });
 
       if (body.error.name) {
         error.name = body.error.name;
@@ -25,6 +26,14 @@ function findOriginalExc(exc: unknown) {
 
       if (body.error.stack) {
         error.stack = body.error.stack;
+      }
+
+      if (body.error.status) {
+        error.status = body.error.status;
+      }
+
+      if (body.error.code) {
+        error.code = body.error.code;
       }
 
       return error;
