@@ -49,7 +49,7 @@
     "prettier:fix": "prettier --write ./etc ./src ./.storybook ./*.ts",
     "release": "release-it --only-version --config ./etc/release-it.ts",
     "storybook": "cross-env BROWSER=chromium storybook dev -p 8443 --https --ssl-cert ./etc/ssl-certs/localhost.crt --ssl-key ./etc/ssl-certs/localhost.key",
-    "test": "cross-env ENVIRON=test vitest",
+    "test": "cross-env ENVIRON=test vitest --watch=false",
     "types:check": "tsc --noEmit",
     "types:config": "tsc --showConfig"
   },
