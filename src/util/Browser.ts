@@ -1,5 +1,5 @@
 import defined from "defined";
-import UAParser, { IResult } from "ua-parser-js";
+import { UAParser, IResult } from "ua-parser-js";
 
 import { VideomailClientOptions } from "../types/options";
 import createError from "./error/createError";
