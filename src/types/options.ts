@@ -70,7 +70,7 @@ export interface VideomailClientOptions {
 
     width?: number | undefined;
     height?: number | undefined;
-    facingMode: string;
+    facingMode: ConstrainDOMString;
     facingModeButton: boolean;
 
     stretch: boolean;

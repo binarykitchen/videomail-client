@@ -98,11 +98,14 @@ class Recorder extends Despot {
 
   private recordingBuffer?: Buffer | undefined;
 
+  private facingMode: ConstrainDOMString;
+
   constructor(visuals: Visuals, replay: Replay, options: VideomailClientOptions) {
     super("Recorder", options);
 
     this.visuals = visuals;
     this.replay = replay;
+    this.facingMode = options.video.facingMode;
   }
 
   private writeStream(buffer: Buffer, opts?: WriteStreamParams) {
@@ -1288,22 +1291,22 @@ class Recorder extends Despot {
     }
   }
 
-  private switchFacingMode(facingMode?: ConstrainDOMString) {
+  private switchFacingMode() {
     if (!getBrowser(this.options).isMobile()) {
       return;
     }
 
-    let newFacingMode: ConstrainDOMString | undefined;
-
-    if (facingMode === "user") {
-      newFacingMode = "environment";
-    } else if (facingMode === "environment") {
-      newFacingMode = "user";
+    if (this.facingMode === "user") {
+      this.facingMode = "environment";
+    } else if (this.facingMode === "environment") {
+      this.facingMode = "user";
     } else {
-      this.options.logger.debug(`Recorder: unsupported facing mode ${facingMode}`);
+      this.options.logger.warn(
+        `Recorder: unsupported facing mode ${pretty(this.facingMode)}`,
+      );
     }
 
-    this.loadGenuineUserMedia({ switchingFacingMode: newFacingMode });
+    this.loadGenuineUserMedia({ switchingFacingMode: this.facingMode });
   }
 
   private initEvents() {
