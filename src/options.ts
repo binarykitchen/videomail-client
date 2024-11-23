@@ -161,11 +161,8 @@ const options: VideomailClientOptions = {
   // true = all form inputs get disabled and disappear when browser can't record
   adjustFormOnBrowserError: true,
 
-  /*
-   * when true, any errors will be sent to the videomail server for analysis
-   * ps: can be a function too returning a boolean
-   */
-  reportErrors: false,
+  // when true, any errors will be sent to the videomail server for analysis
+  reportErrors: true,
 
   // just for testing purposes to simulate browser agent handling
   fakeUaString: undefined,

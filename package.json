@@ -88,7 +88,7 @@
     "@tsconfig/node22": "22.0.0",
     "@tsconfig/strictest": "2.0.5",
     "@types/defined": "1.0.2",
-    "@types/node": "22.9.1",
+    "@types/node": "22.9.3",
     "@types/superagent": "8.1.9",
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.1.10",

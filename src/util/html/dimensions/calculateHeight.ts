@@ -15,7 +15,7 @@ function calculateHeight(
 
   if (width < 1) {
     throw createError({
-      message: "Unable to calculate height when width is less than 1.",
+      message: `Unable to calculate height when width is less than 1 (= ${width}) and responsive mode is set to ${responsive}`,
       options,
     });
   } else if (responsive && element) {
