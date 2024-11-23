@@ -92,8 +92,24 @@ class Replay extends Despot {
     }
 
     if (!height) {
-      const element = this.visuals.getElement() ?? document.body;
-      height = calculateHeight(responsive, videoWidth, this.options, ratio, element);
+      let element = this.visuals.getElement();
+      let target;
+
+      if (element) {
+        target = "visualsElement";
+      } else {
+        element = document.body;
+        target = "document body";
+      }
+
+      height = calculateHeight(
+        responsive,
+        videoWidth,
+        this.options,
+        target,
+        ratio,
+        element,
+      );
     }
 
     if (width > 0) {
