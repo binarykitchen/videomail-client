@@ -135,7 +135,30 @@ class Resource {
     try {
       await superagent(FormMethod.POST, url)
         .query(queryParams)
-        .send(err)
+        .set("Timezone-Id", this.timezoneId)
+        // Note you cant send the Error instance itself, it has to be a plain JSON
+        .send({
+          browser: err.browser,
+          code: err.code,
+          cookies: err.cookies,
+          cpu: err.cpu,
+          device: err.device,
+          engine: err.engine,
+          err: err.err,
+          explanation: err.explanation,
+          location: err.location,
+          logLines: err.logLines,
+          orientation: err.orientation,
+          os: err.os,
+          promise: err.promise,
+          reason: err.reason,
+          screen: err.screen,
+          siteName: err.siteName,
+          status: err.status,
+          title: err.title,
+          message: err.message,
+          stack: err.stack,
+        })
         .timeout(this.options.timeouts.connection);
     } catch (exc) {
       // Can't throw it again, so just print and do nothing else further.
