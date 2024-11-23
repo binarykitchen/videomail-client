@@ -16,16 +16,16 @@ class VideomailError extends HTTPError {
   public explanation: string | undefined;
   public logLines?: string[] | undefined;
   public siteName: string | undefined;
-  public cookies: string | undefined;
+  public cookie: string | undefined;
   public err?: Error | undefined;
   public promise?: Promise<any> | undefined;
   public reason?: any;
-  public browser: IBrowser | undefined;
+  public browser: IBrowser;
   public cpu?: ICPU | undefined;
   public device?: IDevice | undefined;
-  public engine?: IEngine | undefined;
+  public engine: IEngine;
   public os?: IOS | undefined;
-  public screen?: string | undefined;
+  public screen: string;
   public orientation?: string | undefined;
 
   private readonly classList?: string[] | undefined;
@@ -66,8 +66,8 @@ class VideomailError extends HTTPError {
     this.engine = usefulClientData.engine;
     this.os = usefulClientData.os;
 
-    const cookies = global.document.cookie.split("; ");
-    this.cookies = cookies.length > 0 ? cookies.join(",\n") : undefined;
+    const cookie = global.document.cookie.split("; ");
+    this.cookie = cookie.length > 0 ? cookie.join(",\n") : undefined;
 
     this.screen = [screen.width, screen.height, screen.colorDepth].join("×");
 

@@ -8,6 +8,7 @@ import Response from "superagent/lib/node/response";
 import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
 import HTTPError from "./util/error/HTTPError";
+import { FullVideomailErrorData } from "./types/error";
 
 function findOriginalExc(exc: unknown) {
   if (exc instanceof Error && "response" in exc) {
@@ -133,32 +134,34 @@ class Resource {
     const url = `${this.options.baseUrl}/client-error/`;
 
     try {
+      const fullVideomailErrorData: FullVideomailErrorData = {
+        browser: err.browser,
+        code: err.code,
+        cookie: err.cookie,
+        cpu: err.cpu,
+        device: err.device,
+        engine: err.engine,
+        err: err.err,
+        explanation: err.explanation,
+        location: err.location,
+        logLines: err.logLines,
+        orientation: err.orientation,
+        os: err.os,
+        promise: err.promise,
+        reason: err.reason,
+        screen: err.screen,
+        siteName: err.siteName,
+        status: err.status,
+        title: err.title,
+        message: err.message,
+        stack: err.stack,
+      };
+
       await superagent(FormMethod.POST, url)
         .query(queryParams)
         .set("Timezone-Id", this.timezoneId)
         // Note you cant send the Error instance itself, it has to be a plain JSON
-        .send({
-          browser: err.browser,
-          code: err.code,
-          cookies: err.cookies,
-          cpu: err.cpu,
-          device: err.device,
-          engine: err.engine,
-          err: err.err,
-          explanation: err.explanation,
-          location: err.location,
-          logLines: err.logLines,
-          orientation: err.orientation,
-          os: err.os,
-          promise: err.promise,
-          reason: err.reason,
-          screen: err.screen,
-          siteName: err.siteName,
-          status: err.status,
-          title: err.title,
-          message: err.message,
-          stack: err.stack,
-        })
+        .send(fullVideomailErrorData)
         .timeout(this.options.timeouts.connection);
     } catch (exc) {
       // Can't throw it again, so just print and do nothing else further.
