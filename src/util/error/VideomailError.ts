@@ -61,7 +61,11 @@ class VideomailError extends HTTPError {
     const usefulClientData = browser.getUsefulData();
 
     this.browser = usefulClientData.browser;
-    this.cpu = usefulClientData.cpu;
+
+    // Only when architecture is set, pass it over
+    if (usefulClientData.cpu.architecture) {
+      this.cpu = usefulClientData.cpu;
+    }
     this.device = usefulClientData.device;
     this.engine = usefulClientData.engine;
     this.os = usefulClientData.os;

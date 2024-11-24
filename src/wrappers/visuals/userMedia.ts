@@ -391,11 +391,19 @@ class UserMedia extends Despot {
   }
 
   public getVideoHeight() {
-    return this.rawVisualUserMedia?.videoHeight;
+    if (!this.rawVisualUserMedia) {
+      return undefined;
+    }
+
+    return this.rawVisualUserMedia.videoHeight || this.rawVisualUserMedia.height;
   }
 
   public getVideoWidth() {
-    return this.rawVisualUserMedia?.videoWidth;
+    if (!this.rawVisualUserMedia) {
+      return undefined;
+    }
+
+    return this.rawVisualUserMedia.videoWidth || this.rawVisualUserMedia.width;
   }
 
   public hasVideoWidth() {
