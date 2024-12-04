@@ -26,6 +26,9 @@ export default defineConfig({
     },
     {
       format: "cjs",
+      // This will include all the JS code into one single file without
+      // the use of require()
+      autoExternal: false,
       syntax: "es2015",
     },
   ],
