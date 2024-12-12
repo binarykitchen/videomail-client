@@ -15,15 +15,9 @@ export interface VideomailErrorData {
   status?: number | undefined;
   stack?: string | undefined;
 
-  // These are weird and probably not needed but help with narrowing down issues
+  // These are weird and probably not needed but help with narrowing down issues.
   // They come mostly from Videomail's proprietary UI code
-  errConstraint?: string | undefined;
-  errConstructorName?: string | undefined;
-  errName?: string | undefined;
-  errNo?: number | undefined;
-  errType?: string | undefined;
-  errTarget?: EventTarget | null;
-  event?: Event | undefined;
+  errStringified?: string | undefined;
   eventStringified?: string | undefined;
 }
 
