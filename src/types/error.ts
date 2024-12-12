@@ -17,6 +17,8 @@ export interface VideomailErrorData {
 
   // These are weird and probably not needed but help with narrowing down issues.
   // They come mostly from Videomail's proprietary UI code
+  errType?: string | undefined;
+  errTarget?: EventTarget | null;
   errStringified?: string | undefined;
   event?: Event | undefined;
   eventStringified?: string | undefined;
