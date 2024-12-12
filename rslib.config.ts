@@ -23,6 +23,11 @@ export default defineConfig({
       format: "esm",
       syntax: "es2022",
       dts: true,
+      output: {
+        distPath: {
+          root: "./dist/esm/",
+        },
+      },
     },
     {
       format: "cjs",
@@ -30,6 +35,20 @@ export default defineConfig({
       // the use of require()
       autoExternal: false,
       syntax: "es2015",
+      output: {
+        distPath: {
+          root: "./dist/cjs/",
+        },
+      },
+    },
+    {
+      format: "umd",
+      umdName: "VideomailClient",
+      output: {
+        distPath: {
+          root: "./dist/umd/",
+        },
+      },
     },
   ],
   mode: isProductionMode() ? NodeEnvType.PRODUCTION : NodeEnvType.DEVELOPMENT,
