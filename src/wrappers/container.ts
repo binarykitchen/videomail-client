@@ -452,12 +452,12 @@ class Container extends Despot {
 
       this.unloadChildren(params);
       this.hide();
-
+    } catch (exc) {
+      this.emit("ERROR", { exc });
+    } finally {
       Despot.removeAllListeners();
 
       this.built = this.submitted = false;
-    } catch (exc) {
-      this.emit("ERROR", { exc });
     }
   }
 

@@ -258,7 +258,6 @@ class Visuals extends Despot {
 
       this.options.logger.debug(`Visuals: unload(${e ? pretty(e) : ""})`);
 
-      Despot.removeAllListeners();
       this.recorder.unload(params);
       this.recorderInsides.unload();
       this.replay.unload(params);
