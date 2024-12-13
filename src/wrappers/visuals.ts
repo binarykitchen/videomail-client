@@ -249,30 +249,26 @@ class Visuals extends Despot {
   }
 
   public unload(params?: UnloadParams) {
-    try {
-      if (!this.built) {
-        return;
-      }
-
-      const e = params?.e;
-
-      this.options.logger.debug(`Visuals: unload(${e ? pretty(e) : ""})`);
-
-      this.recorder.unload(params);
-      this.recorderInsides.unload();
-      this.replay.unload(params);
-
-      if (e instanceof Error) {
-        // Don't hide when e is an error so that the error can be still
-        // displayed under visuals > notifier
-      } else {
-        this.hide();
-      }
-
-      this.built = false;
-    } catch (exc) {
-      this.emit("ERROR", { exc });
+    if (!this.built) {
+      return;
     }
+
+    const e = params?.e;
+
+    this.options.logger.debug(`Visuals: unload(${e ? pretty(e) : ""})`);
+
+    this.recorder.unload(params);
+    this.recorderInsides.unload();
+    this.replay.unload(params);
+
+    if (e instanceof Error) {
+      // Don't hide when e is an error so that the error can be still
+      // displayed under visuals > notifier
+    } else {
+      this.hide();
+    }
+
+    this.built = false;
   }
 
   public isNotifying() {

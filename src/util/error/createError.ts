@@ -55,7 +55,7 @@ function createError(errorParams: ErrorParams) {
           explanation = `Unmet constraint: ${err.constraint}`;
         }
       } else {
-        explanation = err?.toString();
+        explanation = err?.message;
       }
       break;
     case "MediaDeviceFailedDueToShutdown":
