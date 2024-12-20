@@ -647,11 +647,17 @@ class Recorder extends Despot {
     }
 
     this.options.logger.debug(
-      `Recorder: navigator.mediaDevices.getUserMedia() ${pretty(constraints)}`,
+      `Recorder: our webcam constraints are: ${pretty(constraints)}`,
     );
 
+    // It still can be undefined when not on HTTPS
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!navigator.mediaDevices) {
+      throw new Error("No media devices are available.");
+    }
+
     this.options.logger.debug(
-      `Recorder: navigator.mediaDevices.getSupportedConstraints() ${pretty(navigator.mediaDevices.getSupportedConstraints())}`,
+      `Recorder: available webcam constraints are: ${pretty(navigator.mediaDevices.getSupportedConstraints())}`,
     );
 
     const genuineUserMediaRequest = navigator.mediaDevices.getUserMedia(constraints);
