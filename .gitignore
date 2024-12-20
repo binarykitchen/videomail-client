@@ -3,4 +3,5 @@ npm-debug.log
 .DS_Store
 *.code-workspace
 storybook-static
-dist
+# Put it back after https://github.com/web-infra-dev/rslib/discussions/496#discussioncomment-11612863
+# dist
