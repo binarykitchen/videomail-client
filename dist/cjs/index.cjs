@@ -15097,7 +15097,7 @@ var __webpack_exports__ = {};
     var is_power_of_two = __webpack_require__("./node_modules/is-power-of-two/index.js");
     var is_power_of_two_default = /*#__PURE__*/ __webpack_require__.n(is_power_of_two);
     var package_namespaceObject = {
-        i8: "10.0.20"
+        i8: "10.0.21"
     };
     const NodeEnvType = {
         DEVELOPMENT: "development",

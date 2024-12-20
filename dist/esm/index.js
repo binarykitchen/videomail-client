@@ -5189,7 +5189,7 @@ function isPromise(anything) {
 }
 const util_isPromise = isPromise;
 var package_namespaceObject = {
-    i8: "10.0.20"
+    i8: "10.0.21"
 };
 const NodeEnvType = {
     DEVELOPMENT: "development",
