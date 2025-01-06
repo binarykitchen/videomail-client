@@ -9,6 +9,7 @@ import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
 import HTTPError from "./util/error/HTTPError";
 import { FullVideomailErrorData } from "./types/error";
+import { version } from "./../package.json";
 
 function findOriginalExc(exc: unknown) {
   if (exc instanceof Error && "response" in exc) {
@@ -155,6 +156,7 @@ class Resource {
         title: err.title,
         message: err.message,
         stack: err.stack,
+        vcVersion: version,
       };
 
       await superagent(FormMethod.POST, url)

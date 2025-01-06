@@ -650,12 +650,6 @@ class Recorder extends Despot {
       `Recorder: our webcam constraints are: ${pretty(constraints)}`,
     );
 
-    // It still can be undefined when not on HTTPS
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!navigator.mediaDevices) {
-      throw new Error("No media devices are available.");
-    }
-
     this.options.logger.debug(
       `Recorder: available webcam constraints are: ${pretty(navigator.mediaDevices.getSupportedConstraints())}`,
     );
@@ -690,6 +684,12 @@ class Recorder extends Despot {
     this.emit("LOADING_USER_MEDIA");
 
     try {
+      // It still can be undefined when not on HTTPS
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!navigator.mediaDevices) {
+        throw new Error("No media devices are available.");
+      }
+
       this.userMediaTimeout = window.setTimeout(() => {
         if (!this.isReady()) {
           const err = getBrowser(this.options).getNoAccessIssue();
@@ -701,6 +701,8 @@ class Recorder extends Despot {
 
       this.loadGenuineUserMedia(params);
     } catch (exc) {
+      this.clearUserMediaTimeout();
+
       this.options.logger.debug("Recorder: failed to load genuine user media");
 
       this.userMediaLoading = false;
@@ -713,6 +715,7 @@ class Recorder extends Despot {
         this.options.logger.debug(
           `Recorder: no error listeners attached but throwing exception further`,
         );
+
         throw exc; // throw it further
       }
     }

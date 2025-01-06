@@ -34,4 +34,5 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   orientation?: string | undefined;
   os?: IOS | undefined;
   screen: string;
+  vcVersion: string;
 }
