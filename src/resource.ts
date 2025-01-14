@@ -156,7 +156,9 @@ class Resource {
         title: err.title,
         message: err.message,
         stack: err.stack,
-        vcVersion: version,
+        versions: {
+          videomailClient: version,
+        },
       };
 
       await superagent(FormMethod.POST, url)
@@ -174,11 +176,8 @@ class Resource {
   public async post(videomail: PartialVideomail) {
     const newVideomail: PartialVideomail = this.applyDefaultValues(videomail);
 
-    /*
-     * always good to know the version of the client
-     * the videomail was submitted with
-     */
-    newVideomail[Constants.VERSION_LABEL] = this.options.version;
+    // Always good to know the version of the client the videomail was submitted with
+    newVideomail[Constants.VERSION_LABEL] = version;
 
     try {
       let res: Response;

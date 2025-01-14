@@ -1,5 +1,3 @@
-import { version } from "../package.json";
-
 import { VideomailClientOptions } from "./types/options";
 
 import isProductionMode from "./util/isProductionMode";
@@ -166,8 +164,6 @@ const options: VideomailClientOptions = {
 
   // just for testing purposes to simulate browser agent handling
   fakeUaString: undefined,
-
-  version,
 };
 
 export default options;

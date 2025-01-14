@@ -132,7 +132,6 @@ export interface VideomailClientOptions {
   adjustFormOnBrowserError: boolean;
   reportErrors: boolean;
   fakeUaString?: string | undefined;
-  version: string;
 }
 
 export type PartialVideomailClientOptions = DeepPartial<VideomailClientOptions>;

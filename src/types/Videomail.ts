@@ -44,7 +44,10 @@ interface Videomail {
   subject?: string;
   to?: string[] | undefined;
   url: string;
-  videomailClientVersion: string;
+  versions: {
+    ninjaFormPlugin?: string;
+    videomailClient: string;
+  };
   webm?: string;
   width?: number | undefined;
 }

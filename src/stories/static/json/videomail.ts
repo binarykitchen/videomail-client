@@ -19,7 +19,9 @@ const videomailExample: Videomail = {
   },
   width: 400,
   height: 226,
-  videomailClientVersion: "2.1.26",
+  versions: {
+    videomailClient: "2.1.26",
+  },
   siteName: "videomail.io",
   sending: true,
   alias: "test-example-mofo-485573266478",
