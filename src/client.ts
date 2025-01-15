@@ -19,10 +19,10 @@ export interface ShowParams {
 }
 
 class VideomailClient extends Despot {
-  private container: Container;
+  private readonly container: Container;
 
-  public static ENC_TYPE_APP_JSON = Constants.public.ENC_TYPE_APP_JSON;
-  public static ENC_TYPE_FORM = Constants.public.ENC_TYPE_FORM;
+  public static readonly ENC_TYPE_APP_JSON = Constants.public.ENC_TYPE_APP_JSON;
+  public static readonly ENC_TYPE_FORM = Constants.public.ENC_TYPE_FORM;
 
   public constructor(options: PartialVideomailClientOptions = {}) {
     super("VideomailClient", mergeWithDefaultOptions(options));

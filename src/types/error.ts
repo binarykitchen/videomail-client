@@ -24,6 +24,11 @@ export interface VideomailErrorData {
   eventStringified?: string | undefined;
 }
 
+interface VideomailErrorVersions {
+  ninjaFormPlugin?: string | undefined;
+  videomailClient: string;
+}
+
 export interface FullVideomailErrorData extends VideomailErrorData {
   browser: IBrowser;
   cookie?: string | undefined;
@@ -34,8 +39,5 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   orientation?: string | undefined;
   os?: IOS | undefined;
   screen: string;
-  versions: {
-    ninjaFormPlugin?: string;
-    videomailClient: string;
-  };
+  versions: VideomailErrorVersions | undefined;
 }

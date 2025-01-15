@@ -132,6 +132,10 @@ export interface VideomailClientOptions {
   adjustFormOnBrowserError: boolean;
   reportErrors: boolean;
   fakeUaString?: string | undefined;
+
+  versions?: {
+    ninjaFormPlugin?: string | undefined;
+  };
 }
 
 export type PartialVideomailClientOptions = DeepPartial<VideomailClientOptions>;

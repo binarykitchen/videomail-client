@@ -8,7 +8,7 @@ import createError from "../../error/createError";
 function limitHeight(height: number | undefined, options: VideomailClientOptions) {
   if (!height || height < 1) {
     throw createError({
-      message: "Passed limit-height argument cannot be less than 1!",
+      message: `Passed limit-height argument ${height} cannot be less than 1!`,
       options,
     });
   }
@@ -20,7 +20,10 @@ function limitHeight(height: number | undefined, options: VideomailClientOptions
   );
 
   if (limitedHeight < 1) {
-    throw createError({ message: "Limited height cannot be less than 1!", options });
+    throw createError({
+      message: `Limited height ${limitedHeight} cannot be less than 1!`,
+      options,
+    });
   }
 
   return limitedHeight;

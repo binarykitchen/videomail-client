@@ -9,7 +9,7 @@ import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
 import HTTPError from "./util/error/HTTPError";
 import { FullVideomailErrorData } from "./types/error";
-import { version } from "./../package.json";
+import { version as videomailClientVersion } from "./../package.json";
 
 function findOriginalExc(exc: unknown) {
   if (exc instanceof Error && "response" in exc) {
@@ -157,7 +157,8 @@ class Resource {
         message: err.message,
         stack: err.stack,
         versions: {
-          videomailClient: version,
+          videomailClient: videomailClientVersion,
+          ninjaFormPlugin: this.options.versions?.ninjaFormPlugin,
         },
       };
 
@@ -177,7 +178,7 @@ class Resource {
     const newVideomail: PartialVideomail = this.applyDefaultValues(videomail);
 
     // Always good to know the version of the client the videomail was submitted with
-    newVideomail[Constants.VERSION_LABEL] = version;
+    newVideomail[Constants.VERSION_LABEL] = videomailClientVersion;
 
     try {
       let res: Response;

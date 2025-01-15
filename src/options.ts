@@ -164,6 +164,10 @@ const options: VideomailClientOptions = {
 
   // just for testing purposes to simulate browser agent handling
   fakeUaString: undefined,
+
+  versions: {
+    ninjaFormPlugin: undefined,
+  },
 };
 
 export default options;
