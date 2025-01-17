@@ -46,8 +46,8 @@ jobs:
       - name: 🔎 Run tests
         run: npm run test
 
-      # - name: 🔎 Run Chromatic
-      #   uses: chromaui/action@latest
-      #   with:
-      #     projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-      #     buildScriptName: build:storybook
+      - name: 🔎 Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          buildScriptName: build:storybook
