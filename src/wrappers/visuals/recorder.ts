@@ -965,7 +965,8 @@ class Recorder extends Despot {
       cause = e.type;
     }
 
-    this.options.logger.debug(`Recorder: unload()${cause ? `, cause: ${cause}` : ""}`);
+    const prettyCause = cause ? `, cause: ${cause}` : "";
+    this.options.logger.debug(`Recorder: unload()${prettyCause}`);
 
     this.reset();
 
