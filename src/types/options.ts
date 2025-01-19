@@ -56,10 +56,10 @@ export interface VideomailClientOptions {
     submitButtonSelector?: string | undefined;
   };
 
-  audio: {
-    enabled: boolean;
-    switch: boolean;
-    volume: number;
+  audio?: {
+    enabled?: boolean | undefined;
+    switch?: boolean | undefined;
+    volume?: number | undefined;
     bufferSize: number | "auto";
   };
 

@@ -72,12 +72,12 @@
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "3.2.3",
+    "@chromatic-com/storybook": "3.2.4",
     "@eslint/js": "9.18.0",
     "@rsbuild/plugin-node-polyfill": "1.2.0",
     "@rsbuild/plugin-stylus": "1.0.7",
     "@rsdoctor/rspack-plugin": "0.4.13",
-    "@rslib/core": "0.3.1",
+    "@rslib/core": "0.3.2",
     "@storybook/addon-a11y": "8.5.0",
     "@storybook/addon-console": "3.0.0",
     "@storybook/addon-essentials": "8.5.0",
