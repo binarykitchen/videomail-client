@@ -319,16 +319,17 @@ Bear with me, there are lots of problems to crack, especially with the performan
 
 ### Credits
 
-These guys helped and/or inspired me for this mad project:
+These guys helped inspired me for this awesome project. Thank you so much:
 
 - Heath Sadler
+- Stefan Weber
 - Zack Best
 - Sonia Pivac
-- Isaac Johnston
 - Dominic Tarr
 - Daniel Ly
 - Nicholas Buchanan
 - Kelvin Wong
+- Isaac Johnston
 
 They all deserve lots of beer and love. That order is irrelevant.
 
