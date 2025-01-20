@@ -321,17 +321,17 @@ Bear with me, there are lots of problems to crack, especially with the performan
 
 These guys helped inspired me for this awesome project. Thank you so much:
 
-- Heath Sadler
-- Stefan Weber
-- Zack Best
-- Sonia Pivac
-- Dominic Tarr
-- Daniel Ly
-- Nicholas Buchanan
-- Kelvin Wong
-- Isaac Johnston
+- Heath Sadler (Designer)
+- Stefan Weber (Designer)
+- Zack Best (Jurist)
+- Sonia Pivac (Designer)
+- Dominic Tarr (Boat Builder)
+- Daniel Ly (Developer)
+- Nicholas Buchanan (No idea)
+- Kelvin Wong (Gamer)
+- Isaac Johnston (Consultant)
 
-They all deserve lots of beer and love. That order is irrelevant.
+They all deserve lots of love in return. Thank you so much.
 
 ### Code quality
 
