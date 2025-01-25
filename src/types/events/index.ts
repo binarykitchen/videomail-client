@@ -35,7 +35,7 @@ export interface PreviewParams {
   hasAudio: boolean;
 }
 
-export interface StoppedParams {
+interface StoppedParams {
   recordingStats?: RecordingStats | undefined;
 }
 
@@ -44,12 +44,12 @@ export interface SubmittedParams {
   response: Response;
 }
 
-export interface ValidatingParams {
+interface ValidatingParams {
   targetName?: any;
   event?: any;
 }
 
-export interface InvalidParams {
+interface InvalidParams {
   whyInvalid?: string;
   invalidData?: Record<string, string>;
 }
