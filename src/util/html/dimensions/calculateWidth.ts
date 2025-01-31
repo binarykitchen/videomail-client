@@ -13,7 +13,7 @@ function calculateWidth(
   let height = figureMinHeight(videoHeight, options);
 
   if (responsive) {
-    height = limitHeight(height, options);
+    height = limitHeight(height, options, "calculateWidth");
   }
 
   if (!height || height < 1) {

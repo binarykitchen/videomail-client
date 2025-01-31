@@ -389,7 +389,7 @@ class Container extends Despot {
   }
 
   public limitHeight(height: number) {
-    return limitHeight(height, this.options);
+    return limitHeight(height, this.options, "containers limitHeight fn");
   }
 
   private areVisualsHidden() {

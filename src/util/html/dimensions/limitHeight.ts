@@ -2,13 +2,23 @@ import { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 
 /*
- * this is difficult to compute and is not entirely correct.
- * but good enough for now to ensure some stability.
+ * This is difficult to compute and is not entirely correct.
+ * But good enough for now to ensure some stability.
  */
-function limitHeight(height: number | undefined, options: VideomailClientOptions) {
-  if (!height || height < 1) {
+function limitHeight(
+  height: number | undefined,
+  options: VideomailClientOptions,
+  // TODO Remove later once we have narrowed it down
+  calledFrom: string,
+) {
+  if (height === undefined) {
     throw createError({
-      message: `Passed limit-height argument ${height} cannot be less than 1!`,
+      message: `Passed limit-height argument height cannot be undefined (Called from ${calledFrom})`,
+      options,
+    });
+  } else if (height < 1) {
+    throw createError({
+      message: `Passed limit-height argument ${height} cannot be less than 1! (Called from ${calledFrom})`,
       options,
     });
   }

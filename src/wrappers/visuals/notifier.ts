@@ -356,13 +356,11 @@ class Notifier extends Despot {
     const params = [message, explanation].filter(Boolean);
     this.options.logger.debug(`Notifier: notify(${params.join(", ")})`);
 
-    const stillWait = notifyOptions.stillWait ? notifyOptions.stillWait : false;
-    const entertain = notifyOptions.entertain ? notifyOptions.entertain : false;
-    const blocking = notifyOptions.blocking ? notifyOptions.blocking : false;
-    const classList = notifyOptions.classList ? notifyOptions.classList : false;
-    const removeDimensions = notifyOptions.removeDimensions
-      ? notifyOptions.removeDimensions
-      : false;
+    const stillWait = notifyOptions.stillWait ?? false;
+    const entertain = notifyOptions.entertain ?? false;
+    const blocking = notifyOptions.blocking ?? false;
+    const classList = notifyOptions.classList ?? false;
+    const removeDimensions = notifyOptions.removeDimensions ?? false;
 
     if (this.notifyElement) {
       // reset

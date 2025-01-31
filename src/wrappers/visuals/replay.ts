@@ -181,8 +181,8 @@ class Replay extends Despot {
       this.correctDimensions(
         true,
         // beware that recorderWidth and videomailHeight can be null sometimes
-        videomailWidth ? videomailWidth : this.replayElement.videoWidth,
-        videomailHeight ? videomailHeight : this.replayElement.videoHeight,
+        videomailWidth ?? this.replayElement.videoWidth,
+        videomailHeight ?? this.replayElement.videoHeight,
       );
     }
 
