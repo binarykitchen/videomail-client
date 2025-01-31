@@ -49,10 +49,15 @@ function createError(errorParams: ErrorParams) {
       message = "Invalid webcam constraints";
 
       if (err && "constraint" in err) {
-        if (err.constraint === "width") {
+        const overconstrainedError = err as unknown as OverconstrainedError;
+        const constraint = overconstrainedError.constraint;
+
+        if (constraint === "width") {
           explanation = "Your webcam does not meet the width requirement.";
+        } else if (constraint) {
+          explanation = `Unmet constraint: ${constraint}`;
         } else {
-          explanation = `Unmet constraint: ${err.constraint}`;
+          explanation = err.message;
         }
       } else {
         explanation = err?.message;
