@@ -216,4 +216,25 @@ export const Inject: Story = {
   },
 };
 
+// Automatically record when ready
+export const AutoRecord: Story = {
+  name: "Records right away when loaded",
+  args: {
+    video: {
+      countdown: 3,
+      width: 240,
+      limitSeconds: 60,
+    },
+  },
+  render: (args) => {
+    const videomailClient = new VideomailClient(args);
+
+    videomailClient.on("USER_MEDIA_READY", function () {
+      videomailClient.record();
+    });
+
+    return videomailClient.show();
+  },
+};
+
 export default meta;

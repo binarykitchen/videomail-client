@@ -71,6 +71,7 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 - <a href="#on">`videomailClient.on()`</a>
 - <a href="#show">`videomailClient.show()`</a>
 - <a href="#hide">`videomailClient.hide()`</a>
+- <a href="#record">`videomailClient.record()`</a>
 - <a href="#replay">`videomailClient.replay()`</a>
 - <a href="#startOver">`videomailClient.startOver()`</a>
 - <a href="#getByAlias">`videomailClient.getByAlias()`</a>
@@ -125,6 +126,12 @@ By the way, all videomail errors are instances of `VideomailError`, inherited fr
 ### videomailClient.show()
 
 Automatically fills the DOM with a form for video recording. By default the HTML element with the ID `videomail` will be filled, see options.
+
+<a name="record"></a>
+
+### videomailClient.record()
+
+Forcefully starts recording without the need to press on a record button. Useful for special situations.
 
 <a name="replay"></a>
 

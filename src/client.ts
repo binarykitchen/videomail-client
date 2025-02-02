@@ -149,6 +149,10 @@ class VideomailClient extends Despot {
     void this.container.submit();
   }
 
+  public record() {
+    this.container.record();
+  }
+
   public getLogLines() {
     if (this.options.logger.getLines) {
       return this.options.logger.getLines();
