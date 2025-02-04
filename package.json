@@ -68,7 +68,7 @@
     "is-power-of-two": "1.0.0",
     "nanoevents": "9.1.0",
     "superagent": "10.1.1",
-    "ua-parser-js": "2.0.0",
+    "ua-parser-js": "2.0.1",
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
@@ -89,7 +89,7 @@
     "@tsconfig/node22": "22.0.0",
     "@tsconfig/strictest": "2.0.5",
     "@types/defined": "1.0.2",
-    "@types/node": "22.13.0",
+    "@types/node": "22.13.1",
     "@types/superagent": "8.1.9",
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.1.25",
@@ -116,7 +116,7 @@
     "storybook": "8.5.3",
     "storybook-html-rsbuild": "0.1.8",
     "typescript": "5.7.3",
-    "typescript-eslint": "8.22.0",
+    "typescript-eslint": "8.23.0",
     "vitest": "2.1.8"
   },
   "engines": {

@@ -11,27 +11,16 @@ function limitHeight(
   // TODO Remove later once we have narrowed it down
   calledFrom: string,
 ) {
-  if (height === undefined) {
-    throw createError({
-      message: `Passed limit-height argument height cannot be undefined (Called from ${calledFrom})`,
-      options,
-    });
-  } else if (height < 1) {
-    throw createError({
-      message: `Passed limit-height argument ${height} cannot be less than 1! (Called from ${calledFrom})`,
-      options,
-    });
-  }
+  // Or consider document.body.scrollHeight
+  let limitedHeight = document.documentElement.clientHeight;
 
-  const limitedHeight = Math.min(
-    height,
-    // document.body.scrollHeight,
-    document.documentElement.clientHeight,
-  );
+  if (height) {
+    limitedHeight = Math.min(height, limitedHeight);
+  }
 
   if (limitedHeight < 1) {
     throw createError({
-      message: `Limited height ${limitedHeight} cannot be less than 1!`,
+      message: `Limited height ${limitedHeight} cannot be less than 1! (Called from ${calledFrom})`,
       options,
     });
   }

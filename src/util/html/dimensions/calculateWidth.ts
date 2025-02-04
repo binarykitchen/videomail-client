@@ -18,7 +18,7 @@ function calculateWidth(
 
   if (!height || height < 1) {
     throw createError({
-      message: "Height cannot be smaller than 1 when calculating width.",
+      message: `Height ${height} cannot be smaller than 1 when calculating width.`,
       options,
     });
   }
