@@ -1,8 +1,8 @@
 import "@storybook/addon-console";
 
-import type { Preview } from "@storybook/html";
-
 import { initialize, mswLoader } from "msw-storybook-addon";
+
+import type { Preview } from "@storybook/html";
 
 /*
  * Initializes MSW
@@ -36,7 +36,8 @@ const preview: Preview = {
       },
     },
   },
-  loaders: [mswLoader], // 👈 Add the MSW loader to all stories
+  // 👈 Add the MSW loader to all stories
+  loaders: [mswLoader],
 };
 
 export default preview;

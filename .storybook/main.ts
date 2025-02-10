@@ -11,13 +11,17 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: "storybook-html-rsbuild",
-    options: {
-      builder: {
-        rsbuildConfigPath: "rslib.config.ts",
-      },
-    },
+    options: { builder: { rsbuildConfigPath: "rslib.config.ts" } },
   },
   staticDirs: ["./public"],
+  // Useful trick to alter HTTP header if needed
+  // rsbuildFinal: (config) => {
+  //   if (config.server) {
+  //     config.server.headers = { "permissions-policy": "microphone=(), camera=()" };
+  //   }
+
+  //   return config;
+  // },
 };
 
 export default config;

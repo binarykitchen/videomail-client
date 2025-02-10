@@ -68,7 +68,7 @@
     "is-power-of-two": "1.0.0",
     "nanoevents": "9.1.0",
     "superagent": "10.1.1",
-    "ua-parser-js": "2.0.1",
+    "ua-parser-js": "2.0.2",
     "websocket-stream": "5.5.2"
   },
   "devDependencies": {
@@ -108,7 +108,7 @@
     "jsdom": "26.0.0",
     "msw": "2.7.0",
     "msw-storybook-addon": "2.0.4",
-    "prettier": "3.4.2",
+    "prettier": "3.5.0",
     "prettier-plugin-curly": "0.3.1",
     "prettier-plugin-packagejson": "2.5.8",
     "prettier-plugin-sh": "0.14.0",
