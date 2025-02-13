@@ -1,15 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
 import VideomailClient from "../client";
-import { DeepPartial } from "../types/DeepPartial";
-import { VideomailClientOptions } from "../types/options";
+import { PartialVideomailClientOptions } from "../types/options";
 
-const meta: Meta<DeepPartial<VideomailClientOptions>> = {
+const meta: Meta<PartialVideomailClientOptions> = {
   title: "Error Handling",
   args: { verbose: true },
 };
 
-type Story = StoryObj<DeepPartial<VideomailClientOptions>>;
+type Story = StoryObj<PartialVideomailClientOptions>;
 
 // With an invalid site name, you don't get whitelisted
 //

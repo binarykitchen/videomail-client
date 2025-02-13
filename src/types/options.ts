@@ -1,4 +1,4 @@
-import { DeepPartial } from "./DeepPartial";
+import { PartialDeep } from "type-fest";
 import { PartialVideomail } from "./Videomail";
 
 export interface VideomailClientOptions {
@@ -138,4 +138,4 @@ export interface VideomailClientOptions {
   };
 }
 
-export type PartialVideomailClientOptions = DeepPartial<VideomailClientOptions>;
+export type PartialVideomailClientOptions = PartialDeep<VideomailClientOptions>;

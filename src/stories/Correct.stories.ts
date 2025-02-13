@@ -1,20 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import { VideomailClientOptions } from "../types/options";
-import { DeepPartial } from "../types/DeepPartial";
+import { PartialVideomailClientOptions } from "../types/options";
 import videomailExample from "./static/json/videomail";
 import VideomailClient from "../client";
 
 // TODO Migrate more from Legacy
 
-const meta: Meta<DeepPartial<VideomailClientOptions>> = {
+const meta: Meta<PartialVideomailClientOptions> = {
   title: "Correct",
   args: {
     verbose: true,
   },
 };
 
-type Story = StoryObj<DeepPartial<VideomailClientOptions>>;
+type Story = StoryObj<PartialVideomailClientOptions>;
 
 // A form to correct an existing videomail
 export const CorrectExisting: Story = {

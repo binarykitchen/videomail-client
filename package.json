@@ -115,6 +115,7 @@
     "release-it": "18.1.2",
     "storybook": "8.5.5",
     "storybook-html-rsbuild": "0.1.9",
+    "type-fest": "4.34.1",
     "typescript": "5.7.3",
     "typescript-eslint": "8.24.0",
     "vitest": "2.1.8"

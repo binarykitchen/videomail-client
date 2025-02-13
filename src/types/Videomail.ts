@@ -1,4 +1,4 @@
-import { DeepPartial } from "./DeepPartial";
+import { PartialDeep } from "type-fest";
 import RecordingStats from "./RecordingStats";
 import VideoFormat from "./VideoFormat";
 
@@ -52,6 +52,6 @@ interface Videomail {
   width?: number | undefined;
 }
 
-export type PartialVideomail = DeepPartial<Videomail>;
+export type PartialVideomail = PartialDeep<Videomail>;
 
 export default Videomail;

@@ -2,12 +2,11 @@ import type { Meta, StoryObj } from "@storybook/html";
 import { http, HttpResponse } from "msw";
 
 import { Videomail, VideomailClient } from "../index";
-import { VideomailClientOptions } from "../types/options";
-import { DeepPartial } from "../types/DeepPartial";
+import { PartialVideomailClientOptions } from "../types/options";
 
 import { SubmittedParams } from "../types/events";
 
-const meta: Meta<DeepPartial<VideomailClientOptions>> = {
+const meta: Meta<PartialVideomailClientOptions> = {
   title: "Form",
   args: {
     verbose: true,
@@ -17,7 +16,7 @@ const meta: Meta<DeepPartial<VideomailClientOptions>> = {
   },
 };
 
-type Story = StoryObj<DeepPartial<VideomailClientOptions>>;
+type Story = StoryObj<PartialVideomailClientOptions>;
 
 // Wrap into a form, validation, have a direct submit form and display the record
 //

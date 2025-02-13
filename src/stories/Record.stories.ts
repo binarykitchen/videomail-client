@@ -1,12 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import { VideomailClientOptions } from "../types/options";
-import { DeepPartial } from "../types/DeepPartial";
-
 import "./static/css/entertain.css";
 import VideomailClient from "../client";
+import { PartialVideomailClientOptions } from "../types/options";
 
-const meta: Meta<DeepPartial<VideomailClientOptions>> = {
+const meta: Meta<PartialVideomailClientOptions> = {
   title: "Record",
   args: {
     disableSubmit: true,
@@ -14,7 +12,7 @@ const meta: Meta<DeepPartial<VideomailClientOptions>> = {
   },
 };
 
-type Story = StoryObj<DeepPartial<VideomailClientOptions>>;
+type Story = StoryObj<PartialVideomailClientOptions>;
 
 // Dead simple with most defaults
 export const DeadSimple: Story = {
