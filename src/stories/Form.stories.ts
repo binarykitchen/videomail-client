@@ -420,7 +420,7 @@ export const WithCCAndBCC: Story = {
                   name="to"
                   size="64"
                   type="email"
-                  placeholder="Enter recipient TO email addresss(es)"
+                  placeholder="Enter recipient TO email address(es)"
                 />
                 <input
                   multiple
