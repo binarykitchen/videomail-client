@@ -1,4 +1,4 @@
-const REGEX = /^[\s,]+|[\s,]+$/gu;
+const REGEX = /[ ,]+/u;
 
 // fixes https://github.com/binarykitchen/videomail-client/issues/71
 function trimEmail(email: string) {
@@ -6,7 +6,12 @@ function trimEmail(email: string) {
 }
 
 function trimEmails(emails: string) {
-  return emails.split(REGEX).map((email) => trimEmail(email));
+  const uniqueAddresses = emails
+    .split(REGEX)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return new Set(uniqueAddresses);
 }
 
 export { trimEmail, trimEmails };

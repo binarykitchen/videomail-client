@@ -4,9 +4,9 @@ import VideoFormat from "./VideoFormat";
 
 interface Videomail {
   alias: string;
-  bcc?: string[] | undefined;
+  bcc?: Set<string> | undefined;
   body?: string;
-  cc?: string[] | undefined;
+  cc?: Set<string> | undefined;
   connection?: Record<string, number | string>;
   correctUrl: string;
   dateCreated: number;
@@ -25,24 +25,24 @@ interface Videomail {
   parentKey?: string;
   poster: string;
   recordingStats?: RecordingStats | undefined;
-  rejectedBcc?: string[];
-  rejectedCc?: string[];
-  rejectedTo?: string[];
-  accepted?: string[];
+  rejectedBcc?: Set<string>;
+  rejectedCc?: Set<string>;
+  rejectedTo?: Set<string>;
+  accepted?: Set<string>;
   replyAllUrl?: string;
   replyUrl: string;
   sending: boolean;
   sent?: boolean;
-  sentBcc?: string[];
-  sentCc?: string[];
+  sentBcc?: Set<string>;
+  sentCc?: Set<string>;
   sentDate?: number;
   sentDateIso?: string;
   sentDatePretty?: string;
-  sentTo?: string[];
+  sentTo?: Set<string>;
   siteName: string;
   siteTitle?: string;
   subject?: string;
-  to?: string[] | undefined;
+  to?: Set<string> | undefined;
   url: string;
   versions: {
     ninjaFormPlugin?: string;

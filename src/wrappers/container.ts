@@ -647,9 +647,9 @@ class Container extends Despot {
           const ccIsConfigured = "cc" in recipients;
           const bccIsConfigured = "bcc" in recipients;
 
-          const hasTo = recipients.to && recipients.to.length > 0;
-          const hasCc = recipients.cc && recipients.cc.length > 0;
-          const hasBcc = recipients.bcc && recipients.bcc.length > 0;
+          const hasTo = recipients.to && recipients.to.size > 0;
+          const hasCc = recipients.cc && recipients.cc.size > 0;
+          const hasBcc = recipients.bcc && recipients.bcc.size > 0;
 
           if (toIsConfigured) {
             if (!hasTo) {

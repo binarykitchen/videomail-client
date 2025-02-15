@@ -5,7 +5,7 @@ import Videomail from "../../../types/Videomail";
 const videomailExample: Videomail = {
   subject: "Hamster on Speed",
   from: "automatic@videomail.io",
-  to: ["automatic@videomail.io"],
+  to: new Set(["automatic@videomail.io"]),
   body: "some dead bodies in here",
   recordingStats: {
     avgFps: 16.39344262295082,
@@ -44,7 +44,7 @@ const videomailExample: Videomail = {
     },
   },
   dateUpdated: 1511570574377,
-  accepted: ["automatic@videomail.io"],
+  accepted: new Set(["automatic@videomail.io"]),
   url: "https://videomail.io/videomail/test-example-mofo-485573266478",
   key: "11e7-d179-62e4cfa0-8f72-6ff7f0c1e906",
   mp4: "https://videos.pond5.com/brown-hamster-continuously-running-fast-footage-072830929_main_xxl.mp4",

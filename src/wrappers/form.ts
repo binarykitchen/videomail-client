@@ -20,8 +20,8 @@ export enum FormMethod {
 }
 
 class Form extends Despot {
-  private container: Container;
-  private formElement: HTMLFormElement;
+  private readonly container: Container;
+  private readonly formElement: HTMLFormElement;
 
   private keyInput?: HTMLInputElement | null;
 
