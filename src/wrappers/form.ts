@@ -118,7 +118,9 @@ class Form extends Despot {
           case "INPUT": {
             const inputControl = formControl as HTMLInputElement;
 
-            if (Array.isArray(value)) {
+            if (value instanceof Set) {
+              inputControl.value = [...value].join(", ");
+            } else if (Array.isArray(value)) {
               inputControl.value = value.join(", ");
             } else {
               inputControl.value = value;
