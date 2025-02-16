@@ -6,12 +6,12 @@ function trimEmail(email: string) {
 }
 
 function trimEmails(emails: string) {
-  const uniqueAddresses = emails
+  const trimmedEmails = emails
     .split(REGEX)
     .map((item) => item.trim())
     .filter(Boolean);
 
-  return new Set(uniqueAddresses);
+  return trimmedEmails;
 }
 
 export { trimEmail, trimEmails };

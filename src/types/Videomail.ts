@@ -2,11 +2,13 @@ import { PartialDeep } from "type-fest";
 import RecordingStats from "./RecordingStats";
 import VideoFormat from "./VideoFormat";
 
+// Remember, only primitive types are supported.
+// LevelDB can't store for example Sets or Maps
 interface Videomail {
   alias: string;
-  bcc?: Set<string> | undefined;
+  bcc?: string[] | undefined;
   body?: string;
-  cc?: Set<string> | undefined;
+  cc?: string[] | undefined;
   connection?: Record<string, number | string>;
   correctUrl: string;
   dateCreated: number;
@@ -25,24 +27,24 @@ interface Videomail {
   parentKey?: string;
   poster: string;
   recordingStats?: RecordingStats | undefined;
-  rejectedBcc?: Set<string>;
-  rejectedCc?: Set<string>;
-  rejectedTo?: Set<string>;
-  accepted?: Set<string>;
+  rejectedBcc?: string[];
+  rejectedCc?: string[];
+  rejectedTo?: string[];
+  accepted?: string[];
   replyAllUrl?: string;
   replyUrl: string;
   sending: boolean;
   sent?: boolean;
-  sentBcc?: Set<string>;
-  sentCc?: Set<string>;
+  sentBcc?: string[];
+  sentCc?: string[];
   sentDate?: number;
   sentDateIso?: string;
   sentDatePretty?: string;
-  sentTo?: Set<string>;
+  sentTo?: string[];
   siteName: string;
   siteTitle?: string;
   subject?: string;
-  to?: Set<string> | undefined;
+  to?: string[] | undefined;
   url: string;
   versions: {
     ninjaFormPlugin?: string;
