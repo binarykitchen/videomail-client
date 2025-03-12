@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "3.2.5",
-    "@eslint/js": "9.20.0",
+    "@eslint/js": "9.22.0",
     "@rsbuild/plugin-node-polyfill": "1.3.0",
     "@rsbuild/plugin-stylus": "1.0.8",
     "@rsdoctor/rspack-plugin": "0.4.13",
@@ -96,7 +96,7 @@
     "audit-ci": "7.1.0",
     "chromatic": "11.25.2",
     "cross-env": "7.0.3",
-    "eslint": "9.20.1",
+    "eslint": "9.22.0",
     "eslint-import-resolver-typescript": "3.8.5",
     "eslint-plugin-depend": "0.12.0",
     "eslint-plugin-import-x": "4.6.1",
