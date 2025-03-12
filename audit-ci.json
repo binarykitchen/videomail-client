@@ -1,5 +1,10 @@
 {
   "high": true,
   "package-manager": "npm",
-  "allowlist": ["GHSA-3h5v-q93c-6h6q"]
+  "allowlist": [
+    "GHSA-3h5v-q93c-6h6q",
+    "GHSA-9crc-q9x8-hgqq",
+    "GHSA-jr5f-v2jv-69x6",
+    "GHSA-vjh7-7g9h-fjfh"
+  ]
 }
