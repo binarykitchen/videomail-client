@@ -97,7 +97,7 @@
     "chromatic": "11.27.0",
     "cross-env": "7.0.3",
     "eslint": "9.22.0",
-    "eslint-import-resolver-typescript": "3.8.5",
+    "eslint-import-resolver-typescript": "3.8.6",
     "eslint-plugin-depend": "0.12.0",
     "eslint-plugin-import-x": "4.6.1",
     "eslint-plugin-promise": "7.2.1",
@@ -115,7 +115,7 @@
     "release-it": "18.1.2",
     "storybook": "8.6.4",
     "storybook-html-rsbuild": "0.1.10",
-    "type-fest": "4.34.1",
+    "type-fest": "4.37.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.24.0",
     "vitest": "2.1.8"
