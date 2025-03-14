@@ -83,7 +83,7 @@ class VideomailError extends HTTPError {
 
     this.err = errData?.err;
 
-    const stackTarget = errData?.cause || errData?.err;
+    const stackTarget = errData?.cause ?? errData?.err;
 
     if (stackTarget) {
       // Maintains proper stack trace for where our error was thrown (only available on V8)

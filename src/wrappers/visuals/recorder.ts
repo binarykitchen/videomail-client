@@ -755,7 +755,7 @@ class Recorder extends Despot {
         case "error": {
           const err = createError({
             message: "Oh no, server error!",
-            explanation: command.args.err.toString() || "(No message given)",
+            explanation: command.args.err.toString() ?? "(No message given)",
             options: this.options,
           });
           this.emit("ERROR", { err });
