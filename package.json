@@ -118,7 +118,7 @@
     "type-fest": "4.37.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.26.1",
-    "vitest": "2.1.8"
+    "vitest": "3.0.8"
   },
   "engines": {
     "node": "^22.8.0",
