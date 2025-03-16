@@ -35,7 +35,7 @@ jobs:
         run: npm run lint
 
       - name: 🔎 Check types
-        run: npm run types:check
+        run: npm run types
 
       - name: 🔨 Build
         run: npm run build:prod
