@@ -114,7 +114,7 @@
     "prettier-plugin-sh": "0.15.0",
     "release-it": "18.1.2",
     "storybook": "8.6.6",
-    "storybook-html-rsbuild": "0.1.10",
+    "storybook-html-rsbuild": "1.0.0",
     "type-fest": "4.37.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.26.1",
