@@ -143,6 +143,8 @@ class Resource {
         device: err.device,
         engine: err.engine,
         err: err.err,
+        // Experimental, see if it works. Consider using `err` instead of `err.err` ...
+        errStringified: JSON.stringify(err.err, undefined, 2),
         explanation: err.explanation,
         location: err.location,
         logLines: err.logLines,
