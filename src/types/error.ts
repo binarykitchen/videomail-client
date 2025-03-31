@@ -25,7 +25,7 @@ export interface VideomailErrorData {
 }
 
 interface VideomailErrorVersions {
-  ninjaFormPlugin?: string | undefined;
+  videomailNinjaFormPlugin?: string | undefined;
   videomailClient: string;
 }
 

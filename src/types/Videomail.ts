@@ -47,7 +47,7 @@ interface Videomail {
   to?: string[] | undefined;
   url: string;
   versions: {
-    ninjaFormPlugin?: string;
+    videomailNinjaFormPlugin?: string;
     videomailClient: string;
   };
   webm?: string;

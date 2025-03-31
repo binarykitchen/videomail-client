@@ -160,7 +160,7 @@ class Resource {
         stack: err.stack,
         versions: {
           videomailClient: videomailClientVersion,
-          ninjaFormPlugin: this.options.versions?.ninjaFormPlugin,
+          videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
         },
       };
 

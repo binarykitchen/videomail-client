@@ -166,7 +166,7 @@ const options: VideomailClientOptions = {
   fakeUaString: undefined,
 
   versions: {
-    ninjaFormPlugin: undefined,
+    videomailNinjaFormPlugin: undefined,
   },
 };
 

@@ -134,7 +134,7 @@ export interface VideomailClientOptions {
   fakeUaString?: string | undefined;
 
   versions?: {
-    ninjaFormPlugin?: string | undefined;
+    videomailNinjaFormPlugin?: string | undefined;
   };
 }
 
