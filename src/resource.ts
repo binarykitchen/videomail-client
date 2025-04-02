@@ -1,4 +1,5 @@
 import superagent from "superagent";
+import { serializeError } from "serialize-error";
 
 import Constants from "./constants";
 import { VideomailClientOptions } from "./types/options";
@@ -142,9 +143,7 @@ class Resource {
         cpu: err.cpu,
         device: err.device,
         engine: err.engine,
-        err: err.err,
-        // Experimental, see if it works. Consider using `err` instead of `err.err` ...
-        errStringified: JSON.stringify(err.err, undefined, 2),
+        err: serializeError(err.err),
         explanation: err.explanation,
         location: err.location,
         logLines: err.logLines,

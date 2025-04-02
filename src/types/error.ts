@@ -1,8 +1,9 @@
+import { ErrorObject } from "serialize-error";
 import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
 export interface VideomailErrorData {
   cause?: any;
-  err?: Error | undefined;
+  err?: ErrorObject | undefined;
   explanation?: string | undefined;
   logLines?: string[] | undefined;
   message: string;
@@ -19,9 +20,7 @@ export interface VideomailErrorData {
   // They come mostly from Videomail's proprietary UI code
   errType?: string | undefined;
   errTarget?: EventTarget | null;
-  errStringified?: string | undefined;
   event?: Event | undefined;
-  eventStringified?: string | undefined;
 }
 
 interface VideomailErrorVersions {
