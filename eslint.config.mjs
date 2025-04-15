@@ -79,6 +79,8 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+
       // Prepend "_" in the names of unused function arguments to silence
       // Our linter for some useful parameters we want to still display
       "@typescript-eslint/no-unused-vars": [
