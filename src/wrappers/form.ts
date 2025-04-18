@@ -278,14 +278,17 @@ class Form extends Despot {
     });
 
     this.on("ERROR", (params: ErrorParams) => {
+      const isBrowserProblem = params.err?.isBrowserProblem();
       /*
-       * since https://github.com/binarykitchen/videomail-client/issues/60
+       * Since https://github.com/binarykitchen/videomail-client/issues/60
        * we hide areas to make it easier for the user to process an error
        * (= less distractions)
        */
-      if (this.options.adjustFormOnBrowserError) {
+      if (isBrowserProblem && this.options.adjustFormOnBrowserError) {
         this.hideAll();
-      } else if (params.err?.isBrowserProblem()) {
+      }
+
+      if (isBrowserProblem) {
         this.hideSubmitButton();
       }
     });

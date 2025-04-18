@@ -753,9 +753,11 @@ class Recorder extends Despot {
           this.preview(command.args);
           break;
         case "error": {
+          // Remember on server side the error object is generated using the serializeError fn
           const err = createError({
             message: "Oh no, server error!",
-            explanation: command.args.err.toString() ?? "(No message given)",
+            explanation: command.args.err.message ?? "(No message given)",
+            err: command.args.err,
             options: this.options,
           });
           this.emit("ERROR", { err });
