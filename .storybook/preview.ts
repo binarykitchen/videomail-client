@@ -15,6 +15,7 @@ initialize({
 
     if (
       origin.startsWith("https://videomail.io") ||
+      origin.startsWith("wss://videomail.io") ||
       origin.startsWith("https://videos.pond5.com") ||
       origin.startsWith("https://s1.dmcdn.net")
     ) {

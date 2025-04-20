@@ -29,7 +29,7 @@ export interface ProgressParams {
 }
 
 export interface PreviewParams {
-  key?: string;
+  key?: string | undefined;
   width?: number | undefined;
   height?: number | undefined;
   hasAudio: boolean;

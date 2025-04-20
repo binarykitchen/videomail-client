@@ -23,24 +23,15 @@ import Replay from "./replay";
 import Despot from "../../util/Despot";
 import { UserMediaReadyParams } from "../../types/events";
 import { UnloadParams } from "../container";
+import { Command, CommandArgs } from "../../types/command";
+import { deserializeError } from "serialize-error";
 
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";
 
-interface PreviewArgs {
-  key: string;
-  mp4?: string;
-  webm?: string;
-}
-
 interface WriteStreamParams {
   frameNumber?: number;
   onFlushedCallback?: (params: WriteStreamParams) => void;
-}
-
-interface Command {
-  command: string;
-  args: any;
 }
 
 interface StopParams {
@@ -259,7 +250,19 @@ class Recorder extends Despot {
     });
   }
 
-  private updateFrameProgress(args: { frame: number }) {
+  private updateFrameProgress(args?: CommandArgs) {
+    if (!args) {
+      throw createError({
+        message: "Arguments are missing for updating the frame progress",
+        options: this.options,
+      });
+    } else if (!args.frame) {
+      throw createError({
+        message: "The frame number is missing",
+        options: this.options,
+      });
+    }
+
     this.confirmedFrameNumber = args.frame;
 
     this.frameProgress = this.calculateFrameProgress();
@@ -267,7 +270,19 @@ class Recorder extends Despot {
     this.updateOverallProgress();
   }
 
-  private updateSampleProgress(args: { sample: number }) {
+  private updateSampleProgress(args?: CommandArgs) {
+    if (!args) {
+      throw createError({
+        message: "Arguments are missing for updating the audio sample progress",
+        options: this.options,
+      });
+    } else if (!args.sample) {
+      throw createError({
+        message: "The audio sample number is missing",
+        options: this.options,
+      });
+    }
+
     this.confirmedSampleNumber = args.sample;
 
     this.sampleProgress = this.calculateSampleProgress();
@@ -275,7 +290,14 @@ class Recorder extends Despot {
     this.updateOverallProgress();
   }
 
-  private preview(args: PreviewArgs) {
+  private preview(args?: CommandArgs) {
+    if (!args) {
+      throw createError({
+        message: "Preview arguments are missing.",
+        options: this.options,
+      });
+    }
+
     const hasAudio = this.samplesCount > 0;
 
     this.confirmedFrameNumber =
@@ -754,10 +776,16 @@ class Recorder extends Despot {
           break;
         case "error": {
           // Remember on server side the error object is generated using the serializeError fn
+          let explanation = "(No explanation given)";
+
+          if (command.args?.err?.message) {
+            explanation = command.args.err.message;
+          }
+
           const err = createError({
             message: "Oh no, server error!",
-            explanation: command.args.err.message ?? "(No message given)",
-            err: command.args.err,
+            explanation,
+            err: deserializeError(command.args?.err),
             options: this.options,
           });
           this.emit("ERROR", { err });
