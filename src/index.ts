@@ -5,7 +5,7 @@ import { VideomailClientOptions } from "./types/options";
 import RecordingStats from "./types/RecordingStats";
 import Videomail from "./types/Videomail";
 import { VideoType } from "./types/VideoType";
-import { Command } from "./types/command";
+import { Command, CommandArgs } from "./types/command";
 
 export type { Videomail };
 export type { VideomailEvents };
@@ -13,4 +13,4 @@ export type { RecordingStats };
 export type { VideomailClientOptions };
 export { VideoType, VideomailClient };
 export type { VideomailErrorData, FullVideomailErrorData };
-export type { Command };
+export type { Command, CommandArgs };
