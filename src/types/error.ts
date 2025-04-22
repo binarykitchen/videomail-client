@@ -7,7 +7,6 @@ export interface VideomailErrorData {
   explanation?: string | undefined;
   logLines?: string[] | undefined;
   message: string;
-  promise?: Promise<any> | undefined;
   reason?: any;
   siteName?: string | undefined;
   title: string;

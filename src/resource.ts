@@ -149,7 +149,6 @@ class Resource {
         logLines: err.logLines,
         orientation: err.orientation,
         os: err.os,
-        promise: err.promise,
         reason: err.reason,
         screen: err.screen,
         siteName: err.siteName,
