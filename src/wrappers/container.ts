@@ -274,6 +274,8 @@ class Container extends Despot {
           // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
           if (
             !isEditable &&
+            // Because of https://github.com/binarykitchen/videomail-client/issues/190
+            tagName &&
             tagName.toUpperCase() !== "INPUT" &&
             tagName.toUpperCase() !== "TEXTAREA"
           ) {
