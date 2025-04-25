@@ -13,7 +13,8 @@ interface Videomail {
   correctUrl: string;
   dateCreated: number;
   dateCreatedPretty: string;
-  dateUpdated: number;
+  dateUpdated?: number;
+  dateUpdatedPretty?: string;
   expiresAfter: number;
   expiresAfterIso: string;
   expiresAfterPretty: string;
