@@ -1,14 +1,14 @@
 interface RecordingStats {
-  waitingTime?: number | undefined;
   avgFps?: number | undefined;
-  wantedFps?: number;
   avgInterval?: number;
-  wantedInterval?: number;
-  intervalSum?: number;
   framesCount?: number;
-  videoType?: string;
-  samplesCount?: number;
+  intervalSum?: number;
   sampleRate?: number;
+  samplesCount?: number;
+  videoType?: string;
+  waitingTime?: number | undefined;
+  wantedFps?: number;
+  wantedInterval?: number;
 }
 
 export default RecordingStats;
