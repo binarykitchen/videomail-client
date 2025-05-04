@@ -93,7 +93,7 @@ class Buttons extends Despot {
       radioButtonGroup.appendChild(radioLabel);
 
       if (!options.show) {
-        hideElement(radioButtonElement);
+        hideElement(radioButtonGroup);
       }
 
       // double check that submit button is already in the buttonsElement container as a child?
