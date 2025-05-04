@@ -21,7 +21,6 @@ interface RadioButtonOptions {
   label: string;
   checked: boolean;
   changeHandler: () => void;
-  show?: boolean;
 }
 
 class Buttons extends Despot {
@@ -35,8 +34,8 @@ class Buttons extends Despot {
   private recordAgainButton?: HTMLButtonElement;
   private submitButton?: HTMLButtonElement;
 
-  private audioOnRadioPair;
-  private audioOffRadioPair;
+  private audioOnRadioPair?: HTMLInputElement | undefined;
+  private audioOffRadioPair?: HTMLInputElement | undefined;
 
   private built = false;
 
@@ -66,10 +65,6 @@ class Buttons extends Despot {
 
     if (options.id) {
       radioButtonElement = document.querySelector<HTMLInputElement>(`#${options.id}`);
-
-      if (!options.show) {
-        hideElement(radioButtonElement);
-      }
     }
 
     if (!radioButtonElement) {
@@ -91,10 +86,6 @@ class Buttons extends Despot {
       radioLabel.textContent = options.label;
 
       radioButtonGroup.appendChild(radioLabel);
-
-      if (!options.show) {
-        hideElement(radioButtonGroup);
-      }
 
       // double check that submit button is already in the buttonsElement container as a child?
       if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
@@ -236,7 +227,6 @@ class Buttons extends Despot {
         value: "off",
         label: this.options.text.audioOff,
         checked: !isAudioEnabled(this.options),
-        show: false,
         changeHandler: () => {
           this.container.disableAudio();
         },
@@ -248,7 +238,6 @@ class Buttons extends Despot {
         value: "on",
         label: this.options.text.audioOn,
         checked: isAudioEnabled(this.options),
-        show: false,
         changeHandler: () => {
           this.container.enableAudio();
         },
@@ -257,9 +246,6 @@ class Buttons extends Despot {
   }
 
   private onFormReady(params?: FormReadyParams) {
-    showElement(this.audioOnRadioPair);
-    showElement(this.audioOffRadioPair);
-
     // no need to show record button when doing a record again
     if (!isShown(this.recordAgainButton)) {
       if (!params?.paused) {
@@ -289,6 +275,11 @@ class Buttons extends Despot {
 
   private onUserMediaReady(params: UserMediaReadyParams) {
     this.onFormReady();
+
+    showElement(this.buttonsElement);
+
+    showElement(this.audioOnRadioPair);
+    showElement(this.audioOffRadioPair);
 
     if (isShown(this.recordButton) && !params.recordWhenReady) {
       enableElement(this.recordButton);
@@ -628,6 +619,8 @@ class Buttons extends Despot {
 
       this.container.appendChild(this.buttonsElement);
     }
+
+    hideElement(this.buttonsElement);
 
     this.buildButtons();
 
