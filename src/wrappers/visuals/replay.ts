@@ -266,17 +266,23 @@ class Replay extends Despot {
         });
       }
 
-      this.replayElement.addEventListener("touchstart", (e) => {
-        e.preventDefault();
+      this.replayElement.addEventListener(
+        "touchstart",
+        (e) => {
+          e.preventDefault();
 
-        if (this.replayElement?.paused) {
-          this.replayElement.play().catch((err: unknown) => {
-            throw err;
-          });
-        } else {
-          this.replayElement?.pause();
-        }
-      });
+          if (this.replayElement?.paused) {
+            this.replayElement.play().catch((err: unknown) => {
+              throw err;
+            });
+          } else {
+            this.replayElement?.pause();
+          }
+        },
+        {
+          passive: true,
+        },
+      );
 
       this.replayElement.addEventListener("click", (e) => {
         e.preventDefault();
