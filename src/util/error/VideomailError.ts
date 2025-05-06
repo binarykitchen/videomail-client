@@ -86,8 +86,11 @@ class VideomailError extends HTTPError {
     const stackTarget = errData?.cause ?? errData?.err;
 
     if (stackTarget) {
-      // Maintains proper stack trace for where our error was thrown (only available on V8)
-      Error.captureStackTrace(stackTarget, VideomailError);
+      // Extra check needed because it's not available on browser side
+      if ("captureStackTrace" in Error) {
+        // Maintains proper stack trace for where our error was thrown (only available on V8)
+        Error.captureStackTrace(stackTarget, VideomailError);
+      }
     }
   }
 
