@@ -7,6 +7,8 @@ export interface VideomailErrorData {
   explanation?: string | undefined;
   logLines?: string[] | undefined;
   message: string;
+  // this is for events, such as unhandled promises
+  event?: Event;
   siteName?: string | undefined;
   title: string;
   trace?: string | undefined;
