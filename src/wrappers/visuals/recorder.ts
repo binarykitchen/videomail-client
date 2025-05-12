@@ -783,7 +783,7 @@ class Recorder extends Despot {
           }
 
           const err = createError({
-            message: "Oh no, websocket server error!",
+            message: "Websocket error from Videomail server",
             explanation,
             err: deserializeError(command.args?.err),
             options: this.options,
