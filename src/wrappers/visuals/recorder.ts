@@ -788,6 +788,7 @@ class Recorder extends Despot {
             err: deserializeError(command.args?.err),
             options: this.options,
           });
+
           this.emit("ERROR", { err });
           break;
         }
