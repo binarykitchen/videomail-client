@@ -17,7 +17,7 @@ export interface VideomailErrorData {
   code?: string | undefined;
   status?: number | undefined;
   stack?: string | undefined;
-  errType?: string | undefined;
+  type?: string | undefined;
 }
 
 interface VideomailErrorVersions {
