@@ -782,6 +782,9 @@ class Recorder extends Despot {
             explanation = command.args.err.message;
           }
 
+          // Sometimes, details and cause in the err instance are still displayed as [object Object]
+          // Needs more time and research, but happens very rarely.
+          // I wouldn't invest too much time on this unless users, you and me, we can reproduce it ;)
           const err = createError({
             message: "Websocket error from Videomail server",
             explanation,

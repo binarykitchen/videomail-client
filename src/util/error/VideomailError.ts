@@ -10,7 +10,7 @@ export interface ErrData extends ErrorOptions {
 }
 
 class VideomailError extends HTTPError {
-  public readonly title = "Error thrown from videomail-client npm package";
+  public readonly title = "Error from videomail-client npm package";
   public readonly location = window.location.href;
 
   public explanation: string | undefined;
