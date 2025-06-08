@@ -4,27 +4,28 @@ const mock = {
   onHide() {},
 };
 
-describe("Client", () => {
-  test("Constructor with default arguments", () => {
+describe("client", () => {
+  it("constructor with default arguments", () => {
     const videomailClient = new VideomailClient();
-    expect(videomailClient.isBuilt()).toBeFalsy();
+
+    expect(videomailClient.isBuilt()).toBe(false);
   });
 
-  test("Constructor throws error when width is not divisible by two", () => {
+  it("constructor throws error when width is not divisible by two", () => {
     expect(() => {
       new VideomailClient({ video: { width: 99 } });
-    }).toThrowError(/Width must be divisible by two/u);
+    }).toThrow(/Width must be divisible by two/u);
   });
 
-  test("Showing it sets its built flag to true", () => {
+  it("showing it sets its built flag to true", () => {
     const videomailClient = new VideomailClient();
 
     videomailClient.show();
 
-    expect(videomailClient.isBuilt()).toBeTruthy();
+    expect(videomailClient.isBuilt()).toBe(true);
   });
 
-  test("Hiding emits hide event", () => {
+  it("hiding emits hide event", () => {
     const videomailClient = new VideomailClient();
 
     const onHideSpy = vi.spyOn(mock, "onHide");
@@ -40,26 +41,26 @@ describe("Client", () => {
     expect(onHideSpy).toHaveBeenCalledTimes(1);
   });
 
-  test("On unload, hidden and not built", () => {
+  it("on unload, hidden and not built", () => {
     const videomailClient = new VideomailClient();
 
     videomailClient.show();
     videomailClient.unload();
 
-    expect(videomailClient.isBuilt()).toBeFalsy();
+    expect(videomailClient.isBuilt()).toBe(false);
   });
 
-  test("Not dirty when just shown", () => {
+  it("not dirty when just shown", () => {
     const videomailClient = new VideomailClient();
     videomailClient.show();
 
-    expect(videomailClient.isDirty()).toBeFalsy();
+    expect(videomailClient.isDirty()).toBe(false);
   });
 
-  test("Not recording when just shown", () => {
+  it("not recording when just shown", () => {
     const videomailClient = new VideomailClient();
     videomailClient.show();
 
-    expect(videomailClient.isRecording()).toBeFalsy();
+    expect(videomailClient.isRecording()).toBe(false);
   });
 });

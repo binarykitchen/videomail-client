@@ -9,6 +9,8 @@ import * as regexpPlugin from "eslint-plugin-regexp";
 import pluginSecurity from "eslint-plugin-security";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import deMorgan from "eslint-plugin-de-morgan";
+// import packageJson from "eslint-plugin-package-json";
 // import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
@@ -24,7 +26,9 @@ export default tseslint.config(
   regexpPlugin.configs["flat/all"],
   pluginPromise.configs["flat/recommended"],
   depend.configs["flat/recommended"],
+  deMorgan.configs.recommended,
   {
+    name: "Ignore files",
     ignores: [
       ".github",
       ".vscode",
@@ -35,10 +39,27 @@ export default tseslint.config(
       ".storybook/public",
       "storybook-static",
     ],
-    name: "Ignore files",
   },
   {
-    files: ["**/*.{js,mjs,cjs,ts,tsx}"],
+    name: "Vitest",
+    files: ["**/__tests__/**"],
+    extends: [vitest.configs.all],
+    plugins: {
+      vitest,
+    },
+    rules: {
+      "vitest/prefer-expect-assertions": "off",
+      "vitest/max-expects": "off",
+    },
+  },
+  // {
+  //   name: "package.json",
+  //   files: ["package.json"],
+  //   extends: [packageJson.configs.recommended],
+  // },
+  {
+    name: "All JS and TS files",
+    files: ["**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -57,7 +78,6 @@ export default tseslint.config(
     linterOptions: {
       reportUnusedDisableDirectives: "error",
     },
-    name: "All",
     // TODO Consider removing some of these OFF-rules over time
     rules: {
       "@typescript-eslint/no-dynamic-delete": "off",
@@ -148,13 +168,5 @@ export default tseslint.config(
       "sort-imports": "off",
       "sort-keys": "off",
     },
-  },
-  {
-    files: ["__tests__/**"],
-    plugins: {
-      vitest,
-    },
-    name: "Vitest",
-    ...vitest.configs.recommended.rules,
   },
 );

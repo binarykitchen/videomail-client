@@ -1478,12 +1478,12 @@ class Recorder extends Despot {
      * checking for stream.destroyed needed since
      * https://github.com/binarykitchen/videomail.io/issues/296
      */
-    return (
+    return Boolean(
       this.loop?.isRunning() &&
-      !this.isPaused() &&
-      !this.isNotifying() &&
-      this.stream &&
-      !this.stream.destroyed
+        !this.isPaused() &&
+        !this.isNotifying() &&
+        this.stream &&
+        !this.stream.destroyed,
     );
   }
 
