@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "10.2.44",
+  "version": "10.2.45",
   "description": "A wicked npm package to record videos directly in the browser, wohooo!",
   "keywords": [
     "webcam",
