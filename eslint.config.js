@@ -10,23 +10,12 @@ import pluginSecurity from "eslint-plugin-security";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import deMorgan from "eslint-plugin-de-morgan";
-// import packageJson from "eslint-plugin-package-json";
-// import storybook from "eslint-plugin-storybook";
+import packageJson from "eslint-plugin-package-json";
+import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
 export default tseslint.config(
-  eslint.configs.all,
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  // ...storybook.configs["flat/recommended"],
-  eslintPluginImportX.flatConfigs.recommended,
-  eslintPluginImportX.flatConfigs.typescript,
-  pluginSecurity.configs.recommended,
-  regexpPlugin.configs["flat/all"],
-  pluginPromise.configs["flat/recommended"],
-  depend.configs["flat/recommended"],
-  deMorgan.configs.recommended,
   {
     name: "Ignore files",
     ignores: [
@@ -34,32 +23,13 @@ export default tseslint.config(
       ".vscode",
       "**/node_modules/",
       ".git",
-      "test",
       "dist",
       ".storybook/public",
       "storybook-static",
     ],
   },
   {
-    name: "Vitest",
-    files: ["**/__tests__/**"],
-    extends: [vitest.configs.all],
-    plugins: {
-      vitest,
-    },
-    rules: {
-      "vitest/prefer-expect-assertions": "off",
-      "vitest/max-expects": "off",
-    },
-  },
-  // {
-  //   name: "package.json",
-  //   files: ["package.json"],
-  //   extends: [packageJson.configs.recommended],
-  // },
-  {
-    name: "All JS and TS files",
-    files: ["**/*.{js,mjs,cjs,ts}"],
+    name: "Local configuration",
     languageOptions: {
       globals: {
         ...globals.node,
@@ -78,6 +48,45 @@ export default tseslint.config(
     linterOptions: {
       reportUnusedDisableDirectives: "error",
     },
+  },
+  {
+    name: "Vitest",
+    files: ["**/__tests__/**"],
+    extends: [vitest.configs.all],
+    plugins: {
+      vitest,
+    },
+    rules: {
+      "vitest/prefer-expect-assertions": "off",
+      "vitest/max-expects": "off",
+    },
+  },
+  {
+    name: "package.json",
+    files: ["package.json"],
+    extends: [packageJson.configs.recommended],
+  },
+  {
+    name: "Storybook",
+    files: ["**/stories/*.ts"],
+    plugins: { storybook },
+  },
+  // TODO SPlit JS and TS configs
+  {
+    name: "All JS and TS files",
+    files: ["**/*.{js,mjs,cjs,ts}"],
+    extends: [
+      eslint.configs.all,
+      ...tseslint.configs.strictTypeChecked,
+      ...tseslint.configs.stylisticTypeChecked,
+      eslintPluginImportX.flatConfigs.recommended,
+      eslintPluginImportX.flatConfigs.typescript,
+      pluginSecurity.configs.recommended,
+      regexpPlugin.configs["flat/all"],
+      pluginPromise.configs["flat/recommended"],
+      depend.configs["flat/recommended"],
+      deMorgan.configs.recommended,
+    ],
     // TODO Consider removing some of these OFF-rules over time
     rules: {
       "@typescript-eslint/no-dynamic-delete": "off",

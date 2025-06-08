@@ -7,7 +7,7 @@
   },
   "eslint.useFlatConfig": true,
   "eslint.options": {
-    "overrideConfigFile": "./eslint.config.mjs"
+    "overrideConfigFile": "./eslint.config.js"
   },
   "prettier.configPath": "./prettier.config.cjs",
   "stylelint.validate": ["stylus"],
