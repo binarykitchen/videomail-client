@@ -56,9 +56,11 @@ export default tseslint.config(
     plugins: {
       vitest,
     },
-    rules: {
       "vitest/prefer-expect-assertions": "off",
       "vitest/max-expects": "off",
+      "vitest/prefer-lowercase-title": "off",
+      "vitest/prefer-describe-function-title": "off",
+      "vitest/no-hooks": ["error", { allow: ["beforeAll", "afterAll"] }],
     },
   },
   {
