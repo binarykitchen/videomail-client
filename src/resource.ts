@@ -8,7 +8,7 @@ import createError from "./util/error/createError";
 import Response from "superagent/lib/node/response";
 import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
-import HTTPError from "./util/error/HTTPError";
+import HTTPVideomailError from "./util/error/HTTPVideomailError";
 import { FullVideomailErrorData } from "./types/error";
 import { version as videomailClientVersion } from "./../package.json";
 
@@ -21,10 +21,14 @@ function findOriginalExc(exc: unknown) {
       const message = body.error.message as string;
       const cause = body.error.cause;
 
-      const error = new HTTPError(message, { cause });
+      const error = new HTTPVideomailError(message, { cause });
 
       if (body.error.name) {
         error.name = body.error.name;
+      }
+
+      if (body.error.explanation) {
+        error.explanation = body.error.explanation;
       }
 
       if (body.error.stack) {

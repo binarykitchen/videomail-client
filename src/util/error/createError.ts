@@ -5,10 +5,10 @@ import { isAudioEnabled } from "../options/audio";
 import VideomailError, { ErrData } from "./VideomailError";
 import getBrowser from "../getBrowser";
 import { VideomailClientOptions } from "../../types/options";
-import HTTPError from "./HTTPError";
+import HTTPVideomailError from "./HTTPVideomailError";
 
 interface ErrorParams {
-  err?: HTTPError;
+  err?: HTTPVideomailError;
   exc?: unknown;
   message?: string;
   explanation?: string;
