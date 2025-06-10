@@ -13,7 +13,6 @@ class VideomailError extends HTTPVideomailError {
   public readonly title = "Error from videomail-client npm package";
   public readonly location = window.location.href;
 
-  public explanation: string | undefined;
   public logLines?: string[] | undefined;
   public siteName: string | undefined;
   public cookie: string | undefined;
