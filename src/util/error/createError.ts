@@ -180,11 +180,17 @@ function createError(errorParams: ErrorParams) {
       }
 
       /*
-       * it can be that explanation itself is an error object
+       * It can be that explanation itself is an error object
        * error objects can be prettified to undefined sometimes
        */
       if (!explanation && originalExplanation) {
         explanation = `Inspected: ${originalExplanation}`;
+      }
+
+      // Last resort, explanation has been defined on Videomail server,
+      // so use it instead.
+      if (!explanation && err?.explanation) {
+        explanation = err.explanation;
       }
 
       if (!message && err?.message) {

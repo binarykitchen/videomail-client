@@ -16,6 +16,8 @@ class VideomailError extends HTTPVideomailError {
   public logLines?: string[] | undefined;
   public siteName: string | undefined;
   public cookie: string | undefined;
+  // It might be duplicate with all the other attributes,
+  // but always safe to attach the original error just in case.
   public err?: Error | undefined;
   public promise?: Promise<any> | undefined;
   public reason?: any;
