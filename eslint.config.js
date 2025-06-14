@@ -52,7 +52,7 @@ export default tseslint.config(
   {
     name: "Vitest",
     files: ["**/__tests__/**"],
-    extends: [vitest.configs.all],
+    extends: [vitest.configs.recommended],
     plugins: {
       vitest,
     },
