@@ -88,6 +88,7 @@ class Resource {
       const request = await superagent("get", url)
         .type("json")
         .set("Accept", "application/json")
+        .withCredentials()
         .set("Timezone-Id", this.timezoneId)
         .set(Constants.SITE_NAME_LABEL, this.options.siteName)
         .timeout(this.options.timeouts.connection);
@@ -115,6 +116,7 @@ class Resource {
       const request = await superagent(method, url)
         .query(queryParams)
         .set("Timezone-Id", this.timezoneId)
+        .withCredentials()
         .send(videomail)
         .timeout(this.options.timeouts.connection);
 
@@ -168,6 +170,7 @@ class Resource {
       await superagent(FormMethod.POST, url)
         .query(queryParams)
         .set("Timezone-Id", this.timezoneId)
+        .withCredentials()
         // Note you cant send the Error instance itself, it has to be a plain JSON
         .send(fullVideomailErrorData)
         .timeout(this.options.timeouts.connection);
