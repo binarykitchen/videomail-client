@@ -1,5 +1,3 @@
-import "@storybook/addon-console";
-
 import { initialize, mswLoader } from "msw-storybook-addon";
 
 import type { Preview } from "@storybook/html";
