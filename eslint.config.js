@@ -15,14 +15,24 @@ import packageJson from "eslint-plugin-package-json";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
+/*
+  For the record, it's tricky to configure this perfectly.
+  There are plenty of eslint plugins and each maintainer documents it differently.
+
+  The npm eslint:inspect command is very helpful here which uses the @eslint/config-inspector
+
+  If there are performance issues, always can fine-tune with files: {*.*} to narrow it down.
+  But most of the time it's fine not to define fine and trust their defaults/recommendations.
+
+  TODO Refine further
+*/
 export default tseslint.config(
   {
-    name: "Ignore files",
+    // node_modules and .git already covered in eslint.configs.all
+    name: "ignore some more files",
     ignores: [
       ".github",
       ".vscode",
-      "**/node_modules/",
-      ".git",
       "dist",
       ".storybook/public",
       "storybook-static",
@@ -30,9 +40,15 @@ export default tseslint.config(
     ],
   },
   {
-    name: "Local configuration",
+    name: "global eslint rules for all source files",
+    ...eslint.configs.all,
+  },
+  {
+    name: "local language options",
+    files: ["**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
       globals: {
+        // TODO Node? This is questionable, as it applies for ./etc only, whereas src is browser only
         ...globals.node,
         ...globals.browser,
       },
@@ -41,13 +57,9 @@ export default tseslint.config(
         ecmaFeatures: {
           impliedStrict: true,
         },
-        ecmaVersion: 2022,
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
-    },
-    linterOptions: {
-      reportUnusedDisableDirectives: "error",
     },
   },
   {
@@ -64,29 +76,23 @@ export default tseslint.config(
   {
     ...packageJson.configs.recommended,
   },
-  // Commented out due to this bug
-  // https://github.com/storybookjs/eslint-plugin-storybook/issues/207
-  // {
-  //   ...storybook.configs["flat/recommended"],
-  //   name: "Storybook",
-  //   files: ["**/stories/*.ts"],
-  //   plugins: { storybook },
-  // },
-  // TODO Split JS and TS configs
+  pluginSecurity.configs.recommended,
+  pluginPromise.configs["flat/recommended"],
+  {
+    name: "deMorgan",
+    ...deMorgan.configs.recommended,
+  },
+  // TODO Continue from here, split further
   {
     name: "All JS and TS files",
     files: ["**/*.{js,mjs,cjs,ts}"],
     extends: [
-      eslint.configs.all,
-      ...tseslint.configs.strictTypeChecked,
-      ...tseslint.configs.stylisticTypeChecked,
+      tseslint.configs.strictTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
       eslintPluginImportX.flatConfigs.recommended,
       eslintPluginImportX.flatConfigs.typescript,
-      pluginSecurity.configs.recommended,
       regexpPlugin.configs["flat/all"],
-      pluginPromise.configs["flat/recommended"],
       depend.configs["flat/recommended"],
-      deMorgan.configs.recommended,
     ],
     // TODO Consider removing some of these OFF-rules over time
     rules: {
