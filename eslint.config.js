@@ -11,7 +11,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import deMorgan from "eslint-plugin-de-morgan";
 import packageJson from "eslint-plugin-package-json";
-import storybook from "eslint-plugin-storybook";
+// import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
@@ -26,6 +26,7 @@ export default tseslint.config(
       "dist",
       ".storybook/public",
       "storybook-static",
+      "!.storybook",
     ],
   },
   {
@@ -63,12 +64,15 @@ export default tseslint.config(
   {
     ...packageJson.configs.recommended,
   },
-  {
-    name: "Storybook",
-    files: ["**/stories/*.ts"],
-    plugins: { storybook },
-  },
-  // TODO SPlit JS and TS configs
+  // Commented out due to this bug
+  // https://github.com/storybookjs/eslint-plugin-storybook/issues/207
+  // {
+  //   ...storybook.configs["flat/recommended"],
+  //   name: "Storybook",
+  //   files: ["**/stories/*.ts"],
+  //   plugins: { storybook },
+  // },
+  // TODO Split JS and TS configs
   {
     name: "All JS and TS files",
     files: ["**/*.{js,mjs,cjs,ts}"],
