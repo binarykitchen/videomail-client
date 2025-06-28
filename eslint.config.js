@@ -50,13 +50,9 @@ export default tseslint.config(
     },
   },
   {
-    name: "Vitest",
-    files: ["**/__tests__/**"],
-    extends: [vitest.configs.recommended],
-    plugins: {
-      vitest,
-    },
+    ...vitest.configs.recommended,
     rules: {
+      ...vitest.configs.recommended.rules,
       "vitest/prefer-expect-assertions": "off",
       "vitest/max-expects": "off",
       "vitest/prefer-lowercase-title": "off",
@@ -65,9 +61,7 @@ export default tseslint.config(
     },
   },
   {
-    name: "package.json",
-    files: ["package.json"],
-    extends: [packageJson.configs.recommended],
+    ...packageJson.configs.recommended,
   },
   {
     name: "Storybook",
