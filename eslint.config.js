@@ -76,24 +76,28 @@ export default tseslint.config(
   {
     ...packageJson.configs.recommended,
   },
+  eslintPluginImportX.flatConfigs.recommended,
+  eslintPluginImportX.flatConfigs.typescript,
   pluginSecurity.configs.recommended,
   pluginPromise.configs["flat/recommended"],
   {
     name: "deMorgan",
     ...deMorgan.configs.recommended,
   },
-  // TODO Continue from here, split further
+  {
+    name: "regexp",
+    ...regexpPlugin.configs["flat/all"],
+  },
+  {
+    name: "depend",
+    ...depend.configs["flat/recommended"],
+  },
+
+  // TODO Continue from here, split further. Split between JS and TS.
   {
     name: "All JS and TS files",
     files: ["**/*.{js,mjs,cjs,ts}"],
-    extends: [
-      tseslint.configs.strictTypeChecked,
-      tseslint.configs.stylisticTypeChecked,
-      eslintPluginImportX.flatConfigs.recommended,
-      eslintPluginImportX.flatConfigs.typescript,
-      regexpPlugin.configs["flat/all"],
-      depend.configs["flat/recommended"],
-    ],
+    extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
     // TODO Consider removing some of these OFF-rules over time
     rules: {
       "@typescript-eslint/no-dynamic-delete": "off",
