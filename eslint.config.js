@@ -63,21 +63,22 @@ export default tseslint.config(
     },
   },
   {
-    ...vitest.configs.recommended,
-    rules: {
-      ...vitest.configs.recommended.rules,
-      "vitest/prefer-expect-assertions": "off",
-      "vitest/max-expects": "off",
-      "vitest/prefer-lowercase-title": "off",
-      "vitest/prefer-describe-function-title": "off",
-      "vitest/no-hooks": ["error", { allow: ["beforeAll", "afterAll"] }],
-    },
-  },
-  {
     ...packageJson.configs.recommended,
   },
-  eslintPluginImportX.flatConfigs.recommended,
-  eslintPluginImportX.flatConfigs.typescript,
+  // Can't give it a name because of plugins/extends.
+  // Perhaps can improve it in the next updates or in ESLint v10 ...
+  {
+    plugins: {
+      "import-x": eslintPluginImportX,
+    },
+    extends: [
+      eslintPluginImportX.flatConfigs.recommended,
+      eslintPluginImportX.flatConfigs.typescript,
+    ],
+    rules: {
+      "import-x/no-named-as-default-member": "off",
+    },
+  },
   pluginSecurity.configs.recommended,
   pluginPromise.configs["flat/recommended"],
   {
@@ -91,6 +92,17 @@ export default tseslint.config(
   {
     name: "depend",
     ...depend.configs["flat/recommended"],
+  },
+  {
+    ...vitest.configs.recommended,
+    rules: {
+      ...vitest.configs.recommended.rules,
+      "vitest/prefer-expect-assertions": "off",
+      "vitest/max-expects": "off",
+      "vitest/prefer-lowercase-title": "off",
+      "vitest/prefer-describe-function-title": "off",
+      "vitest/no-hooks": ["error", { allow: ["beforeAll", "afterAll"] }],
+    },
   },
 
   // TODO Continue from here, split further. Split between JS and TS.
@@ -144,7 +156,6 @@ export default tseslint.config(
       "func-names": "off",
       "func-style": "off",
       "id-length": "off",
-      "import-x/no-named-as-default-member": "off",
       "init-declarations": "off",
       "max-depth": "off",
       "max-lines": "off",
