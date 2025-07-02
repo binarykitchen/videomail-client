@@ -892,11 +892,11 @@ class Recorder extends Despot {
   private getAvgFps() {
     const intervalSum = this.getIntervalSum();
 
-    if (intervalSum === 0) {
+    if (intervalSum === 0 || intervalSum === undefined || intervalSum === null) {
       return undefined;
     }
 
-    return (this.framesCount / this.getIntervalSum()) * 1000;
+    return (this.framesCount / intervalSum) * 1000;
   }
 
   public getRecordingStats() {
