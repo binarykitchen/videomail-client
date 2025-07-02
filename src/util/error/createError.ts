@@ -233,6 +233,7 @@ function createError(errorParams: ErrorParams) {
     err,
   };
 
+  // Remember, this will create a new error stack trace from there
   const videomailError = new VideomailError(
     message ?? "(undefined message)",
     options,

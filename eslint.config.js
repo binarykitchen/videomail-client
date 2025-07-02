@@ -11,7 +11,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import deMorgan from "eslint-plugin-de-morgan";
 import packageJson from "eslint-plugin-package-json";
-// import storybook from "eslint-plugin-storybook";
+// Import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
@@ -28,7 +28,7 @@ import packageJson from "eslint-plugin-package-json";
 */
 export default tseslint.config(
   {
-    // node_modules and .git already covered in eslint.configs.all
+    // Node_modules and .git already covered in eslint.configs.all
     name: "ignore some more files",
     ignores: [
       ".github",
