@@ -46,7 +46,6 @@ class Despot {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   public on<E extends keyof VideomailEvents>(eventName: E, callback: VideomailEvents[E]) {
     return Despot.EMITTER.on(eventName, callback);
   }
