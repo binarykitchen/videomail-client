@@ -70,6 +70,7 @@ class VideomailError extends HTTPVideomailError {
     if (usefulClientData.cpu.architecture) {
       this.cpu = usefulClientData.cpu;
     }
+
     this.device = usefulClientData.device.type ? usefulClientData.device : undefined;
     this.engine = usefulClientData.engine;
     this.os = usefulClientData.os;

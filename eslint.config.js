@@ -19,7 +19,7 @@ import packageJson from "eslint-plugin-package-json";
   For the record, it's tricky to configure this perfectly.
   There are plenty of eslint plugins and each maintainer documents it differently.
 
-  The npm eslint:inspect command is very helpful here which uses the @eslint/config-inspector
+  The npm run lint:inspect command is very helpful here which uses the @eslint/config-inspector
 
   If there are performance issues, always can fine-tune with files: {*.*} to narrow it down.
   But most of the time it's fine not to define fine and trust their defaults/recommendations.
@@ -28,7 +28,7 @@ import packageJson from "eslint-plugin-package-json";
 */
 export default tseslint.config(
   {
-    // Node_modules and .git already covered in eslint.configs.all
+    // Node_modules and .git already covered in eslint.configs.all below
     name: "ignore some more files",
     ignores: [
       ".github",
