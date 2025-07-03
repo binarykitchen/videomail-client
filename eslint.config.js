@@ -164,11 +164,10 @@ export default tseslint.config(
       "vitest/no-hooks": ["error", { allow: ["beforeAll", "afterAll"] }],
     },
   },
-
-  // TODO Continue from here, split further. Split between JS and TS.
   {
-    name: "All JS and TS files",
-    files: ["**/*.{js,mjs,cjs,ts}"],
+    name: "Source code files with TypeScript",
+    // JS included because TS gets compiled to JS and we want to lint the output as well
+    files: ["**/*.{js,ts}"],
     extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
     // TODO Consider removing some of these OFF-rules over time
     rules: {
