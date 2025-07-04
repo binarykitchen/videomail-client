@@ -15,6 +15,9 @@ import packageJson from "eslint-plugin-package-json";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
+const ALL_FILES = ["**/*.{js,mjs,cjs,ts}"];
+const CLIENT_ONLY_FILES = ["src/**/*.{js,ts}"];
+
 /*
   For the record, it's tricky to configure this perfectly.
   There are plenty of eslint plugins and each maintainer documents it differently.
@@ -23,8 +26,6 @@ import packageJson from "eslint-plugin-package-json";
 
   If there are performance issues, always can fine-tune with files: {*.*} to narrow it down.
   But most of the time it's fine not to define fine and trust their defaults/recommendations.
-
-  TODO Refine further
 */
 export default tseslint.config(
   {
@@ -42,6 +43,7 @@ export default tseslint.config(
   {
     name: "global eslint rules for all source files",
     ...eslint.configs.all,
+    files: ALL_FILES,
     rules: {
       camelcase: "off",
       "capitalized-comments": "off",
@@ -84,13 +86,11 @@ export default tseslint.config(
     },
   },
   {
-    name: "local language options",
-    files: ["**/*.{js,mjs,cjs,ts}"],
+    name: "general language options",
+    files: ALL_FILES,
     languageOptions: {
       globals: {
-        // TODO Node? This is questionable, as it applies for ./etc only, whereas src is browser only
         ...globals.node,
-        ...globals.browser,
       },
       parser: tseslint.parser,
       parserOptions: {
@@ -103,11 +103,21 @@ export default tseslint.config(
     },
   },
   {
+    name: "client-only language options",
+    files: [CLIENT_ONLY_FILES],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  {
     ...packageJson.configs.recommended,
   },
   // Can't give it a name because of plugins/extends.
   // Perhaps can improve it in the next updates or in ESLint v10 ...
   {
+    files: ALL_FILES,
     plugins: {
       "import-x": eslintPluginImportX,
     },
@@ -121,6 +131,7 @@ export default tseslint.config(
   },
   {
     ...pluginSecurity.configs.recommended,
+    files: ALL_FILES,
     rules: {
       "security/detect-non-literal-fs-filename": "off",
       "security/detect-object-injection": "off",
@@ -129,6 +140,7 @@ export default tseslint.config(
   },
   {
     ...pluginPromise.configs["flat/recommended"],
+    files: ALL_FILES,
     rules: {
       "promise/always-return": "off",
       "promise/no-callback-in-promise": "off",
@@ -137,11 +149,13 @@ export default tseslint.config(
   },
   {
     name: "deMorgan",
+    files: ALL_FILES,
     ...deMorgan.configs.recommended,
   },
   {
     name: "regexp",
     ...regexpPlugin.configs["flat/all"],
+    files: ALL_FILES,
     rules: {
       "regexp/no-super-linear-move": "off",
       "regexp/prefer-named-capture-group": "off",
@@ -152,6 +166,7 @@ export default tseslint.config(
   {
     name: "depend",
     ...depend.configs["flat/recommended"],
+    files: ALL_FILES,
   },
   {
     ...vitest.configs.recommended,
@@ -166,8 +181,7 @@ export default tseslint.config(
   },
   {
     name: "Source code files with TypeScript",
-    // JS included because TS gets compiled to JS and we want to lint the output as well
-    files: ["**/*.{js,ts}"],
+    files: ALL_FILES,
     extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
     // TODO Consider removing some of these OFF-rules over time
     rules: {
