@@ -75,7 +75,7 @@ class VideomailError extends HTTPVideomailError {
     this.engine = usefulClientData.engine;
     this.os = usefulClientData.os;
 
-    let cookie: string[] | undefined = undefined;
+    let cookie: string[] | undefined;
 
     if (global.document.cookie.length > 0) {
       cookie = global.document.cookie.split(",").map((c) => c.trim());

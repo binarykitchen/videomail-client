@@ -45,8 +45,10 @@ export default tseslint.config(
     ...eslint.configs.all,
     files: ALL_FILES,
     rules: {
+      ...eslint.configs.all.rules,
       camelcase: "off",
       "capitalized-comments": "off",
+      "class-methods-use-this": "off",
       complexity: "off",
       "consistent-return": "off",
       "default-param-last": "off",
@@ -126,25 +128,29 @@ export default tseslint.config(
       eslintPluginImportX.flatConfigs.typescript,
     ],
     rules: {
+      ...eslintPluginImportX.flatConfigs.recommended.rules,
       "import-x/no-named-as-default-member": "off",
     },
+  },
+  {
+    name: "depend",
+    ...depend.configs["flat/recommended"],
+    files: ALL_FILES,
   },
   {
     ...pluginSecurity.configs.recommended,
     files: ALL_FILES,
     rules: {
-      "security/detect-non-literal-fs-filename": "off",
+      ...pluginSecurity.configs.recommended.rules,
       "security/detect-object-injection": "off",
-      "security/detect-unsafe-regex": "off",
     },
   },
   {
     ...pluginPromise.configs["flat/recommended"],
     files: ALL_FILES,
     rules: {
+      ...pluginPromise.configs["flat/recommended"].rules,
       "promise/always-return": "off",
-      "promise/no-callback-in-promise": "off",
-      "promise/no-promise-in-callback": "off",
     },
   },
   {
@@ -157,16 +163,9 @@ export default tseslint.config(
     ...regexpPlugin.configs["flat/all"],
     files: ALL_FILES,
     rules: {
-      "regexp/no-super-linear-move": "off",
-      "regexp/prefer-named-capture-group": "off",
+      ...regexpPlugin.configs["flat/all"].rules,
       "regexp/require-unicode-sets-regexp": "off",
-      "regexp/no-super-linear-backtracking": "off",
     },
-  },
-  {
-    name: "depend",
-    ...depend.configs["flat/recommended"],
-    files: ALL_FILES,
   },
   {
     ...vitest.configs.recommended,
