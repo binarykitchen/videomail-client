@@ -1,5 +1,8 @@
 function isPromise(anything) {
-  return anything && typeof Promise !== "undefined" && anything instanceof Promise;
+  return Boolean(
+    anything &&
+      typeof Promise !== "undefined" &&
+      Object.prototype.toString.call(anything) === "[object Promise]",
+  );
 }
-
 export default isPromise;
