@@ -9,7 +9,7 @@ import UserMedia from "../../../wrappers/visuals/userMedia";
 const CHANNELS = 1;
 
 /*
- * for inspiration see
+ * For inspiration see
  * https://github.com/saebekassebil/microphone-stream
  */
 
