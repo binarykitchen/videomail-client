@@ -1,4 +1,4 @@
-// constants (changing these only break down functionality, so be careful)
+// Global constants (changing these break down functionality, so be careful)
 
 export default {
   SITE_NAME_LABEL: "x-videomail-site-name",

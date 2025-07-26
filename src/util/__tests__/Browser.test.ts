@@ -1,7 +1,7 @@
 import Browser from "../Browser";
 import mergeWithDefaultOptions from "../options/mergeWithDefaultOptions";
 
-describe("browser class", () => {
+describe("Browser class", () => {
   it("constructor with default tells test environment runs under jsdom", () => {
     const defaultOptions = mergeWithDefaultOptions();
     const browser = new Browser(defaultOptions);
