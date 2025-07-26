@@ -11,11 +11,21 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import deMorgan from "eslint-plugin-de-morgan";
 import packageJson from "eslint-plugin-package-json";
-// Import storybook from "eslint-plugin-storybook";
+// import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
-const ALL_FILES = ["**/*.{js,mjs,cjs,ts}"];
+const ALL_FILES = [
+  // Source and test files
+  "src/**/*.{js,ts}",
+  // Storybook config
+  ".storybook/**/*.{js,ts}",
+  // Root level files
+  "*.{js,ts,cjs}",
+  // Scripts
+  "etc/**/*.{js,ts}",
+];
+
 const CLIENT_ONLY_FILES = ["src/**/*.{js,ts}"];
 
 /*

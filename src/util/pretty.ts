@@ -3,7 +3,7 @@ import util from "node:util";
 function inspect(element: unknown) {
   return util
     .inspect(element, {
-      colors: true,
+      colors: false,
       compact: true,
       depth: 4,
       breakLength: Infinity,
@@ -12,6 +12,7 @@ function inspect(element: unknown) {
     .replace(/\r?\n/gu, "");
 }
 
+// Prettifies any HTML element for better readability in logs
 function pretty(anything: unknown) {
   if (anything instanceof HTMLElement) {
     if (anything.id) {

@@ -25,10 +25,9 @@ class CollectLogger {
     return line;
   }
 
-  /*
-   * workaround: since we cannot overwrite console.log without having the correct file and line number
-   * we'll use groupCollapsed() and trace() instead to get these.
-   */
+  // Workaround: since we cannot overwrite console.log without having the
+  // correct file and line number we'll use groupCollapsed() and
+  // trace() instead to get these.
   public debug(...args) {
     const output = this.lifo("debug", args);
 

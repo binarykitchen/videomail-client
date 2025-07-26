@@ -16,7 +16,13 @@
     "module": "esnext",
     "moduleResolution": "bundler",
 
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext",
+      // Add for ServiceWorker support
+      "WebWorker"
+    ],
     "types": ["vitest/globals"],
 
     "allowSyntheticDefaultImports": true,
