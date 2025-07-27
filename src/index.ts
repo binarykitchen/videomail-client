@@ -11,6 +11,6 @@ export type { Videomail };
 export type { VideomailEvents };
 export type { RecordingStats };
 export type { VideomailClientOptions };
-export { VideomailClient,VideoType };
-export type { FullVideomailErrorData, PartialVideomail,VideomailErrorData };
+export { VideomailClient, VideoType };
+export type { FullVideomailErrorData, PartialVideomail, VideomailErrorData };
 export type { Command, CommandArgs };
