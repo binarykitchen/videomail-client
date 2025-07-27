@@ -1,16 +1,16 @@
 import contains from "contains";
 
-import Despot from "../util/Despot";
-import { isAudioEnabled } from "../util/options/audio";
-import Container, { FormReadyParams } from "./container";
-import { VideomailClientOptions } from "../types/options";
 import { ErrorParams, RecordingParams, UserMediaReadyParams } from "../types/events";
+import { VideomailClientOptions } from "../types/options";
+import Despot from "../util/Despot";
+import adjustButton, { ButtonType } from "../util/html/adjustButton";
 import disableElement from "../util/html/disableElement";
 import enableElement from "../util/html/enableElement";
 import hideElement from "../util/html/hideElement";
-import showElement from "../util/html/showElement";
 import isShown from "../util/html/isShown";
-import adjustButton, { ButtonType } from "../util/html/adjustButton";
+import showElement from "../util/html/showElement";
+import { isAudioEnabled } from "../util/options/audio";
+import Container, { FormReadyParams } from "./container";
 
 type ClickHandler = (params: { event: MouseEvent }) => void;
 

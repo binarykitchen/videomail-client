@@ -1,10 +1,11 @@
 import AudioSample from "audio-sample";
 import isPOT from "is-power-of-two";
+
 import options from "../../../options";
-import getBrowser from "../../getBrowser";
-import createError from "../../error/createError";
 import { VideomailClientOptions } from "../../../types/options";
 import UserMedia from "../../../wrappers/visuals/userMedia";
+import createError from "../../error/createError";
+import getBrowser from "../../getBrowser";
 
 const CHANNELS = 1;
 

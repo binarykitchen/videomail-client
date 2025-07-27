@@ -1,16 +1,16 @@
 import hidden from "hidden";
 
+import { ShowParams } from "../client";
+import { VideomailClientOptions } from "../types/options";
 import Despot from "../util/Despot";
+import VideomailError from "../util/error/VideomailError";
+import getBrowser from "../util/getBrowser";
+import pretty from "../util/pretty";
+import Container, { UnloadParams } from "./container";
 import RecorderInsides from "./visuals/inside/recorderInsides";
 import Notifier from "./visuals/notifier";
 import Recorder from "./visuals/recorder";
 import Replay from "./visuals/replay";
-import Container, { UnloadParams } from "./container";
-import { VideomailClientOptions } from "../types/options";
-import getBrowser from "../util/getBrowser";
-import pretty from "../util/pretty";
-import VideomailError from "../util/error/VideomailError";
-import { ShowParams } from "../client";
 
 class Visuals extends Despot {
   private readonly container: Container;

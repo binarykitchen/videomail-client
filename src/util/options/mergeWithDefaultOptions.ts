@@ -1,10 +1,11 @@
 import deepmerge from "deepmerge";
-import CollectLogger from "../CollectLogger";
+
 import defaultOptions from "../../options";
 import {
   PartialVideomailClientOptions,
   VideomailClientOptions,
 } from "../../types/options";
+import CollectLogger from "../CollectLogger";
 import isTest from "../isTest";
 
 function mergeWithDefaultOptions(options: PartialVideomailClientOptions = {}) {

@@ -1,8 +1,8 @@
 import hidden from "hidden";
 
+import { VideomailClientOptions } from "../../../../types/options";
 import Despot from "../../../../util/Despot";
 import Visuals from "../../../visuals";
-import { VideomailClientOptions } from "../../../../types/options";
 
 class FacingMode extends Despot {
   private visuals: Visuals;

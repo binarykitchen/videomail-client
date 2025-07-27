@@ -1,4 +1,5 @@
 import hidden from "hidden";
+
 import { VideomailClientOptions } from "../../../../types/options";
 import Visuals from "../../../visuals";
 

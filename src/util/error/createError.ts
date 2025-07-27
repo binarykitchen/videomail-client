@@ -1,11 +1,10 @@
 import Resource from "../../resource";
-
-import pretty from "../pretty";
-import { isAudioEnabled } from "../options/audio";
-import VideomailError, { ErrData } from "./VideomailError";
-import getBrowser from "../getBrowser";
 import { VideomailClientOptions } from "../../types/options";
+import getBrowser from "../getBrowser";
+import { isAudioEnabled } from "../options/audio";
+import pretty from "../pretty";
 import HTTPVideomailError from "./HTTPVideomailError";
+import VideomailError, { ErrData } from "./VideomailError";
 
 interface ErrorParams {
   err?: HTTPVideomailError;

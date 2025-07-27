@@ -2,9 +2,8 @@ import type { Meta, StoryObj } from "@storybook/html";
 import { http, HttpResponse } from "msw";
 
 import { Videomail, VideomailClient } from "../index";
-import { PartialVideomailClientOptions } from "../types/options";
-
 import { SubmittedParams } from "../types/events";
+import { PartialVideomailClientOptions } from "../types/options";
 
 const meta: Meta<PartialVideomailClientOptions> = {
   title: "Form",

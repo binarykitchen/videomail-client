@@ -1,13 +1,13 @@
 import hidden from "hidden";
 
-import Despot from "../../util/Despot";
-import { isAudioEnabled } from "../../util/options/audio";
-import Visuals from "../visuals";
-import { VideomailClientOptions } from "../../types/options";
-import getBrowser from "../../util/getBrowser";
-import VideomailError from "../../util/error/VideomailError";
 import { ProgressParams, StoppingParams } from "../../types/events";
+import { VideomailClientOptions } from "../../types/options";
+import Despot from "../../util/Despot";
+import VideomailError from "../../util/error/VideomailError";
+import getBrowser from "../../util/getBrowser";
+import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
+import Visuals from "../visuals";
 
 const NOTIFIER_MESSAGE_ID = "notifierMessage";
 

@@ -1,30 +1,28 @@
 import animitter from "animitter";
+import AudioSample from "audio-sample";
 import Frame from "canvas-to-buffer";
 import hidden from "hidden";
-
+import { deserializeError } from "serialize-error";
 import websocket from "websocket-stream";
 
 import Constants from "../../constants";
-import pretty from "../../util/pretty";
-import UserMedia from "./userMedia";
-
-import { isAudioEnabled } from "../../util/options/audio";
-import calculateWidth from "../../util/html/dimensions/calculateWidth";
-import calculateHeight from "../../util/html/dimensions/calculateHeight";
-import Visuals from "../visuals";
+import { Command, CommandArgs } from "../../types/command";
+import { UserMediaReadyParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
+import RecordingStats from "../../types/RecordingStats";
+import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import VideomailError from "../../util/error/VideomailError";
 import getBrowser from "../../util/getBrowser";
+import calculateHeight from "../../util/html/dimensions/calculateHeight";
+import calculateWidth from "../../util/html/dimensions/calculateWidth";
 import getRatio from "../../util/html/dimensions/getRatio";
-import AudioSample from "audio-sample";
-import RecordingStats from "../../types/RecordingStats";
-import Replay from "./replay";
-import Despot from "../../util/Despot";
-import { UserMediaReadyParams } from "../../types/events";
+import { isAudioEnabled } from "../../util/options/audio";
+import pretty from "../../util/pretty";
 import { UnloadParams } from "../container";
-import { Command, CommandArgs } from "../../types/command";
-import { deserializeError } from "serialize-error";
+import Visuals from "../visuals";
+import Replay from "./replay";
+import UserMedia from "./userMedia";
 
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";

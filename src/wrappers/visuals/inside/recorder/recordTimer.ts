@@ -1,9 +1,9 @@
 import hidden from "hidden";
 
-import Visuals from "../../../visuals";
-import RecordNote from "./recordNote";
 import { VideomailClientOptions } from "../../../../types/options";
 import pad from "../../../../util/pad";
+import Visuals from "../../../visuals";
+import RecordNote from "./recordNote";
 
 class RecordTimer {
   private visuals: Visuals;

@@ -1,6 +1,7 @@
+import "./static/css/entertain.css";
+
 import type { Meta, StoryObj } from "@storybook/html";
 
-import "./static/css/entertain.css";
 import VideomailClient from "../client";
 import { PartialVideomailClientOptions } from "../types/options";
 

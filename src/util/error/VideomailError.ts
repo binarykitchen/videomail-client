@@ -1,4 +1,5 @@
 import { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
+
 import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../getBrowser";
 import HTTPVideomailError from "./HTTPVideomailError";

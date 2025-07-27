@@ -1,5 +1,4 @@
 import { VideomailClientOptions } from "./types/options";
-
 import isProductionMode from "./util/isProductionMode";
 
 const PRODUCTION = isProductionMode();

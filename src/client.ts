@@ -1,13 +1,11 @@
 import Constants from "./constants";
-
 import Resource from "./resource";
-
-import Container from "./wrappers/container";
 import { PartialVideomailClientOptions } from "./types/options";
 import Videomail from "./types/Videomail";
-import mergeWithDefaultOptions from "./util/options/mergeWithDefaultOptions";
-import createError from "./util/error/createError";
 import Despot from "./util/Despot";
+import createError from "./util/error/createError";
+import mergeWithDefaultOptions from "./util/options/mergeWithDefaultOptions";
+import Container from "./wrappers/container";
 
 export interface StartOverParams {
   keepHidden?: boolean | undefined;

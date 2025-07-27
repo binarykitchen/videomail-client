@@ -1,13 +1,13 @@
-import Despot from "../../util/Despot";
-import pretty from "./../../util/pretty";
-import { isAudioEnabled } from "../../util/options/audio";
-import Recorder from "./recorder";
 import { VideomailClientOptions } from "../../types/options";
+import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
-import isPromise from "../../util/isPromise";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
-import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
 import getFirstVideoTrack from "../../util/html/media/getFirstVideoTrack";
+import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
+import isPromise from "../../util/isPromise";
+import { isAudioEnabled } from "../../util/options/audio";
+import pretty from "./../../util/pretty";
+import Recorder from "./recorder";
 
 const EVENT_ASCII = "|—O—|";
 

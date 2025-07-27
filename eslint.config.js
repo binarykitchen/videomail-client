@@ -1,16 +1,17 @@
 // @ts-check
 
 import eslint from "@eslint/js";
+import vitest from "@vitest/eslint-plugin";
+import deMorgan from "eslint-plugin-de-morgan";
 import * as depend from "eslint-plugin-depend";
 import eslintPluginImportX from "eslint-plugin-import-x";
-import vitest from "@vitest/eslint-plugin";
+import packageJson from "eslint-plugin-package-json";
 import pluginPromise from "eslint-plugin-promise";
 import * as regexpPlugin from "eslint-plugin-regexp";
 import pluginSecurity from "eslint-plugin-security";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import deMorgan from "eslint-plugin-de-morgan";
-import packageJson from "eslint-plugin-package-json";
 // import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
@@ -41,14 +42,7 @@ export default tseslint.config(
   {
     // Node_modules and .git already covered in eslint.configs.all below
     name: "ignore some more files",
-    ignores: [
-      ".github",
-      ".vscode",
-      "dist",
-      ".storybook/public",
-      "storybook-static",
-      "!.storybook",
-    ],
+    ignores: [".storybook/public", "storybook-static", "!.storybook"],
   },
   {
     name: "global eslint rules for all source files",
@@ -93,6 +87,9 @@ export default tseslint.config(
       "prefer-arrow-callback": "off",
       "prefer-destructuring": "off",
       "prefer-named-capture-group": "off",
+
+      // These two are great, but can't be autofixed unfortunately,
+      // hence adding eslint-plugin-simple-import-sort, see further below.
       "sort-imports": "off",
       "sort-keys": "off",
     },
@@ -175,6 +172,16 @@ export default tseslint.config(
     rules: {
       ...regexpPlugin.configs["flat/all"].rules,
       "regexp/require-unicode-sets-regexp": "off",
+    },
+  },
+  {
+    name: "sort imports and exports",
+    plugins: {
+      "simple-import-sort": simpleImportSort,
+    },
+    rules: {
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
     },
   },
   {

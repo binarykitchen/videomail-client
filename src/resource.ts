@@ -1,16 +1,16 @@
-import superagent from "superagent";
 import { serializeError } from "serialize-error";
+import superagent from "superagent";
+import Response from "superagent/lib/node/response";
 
+import { version as videomailClientVersion } from "./../package.json";
 import Constants from "./constants";
+import { FullVideomailErrorData } from "./types/error";
 import { VideomailClientOptions } from "./types/options";
 import Videomail, { PartialVideomail } from "./types/Videomail";
 import createError from "./util/error/createError";
-import Response from "superagent/lib/node/response";
+import HTTPVideomailError from "./util/error/HTTPVideomailError";
 import VideomailError from "./util/error/VideomailError";
 import { FormInputs, FormMethod } from "./wrappers/form";
-import HTTPVideomailError from "./util/error/HTTPVideomailError";
-import { FullVideomailErrorData } from "./types/error";
-import { version as videomailClientVersion } from "./../package.json";
 
 function findOriginalExc(exc: unknown) {
   if (exc instanceof Error && "response" in exc) {

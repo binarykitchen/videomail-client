@@ -15,4 +15,4 @@ function isAutoPauseEnabled(options: VideomailClientOptions) {
   return options.enableAutoPause && options.enablePause;
 }
 
-export { isAudioEnabled, setAudioEnabled, isAutoPauseEnabled };
+export { isAudioEnabled, isAutoPauseEnabled,setAudioEnabled };

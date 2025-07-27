@@ -1,10 +1,9 @@
-import fs from "fs";
-import path from "path";
-
-import { defineConfig } from "@rslib/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginStylus } from "@rsbuild/plugin-stylus";
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
+import { defineConfig } from "@rslib/core";
+import fs from "fs";
+import path from "path";
 
 import { NodeEnvType } from "./src/types/env";
 import isProductionMode from "./src/util/isProductionMode";

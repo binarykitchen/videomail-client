@@ -1,24 +1,24 @@
+import "./../styles/main.styl";
+
 import Visibility from "document-visibility";
 import hidden from "hidden";
+import Response from "superagent/lib/node/response";
 
-import { ErrorParams } from "../types/events";
+import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";
+import { ErrorParams } from "../types/events";
+import { VideomailClientOptions } from "../types/options";
+import Videomail from "../types/Videomail";
 import Despot from "../util/Despot";
+import createError from "../util/error/createError";
+import getBrowser from "../util/getBrowser";
+import limitHeight from "../util/html/dimensions/limitHeight";
+import limitWidth from "../util/html/dimensions/limitWidth";
+import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
+import pretty from "../util/pretty";
 import Buttons from "./buttons";
 import Form, { FormInputs, FormMethod } from "./form";
 import Visuals from "./visuals";
-
-import "./../styles/main.styl";
-import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
-import { VideomailClientOptions } from "../types/options";
-import getBrowser from "../util/getBrowser";
-import limitWidth from "../util/html/dimensions/limitWidth";
-import limitHeight from "../util/html/dimensions/limitHeight";
-import pretty from "../util/pretty";
-import { ShowParams, StartOverParams } from "../client";
-import Response from "superagent/lib/node/response";
-import createError from "../util/error/createError";
-import Videomail from "../types/Videomail";
 interface BuildOptions {
   playerOnly?: boolean;
   replayParentElementId?: string | undefined;

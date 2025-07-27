@@ -1,15 +1,15 @@
 import getFormData from "get-form-data";
 import hidden from "hidden";
 
-import Despot from "../util/Despot";
-import Container from "./container";
-import { VideomailClientOptions } from "../types/options";
-import createError from "../util/error/createError";
-import { trimEmail, trimEmails } from "../util/trimEmail";
-import Videomail, { PartialVideomail } from "../types/Videomail";
 import { ErrorParams, PreviewParams } from "../types/events";
-import pretty from "../util/pretty";
+import { VideomailClientOptions } from "../types/options";
+import Videomail, { PartialVideomail } from "../types/Videomail";
+import Despot from "../util/Despot";
+import createError from "../util/error/createError";
 import isNotButton from "../util/html/isNotButton";
+import pretty from "../util/pretty";
+import { trimEmail, trimEmails } from "../util/trimEmail";
+import Container from "./container";
 
 export type FormInputs = Record<string, string>;
 

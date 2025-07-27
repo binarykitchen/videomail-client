@@ -1,6 +1,5 @@
-import { initialize, mswLoader } from "msw-storybook-addon";
-
 import type { Preview } from "@storybook/html";
+import { initialize, mswLoader } from "msw-storybook-addon";
 
 /*
  * Initializes MSW

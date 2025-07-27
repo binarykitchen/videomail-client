@@ -1,17 +1,17 @@
 import hidden from "hidden";
 
-import Despot from "../../util/Despot";
-import { isAudioEnabled } from "../../util/options/audio";
-import { VideomailClientOptions } from "../../types/options";
-import Visuals from "../visuals";
-import getBrowser from "../../util/getBrowser";
-import calculateWidth from "../../util/html/dimensions/calculateWidth";
-import calculateHeight from "../../util/html/dimensions/calculateHeight";
-import Videomail from "../../types/Videomail";
-import pretty from "../../util/pretty";
 import { PreviewParams } from "../../types/events";
-import { UnloadParams } from "../container";
+import { VideomailClientOptions } from "../../types/options";
+import Videomail from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";
+import Despot from "../../util/Despot";
+import getBrowser from "../../util/getBrowser";
+import calculateHeight from "../../util/html/dimensions/calculateHeight";
+import calculateWidth from "../../util/html/dimensions/calculateWidth";
+import { isAudioEnabled } from "../../util/options/audio";
+import pretty from "../../util/pretty";
+import { UnloadParams } from "../container";
+import Visuals from "../visuals";
 
 class Replay extends Despot {
   private readonly visuals: Visuals;

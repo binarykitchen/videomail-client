@@ -1,13 +1,12 @@
+import { VideomailClientOptions } from "../../../types/options";
 import Despot from "../../../util/Despot";
-
+import getBrowser from "../../../util/getBrowser";
+import Visuals from "../../visuals";
 import Countdown from "./recorder/countdown";
 import FacingMode from "./recorder/facingMode";
 import PausedNote from "./recorder/pausedNote";
 import RecordNote from "./recorder/recordNote";
 import RecordTimer from "./recorder/recordTimer";
-import getBrowser from "../../../util/getBrowser";
-import Visuals from "../../visuals";
-import { VideomailClientOptions } from "../../../types/options";
 
 class RecorderInsides extends Despot {
   private recordNote: RecordNote;
