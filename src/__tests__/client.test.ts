@@ -1,10 +1,10 @@
 import VideomailClient from "../client";
 
-const mock = {
-  onHide() {},
-};
+describe("Client", () => {
+  const mock = {
+    onHide() {},
+  };
 
-describe("client", () => {
   it("constructor with default arguments", () => {
     const videomailClient = new VideomailClient();
 

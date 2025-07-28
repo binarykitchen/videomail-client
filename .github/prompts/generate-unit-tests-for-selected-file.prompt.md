@@ -1,3 +1,9 @@
+---
+mode: 'agent'
+tools: ['codebase', 'editFiles', 'runTests', 'search']
+description: 'Generate unit tests for selected file'
+---
+
 # Unit Test Generation Instructions
 
 When generating unit tests, please follow these guidelines:

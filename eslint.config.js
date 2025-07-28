@@ -192,7 +192,10 @@ export default tseslint.config(
       "vitest/max-expects": "off",
       "vitest/prefer-lowercase-title": "off",
       "vitest/prefer-describe-function-title": "off",
-      "vitest/no-hooks": ["error", { allow: ["beforeAll", "afterAll"] }],
+      "vitest/no-hooks": [
+        "error",
+        { allow: ["beforeAll", "afterAll", "beforeEach", "afterEach"] },
+      ],
     },
   },
   {

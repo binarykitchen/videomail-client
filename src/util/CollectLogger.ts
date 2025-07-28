@@ -1,11 +1,12 @@
 import { VideomailClientOptions } from "../types/options";
+import Browser from "./Browser";
 import getBrowser from "./getBrowser";
 
 class CollectLogger {
-  private browser;
+  private browser: Browser;
   private logger;
   private stack: string[] = [];
-  private options;
+  private options: VideomailClientOptions;
 
   public constructor(options: VideomailClientOptions) {
     this.options = options;
