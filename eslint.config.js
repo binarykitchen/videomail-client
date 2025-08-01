@@ -10,9 +10,9 @@ import pluginPromise from "eslint-plugin-promise";
 import * as regexpPlugin from "eslint-plugin-regexp";
 import pluginSecurity from "eslint-plugin-security";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
+// import storybook from "eslint-plugin-storybook";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-// import storybook from "eslint-plugin-storybook";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 

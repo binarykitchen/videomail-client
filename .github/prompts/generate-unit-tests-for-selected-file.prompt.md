@@ -15,6 +15,7 @@ When generating unit tests, please follow these guidelines:
 5. Write tests that cover the functionality of the source file, including edge cases and error handling.
 6. Honour the global Vitest configuration found in the root folder at `vitest.config.ts`.
 7. There is no need to import Vitest's `expect` or `describe` as they are globally available.
+8. Whenever you generate the unit test code, ensure it produces no TypeError or ESLint errors.
 
 ## Preferred Test Structure
 
