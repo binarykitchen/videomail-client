@@ -1,6 +1,6 @@
 // @ts-check
 
-import eslint from "@eslint/js";
+import js from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
 import deMorgan from "eslint-plugin-de-morgan";
 import * as depend from "eslint-plugin-depend";
@@ -42,14 +42,14 @@ export default tseslint.config(
   {
     // Node_modules and .git already covered in eslint.configs.all below
     name: "ignore some more files",
-    ignores: [".storybook/public", "storybook-static", "!.storybook"],
+    ignores: ["dist", ".storybook/public", "storybook-static", "!.storybook"],
   },
   {
     name: "global eslint rules for all source files",
-    ...eslint.configs.all,
+    ...js.configs.all,
     files: ALL_FILES,
     rules: {
-      ...eslint.configs.all.rules,
+      ...js.configs.all.rules,
       camelcase: "off",
       "capitalized-comments": "off",
       "class-methods-use-this": "off",
@@ -98,8 +98,11 @@ export default tseslint.config(
     name: "general language options",
     files: ALL_FILES,
     languageOptions: {
+      // Ensure the version also supports back to 5 years ago.
+      // This for older devices and whoever doesn't update :)
+      ecmaVersion: 2020,
       globals: {
-        ...globals.node,
+        ...globals.browser,
       },
       parser: tseslint.parser,
       parserOptions: {
