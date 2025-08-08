@@ -203,7 +203,7 @@ class Notifier extends Despot {
 
   public error(err: VideomailError) {
     const message = err.message;
-    const explanation = err.explanation ? err.explanation.toString() : undefined;
+    const explanation = err.explanation;
 
     if (!message) {
       this.options.logger.debug(

@@ -89,7 +89,7 @@ class VideomailError extends HTTPVideomailError {
     // Needed for unit tests
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (screen.orientation) {
-      this.orientation = screen.orientation.type.toString();
+      this.orientation = screen.orientation.type;
     }
 
     this.err = errData?.err;
