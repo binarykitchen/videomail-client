@@ -3,9 +3,12 @@ import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
 // Make sure these are only native, primitive types, not fully bloated objects
 export interface VideomailErrorData {
-  // This is for unhandled promise rejection events
+  // These two are for unhandled promise rejection events.
   // Any other error causes, they shall go into the err (ErrorObject)
   cause?: any;
+  // TODO Not sure if this can reported via API
+  promise?: Promise<any>;
+
   err?: ErrorObject | undefined;
   name?: string;
   explanation?: string | undefined;
