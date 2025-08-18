@@ -6,8 +6,8 @@ export interface VideomailErrorData {
   // These two are for unhandled promise rejection events.
   // Any other error causes, they shall go into the err (ErrorObject)
   cause?: any;
-  // TODO Not sure if this can reported via API
-  promise?: Promise<any>;
+  // TODO Not sure if this can be reported via API. Needs experimenting. Hence any for now.
+  promise?: any;
 
   err?: ErrorObject | undefined;
   name?: string;
