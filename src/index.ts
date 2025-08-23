@@ -1,6 +1,7 @@
 import VideomailClient from "./client";
 import { Command, CommandArgs } from "./types/command";
 import DeliveryRecord from "./types/DeliveryRecord";
+import { EmailAddress, EmailAddresses } from "./types/EmailAddress";
 import { FullVideomailErrorData, VideomailErrorData } from "./types/error";
 import VideomailEvents from "./types/events";
 import { VideomailClientOptions } from "./types/options";
@@ -16,3 +17,4 @@ export { VideomailClient, VideoType };
 export type { FullVideomailErrorData, PartialVideomail, VideomailErrorData };
 export type { Command, CommandArgs };
 export type { DeliveryRecord };
+export type { EmailAddress, EmailAddresses };
