@@ -1,9 +1,9 @@
 import { EmailAddress } from "./EmailAddress";
 
 interface DeliveryReport {
-  userKey?: string | undefined;
+  userKey: string | false;
 }
 
-type DeliveryRecord = Record<EmailAddress, DeliveryReport | undefined>;
+type DeliveryRecord = Record<EmailAddress, DeliveryReport>;
 
 export default DeliveryRecord;
