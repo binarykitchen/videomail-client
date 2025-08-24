@@ -69,8 +69,6 @@ interface Videomail {
   rejectedTo?: DeliveryRecord;
   rejectedCc?: DeliveryRecord;
   rejectedBcc?: DeliveryRecord;
-
-  accepted?: DeliveryRecord;
 }
 
 export type PartialVideomail = PartialDeep<Videomail>;

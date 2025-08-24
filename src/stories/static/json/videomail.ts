@@ -44,7 +44,6 @@ const videomailExample: Videomail = {
     },
   },
   dateUpdated: 1511570574377,
-  accepted: { "automatic@videomail.io": { userKey: false } },
   url: "https://videomail.io/videomail/test-example-mofo-485573266478",
   key: "11e7-d179-62e4cfa0-8f72-6ff7f0c1e906",
   mp4: "https://videos.pond5.com/brown-hamster-continuously-running-fast-footage-072830929_main_xxl.mp4",
