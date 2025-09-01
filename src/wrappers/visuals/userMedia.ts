@@ -4,7 +4,6 @@ import createError from "../../util/error/createError";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
 import getFirstVideoTrack from "../../util/html/media/getFirstVideoTrack";
 import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
-import isPromise from "../../util/isPromise";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "./../../util/pretty";
 import Recorder from "./recorder";
@@ -17,8 +16,8 @@ interface StopParams {
 }
 
 class UserMedia extends Despot {
-  private recorder: Recorder;
-  private rawVisualUserMedia: HTMLVideoElement | undefined | null;
+  private readonly recorder: Recorder;
+  private readonly rawVisualUserMedia: HTMLVideoElement | undefined | null;
 
   private paused = false;
   private recording = false;
@@ -163,41 +162,34 @@ class UserMedia extends Despot {
             `UserMedia: play(): media.readyState=${this.rawVisualUserMedia.readyState}, media.paused=${this.rawVisualUserMedia.paused}, media.ended=${this.rawVisualUserMedia.ended}, media.played=${pretty(this.rawVisualUserMedia.played)}`,
           );
 
-          let p;
-
-          try {
-            p = this.rawVisualUserMedia.play();
-          } catch (exc) {
-            /*
-             * this in the hope to catch InvalidStateError, see
-             * https://github.com/binarykitchen/videomail-client/issues/149
-             */
-            this.options.logger.warn(`Caught raw user media play exception: ${exc}`);
-          }
-
-          /*
-           * using the promise here just experimental for now
-           * and this to catch any weird errors early if possible
-           */
-          if (isPromise(p)) {
-            p.then(() => {
+          this.rawVisualUserMedia
+            .play()
+            .then(() => {
               if (!this.playingPromiseReached) {
                 this.options.logger.debug(
                   "UserMedia: play promise successful. Playing now.",
                 );
                 this.playingPromiseReached = true;
               }
-            }).catch((reason) => {
+            })
+            .catch((exc: unknown) => {
               /*
-               * promise can be interrupted, i.E. when switching tabs
+               * Promise can be interrupted, i.E. when switching tabs
                * and promise can get resumed when switching back to tab, hence
                * do not treat this like an error
                */
-              this.options.logger.warn(
-                `Caught pending user media promise exception: ${reason.toString()}`,
-              );
+              if (exc instanceof Error) {
+                this.options.logger.warn(
+                  `Caught pending user media promise exception: ${exc.toString()}`,
+                );
+              } else {
+                throw createError({
+                  message: "Failed to play user media upon play event.",
+                  exc,
+                  options: this.options,
+                });
+              }
             });
-          }
         }
       } catch (exc) {
         unloadAllEventListeners();
@@ -343,9 +335,7 @@ class UserMedia extends Despot {
 
       // do not stop "too much" when going to initialize anyway
       if (!params?.aboutToInitialize) {
-        if (!chosenStream) {
-          chosenStream = this.currentVisualStream;
-        }
+        chosenStream ??= this.currentVisualStream;
 
         const tracks = chosenStream?.getTracks();
 
@@ -355,7 +345,7 @@ class UserMedia extends Despot {
           });
         }
 
-        this.setVisualStream(undefined);
+        this.setVisualStream();
 
         this.audioRecorder?.stop();
         this.audioRecorder = undefined;

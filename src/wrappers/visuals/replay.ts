@@ -5,6 +5,7 @@ import { VideomailClientOptions } from "../../types/options";
 import Videomail from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";
 import Despot from "../../util/Despot";
+import createError from "../../util/error/createError";
 import getBrowser from "../../util/getBrowser";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
@@ -272,8 +273,13 @@ class Replay extends Despot {
           e.preventDefault();
 
           if (this.replayElement?.paused) {
-            this.replayElement.play().catch((err: unknown) => {
-              throw err;
+            this.replayElement.play().catch((exc: unknown) => {
+              throw createError({
+                message:
+                  "Failed to play replay video while paused upon touchstart event.",
+                exc,
+                options: this.options,
+              });
             });
           } else {
             this.replayElement?.pause();
@@ -288,8 +294,12 @@ class Replay extends Despot {
         e.preventDefault();
 
         if (this.replayElement?.paused) {
-          this.replayElement.play().catch((err: unknown) => {
-            throw err;
+          this.replayElement.play().catch((exc: unknown) => {
+            throw createError({
+              message: "Failed to play replay video while paused upon click event.",
+              exc,
+              options: this.options,
+            });
           });
         } else {
           this.replayElement?.pause();

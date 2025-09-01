@@ -24,7 +24,7 @@ interface NotifyOptions extends MessageOptions {
 }
 
 class Notifier extends Despot {
-  private visuals: Visuals;
+  private readonly visuals: Visuals;
 
   private notifyElement?: HTMLElement | null | undefined;
   private messageElement?: HTMLHeadingElement | null | undefined;
