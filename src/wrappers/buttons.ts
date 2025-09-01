@@ -24,7 +24,7 @@ interface RadioButtonOptions {
 }
 
 class Buttons extends Despot {
-  private container: Container;
+  private readonly container: Container;
 
   private buttonsElement?: HTMLElement | null | undefined;
   private recordButton?: HTMLButtonElement;

@@ -9,12 +9,12 @@ import RecordNote from "./recorder/recordNote";
 import RecordTimer from "./recorder/recordTimer";
 
 class RecorderInsides extends Despot {
-  private recordNote: RecordNote;
-  private recordTimer: RecordTimer;
+  private readonly recordNote: RecordNote;
+  private readonly recordTimer: RecordTimer;
 
-  private countdown?: Countdown;
-  private facingMode?: FacingMode;
-  private pausedNote?: PausedNote;
+  private readonly countdown?: Countdown;
+  private readonly facingMode?: FacingMode;
+  private readonly pausedNote?: PausedNote;
 
   private built = false;
 

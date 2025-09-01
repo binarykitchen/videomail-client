@@ -6,9 +6,9 @@ import Visuals from "../../../visuals";
 import RecordNote from "./recordNote";
 
 class RecordTimer {
-  private visuals: Visuals;
-  private recordNote: RecordNote;
-  private options: VideomailClientOptions;
+  private readonly visuals: Visuals;
+  private readonly recordNote: RecordNote;
+  private readonly options: VideomailClientOptions;
 
   private recordTimerElement?: HTMLElement | undefined | null;
 

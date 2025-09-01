@@ -4,8 +4,8 @@ import { VideomailClientOptions } from "../../../../types/options";
 import Visuals from "../../../visuals";
 
 class PausedNote {
-  private visuals: Visuals;
-  private options: VideomailClientOptions;
+  private readonly visuals: Visuals;
+  private readonly options: VideomailClientOptions;
 
   private pausedBlockElement?: HTMLElement | null | undefined;
   private pausedHeaderElement?: HTMLElement | null | undefined;

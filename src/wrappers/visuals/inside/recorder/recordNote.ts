@@ -3,7 +3,7 @@ import hidden from "hidden";
 import Visuals from "../../../visuals";
 
 class RecordNote {
-  private visuals: Visuals;
+  private readonly visuals: Visuals;
   private recordNoteElement: HTMLElement | null | undefined;
 
   constructor(visuals: Visuals) {

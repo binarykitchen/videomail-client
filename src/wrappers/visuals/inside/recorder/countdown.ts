@@ -4,8 +4,8 @@ import { VideomailClientOptions } from "../../../../types/options";
 import Visuals from "../../../visuals";
 
 class Countdown {
-  private visuals: Visuals;
-  private options: VideomailClientOptions;
+  private readonly visuals: Visuals;
+  private readonly options: VideomailClientOptions;
 
   private countdownElement?: HTMLElement | null | undefined;
   private intervalId?: number | undefined;

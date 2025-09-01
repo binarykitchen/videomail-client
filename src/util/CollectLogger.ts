@@ -3,10 +3,10 @@ import Browser from "./Browser";
 import getBrowser from "./getBrowser";
 
 class CollectLogger {
-  private browser: Browser;
-  private logger;
-  private stack: string[] = [];
-  private options: VideomailClientOptions;
+  private readonly browser: Browser;
+  private readonly logger;
+  private readonly stack: string[] = [];
+  private readonly options: VideomailClientOptions;
 
   public constructor(options: VideomailClientOptions) {
     this.options = options;

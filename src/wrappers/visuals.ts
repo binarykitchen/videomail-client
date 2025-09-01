@@ -15,10 +15,10 @@ import Replay from "./visuals/replay";
 class Visuals extends Despot {
   private readonly container: Container;
 
-  private replay: Replay;
-  private recorder: Recorder;
-  private recorderInsides: RecorderInsides;
-  private notifier: Notifier;
+  private readonly replay: Replay;
+  private readonly recorder: Recorder;
+  private readonly recorderInsides: RecorderInsides;
+  private readonly notifier: Notifier;
 
   private visualsElement?: HTMLElement | null | undefined;
   private built = false;

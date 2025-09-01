@@ -338,9 +338,7 @@ class Recorder extends Despot {
       this.waitingTime = Date.now() - this.stopTime;
     }
 
-    if (!this.recordingStats) {
-      this.recordingStats = {};
-    }
+    this.recordingStats ??= {};
 
     this.recordingStats.waitingTime = this.waitingTime;
   }
@@ -1446,9 +1444,7 @@ class Recorder extends Despot {
       this.recorderElement.style.width = "100%";
     }
 
-    if (!this.userMedia) {
-      this.userMedia = new UserMedia(this, this.options);
-    }
+    this.userMedia ??= new UserMedia(this, this.options);
 
     this.show();
 

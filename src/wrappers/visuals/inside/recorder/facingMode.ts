@@ -5,7 +5,7 @@ import Despot from "../../../../util/Despot";
 import Visuals from "../../../visuals";
 
 class FacingMode extends Despot {
-  private visuals: Visuals;
+  private readonly visuals: Visuals;
   private facingModeElement?: HTMLElement | null | undefined;
 
   constructor(visuals: Visuals, options: VideomailClientOptions) {
