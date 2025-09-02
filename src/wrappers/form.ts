@@ -1,12 +1,13 @@
 import getFormData from "get-form-data";
-import hidden from "hidden";
 
 import { ErrorParams, PreviewParams } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
 import Videomail, { PartialVideomail } from "../types/Videomail";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
+import hideElement from "../util/html/hideElement";
 import isNotButton from "../util/html/isNotButton";
+import showElement from "../util/html/showElement";
 import pretty from "../util/pretty";
 import { trimEmail, trimEmails } from "../util/trimEmail";
 import Container from "./container";
@@ -165,12 +166,12 @@ class Form extends Despot {
 
   private hideAll() {
     for (const formElement of this.formElement.elements) {
-      hidden(formElement, true);
+      hideElement(formElement as HTMLElement);
     }
 
     // Just do not hide the form itself when it act as a container
     if (!this.formElement.classList.contains(this.options.selectors.containerClass)) {
-      hidden(this.formElement, true);
+      hideElement(this.formElement);
     }
   }
 
@@ -320,7 +321,7 @@ class Form extends Despot {
 
   private hideSubmitButton() {
     const submitButton = this.findSubmitButton();
-    hidden(submitButton, true);
+    hideElement(submitButton);
   }
 
   public unload() {
@@ -415,16 +416,16 @@ class Form extends Despot {
     return null;
   }
 
-  public findSubmitButton() {
+  public findSubmitButton(): HTMLButtonElement | null {
     return this.formElement.querySelector("[type='submit']");
   }
 
   public hide() {
-    hidden(this.formElement, true);
+    hideElement(this.formElement);
   }
 
   public show() {
-    hidden(this.formElement, false);
+    showElement(this.formElement);
   }
 }
 

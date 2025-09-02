@@ -1,11 +1,9 @@
-import hidden from "hidden";
-
 function showElement(element?: HTMLElement | null) {
   if (!element) {
     return;
   }
 
-  hidden(element, false);
+  element.style.removeProperty("display");
 }
 
 export default showElement;

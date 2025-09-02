@@ -1,7 +1,6 @@
 import animitter from "animitter";
 import AudioSample from "audio-sample";
 import Frame from "canvas-to-buffer";
-import hidden from "hidden";
 import { deserializeError } from "serialize-error";
 import websocket from "websocket-stream";
 
@@ -17,6 +16,9 @@ import getBrowser from "../../util/getBrowser";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
 import getRatio from "../../util/html/dimensions/getRatio";
+import hideElement from "../../util/html/hideElement";
+import isHidden from "../../util/html/isHidden";
+import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
 import { UnloadParams } from "../container";
@@ -175,9 +177,7 @@ class Recorder extends Despot {
   }
 
   public show() {
-    if (this.recorderElement) {
-      hidden(this.recorderElement, false);
-    }
+    showElement(this.recorderElement);
   }
 
   private onUserMediaReady(params?: UserMediaReadyParams) {
@@ -826,7 +826,7 @@ class Recorder extends Despot {
   }
 
   private isHidden() {
-    return !this.recorderElement || hidden(this.recorderElement);
+    return !this.recorderElement || isHidden(this.recorderElement);
   }
 
   private writeCommand(command: string, args: any, cb?: () => void) {
@@ -1484,7 +1484,7 @@ class Recorder extends Despot {
   public hide() {
     if (!this.isHidden()) {
       if (this.recorderElement) {
-        hidden(this.recorderElement, true);
+        hideElement(this.recorderElement);
       }
 
       this.clearUserMediaTimeout();

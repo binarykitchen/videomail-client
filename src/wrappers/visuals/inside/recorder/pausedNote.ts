@@ -1,6 +1,6 @@
-import hidden from "hidden";
-
 import { VideomailClientOptions } from "../../../../types/options";
+import hideElement from "../../../../util/html/hideElement";
+import showElement from "../../../../util/html/showElement";
 import Visuals from "../../../visuals";
 
 class PausedNote {
@@ -64,11 +64,11 @@ class PausedNote {
   }
 
   public hide() {
-    hidden(this.pausedBlockElement, true);
+    hideElement(this.pausedBlockElement);
   }
 
   public show() {
-    hidden(this.pausedBlockElement, false);
+    showElement(this.pausedBlockElement);
   }
 }
 

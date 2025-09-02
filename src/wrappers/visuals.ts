@@ -1,10 +1,11 @@
-import hidden from "hidden";
-
 import { ShowParams } from "../client";
 import { VideomailClientOptions } from "../types/options";
 import Despot from "../util/Despot";
 import VideomailError from "../util/error/VideomailError";
 import getBrowser from "../util/getBrowser";
+import hideElement from "../util/html/hideElement";
+import isHidden from "../util/html/isHidden";
+import showElement from "../util/html/showElement";
 import pretty from "../util/pretty";
 import Container, { UnloadParams } from "./container";
 import RecorderInsides from "./visuals/inside/recorderInsides";
@@ -338,7 +339,7 @@ class Visuals extends Despot {
 
   public hide() {
     if (this.visualsElement) {
-      hidden(this.visualsElement, true);
+      hideElement(this.visualsElement);
       this.emit("HIDE");
     }
   }
@@ -346,13 +347,13 @@ class Visuals extends Despot {
   public isHidden() {
     if (!this.built) {
       return true;
-    } else if (this.visualsElement) {
-      return hidden(this.visualsElement);
     }
+
+    return isHidden(this.visualsElement);
   }
 
   public showVisuals() {
-    hidden(this.visualsElement, false);
+    showElement(this.visualsElement);
   }
 
   public show(params?: ShowParams) {

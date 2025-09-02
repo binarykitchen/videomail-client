@@ -1,6 +1,6 @@
-import hidden from "hidden";
-
 import { VideomailClientOptions } from "../../../../types/options";
+import hideElement from "../../../../util/html/hideElement";
+import showElement from "../../../../util/html/showElement";
 import Visuals from "../../../visuals";
 
 class Countdown {
@@ -48,7 +48,7 @@ class Countdown {
       throw new Error("Unable to start countdown without an element");
     }
 
-    if (!(typeof this.options.video.countdown === "number")) {
+    if (typeof this.options.video.countdown !== "number") {
       throw new Error(
         `The defined countdown is not a valid number: ${this.options.video.countdown}`,
       );
@@ -88,7 +88,7 @@ class Countdown {
   }
 
   public show() {
-    hidden(this.countdownElement, false);
+    showElement(this.countdownElement);
   }
 
   public isCountingDown() {
@@ -103,7 +103,7 @@ class Countdown {
   }
 
   public hide() {
-    hidden(this.countdownElement, true);
+    hideElement(this.countdownElement);
     this.unload();
   }
 }

@@ -1,7 +1,7 @@
-import hidden from "hidden";
-
 import { VideomailClientOptions } from "../../../../types/options";
 import Despot from "../../../../util/Despot";
+import hideElement from "../../../../util/html/hideElement";
+import showElement from "../../../../util/html/showElement";
 import Visuals from "../../../visuals";
 
 class FacingMode extends Despot {
@@ -49,11 +49,11 @@ class FacingMode extends Despot {
   }
 
   public hide() {
-    hidden(this.facingModeElement, true);
+    hideElement(this.facingModeElement);
   }
 
   public show() {
-    hidden(this.facingModeElement, false);
+    showElement(this.facingModeElement);
   }
 }
 

@@ -1,11 +1,11 @@
-import hidden from "hidden";
-
 function isShown(element?: HTMLElement | null) {
   if (!element) {
     return false;
   }
 
-  return !hidden(element);
+  const display = element.style.getPropertyValue("display");
+
+  return !display.includes("none");
 }
 
 export default isShown;

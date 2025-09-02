@@ -1,11 +1,9 @@
-import hidden from "hidden";
-
 function hideElement(element?: HTMLElement | null) {
   if (!element) {
     return;
   }
 
-  hidden(element, true);
+  element.style.setProperty("display", "none", "important");
 }
 
 export default hideElement;

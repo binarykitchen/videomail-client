@@ -1,10 +1,11 @@
-import hidden from "hidden";
-
 import { ProgressParams, StoppingParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import VideomailError from "../../util/error/VideomailError";
 import getBrowser from "../../util/getBrowser";
+import hideElement from "../../util/html/hideElement";
+import isHidden from "../../util/html/isHidden";
+import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
 import Visuals from "../visuals";
@@ -162,9 +163,7 @@ class Notifier extends Despot {
   }
 
   private show() {
-    if (this.notifyElement) {
-      hidden(this.notifyElement, false);
-    }
+    showElement(this.notifyElement);
   }
 
   private runEntertainment() {
@@ -266,7 +265,7 @@ class Notifier extends Despot {
       );
     }
 
-    hidden(this.messageElement, false);
+    showElement(this.messageElement);
   }
 
   private setExplanation(explanation: string) {
@@ -287,7 +286,7 @@ class Notifier extends Despot {
 
     this.explanationElement.innerHTML = explanation;
 
-    hidden(this.explanationElement, false);
+    showElement(this.explanationElement);
   }
 
   public build() {
@@ -313,22 +312,18 @@ class Notifier extends Despot {
   }
 
   private hideMessage() {
-    if (this.getMessageElement()) {
-      hidden(this.messageElement, true);
-    }
+    hideElement(this.getMessageElement());
   }
 
   private hideExplanation() {
-    if (this.explanationElement) {
-      hidden(this.explanationElement, true);
-    }
+    hideElement(this.explanationElement);
   }
 
   public hide() {
     this.cancelEntertainment();
 
     if (this.notifyElement) {
-      hidden(this.notifyElement, true);
+      hideElement(this.notifyElement);
       this.notifyElement.classList.remove("blocking");
     }
 
@@ -341,7 +336,7 @@ class Notifier extends Despot {
       return false;
     }
 
-    return this.notifyElement && !hidden(this.notifyElement);
+    return this.notifyElement && !isHidden(this.notifyElement);
   }
 
   public isBuilt() {

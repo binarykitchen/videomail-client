@@ -1,7 +1,6 @@
 import "./../styles/main.styl";
 
 import Visibility from "document-visibility";
-import hidden from "hidden";
 import Response from "superagent/lib/node/response";
 
 import { ShowParams, StartOverParams } from "../client";
@@ -14,6 +13,8 @@ import createError from "../util/error/createError";
 import getBrowser from "../util/getBrowser";
 import limitHeight from "../util/html/dimensions/limitHeight";
 import limitWidth from "../util/html/dimensions/limitWidth";
+import hideElement from "../util/html/hideElement";
+import showElement from "../util/html/showElement";
 import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 import pretty from "../util/pretty";
 import Buttons from "./buttons";
@@ -355,7 +356,7 @@ class Container extends Despot {
   }
 
   private hideMySelf() {
-    hidden(this.containerElement, true);
+    hideElement(this.containerElement);
   }
 
   private async submitVideomail(formInputs: FormInputs, method: FormMethod) {
@@ -471,7 +472,7 @@ class Container extends Despot {
       });
     }
 
-    hidden(this.containerElement, false);
+    showElement(this.containerElement);
 
     this.visuals.show(params);
 

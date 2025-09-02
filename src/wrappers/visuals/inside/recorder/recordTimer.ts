@@ -1,6 +1,6 @@
-import hidden from "hidden";
-
 import { VideomailClientOptions } from "../../../../types/options";
+import hideElement from "../../../../util/html/hideElement";
+import showElement from "../../../../util/html/showElement";
 import pad from "../../../../util/pad";
 import Visuals from "../../../visuals";
 import RecordNote from "./recordNote";
@@ -99,14 +99,14 @@ class RecordTimer {
   }
 
   private hide() {
-    hidden(this.recordTimerElement, true);
+    hideElement(this.recordTimerElement);
   }
 
   private show() {
     this.recordTimerElement?.classList.remove("near");
     this.recordTimerElement?.classList.remove("nigh");
 
-    hidden(this.recordTimerElement, false);
+    showElement(this.recordTimerElement);
   }
 
   private getSecondsRecorded() {

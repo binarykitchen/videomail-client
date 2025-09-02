@@ -1,5 +1,3 @@
-import hidden from "hidden";
-
 import { PreviewParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
 import Videomail from "../../types/Videomail";
@@ -9,6 +7,9 @@ import createError from "../../util/error/createError";
 import getBrowser from "../../util/getBrowser";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
+import hideElement from "../../util/html/hideElement";
+import isHidden from "../../util/html/isHidden";
+import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
 import { UnloadParams } from "../container";
@@ -189,14 +190,14 @@ class Replay extends Despot {
 
     if (playerOnly) {
       if (hasMedia) {
-        hidden(this.replayElement, false);
+        showElement(this.replayElement);
       }
     } else {
-      hidden(this.replayElement, false);
+      showElement(this.replayElement);
     }
 
     if (playerOnly) {
-      hidden(this.replayElement.parentNode, false);
+      showElement(this.replayElement.parentElement);
     } else {
       this.visuals.show();
     }
@@ -473,10 +474,10 @@ class Replay extends Despot {
 
   public hide() {
     if (this.isStandalone()) {
-      hidden(this.visuals, true);
+      this.visuals.hide();
     } else if (this.replayElement) {
-      hidden(this.replayElement, true);
-      hidden(this.replayElement.parentNode, true);
+      hideElement(this.replayElement);
+      hideElement(this.replayElement.parentElement);
     }
   }
 
@@ -485,7 +486,7 @@ class Replay extends Despot {
       return false;
     }
 
-    return !hidden(this.replayElement) && !this.visuals.isHidden();
+    return !isHidden(this.replayElement) && !this.visuals.isHidden();
   }
 
   public getVisuals() {

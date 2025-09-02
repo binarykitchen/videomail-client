@@ -1,5 +1,5 @@
-import hidden from "hidden";
-
+import hideElement from "../../../../util/html/hideElement";
+import showElement from "../../../../util/html/showElement";
 import Visuals from "../../../visuals";
 
 class RecordNote {
@@ -41,11 +41,11 @@ class RecordNote {
   }
 
   public hide() {
-    hidden(this.recordNoteElement, true);
+    hideElement(this.recordNoteElement);
   }
 
   public show() {
-    hidden(this.recordNoteElement, false);
+    showElement(this.recordNoteElement);
   }
 }
 
