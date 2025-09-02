@@ -3,6 +3,7 @@ function hideElement(element?: HTMLElement | null) {
     return;
   }
 
+  // It has to be !important because some poorly WordPress themes override inline styles
   element.style.setProperty("display", "none", "important");
 }
 
