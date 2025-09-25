@@ -22,7 +22,6 @@ export type {
   VideomailClientOptions,
   VideomailErrorData,
   VideomailEvents,
-  VideoType,
 };
 
-export { VideomailClient };
+export { VideomailClient, VideoType };
