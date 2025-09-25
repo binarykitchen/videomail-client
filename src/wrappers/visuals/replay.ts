@@ -1,6 +1,6 @@
 import { PreviewParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
-import Videomail from "../../types/Videomail";
+import type { Videomail } from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";

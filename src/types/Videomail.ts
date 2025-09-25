@@ -71,6 +71,6 @@ interface Videomail {
   rejectedBcc?: DeliveryRecord;
 }
 
-export type PartialVideomail = PartialDeep<Videomail>;
+type PartialVideomail = PartialDeep<Videomail>;
 
-export default Videomail;
+export type { PartialVideomail, Videomail };

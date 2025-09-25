@@ -1,6 +1,6 @@
 // Used for mocked MSW responses in storybook
 
-import Videomail from "../../../types/Videomail";
+import type { Videomail } from "../../../types/Videomail";
 
 const videomailExample: Videomail = {
   subject: "Hamster on Speed",

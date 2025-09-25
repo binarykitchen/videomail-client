@@ -2,7 +2,7 @@ import getFormData from "get-form-data";
 
 import { ErrorParams, PreviewParams } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
-import Videomail, { PartialVideomail } from "../types/Videomail";
+import type { PartialVideomail, Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
 import hideElement from "../util/html/hideElement";
