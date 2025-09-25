@@ -2,16 +2,16 @@ import defined from "defined";
 import { IResult, UAParser } from "ua-parser-js";
 
 import { VideomailClientOptions } from "../types/options";
-import { VideoType } from "../types/VideoType";
+import { VideoType, VideoTypeValue } from "../types/VideoType";
 import createError from "./error/createError";
 import canPlayType from "./html/media/canPlayType";
 
 const FALLBACK_VIDEO_TYPE = VideoType.MP4;
 
 class Browser {
-  private options: VideomailClientOptions;
-  private result: IResult;
-  private videoType: VideoType | undefined;
+  private readonly options: VideomailClientOptions;
+  private readonly result: IResult;
+  private videoType: VideoTypeValue | undefined;
 
   public constructor(options: VideomailClientOptions) {
     this.options = options;
