@@ -1,6 +1,6 @@
-import { VideoTypeValue } from "../../../types/VideoType";
+import { VideoType } from "../../../types/VideoType";
 
-function canPlayType(video: HTMLVideoElement, type: VideoTypeValue) {
+function canPlayType(video: HTMLVideoElement, type: VideoType) {
   const canPlayType = video.canPlayType(`video/${type}`);
 
   // definitely cannot be played here
