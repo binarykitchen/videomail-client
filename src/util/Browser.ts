@@ -2,16 +2,16 @@ import defined from "defined";
 import { IResult, UAParser } from "ua-parser-js";
 
 import { VideomailClientOptions } from "../types/options";
-import { VideoType, VideoTypeValue } from "../types/VideoType";
+import { VideoExtension, VideoExtensionType } from "../types/VideoExtension";
 import createError from "./error/createError";
 import canPlayType from "./html/media/canPlayType";
 
-const FALLBACK_VIDEO_TYPE = VideoType.MP4;
+const FALLBACK_VIDEO_TYPE = VideoExtension.MP4;
 
 class Browser {
   private readonly options: VideomailClientOptions;
   private readonly result: IResult;
-  private videoType: VideoTypeValue | undefined;
+  private videoType: VideoExtensionType | undefined;
 
   public constructor(options: VideomailClientOptions) {
     this.options = options;
@@ -80,14 +80,14 @@ class Browser {
 
   public getVideoType(video: HTMLVideoElement) {
     if (!this.videoType) {
-      if (canPlayType(video, VideoType.MP4)) {
-        this.videoType = VideoType.MP4;
-      } else if (canPlayType(video, VideoType.WebM)) {
-        this.videoType = VideoType.WebM;
+      if (canPlayType(video, VideoExtension.MP4)) {
+        this.videoType = VideoExtension.MP4;
+      } else if (canPlayType(video, VideoExtension.WebM)) {
+        this.videoType = VideoExtension.WebM;
       }
     }
 
-    if (this.videoType !== VideoType.WebM && this.videoType !== VideoType.MP4) {
+    if (this.videoType !== VideoExtension.WebM && this.videoType !== VideoExtension.MP4) {
       // We only support these two. Anything else defaults to the fallback
       this.videoType = FALLBACK_VIDEO_TYPE;
     }
