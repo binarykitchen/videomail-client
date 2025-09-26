@@ -7,14 +7,22 @@ import VideomailEvents from "./types/events";
 import { VideomailClientOptions } from "./types/options";
 import RecordingStats from "./types/RecordingStats";
 import Videomail, { PartialVideomail } from "./types/Videomail";
-import { VideoType } from "./types/VideoType";
+import { VideoType, VideoTypeType } from "./types/VideoType";
 
-export type { Videomail };
-export type { VideomailEvents };
-export type { RecordingStats };
-export type { VideomailClientOptions };
+export type {
+  Command,
+  CommandArgs,
+  DeliveryRecord,
+  EmailAddress,
+  EmailAddresses,
+  FullVideomailErrorData,
+  PartialVideomail,
+  RecordingStats,
+  Videomail,
+  VideomailClientOptions,
+  VideomailErrorData,
+  VideomailEvents,
+  VideoTypeType,
+};
+
 export { VideomailClient, VideoType };
-export type { FullVideomailErrorData, PartialVideomail, VideomailErrorData };
-export type { Command, CommandArgs };
-export type { DeliveryRecord };
-export type { EmailAddress, EmailAddresses };

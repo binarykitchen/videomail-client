@@ -10,7 +10,7 @@ import Videomail, { PartialVideomail } from "./types/Videomail";
 import createError from "./util/error/createError";
 import HTTPVideomailError from "./util/error/HTTPVideomailError";
 import VideomailError from "./util/error/VideomailError";
-import { FormInputs, FormMethod } from "./wrappers/form";
+import { FormInputs, FormMethod, FormMethodType } from "./wrappers/form";
 
 function findOriginalExc(exc: unknown) {
   if (exc instanceof Error && "response" in exc) {
@@ -101,7 +101,7 @@ class Resource {
     }
   }
 
-  private async write(method: FormMethod, videomail: PartialVideomail) {
+  private async write(method: FormMethodType, videomail: PartialVideomail) {
     const queryParams = {
       [Constants.SITE_NAME_LABEL]: this.options.siteName,
     };

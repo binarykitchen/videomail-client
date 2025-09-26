@@ -16,18 +16,18 @@ import tseslint from "typescript-eslint";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
+// Source and test files
+const CLIENT_ONLY_FILES = "src/**/*.{js,ts}";
+const STORYBOOK_FILES = ".storybook/**/*.{js,ts}";
+
 const ALL_FILES = [
-  // Source and test files
-  "src/**/*.{js,ts}",
-  // Storybook config
-  ".storybook/**/*.{js,ts}",
+  CLIENT_ONLY_FILES,
+  STORYBOOK_FILES,
   // Root level files
   "*.{js,ts}",
   // Scripts
   "etc/**/*.{js,ts}",
 ];
-
-const CLIENT_ONLY_FILES = ["src/**/*.{js,ts}"];
 
 /*
   For the record, it's tricky to configure this perfectly.

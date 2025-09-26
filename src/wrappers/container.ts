@@ -18,7 +18,7 @@ import showElement from "../util/html/showElement";
 import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 import pretty from "../util/pretty";
 import Buttons from "./buttons";
-import Form, { FormInputs, FormMethod } from "./form";
+import Form, { FormInputs, FormMethod, FormMethodType } from "./form";
 import Visuals from "./visuals";
 interface BuildOptions {
   playerOnly?: boolean;
@@ -61,8 +61,12 @@ class Container extends Despot {
   }
 
   private buildChildren(playerOnly = false, parentElement?: HTMLElement | null) {
+    const parentElementInfo = parentElement
+      ? `, parentElement="${pretty(parentElement)}"`
+      : "";
+
     this.options.logger.debug(
-      `Container: buildChildren (playerOnly = ${playerOnly}${parentElement ? `, parentElement="${pretty(parentElement)}"` : ""})`,
+      `Container: buildChildren (playerOnly = ${playerOnly}${parentElementInfo})`,
     );
 
     if (this.containerElement) {
@@ -359,7 +363,7 @@ class Container extends Despot {
     hideElement(this.containerElement);
   }
 
-  private async submitVideomail(formInputs: FormInputs, method: FormMethod) {
+  private async submitVideomail(formInputs: FormInputs, method: FormMethodType) {
     const videomailFormData = this.form?.transformFormData(formInputs);
 
     if (!videomailFormData) {
@@ -723,7 +727,7 @@ class Container extends Despot {
     return this.buttons.isReady();
   }
 
-  public async submitAll(formData: FormInputs, method: FormMethod, url: string) {
+  public async submitAll(formData: FormInputs, method: FormMethodType, url: string) {
     let response: Response | undefined;
 
     try {

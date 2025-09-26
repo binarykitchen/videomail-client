@@ -14,11 +14,13 @@ import Container from "./container";
 
 export type FormInputs = Record<string, string>;
 
-export enum FormMethod {
-  POST = "post",
-  PUT = "put",
-  GET = "get",
-}
+export const FormMethod = {
+  POST: "post",
+  PUT: "put",
+  GET: "get",
+} as const;
+
+export type FormMethodType = (typeof FormMethod)[keyof typeof FormMethod];
 
 class Form extends Despot {
   private readonly container: Container;
@@ -380,7 +382,7 @@ class Form extends Despot {
     const url = this.formElement.getAttribute("action") ?? this.options.baseUrl;
     const method = this.formElement.getAttribute("method");
 
-    let chosenMethod: FormMethod;
+    let chosenMethod: FormMethodType;
 
     switch (method) {
       case FormMethod.POST:
