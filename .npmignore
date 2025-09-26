@@ -10,7 +10,7 @@ test
 audit-ci.json
 chromatic.config.json
 eslint.config.js
-prettier.config.cjs
+prettier.config.js
 tsconfig.json
 tsconfig.prod.json
 package-lock.json

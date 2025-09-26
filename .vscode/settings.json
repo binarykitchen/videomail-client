@@ -9,7 +9,7 @@
   "eslint.options": {
     "overrideConfigFile": "./eslint.config.js"
   },
-  "prettier.configPath": "./prettier.config.cjs",
+  "prettier.configPath": "./prettier.config.js",
   "stylelint.validate": ["stylus"],
   "cSpell.words": [
     "animitter",

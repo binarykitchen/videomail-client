@@ -22,7 +22,7 @@ const ALL_FILES = [
   // Storybook config
   ".storybook/**/*.{js,ts}",
   // Root level files
-  "*.{js,ts,cjs}",
+  "*.{js,ts}",
   // Scripts
   "etc/**/*.{js,ts}",
 ];
