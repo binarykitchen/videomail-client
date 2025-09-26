@@ -6,4 +6,4 @@ const config = {
   plugins: ["prettier-plugin-curly", "prettier-plugin-sh", "prettier-plugin-packagejson"],
 };
 
-module.exports = config;
+export default config;

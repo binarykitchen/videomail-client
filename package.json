@@ -55,7 +55,7 @@
     "types": "tsc --noEmit",
     "types:config": "tsc --showConfig"
   },
-  "prettier": "./prettier.config.cjs",
+  "prettier": "./prettier.config.js",
   "dependencies": {
     "animitter": "3.0.0",
     "audio-sample": "5.0.0",
@@ -94,7 +94,7 @@
     "audit-ci": "7.1.0",
     "chromatic": "13.2.0",
     "cross-env": "10.0.0",
-    "eslint": "9.35.0",
+    "eslint": "9.36.0",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-de-morgan": "1.3.1",
     "eslint-plugin-depend": "1.3.1",
