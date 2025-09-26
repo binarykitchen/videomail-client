@@ -69,8 +69,7 @@ export default defineConfig({
   tools: {
     htmlPlugin: false,
     rspack: (_config, { appendPlugins }) => {
-      // Only register the plugin when RSDOCTOR is true, as the plugin will increase the build time
-      // Can be run with RSDOCTOR=true npm run build:prod
+      // To run this, use the `npm run build:prod:doc` command
       if (process.env.RSDOCTOR) {
         appendPlugins(
           new RsdoctorRspackPlugin({

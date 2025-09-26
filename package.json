@@ -42,6 +42,7 @@
   "scripts": {
     "audit": "npx audit-ci --config audit-ci.json",
     "build:prod": "cross-env NODE_ENV=production rslib build",
+    "build:prod:doc": "cross-env RSDOCTOR=true npm run build:prod",
     "build:storybook": "storybook build",
     "chromatic": "npx chromatic --project-token=chpt_742ead9ab882938",
     "lint": "eslint --color .",
@@ -122,8 +123,8 @@
     "vitest": "3.2.4"
   },
   "engines": {
-    "node": "^22.16.0",
-    "npm": "^10.9.2"
+    "node": "^22.20.0",
+    "npm": "^10.9.3"
   },
   "msw": {
     "workerDirectory": [
