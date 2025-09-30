@@ -245,17 +245,18 @@ class Form extends Despot {
 
     this.on("PREVIEW", (params?: PreviewParams) => {
       /*
-       * beware that preview doesn't always come with a key, i.E.
+       * Beware that preview doesn't always come with a key, i.E.
        * container.show() can emit PREVIEW without a key when a replay already exists
        * (can happen when showing - hiding - showing videomail over again)
        */
 
-      // only emit error if key is missing AND the input has no key (value) yet
+      // Only emit error if key is missing AND the input has no key (value) yet
       if (!params?.key && !this.keyInput?.value) {
         const err = createError({
           message: "Videomail key for preview is missing!",
           options: this.options,
         });
+
         this.emit("ERROR", { err });
       } else if (params?.key && this.keyInput) {
         this.keyInput.value = params.key;
@@ -263,6 +264,7 @@ class Form extends Despot {
         // Important so that any other JS framework can detect changes
         this.keyInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
+
       /*
        * else leave as it and use existing keyInput.value
        */
