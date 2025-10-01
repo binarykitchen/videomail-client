@@ -582,7 +582,7 @@ class Container extends Despot {
     this.visuals.pause(params);
   }
 
-  // this code needs a good rewrite :(
+  // That code needs a good rewrite :(
   public validate(event?, force = false) {
     let runValidation = true;
     let valid = true;
@@ -611,10 +611,13 @@ class Container extends Despot {
         this.emit("VALIDATING");
       }
 
-      const visualsValid =
-        this.visuals.validate() && this.buttons.isRecordAgainButtonEnabled();
+      let whyInvalid: string | undefined;
 
-      let whyInvalid;
+      const isRecordAgainButtonEnabled = this.buttons.isRecordAgainButtonEnabled();
+
+      // Not sure why the isRecordAgainButtonEnabled check is needed
+      const visualsValid = this.visuals.validate() && isRecordAgainButtonEnabled;
+
       let invalidData: Record<string, any> | undefined;
 
       if (this.form) {
@@ -695,6 +698,7 @@ class Container extends Despot {
         }
       } else {
         valid = visualsValid;
+        whyInvalid = "Because visuals aren't valid";
       }
 
       if (valid) {

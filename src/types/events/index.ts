@@ -51,7 +51,7 @@ export interface ValidatingParams {
 }
 
 export interface InvalidParams {
-  whyInvalid?: string;
+  whyInvalid?: string | undefined;
   invalidData?: Record<string, string>;
 }
 

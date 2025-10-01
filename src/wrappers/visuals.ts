@@ -318,7 +318,11 @@ class Visuals extends Despot {
   }
 
   public validate() {
-    return this.recorder.validate() && this.isReplayShown();
+    if (this.isReplayShown()) {
+      return true;
+    }
+
+    return this.recorder.validate();
   }
 
   public getRecordingStats() {
