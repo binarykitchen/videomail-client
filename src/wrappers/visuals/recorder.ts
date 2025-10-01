@@ -34,7 +34,7 @@ interface WriteStreamParams {
   onFlushedCallback?: (params: WriteStreamParams) => void;
 }
 
-interface StopParams {
+export interface StopParams {
   limitReached?: boolean;
 }
 

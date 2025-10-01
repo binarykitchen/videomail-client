@@ -10,7 +10,7 @@ import pretty from "../util/pretty";
 import Container, { UnloadParams } from "./container";
 import RecorderInsides from "./visuals/inside/recorderInsides";
 import Notifier from "./visuals/notifier";
-import Recorder from "./visuals/recorder";
+import Recorder, { StopParams } from "./visuals/recorder";
 import Replay from "./visuals/replay";
 
 class Visuals extends Despot {
@@ -24,12 +24,12 @@ class Visuals extends Despot {
   private visualsElement?: HTMLElement | null | undefined;
   private built = false;
 
-  constructor(container, options: VideomailClientOptions) {
+  constructor(container: Container, options: VideomailClientOptions) {
     super("Visuals", options);
 
     this.container = container;
 
-    // can be overwritten with setter fn
+    // Can be overwritten with setter fn
     this.replay = new Replay(this, options);
 
     this.recorder = new Recorder(this, this.replay, options);
@@ -220,7 +220,7 @@ class Visuals extends Despot {
     this.container.endWaiting();
   }
 
-  public stop(params?) {
+  public stop(params?: StopParams) {
     this.recorder.stop(params);
     this.recorderInsides.hidePause();
   }

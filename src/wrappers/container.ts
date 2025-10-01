@@ -817,10 +817,12 @@ class Container extends Despot {
 
   // Only used for replays
   public loadForm(videomail: Videomail) {
-    if (this.form) {
-      this.form.loadVideomail(videomail);
-      this.validate();
+    if (!this.form) {
+      return;
     }
+
+    this.form.loadVideomail(videomail);
+    this.validate();
   }
 
   public enableAudio() {

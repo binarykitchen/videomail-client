@@ -97,11 +97,11 @@ class VideomailClient extends Despot {
     });
 
     this.container.buildForm();
-    this.container.loadForm(videomail);
 
     // Wait until ready to avoid HTTP 416 errors (request range unavailable)
     this.once("REPLAY_SHOWN", () => {
       this.container.showReplayOnly();
+      this.container.loadForm(videomail);
     });
 
     const replay = this.container.getReplay();
