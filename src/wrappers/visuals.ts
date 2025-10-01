@@ -145,8 +145,12 @@ class Visuals extends Despot {
   }
 
   public build(playerOnly = false, parentElement?: HTMLElement | null) {
+    const parentElementInfo = parentElement
+      ? `, parentElement="${pretty(parentElement)}"`
+      : "";
+
     this.options.logger.debug(
-      `Visuals: build (playerOnly = ${playerOnly}${parentElement ? `, parentElement="${pretty(parentElement)}"` : ""})`,
+      `Visuals: build (playerOnly = ${playerOnly}${parentElementInfo})`,
     );
 
     if (parentElement) {
