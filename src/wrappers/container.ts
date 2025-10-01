@@ -587,7 +587,9 @@ class Container extends Despot {
     let runValidation = true;
     let valid = true;
 
-    if (!this.options.enableAutoValidation) {
+    if (!this.built) {
+      runValidation = false;
+    } else if (!this.options.enableAutoValidation) {
       runValidation = false;
       this.lastValidation = true; // needed so that it can be submitted anyway, see submit()
     } else if (force) {
