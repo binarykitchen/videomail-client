@@ -253,7 +253,7 @@ class Form extends Despot {
       // Only emit error if key is missing AND the input has no key (value) yet
       if (!params?.key && !this.keyInput?.value) {
         const err = createError({
-          message: "Videomail key for preview is missing!",
+          message: "Videomail key and its value for previewing is missing",
           options: this.options,
         });
 
