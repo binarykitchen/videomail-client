@@ -54,7 +54,7 @@ class VideomailClient extends Despot {
 
   public build() {
     /*
-     * it can happen that it gets called twice, i.E. when an error is thrown
+     * It can happen that it gets called twice, i.E. when an error is thrown
      * in the middle of the build() fn
      */
     if (!this.container.isBuilt()) {

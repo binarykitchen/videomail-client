@@ -984,12 +984,13 @@ class Recorder extends Despot {
 
   public unload(params?: UnloadParams) {
     if (this.unloaded || !this.built) {
-      return; // already unloaded
+      // already unloaded
+      return;
     }
 
     const e = params?.e;
 
-    let cause;
+    let cause: string | undefined;
 
     if (e) {
       cause = e.type;
@@ -1011,10 +1012,11 @@ class Recorder extends Despot {
       // server will disconnect socket automatically after submitting
     } else if (this.stream) {
       /*
-       * force to disconnect socket right now to clean temp files on server
+       * Force to disconnect socket right now to clean temp files on server
        * event listeners will do the rest
        */
-      this.options.logger.debug(`Recorder: ending stream ...`);
+      this.options.logger.debug(`Recorder: destroying stream ...`);
+
       this.stream.destroy();
       this.stream = undefined;
     }
@@ -1235,7 +1237,7 @@ class Recorder extends Despot {
     this.emit("RECORDING", { framesCount: this.framesCount });
 
     // see https://github.com/hapticdata/animitter/issues/3
-    this.loop.on("update", (_deltaTime, elapsedTime) => {
+    this.loop.on("update", (_deltaTime, elapsedTime: number) => {
       let avgFPS: number | undefined;
 
       if (elapsedTime !== 0) {
@@ -1246,7 +1248,7 @@ class Recorder extends Despot {
       }
 
       this.options.logger.debug(
-        `Recorder: avgFps = ${avgFPS}, framesCount = ${this.framesCount}`,
+        `Recorder updates avgFps = ${avgFPS} at frame ${this.framesCount}`,
       );
     });
 

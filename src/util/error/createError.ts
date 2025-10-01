@@ -142,7 +142,7 @@ function createError(errorParams: ErrorParams) {
     case VideomailError.NOT_READABLE_ERROR:
     case VideomailError.TRACK_START_ERROR:
       message = "No access to webcam";
-      explanation = "A hardware error occurred which prevented access to your webcam";
+      explanation = "Perhaps you are already using it in another browser?";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
