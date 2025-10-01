@@ -64,7 +64,7 @@ class RecordTimer {
       this.update();
 
       if (this.countdown < 1) {
-        this.visuals.stop(true);
+        this.visuals.stop();
       }
     }
   }
