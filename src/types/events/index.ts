@@ -31,8 +31,8 @@ export interface ProgressParams {
 
 export interface VideomailPreviewParams {
   key?: string | undefined;
-  width: number | undefined;
-  height: number | undefined;
+  width?: number | undefined;
+  height?: number | undefined;
   hasAudio: boolean;
   duration: number;
 }
