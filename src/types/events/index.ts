@@ -29,11 +29,12 @@ export interface ProgressParams {
   sampleProgress?: string | undefined;
 }
 
-export interface PreviewParams {
+export interface VideomailPreviewParams {
   key?: string | undefined;
-  width?: number | undefined;
-  height?: number | undefined;
+  width: number | undefined;
+  height: number | undefined;
   hasAudio: boolean;
+  duration: number;
 }
 
 export interface StoppedParams {
@@ -103,7 +104,7 @@ interface VideomailEvents {
   // recording is being paused
   PAUSED: () => void;
   // video preview is set
-  PREVIEW: (params?: PreviewParams) => void;
+  PREVIEW: (params?: VideomailPreviewParams) => void;
   // video preview is shown
   PREVIEW_SHOWN: () => void;
   // start sending

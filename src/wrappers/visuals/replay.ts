@@ -1,4 +1,4 @@
-import { PreviewParams } from "../../types/events";
+import { VideomailPreviewParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
 import Videomail from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";
@@ -263,7 +263,7 @@ class Replay extends Despot {
 
     if (!this.built) {
       if (!this.isStandalone()) {
-        this.on("PREVIEW", (params?: PreviewParams) => {
+        this.on("PREVIEW", (params?: VideomailPreviewParams) => {
           this.show(params?.width, params?.height, params?.hasAudio);
         });
       }

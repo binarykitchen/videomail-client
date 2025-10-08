@@ -5,7 +5,7 @@ import { deserializeError } from "serialize-error";
 import websocket from "websocket-stream";
 
 import Constants from "../../constants";
-import { Command, CommandArgs } from "../../types/command";
+import { Command, VideomailCommandArgs } from "../../types/command";
 import { UserMediaReadyParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
 import RecordingStats from "../../types/RecordingStats";
@@ -248,7 +248,7 @@ class Recorder extends Despot {
     });
   }
 
-  private updateFrameProgress(args?: CommandArgs) {
+  private updateFrameProgress(args?: VideomailCommandArgs) {
     if (!args) {
       throw createError({
         message: "Arguments are missing for updating the frame progress",
@@ -268,7 +268,7 @@ class Recorder extends Despot {
     this.updateOverallProgress();
   }
 
-  private updateSampleProgress(args?: CommandArgs) {
+  private updateSampleProgress(args?: VideomailCommandArgs) {
     if (!args) {
       throw createError({
         message: "Arguments are missing for updating the audio sample progress",
@@ -288,7 +288,7 @@ class Recorder extends Despot {
     this.updateOverallProgress();
   }
 
-  private preview(args?: CommandArgs) {
+  private preview(args?: VideomailCommandArgs) {
     if (!args) {
       throw createError({
         message: "Preview arguments are missing.",
@@ -331,7 +331,7 @@ class Recorder extends Despot {
     const width = this.getRecorderWidth(true);
     const height = this.getRecorderHeight(true);
 
-    this.emit("PREVIEW", { key: this.key, width, height, hasAudio });
+    this.emit("PREVIEW", { key: this.key, width, height, hasAudio, duration: -1 });
 
     // keep it for recording stats
     if (this.stopTime) {

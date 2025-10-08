@@ -1,6 +1,6 @@
 import getFormData from "get-form-data";
 
-import { ErrorParams, PreviewParams } from "../types/events";
+import { ErrorParams, VideomailPreviewParams } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
 import Videomail, { PartialVideomail } from "../types/Videomail";
 import Despot from "../util/Despot";
@@ -243,7 +243,7 @@ class Form extends Despot {
       }
     }
 
-    this.on("PREVIEW", (params?: PreviewParams) => {
+    this.on("PREVIEW", (params?: VideomailPreviewParams) => {
       /*
        * Beware that preview doesn't always come with a key, i.E.
        * container.show() can emit PREVIEW without a key when a replay already exists
