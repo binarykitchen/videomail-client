@@ -3,7 +3,7 @@ import { Command, VideomailCommandArgs } from "./types/command";
 import DeliveryRecord from "./types/DeliveryRecord";
 import { EmailAddress, EmailAddresses } from "./types/EmailAddress";
 import { FullVideomailErrorData, VideomailErrorData } from "./types/error";
-import VideomailEvents from "./types/events";
+import VideomailEvents, { VideomailPreviewParams } from "./types/events";
 import { VideomailClientOptions } from "./types/options";
 import RecordingStats from "./types/RecordingStats";
 import Videomail, { PartialVideomail } from "./types/Videomail";
@@ -22,6 +22,7 @@ export type {
   VideomailCommandArgs,
   VideomailErrorData,
   VideomailEvents,
+  VideomailPreviewParams,
   VideoTypeType,
 };
 
