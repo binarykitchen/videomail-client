@@ -331,7 +331,9 @@ class Recorder extends Despot {
     const width = this.getRecorderWidth(true);
     const height = this.getRecorderHeight(true);
 
-    this.emit("PREVIEW", { key: this.key, width, height, hasAudio, duration: -1 });
+    const duration = args.duration ?? -1;
+
+    this.emit("PREVIEW", { key: this.key, width, height, hasAudio, duration });
 
     // keep it for recording stats
     if (this.stopTime) {
