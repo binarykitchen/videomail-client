@@ -39,6 +39,12 @@
 
     "noEmit": true,
 
+    // This to speed up CI and avoid external type issues
+    "skipLibCheck": true,
+
+    // So that eslint and prettier written in JS can be included
+    "allowJs": true,
+
     // TODO Remove these exceptions and fix more errors one day
     "noImplicitAny": false,
     "noPropertyAccessFromIndexSignature": false

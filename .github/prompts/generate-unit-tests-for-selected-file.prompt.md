@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-tools: ['codebase', 'editFiles', 'runTests', 'search']
+tools: ['search/codebase', 'edit/editFiles', 'search']
 description: 'Generate unit tests for selected file'
 ---
 

@@ -16,8 +16,8 @@ import tseslint from "typescript-eslint";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
-// Source and test files
 const CLIENT_ONLY_FILES = "src/**/*.{js,ts}";
+const TEST_ONLY_FILES = "src/**/__tests__/**";
 const STORYBOOK_FILES = ".storybook/**/*.{js,ts}";
 
 const ALL_FILES = [
@@ -188,6 +188,7 @@ export default tseslint.config(
     },
   },
   {
+    files: [TEST_ONLY_FILES],
     ...vitest.configs.recommended,
     rules: {
       ...vitest.configs.recommended.rules,
@@ -195,6 +196,7 @@ export default tseslint.config(
       "vitest/max-expects": "off",
       "vitest/prefer-lowercase-title": "off",
       "vitest/prefer-describe-function-title": "off",
+      // Allow hooks inside test files
       "vitest/no-hooks": [
         "error",
         { allow: ["beforeAll", "afterAll", "beforeEach", "afterEach"] },
