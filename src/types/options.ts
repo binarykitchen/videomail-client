@@ -132,6 +132,7 @@ export interface VideomailClientOptions {
   displayErrors: boolean;
   adjustFormOnBrowserError: boolean;
   reportErrors: boolean;
+  disableFormWhenSubmitting?: boolean | undefined;
   fakeUaString?: string | undefined;
 
   versions?: {

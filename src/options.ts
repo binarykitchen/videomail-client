@@ -161,6 +161,12 @@ const options: VideomailClientOptions = {
   // when true, any errors will be sent to the videomail server for analysis
   reportErrors: true,
 
+  // This is because we need to set this to false by default for our WordPress plugin unfortunately.
+  // Because WordPress plugins do overlap with each other.
+  //
+  // We will keep the default to `true` but offer an option to correct it on WP side.
+  disableFormWhenSubmitting: true,
+
   // just for testing purposes to simulate browser agent handling
   fakeUaString: undefined,
 

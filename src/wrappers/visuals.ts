@@ -204,7 +204,7 @@ class Visuals extends Despot {
   }
 
   public removeChild(child: HTMLElement) {
-    this.visualsElement?.removeChild(child);
+    child.remove();
   }
 
   public reset() {

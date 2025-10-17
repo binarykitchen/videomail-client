@@ -751,7 +751,11 @@ class Container extends Despot {
       this.options.logger.debug(`Container: submitAll(${output})`);
 
       this.beginWaiting();
-      this.disableForm(true);
+
+      if (this.options.disableFormWhenSubmitting) {
+        this.disableForm(true);
+      }
+
       this.emit("SUBMITTING");
 
       if (!hasVideomailKey) {

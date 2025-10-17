@@ -49,7 +49,7 @@
     "lint:fix": "eslint --color --fix .",
     "lint:inspect": "eslint --inspect-config",
     "prettier": "prettier --check ./etc ./src ./.storybook ./*.ts ./*.js",
-    "prettier:fix": "prettier --write ./etc ./src ./.storybook ./*.ts",
+    "prettier:fix": "prettier --write ./etc ./src ./.storybook ./*.ts ./*.js",
     "release": "release-it --only-version --config ./etc/release-it.ts",
     "storybook": "cross-env BROWSER=chromium storybook dev -p 8443 --https --ssl-cert ./etc/ssl-certs/localhost.crt --ssl-key ./etc/ssl-certs/localhost.key",
     "test": "cross-env ENVIRON=test vitest --watch=false",

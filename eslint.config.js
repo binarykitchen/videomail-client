@@ -16,17 +16,17 @@ import tseslint from "typescript-eslint";
 
 // Good reference: https://github.com/dustinspecker/awesome-eslint#readme
 
-const CLIENT_ONLY_FILES = "src/**/*.{js,ts}";
-const TEST_ONLY_FILES = "src/**/__tests__/**";
-const STORYBOOK_FILES = ".storybook/**/*.{js,ts}";
+const CLIENT_ONLY_FILES = "./src/**/*.{js,ts}";
+const TEST_ONLY_FILES = "./src/**/__tests__/**";
+const STORYBOOK_FILES = "./.storybook/**/*.{js,ts}";
 
 const ALL_FILES = [
   CLIENT_ONLY_FILES,
   STORYBOOK_FILES,
   // Root level files
-  "*.{js,ts}",
+  "./*.{js,ts}",
   // Scripts
-  "etc/**/*.{js,ts}",
+  "./etc/**/*.{js,ts}",
 ];
 
 /*
