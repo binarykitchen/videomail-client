@@ -11,4 +11,4 @@ interface RecordingStats {
   wantedInterval?: number;
 }
 
-export default RecordingStats;
+export type { RecordingStats };

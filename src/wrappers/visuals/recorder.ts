@@ -8,7 +8,7 @@ import Constants from "../../constants";
 import { Command, VideomailCommandArgs } from "../../types/command";
 import { UserMediaReadyParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
-import RecordingStats from "../../types/RecordingStats";
+import { RecordingStats } from "../../types/RecordingStats";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import VideomailError from "../../util/error/VideomailError";

@@ -2,7 +2,7 @@ import { PartialDeep } from "type-fest";
 
 import { DeliveryRecord } from "./Delivery";
 import { EmailAddress, EmailAddresses } from "./EmailAddress";
-import RecordingStats from "./RecordingStats";
+import { RecordingStats } from "./RecordingStats";
 import VideoFormat from "./VideoFormat";
 
 // Remember, only primitive types are supported.
