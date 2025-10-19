@@ -366,7 +366,7 @@ class Replay extends Despot {
         firstTrack.setAttribute("src", src);
       } else {
         // Remove when no captions available
-        this.replayElement.removeChild(firstTrack);
+        firstTrack.remove();
       }
     } else {
       // Insert one then
@@ -420,7 +420,7 @@ class Replay extends Despot {
     } else if (src) {
       source.setAttribute("src", src);
     } else {
-      this.replayElement.removeChild(source);
+      source.remove();
     }
   }
 

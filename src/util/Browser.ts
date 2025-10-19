@@ -75,7 +75,7 @@ class Browser {
       return false;
     }
 
-    return this.isSafari() && parseFloat(version) >= 11;
+    return this.isSafari() && Number.parseFloat(version) >= 11;
   }
 
   public getVideoType(video: HTMLVideoElement) {

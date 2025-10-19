@@ -49,7 +49,7 @@ class Countdown {
     }
 
     if (typeof this.options.video.countdown !== "number") {
-      throw new Error(
+      throw new TypeError(
         `The defined countdown is not a valid number: ${this.options.video.countdown}`,
       );
     }
