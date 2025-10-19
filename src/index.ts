@@ -1,3 +1,5 @@
+import { VideoType } from "./types/VideoType";
+
 export type { Command } from "./types/command";
 export type { VideomailCommandArgs } from "./types/command";
 export type { DeliveryRecord } from "./types/Delivery";
@@ -9,4 +11,6 @@ export type RecordingStats = "./types/RecordingStats";
 export { VideomailClient } from "./client";
 export type { PartialVideomail, Videomail } from "./types/Videomail";
 export type { VideoTypeType } from "./types/VideoType";
-export { VideoType } from "./types/VideoType";
+
+// TODO Will sort this out later after the TS v10 release
+export { VideoType };
