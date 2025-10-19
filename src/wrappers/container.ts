@@ -7,7 +7,7 @@ import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";
 import { ErrorParams } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
-import Videomail from "../types/Videomail";
+import { Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
 import getBrowser from "../util/getBrowser";
@@ -20,6 +20,7 @@ import pretty from "../util/pretty";
 import Buttons from "./buttons";
 import Form, { FormInputs, FormMethod, FormMethodType } from "./form";
 import Visuals from "./visuals";
+
 interface BuildOptions {
   playerOnly?: boolean;
   replayParentElementId?: string | undefined;

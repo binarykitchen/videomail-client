@@ -1,6 +1,6 @@
 import { createNanoEvents } from "nanoevents";
 
-import VideomailEvents from "../types/events";
+import { VideomailEvents } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
 import VideomailError from "./error/VideomailError";
 import pretty from "./pretty";

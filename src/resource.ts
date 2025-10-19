@@ -6,7 +6,7 @@ import { version as videomailClientVersion } from "./../package.json";
 import Constants from "./constants";
 import { FullVideomailErrorData } from "./types/error";
 import { VideomailClientOptions } from "./types/options";
-import Videomail, { PartialVideomail } from "./types/Videomail";
+import { PartialVideomail, Videomail } from "./types/Videomail";
 import createError from "./util/error/createError";
 import HTTPVideomailError from "./util/error/HTTPVideomailError";
 import VideomailError from "./util/error/VideomailError";

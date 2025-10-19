@@ -1,7 +1,7 @@
 import Constants from "./constants";
 import Resource from "./resource";
 import { PartialVideomailClientOptions } from "./types/options";
-import Videomail from "./types/Videomail";
+import { Videomail } from "./types/Videomail";
 import Despot from "./util/Despot";
 import createError from "./util/error/createError";
 import mergeWithDefaultOptions from "./util/options/mergeWithDefaultOptions";

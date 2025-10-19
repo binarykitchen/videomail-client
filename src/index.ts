@@ -1,29 +1,13 @@
 import VideomailClient from "./client";
-import { Command, VideomailCommandArgs } from "./types/command";
-import DeliveryRecord from "./types/DeliveryRecord";
-import { EmailAddress, EmailAddresses } from "./types/EmailAddress";
-import { FullVideomailErrorData, VideomailErrorData } from "./types/error";
-import VideomailEvents, { VideomailPreviewParams } from "./types/events";
-import { VideomailClientOptions } from "./types/options";
-import RecordingStats from "./types/RecordingStats";
-import Videomail, { PartialVideomail } from "./types/Videomail";
-import { VideoType, VideoTypeType } from "./types/VideoType";
 
-export type {
-  Command,
-  DeliveryRecord,
-  EmailAddress,
-  EmailAddresses,
-  FullVideomailErrorData,
-  PartialVideomail,
-  RecordingStats,
-  Videomail,
-  VideomailClientOptions,
-  VideomailCommandArgs,
-  VideomailErrorData,
-  VideomailEvents,
-  VideomailPreviewParams,
-  VideoTypeType,
-};
+export type { Command } from "./types/command";
+export type DeliveryRecord = "./types/DeliveryRecord";
+export type { VideomailCommandArgs } from "./types/command";
+export type { EmailAddress, EmailAddresses } from "./types/EmailAddress";
+export type { FullVideomailErrorData, VideomailErrorData } from "./types/error";
+export type { VideomailEvents, VideomailPreviewParams } from "./types/events";
+export type { VideomailClientOptions } from "./types/options";
+export type RecordingStats = "./types/RecordingStats";
+export type { PartialVideomail, Videomail } from "./types/Videomail";
 
-export { VideomailClient, VideoType };
+export { VideomailClient };

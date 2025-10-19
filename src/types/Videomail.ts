@@ -7,7 +7,7 @@ import VideoFormat from "./VideoFormat";
 
 // Remember, only primitive types are supported.
 // LevelDB can't store for example Sets or Maps
-interface Videomail {
+export interface Videomail {
   // First, typical email typings
   subject?: string;
   body?: string;
@@ -72,5 +72,3 @@ interface Videomail {
 }
 
 export type PartialVideomail = PartialDeep<Videomail>;
-
-export default Videomail;

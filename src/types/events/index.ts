@@ -3,7 +3,7 @@ import Response from "superagent/lib/node/response";
 import VideomailError from "../../util/error/VideomailError";
 import { FormReadyParams } from "../../wrappers/container";
 import RecordingStats from "../RecordingStats";
-import Videomail from "../Videomail";
+import { Videomail } from "../Videomail";
 
 export interface UserMediaReadyParams {
   switchingFacingMode?: ConstrainDOMString | undefined;
@@ -56,7 +56,7 @@ export interface InvalidParams {
   invalidData?: Record<string, string>;
 }
 
-interface VideomailEvents {
+export interface VideomailEvents {
   // when about to ask for webcam permissions
   ASKING_WEBCAM_PERMISSION: () => void;
   // encoding video
@@ -143,5 +143,3 @@ interface VideomailEvents {
   // document just became visible
   VISIBLE: () => void;
 }
-
-export default VideomailEvents;
