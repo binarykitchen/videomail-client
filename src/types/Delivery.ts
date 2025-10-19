@@ -6,4 +6,4 @@ interface DeliveryReport {
 
 type DeliveryRecord = Record<EmailAddress, DeliveryReport>;
 
-export default DeliveryRecord;
+export type { DeliveryRecord };
