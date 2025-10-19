@@ -1,4 +1,4 @@
-import VideomailClient from "../client";
+import { VideomailClient } from "../client";
 
 describe("Client", () => {
   const mock = {

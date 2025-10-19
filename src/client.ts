@@ -160,4 +160,4 @@ class VideomailClient extends Despot {
   }
 }
 
-export default VideomailClient;
+export { VideomailClient };
