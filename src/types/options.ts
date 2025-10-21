@@ -120,7 +120,7 @@ export interface VideomailClientOptions {
       | ((videomail: PartialVideomail) => PartialVideomail);
     adjustFormValueBeforePopulating?:
       | undefined
-      | ((name: string, videomail: Videomail) => string);
+      | ((name: string, value: any, videomail: Videomail) => string);
   };
 
   defaults: {

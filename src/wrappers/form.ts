@@ -118,7 +118,11 @@ class Form extends Despot {
         const tagName = formControl.tagName;
 
         if (this.options.callbacks.adjustFormValueBeforePopulating) {
-          value = this.options.callbacks.adjustFormValueBeforePopulating(name, videomail);
+          value = this.options.callbacks.adjustFormValueBeforePopulating(
+            name,
+            value,
+            videomail,
+          );
         }
 
         switch (tagName) {
