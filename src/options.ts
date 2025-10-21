@@ -137,10 +137,15 @@ const options: VideomailClientOptions = {
 
   callbacks: {
     /*
-     * a custom callback to tweak form data before posting to server
+     * A custom callback to tweak form data before posting to server
      * this is for advanced use only and shouldn't be used if possible
      */
     adjustFormDataBeforePosting: undefined,
+
+    /*
+      Another custom callback to tweak a single form value before populating the form.
+    */
+    adjustFormValueBeforePopulating: undefined,
   },
 
   defaults: {

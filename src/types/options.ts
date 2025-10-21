@@ -1,6 +1,6 @@
 import { PartialDeep } from "type-fest";
 
-import { PartialVideomail } from "./Videomail";
+import { PartialVideomail, Videomail } from "./Videomail";
 
 export interface VideomailClientOptions {
   logger: {
@@ -118,6 +118,9 @@ export interface VideomailClientOptions {
     adjustFormDataBeforePosting?:
       | undefined
       | ((videomail: PartialVideomail) => PartialVideomail);
+    adjustFormValueBeforePopulating?:
+      | undefined
+      | ((name: string, videomail: Videomail) => string);
   };
 
   defaults: {
