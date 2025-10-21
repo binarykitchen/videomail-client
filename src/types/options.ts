@@ -12,7 +12,7 @@ export interface VideomailClientOptions {
   };
   logStackSize: number;
   verbose: boolean;
-  baseUrl: string;
+  apiUrl: string;
   socketUrl: string;
   siteName: string;
   enablePause: boolean;

@@ -82,7 +82,7 @@ class Resource {
   }
 
   private async get(identifierName: string, identifierValue: string) {
-    const url = `${this.options.baseUrl}/videomail/${identifierName}/${identifierValue}/snapshot`;
+    const url = `${this.options.apiUrl}/videomail/${identifierName}/${identifierValue}/snapshot`;
 
     try {
       const request = await superagent("get", url)
@@ -106,7 +106,7 @@ class Resource {
       [Constants.SITE_NAME_LABEL]: this.options.siteName,
     };
 
-    let url = `${this.options.baseUrl}/videomail/`;
+    let url = `${this.options.apiUrl}/videomail/`;
 
     if (method === FormMethod.PUT && videomail.key) {
       url += videomail.key;
@@ -139,7 +139,7 @@ class Resource {
       [Constants.SITE_NAME_LABEL]: this.options.siteName,
     };
 
-    const url = `${this.options.baseUrl}/client-error/`;
+    const url = `${this.options.apiUrl}/client-error/`;
 
     try {
       const fullVideomailErrorData: FullVideomailErrorData = {
