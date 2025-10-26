@@ -11,6 +11,7 @@ import { Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
 import getBrowser from "../util/getBrowser";
+import getValidity from "../util/getValidity";
 import limitHeight from "../util/html/dimensions/limitHeight";
 import limitWidth from "../util/html/dimensions/limitWidth";
 import hideElement from "../util/html/hideElement";
@@ -628,12 +629,18 @@ class Container extends Despot {
 
         if (invalidInput) {
           const name = invalidInput.getAttribute("name");
+          const validity = getValidity(invalidInput);
 
           valid = false;
 
           if (name) {
-            whyInvalid = `Input "${name}" seems wrong 🤔`;
             invalidData = { [name]: invalidInput.getAttribute("value") };
+
+            if (validity?.valueMissing) {
+              whyInvalid = `Please fill out field "${name}" ⚠️`;
+            } else {
+              whyInvalid = `Input "${name}" seems wrong 🤔`;
+            }
           }
         } else if (!this.areVisualsHidden() && !visualsValid) {
           // TODO Improve this check to have this based on `key`

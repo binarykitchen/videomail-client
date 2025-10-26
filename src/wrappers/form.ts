@@ -5,6 +5,7 @@ import { VideomailClientOptions } from "../types/options";
 import { PartialVideomail, Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
+import getValidity from "../util/getValidity";
 import hideElement from "../util/html/hideElement";
 import isNotButton from "../util/html/isNotButton";
 import showElement from "../util/html/showElement";
@@ -417,8 +418,7 @@ class Form extends Despot {
     const elements = this.getRegisteredFormElements();
 
     for (const element of elements) {
-      const validity =
-        "validity" in element ? (element.validity as ValidityState) : undefined;
+      const validity = getValidity(element);
 
       if (!validity?.valid) {
         return element;
