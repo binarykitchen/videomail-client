@@ -186,6 +186,9 @@ class Resource {
     // Always good to know the version of the client the videomail was submitted with
     newVideomail[Constants.VERSION_LABEL] = videomailClientVersion;
 
+    // Likewise, good to know where it has been recorded
+    newVideomail.recordLocation = window.location.href;
+
     try {
       let res: Response;
 

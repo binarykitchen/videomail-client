@@ -166,7 +166,7 @@ class Container extends Despot {
     // It's ok to return no form, especially when in replay mode
     let formElement: HTMLFormElement | undefined | null;
 
-    if (this.containerElement && this.containerElement.tagName === "FORM") {
+    if (this.containerElement?.tagName === "FORM") {
       formElement = this.containerElement as HTMLFormElement;
     } else if (this.options.selectors.formId) {
       formElement = document.querySelector<HTMLFormElement>(
@@ -634,12 +634,11 @@ class Container extends Despot {
           valid = false;
 
           if (name) {
-            invalidData = { [name]: invalidInput.getAttribute("value") };
-
             if (validity?.valueMissing) {
               whyInvalid = `Please fill out field "${name}" ⚠️`;
             } else {
               whyInvalid = `Input "${name}" seems wrong 🤔`;
+              invalidData = { [name]: invalidInput.getAttribute("value") };
             }
           }
         } else if (!this.areVisualsHidden() && !visualsValid) {

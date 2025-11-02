@@ -39,6 +39,7 @@ export interface Videomail {
   captions?: string | undefined;
   poster: string;
   recordingStats?: RecordingStats | undefined;
+  recordLocation?: string | undefined;
 
   replyAllUrl?: string;
   replyUrl: string;
