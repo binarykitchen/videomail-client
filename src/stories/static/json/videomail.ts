@@ -51,10 +51,10 @@ const videomailExample: Videomail = {
   poster: "https://s1.dmcdn.net/v/VwuuU1b-B8bKNOTFe/x1080",
   replyUrl: "/reply/test-example-mofo-485573266478",
   correctUrl: "https://videomail.io/correct/test-example-mofo-485573266478",
-  dateCreatedPretty: "Nov 25, 2017, 1:42 PM",
+  dateCreatedServerPretty: "Nov 25, 2017, 1:42 PM",
   expiresAfter: 1734131452642,
   expiresAfterIso: "2024-12-13T23:10:52.642Z",
-  expiresAfterPretty: "14 Dec 2024, 12:10 pm",
+  expiresAfterServerPretty: "14 Dec 2024, 12:10 pm",
 };
 
 export default videomailExample;

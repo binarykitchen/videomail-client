@@ -24,12 +24,12 @@ export interface Videomail {
   connection?: Record<string, number | string>;
   correctUrl: string;
   dateCreated: number;
-  dateCreatedPretty: string;
+  dateCreatedServerPretty: string;
   dateUpdated?: number;
-  dateUpdatedPretty?: string;
+  dateUpdatedServerPretty?: string;
   expiresAfter: number;
   expiresAfterIso: string;
-  expiresAfterPretty: string;
+  expiresAfterServerPretty: string;
   format?: VideoFormat;
   height?: number | undefined;
   key: string;
@@ -48,7 +48,7 @@ export interface Videomail {
 
   sentDate?: number;
   sentDateIso?: string;
-  sentDatePretty?: string;
+  sentDateServerPretty?: string;
 
   siteName: string;
   siteTitle?: string;
