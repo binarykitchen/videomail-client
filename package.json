@@ -59,7 +59,7 @@
   "prettier": "./prettier.config.js",
   "dependencies": {
     "animitter": "3.0.0",
-    "audio-sample": "5.0.0",
+    "audio-sample": "6.0.0",
     "canvas-to-buffer": "4.1.2",
     "contains": "0.1.1",
     "deepmerge": "4.3.1",
@@ -88,7 +88,7 @@
     "@tsconfig/node22": "22.0.2",
     "@tsconfig/strictest": "2.0.7",
     "@types/defined": "1.0.2",
-    "@types/node": "22.18.6",
+    "@types/node": "24.10.0",
     "@types/superagent": "8.1.9",
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.4.1",
