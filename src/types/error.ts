@@ -21,6 +21,12 @@ export interface VideomailErrorData {
   status?: number | undefined;
   stack?: string | undefined;
   type?: string | undefined;
+
+  // CSP & Security Policy Violation Related
+  blockedURI?: string | undefined;
+  effectiveDirective?: string | undefined;
+  violatedDirective?: string | undefined;
+  originalPolicy?: string | undefined;
 }
 
 interface VideomailErrorVersions {
