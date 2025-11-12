@@ -366,10 +366,10 @@ class UserMedia extends Despot {
 
   public createCanvas() {
     const canvas = document.createElement("canvas");
-    const dimension = this.getRawWidth(true);
+    const rawWidthDimension = this.getRawWidth(true);
 
-    if (dimension.value) {
-      canvas.width = dimension.value;
+    if (rawWidthDimension.value) {
+      canvas.width = rawWidthDimension.value;
     }
 
     const rawHeight = this.getRawHeight(true);
@@ -405,7 +405,7 @@ class UserMedia extends Despot {
 
   public getRawWidth(responsive: boolean) {
     let rawWidth = this.getVideoWidth();
-    const dimension: Dimension = { unit: "px" };
+    const widthDimension: Dimension = { unit: "px" };
 
     if (this.options.video.width || this.options.video.height) {
       if (!responsive) {
@@ -417,13 +417,13 @@ class UserMedia extends Despot {
     }
 
     if (responsive) {
-      const dimension = this.recorder.limitWidth(rawWidth);
-      rawWidth = dimension?.value;
+      const widthDimension = this.recorder.limitWidth(rawWidth);
+      rawWidth = widthDimension?.value;
     }
 
-    dimension.value = rawWidth;
+    widthDimension.value = rawWidth;
 
-    return dimension;
+    return widthDimension;
   }
 
   public getRawHeight(responsive: boolean) {
