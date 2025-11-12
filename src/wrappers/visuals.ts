@@ -129,10 +129,14 @@ class Visuals extends Despot {
 
       if (widthDimension) {
         this.visualsElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
+      } else {
+        this.visualsElement.style.removeProperty("width");
       }
 
       if (heightDimension) {
         this.visualsElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+      } else {
+        this.visualsElement.style.removeProperty("height");
       }
     }
   }

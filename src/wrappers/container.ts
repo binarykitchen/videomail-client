@@ -342,14 +342,16 @@ class Container extends Despot {
     if (this.options.video.stretch) {
       this.removeDimensions();
     } else if (this.containerElement) {
-      let dimension = useFullWidth(this.options.video.mobileBreakPoint);
+      let widthDimension = useFullWidth(this.options.video.mobileBreakPoint);
 
-      if (!dimension) {
-        dimension = this.visuals.getRecorderWidth(true);
+      if (!widthDimension) {
+        widthDimension = this.visuals.getRecorderWidth(true);
       }
 
-      if (dimension?.value) {
-        this.containerElement.style.width = `${dimension.value}${dimension.unit}`;
+      if (widthDimension?.value) {
+        this.containerElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
+      } else {
+        this.containerElement.style.removeProperty("width");
       }
     }
   }

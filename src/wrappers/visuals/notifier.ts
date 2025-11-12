@@ -175,10 +175,14 @@ class Notifier extends Despot {
 
       if (widthDimension) {
         this.notifyElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
+      } else {
+        this.notifyElement.style.removeProperty("width");
       }
 
       if (heightDimension) {
         this.notifyElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+      } else {
+        this.notifyElement.style.removeProperty("height");
       }
     }
   }

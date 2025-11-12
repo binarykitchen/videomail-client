@@ -1330,12 +1330,15 @@ class Recorder extends Despot {
 
     if (this.options.video.stretch || widthDimension) {
       this.recorderElement.style.width = "100%";
+      this.recorderElement.style.removeProperty("height");
     } else {
       if (this.options.video.width) {
         const recorderWidth = this.getRecorderWidth(true);
 
         if (recorderWidth?.value) {
           this.recorderElement.width = recorderWidth.value;
+        } else {
+          this.recorderElement.style.removeProperty("width");
         }
       }
 
@@ -1344,6 +1347,8 @@ class Recorder extends Despot {
 
         if (recorderHeight.value) {
           this.recorderElement.height = recorderHeight.value;
+        } else {
+          this.recorderElement.style.removeProperty("height");
         }
       }
     }
