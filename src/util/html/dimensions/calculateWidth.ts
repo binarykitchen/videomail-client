@@ -1,3 +1,4 @@
+import { Dimension } from "../../../types/dimension";
 import { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 import figureMinHeight from "./figureMinHeight";
@@ -10,10 +11,15 @@ function calculateWidth(
   options: VideomailClientOptions,
   ratio?: number,
 ) {
+  const dimension: Dimension = {
+    unit: "px",
+  };
+
   let height = figureMinHeight(videoHeight, options);
 
   if (responsive) {
-    height = limitHeight(height, options, "calculateWidth");
+    const limitedDimension = limitHeight(height, options, "calculateWidth");
+    height = limitedDimension.value;
   }
 
   if (!height || height < 1) {
@@ -33,7 +39,9 @@ function calculateWidth(
     });
   }
 
-  return calculatedWidth;
+  dimension.value = calculatedWidth;
+
+  return dimension;
 }
 
 export default calculateWidth;

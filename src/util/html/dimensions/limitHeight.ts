@@ -1,3 +1,4 @@
+import { Dimension } from "../../../types/dimension";
 import { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 
@@ -11,6 +12,10 @@ function limitHeight(
   // TODO Remove later once we have narrowed it down
   calledFrom: string,
 ) {
+  const dimension: Dimension = {
+    unit: "px",
+  };
+
   // Or consider document.body.scrollHeight
   let limitedHeight = document.documentElement.clientHeight;
 
@@ -25,7 +30,9 @@ function limitHeight(
     });
   }
 
-  return limitedHeight;
+  dimension.value = limitedHeight;
+
+  return dimension;
 }
 
 export default limitHeight;

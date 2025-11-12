@@ -69,14 +69,16 @@ const options: VideomailClientOptions = {
   audio: {
     enabled: false, // set to true for experimental audio recording
     switch: false, // enables a switcher for audio recording (on/off)
-    volume: 0.2, // must be between 0 .. 1 but 0.20 is recommended to avoid
-    // distorting at the higher volume peaks
-    bufferSize: "auto", // decides how often the audio is being sampled,
+    // must be between 0 .. 1 but 0.20 is recommended to avoid distorting at the higher volume peaks
+    volume: 0.2,
     /*
-     * can be 'auto' or an integer being a power of two like 512 or 2048
+     * Decides how often the audio is being sampled,
+     *
+     * It can be 'auto' or an integer being a power of two like 512 or 2048
      * the higher the less traffic, but harder to adjust with rubberband
      * to match with the video length on server side during encoding
      */
+    bufferSize: "auto",
   },
 
   video: {
@@ -85,7 +87,7 @@ const options: VideomailClientOptions = {
     countdown: 3, // set it to 0 or false to disable it
 
     /*
-     * it is recommended to set one dimension only and leave the other one to auto
+     * It is recommended to set one dimension only and leave the other one to auto
      * because each webcam has a different aspect ratio
      */
 
@@ -95,6 +97,9 @@ const options: VideomailClientOptions = {
     facingModeButton: false,
 
     stretch: false, // Set to true if you want the video to take the full width of the parent container
+
+    // If you define one, all video related width will be set to 100% below this breakpoint
+    mobileBreakPoint: undefined,
   },
 
   image: {

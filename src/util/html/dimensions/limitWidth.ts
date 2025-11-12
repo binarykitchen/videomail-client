@@ -1,3 +1,4 @@
+import { Dimension } from "../../../types/dimension";
 import { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 import getOuterWidth from "./getOuterWidth";
@@ -7,6 +8,10 @@ function limitWidth(
   options: VideomailClientOptions,
   width?: number,
 ) {
+  const limitedDimension: Dimension = {
+    unit: "px",
+  };
+
   let limitedWidth: number;
 
   const outerWidth = getOuterWidth(element);
@@ -23,7 +28,9 @@ function limitWidth(
     throw createError({ message: "Limited width cannot be less than 1!", options });
   }
 
-  return limitedWidth;
+  limitedDimension.value = limitedWidth;
+
+  return limitedDimension;
 }
 
 export default limitWidth;

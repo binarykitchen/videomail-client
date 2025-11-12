@@ -14,6 +14,7 @@ import getBrowser from "../util/getBrowser";
 import getValidity from "../util/getValidity";
 import limitHeight from "../util/html/dimensions/limitHeight";
 import limitWidth from "../util/html/dimensions/limitWidth";
+import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import showElement from "../util/html/showElement";
 import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
@@ -333,10 +334,14 @@ class Container extends Despot {
     if (this.options.video.stretch) {
       this.removeDimensions();
     } else if (this.containerElement) {
-      const width = this.visuals.getRecorderWidth(true);
+      let dimension = useFullWidth(this.options.video.mobileBreakPoint);
 
-      if (width) {
-        this.containerElement.style.width = `${width}px`;
+      if (!dimension) {
+        dimension = this.visuals.getRecorderWidth(true);
+      }
+
+      if (dimension?.value) {
+        this.containerElement.style.width = `${dimension.value}${dimension.unit}`;
       }
     }
   }
@@ -375,8 +380,11 @@ class Container extends Despot {
     if (method === FormMethod.POST) {
       videomailFormData.recordingStats = this.visuals.getRecordingStats();
 
-      videomailFormData.width = this.visuals.getRecorderWidth(true);
-      videomailFormData.height = this.visuals.getRecorderHeight(true);
+      const widthDimension = this.visuals.getRecorderWidth(true);
+      const heightDimension = this.visuals.getRecorderHeight(true);
+
+      videomailFormData.width = widthDimension?.value;
+      videomailFormData.height = heightDimension.value;
 
       return await this.resource.post(videomailFormData);
     } else if (method === FormMethod.PUT) {

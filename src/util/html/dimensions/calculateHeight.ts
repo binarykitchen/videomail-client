@@ -1,3 +1,4 @@
+import { Dimension } from "../../../types/dimension";
 import { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 import figureMinHeight from "./figureMinHeight";
@@ -12,7 +13,11 @@ function calculateHeight(
   ratio?: number,
   element?: HTMLElement | null,
 ) {
-  let width = videoWidth;
+  const dimension: Dimension = {
+    unit: "px",
+  };
+
+  let width: number | undefined = videoWidth;
 
   if (width < 1) {
     throw createError({
@@ -20,20 +25,25 @@ function calculateHeight(
       options,
     });
   } else if (responsive && element) {
-    width = limitWidth(element, options, width);
+    const limitedDimension = limitWidth(element, options, width);
+    width = limitedDimension.value;
   }
 
   const chosenRatio = ratio ?? getRatio(options, undefined, videoWidth);
-  const height = Math.round(width * chosenRatio);
+  const height = width ? Math.round(width * chosenRatio) : undefined;
 
-  if (Number.isInteger(height) && height < 1) {
+  if (height && Number.isInteger(height) && height < 1) {
     throw createError({
       message: "Just calculated a height less than 1 which is wrong.",
       options,
     });
   }
 
-  return figureMinHeight(height, options);
+  const minHeight = figureMinHeight(height, options);
+
+  dimension.value = minHeight;
+
+  return dimension;
 }
 
 export default calculateHeight;

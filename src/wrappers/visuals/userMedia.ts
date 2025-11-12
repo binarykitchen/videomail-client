@@ -1,3 +1,4 @@
+import { Dimension } from "../../types/dimension";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
@@ -154,8 +155,8 @@ class UserMedia extends Despot {
         this.rawVisualUserMedia?.load();
 
         /*
-         * fixes https://github.com/binarykitchen/videomail.io/issues/401
-         * see https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
+         * Fixes https://github.com/binarykitchen/videomail.io/issues/401, see
+         * https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
          */
         if (this.rawVisualUserMedia?.paused) {
           this.options.logger.debug(
@@ -365,10 +366,10 @@ class UserMedia extends Despot {
 
   public createCanvas() {
     const canvas = document.createElement("canvas");
-    const rawWidth = this.getRawWidth(true);
+    const dimension = this.getRawWidth(true);
 
-    if (rawWidth) {
-      canvas.width = rawWidth;
+    if (dimension.value) {
+      canvas.width = dimension.value;
     }
 
     const rawHeight = this.getRawHeight(true);
@@ -404,27 +405,33 @@ class UserMedia extends Despot {
 
   public getRawWidth(responsive: boolean) {
     let rawWidth = this.getVideoWidth();
+    const dimension: Dimension = { unit: "px" };
 
     if (this.options.video.width || this.options.video.height) {
       if (!responsive) {
         rawWidth = this.options.video.width;
       } else {
-        rawWidth = this.recorder.calculateWidth(responsive);
+        const dimension = this.recorder.calculateWidth(responsive);
+        rawWidth = dimension.value;
       }
     }
 
     if (responsive) {
-      rawWidth = this.recorder.limitWidth(rawWidth);
+      const dimension = this.recorder.limitWidth(rawWidth);
+      rawWidth = dimension?.value;
     }
 
-    return rawWidth;
+    dimension.value = rawWidth;
+
+    return dimension;
   }
 
   public getRawHeight(responsive: boolean) {
     let rawHeight: number | undefined;
 
     if (this.options.video.width || this.options.video.height) {
-      rawHeight = this.recorder.calculateHeight(responsive);
+      const heightDimension = this.recorder.calculateHeight(responsive);
+      rawHeight = heightDimension.value;
 
       if (!rawHeight || rawHeight < 1) {
         throw createError({
@@ -446,7 +453,8 @@ class UserMedia extends Despot {
     }
 
     if (responsive) {
-      rawHeight = this.recorder.limitHeight(rawHeight);
+      const heightDimension = this.recorder.limitHeight(rawHeight);
+      rawHeight = heightDimension.value;
     }
 
     return rawHeight;

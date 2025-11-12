@@ -1,8 +1,10 @@
 import { ShowParams } from "../client";
+import { Dimension } from "../types/dimension";
 import { VideomailClientOptions } from "../types/options";
 import Despot from "../util/Despot";
 import VideomailError from "../util/error/VideomailError";
 import getBrowser from "../util/getBrowser";
+import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import isHidden from "../util/html/isHidden";
 import showElement from "../util/html/showElement";
@@ -113,8 +115,21 @@ class Visuals extends Despot {
     if (this.options.video.stretch) {
       this.removeDimensions();
     } else if (this.visualsElement) {
-      this.visualsElement.style.width = `${this.getRecorderWidth(true)}px`;
-      this.visualsElement.style.height = `${this.getRecorderHeight(true)}px`;
+      let heightDimension: Dimension | undefined;
+      let widthDimension = useFullWidth(this.options.video.mobileBreakPoint);
+
+      if (!widthDimension) {
+        widthDimension = this.getRecorderWidth(true);
+        heightDimension = this.getRecorderHeight(true);
+      }
+
+      if (widthDimension) {
+        this.visualsElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
+      }
+
+      if (heightDimension) {
+        this.visualsElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+      }
     }
   }
 

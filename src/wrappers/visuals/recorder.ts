@@ -6,6 +6,7 @@ import websocket from "websocket-stream";
 
 import Constants from "../../constants";
 import { Command, VideomailCommandArgs } from "../../types/command";
+import { Dimension } from "../../types/dimension";
 import { UserMediaReadyParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
 import { RecordingStats } from "../../types/RecordingStats";
@@ -16,6 +17,7 @@ import getBrowser from "../../util/getBrowser";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
 import getRatio from "../../util/html/dimensions/getRatio";
+import useFullWidth from "../../util/html/dimensions/useFullWidth";
 import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
@@ -328,12 +330,18 @@ class Recorder extends Despot {
 
     this.hide();
 
-    const width = this.getRecorderWidth(true);
-    const height = this.getRecorderHeight(true);
+    const widthDimension = this.getRecorderWidth(true);
+    const heightDimension = this.getRecorderHeight(true);
 
     const duration = args.duration ?? -1;
 
-    this.emit("PREVIEW", { key: this.key, width, height, hasAudio, duration });
+    this.emit("PREVIEW", {
+      key: this.key,
+      width: widthDimension?.value,
+      height: heightDimension.value,
+      hasAudio,
+      duration,
+    });
 
     // keep it for recording stats
     if (this.stopTime) {
@@ -653,8 +661,8 @@ class Recorder extends Despot {
        */
       const limitedWidth = this.limitWidth();
 
-      if (limitedWidth) {
-        constraints.video.width = { ideal: limitedWidth };
+      if (limitedWidth?.value) {
+        constraints.video.width = { ideal: limitedWidth.value };
       }
     }
 
@@ -1318,19 +1326,25 @@ class Recorder extends Despot {
       return;
     }
 
-    if (this.options.video.width) {
-      const recorderWidth = this.getRecorderWidth(true);
+    const widthDimension = useFullWidth(this.options.video.mobileBreakPoint);
 
-      if (recorderWidth) {
-        this.recorderElement.width = recorderWidth;
+    if (this.options.video.stretch || widthDimension) {
+      this.recorderElement.style.width = "100%";
+    } else {
+      if (this.options.video.width) {
+        const recorderWidth = this.getRecorderWidth(true);
+
+        if (recorderWidth?.value) {
+          this.recorderElement.width = recorderWidth.value;
+        }
       }
-    }
 
-    if (this.options.video.height) {
-      const recorderHeight = this.getRecorderHeight(true);
+      if (this.options.video.height) {
+        const recorderHeight = this.getRecorderHeight(true);
 
-      if (recorderHeight) {
-        this.recorderElement.height = recorderHeight;
+        if (recorderHeight.value) {
+          this.recorderElement.height = recorderHeight.value;
+        }
       }
     }
   }
@@ -1437,16 +1451,12 @@ class Recorder extends Despot {
     this.recorderElement.setAttribute("webkit-playsinline", "webkit-playsinline");
 
     /*
-     * add these here, not in CSS because users can configure custom
+     * Add these here, not in CSS because users can configure custom
      * class names
      */
     this.recorderElement.style.transform = "rotateY(180deg)";
     this.recorderElement.style["-webkit-transform"] = "rotateY(180deg)";
     this.recorderElement.style["-moz-transform"] = "rotateY(180deg)";
-
-    if (this.options.video.stretch) {
-      this.recorderElement.style.width = "100%";
-    }
 
     this.userMedia ??= new UserMedia(this, this.options);
 
@@ -1501,7 +1511,7 @@ class Recorder extends Despot {
   }
 
   /*
-   * these two return the true dimensions of the webcam area.
+   * These two return the true dimensions of the webcam area.
    * needed because on mobiles they might be different.
    */
   public getRecorderWidth(responsive: boolean) {
@@ -1511,19 +1521,45 @@ class Recorder extends Despot {
       return this.limitWidth(this.options.video.width);
     }
 
-    return this.options.video.width;
+    const dimension: Dimension = {
+      unit: "px",
+      value: this.options.video.width,
+    };
+
+    return dimension;
   }
 
   public getRecorderHeight(responsive: boolean, useBoundingClientRect?: boolean) {
     if (this.recorderElement && useBoundingClientRect) {
-      return this.recorderElement.getBoundingClientRect().height;
+      const height = this.recorderElement.getBoundingClientRect().height;
+
+      const dimension: Dimension = {
+        unit: "px",
+        value: height,
+      };
+
+      return dimension;
     } else if (this.userMedia) {
-      return this.userMedia.getRawHeight(responsive);
+      const height = this.userMedia.getRawHeight(responsive);
+
+      const dimension: Dimension = {
+        unit: "px",
+        value: height,
+      };
+
+      return dimension;
     } else if (responsive && this.options.video.height) {
       return this.calculateHeight(responsive);
     }
 
-    return this.options.video.height;
+    const height = this.options.video.height;
+
+    const dimension: Dimension = {
+      unit: "px",
+      value: height,
+    };
+
+    return dimension;
   }
 
   private getRatio() {

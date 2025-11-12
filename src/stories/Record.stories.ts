@@ -236,4 +236,18 @@ export const AutoRecord: Story = {
   },
 };
 
+export const MobileBreakPoint: Story = {
+  name: "Sets a mobile breakpoint",
+  args: {
+    video: {
+      width: 400,
+      mobileBreakPoint: 740,
+    },
+  },
+  render: (args) => {
+    const videomailClient = new VideomailClient(args);
+    return videomailClient.show();
+  },
+};
+
 export default meta;

@@ -75,6 +75,7 @@ export interface VideomailClientOptions {
     facingModeButton: boolean;
 
     stretch: boolean;
+    mobileBreakPoint?: number | undefined;
   };
 
   image: {

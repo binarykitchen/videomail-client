@@ -1,8 +1,10 @@
+import { Dimension } from "../../types/dimension";
 import { ProgressParams, StoppingParams } from "../../types/events";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import VideomailError from "../../util/error/VideomailError";
 import getBrowser from "../../util/getBrowser";
+import useFullWidth from "../../util/html/dimensions/useFullWidth";
 import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
@@ -154,11 +156,26 @@ class Notifier extends Despot {
     }
 
     if (this.options.video.stretch) {
+      const heightDimension = this.visuals.getRecorderHeight(true, true);
+
       this.notifyElement.style.width = "auto";
-      this.notifyElement.style.height = `${this.visuals.getRecorderHeight(true, true)}px`;
+      this.notifyElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
     } else {
-      this.notifyElement.style.width = `${this.visuals.getRecorderWidth(true)}px`;
-      this.notifyElement.style.height = `${this.visuals.getRecorderHeight(true)}px`;
+      let heightDimension: Dimension | undefined;
+      let widthDimension = useFullWidth(this.options.video.mobileBreakPoint);
+
+      if (!widthDimension) {
+        widthDimension = this.visuals.getRecorderWidth(true);
+        heightDimension = this.visuals.getRecorderHeight(true);
+      }
+
+      if (widthDimension) {
+        this.notifyElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
+      }
+
+      if (heightDimension) {
+        this.notifyElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+      }
     }
   }
 
