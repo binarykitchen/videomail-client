@@ -108,6 +108,10 @@ class Visuals extends Despot {
           this.removeDimensions();
         }
       });
+
+      this.on("WINDOW_RESIZE", () => {
+        this.correctDimensions();
+      });
     }
   }
 

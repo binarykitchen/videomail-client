@@ -236,6 +236,10 @@ class Container extends Despot {
   private initEvents(playerOnly = false) {
     this.options.logger.debug(`Container: initEvents (playerOnly = ${playerOnly})`);
 
+    window.addEventListener("resize", () => {
+      this.emit("WINDOW_RESIZE");
+    });
+
     if (this.options.enableAutoUnload) {
       window.addEventListener(
         "beforeunload",
@@ -317,6 +321,10 @@ class Container extends Despot {
       if (browser.isMobile()) {
         this.removeDimensions();
       }
+    });
+
+    this.on("WINDOW_RESIZE", () => {
+      this.correctDimensions();
     });
 
     if (!playerOnly) {

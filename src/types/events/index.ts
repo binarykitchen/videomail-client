@@ -142,4 +142,6 @@ export interface VideomailEvents {
   VALIDATING: (params?: ValidatingParams) => void;
   // document just became visible
   VISIBLE: () => void;
+  // when window's inner width has changed
+  WINDOW_RESIZE: () => void;
 }

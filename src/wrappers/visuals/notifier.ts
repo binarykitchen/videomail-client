@@ -148,6 +148,10 @@ class Notifier extends Despot {
         this.hide();
       }
     });
+
+    this.on("WINDOW_RESIZE", () => {
+      this.correctNotifierDimensions();
+    });
   }
 
   private correctNotifierDimensions() {

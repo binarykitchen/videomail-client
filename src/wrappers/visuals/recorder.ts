@@ -1414,6 +1414,10 @@ class Recorder extends Despot {
     this.on("SWITCH_FACING_MODE", () => {
       this.switchFacingMode();
     });
+
+    this.on("WINDOW_RESIZE", () => {
+      this.correctDimensions();
+    });
   }
 
   private buildElement() {

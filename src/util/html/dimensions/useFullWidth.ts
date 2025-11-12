@@ -1,6 +1,5 @@
 import { Dimension } from "../../../types/dimension";
 
-// TODO Implement event listener when viewport width has changed to reconfigure dimensions
 function useFullWidth(mobileBreakPoint?: number) {
   if (mobileBreakPoint === undefined) {
     return undefined;
