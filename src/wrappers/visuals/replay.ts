@@ -95,7 +95,7 @@ class Replay extends Despot {
 
     if (!height) {
       let element = this.visuals.getElement();
-      let target;
+      let target: string;
 
       if (element) {
         target = "visualsElement";

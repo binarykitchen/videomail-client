@@ -7,7 +7,7 @@ import limitWidth from "./limitWidth";
 
 function calculateHeight(
   responsive: boolean,
-  videoWidth: number,
+  videoWidth: number | undefined,
   options: VideomailClientOptions,
   target: string,
   ratio?: number,
@@ -19,7 +19,7 @@ function calculateHeight(
 
   let width: number | undefined = videoWidth;
 
-  if (width < 1) {
+  if (width !== undefined && width < 1) {
     throw createError({
       message: `Unable to calculate height for target ${target} when width is less than 1 (= ${width}) and responsive mode is set to ${responsive}`,
       options,

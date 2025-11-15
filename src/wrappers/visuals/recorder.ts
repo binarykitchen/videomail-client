@@ -1605,8 +1605,8 @@ class Recorder extends Despot {
   }
 
   public calculateHeight(responsive: boolean) {
-    let videoWidth;
-    let target;
+    let videoWidth: number | undefined;
+    let target = "(unknown)";
 
     if (this.userMedia) {
       target = "userMedia";
