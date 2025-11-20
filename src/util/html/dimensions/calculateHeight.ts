@@ -19,9 +19,9 @@ function calculateHeight(
 
   let width: number | undefined = videoWidth;
 
-  if (width !== undefined && width < 1) {
+  if (width === 0) {
     throw createError({
-      message: `Unable to calculate height for target ${target} when width is less than 1 (= ${width}) and responsive mode is set to ${responsive}`,
+      message: `Unable to calculate height for target ${target} when width is zero, while responsive mode is set to ${responsive}`,
       options,
     });
   } else if (responsive && element) {
