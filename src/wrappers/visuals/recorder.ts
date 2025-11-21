@@ -1606,13 +1606,10 @@ class Recorder extends Despot {
 
   public calculateHeight(responsive: boolean) {
     let videoWidth: number | undefined;
-    let target = "(unknown)";
 
     if (this.userMedia) {
-      target = "userMedia";
       videoWidth = this.userMedia.getVideoWidth();
     } else if (this.recorderElement) {
-      target = "recorderElement";
       videoWidth = this.recorderElement.videoWidth || this.recorderElement.width;
     }
 
@@ -1620,7 +1617,6 @@ class Recorder extends Despot {
       responsive,
       videoWidth,
       this.options,
-      target,
       this.getRatio(),
       this.recorderElement,
     );

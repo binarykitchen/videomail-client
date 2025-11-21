@@ -120,7 +120,7 @@
     "type-fest": "5.2.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.41.0",
-    "vitest": "4.0.10"
+    "vitest": "4.0.13"
   },
   "engines": {
     "node": "^24.11.0",

@@ -9,7 +9,6 @@ function calculateHeight(
   responsive: boolean,
   videoWidth: number | undefined,
   options: VideomailClientOptions,
-  target: string,
   ratio?: number,
   element?: HTMLElement | null,
 ) {
@@ -19,12 +18,7 @@ function calculateHeight(
 
   let width: number | undefined = videoWidth;
 
-  if (width === 0) {
-    throw createError({
-      message: `Unable to calculate height for target ${target} when width is zero, while responsive mode is set to ${responsive}`,
-      options,
-    });
-  } else if (responsive && element) {
+  if (responsive && element) {
     const limitedDimension = limitWidth(element, options, width);
     width = limitedDimension.value;
   }
