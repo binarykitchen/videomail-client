@@ -242,7 +242,10 @@ class Replay extends Despot {
 
     this.hide();
 
-    this.replayElement.setAttribute("autoplay", "true");
+    if (this.options.video.autoPlay) {
+      this.replayElement.setAttribute("autoplay", this.options.video.autoPlay.toString());
+    }
+
     this.replayElement.setAttribute("autostart", "true");
     this.replayElement.setAttribute("autobuffer", "true");
     this.replayElement.setAttribute("playsinline", "true");

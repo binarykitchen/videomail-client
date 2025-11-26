@@ -76,6 +76,8 @@ export interface VideomailClientOptions {
 
     stretch: boolean;
     mobileBreakPoint?: number | undefined;
+
+    autoPlay?: boolean | undefined;
   };
 
   image: {

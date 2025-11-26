@@ -2,6 +2,7 @@
 
 import js from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
+import { defineConfig } from "eslint/config";
 import deMorgan from "eslint-plugin-de-morgan";
 import * as depend from "eslint-plugin-depend";
 import eslintPluginImportX from "eslint-plugin-import-x";
@@ -38,7 +39,7 @@ const ALL_FILES = [
   If there are performance issues, always can fine-tune with files: {*.*} to narrow it down.
   But most of the time it's fine not to define fine and trust their defaults/recommendations.
 */
-export default tseslint.config(
+export default defineConfig([
   {
     // Node_modules and .git already covered in eslint.configs.all below
     name: "ignore some more files",
@@ -247,4 +248,4 @@ export default tseslint.config(
       "@typescript-eslint/restrict-template-expressions": "off",
     },
   },
-);
+]);

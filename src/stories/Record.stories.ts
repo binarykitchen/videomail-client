@@ -250,4 +250,18 @@ export const MobileBreakPoint: Story = {
   },
 };
 
+export const AutoPlayOnReplay: Story = {
+  name: "Auto play video after recording",
+  args: {
+    video: {
+      width: 400,
+      autoPlay: true,
+    },
+  },
+  render: (args) => {
+    const videomailClient = new VideomailClient(args);
+    return videomailClient.show();
+  },
+};
+
 export default meta;

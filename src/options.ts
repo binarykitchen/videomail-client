@@ -100,6 +100,10 @@ const options: VideomailClientOptions = {
 
     // If you define one, all video related width will be set to 100% below this breakpoint
     mobileBreakPoint: undefined,
+
+    // Default is undefined, because ...
+    // ... accessibility. Let the user decide when to play.
+    autoPlay: undefined,
   },
 
   image: {
