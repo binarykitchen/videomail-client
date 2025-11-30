@@ -143,5 +143,5 @@ export interface VideomailEvents {
   // document just became visible
   VISIBLE: () => void;
   // when window's inner width has changed
-  WINDOW_RESIZE: () => void;
+  WINDOW_RESIZE: (source: string) => void;
 }

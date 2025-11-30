@@ -237,7 +237,11 @@ class Container extends Despot {
     this.options.logger.debug(`Container: initEvents (playerOnly = ${playerOnly})`);
 
     window.addEventListener("resize", () => {
-      this.emit("WINDOW_RESIZE");
+      if (!this.built) {
+        return;
+      }
+
+      this.emit("WINDOW_RESIZE", "container");
     });
 
     if (this.options.enableAutoUnload) {
