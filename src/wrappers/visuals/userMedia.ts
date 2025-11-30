@@ -451,14 +451,6 @@ class UserMedia extends Despot {
         });
       }
 
-      if (rawHeight === 0) {
-        throw createError({
-          message: "Bad dimensions",
-          explanation: "Raw video height from DOM element cannot be zero.",
-          options: this.options,
-        });
-      }
-
       if (rawHeight < 1) {
         throw createError({
           message: "Bad dimensions",
