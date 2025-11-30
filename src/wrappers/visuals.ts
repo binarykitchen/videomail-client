@@ -480,6 +480,11 @@ class Visuals extends Despot {
     }
   }
 
+  public setLimitSeconds(limitSeconds: number) {
+    this.options.video.limitSeconds = limitSeconds;
+    this.recorderInsides.setLimitSeconds(limitSeconds);
+  }
+
   public getElement() {
     return this.visualsElement;
   }

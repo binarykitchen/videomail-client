@@ -121,6 +121,10 @@ class RecordTimer {
     return this.options.video.limitSeconds;
   }
 
+  public setLimitSeconds(limitSeconds: number) {
+    this.options.video.limitSeconds = limitSeconds;
+  }
+
   public start() {
     this.countdown = this.getStartSeconds();
     this.nearComputed = this.endNighComputed = false;

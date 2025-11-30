@@ -77,6 +77,24 @@ class VideomailClient extends Despot {
     this.container.startOver(params);
   }
 
+  // Useful for altering limit when user has changed options in real-time like
+  // enabling/disabling audio etc
+  public setLimitSeconds(limitSeconds: number) {
+    if (this.options.video.limitSeconds === limitSeconds) {
+      this.options.logger.debug(
+        `Client: setLimitSeconds called but limitSeconds is already ${limitSeconds}, doing nothing.`,
+      );
+
+      return;
+    }
+
+    this.options.video.limitSeconds = limitSeconds;
+
+    this.options.logger.debug(`Client: setLimitSeconds (limitSeconds = ${limitSeconds})`);
+
+    this.container.setLimitSeconds(limitSeconds);
+  }
+
   public unload(startingOver = false) {
     this.container.unload({ startingOver });
   }

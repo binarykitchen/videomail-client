@@ -153,6 +153,11 @@ class RecorderInsides extends Despot {
   public checkTimer(elapsedTime: number) {
     this.recordTimer.check(elapsedTime);
   }
+
+  public setLimitSeconds(limitSeconds: number) {
+    this.options.video.limitSeconds = limitSeconds;
+    this.recordTimer.setLimitSeconds(limitSeconds);
+  }
 }
 
 export default RecorderInsides;

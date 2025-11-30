@@ -83,6 +83,7 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 - <a href="#isBuilt">`videomailClient.isBuilt()`</a>
 - <a href="#submit">`videomailClient.submit()`</a>
 - <a href="#getLogLines">`videomailClient.getLogLines()`</a>
+- <a href="#setLimitSeconds">`videomailClient.setLimitSeconds()`</a>
 
 <a name="constructor"></a>
 
@@ -200,6 +201,12 @@ Calling this function will manually trigger a submission of the recorded videoma
 ### videomailClient.getLogLines()
 
 For advanced use only: returns you a collection of log lines that show what code has been covered recently. Useful if you want to debug something tricky.
+
+<a name="setLimitSeconds"></a>
+
+### videomailClient.setLimitSeconds()
+
+For advanced use only: sets the recording time limit in seconds. Useful if you want to dynamically change the recording duration.
 
 <a name="whatisstored"></a>
 

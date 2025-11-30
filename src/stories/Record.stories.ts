@@ -79,6 +79,43 @@ export const Audio: Story = {
   },
 };
 
+export const ChangingLimit: Story = {
+  name: "Changing limit on the fly",
+  args: {
+    enableAutoPause: false,
+    audio: {
+      enabled: false,
+      switch: true,
+    },
+    image: {
+      quality: 0.4,
+    },
+    video: {
+      limitSeconds: 30,
+      countdown: false,
+      width: 320,
+    },
+    text: {
+      buttons: {
+        preview: "Stop",
+      },
+    },
+  },
+  render: (args) => {
+    const videomailClient = new VideomailClient(args);
+
+    videomailClient.on("ENABLING_AUDIO", function () {
+      videomailClient.setLimitSeconds(15);
+    });
+
+    videomailClient.on("DISABLING_AUDIO", function () {
+      videomailClient.setLimitSeconds(30);
+    });
+
+    return videomailClient.show();
+  },
+};
+
 // High quality: High FPS, near HD quality, short duration and without auto-pause
 //
 // This example shows that your browser cannot meet the FPS requirements due to

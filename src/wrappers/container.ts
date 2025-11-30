@@ -899,6 +899,11 @@ class Container extends Despot {
   public recordAgain() {
     this.visuals.recordAgain();
   }
+
+  public setLimitSeconds(limitSeconds: number) {
+    this.options.video.limitSeconds = limitSeconds;
+    this.visuals.setLimitSeconds(limitSeconds);
+  }
 }
 
 export default Container;
