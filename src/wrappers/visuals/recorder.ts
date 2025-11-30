@@ -1497,10 +1497,10 @@ class Recorder extends Despot {
      */
     return Boolean(
       this.loop?.isRunning() &&
-        !this.isPaused() &&
-        !this.isNotifying() &&
-        this.stream &&
-        !this.stream.destroyed,
+      !this.isPaused() &&
+      !this.isNotifying() &&
+      this.stream &&
+      !this.stream.destroyed,
     );
   }
 
