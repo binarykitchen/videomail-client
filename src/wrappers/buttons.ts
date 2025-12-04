@@ -1,6 +1,10 @@
 import contains from "contains";
 
-import { ErrorParams, RecordingParams, UserMediaReadyParams } from "../types/events";
+import {
+  VideomailErrorParams,
+  VideomailRecordingParams,
+  VideomailUserMediaReadyParams,
+} from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import Despot from "../util/Despot";
 import adjustButton, { ButtonType } from "../util/html/adjustButton";
@@ -273,7 +277,7 @@ class Buttons extends Despot {
     this.hide();
   }
 
-  private onUserMediaReady(params: UserMediaReadyParams) {
+  private onUserMediaReady(params: VideomailUserMediaReadyParams) {
     this.onFormReady();
 
     showElement(this.buttonsElement);
@@ -353,7 +357,7 @@ class Buttons extends Despot {
     showElement(this.previewButton);
   }
 
-  private onRecording(params: RecordingParams) {
+  private onRecording(params: VideomailRecordingParams) {
     /*
      * it is possible to hide while recording, hence
      * check framesCount first (coming from recorder)
@@ -464,7 +468,7 @@ class Buttons extends Despot {
   private initEvents() {
     this.options.logger.debug("Buttons: initEvents()");
 
-    this.on("USER_MEDIA_READY", (params: UserMediaReadyParams) => {
+    this.on("USER_MEDIA_READY", (params: VideomailUserMediaReadyParams) => {
       if (!params.switchingFacingMode) {
         this.onUserMediaReady(params);
       }
@@ -478,7 +482,7 @@ class Buttons extends Despot {
       this.adjustButtonsForPause();
     });
 
-    this.on("RECORDING", (params: RecordingParams) => {
+    this.on("RECORDING", (params: VideomailRecordingParams) => {
       this.onRecording(params);
     });
 
@@ -560,7 +564,7 @@ class Buttons extends Despot {
       disableElement(this.audioOffRadioPair);
     });
 
-    this.on("ERROR", (params: ErrorParams) => {
+    this.on("ERROR", (params: VideomailErrorParams) => {
       /*
        * since https://github.com/binarykitchen/videomail-client/issues/60
        * we hide areas to make it easier for the user

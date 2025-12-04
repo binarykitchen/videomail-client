@@ -2,9 +2,7 @@ import type { Meta, StoryObj } from "@storybook/html";
 
 import { VideomailClient } from "../client";
 import { PartialVideomailClientOptions } from "../types/options";
-import videomailExample from "./static/json/videomail";
-
-// TODO Migrate more from Legacy
+import videomailExample from "./static/json/desktopVideomail";
 
 const meta: Meta<PartialVideomailClientOptions> = {
   title: "Correct",

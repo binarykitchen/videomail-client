@@ -1,4 +1,4 @@
-import { VideomailPreviewParams } from "../../types/events";
+import { VideomailPreviewParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import { Videomail } from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";

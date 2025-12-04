@@ -1,5 +1,9 @@
 import { Dimension } from "../../types/dimension";
-import { ProgressParams, StoppingParams } from "../../types/events";
+import {
+  VideomailProgressParams,
+  VideomailStoppingParams,
+  VideomailUserMediaReadyParams,
+} from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import VideomailError from "../../util/error/VideomailError";
@@ -110,7 +114,7 @@ class Notifier extends Despot {
       this.onLoadingUserMedia();
     });
 
-    this.on("USER_MEDIA_READY", () => {
+    this.on("USER_MEDIA_READY", (_params: VideomailUserMediaReadyParams) => {
       // Ensure notifier has correct dimensions, especially when stretched
       this.correctNotifierDimensions();
 
@@ -121,11 +125,11 @@ class Notifier extends Despot {
       this.hide();
     });
 
-    this.on("STOPPING", (params: StoppingParams) => {
+    this.on("STOPPING", (params: VideomailStoppingParams) => {
       this.onStopping(params.limitReached);
     });
 
-    this.on("PROGRESS", (params: ProgressParams) => {
+    this.on("PROGRESS", (params: VideomailProgressParams) => {
       this.onProgress(params.frameProgress, params.sampleProgress);
     });
 

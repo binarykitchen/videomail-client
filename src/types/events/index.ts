@@ -1,60 +1,16 @@
-import Response from "superagent/lib/node/response";
-
-import VideomailError from "../../util/error/VideomailError";
 import { FormReadyParams } from "../../wrappers/container";
-import { RecordingStats } from "../RecordingStats";
-import { Videomail } from "../Videomail";
-
-export interface UserMediaReadyParams {
-  switchingFacingMode?: ConstrainDOMString | undefined;
-  recordWhenReady?: boolean | undefined;
-  paused?: boolean | undefined;
-}
-
-export interface ErrorParams {
-  exc?: unknown;
-  err?: VideomailError;
-}
-
-export interface RecordingParams {
-  framesCount: number;
-}
-
-export interface StoppingParams {
-  limitReached?: boolean | undefined;
-}
-
-export interface ProgressParams {
-  frameProgress: string;
-  sampleProgress?: string | undefined;
-}
-
-export interface VideomailPreviewParams {
-  key?: string | undefined;
-  width?: number | undefined;
-  height?: number | undefined;
-  hasAudio: boolean;
-  duration: number;
-}
-
-export interface StoppedParams {
-  recordingStats?: RecordingStats | undefined;
-}
-
-export interface SubmittedParams {
-  videomail: Videomail;
-  response: Response;
-}
-
-export interface ValidatingParams {
-  targetName?: any;
-  event?: any;
-}
-
-export interface InvalidParams {
-  whyInvalid?: string | undefined;
-  invalidData?: Record<string, string>;
-}
+import {
+  VideomailErrorParams,
+  VideomailInvalidParams,
+  VideomailPreviewParams,
+  VideomailProgressParams,
+  VideomailRecordingParams,
+  VideomailStoppedParams,
+  VideomailStoppingParams,
+  VideomailSubmittedParams,
+  VideomailUserMediaReadyParams,
+  VideomailValidatingParams,
+} from "./params";
 
 export interface VideomailEvents {
   // when about to ask for webcam permissions
@@ -80,7 +36,7 @@ export interface VideomailEvents {
   // about to enable audio
   ENABLING_AUDIO: () => void;
   // an error occurred
-  ERROR: (params: ErrorParams) => void;
+  ERROR: (params: VideomailErrorParams) => void;
   // for debugging only, is emitted when an event is emitted lol,
   EVENT_EMITTED: () => void;
   // emitted once when fist frame has been sent to server
@@ -92,7 +48,7 @@ export interface VideomailEvents {
   // emitted when hidden
   HIDE: () => void;
   // form is invalid
-  INVALID: (params: InvalidParams) => void;
+  INVALID: (params: VideomailInvalidParams) => void;
   // document just became INvisible
   INVISIBLE: () => void;
   // raised when webcam knows its dimensions
@@ -108,9 +64,9 @@ export interface VideomailEvents {
   // video preview is shown
   PREVIEW_SHOWN: () => void;
   // start sending
-  PROGRESS: (params: ProgressParams) => void;
+  PROGRESS: (params: VideomailProgressParams) => void;
   // webcam is recording
-  RECORDING: (params: RecordingParams) => void;
+  RECORDING: (params: VideomailRecordingParams) => void;
   // submitted video is shown
   REPLAY_SHOWN: () => void;
   // resetting everything to go back to initial state
@@ -124,22 +80,22 @@ export interface VideomailEvents {
   // starting all over again back to its initial state
   STARTING_OVER: () => void;
   // recording has stopped
-  STOPPED: (params: StoppedParams) => void;
+  STOPPED: (params: VideomailStoppedParams) => void;
   // recording is being stopped (= preview)
-  STOPPING: (params: StoppingParams) => void;
+  STOPPING: (params: VideomailStoppingParams) => void;
   // form has been successfully submitted
-  SUBMITTED: (params: SubmittedParams) => void;
+  SUBMITTED: (params: VideomailSubmittedParams) => void;
   // form is being submitted
   SUBMITTING: () => void;
   // to switch camera on mobiles between front and back
   SWITCH_FACING_MODE: () => void;
   UNLOADING: () => void;
   // user media (= webcam) is ready, loaded
-  USER_MEDIA_READY: (params: UserMediaReadyParams) => void;
+  USER_MEDIA_READY: (params: VideomailUserMediaReadyParams) => void;
   // form is valid
   VALID: () => void;
   // form is being validated
-  VALIDATING: (params?: ValidatingParams) => void;
+  VALIDATING: (params?: VideomailValidatingParams) => void;
   // document just became visible
   VISIBLE: () => void;
   // when window's inner width has changed

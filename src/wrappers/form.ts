@@ -1,6 +1,6 @@
 import getFormData from "get-form-data";
 
-import { ErrorParams, VideomailPreviewParams } from "../types/events";
+import { VideomailErrorParams, VideomailPreviewParams } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import { PartialVideomail, Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
@@ -291,7 +291,7 @@ class Form extends Despot {
       this.formElement.classList.remove("invalid");
     });
 
-    this.on("ERROR", (params: ErrorParams) => {
+    this.on("ERROR", (params: VideomailErrorParams) => {
       const isBrowserProblem = params.err?.isBrowserProblem();
       /*
        * Since https://github.com/binarykitchen/videomail-client/issues/60

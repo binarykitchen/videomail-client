@@ -2,7 +2,7 @@
 
 import { Videomail } from "../../../types/Videomail";
 
-const videomailExample: Videomail = {
+const videomailDesktopExample: Videomail = {
   subject: "Hamster on Speed",
   from: "automatic@videomail.io",
   to: ["automatic@videomail.io"],
@@ -57,4 +57,4 @@ const videomailExample: Videomail = {
   expiresAfterServerPretty: "14 Dec 2024, 12:10 pm",
 };
 
-export default videomailExample;
+export default videomailDesktopExample;

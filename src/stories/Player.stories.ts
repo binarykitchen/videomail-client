@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from "@storybook/html";
 
 import { VideomailClient } from "../client";
 import { PartialVideomailClientOptions } from "../types/options";
-import videomailExample from "./static/json/videomail";
+import videomailDesktopExample from "./static/json/desktopVideomail";
+import videomailMobileExample from "./static/json/mobileVideomail";
 
 const meta: Meta<PartialVideomailClientOptions> = {
   title: "Player",
@@ -14,12 +15,21 @@ const meta: Meta<PartialVideomailClientOptions> = {
 
 type Story = StoryObj<PartialVideomailClientOptions>;
 
-// Play an existing videomail, nothing else
-export const PlayVideomail: Story = {
-  name: "Play videomail",
+// Play an existing desktop videomail, nothing else
+export const PlayDesktopVideomail: Story = {
+  name: "Play desktop videomail",
   render: (args) => {
     const videomailClient = new VideomailClient(args);
-    return videomailClient.replay(videomailExample);
+    return videomailClient.replay(videomailDesktopExample);
+  },
+};
+
+// Play an existing videomail recorded on mobile, nothing else
+export const PlayMobileVideomail: Story = {
+  name: "Play mobile videomail",
+  render: (args) => {
+    const videomailClient = new VideomailClient(args);
+    return videomailClient.replay(videomailMobileExample);
   },
 };
 
@@ -71,7 +81,7 @@ export const PlayVideomailWithForm: Story = {
 
     // just a copy paste of json of the videomail
     // you normally would get from a xhr get request
-    videomailClient.replay(videomailExample, "videomail");
+    videomailClient.replay(videomailDesktopExample, "videomail");
   },
 };
 

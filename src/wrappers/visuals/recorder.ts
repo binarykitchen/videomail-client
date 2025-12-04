@@ -7,7 +7,7 @@ import websocket from "websocket-stream";
 import Constants from "../../constants";
 import { Command, VideomailCommandArgs } from "../../types/command";
 import { Dimension } from "../../types/dimension";
-import { UserMediaReadyParams } from "../../types/events";
+import { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import { RecordingStats } from "../../types/RecordingStats";
 import Despot from "../../util/Despot";
@@ -182,7 +182,7 @@ class Recorder extends Despot {
     showElement(this.recorderElement);
   }
 
-  private onUserMediaReady(params?: UserMediaReadyParams) {
+  private onUserMediaReady(params?: VideomailUserMediaReadyParams) {
     try {
       this.options.logger.debug(
         `Recorder: onUserMediaReady(${params ? pretty(params) : ""})`,
@@ -598,7 +598,10 @@ class Recorder extends Despot {
     }
   }
 
-  private getUserMediaCallback(localStream: MediaStream, params?: UserMediaReadyParams) {
+  private getUserMediaCallback(
+    localStream: MediaStream,
+    params?: VideomailUserMediaReadyParams,
+  ) {
     if (!this.userMedia) {
       throw new Error("No user media is defined");
     }
@@ -628,7 +631,7 @@ class Recorder extends Despot {
     }
   }
 
-  private loadGenuineUserMedia(params?: UserMediaReadyParams) {
+  private loadGenuineUserMedia(params?: VideomailUserMediaReadyParams) {
     this.options.logger.debug(
       `Recorder: loadGenuineUserMedia(${params ? pretty(params) : ""})`,
     );
@@ -693,7 +696,7 @@ class Recorder extends Despot {
       });
   }
 
-  private loadUserMedia(params?: UserMediaReadyParams) {
+  private loadUserMedia(params?: VideomailUserMediaReadyParams) {
     if (this.userMediaLoaded) {
       this.options.logger.debug(
         "Recorder: skipping loadUserMedia() because it is already loaded",

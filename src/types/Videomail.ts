@@ -49,6 +49,7 @@ export interface Videomail {
   sentDate?: number;
   sentDateIso?: string;
   sentDateServerPretty?: string;
+  serverTimePretty?: string;
 
   siteName: string;
   siteTitle?: string;

@@ -5,7 +5,7 @@ import Response from "superagent/lib/node/response";
 
 import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";
-import { ErrorParams } from "../types/events";
+import { VideomailErrorParams } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
@@ -207,7 +207,7 @@ class Container extends Despot {
     }
   }
 
-  private processError(params: ErrorParams) {
+  private processError(params: VideomailErrorParams) {
     this.hasError = true;
 
     if (params.err?.stack) {
@@ -315,7 +315,7 @@ class Container extends Despot {
      * better to keep the one and only error listeners
      * at one spot, here, because unload() will do a removeAllListeners()
      */
-    this.on("ERROR", (params: ErrorParams) => {
+    this.on("ERROR", (params: VideomailErrorParams) => {
       this.processError(params);
 
       this.endWaiting();

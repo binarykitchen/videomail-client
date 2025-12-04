@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/html";
 import { http, HttpResponse } from "msw";
 
-import { Videomail, VideomailClient } from "../index";
-import { SubmittedParams } from "../types/events";
+import { Videomail, VideomailClient, VideomailSubmittedParams } from "../index";
 import { PartialVideomailClientOptions } from "../types/options";
 
 const meta: Meta<PartialVideomailClientOptions> = {
@@ -54,7 +53,7 @@ export const DirectSubmission: Story = {
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 
-    const onSubmitted = ({ videomail }: SubmittedParams) => {
+    const onSubmitted = ({ videomail }: VideomailSubmittedParams) => {
       videomailClient.replay(videomail, "viewVideo");
 
       const startOverButton = document.getElementById("startOver");
@@ -200,7 +199,7 @@ export const ContactForm: Story = {
       };
     }
 
-    const onSubmitted = ({ videomail, response }: SubmittedParams) => {
+    const onSubmitted = ({ videomail, response }: VideomailSubmittedParams) => {
       const statusHeader = document.querySelector<HTMLHeadElement>("h3.status");
 
       if (statusHeader) {
@@ -285,7 +284,7 @@ export const VideoSubmissionOnly: Story = {
       }
     }
 
-    const onSubmitted = ({ videomail }: SubmittedParams) => {
+    const onSubmitted = ({ videomail }: VideomailSubmittedParams) => {
       setAttribute(videomail, "url");
       setAttribute(videomail, "webm");
       setAttribute(videomail, "mp4");
@@ -359,7 +358,7 @@ export const Stretch: Story = {
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 
-    const onSubmitted = ({ videomail, response }: SubmittedParams) => {
+    const onSubmitted = ({ videomail, response }: VideomailSubmittedParams) => {
       const statusHeader = document.querySelector("h3.status");
 
       if (statusHeader) {
@@ -463,7 +462,7 @@ export const WithCCAndBCC: Story = {
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 
-    const onSubmitted = ({ videomail, response }: SubmittedParams) => {
+    const onSubmitted = ({ videomail, response }: VideomailSubmittedParams) => {
       const statusHeader = document.querySelector("h3.status");
 
       if (statusHeader) {
