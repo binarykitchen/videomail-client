@@ -27,6 +27,9 @@ initialize({
 
 const preview: Preview = {
   parameters: {
+    docs: {
+      codePanel: true,
+    },
     options: {
       storySort: {
         // See https://storybook.js.org/docs/writing-stories/naming-components-and-hierarchy
