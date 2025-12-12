@@ -10,6 +10,7 @@ import { PartialVideomail, Videomail } from "./types/Videomail";
 import createError from "./util/error/createError";
 import HTTPVideomailError from "./util/error/HTTPVideomailError";
 import VideomailError from "./util/error/VideomailError";
+import getBrowser from "./util/getBrowser";
 import { FormInputs, FormMethod, FormMethodType } from "./wrappers/form";
 
 function findOriginalExc(exc: unknown) {
@@ -192,6 +193,9 @@ class Resource {
 
     // Likewise, good to know where it has been recorded
     newVideomail.recordLocation = window.location.href;
+
+    const browser = getBrowser(this.options);
+    newVideomail.browserStats = browser.getUsefulData();
 
     try {
       let res: Response;

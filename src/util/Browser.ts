@@ -1,6 +1,7 @@
 import defined from "defined";
 import { IResult, UAParser } from "ua-parser-js";
 
+import { BrowserStats } from "../types/BrowserStats";
 import { VideomailClientOptions } from "../types/options";
 import { VideoType, VideoTypeType } from "../types/VideoType";
 import createError from "./error/createError";
@@ -103,7 +104,7 @@ class Browser {
   public getNoAccessIssue() {
     const message = "Unable to access webcam";
 
-    let explanation;
+    let explanation: string;
 
     if (this.isChromeBased()) {
       explanation = "Click on the allow button to grant access to your webcam";
@@ -117,7 +118,7 @@ class Browser {
   }
 
   public getUsefulData() {
-    return {
+    const data: BrowserStats = {
       ua: this.result.ua,
       browser: this.result.browser,
       cpu: this.result.cpu,
@@ -125,6 +126,8 @@ class Browser {
       engine: this.result.engine,
       os: this.result.os,
     };
+
+    return data;
   }
 }
 

@@ -1,5 +1,6 @@
 import { PartialDeep } from "type-fest";
 
+import { BrowserStats } from "./BrowserStats";
 import { DeliveryRecord } from "./Delivery";
 import { EmailAddress, EmailAddresses } from "./EmailAddress";
 import { RecordingStats } from "./RecordingStats";
@@ -38,6 +39,7 @@ export interface Videomail {
   vtt?: string;
   captions?: string | undefined;
   poster: string;
+  browserStats?: BrowserStats | undefined;
   recordingStats?: RecordingStats | undefined;
   recordLocation?: string | undefined;
 

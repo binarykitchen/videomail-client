@@ -1,6 +1,7 @@
 import { VideoType } from "./types/VideoType";
 
 export { VideomailClient } from "./client";
+export type { BrowserStats } from "./types/BrowserStats";
 export type { Command } from "./types/command";
 export type { VideomailCommandArgs } from "./types/command";
 export type { DeliveryRecord } from "./types/Delivery";
