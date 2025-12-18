@@ -127,13 +127,13 @@ class Visuals extends Despot {
         heightDimension = this.getRecorderHeight(true);
       }
 
-      if (widthDimension) {
+      if (widthDimension?.value) {
         this.visualsElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
       } else {
         this.visualsElement.style.removeProperty("width");
       }
 
-      if (heightDimension) {
+      if (heightDimension?.value) {
         this.visualsElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
       } else {
         this.visualsElement.style.removeProperty("height");
