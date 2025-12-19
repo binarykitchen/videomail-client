@@ -107,12 +107,9 @@ function createError(errorParams: ErrorParams) {
       break;
 
     case "HARDWARE_UNAVAILABLE":
+    case "AbortError": // That's for Firefox
       message = "Webcam is unavailable";
       explanation = "Maybe it is already busy in another window?";
-
-      if (browser.isChromeBased() || browser.isFirefox()) {
-        explanation += " Or you have to allow access above?";
-      }
 
       classList.push(VideomailError.WEBCAM_PROBLEM);
 
