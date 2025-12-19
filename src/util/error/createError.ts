@@ -1,6 +1,5 @@
 import Resource from "../../resource";
 import { VideomailClientOptions } from "../../types/options";
-import getBrowser from "../getBrowser";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../pretty";
 import HTTPVideomailError from "./HTTPVideomailError";
@@ -34,7 +33,6 @@ function createError(errorParams: ErrorParams) {
   const classList = errorParams.classList ?? [];
 
   const audioEnabled = isAudioEnabled(options);
-  const browser = getBrowser(options);
 
   const errName = err?.name ?? err?.constructor.name;
 
