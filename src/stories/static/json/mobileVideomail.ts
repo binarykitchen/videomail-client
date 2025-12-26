@@ -4,7 +4,7 @@ import { Videomail } from "../../../types/Videomail";
 
 const videomailMobileExample: Videomail = {
   alias: "re-test-furz-3-dec-2025-06-17-pm-144110111540",
-  correctUrl:
+  editUrl:
     "https://videomail.io/videomail/alias/re-test-furz-3-dec-2025-06-17-pm-144110111540/correct",
   dateCreated: 1764739035953,
   dateCreatedServerPretty: "3 Dec 2025, 06:17 pm (NZDT)",

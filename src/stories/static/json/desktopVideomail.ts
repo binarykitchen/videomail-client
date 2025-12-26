@@ -50,7 +50,7 @@ const videomailDesktopExample: Videomail = {
   webm: "https://videos.pond5.com/brown-hamster-continuously-running-fast-footage-072830929_main_xxl.webm",
   poster: "https://s1.dmcdn.net/v/VwuuU1b-B8bKNOTFe/x1080",
   replyUrl: "/reply/test-example-mofo-485573266478",
-  correctUrl: "https://videomail.io/correct/test-example-mofo-485573266478",
+  editUrl: "https://videomail.io/correct/test-example-mofo-485573266478",
   dateCreatedServerPretty: "Nov 25, 2017, 1:42 PM",
   expiresAfter: 1734131452642,
   expiresAfterIso: "2024-12-13T23:10:52.642Z",

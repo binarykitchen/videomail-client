@@ -23,7 +23,6 @@ export interface Videomail {
   // Then Videomail specific stuff
 
   connection?: Record<string, number | string>;
-  correctUrl: string;
   dateCreated: number;
   dateCreatedServerPretty: string;
   dateUpdated?: number;
@@ -73,6 +72,9 @@ export interface Videomail {
   rejectedTo?: DeliveryRecord;
   rejectedCc?: DeliveryRecord;
   rejectedBcc?: DeliveryRecord;
+
+  editUrl?: string;
+  repeatUrl?: string;
 }
 
 export type PartialVideomail = PartialDeep<Videomail>;
