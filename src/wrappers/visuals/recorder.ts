@@ -338,7 +338,7 @@ class Recorder extends Despot {
     this.emit("PREVIEW", {
       key: this.key,
       width: widthDimension?.value,
-      height: heightDimension.value,
+      height: heightDimension?.value,
       hasAudio,
       duration,
     });
@@ -1348,7 +1348,7 @@ class Recorder extends Despot {
       if (this.options.video.height) {
         const recorderHeight = this.getRecorderHeight(true);
 
-        if (recorderHeight.value) {
+        if (recorderHeight?.value) {
           this.recorderElement.height = recorderHeight.value;
         } else {
           this.recorderElement.style.removeProperty("height");
@@ -1542,36 +1542,34 @@ class Recorder extends Despot {
   }
 
   public getRecorderHeight(responsive: boolean, useBoundingClientRect?: boolean) {
+    let recorderHeight: Dimension | undefined;
+
     if (this.recorderElement && useBoundingClientRect) {
       const height = this.recorderElement.getBoundingClientRect().height;
 
-      const dimension: Dimension = {
+      recorderHeight = {
         unit: "px",
         value: height,
       };
-
-      return dimension;
     } else if (this.userMedia) {
       const height = this.userMedia.getRawHeight(responsive);
 
-      const dimension: Dimension = {
+      recorderHeight = {
         unit: "px",
         value: height,
       };
-
-      return dimension;
     } else if (responsive && this.options.video.height) {
-      return this.calculateHeight(responsive);
+      recorderHeight = this.calculateHeight(responsive);
+    } else if (this.options.video.height) {
+      const height = this.options.video.height;
+
+      recorderHeight = {
+        unit: "px",
+        value: height,
+      };
     }
 
-    const height = this.options.video.height;
-
-    const dimension: Dimension = {
-      unit: "px",
-      value: height,
-    };
-
-    return dimension;
+    return recorderHeight;
   }
 
   private getRatio() {
@@ -1608,21 +1606,33 @@ class Recorder extends Despot {
   }
 
   public calculateHeight(responsive: boolean) {
-    let videoWidth: number | undefined;
+    let videoDimension: Dimension | undefined;
 
     if (this.userMedia) {
-      videoWidth = this.userMedia.getVideoWidth();
+      const videoHeight = this.userMedia.getVideoHeight();
+
+      videoDimension = {
+        value: videoHeight,
+        unit: "px",
+      };
     } else if (this.recorderElement) {
-      videoWidth = this.recorderElement.videoWidth || this.recorderElement.width;
+      const videoHeight = this.recorderElement.videoHeight || this.recorderElement.height;
+
+      videoDimension = {
+        value: videoHeight,
+        unit: "px",
+      };
+    } else {
+      videoDimension = calculateHeight(
+        responsive,
+        undefined,
+        this.options,
+        this.getRatio(),
+        this.recorderElement,
+      );
     }
 
-    return calculateHeight(
-      responsive,
-      videoWidth,
-      this.options,
-      this.getRatio(),
-      this.recorderElement,
-    );
+    return videoDimension;
   }
 
   public getRawVisualUserMedia() {

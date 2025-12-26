@@ -398,7 +398,7 @@ class Container extends Despot {
       const heightDimension = this.visuals.getRecorderHeight(true);
 
       videomailFormData.width = widthDimension?.value;
-      videomailFormData.height = heightDimension.value;
+      videomailFormData.height = heightDimension?.value;
 
       return await this.resource.post(videomailFormData);
     } else if (method === FormMethod.PUT) {

@@ -167,7 +167,10 @@ class Notifier extends Despot {
       const heightDimension = this.visuals.getRecorderHeight(true, true);
 
       this.notifyElement.style.width = "auto";
-      this.notifyElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+
+      if (heightDimension) {
+        this.notifyElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+      }
     } else {
       let heightDimension: Dimension | undefined;
       let widthDimension = useFullWidth(this.options.video.mobileBreakPoint);

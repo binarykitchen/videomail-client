@@ -91,7 +91,7 @@
     "@types/node": "24.10.1",
     "@types/superagent": "8.1.9",
     "@types/ua-parser-js": "0.7.39",
-    "@vitest/eslint-plugin": "1.5.2",
+    "@vitest/eslint-plugin": "1.6.4",
     "audit-ci": "7.1.0",
     "chromatic": "13.3.4",
     "cross-env": "10.1.0",
