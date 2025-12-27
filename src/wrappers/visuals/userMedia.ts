@@ -433,9 +433,17 @@ class UserMedia extends Despot {
       const heightDimension = this.recorder.calculateHeight(responsive);
       rawHeight = heightDimension.value;
 
-      if (!rawHeight || rawHeight < 1) {
+      if (rawHeight === undefined) {
         throw createError({
-          message: "Bad dimensions",
+          message: "Undefined height",
+          explanation: "Calculated raw height cannot be undefined.",
+          options: this.options,
+        });
+      }
+
+      if (rawHeight < 1) {
+        throw createError({
+          message: "Invalid height",
           explanation: "Calculated raw height cannot be less than 1!",
           options: this.options,
         });

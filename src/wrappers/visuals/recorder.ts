@@ -357,10 +357,6 @@ class Recorder extends Despot {
     if (!this.connected) {
       this.connecting = true;
 
-      this.options.logger.debug(
-        `Recorder: initializing web socket to ${this.options.socketUrl}`,
-      );
-
       this.emit("CONNECTING");
 
       // https://github.com/maxogden/websocket-stream#binary-sockets
@@ -373,6 +369,8 @@ class Recorder extends Despot {
       const url2Connect = `${this.options.socketUrl}?${encodeURIComponent(
         Constants.SITE_NAME_LABEL,
       )}=${encodeURIComponent(this.options.siteName)}`;
+
+      this.options.logger.debug(`Recorder: initializing web socket to ${url2Connect}`);
 
       try {
         /*
