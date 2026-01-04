@@ -1550,7 +1550,18 @@ class Recorder extends Despot {
         value: height,
       };
     } else if (this.userMedia) {
-      const height = this.userMedia.getRawHeight(responsive);
+      let height = this.userMedia.getRawHeight(responsive);
+
+      // Because user media isn't rendered it, yet is using the ideal height.
+      // Regardless is a lesser width was chosen, hence respect ratio and recalculate.
+      if (height !== undefined && this.options.video.width) {
+        const ratio = this.getRatio();
+
+        if (ratio !== undefined) {
+          const maxHeight = this.options.video.width * ratio;
+          height = Math.min(maxHeight, height);
+        }
+      }
 
       recorderHeight = {
         unit: "px",

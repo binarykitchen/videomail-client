@@ -134,7 +134,8 @@ class Visuals extends Despot {
       }
 
       if (heightDimension?.value) {
-        this.visualsElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
+        const height = `${heightDimension.value}${heightDimension.unit}`;
+        this.visualsElement.style.height = height;
       } else {
         this.visualsElement.style.removeProperty("height");
       }

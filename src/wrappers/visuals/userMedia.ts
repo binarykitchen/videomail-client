@@ -441,10 +441,10 @@ class UserMedia extends Despot {
         });
       }
 
-      if (rawHeight < 1) {
+      if (rawHeight !== 0 && rawHeight < 1) {
         throw createError({
           message: "Invalid height",
-          explanation: "Calculated raw height cannot be less than 1!",
+          explanation: `Calculated raw height of ${rawHeight} cannot be less than 1!`,
           options: this.options,
         });
       }
@@ -459,7 +459,7 @@ class UserMedia extends Despot {
         });
       }
 
-      if (rawHeight < 1) {
+      if (rawHeight !== 0 && rawHeight < 1) {
         throw createError({
           message: "Bad dimensions",
           explanation: "Raw video height from DOM element cannot be less than 1.",
