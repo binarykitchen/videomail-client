@@ -140,6 +140,7 @@ export interface VideomailClientOptions {
   reportErrors: boolean;
   disableFormWhenSubmitting?: boolean | undefined;
   fakeUaString?: string | undefined;
+  recalculateDimensionsOnWindowResize?: boolean;
 
   versions?: {
     videomailNinjaFormPlugin?: string | undefined;

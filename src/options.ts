@@ -184,6 +184,10 @@ const options: VideomailClientOptions = {
   // just for testing purposes to simulate browser agent handling
   fakeUaString: undefined,
 
+  // Experimental, needs more work:
+  // But for better mobile support, this shall be set to true for now.
+  recalculateDimensionsOnWindowResize: false,
+
   versions: {
     videomailNinjaFormPlugin: undefined,
   },
