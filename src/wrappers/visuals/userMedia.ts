@@ -404,16 +404,17 @@ class UserMedia extends Despot {
   }
 
   public getRawWidth(responsive: boolean) {
-    let rawWidth = this.getVideoWidth();
+    let rawWidth: number | undefined;
     const widthDimension: Dimension = { unit: "px" };
 
-    if (this.options.video.width || this.options.video.height) {
-      if (!responsive) {
+    if (!responsive) {
+      if (this.options.video.width) {
         rawWidth = this.options.video.width;
       } else {
-        const dimension = this.recorder.calculateWidth(responsive);
-        rawWidth = dimension.value;
+        rawWidth = this.getVideoWidth();
       }
+    } else {
+      rawWidth = this.getVideoWidth();
     }
 
     if (responsive) {
@@ -429,42 +430,21 @@ class UserMedia extends Despot {
   public getRawHeight(responsive: boolean) {
     let rawHeight: number | undefined;
 
-    if (this.options.video.width || this.options.video.height) {
-      const heightDimension = this.recorder.calculateHeight(responsive);
-      rawHeight = heightDimension.value;
-
-      if (rawHeight === undefined) {
-        throw createError({
-          message: "Undefined height",
-          explanation: "Calculated raw height cannot be undefined.",
-          options: this.options,
-        });
-      }
-
-      if (rawHeight !== 0 && rawHeight < 1) {
-        throw createError({
-          message: "Invalid height",
-          explanation: `Calculated raw height of ${rawHeight} cannot be less than 1!`,
-          options: this.options,
-        });
+    if (!responsive) {
+      if (this.options.video.height) {
+        rawHeight = this.options.video.height;
+      } else {
+        rawHeight = this.getVideoHeight();
       }
     } else {
-      rawHeight = this.getVideoHeight();
+      rawHeight = this.options.video.height || this.getVideoHeight();
 
-      if (rawHeight === undefined) {
-        throw createError({
-          message: "Bad dimensions",
-          explanation: "Raw video height from DOM element cannot be undefined.",
-          options: this.options,
-        });
-      }
+      // In that case we have to calculate it ourselves with the ratio
+      const ratio = this.recorder.getRatio();
+      const rawWidth = this.getRawWidth(responsive);
 
-      if (rawHeight !== 0 && rawHeight < 1) {
-        throw createError({
-          message: "Bad dimensions",
-          explanation: "Raw video height from DOM element cannot be less than 1.",
-          options: this.options,
-        });
+      if (ratio !== undefined && rawWidth.value) {
+        rawHeight = rawWidth.value * ratio;
       }
     }
 

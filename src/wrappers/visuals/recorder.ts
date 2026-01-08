@@ -1558,8 +1558,8 @@ class Recorder extends Despot {
         const ratio = this.getRatio();
 
         if (ratio !== undefined) {
-          const maxHeight = this.options.video.width * ratio;
-          height = Math.min(maxHeight, height);
+          const idealHeight = this.options.video.width * ratio;
+          height = Math.min(idealHeight, height);
         }
       }
 
@@ -1581,7 +1581,7 @@ class Recorder extends Despot {
     return recorderHeight;
   }
 
-  private getRatio() {
+  public getRatio() {
     let ratio: number | undefined;
 
     if (this.userMedia) {
@@ -1603,7 +1603,7 @@ class Recorder extends Despot {
   }
 
   public calculateWidth(responsive: boolean) {
-    let videoHeight;
+    let videoHeight: number | undefined;
 
     if (this.userMedia) {
       videoHeight = this.userMedia.getVideoHeight();
@@ -1611,7 +1611,9 @@ class Recorder extends Despot {
       videoHeight = this.recorderElement.videoHeight || this.recorderElement.height;
     }
 
-    return calculateWidth(responsive, videoHeight, this.options, this.getRatio());
+    const ratio = this.getRatio();
+
+    return calculateWidth(responsive, this.options, videoHeight, ratio);
   }
 
   public calculateHeight(responsive: boolean) {
@@ -1660,7 +1662,7 @@ class Recorder extends Despot {
     return this.visuals.limitWidth(width);
   }
 
-  public limitHeight(height: number) {
+  public limitHeight(height: number | undefined) {
     return this.visuals.limitHeight(height);
   }
 

@@ -427,7 +427,7 @@ class Visuals extends Despot {
     return this.container.limitWidth(width);
   }
 
-  public limitHeight(height: number) {
+  public limitHeight(height: number | undefined) {
     return this.container.limitHeight(height);
   }
 

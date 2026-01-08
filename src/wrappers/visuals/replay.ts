@@ -90,7 +90,7 @@ class Replay extends Despot {
     }
 
     if (!width) {
-      width = calculateWidth(responsive, videoHeight, this.options, ratio);
+      width = calculateWidth(responsive, this.options, videoHeight, ratio);
     }
 
     if (!height) {

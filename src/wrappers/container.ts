@@ -421,7 +421,7 @@ class Container extends Despot {
     return limitWidth(this.containerElement, this.options, width);
   }
 
-  public limitHeight(height: number) {
+  public limitHeight(height: number | undefined) {
     return limitHeight(height, this.options, "containers limitHeight fn");
   }
 

@@ -7,8 +7,8 @@ import limitHeight from "./limitHeight";
 
 function calculateWidth(
   responsive: boolean,
-  videoHeight: number,
   options: VideomailClientOptions,
+  videoHeight?: number,
   ratio?: number,
 ) {
   const dimension: Dimension = {
