@@ -59,7 +59,7 @@ const videomailMobileExample: Videomail = {
     },
   },
   serverTimePretty: "4 Dec 2025, 06:42 pm",
-  siteName: "videomail.io",
+  whitelistKey: "videomail.io",
   subject: "RE: Test furz",
   url: "https://videomail.io/videomail/alias/re-test-furz-3-dec-2025-06-17-pm-144110111540",
   versions: {

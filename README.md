@@ -59,7 +59,7 @@ There are plenty if you just ask us. And way more will follow, we are rolling ..
 
 There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at [src/options.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/options.ts)
 
-In most cases, these defaults are good enough. But `siteName` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
+In most cases, these defaults are good enough. But `whitelistKey` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
 Looking at the examples in the `/src/stories` folder should give you some ideas how to use these options.
 
@@ -92,7 +92,7 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 The constructor accepts a JSON with optional <a href="#options">options</a>. Example:
 
 ```ts
-const videomailClient = new VideomailClient({ siteName: "my site name" });
+const videomailClient = new VideomailClient({ whitelistKey: "my whitelist key" });
 ```
 
 <a name="on"></a>
@@ -233,7 +233,7 @@ It's emitted in the SUBMITTED event under the videomail object:
   "width": 320,
   "height": 240,
   "videomailClientVersion": "2.4.11",
-  "siteName": "videomail-client-demo",
+  "whitelistKey": "videomail-client-demo",
   "alias": "some-subject-183622500964",
   "dateCreated": 1541130589811,
   "url": "https://videomail.io/videomail/some-subject-150322500964",

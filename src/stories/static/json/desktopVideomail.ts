@@ -22,7 +22,7 @@ const videomailDesktopExample: Videomail = {
   versions: {
     videomailClient: "2.1.26",
   },
-  siteName: "videomail.io",
+  whitelistKey: "videomail.io",
   sending: true,
   alias: "test-example-mofo-485573266478",
   dateCreated: 1511570565748,

@@ -15,7 +15,7 @@ class VideomailError extends HTTPVideomailError {
   public readonly location = window.location.href;
 
   public logLines?: string[] | undefined;
-  public siteName: string | undefined;
+  public whitelistKey: string | undefined;
 
   // TODO Cookie, singular? It should be in plural, although there is the global document.cookie ...
   public cookie: string[] | undefined;
@@ -58,7 +58,7 @@ class VideomailError extends HTTPVideomailError {
 
     this.explanation = errData?.explanation;
     this.logLines = errData?.logLines;
-    this.siteName = options.siteName;
+    this.whitelistKey = options.whitelistKey;
 
     this.classList = classList;
 

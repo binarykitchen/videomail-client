@@ -316,14 +316,14 @@ class Recorder extends Despot {
      */
     if (args.mp4) {
       this.replay.setMp4Source(
-        `${args.mp4 + Constants.SITE_NAME_LABEL}/${this.options.siteName}/videomail.mp4`,
+        `${args.mp4 + Constants.WHITELIST_KEY_LABEL}/${this.options.whitelistKey}/videomail.mp4`,
         true,
       );
     }
 
     if (args.webm) {
       this.replay.setWebMSource(
-        `${args.webm + Constants.SITE_NAME_LABEL}/${this.options.siteName}/videomail.webm`,
+        `${args.webm + Constants.WHITELIST_KEY_LABEL}/${this.options.whitelistKey}/videomail.webm`,
         true,
       );
     }
@@ -367,8 +367,8 @@ class Recorder extends Despot {
        */
 
       const url2Connect = `${this.options.socketUrl}?${encodeURIComponent(
-        Constants.SITE_NAME_LABEL,
-      )}=${encodeURIComponent(this.options.siteName)}`;
+        Constants.WHITELIST_KEY_LABEL,
+      )}=${encodeURIComponent(this.options.whitelistKey)}`;
 
       this.options.logger.debug(`Recorder: initializing web socket to ${url2Connect}`);
 

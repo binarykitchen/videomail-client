@@ -52,7 +52,8 @@ export interface Videomail {
   sentDateServerPretty?: string;
   serverTimePretty?: string;
 
-  siteName: string;
+  whitelistKey: string;
+
   siteTitle?: string;
   url: string;
   userKey?: string;

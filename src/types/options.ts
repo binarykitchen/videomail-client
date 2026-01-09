@@ -14,7 +14,7 @@ export interface VideomailClientOptions {
   verbose: boolean;
   apiUrl: string;
   socketUrl: string;
-  siteName: string;
+  whitelistKey: string;
   enablePause: boolean;
   enableAutoPause: boolean;
   enableSpace: boolean;

@@ -1,7 +1,7 @@
 // Global constants (changing these break down functionality, so be careful)
 
 export default {
-  SITE_NAME_LABEL: "x-videomail-site-name",
+  WHITELIST_KEY_LABEL: "x-videomail-whitelist-key",
   VERSION_LABEL: "videomailClientVersion",
 
   public: {

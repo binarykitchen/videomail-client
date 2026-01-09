@@ -14,7 +14,7 @@ export interface VideomailErrorData {
   explanation?: string | undefined;
   logLines?: string[] | undefined;
   message: string;
-  siteName?: string | undefined;
+  whitelistKey?: string | undefined;
   title: string;
   trace?: string | undefined;
   code?: string | undefined;

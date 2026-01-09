@@ -10,13 +10,13 @@ const meta: Meta<PartialVideomailClientOptions> = {
 
 type Story = StoryObj<PartialVideomailClientOptions>;
 
-// With an invalid site name, you don't get whitelisted
+// With an invalid whitelist key, you don't get whitelisted
 //
-// By default the site name is "videomail-client-demo" which works on localhost only
+// By default the whitelist key is "videomail-client-demo" which works on localhost only
 // To run the videomail client on your site, you'll have to register it at
-// https://www.videomail.io/whitelist to obtain a valid site name
-export const InvalidSiteName: Story = {
-  args: { siteName: "invalid-site-name" },
+// https://www.videomail.io/whitelist to obtain a valid whitelist key
+export const InvalidWhitelistKey: Story = {
+  args: { whitelistKey: "invalid-whitelist-key" },
   render: (args) => {
     const videomailClient = new VideomailClient(args);
     return videomailClient.show();

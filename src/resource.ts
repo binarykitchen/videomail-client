@@ -91,7 +91,7 @@ class Resource {
         .set("Accept", "application/json")
         .withCredentials()
         .set("Timezone-Id", this.timezoneId)
-        .set(Constants.SITE_NAME_LABEL, this.options.siteName)
+        .set(Constants.WHITELIST_KEY_LABEL, this.options.whitelistKey)
         .timeout(this.options.timeouts.connection);
 
       const videomail = request.body as Videomail;
@@ -104,7 +104,7 @@ class Resource {
 
   private async write(method: FormMethodType, videomail: PartialVideomail) {
     const queryParams = {
-      [Constants.SITE_NAME_LABEL]: this.options.siteName,
+      [Constants.WHITELIST_KEY_LABEL]: this.options.whitelistKey,
     };
 
     let url = `${this.options.apiUrl}/videomail/`;
@@ -137,7 +137,7 @@ class Resource {
 
   public async reportError(err: VideomailError) {
     const queryParams = {
-      [Constants.SITE_NAME_LABEL]: this.options.siteName,
+      [Constants.WHITELIST_KEY_LABEL]: this.options.whitelistKey,
     };
 
     const url = `${this.options.apiUrl}/client-error/`;
@@ -157,7 +157,7 @@ class Resource {
         orientation: err.orientation,
         os: err.os,
         screen: err.screen,
-        siteName: err.siteName,
+        whitelistKey: err.whitelistKey,
         status: err.status,
         title: err.title,
         message: err.message,
