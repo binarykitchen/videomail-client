@@ -54,7 +54,9 @@ export interface Videomail {
 
   whitelistKey: string;
 
+  // TODO Double check, probably not needed.
   siteTitle?: string;
+
   url: string;
   userKey?: string;
   versions: {

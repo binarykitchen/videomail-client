@@ -42,7 +42,7 @@ That's it. Easy as apple pie.
 
 ## Demo
 
-A mirror of latest videomail-client can be seen on [videomail-client.netlify.com](https://videomail-client.netlify.com/)
+A mirror of latest videomail-client can be seen on [videomail-client.netlify.app](https://videomail-client.netlify.app)
 
 ### Real world usages
 
@@ -59,7 +59,7 @@ There are plenty if you just ask us. And way more will follow, we are rolling ..
 
 There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at [src/options.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/options.ts)
 
-In most cases, these defaults are good enough. But `whitelistKey` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
+In most cases, these defaults are good enough. Only one option, `whitelistKey` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
 
 Looking at the examples in the `/src/stories` folder should give you some ideas how to use these options.
 
@@ -280,7 +280,7 @@ Otherwise only the videomail alias is in the form body and will have to call `vi
 
 Examples will work right away on [https://localhost:8443](https://localhost:8443). This is because localhost is whitelisted on the remote Videomail server. `https://localhost` and `https://localhost:443` are whitelisted too for local development. Other IP addresses won't work. If this is a problem, contact me and I can whitelist more.
 
-In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, just lodge a whitelist request at [https://videomail.io/whitelist](https://videomail.io/whitelist). Then you should get a new site name and a list of whitelisted URLs for your own usage pretty fast (within less than 48 hours).
+In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, just lodge a whitelist request at [https://videomail.io/whitelist](https://videomail.io/whitelist). Then you should get a new whitelist key and a list of whitelisted URLs for your own usage.
 
 <a name="compatibility"></a>
 
