@@ -55,7 +55,7 @@ export interface Videomail {
   whitelistKey: string;
 
   // Never stored, for snapshots only and retrieved via whitelist key
-  siteName?: string;
+  siteName?: string | undefined;
 
   url: string;
   userKey?: string;
