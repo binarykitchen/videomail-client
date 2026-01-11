@@ -240,7 +240,7 @@ It's emitted in the SUBMITTED event under the videomail object:
   "key": "11e8-de52-55ac2630-b22b-71959562a989",
   "expirationPretty": "1 hour",
   "expiresAfter": 1541134189811,
-  "siteTitle": "Videomail Client Example",
+  "siteName": "Videomail Client Example",
   "webm": "https://videomail.io/videomail/some-subject-183622500964/type/webm/",
   "poster": "https://videomail.io/videomail/some-subject-183622500964/poster/",
   "dateCreatedPretty": "Nov 2, 2018, 4:49 PM",
