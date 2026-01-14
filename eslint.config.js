@@ -110,7 +110,7 @@ export default defineConfig([
         ecmaFeatures: {
           impliedStrict: true,
         },
-        projectService: true,
+        project: ["./tsconfig.json"],
         tsconfigRootDir: import.meta.dirname,
       },
     },
