@@ -85,7 +85,7 @@
     "@storybook/addon-docs": "10.1.11",
     "@storybook/addon-links": "10.1.11",
     "@storybook/html": "10.1.11",
-    "@tsconfig/node24": "24.0.3",
+    "@tsconfig/node22": "22.0.5",
     "@tsconfig/strictest": "2.0.8",
     "@types/defined": "1.0.2",
     "@types/node": "24.10.8",

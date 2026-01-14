@@ -20,7 +20,7 @@ The root `/README.md` file has further general information for you, the GitHub C
 
 ## Libraries and Frameworks
 
-- All runs on Node.js, the used version is defined in the `.nvmrc` file. Presently it's v22
+- All runs on Node.js, the used version is defined in the `.nvmrc` file.
 - We do not use React nor any frameworks. All is raw, in Vanilla JavaScript.
 - For video recording, we grab images with the deprecated getUserMedia API, send them through WebSocket streams, using the (websocket-stream package)[https://www.npmjs.com/package/websocket-stream] and once the user presses the stop button, the server side which is (Videomail)[https://www.videomail.io] itself, compiles these image frames into a video and sends them out within an email. That's the big idea.
 - We are aware that the getUserMedia API is deprecated, but we have no time to migrate this to the new MediaDevices API. All still works well, so we can ignore this for now.
@@ -51,6 +51,7 @@ Its configuration file can be found in the root folder at rslib.config.ts.
 These are configured on the Videomail server side and vary from website to website. The videomail-client package is just a client which sends the video frames to the Videomail server.
 
 But here are the default specs for the main Videomail website itself:
+
 - FPS: 18
 - Resolution: 400x300
 - Video format: MP4 and WebM
