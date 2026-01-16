@@ -10,7 +10,7 @@
   ],
   "extends": [
     "./node_modules/@tsconfig/strictest/tsconfig.json",
-    "./node_modules/@tsconfig/node22/tsconfig.json"
+    "./node_modules/@tsconfig/node24/tsconfig.json"
   ],
   "compilerOptions": {
     "module": "esnext",
@@ -23,7 +23,7 @@
       // Add for ServiceWorker support
       "WebWorker"
     ],
-    "types": ["vitest/globals"],
+    "types": ["node", "vitest/globals"],
 
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,

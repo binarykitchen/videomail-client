@@ -2,20 +2,21 @@
 
 import js from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
-import { defineConfig } from "eslint/config";
-import deMorgan from "eslint-plugin-de-morgan";
-import * as depend from "eslint-plugin-depend";
-import eslintPluginImportX from "eslint-plugin-import-x";
-import packageJson from "eslint-plugin-package-json";
+import { defineConfig, globalIgnores } from "eslint/config";
+import eslintDeMorgan from "eslint-plugin-de-morgan";
+import eslintDepend from "eslint-plugin-depend";
+import eslintImportX from "eslint-plugin-import-x";
+import eslintPackageJson from "eslint-plugin-package-json";
 import pluginPromise from "eslint-plugin-promise";
-import * as regexpPlugin from "eslint-plugin-regexp";
-import pluginSecurity from "eslint-plugin-security";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-// import storybook from "eslint-plugin-storybook";
+import eslintRegexpPlugin from "eslint-plugin-regexp";
+import eslintSecurity from "eslint-plugin-security";
+import eslintSimpleImportSort from "eslint-plugin-simple-import-sort";
+// import eslintStorybook from "eslint-plugin-storybook";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-// Good reference: https://github.com/dustinspecker/awesome-eslint#readme
+// Good reference:
+// https://github.com/dustinspecker/awesome-eslint#readme
 
 const CLIENT_ONLY_FILES = "./src/**/*.{js,ts}";
 const TEST_ONLY_FILES = "./src/**/__tests__/**";
@@ -40,11 +41,13 @@ const ALL_FILES = [
   But most of the time it's fine not to define fine and trust their defaults/recommendations.
 */
 export default defineConfig([
-  {
-    // Node_modules and .git already covered in eslint.configs.all below
-    name: "ignore some more files",
-    ignores: ["dist", ".storybook/public", "storybook-static", "!.storybook"],
-  },
+  globalIgnores(["dist", "storybook-static", ".storybook/public/mockServiceWorker.js"]),
+  eslintDeMorgan.configs.recommended,
+  eslintPackageJson.configs.recommended,
+  eslintSecurity.configs.recommended,
+  eslintRegexpPlugin.configs["flat/recommended"],
+  eslintImportX.flatConfigs.recommended,
+  // ...eslintStorybook.configs["flat/recommended"],
   {
     name: "global eslint rules for all source files",
     ...js.configs.all,
@@ -124,35 +127,34 @@ export default defineConfig([
       },
     },
   },
-  {
-    ...packageJson.configs.recommended,
-  },
   // Can't give it a name because of plugins/extends.
   // Perhaps can improve it in the next updates or in ESLint v10 ...
   {
     files: ALL_FILES,
     plugins: {
-      "import-x": eslintPluginImportX,
+      "import-x": eslintImportX,
     },
     extends: [
-      eslintPluginImportX.flatConfigs.recommended,
-      eslintPluginImportX.flatConfigs.typescript,
+      eslintImportX.flatConfigs.recommended,
+      eslintImportX.flatConfigs.typescript,
     ],
     rules: {
-      ...eslintPluginImportX.flatConfigs.recommended.rules,
+      ...eslintImportX.flatConfigs.recommended.rules,
       "import-x/no-named-as-default-member": "off",
     },
   },
   {
     name: "depend",
-    ...depend.configs["flat/recommended"],
-    files: ALL_FILES,
+    plugins: {
+      depend: eslintDepend,
+    },
+    extends: ["depend/flat/recommended"],
   },
   {
-    ...pluginSecurity.configs.recommended,
+    ...eslintSecurity.configs.recommended,
     files: ALL_FILES,
     rules: {
-      ...pluginSecurity.configs.recommended.rules,
+      ...eslintSecurity.configs.recommended.rules,
       "security/detect-object-injection": "off",
     },
   },
@@ -165,23 +167,9 @@ export default defineConfig([
     },
   },
   {
-    name: "deMorgan",
-    files: ALL_FILES,
-    ...deMorgan.configs.recommended,
-  },
-  {
-    name: "regexp",
-    ...regexpPlugin.configs["flat/all"],
-    files: ALL_FILES,
-    rules: {
-      ...regexpPlugin.configs["flat/all"].rules,
-      "regexp/require-unicode-sets-regexp": "off",
-    },
-  },
-  {
     name: "sort imports and exports",
     plugins: {
-      "simple-import-sort": simpleImportSort,
+      "simple-import-sort": eslintSimpleImportSort,
     },
     rules: {
       "simple-import-sort/imports": "error",

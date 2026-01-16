@@ -1,9 +1,14 @@
 //@ts-check
 
-/** @type {import('prettier').Config} */
+/** @type {import("prettier").Config} */
 const config = {
   printWidth: 90,
-  plugins: ["prettier-plugin-curly", "prettier-plugin-sh", "prettier-plugin-packagejson"],
+  plugins: [
+    "prettier-plugin-curly",
+    "prettier-plugin-sh",
+    "prettier-plugin-packagejson",
+    "prettier-plugin-jsdoc",
+  ],
 };
 
 export default config;
