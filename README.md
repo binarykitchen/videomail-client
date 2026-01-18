@@ -14,10 +14,10 @@
 Record videos in contact forms!
 
 Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds.
-This without the need for Flash, Java nor any other plugins / addons. Just TypeScript, compiled into ESM (ES2022) with their declarations.
+This without the need for Flash, Java nor any other plugins / addons. Just TypeScript, compiled into ESM with their declarations.
 
+- <a href="#demo">Live Demo
 - <a href="#storybook">Storybook (examples)</a>
-- <a href="#demo">Demo / Fully working version</a>
 - <a href="#options">Options</a>
 - <a href="#api">API</a>
 - <a href="#form">Form Submissions</a>
@@ -27,31 +27,35 @@ This without the need for Flash, Java nor any other plugins / addons. Just TypeS
 - <a href="#addons">Addons</a>
 - <a href="#notes">Notes</a>
 
+<a name="demo"></a>
+
+## Live Demo
+
+Want a play with the latest videomail-client version? ‍️⛹🏼<br/>
+Sure, the playground is yours on [videomail-client.netlify.app](https://videomail-client.netlify.app)
+
+### Real world usages
+
+There is a full version with all its features on [videomail.io](https://videomail.io).
+
+And there is more:
+
+- https://wfdeaf.org/contact
+- https://www.deaf.org.nz/contact
+- ...
+
+And many more out there. We are rolling ...
+
 <a name="storybook"></a>
 
 ## Storybook (examples)
 
-To check out some examples in your browser, just run these two commands:
+To check out some examples in your browser locally, just run these two commands:
 
 1. `npm install`
 2. `npm run storybook`
 
 That's it. Easy as apple pie.
-
-<a name="demo"></a>
-
-## Demo
-
-A mirror of latest videomail-client can be seen on [videomail-client.netlify.app](https://videomail-client.netlify.app)
-
-### Real world usages
-
-Check out the full version with all its features on [videomail.io](https://videomail.io) itself. Aim is to turn this into a stable product in the near future with some external assistance.
-
-On that site I just include `import { VideomailClient}  from "videomail-client"` in the app logic.
-
-Another live example would be https://seeflow.co.nz/contact or https://www.deaf.org.nz/contact
-There are plenty if you just ask us. And way more will follow, we are rolling ...
 
 <a name="options"></a>
 
