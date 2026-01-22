@@ -31,8 +31,7 @@ This without the need for Flash, Java nor any other plugins / addons. Just TypeS
 
 ## Live Demo
 
-Want a play with the latest videomail-client version? ‍️⛹🏼<br/>
-Sure, the playground is yours on [videomail-client.netlify.app](https://videomail-client.netlify.app)
+Have fun on [videomail-client.netlify.app](https://videomail-client.netlify.app)
 
 ### Real world usages
 
