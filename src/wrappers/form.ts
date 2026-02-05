@@ -271,9 +271,7 @@ class Form extends Despot {
         this.keyInput.value = params.key;
 
         // Important so that any other JS framework can detect changes
-        this.keyInput.dispatchEvent(
-          new InputEvent("keyInput", { bubbles: true, data: params.key }),
-        );
+        this.keyInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
 
       /*
