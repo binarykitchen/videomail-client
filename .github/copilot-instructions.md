@@ -1,10 +1,10 @@
 # Project Overview
 
-This public project, called videomail-client, is a web-based npm package for reuse in any other web applications and also in a separate WordPress plugin, see (videomail-for-ninja-forms)[https://github.com/binarykitchen/videomail-for-ninja-forms].
+This public project, called videomail-client, is a web-based npm package for reuse in any other web applications and also in a separate WordPress plugin, see [videomail-for-ninja-forms](https://github.com/binarykitchen/videomail-for-ninja-forms).
 
-The most important consumer of this package is (Videomail)[https://www.videomail.io] itself which heavily relies on this package and resides in another, but private repository. Videomail's goal is to enable Sign Language in emails. Deaf users are our main audience.
+The most important consumer of this package is [Videomail](https://www.videomail.io) itself which heavily relies on this package and resides in another, but private repository. Videomail's goal is to enable Sign Language in emails. Deaf users are our main audience.
 
-Another important consumers are those who use the WordPress plugin of this package, videomail-client, which is called (videomail-for-ninja-forms)[https://github.com/binarykitchen/videomail-for-ninja-forms].
+Another important consumers are those who use the WordPress plugin of this package, videomail-client, which is called [videomail-for-ninja-forms](https://github.com/binarykitchen/videomail-for-ninja-forms).
 
 It's core focus is to take snapshots from the webcam using the getUserMedia API.
 The root `/README.md` file has further general information for you, the GitHub Copilot. Please also parse this README and add it to the context of this file.
@@ -14,7 +14,7 @@ The root `/README.md` file has further general information for you, the GitHub C
 - `/.github`: Has instructions for the GitHub Copilot and some workflows for github.com itself
 - `/.storybook`: Comes with general Storybook settings
 - `/.vscode`: General configurations for VS Code users regarding extensions and settings
-- `/dist`: Anything compiled by rslib goes in here. (rslib)[https://rslib.rs/] is our bundler.
+- `/dist`: Anything compiled by rslib goes in here. [rslib](https://rslib.rs/) is our bundler.
 - `/etc`: It contains script for SSL certificates and for releasing new npm package versions
 - `/src`: Contains the source code with all their unit tests, under `__tests__` in the same subdirectory
 
@@ -22,7 +22,7 @@ The root `/README.md` file has further general information for you, the GitHub C
 
 - All runs on Node.js, the used version is defined in the `.nvmrc` file.
 - We do not use React nor any frameworks. All is raw, in Vanilla JavaScript.
-- For video recording, we grab images with the deprecated getUserMedia API, send them through WebSocket streams, using the (websocket-stream package)[https://www.npmjs.com/package/websocket-stream] and once the user presses the stop button, the server side which is (Videomail)[https://www.videomail.io] itself, compiles these image frames into a video and sends them out within an email. That's the big idea.
+- For video recording, we grab images with the deprecated getUserMedia API, send them through WebSocket streams, using the [websocket-stream package](https://www.npmjs.com/package/websocket-stream) and once the user presses the stop button, the server side which is [Videomail](https://www.videomail.io) itself, compiles these image frames into a video and sends them out within an email. That's the big idea.
 - We are aware that the getUserMedia API is deprecated, but we have no time to migrate this to the new MediaDevices API. All still works well, so we can ignore this for now.
 - Most source code is written in TypeScript.
 - Security checks using the audit-ci package are included and configured. Security is important.
@@ -31,7 +31,7 @@ The root `/README.md` file has further general information for you, the GitHub C
 
 ## Browsers and mobile devices
 
-The bare minimum is to support those browsers who support the getUserMedia API. Not the older ones. To check if a browser supports this API, you can use the (caniuse.com)[https://caniuse.com/?search=getUserMedia] website.
+The bare minimum is to support those browsers who support the getUserMedia API. Not the older ones. To check if a browser supports this API, you can use the [caniuse.com](https://caniuse.com/?search=getUserMedia) website.
 
 Regarding network issues, we already have mechanisms in place to lower the FPS before encoding these videos on the Videomail server side.
 
@@ -57,7 +57,7 @@ But here are the default specs for the main Videomail website itself:
 - Video format: MP4 and WebM
 - Duration: 180 seconds (3 minutes)
 - Audio: we sample PCM from the AudioContext API, which is the default audio format for the Videomail server. On the Videomail server side we use ffmpeg to merge the audio, the images, both into two video files, one in MP4 and one in WebM format.
-- Subtitles: another reason to include audio is to allow the Videomail server to generate subtitles for the video. This is done using the (nodejs-whisper package)[https://github.com/ChetanXpro/nodejs-whisper], which is configured on the Videomail server side.
+- Subtitles: another reason to include audio is to allow the Videomail server to generate subtitles for the video. This is done using the [nodejs-whisper package](https://github.com/ChetanXpro/nodejs-whisper), which is configured on the Videomail server side.
 
 ## Performance Metrics
 
@@ -70,15 +70,15 @@ But here are the default specs for the main Videomail website itself:
 
 ### Unit Tests
 
-- For unit tests we use the next generation (Vitest)[https://vitest.dev] framework.
+- For unit tests we use the next generation [Vitest](https://vitest.dev) framework.
 - Vitest was chosen because it is fast, has a great API and is compatible with other testing frameworks like Jest.
 - The unit tests are located in the `__tests__` subdirectory of each source code
 
 ### Visual Tests
 
-For visual tests, we use (Storybook)[https://storybook.js.org]. It is configured in the `.storybook` folder. The Storybook is used to visually test components and their states.
+For visual tests, we use [Storybook](https://storybook.js.org). It is configured in the `.storybook` folder. The Storybook is used to visually test components and their states.
 
-In addition, we also use (Chromatic)[https://www.chromatic.com] to catch any visual differences between git commits.
+In addition, we also use [Chromatic](https://www.chromatic.com) to catch any visual differences between git commits.
 
 ## Accessibility
 

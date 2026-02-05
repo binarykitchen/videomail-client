@@ -6,6 +6,8 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import eslintDeMorgan from "eslint-plugin-de-morgan";
 import eslintDepend from "eslint-plugin-depend";
 import eslintImportX from "eslint-plugin-import-x";
+import markdownlintPlugin from "eslint-plugin-markdownlint";
+import markdownlintParser from "eslint-plugin-markdownlint/parser.js";
 import eslintPackageJson from "eslint-plugin-package-json";
 import pluginPromise from "eslint-plugin-promise";
 import eslintRegexpPlugin from "eslint-plugin-regexp";
@@ -149,6 +151,21 @@ export default defineConfig([
       depend: eslintDepend,
     },
     extends: ["depend/flat/recommended"],
+  },
+  {
+    files: ["**/*md"],
+    plugins: {
+      markdownlint: markdownlintPlugin,
+    },
+    languageOptions: {
+      parser: markdownlintParser,
+    },
+    rules: {
+      ...markdownlintPlugin.configs.recommended.rules,
+      "markdownlint/md013": "off",
+      "markdownlint/md033": "off",
+      "markdownlint/md041": "off",
+    },
   },
   {
     ...eslintSecurity.configs.recommended,

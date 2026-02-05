@@ -39,8 +39,8 @@ There is a full version with all its features on [videomail.io](https://videomai
 
 And there is more:
 
-- https://wfdeaf.org/contact
-- https://www.deaf.org.nz/contact
+- [https://wfdeaf.org/contact](https://wfdeaf.org/contact)
+- [https://www.deaf.org.nz/contact](https://www.deaf.org.nz/contact)
 - ...
 
 And many more out there. We are rolling ...
@@ -115,7 +115,7 @@ videomailClient.on("SUBMITTED", ({ videomail, response }) => {
 });
 ```
 
-#### Supported events:
+#### Supported events
 
 Check them out at [src/types/events/index.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/types/events/index.ts)
 
@@ -309,7 +309,7 @@ PS: On Safari and iPhones/iPads you can play the videomails fine without any iss
 ## Addons
 
 There is a Videomail WordPress addon, wicked!
-https://wordpress.org/plugins/videomail-for-ninja-forms/
+<https://wordpress.org/plugins/videomail-for-ninja-forms/>
 
 It's an extension of the popular form builder called Ninja Forms. When the videomail addon is installed, then you can just drag and drop a live webcam input into the form! And tell what should happen upon submission. So easy.
 
@@ -320,7 +320,7 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 ### Changelog
 
 Too hard to maintain. Just do `git log` or look here
-https://github.com/binarykitchen/videomail-client/commits/master
+<https://github.com/binarykitchen/videomail-client/commits/master>
 
 ### Noise
 
