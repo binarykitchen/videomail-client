@@ -48,7 +48,8 @@ class AudioRecorder {
     return this.vcAudioContext;
   }
 
-  private onAudioProcess(e, cb: AudioProcessCB) {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  private onAudioProcess(e: AudioProcessingEvent, cb: AudioProcessCB) {
     if (!this.userMedia.isRecording() || this.userMedia.isPaused()) {
       return;
     }
@@ -57,6 +58,7 @@ class AudioRecorder {
      * Returns a Float32Array containing the PCM data associated with the channel,
      * defined by the channel parameter (with 0 representing the first channel)
      */
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     const float32Array = e.inputBuffer.getChannelData(0);
 
     cb(new AudioSample(float32Array));

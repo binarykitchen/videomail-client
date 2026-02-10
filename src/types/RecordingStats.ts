@@ -1,8 +1,8 @@
 interface RecordingStats {
   avgFps?: number | undefined;
-  avgInterval?: number;
+  avgInterval?: number | undefined;
   framesCount?: number;
-  intervalSum?: number;
+  intervalSum?: number | undefined;
   sampleRate?: number;
   samplesCount?: number;
   videoType?: string;

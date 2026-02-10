@@ -888,18 +888,28 @@ class Recorder extends Despot {
     this.loop?.dispose();
   }
 
-  private getIntervalSum() {
+  private getIntervalSum(): number | undefined {
+    if (!this.loop) {
+      return undefined;
+    }
+
     return this.loop.getElapsedTime();
   }
 
   private getAvgInterval() {
-    return this.getIntervalSum() / this.framesCount;
+    const intervalSum = this.getIntervalSum();
+
+    if (!intervalSum) {
+      return undefined;
+    }
+
+    return intervalSum / this.framesCount;
   }
 
   private getAvgFps() {
     const intervalSum = this.getIntervalSum();
 
-    if (intervalSum === 0 || intervalSum === undefined || intervalSum === null) {
+    if (!intervalSum) {
       return undefined;
     }
 
@@ -943,7 +953,7 @@ class Recorder extends Despot {
 
       this.recordingStats = {
         /*
-         * do not use loop.getFPS() as this will only return the fps from the last delta,
+         * Do not use loop.getFPS() as this will only return the fps from the last delta,
          * not the average. see https://github.com/hapticdata/animitter/issues/3
          */
         avgFps: this.getAvgFps(),
