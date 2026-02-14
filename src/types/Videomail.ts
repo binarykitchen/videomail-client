@@ -7,7 +7,7 @@ import { RecordingStats } from "./RecordingStats";
 import VideoFormat from "./VideoFormat";
 
 // Remember, only primitive types are supported.
-// LevelDB can't store for example Sets or Maps
+// LevelDB can't store for example Sets or Maps.
 export interface Videomail {
   // First, typical email typings
   subject?: string;
@@ -33,7 +33,6 @@ export interface Videomail {
   format?: VideoFormat;
   height?: number | undefined;
   key: string;
-  parentKey?: string;
   mp4?: string;
   vtt?: string;
   captions?: string | undefined;
@@ -41,6 +40,10 @@ export interface Videomail {
   browserStats?: BrowserStats | undefined;
   recordingStats?: RecordingStats | undefined;
   recordLocation?: string | undefined;
+
+  parentKey?: string;
+  // Never stored, for snapshots only when a parent key exists
+  parentSnapshots?: Videomail[];
 
   replyAllUrl?: string;
   replyUrl: string;
@@ -55,6 +58,7 @@ export interface Videomail {
   whitelistKey: string;
 
   // Never stored, for snapshots only and retrieved via whitelist key
+  // Consider removing once all has been migrated to the new whitelist system.
   siteName?: string | undefined;
 
   url: string;
