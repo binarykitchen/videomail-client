@@ -41,9 +41,9 @@ export interface Videomail {
   recordingStats?: RecordingStats | undefined;
   recordLocation?: string | undefined;
 
-  parentKey?: string;
+  parentKey?: string | undefined;
   // Never stored, for snapshots only when a parent key exists
-  parentSnapshots?: Videomail[];
+  parentSnapshots?: Videomail[] | undefined;
 
   replyAllUrl?: string;
   replyUrl: string;
