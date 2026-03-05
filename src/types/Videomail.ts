@@ -80,6 +80,9 @@ export interface Videomail {
   rejectedCc?: DeliveryRecord;
   rejectedBcc?: DeliveryRecord;
 
+  // When true, the videomail is visible to the Videomail wall
+  public?: boolean;
+
   editUrl?: string;
   repeatUrl?: string;
 }
