@@ -107,7 +107,8 @@ class Resource {
       [Constants.WHITELIST_KEY_LABEL]: this.options.whitelistKey,
     };
 
-    let url = `${this.options.apiUrl}/videomail/`;
+    const path = videomail.public ? "wall" : "videomail";
+    let url = `${this.options.apiUrl}/${path}/`;
 
     if (method === FormMethod.PUT && videomail.key) {
       url += videomail.key;
