@@ -81,7 +81,7 @@
     "@rsbuild/plugin-node-polyfill": "1.4.4",
     "@rsbuild/plugin-stylus": "1.3.1",
     "@rsdoctor/rspack-plugin": "1.5.3",
-    "@rslib/core": "0.19.6",
+    "@rslib/core": "0.20.0",
     "@storybook/addon-a11y": "10.2.17",
     "@storybook/addon-docs": "10.2.17",
     "@storybook/addon-links": "10.2.17",
@@ -104,7 +104,7 @@
     "eslint-plugin-markdownlint": "0.9.0",
     "eslint-plugin-package-json": "0.90.1",
     "eslint-plugin-promise": "7.2.1",
-    "eslint-plugin-regexp": "3.0.0",
+    "eslint-plugin-regexp": "3.1.0",
     "eslint-plugin-security": "4.0.0",
     "eslint-plugin-simple-import-sort": "12.1.1",
     "globals": "17.4.0",
@@ -118,11 +118,11 @@
     "prettier-plugin-sh": "0.18.0",
     "release-it": "19.2.4",
     "storybook": "10.2.17",
-    "storybook-html-rsbuild": "3.2.2",
+    "storybook-html-rsbuild": "3.3.2",
     "type-fest": "5.4.4",
     "typescript": "5.9.3",
     "typescript-eslint": "8.56.1",
-    "vitest": "4.0.18"
+    "vitest": "4.1.0"
   },
   "engines": {
     "node": "^24.13.0",
