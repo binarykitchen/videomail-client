@@ -14,6 +14,8 @@ export interface Videomail {
   body?: string;
 
   from: EmailAddress;
+  fromNickName?: string | undefined;
+
   to?: EmailAddresses | undefined;
   bcc?: EmailAddresses | undefined;
   cc?: EmailAddresses | undefined;
