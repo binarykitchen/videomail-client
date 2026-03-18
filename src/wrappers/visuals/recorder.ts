@@ -5,7 +5,7 @@ import { deserializeError } from "serialize-error";
 import websocket from "websocket-stream";
 
 import Constants from "../../constants";
-import { Command, VideomailCommandArgs } from "../../types/command";
+import { VideomailCommand, VideomailCommandArgs } from "../../types/command";
 import { Dimension } from "../../types/dimension";
 import { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
@@ -750,7 +750,7 @@ class Recorder extends Despot {
     }
   }
 
-  private executeCommand(command: Command) {
+  private executeCommand(command: VideomailCommand) {
     if (this.unloaded) {
       // Skip
       return;
@@ -855,7 +855,7 @@ class Recorder extends Despot {
         this.options.logger.debug(`$ ${command}`);
       }
 
-      const commandObj: Command = {
+      const commandObj: VideomailCommand = {
         command,
         args,
       };

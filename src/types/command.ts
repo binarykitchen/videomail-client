@@ -12,7 +12,7 @@ export interface VideomailCommandArgs {
   duration?: number;
 }
 
-export interface Command {
+export interface VideomailCommand {
   command: string;
   args?: VideomailCommandArgs;
 }
