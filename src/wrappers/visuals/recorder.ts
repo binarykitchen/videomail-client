@@ -374,14 +374,10 @@ class Recorder extends Despot {
 
       try {
         /*
-         * websocket options cannot be set on client side, only on server, see
+         * Websocket options cannot be set on client side, only on server, see
          * https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
          */
-        this.stream = websocket(url2Connect, {
-          perMessageDeflate: false,
-          // see https://github.com/maxogden/websocket-stream/issues/117#issuecomment-298826011
-          objectMode: true,
-        });
+        this.stream = websocket(url2Connect);
       } catch (exc) {
         this.connecting = this.connected = false;
 
