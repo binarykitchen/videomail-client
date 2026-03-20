@@ -384,7 +384,7 @@ class Recorder extends Despot {
         const err = createError({
           message: "Failed to connect to server",
           explanation:
-            "Please upgrade your browser. Your current version does not seem to support websockets.",
+            "If this happens again, please contact us with the details of your environment.",
           options: this.options,
           exc,
         });
@@ -438,13 +438,12 @@ class Recorder extends Despot {
           }
         });
 
-        this.stream.on("data", (data) => {
+        this.stream.on("data", (data: Uint8Array) => {
           this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
-          let command;
-
           try {
-            command = JSON.parse(data.toString());
+            const command = JSON.parse(data.toString());
+            this.executeCommand(command);
           } catch (exc) {
             this.options.logger.debug(`Failed to parse command: ${exc}`);
 
@@ -457,8 +456,6 @@ class Recorder extends Despot {
             });
 
             this.emit("ERROR", { err });
-          } finally {
-            this.executeCommand(command);
           }
         });
 
