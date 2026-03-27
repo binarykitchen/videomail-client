@@ -373,11 +373,9 @@ class Recorder extends Despot {
       this.options.logger.debug(`Recorder: initializing web socket to ${url2Connect}`);
 
       try {
-        /*
-         * Websocket options cannot be set on client side, only on server, see
-         * https://github.com/maxogden/websocket-stream/issues/116#issuecomment-296421077
-         */
-        this.stream = websocket(url2Connect);
+        this.stream = websocket(url2Connect, {
+          perMessageDeflate: false,
+        });
       } catch (exc) {
         this.connecting = this.connected = false;
 

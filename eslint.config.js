@@ -218,6 +218,7 @@ export default defineConfig([
       "@typescript-eslint/no-dynamic-delete": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-unnecessary-type-arguments": "off",
 
       // See https://github.com/orgs/react-hook-form/discussions/8622#discussioncomment-4060570
       "@typescript-eslint/no-misused-promises": [
