@@ -48,7 +48,7 @@ export interface Videomail {
   // Never stored, for snapshots only when a parent key exists
   parentSnapshots?: Videomail[] | undefined;
 
-  reactions: Reactions | undefined;
+  reactions?: Reactions | undefined;
 
   replyAllUrl?: string;
   replyUrl: string;
