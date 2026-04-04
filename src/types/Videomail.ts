@@ -3,8 +3,8 @@ import { PartialDeep } from "type-fest";
 import { BrowserStats } from "./BrowserStats";
 import { DeliveryRecord } from "./Delivery";
 import { EmailAddress, EmailAddresses } from "./EmailAddress";
-import { Reactions } from "./reaction";
 import { RecordingStats } from "./RecordingStats";
+import { UserKey } from "./user";
 import VideoFormat from "./VideoFormat";
 
 // Remember, only primitive types are supported.
@@ -48,8 +48,6 @@ export interface Videomail {
   // Never stored, for snapshots only when a parent key exists
   parentSnapshots?: Videomail[] | undefined;
 
-  reactions?: Reactions | undefined;
-
   replyAllUrl?: string;
   replyUrl: string;
 
@@ -70,7 +68,7 @@ export interface Videomail {
   siteName?: string | undefined;
 
   url: string;
-  userKey?: string;
+  userKey?: UserKey | undefined;
   versions: {
     videomailNinjaFormPlugin?: string;
     videomailClient: string;
