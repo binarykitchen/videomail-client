@@ -14,7 +14,6 @@ export type {
   PartialReactions,
   ReactionKey,
   ReactionLabel,
-  ReactionPretty,
   ReactionsPretty,
   ReactionsType,
 } from "./types/reaction";
