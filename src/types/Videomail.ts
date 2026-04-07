@@ -3,6 +3,7 @@ import { PartialDeep } from "type-fest";
 import { BrowserStats } from "./BrowserStats";
 import { DeliveryRecord } from "./Delivery";
 import { EmailAddress, EmailAddresses } from "./EmailAddress";
+import { ReactionsByUserKey, ReactionsPrettyByUserKey } from "./reaction";
 import { RecordingStats } from "./RecordingStats";
 import { UserKey } from "./user";
 import VideoFormat from "./VideoFormat";
@@ -47,6 +48,9 @@ export interface Videomail {
   parentKey?: string | undefined;
   // Never stored, for snapshots only when a parent key exists
   parentSnapshots?: Videomail[] | undefined;
+
+  reactions?: ReactionsByUserKey | undefined;
+  reactionsPretty?: ReactionsPrettyByUserKey | undefined;
 
   replyAllUrl?: string;
   replyUrl: string;
