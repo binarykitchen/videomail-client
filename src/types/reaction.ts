@@ -5,17 +5,3 @@ export const Reactions = {
   GRINNING_SWEAT: { key: "grinningSweat", label: "Smile / Grinning Sweat" },
   ANGER: { key: "anger", label: "Angry" },
 } as const;
-
-export type ReactionsType = (typeof Reactions)[keyof typeof Reactions];
-export type ReactionKey = ReactionsType["key"];
-export type ReactionLabel = ReactionsType["label"];
-
-type UserKey = string;
-
-export type PartialReactions = Partial<Record<ReactionKey, UserKey[]>>;
-
-export type ReactionPretty = number | UserKey[];
-
-// When logged in, it's an array of nick names or masked email addresses, otherwise
-// when not logged in, it's just a number of reactions.
-export type ReactionsPretty = Record<string, ReactionPretty>;
