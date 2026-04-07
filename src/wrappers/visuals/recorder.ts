@@ -381,8 +381,7 @@ class Recorder extends Despot {
 
         const err = createError({
           message: "Failed to connect to server",
-          explanation:
-            "If this happens again, please contact us with the details of your environment.",
+          explanation: `Unable to build websocket to ${url2Connect}. Please check your connection and try again. If the problem persists, contact us.`,
           options: this.options,
           exc,
         });
