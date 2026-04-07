@@ -12,9 +12,11 @@ export type * from "./types/events/params";
 export type { VideomailClientOptions } from "./types/options";
 export type {
   ReactionKey,
+  ReactionLabel,
   ReactionPrettyByUserKey,
   ReactionsByUserKey,
   ReactionsPrettyByUserKey,
+  ReactionType,
 } from "./types/reaction";
 export { Reactions } from "./types/reaction";
 export type { RecordingStats } from "./types/RecordingStats";

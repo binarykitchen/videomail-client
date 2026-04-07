@@ -6,7 +6,9 @@ export const Reactions = {
   ANGER: { key: "anger", label: "Angry" },
 } as const;
 
-export type ReactionKey = (typeof Reactions)[keyof typeof Reactions]["key"];
+export type ReactionType = (typeof Reactions)[keyof typeof Reactions];
+export type ReactionKey = ReactionType["key"];
+export type ReactionLabel = ReactionType["label"];
 
 /*
   Example usage:
