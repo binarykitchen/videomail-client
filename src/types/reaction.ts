@@ -10,51 +10,11 @@ export type ReactionType = (typeof Reactions)[keyof typeof Reactions];
 export type ReactionKey = ReactionType["key"];
 export type ReactionLabel = ReactionType["label"];
 
-/*
-  Example usage:
-
-  const exampleReactionsByUserKey: ReactionsByUserKey = {
-    [Reactions.GRINNING_SWEAT.key]: [userKey1, userKey2],
-    [Reactions.ANGER.key]: [userKey3],
-    [Reactions.FOLDED_HANDS.key]: [userKey4, userKey5, userKey6],
-  };
-*/
 export type ReactionsByUserKey = Partial<Record<ReactionKey, readonly string[]>>;
 
-/*
-  Example usage:
-
-  const exampleReactionsPretty: ReactionsPrettyByUserKey = {
-    [Reactions.GRINNING_SWEAT.key]: {
-      [userKey1]: {
-        nickName: "User 1",
-      },
-      [userKey2]: {
-        maskedEmailAddress: "user2@****.com",
-      },
-    },
-    [Reactions.ANGER.key]: {
-      [userKey3]: {
-        nickName: "User 3",
-      },
-    },
-    [Reactions.FOLDED_HANDS.key]: {
-      [userKey4]: {
-        maskedEmailAddress: "user4@****.com",
-      },
-      [userKey5]: {
-        maskedEmailAddress: "user5@****.com",
-      },
-      [userKey6]: {
-        nickName: "User 6",
-      },
-    },
-  };
-*/
-
 export interface ReactionPrettyByUserKey {
-  nickName?: string;
-  maskedEmailAddress?: string;
+  nickName?: string | undefined;
+  maskedEmailAddress?: string | undefined;
 }
 
 export type ReactionsPrettyByUserKey = Partial<
