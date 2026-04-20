@@ -75,42 +75,59 @@ class Replay extends Despot {
       throw new Error("There is no replay element to correct dimensions for.");
     }
 
-    let height;
-    let width;
+    let heightValue: number | undefined;
+    let widthValue: number | undefined;
 
-    let ratio;
+    let ratio: number | undefined;
 
     if (this.videomail) {
-      width = this.videomail.width;
-      height = this.videomail.height;
+      widthValue = this.videomail.width;
+      heightValue = this.videomail.height;
 
-      if (width) {
-        ratio = height / width;
+      if (widthValue && heightValue) {
+        ratio = heightValue / widthValue;
       }
     }
 
-    if (!width) {
-      width = calculateWidth(responsive, this.options, videoHeight, ratio);
+    if (!widthValue) {
+      const newWidthDimensions = calculateWidth(
+        responsive,
+        this.options,
+        videoHeight,
+        ratio,
+      );
+
+      const newWidth = newWidthDimensions.value;
+
+      widthValue = newWidth;
     }
 
-    if (!height) {
+    if (!heightValue) {
       let element = this.visuals.getElement();
 
       if (!element) {
         element = document.body;
       }
 
-      height = calculateHeight(responsive, videoWidth, this.options, ratio, element);
+      const newDimensions = calculateHeight(
+        responsive,
+        videoWidth,
+        this.options,
+        ratio,
+        element,
+      );
+
+      heightValue = newDimensions.value;
     }
 
-    if (width > 0) {
-      this.replayElement.style.width = `${width}px`;
+    if (widthValue) {
+      this.replayElement.style.width = `${widthValue}px`;
     } else {
       this.replayElement.style.width = "auto";
     }
 
-    if (height > 0) {
-      this.replayElement.style.height = `${height}px`;
+    if (heightValue) {
+      this.replayElement.style.height = `${heightValue}px`;
     } else {
       this.replayElement.style.height = "auto";
     }
