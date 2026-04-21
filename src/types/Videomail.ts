@@ -40,7 +40,7 @@ export interface Videomail {
   mp4?: string;
   vtt?: string;
   captions?: string | undefined;
-  poster: string;
+  poster?: string | undefined;
   browserStats?: BrowserStats | undefined;
   recordingStats?: RecordingStats | undefined;
   recordLocation?: string | undefined;
