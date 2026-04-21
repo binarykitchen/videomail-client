@@ -72,7 +72,13 @@ export interface Videomail {
   siteName?: string | undefined;
 
   url: string;
+
   userKey?: UserKey | undefined;
+
+  // Never stored. Points to the latest public videomail poster of the user, if any.
+  // Used for the Videomail wall.
+  userPublicPoster?: string | undefined;
+
   versions: {
     videomailNinjaFormPlugin?: string;
     videomailClient: string;
