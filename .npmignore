@@ -12,7 +12,6 @@ chromatic.config.json
 eslint.config.js
 prettier.config.js
 tsconfig.json
-tsconfig.prod.json
 package-lock.json
 *.code-workspace
 dist/etc

@@ -14,7 +14,6 @@ const resolvePath = (relativePath: string) => path.resolve(rootDir, relativePath
 
 const srcDir = resolvePath("src");
 const tsConfig = resolvePath("tsconfig.json");
-const tsConfigProd = resolvePath("tsconfig.prod.json");
 const tsEntry = resolvePath(path.join(srcDir, "index.ts"));
 
 export default defineConfig({
@@ -64,7 +63,7 @@ export default defineConfig({
     entry: {
       index: tsEntry,
     },
-    tsconfigPath: isProductionMode() ? tsConfigProd : tsConfig,
+    tsconfigPath: tsConfig,
   },
   plugins: [pluginStylus(), pluginNodePolyfill()],
   tools: {

@@ -1,8 +1,0 @@
-{
-  "include": ["src"],
-  "exclude": ["src/stories", "**/__tests__"],
-  "extends": ["./tsconfig.json"],
-  "compilerOptions": {
-    "rootDir": "./src"
-  }
-}
