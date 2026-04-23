@@ -42,6 +42,9 @@
     // This to speed up CI and avoid external type issues
     "skipLibCheck": true,
 
+    // Keep supporting side-effect style imports without declaration files
+    "noUncheckedSideEffectImports": false,
+
     // So that eslint and prettier written in JS can be included
     "allowJs": true,
 
