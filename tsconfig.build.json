@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**", "src/stories/**"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "noEmit": false,
+    "types": ["node"]
+  }
+}

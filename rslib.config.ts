@@ -13,7 +13,7 @@ const rootDir = process.cwd();
 const resolvePath = (relativePath: string) => path.resolve(rootDir, relativePath);
 
 const srcDir = resolvePath("src");
-const tsConfig = resolvePath("tsconfig.json");
+const tsConfig = resolvePath("tsconfig.build.json");
 const tsEntry = resolvePath(path.join(srcDir, "index.ts"));
 
 export default defineConfig({
