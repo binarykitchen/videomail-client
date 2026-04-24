@@ -13,6 +13,8 @@
     "./node_modules/@tsconfig/node24/tsconfig.json"
   ],
   "compilerOptions": {
+    "rootDir": ".",
+
     "module": "esnext",
     "moduleResolution": "bundler",
 
