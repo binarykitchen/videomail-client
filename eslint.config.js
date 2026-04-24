@@ -8,7 +8,6 @@ import eslintDepend from "eslint-plugin-depend";
 import eslintImportX from "eslint-plugin-import-x";
 import eslintPackageJson from "eslint-plugin-package-json";
 import eslintRegexpPlugin from "eslint-plugin-regexp";
-import eslintSecurity from "eslint-plugin-security";
 import eslintSimpleImportSort from "eslint-plugin-simple-import-sort";
 // import eslintStorybook from "eslint-plugin-storybook";
 import globals from "globals";
@@ -43,7 +42,6 @@ export default defineConfig([
   globalIgnores(["dist", "storybook-static", ".storybook/public/mockServiceWorker.js"]),
   eslintDeMorgan.configs.recommended,
   eslintPackageJson.configs.recommended,
-  eslintSecurity.configs.recommended,
   eslintRegexpPlugin.configs["flat/recommended"],
   eslintImportX.flatConfigs.recommended,
   // ...eslintStorybook.configs["flat/recommended"],
@@ -148,14 +146,6 @@ export default defineConfig([
       depend: eslintDepend,
     },
     extends: ["depend/flat/recommended"],
-  },
-  {
-    ...eslintSecurity.configs.recommended,
-    files: ALL_FILES,
-    rules: {
-      ...eslintSecurity.configs.recommended.rules,
-      "security/detect-object-injection": "off",
-    },
   },
   {
     name: "sort imports and exports",
