@@ -21,6 +21,7 @@ export type {
 } from "./types/reaction";
 export { Reactions } from "./types/reaction";
 export type { RecordingStats } from "./types/RecordingStats";
+export type { VideomailThread } from "./types/thread";
 export type { PartialVideomail, Videomail } from "./types/Videomail";
 export type { VideoTypeType } from "./types/VideoType";
 
