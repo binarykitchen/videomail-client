@@ -5,7 +5,9 @@ import Response from "superagent/lib/node/response";
 import { version as videomailClientVersion } from "./../package.json";
 import Constants from "./constants";
 import { FullVideomailErrorData } from "./types/error";
+import { VideomailIdentifier } from "./types/identifier";
 import { VideomailClientOptions } from "./types/options";
+import { VideomailThread } from "./types/thread";
 import { PartialVideomail, Videomail } from "./types/Videomail";
 import createError from "./util/error/createError";
 import HTTPVideomailError from "./util/error/HTTPVideomailError";
@@ -82,8 +84,12 @@ class Resource {
     return newVideomail;
   }
 
-  private async get(identifierName: string, identifierValue: string) {
-    const url = `${this.options.apiUrl}/videomail/${identifierName}/${identifierValue}/snapshot`;
+  private async get(
+    identifierName: string,
+    identifierValue: string,
+    identifierType: VideomailIdentifier,
+  ) {
+    const url = `${this.options.apiUrl}/videomail/${identifierName}/${identifierValue}/${identifierType}`;
 
     try {
       const request = await superagent("get", url)
@@ -94,8 +100,12 @@ class Resource {
         .set(Constants.WHITELIST_KEY_LABEL, this.options.whitelistKey)
         .timeout(this.options.timeouts.connection);
 
-      const videomail = request.body as Videomail;
+      if (identifierType === "thread") {
+        const thread = request.body as VideomailThread;
+        return thread;
+      }
 
+      const videomail = request.body as Videomail;
       return videomail;
     } catch (exc) {
       throw createError({ exc: findOriginalExc(exc), options: this.options });
@@ -129,11 +139,19 @@ class Resource {
   }
 
   public async getByAlias(alias: string) {
-    return await this.get("alias", alias);
+    return (await this.get("alias", alias, "snapshot")) as Videomail;
   }
 
   public async getByKey(key: string) {
-    return await this.get("key", key);
+    return (await this.get("key", key, "snapshot")) as Videomail;
+  }
+
+  public async getThreadByAlias(alias: string) {
+    return (await this.get("alias", alias, "thread")) as VideomailThread;
+  }
+
+  public async getThreadByKey(key: string) {
+    return (await this.get("key", key, "thread")) as VideomailThread;
   }
 
   public async reportError(err: VideomailError) {

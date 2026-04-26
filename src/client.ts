@@ -148,6 +148,16 @@ class VideomailClient extends Despot {
     return await resource.getByKey(key);
   }
 
+  public async getThreadByAlias(alias: string) {
+    const resource = new Resource(this.options);
+    return await resource.getThreadByAlias(alias);
+  }
+
+  public async getThreadByKey(key: string) {
+    const resource = new Resource(this.options);
+    return await resource.getThreadByKey(key);
+  }
+
   // Returns true when a video has been recorded but is not submitted yet
   public isDirty() {
     return this.container.isDirty();
