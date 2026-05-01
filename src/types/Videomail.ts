@@ -53,6 +53,7 @@ export interface Videomail {
   replyAllUrl?: string;
   replyUrl: string;
 
+  commentUrl?: string;
   shareUrl?: string;
 
   sending: boolean;
