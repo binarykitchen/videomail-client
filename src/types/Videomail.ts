@@ -75,10 +75,8 @@ export interface Videomail {
   reactions?: ReactionsByUserKey | undefined;
   reactionsPretty?: ReactionsPrettyByUserKey | undefined;
 
-  comment?: {
-    count?: number | undefined;
-    url?: string | undefined;
-  };
+  commentUrl?: string | undefined;
+  commentCount?: number | undefined;
 
   shareUrl?: string | undefined;
 
