@@ -8,7 +8,7 @@ describe("createError fn", () => {
     const error = createError({ options: defaultOptions });
 
     expect(error.message).toBe("(undefined message)");
-    expect(error.explanation).toBe("(undefined explanation)");
+    expect(error.explanation).toBeUndefined();
   });
 
   it("a videomail error with a custom message and explanation can be created", () => {

@@ -218,7 +218,7 @@ function createError(errorParams: ErrorParams) {
   options.logger.debug(`VideomailError: create(${args})`);
 
   const errData: ErrData = {
-    explanation: explanation ?? "(undefined explanation)",
+    explanation,
     logLines,
     err,
   };
