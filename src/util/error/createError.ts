@@ -53,11 +53,11 @@ function createError(errorParams: ErrorParams) {
           explanation = "Your webcam does not meet the width requirement.";
         } else if (constraint) {
           explanation = `Unmet constraint: ${constraint}`;
-        } else {
+        } else if (err.message) {
           explanation = err.message;
         }
-      } else {
-        explanation = err?.message;
+      } else if (err?.message) {
+        explanation = err.message;
       }
       break;
     case "MediaDeviceFailedDueToShutdown":
@@ -149,7 +149,10 @@ function createError(errorParams: ErrorParams) {
 
     case VideomailError.DOM_EXCEPTION:
       message = "DOM Exception";
-      explanation = pretty(err);
+
+      if (err) {
+        explanation = pretty(err);
+      }
 
       break;
 
@@ -163,7 +166,11 @@ function createError(errorParams: ErrorParams) {
      */
     case VideomailError.MEDIA_DEVICE_NOT_SUPPORTED:
       message = "Media device not supported";
-      explanation = pretty(err);
+
+      if (err) {
+        explanation = pretty(err);
+      }
+
       break;
 
     default: {
@@ -192,14 +199,8 @@ function createError(errorParams: ErrorParams) {
       }
 
       // for weird, undefined cases
-      if (!message) {
-        if (errName) {
-          message = `${errName} (weird)`;
-        }
-
-        if (!explanation) {
-          explanation = pretty(err);
-        }
+      if (!message && errName) {
+        message = `${errName} (weird)`;
       }
 
       break;
@@ -217,7 +218,7 @@ function createError(errorParams: ErrorParams) {
   options.logger.debug(`VideomailError: create(${args})`);
 
   const errData: ErrData = {
-    explanation,
+    explanation: explanation ?? "(undefined explanation)",
     logLines,
     err,
   };
