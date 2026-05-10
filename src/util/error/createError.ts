@@ -200,18 +200,13 @@ function createError(errorParams: ErrorParams) {
         if (!explanation) {
           explanation = pretty(err);
         }
-
-        // avoid dupes
-        if (pretty(message) === explanation) {
-          explanation = undefined;
-        }
       }
 
       break;
     }
   }
 
-  let logLines;
+  let logLines: string[] | undefined;
 
   if (options.logger.getLines) {
     logLines = options.logger.getLines();
