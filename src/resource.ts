@@ -120,8 +120,17 @@ class Resource {
     const path = videomail.public ? "wall" : "videomail";
     let url = `${this.options.apiUrl}/${path}/`;
 
-    if (method === FormMethod.PUT && videomail.key) {
-      url += videomail.key;
+    if (method === FormMethod.PUT) {
+      if (videomail.public) {
+        throw createError({
+          message: "A public videomail cannot be updated.",
+          options: this.options,
+        });
+      }
+
+      if (videomail.key) {
+        url += videomail.key;
+      }
     }
 
     try {
