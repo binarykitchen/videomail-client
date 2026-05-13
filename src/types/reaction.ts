@@ -3,6 +3,7 @@ export const Reactions = {
   APPLAUSE: { key: "applause", label: "Applause" },
   GRINNING_SWEAT: { key: "grinningSweat", label: "Whew!" },
   FIRE: { key: "fire", label: "Fire" },
+  SAD: { key: "sad", label: "Sad" },
 } as const;
 
 export type ReactionType = (typeof Reactions)[keyof typeof Reactions];

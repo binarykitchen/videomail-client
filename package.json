@@ -76,11 +76,11 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "5.1.2",
-    "@eslint/config-inspector": "2.0.1",
+    "@eslint/config-inspector": "3.0.2",
     "@eslint/js": "10.0.1",
     "@rsbuild/plugin-node-polyfill": "1.4.4",
     "@rsbuild/plugin-stylus": "1.3.2",
-    "@rsdoctor/rspack-plugin": "1.5.10",
+    "@rsdoctor/rspack-plugin": "1.5.11",
     "@rslib/core": "0.21.4",
     "@storybook/addon-a11y": "10.3.6",
     "@storybook/addon-docs": "10.3.6",
@@ -94,7 +94,7 @@
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.17",
     "audit-ci": "7.1.0",
-    "chromatic": "16.9.1",
+    "chromatic": "16.10.0",
     "cross-env": "10.1.0",
     "eslint": "10.3.0",
     "eslint-import-resolver-typescript": "4.4.4",
@@ -106,7 +106,7 @@
     "eslint-plugin-simple-import-sort": "13.0.0",
     "globals": "17.6.0",
     "jsdom": "29.1.1",
-    "msw": "2.14.5",
+    "msw": "2.14.6",
     "msw-storybook-addon": "2.0.7",
     "prettier": "3.8.3",
     "prettier-plugin-curly": "0.4.1",
@@ -118,8 +118,8 @@
     "storybook-html-rsbuild": "3.3.3",
     "type-fest": "5.6.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.59.2",
-    "vitest": "4.1.5"
+    "typescript-eslint": "8.59.3",
+    "vitest": "4.1.6"
   },
   "engines": {
     "node": "^24.15.0",
