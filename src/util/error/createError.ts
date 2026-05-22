@@ -239,6 +239,11 @@ function createError(errorParams: ErrorParams) {
   if (options.reportErrors) {
     const resource = new Resource(options);
 
+    // Remember, we're reporting the error on API level, and are also throwing it further.
+    // This by intention, because this package is also used by our WordPress plugin where
+    // error handling is unclear.
+    //
+    // Better to report the error and throw it further, than to not report it at all ;)
     resource.reportError(videomailError).catch((reason: unknown) => {
       console.error(reason);
     });
