@@ -1,6 +1,3 @@
 import { Videomail } from "./Videomail";
 
-export interface VideomailThread {
-  list: Videomail[];
-  commentAlias?: string;
-}
+export type VideomailThread = Videomail[];
