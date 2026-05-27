@@ -94,7 +94,7 @@
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.18",
     "audit-ci": "7.1.0",
-    "chromatic": "17.0.0",
+    "chromatic": "17.0.1",
     "cross-env": "10.1.0",
     "eslint": "10.4.0",
     "eslint-import-resolver-typescript": "4.4.4",
