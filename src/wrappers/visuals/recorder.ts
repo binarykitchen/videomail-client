@@ -362,13 +362,46 @@ class Recorder extends Despot {
       // https://github.com/maxogden/websocket-stream#binary-sockets
 
       /*
-       * we use query parameters here because we cannot set custom headers in web sockets,
+       * We use query parameters here because we cannot set custom headers in web sockets,
        * see https://github.com/websockets/ws/issues/467
        */
 
-      const url2Connect = `${this.options.socketUrl}?${encodeURIComponent(
-        Constants.WHITELIST_KEY_LABEL,
-      )}=${encodeURIComponent(this.options.whitelistKey)}`;
+      let url2Connect: string;
+
+      try {
+        /*
+         * Use the URL API to validate and normalize socketUrl before use.
+         *
+         * Plain string concatenation with encodeURIComponent cannot detect a
+         * malformed socketUrl (e.g. trailing whitespace from WordPress config)
+         * and lets an invalid string reach the WebSocket constructor, which
+         * throws a cryptic "the provided URL is invalid" error with no context.
+         *
+         * new URL() throws immediately with a clear message when socketUrl is bad,
+         * and URLSearchParams encodes the query parameter correctly.
+         */
+        const socketUrlObj = new URL(this.options.socketUrl);
+
+        socketUrlObj.searchParams.set(
+          Constants.WHITELIST_KEY_LABEL,
+          this.options.whitelistKey,
+        );
+
+        url2Connect = socketUrlObj.toString();
+      } catch (exc) {
+        this.connecting = this.connected = false;
+
+        const err = createError({
+          message: "Invalid WebSocket URL",
+          explanation: `The configured socketUrl "${this.options.socketUrl}" is not a valid URL. Please check your videomail-client configuration.`,
+          options: this.options,
+          exc,
+        });
+
+        this.emit("ERROR", { err });
+
+        return;
+      }
 
       this.options.logger.debug(`Recorder: initializing web socket to ${url2Connect}`);
 
