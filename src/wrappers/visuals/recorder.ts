@@ -406,12 +406,14 @@ class Recorder extends Despot {
       this.options.logger.debug(`Recorder: initializing web socket to ${url2Connect}`);
 
       try {
-        // Keep protocols undefined explicitly to avoid passing `null` as protocol.
-        // Some browsers reject that constructor shape with a misleading
-        // "provided URL is invalid" error.
-        this.stream = websocket(url2Connect, undefined, {
-          perMessageDeflate: false,
-        });
+        /*
+         * Build the native socket first and then wrap it as a stream.
+         * This avoids browser/runtime quirks around websocket-stream passing
+         * protocol arguments through to the WebSocket constructor.
+         */
+        const nativeSocket = new WebSocket(url2Connect);
+
+        this.stream = websocket(nativeSocket);
       } catch (exc) {
         this.connecting = this.connected = false;
 
