@@ -12,6 +12,7 @@ import { VideomailClientOptions } from "../../types/options";
 import { RecordingStats } from "../../types/RecordingStats";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
+import getWebSocketDiagnostic from "../../util/error/getWebSocketDiagnostic";
 import VideomailError from "../../util/error/VideomailError";
 import getBrowser from "../../util/getBrowser";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
@@ -416,10 +417,14 @@ class Recorder extends Despot {
         this.stream = websocket(nativeSocket);
       } catch (exc) {
         this.connecting = this.connected = false;
+        const diagnostic = getWebSocketDiagnostic();
 
         const err = createError({
           message: "Failed to connect to server",
-          explanation: `Unable to build websocket to ${url2Connect}. Please check your connection and try again. If the problem persists, contact us.`,
+          explanation:
+            `Unable to build websocket to ${url2Connect}. ` +
+            `Please check your connection and try again. ` +
+            `If the problem persists, contact us.${diagnostic}`,
           options: this.options,
           exc,
         });
