@@ -417,7 +417,7 @@ class Recorder extends Despot {
         this.stream = websocket(nativeSocket);
       } catch (exc) {
         this.connecting = this.connected = false;
-        const diagnostic = getWebSocketDiagnostic();
+        const diagnostic = getWebSocketDiagnostic(url2Connect);
 
         const err = createError({
           message: "Failed to connect to server",
