@@ -26,7 +26,6 @@ export interface Videomail {
   cc?: EmailAddresses | undefined;
 
   alias: string;
-  aliasID: string;
 
   replyAllUrl?: string;
   replyUrl: string;
