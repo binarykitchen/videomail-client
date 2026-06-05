@@ -1,3 +1,6 @@
+// Temporary: this to be removed once we have a better understanding of the root cause of
+// random WebSocket connection failures from deafhistorycollectionsaustralia
+
 function getEdgeCodes(value: string, amount: number, fromEnd?: boolean) {
   const chars = fromEnd ? value.slice(-amount) : value.slice(0, amount);
   const codes = Array.from(chars, (char) => String(char.codePointAt(0))).join(".");
