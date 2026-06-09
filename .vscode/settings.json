@@ -1,13 +1,9 @@
 {
-  "stylelint.validate": ["css", "scss", "less", "stylus"],
   "editor.tabSize": 2,
   "files.trimTrailingWhitespace": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  "prettier.configPath": "./prettier.config.js",
-  "[stylus]": {
-    "editor.defaultFormatter": "stylelint.vscode-stylelint"
-  }
+  "prettier.configPath": "./prettier.config.js"
 }
