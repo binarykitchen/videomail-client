@@ -424,7 +424,7 @@ class Recorder extends Despot {
           explanation:
             `Unable to build websocket to ${url2Connect}. ` +
             `Please check your connection and try again. ` +
-            `If the problem persists, contact us.${diagnostic}`,
+            `If the problem persists, contact us. Diagnostic: ${diagnostic}`,
           options: this.options,
           exc,
         });
