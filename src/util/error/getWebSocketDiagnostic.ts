@@ -39,7 +39,7 @@ function getWebSocketDiagnostic(url2Connect: string) {
   const urlHasReplacementChar = url2Connect.includes("\uFFFD");
 
   const diagnostic =
-    ` websocketDiagnostics{` +
+    `websocketDiagnostics{` +
     `webdriver=${String(navigator.webdriver)}, ` +
     `wsCtorNative=${String(wsCtorNative)}, ` +
     `urlLen=${url2Connect.length}, ` +

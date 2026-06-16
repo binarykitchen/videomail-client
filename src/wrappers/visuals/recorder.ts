@@ -404,27 +404,48 @@ class Recorder extends Despot {
         return;
       }
 
-      this.options.logger.debug(`Recorder: initializing web socket to ${url2Connect}`);
+      this.options.logger.debug(
+        `Recorder: initializing web socket stream to ${url2Connect}`,
+      );
+
+      let nativeSocket: WebSocket;
+
+      /*
+       * Build the native socket first and then wrap it as a stream.
+       * This avoids browser/runtime quirks around websocket-stream passing
+       * protocol arguments through to the WebSocket constructor.
+       */
 
       try {
-        /*
-         * Build the native socket first and then wrap it as a stream.
-         * This avoids browser/runtime quirks around websocket-stream passing
-         * protocol arguments through to the WebSocket constructor.
-         */
-        const nativeSocket = new WebSocket(url2Connect);
-
-        this.stream = websocket(nativeSocket);
+        nativeSocket = new WebSocket(url2Connect);
       } catch (exc) {
         this.connecting = this.connected = false;
         const diagnostic = getWebSocketDiagnostic(url2Connect);
 
         const err = createError({
-          message: "Failed to connect to server",
+          message: `Failed to construct WebSocket to ${url2Connect}`,
           explanation:
-            `Unable to build websocket to ${url2Connect}. ` +
             `Please check your connection and try again. ` +
             `If the problem persists, contact us. Diagnostic: ${diagnostic}`,
+          options: this.options,
+          exc,
+        });
+
+        this.emit("ERROR", { err });
+
+        // No need to continue further
+        return;
+      }
+
+      try {
+        this.stream = websocket(nativeSocket);
+      } catch (exc) {
+        this.connecting = this.connected = false;
+
+        const err = createError({
+          message: `Failed to create a stream to ${url2Connect}`,
+          explanation:
+            "Please check your connection and try again. If the problem persists, contact us.",
           options: this.options,
           exc,
         });
