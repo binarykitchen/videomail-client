@@ -420,13 +420,28 @@ class Recorder extends Despot {
         nativeSocket = new WebSocket(url2Connect);
       } catch (exc) {
         this.connecting = this.connected = false;
+
         const diagnostic = getWebSocketDiagnostic(url2Connect);
 
+        // Useful for temporary full technical diagnostic regardless of cause
+        // this.options.logger.debug(`Recorder: WebSocket diagnostic: ${diagnostic.text}`);
+
+        /*
+         * Use a clearly distinct message for crawler/bot failures so the
+         * server can filter these from email alerts while still logging them.
+         * A real user never reaches this branch with probeBase failing.
+         */
+        const message = diagnostic.looksAutomated
+          ? "Automated crawler: WebSocket not supported in this environment"
+          : `Failed to construct WebSocket to ${url2Connect}`;
+
+        const explanation = diagnostic.looksAutomated
+          ? "Headless crawlers cannot use Videomail's WebSocket. No action needed."
+          : `Please check your connection and try again. If the problem persists, contact us. Diagnostic: ${diagnostic.text}`;
+
         const err = createError({
-          message: `Failed to construct WebSocket to ${url2Connect}`,
-          explanation:
-            `Please check your connection and try again. ` +
-            `If the problem persists, contact us. Diagnostic: ${diagnostic}`,
+          message,
+          explanation,
           options: this.options,
           exc,
         });
