@@ -50,6 +50,7 @@ export interface Videomail {
   dateCreatedServerPretty: string;
   dateUpdated?: number;
   dateUpdatedServerPretty?: string;
+  expired?: boolean;
   expiresAfter: number;
   expiresAfterIso: string;
   expiresAfterServerPretty: string;

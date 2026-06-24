@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: 🛒 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -29,22 +29,22 @@ jobs:
         run: npm install
 
       - name: 🔎 Run prettier
-        run: npm run prettier
+        run: node --run prettier
 
       - name: 🔎 Run linter
-        run: npm run lint
+        run: node --run lint
 
       - name: 🔎 Check types
-        run: npm run types
+        run: node --run types
 
       - name: 🔨 Build
-        run: npm run build:prod
+        run: node --run build:prod
 
       - name: 🔎 Audit (detect vulnerabilities)
-        run: npm run audit
+        run: node --run audit
 
       - name: 🔎 Run tests
-        run: npm run test
+        run: node --run test
 
       - name: 🔎 Run Chromatic
         uses: chromaui/action@latest
