@@ -8,13 +8,13 @@ const config: Config = {
   // https://github.com/release-it/release-it/tree/main?tab=readme-ov-file#hooks
   hooks: {
     "before:init": [
-      "npm run prettier",
-      "npm run lint",
-      "npm run types",
-      "npm run audit",
-      "npm test",
+      "node --run prettier",
+      "node --run lint",
+      "node --run types",
+      "node --run audit",
+      "node --run test",
     ],
-    "after:bump": "npm run build:prod",
+    "after:bump": "node --run build:prod",
   },
 };
 
