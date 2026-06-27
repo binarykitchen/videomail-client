@@ -10,6 +10,7 @@ import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
+import VideomailError from "../util/error/VideomailError";
 import getBrowser from "../util/getBrowser";
 import getValidity from "../util/getValidity";
 import limitHeight from "../util/html/dimensions/limitHeight";
@@ -228,6 +229,12 @@ class Container extends Despot {
 
     if (this.options.displayErrors && params.err) {
       this.visuals.error(params.err);
+    } else if (
+      this.options.displayErrors &&
+      params.exc &&
+      params.exc instanceof VideomailError
+    ) {
+      this.visuals.error(params.exc);
     } else {
       this.visuals.reset();
     }

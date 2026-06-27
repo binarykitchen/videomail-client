@@ -5,6 +5,7 @@ import createError from "../../util/error/createError";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
 import getFirstVideoTrack from "../../util/html/media/getFirstVideoTrack";
 import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
+import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "./../../util/pretty";
 import Recorder from "./recorder";
@@ -289,10 +290,16 @@ class UserMedia extends Despot {
           explanation: "The video track seems to be disabled. Enable it in your system.",
           options: this.options,
         });
+      } else if (isVirtualCamera(videoTrack)) {
+        throw createError({
+          message: "Virtual cameras are not allowed.",
+          explanation: `Please use a real camera, not "${videoTrack.label}".`,
+          options: this.options,
+        });
       } else {
         let description = "";
 
-        if (videoTrack.label && videoTrack.label.length > 0) {
+        if (videoTrack.label.length > 0) {
           description = description.concat(videoTrack.label);
         }
 
