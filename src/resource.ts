@@ -140,7 +140,7 @@ class Resource {
         cpu: err.cpu,
         device: err.device,
         engine: err.engine,
-        err: serializeError(err.err),
+        err: err.err ? serializeError(err.err) : undefined,
         explanation: err.explanation,
         location: err.location,
         logLines: err.logLines,
