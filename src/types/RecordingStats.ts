@@ -9,6 +9,7 @@ interface RecordingStats {
   waitingTime?: number | undefined;
   wantedFps?: number;
   wantedInterval?: number;
+  videoTrackLabel?: string | undefined;
 }
 
 export type { RecordingStats };

@@ -31,6 +31,8 @@ class UserMedia extends Despot {
   private onLoadedMetaDataReached = false;
   private playingPromiseReached = false;
 
+  private videoTrackLabel?: string | undefined;
+
   constructor(recorder: Recorder, options: VideomailClientOptions) {
     super("UserMedia", options);
 
@@ -135,6 +137,7 @@ class UserMedia extends Despot {
     this.onPlayReached = false;
     this.onLoadedMetaDataReached = false;
     this.playingPromiseReached = false;
+    this.videoTrackLabel = undefined;
 
     if (isAudioEnabled(this.options)) {
       this.audioRecorder ??= new AudioRecorder(this, this.options);
@@ -151,7 +154,8 @@ class UserMedia extends Despot {
     };
 
     const play = () => {
-      // Resets the media element and restarts the media resource. Any pending events are discarded.
+      // Resets the media element and restarts the media resource.
+      // Any pending events are discarded.
       try {
         this.rawVisualUserMedia?.load();
 
@@ -281,6 +285,7 @@ class UserMedia extends Despot {
 
     try {
       const videoTrack = getFirstVideoTrack(localMediaStream);
+      this.videoTrackLabel = videoTrack?.label;
 
       if (!videoTrack) {
         this.options.logger.debug("UserMedia: detected (but no video tracks exist");
@@ -333,6 +338,10 @@ class UserMedia extends Despot {
     }
   }
 
+  public getVideoTrackLabel() {
+    return this.videoTrackLabel;
+  }
+
   public isReady() {
     return Boolean(this.rawVisualUserMedia?.src);
   }
@@ -360,7 +369,7 @@ class UserMedia extends Despot {
       }
 
       /*
-       * don't have to reset these states when just switching camera
+       * Don't have to reset these states when just switching camera
        * while still recording or pausing
        */
       if (!params?.switchingFacingMode) {

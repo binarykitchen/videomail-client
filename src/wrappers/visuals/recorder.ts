@@ -1032,8 +1032,13 @@ class Recorder extends Despot {
 
         intervalSum: this.getIntervalSum(),
         framesCount: this.framesCount,
+
         videoType,
       };
+
+      if (this.userMedia) {
+        this.recordingStats.videoTrackLabel = this.userMedia.getVideoTrackLabel();
+      }
 
       if (isAudioEnabled(this.options) && this.userMedia) {
         this.recordingStats.samplesCount = this.samplesCount;
