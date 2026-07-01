@@ -50,4 +50,6 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   screen: string;
   versions?: VideomailErrorVersions | undefined;
   clientIp?: string | null | undefined;
+  userAgent?: string | null | undefined;
+  isBot?: boolean | undefined;
 }
