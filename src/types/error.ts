@@ -33,10 +33,9 @@ export interface VideomailErrorData {
 interface VideomailErrorVersions {
   videomailNinjaFormPlugin?: string | undefined;
   videomailClient: string;
-  videomail?: {
-    client?: string | undefined;
-    server?: string | undefined;
-  };
+  // Injected by the videomail itself (private)
+  videomailUI?: string | undefined;
+  videomailServer?: string | undefined;
 }
 
 export interface FullVideomailErrorData extends VideomailErrorData {
