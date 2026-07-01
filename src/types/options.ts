@@ -119,11 +119,9 @@ export interface VideomailClientOptions {
 
   callbacks: {
     adjustFormDataBeforePosting?:
-      | undefined
-      | ((videomail: PartialVideomail) => PartialVideomail);
+      undefined | ((videomail: PartialVideomail) => PartialVideomail);
     adjustFormValueBeforePopulating?:
-      | undefined
-      | ((name: string, value: any, videomail: Videomail) => string);
+      undefined | ((name: string, value: any, videomail: Videomail) => string);
   };
 
   defaults: {
