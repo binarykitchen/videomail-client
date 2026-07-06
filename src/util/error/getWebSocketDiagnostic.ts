@@ -113,12 +113,7 @@ function getAutomationSignals(probeBase: string, probeSimpleQuery: string) {
   };
 }
 
-export interface WebSocketDiagnosticResult {
-  text: string;
-  looksAutomated: boolean;
-}
-
-function getWebSocketDiagnostic(url2Connect: string): WebSocketDiagnosticResult {
+function getWebSocketDiagnostic(url2Connect: string) {
   const wsCtorFingerprint = String(globalThis.WebSocket)
     .slice(0, 80)
     .replace(/\s+/gu, " ");
