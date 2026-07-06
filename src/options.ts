@@ -8,7 +8,7 @@ const options: VideomailClientOptions = {
   logStackSize: 30, // limits the stack size of log outputs to collect
   verbose: !PRODUCTION, // set true to log more info
   apiUrl: "https://videomail.io/api", // leave as it, permanent API url to post videos
-  socketUrl: "wss://videomail.io", // leave as it, permanent websocket url to send frames
+  socketUrl: "wss://videomail.io/ws", // leave as it, permanent websocket url to send frames
   whitelistKey: "videomail-client-demo", // Required for API, use https://videomail.io/whitelist
   enablePause: true, // enable pause/resume button
   enableAutoPause: true, // automatically pauses when window becomes inactive
