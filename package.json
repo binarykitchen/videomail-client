@@ -81,7 +81,7 @@
     "@rsbuild/plugin-node-polyfill": "1.4.6",
     "@rsbuild/plugin-stylus": "2.0.1",
     "@rsdoctor/rspack-plugin": "1.5.17",
-    "@rslib/core": "0.23.1",
+    "@rslib/core": "0.23.2",
     "@storybook/addon-a11y": "10.4.6",
     "@storybook/addon-docs": "10.4.6",
     "@storybook/addon-links": "10.4.6",
@@ -92,9 +92,9 @@
     "@types/node": "24.12.3",
     "@types/superagent": "8.1.10",
     "@types/ua-parser-js": "0.7.39",
-    "@vitest/eslint-plugin": "1.6.20",
+    "@vitest/eslint-plugin": "1.6.21",
     "audit-ci": "7.1.0",
-    "chromatic": "17.8.0",
+    "chromatic": "18.0.1",
     "cross-env": "10.1.0",
     "eslint": "10.6.0",
     "eslint-import-resolver-typescript": "4.4.5",
@@ -116,10 +116,10 @@
     "release-it": "20.2.1",
     "storybook": "10.4.6",
     "storybook-html-rsbuild": "3.3.4",
-    "type-fest": "5.7.0",
+    "type-fest": "5.8.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.62.1",
-    "vitest": "4.1.9"
+    "vitest": "4.1.10"
   },
   "engines": {
     "node": "^24.15.0",
