@@ -10,7 +10,9 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: "storybook-html-rsbuild",
-    options: { builder: { rsbuildConfigPath: "rslib.config.ts" } },
+    options: {
+      builder: { rsbuildConfigPath: "rslib.config.ts", lazyCompilation: false },
+    },
   },
   staticDirs: ["./public"],
   // Useful trick to alter HTTP header if needed

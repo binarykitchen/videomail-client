@@ -5,8 +5,8 @@ import { pluginStylus } from "@rsbuild/plugin-stylus";
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import { defineConfig } from "@rslib/core";
 
-import { NodeEnvType } from "./src/types/env";
-import isProductionMode from "./src/util/isProductionMode";
+import { NodeEnvType } from "./src/types/env.ts";
+import isProductionMode from "./src/util/isProductionMode.ts";
 
 const rootDir = process.cwd();
 

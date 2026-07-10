@@ -1,4 +1,4 @@
-import { NodeEnvType } from "./../types/env";
+import { NodeEnvType } from "./../types/env.ts";
 
 function getNodeEnv() {
   if (!process.env.NODE_ENV) {
