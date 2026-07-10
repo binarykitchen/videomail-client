@@ -60,7 +60,7 @@
   "prettier": "./prettier.config.js",
   "dependencies": {
     "animitter": "3.0.0",
-    "audio-sample": "6.0.0",
+    "audio-sample": "7.0.0",
     "canvas-to-buffer": "4.1.2",
     "contains": "0.1.1",
     "deepmerge": "4.3.1",
@@ -80,7 +80,7 @@
     "@eslint/js": "10.0.1",
     "@rsbuild/plugin-node-polyfill": "1.4.6",
     "@rsbuild/plugin-stylus": "2.0.1",
-    "@rsdoctor/rspack-plugin": "1.5.17",
+    "@rsdoctor/rspack-plugin": "1.5.18",
     "@rslib/core": "0.23.2",
     "@storybook/addon-a11y": "10.4.6",
     "@storybook/addon-docs": "10.4.6",
@@ -89,10 +89,10 @@
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
     "@types/defined": "1.0.2",
-    "@types/node": "24.12.3",
+    "@types/node": "24.13.3",
     "@types/superagent": "8.1.10",
     "@types/ua-parser-js": "0.7.39",
-    "@vitest/eslint-plugin": "1.6.21",
+    "@vitest/eslint-plugin": "1.6.22",
     "audit-ci": "7.1.0",
     "chromatic": "18.0.1",
     "cross-env": "10.1.0",
@@ -106,9 +106,9 @@
     "eslint-plugin-simple-import-sort": "13.0.0",
     "globals": "17.7.0",
     "jsdom": "29.1.1",
-    "msw": "2.14.6",
+    "msw": "2.15.0",
     "msw-storybook-addon": "2.0.7",
-    "prettier": "3.9.4",
+    "prettier": "3.9.5",
     "prettier-plugin-curly": "0.4.1",
     "prettier-plugin-jsdoc": "1.8.1",
     "prettier-plugin-packagejson": "3.0.2",
@@ -118,12 +118,12 @@
     "storybook-html-rsbuild": "3.3.4",
     "type-fest": "5.8.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.62.1",
+    "typescript-eslint": "8.63.0",
     "vitest": "4.1.10"
   },
   "engines": {
-    "node": "^24.15.0",
-    "npm": "^11.12.1"
+    "node": ">=24.18.0",
+    "npm": ">=11.16.0"
   },
   "msw": {
     "workerDirectory": [
