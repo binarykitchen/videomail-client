@@ -521,12 +521,12 @@ class Recorder extends Despot {
             const command = JSON.parse(data.toString());
             this.executeCommand(command);
           } catch (exc) {
-            this.options.logger.debug(`Failed to parse command: ${exc}`);
+            this.options.logger.error(`Failed to parse command: ${exc}`);
 
             const err = createError({
               message: "Invalid server command",
               // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-              explanation: `Contact us asap. Bad command was ${data.toString()}. `,
+              explanation: `Contact us. The invalid command was: ${data.toString()}.`,
               options: this.options,
               exc,
             });
