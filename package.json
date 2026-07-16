@@ -89,7 +89,7 @@
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
     "@types/defined": "1.0.2",
-    "@types/node": "24.13.3",
+    "@types/node": "26.1.1",
     "@types/superagent": "8.1.11",
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.23",
@@ -122,8 +122,8 @@
     "vitest": "4.1.10"
   },
   "engines": {
-    "node": "^24.18.0",
-    "npm": ">=11.16.0"
+    "node": "^26.5.0",
+    "npm": "^11.16.0"
   },
   "msw": {
     "workerDirectory": [
