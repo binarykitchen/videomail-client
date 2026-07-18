@@ -10,7 +10,7 @@
   ],
   "extends": [
     "./node_modules/@tsconfig/strictest/tsconfig.json",
-    "./node_modules/@tsconfig/node24/tsconfig.json"
+    "./node_modules/@tsconfig/node26/tsconfig.json"
   ],
   "compilerOptions": {
     "rootDir": ".",

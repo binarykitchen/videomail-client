@@ -82,11 +82,11 @@
     "@rsbuild/plugin-stylus": "2.0.1",
     "@rsdoctor/rspack-plugin": "1.6.0",
     "@rslib/core": "0.23.2",
-    "@storybook/addon-a11y": "10.5.0",
-    "@storybook/addon-docs": "10.5.0",
-    "@storybook/addon-links": "10.5.0",
-    "@storybook/html": "10.5.0",
-    "@tsconfig/node24": "24.0.4",
+    "@storybook/addon-a11y": "10.5.2",
+    "@storybook/addon-docs": "10.5.2",
+    "@storybook/addon-links": "10.5.2",
+    "@storybook/html": "10.5.2",
+    "@tsconfig/node26": "26.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/defined": "1.0.2",
     "@types/node": "26.1.1",
@@ -103,7 +103,7 @@
     "eslint-plugin-import-x": "4.17.1",
     "eslint-plugin-package-json": "1.6.0",
     "eslint-plugin-regexp": "3.1.1",
-    "eslint-plugin-simple-import-sort": "13.0.0",
+    "eslint-plugin-simple-import-sort": "14.0.0",
     "globals": "17.7.0",
     "jsdom": "29.1.1",
     "msw": "2.15.0",
@@ -114,7 +114,7 @@
     "prettier-plugin-packagejson": "3.0.2",
     "prettier-plugin-sh": "0.19.0",
     "release-it": "20.2.1",
-    "storybook": "10.5.0",
+    "storybook": "10.5.2",
     "storybook-html-rsbuild": "3.3.4",
     "type-fest": "5.8.0",
     "typescript": "6.0.3",
@@ -123,7 +123,7 @@
   },
   "engines": {
     "node": "^26.5.0",
-    "npm": "^11.16.0"
+    "npm": ">=11.16.0"
   },
   "msw": {
     "workerDirectory": [
