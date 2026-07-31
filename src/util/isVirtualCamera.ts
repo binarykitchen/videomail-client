@@ -8,9 +8,11 @@ function isVirtualCamera(videoTrack: MediaStreamTrack) {
     return true;
   }
 
-  return VIRTUAL_KEYWORDS.some((keyword) =>
+  const isVirtual = VIRTUAL_KEYWORDS.some((keyword) =>
     videoTrack.label.toLowerCase().includes(keyword),
   );
+
+  return isVirtual;
 }
 
 export default isVirtualCamera;
