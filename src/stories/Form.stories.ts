@@ -236,6 +236,7 @@ export const ContactForm: Story = {
 export const VideoSubmissionOnly: Story = {
   args: {
     enablePause: false,
+    audio: { enabled: true },
     video: {
       limitSeconds: 80,
       width: 640,

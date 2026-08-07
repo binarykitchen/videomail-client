@@ -15,10 +15,27 @@ const meta: Meta<PartialVideomailClientOptions> = {
 
 type Story = StoryObj<PartialVideomailClientOptions>;
 
-// Dead simple with most defaults
+// DeaF simple with most defaults
+export const DeaFSimple: Story = {
+  name: "DeaF simple",
+  args: {
+    video: {
+      width: 320,
+    },
+  },
+  render: (args) => {
+    const videomailClient = new VideomailClient(args);
+    return videomailClient.show();
+  },
+};
+
+// Likewise but with audio for those who do not know Sign Language ;)
 export const DeadSimple: Story = {
   name: "Dead simple",
   args: {
+    audio: {
+      enabled: true,
+    },
     video: {
       width: 320,
     },
