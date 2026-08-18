@@ -968,7 +968,8 @@ class Recorder extends Despot {
   private getAvgInterval() {
     const intervalSum = this.getIntervalSum();
 
-    if (!intervalSum) {
+    // Explicitly reject undefined and invalid values (zero or negative).
+    if (intervalSum === undefined || intervalSum <= 0) {
       return undefined;
     }
 
@@ -978,7 +979,8 @@ class Recorder extends Despot {
   private getAvgFps() {
     const intervalSum = this.getIntervalSum();
 
-    if (!intervalSum) {
+    // Explicitly reject undefined and invalid values (zero or negative).
+    if (intervalSum === undefined || intervalSum <= 0) {
       return undefined;
     }
 
