@@ -1,6 +1,6 @@
 {
   "name": "videomail-client",
-  "version": "15.0.3",
+  "version": "15.1.0",
   "description": "A wicked npm package to record videos directly in the browser, for Deaf and Sign Language!",
   "keywords": [
     "webcam",
