@@ -13,6 +13,7 @@ import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import VideomailError from "./util/error/VideomailError";
 import getBrowser from "./util/getBrowser";
+import getCapacitorDeviceMetadata from "./util/getCapacitorDeviceMetadata";
 import { FormInputs, FormMethod, FormMethodType } from "./wrappers/form";
 
 class Resource {
@@ -132,43 +133,41 @@ class Resource {
 
     const url = `${this.options.apiUrl}/client-error/`;
 
-    try {
-      const fullVideomailErrorData: FullVideomailErrorData = {
-        browser: err.browser,
-        code: err.code,
-        cookie: err.cookie,
-        cpu: err.cpu,
-        device: err.device,
-        engine: err.engine,
-        err: err.err ? serializeError(err.err) : undefined,
-        explanation: err.explanation,
-        location: err.location,
-        logLines: err.logLines,
-        orientation: err.orientation,
-        os: err.os,
-        screen: err.screen,
-        whitelistKey: err.whitelistKey,
-        status: err.status,
-        title: err.title,
-        message: err.message,
-        stack: err.stack,
-        versions: {
-          videomailClient: videomailClientVersion,
-          videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
-        },
-      };
+    const capacitorDevice = await getCapacitorDeviceMetadata();
 
-      await superagent(FormMethod.POST, url)
-        .query(queryParams)
-        .set("Timezone-Id", this.timezoneId)
-        .withCredentials()
-        // Note you cant send the Error instance itself, it has to be a plain JSON
-        .send(fullVideomailErrorData)
-        .timeout(this.options.timeouts.connection);
-    } catch (exc) {
-      // Can't throw it again, so just print and do nothing else further.
-      console.error(exc);
-    }
+    const fullVideomailErrorData: FullVideomailErrorData = {
+      capacitorDevice,
+      browser: err.browser,
+      code: err.code,
+      cookie: err.cookie,
+      cpu: err.cpu,
+      device: err.device,
+      engine: err.engine,
+      err: err.err ? serializeError(err.err) : undefined,
+      explanation: err.explanation,
+      location: err.location,
+      logLines: err.logLines,
+      orientation: err.orientation,
+      os: err.os,
+      screen: err.screen,
+      whitelistKey: err.whitelistKey,
+      status: err.status,
+      title: err.title,
+      message: err.message,
+      stack: err.stack,
+      versions: {
+        videomailClient: videomailClientVersion,
+        videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
+      },
+    };
+
+    await superagent(FormMethod.POST, url)
+      .query(queryParams)
+      .set("Timezone-Id", this.timezoneId)
+      .withCredentials()
+      // Note you cant send the Error instance itself, it has to be a plain JSON
+      .send(fullVideomailErrorData)
+      .timeout(this.options.timeouts.connection);
   }
 
   public async post(videomail: PartialVideomail) {

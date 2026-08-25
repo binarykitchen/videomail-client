@@ -59,6 +59,7 @@
   },
   "prettier": "./prettier.config.js",
   "dependencies": {
+    "@capacitor/device": "8.0.3",
     "animitter": "3.0.0",
     "audio-sample": "7.0.0",
     "canvas-to-buffer": "4.1.2",

@@ -1,6 +1,8 @@
 import { ErrorObject } from "serialize-error";
 import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
+import { CapacitorDeviceMetadata } from "./device";
+
 // Make sure these are only native, primitive types, not fully bloated objects
 export interface VideomailErrorData {
   // These two are for unhandled promise rejection events.
@@ -52,4 +54,5 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   clientIp?: string | null | undefined;
   userAgent?: string | null | undefined;
   isBot?: boolean | undefined;
+  capacitorDevice: CapacitorDeviceMetadata;
 }
