@@ -11,7 +11,7 @@
     "audio",
     "recorder"
   ],
-  "homepage": "https://videomail.io",
+  "homepage": "https://github.com/binarykitchen/videomail-client",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/binarykitchen/videomail-client.git"
