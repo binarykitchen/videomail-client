@@ -484,9 +484,12 @@ class Replay extends Despot {
       // Remove controls so that on native devices, no black horizontal bar appears
       this.replayElement.removeAttribute("controls");
 
-      // Force iOS to release the media layer context
-      this.replayElement.src = "";
-      this.replayElement.load();
+      // Release/reset the element,
+      // guard it so it only touches src when one was actually present
+      if (this.replayElement.hasAttribute("src")) {
+        this.replayElement.removeAttribute("src");
+        this.replayElement.load();
+      }
 
       hideElement(this.replayElement);
       hideElement(this.replayElement.parentElement);
