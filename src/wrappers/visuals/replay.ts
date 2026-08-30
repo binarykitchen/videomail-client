@@ -42,11 +42,6 @@ class Replay extends Despot {
     }
   }
 
-  // Questionable, does not make sense
-  private isStandalone() {
-    return this.visuals.constructor.name === "HTMLDivElement";
-  }
-
   private copyAttributes(newVideomail: Videomail) {
     let attributeContainer;
 
@@ -267,15 +262,15 @@ class Replay extends Despot {
     this.replayElement.setAttribute("autobuffer", "true");
     this.replayElement.setAttribute("playsinline", "true");
     this.replayElement.setAttribute("webkit-playsinline", "webkit-playsinline");
-    this.replayElement.setAttribute("controls", "controls");
     this.replayElement.setAttribute("preload", "auto");
 
     if (!this.built) {
-      if (!this.isStandalone()) {
-        this.on("PREVIEW", (params?: VideomailPreviewParams) => {
-          this.show(params?.width, params?.height, params?.hasAudio);
-        });
-      }
+      this.on("PREVIEW", (params?: VideomailPreviewParams) => {
+        // Only add controls when needed, so that the native video controls do
+        // not appear unnecessarily before recording
+        this.replayElement?.setAttribute("controls", "controls");
+        this.show(params?.width, params?.height, params?.hasAudio);
+      });
 
       this.replayElement.addEventListener(
         "touchstart",
@@ -482,9 +477,10 @@ class Replay extends Despot {
   }
 
   public hide() {
-    if (this.isStandalone()) {
-      this.visuals.hide();
-    } else if (this.replayElement) {
+    if (this.replayElement) {
+      // Remove controls so that on native devices, no black horizontal bar appears
+      this.replayElement.removeAttribute("controls");
+
       hideElement(this.replayElement);
       hideElement(this.replayElement.parentElement);
     }
