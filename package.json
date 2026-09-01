@@ -95,7 +95,7 @@
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.27",
     "audit-ci": "7.1.0",
-    "chromatic": "18.7.1",
+    "chromatic": "18.7.2",
     "cross-env": "10.1.0",
     "eslint": "10.9.1",
     "eslint-import-resolver-typescript": "4.4.5",
@@ -117,9 +117,9 @@
     "release-it": "21.0.2",
     "storybook": "10.5.10",
     "storybook-html-rsbuild": "3.4.2",
-    "type-fest": "5.8.0",
+    "type-fest": "5.9.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.68.0",
+    "typescript-eslint": "8.69.0",
     "vitest": "4.1.11"
   },
   "engines": {
