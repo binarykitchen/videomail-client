@@ -350,7 +350,7 @@ class UserMedia extends Despot {
     try {
       let chosenStream = visualStream;
 
-      // do not stop "too much" when going to initialize anyway
+      // Do not stop "too much" when going to initialize anyway
       if (!params?.aboutToInitialize) {
         chosenStream ??= this.currentVisualStream;
 

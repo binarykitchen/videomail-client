@@ -57,4 +57,5 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   capacitorDevice: CapacitorDeviceMetadata;
   supportedConstraints: MediaTrackSupportedConstraints;
   enumerateDevices: MediaDeviceInfo[];
+  usedConstraints?: MediaStreamConstraints | undefined;
 }

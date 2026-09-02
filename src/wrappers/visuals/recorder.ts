@@ -616,7 +616,7 @@ class Recorder extends Despot {
     return this.blocking;
   }
 
-  private userMediaErrorCallback(err) {
+  private userMediaErrorCallback(err, usedConstraints: MediaStreamConstraints) {
     this.userMediaLoading = false;
     this.clearUserMediaTimeout();
 
@@ -630,14 +630,18 @@ class Recorder extends Despot {
 
     if (errorListeners?.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
-        const videomailError = createError({ err, options: this.options });
+        const videomailError = createError({
+          err,
+          options: this.options,
+          usedConstraints,
+        });
         this.emit("ERROR", { err: videomailError });
       } else {
-        // do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
+        // Do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
         this.options.logger.debug(`Recorder: ignore user media error ${pretty(err)}`);
       }
 
-      // retry after a while
+      // Retry after a while
       this.retryTimeout = window.setTimeout(
         this.initSocket.bind(this),
         this.options.timeouts.userMedia,
@@ -655,7 +659,7 @@ class Recorder extends Despot {
         `Recorder: no error listeners attached but throwing error ${pretty(err)}`,
       );
 
-      // weird situation, throw it instead of emitting since there are no error listeners
+      // Weird situation, throw it instead of emitting since there are no error listeners
       throw createError({
         err,
         message:
@@ -759,7 +763,7 @@ class Recorder extends Despot {
         this.getUserMediaCallback(localStream, params);
       })
       .catch((reason: unknown) => {
-        this.userMediaErrorCallback(reason);
+        this.userMediaErrorCallback(reason, constraints);
       });
   }
 

@@ -12,6 +12,7 @@ interface ErrorParams {
   explanation?: string;
   options: VideomailClientOptions;
   classList?: string[];
+  usedConstraints?: MediaStreamConstraints;
 }
 
 function createError(errorParams: ErrorParams) {
@@ -235,6 +236,7 @@ function createError(errorParams: ErrorParams) {
     videomailError.status = err.status;
     videomailError.code = err.code;
     videomailError.constraint = err.constraint;
+    videomailError.usedConstraints = err.usedConstraints;
   }
 
   if (options.reportErrors) {

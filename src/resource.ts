@@ -159,6 +159,7 @@ class Resource {
       stack: err.stack,
       supportedConstraints,
       enumerateDevices,
+      usedConstraints: err.usedConstraints,
       versions: {
         videomailClient: videomailClientVersion,
         videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
