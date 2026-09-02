@@ -234,6 +234,7 @@ function createError(errorParams: ErrorParams) {
   if (err) {
     videomailError.status = err.status;
     videomailError.code = err.code;
+    videomailError.constraint = err.constraint;
   }
 
   if (options.reportErrors) {

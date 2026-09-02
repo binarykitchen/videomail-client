@@ -134,6 +134,8 @@ class Resource {
     const url = `${this.options.apiUrl}/client-error/`;
 
     const capacitorDevice = await getCapacitorDeviceMetadata();
+    const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+    const enumerateDevices = await navigator.mediaDevices.enumerateDevices();
 
     const fullVideomailErrorData: FullVideomailErrorData = {
       capacitorDevice,
@@ -155,6 +157,8 @@ class Resource {
       title: err.title,
       message: err.message,
       stack: err.stack,
+      supportedConstraints,
+      enumerateDevices,
       versions: {
         videomailClient: videomailClientVersion,
         videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
