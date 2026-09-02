@@ -20,7 +20,17 @@ async function getCapacitorDeviceMetadata() {
   try {
     info = await Device.getInfo();
   } catch (exc) {
-    errors.push(serializeError(exc));
+    const err = serializeError(exc);
+
+    let ignore = false;
+
+    if (err.message?.includes("Device API not available in this browser")) {
+      ignore = true;
+    }
+
+    if (!ignore) {
+      errors.push(err);
+    }
   }
 
   try {
