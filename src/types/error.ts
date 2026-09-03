@@ -55,7 +55,7 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   userAgent?: string | null | undefined;
   isBot?: boolean | undefined;
   capacitorDevice: CapacitorDeviceMetadata;
-  supportedConstraints: MediaTrackSupportedConstraints;
-  enumerateDevices: MediaDeviceInfo[];
+  supportedConstraints?: MediaTrackSupportedConstraints | undefined;
+  enumerateDevices?: MediaDeviceInfo[] | undefined;
   usedConstraints?: MediaStreamConstraints | undefined;
 }
