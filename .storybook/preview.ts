@@ -1,29 +1,6 @@
 import type { Preview } from "@storybook/html";
-import { initialize, mswLoader } from "msw-storybook-addon";
-
-/*
- * Initializes MSW
- * See https://github.com/mswjs/msw-storybook-addon#configuring-msw
- * to learn how to customize it
- */
-initialize({
-  onUnhandledRequest: ({ url, method }) => {
-    const origin = new URL(url).origin;
-
-    if (
-      origin.startsWith("https://videomail.io") ||
-      origin.startsWith("wss://videomail.io") ||
-      origin.startsWith("https://videos.pond5.com") ||
-      origin.startsWith("https://s1.dmcdn.net")
-    ) {
-      // When using the real videomail server or fun hamster videos, don't need to mock that
-      return false;
-    }
-
-    console.warn(`Unhandled ${method} request to ${url}`);
-    return true;
-  },
-});
+import { setupWorker } from "msw/browser";
+import { mswLoader } from "msw-storybook-addon/csf3";
 
 const preview: Preview = {
   parameters: {
@@ -32,13 +9,38 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        // See https://storybook.js.org/docs/writing-stories/naming-components-and-hierarchy
         order: ["Record", "*", "Error Handling"],
       },
     },
   },
-  // 👈 Add the MSW loader to all stories
-  loaders: [mswLoader],
+
+  // Initialize MSW and pass custom options directly via the loader function
+  loaders: [
+    mswLoader(async () => {
+      const worker = setupWorker();
+
+      await worker.start({
+        onUnhandledRequest: (request, print) => {
+          const origin = new URL(request.url).origin;
+
+          if (
+            origin.startsWith("https://videomail.io") ||
+            origin.startsWith("wss://videomail.io") ||
+            origin.startsWith("https://videos.pond5.com") ||
+            origin.startsWith("https://s1.dmcdn.net")
+          ) {
+            // Bypass mocking for the real videomail server or assets
+            return;
+          }
+
+          // Use the worker's native warning print tool for unhandled requests
+          print.warning();
+        },
+      });
+
+      return worker;
+    }),
+  ],
 };
 
 export default preview;

@@ -108,17 +108,17 @@ export const ContactForm: Story = {
       },
     },
   },
-  parameters: {
-    msw: {
-      handlers: [
-        // Just mock and return it back
-        http.post("https://localhost:8443/contact", async ({ request }) => {
-          const videomail = await request.json();
-          return HttpResponse.json(videomail);
-        }),
-      ],
-    },
+
+  beforeEach({ msw }) {
+    msw.use(
+      // Just mock and return it back
+      http.post("https://localhost:8443/contact", async ({ request }) => {
+        const videomail = await request.json();
+        return HttpResponse.json(videomail);
+      }),
+    );
   },
+
   render: () => `<style type="text/css">
                   input[type="email"],
                   input[type="text"],
@@ -169,6 +169,7 @@ export const ContactForm: Story = {
                 <video class="replay"></video>
                 <button id="startOver">Start over</button>
               </div>`,
+
   play: ({ args }) => {
     const videomailClient = new VideomailClient(args);
 
