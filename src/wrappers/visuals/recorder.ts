@@ -66,6 +66,7 @@ class Recorder extends Despot {
 
   private userMediaTimeout?: number | undefined;
   private retryTimeout?: number | undefined;
+  private connectionTimeout?: number | undefined;
 
   private frameProgress?: string | undefined;
   private sampleProgress?: string | undefined;
@@ -81,6 +82,7 @@ class Recorder extends Despot {
   private stream?: websocket.WebSocketDuplex | undefined;
   private connecting = false;
   private connected = false;
+  private connectionFailed = false;
   private blocking = false;
   private built = false;
   private key?: string | undefined;
@@ -225,6 +227,47 @@ class Recorder extends Despot {
     this.retryTimeout = undefined;
   }
 
+  private clearConnectionTimeout() {
+    if (!this.connectionTimeout) {
+      return;
+    }
+
+    this.options.logger.debug("Recorder: clearConnectionTimeout()");
+
+    window.clearTimeout(this.connectionTimeout);
+    this.connectionTimeout = undefined;
+  }
+
+  /*
+   * A web socket that never reaches OPEN gives us no usable detail: the browser fires
+   * an opaque error event (deliberately, to avoid leaking network information) followed
+   * by a close with code 1006. Without reporting it here the recorder would sit on
+   * "Connecting …" forever, which is what users see when the socket URL is unreachable.
+   */
+  private failConnection(params: { url2Connect: string; explanation: string }) {
+    if (this.connectionFailed || this.connected || this.unloaded) {
+      return;
+    }
+
+    this.connectionFailed = true;
+    this.connecting = false;
+
+    this.clearConnectionTimeout();
+
+    if (this.stream) {
+      this.stream.destroy();
+      this.stream = undefined;
+    }
+
+    const err = createError({
+      message: "Unable to connect to the server",
+      explanation: params.explanation,
+      options: this.options,
+    });
+
+    this.emit("ERROR", { err });
+  }
+
   private calculateFrameProgress() {
     return `${((this.confirmedFrameNumber / (this.framesCount || 1)) * 100).toFixed(2)}%`;
   }
@@ -357,6 +400,7 @@ class Recorder extends Despot {
   private initSocket(cb?: () => void) {
     if (!this.connected) {
       this.connecting = true;
+      this.connectionFailed = false;
 
       this.emit("CONNECTING");
 
@@ -469,6 +513,20 @@ class Recorder extends Despot {
       }
 
       if (this.stream) {
+        const connectionTimeoutMs = this.options.timeouts.connection;
+
+        /*
+         * Covers the case where the connection stalls instead of being refused, for
+         * example when packets to the host are silently dropped. Then neither an error
+         * nor a close event ever arrives and only the OS level timeout would end it.
+         */
+        this.connectionTimeout = window.setTimeout(() => {
+          this.failConnection({
+            url2Connect,
+            explanation: `The server at ${url2Connect} did not respond within ${connectionTimeoutMs}ms. Please check your internet connection and try again. If the problem persists, contact us.`,
+          });
+        }, connectionTimeoutMs);
+
         // useful for debugging streams
 
         /*
@@ -487,13 +545,19 @@ class Recorder extends Despot {
          * }
          */
 
-        this.stream.on("close", (err) => {
+        this.stream.on("close", () => {
           this.options.logger.debug(`${PIPE_SYMBOL}Stream has closed`);
 
+          const neverConnected = this.connecting && !this.connected;
+
+          this.clearConnectionTimeout();
           this.connecting = this.connected = false;
 
-          if (err) {
-            this.emit("ERROR", { err });
+          if (neverConnected) {
+            this.failConnection({
+              url2Connect,
+              explanation: `The connection to ${url2Connect} was refused or could not be reached. Please check your internet connection and try again. If the problem persists, contact us.`,
+            });
           } else if (this.userMediaLoaded) {
             this.initSocket();
           }
@@ -501,6 +565,8 @@ class Recorder extends Despot {
 
         this.stream.on("connect", () => {
           this.options.logger.debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
+
+          this.clearConnectionTimeout();
 
           const isClosing = this.stream?.socket.readyState === WebSocket.CLOSING;
 
@@ -1103,6 +1169,10 @@ class Recorder extends Despot {
     this.reset();
 
     this.clearUserMediaTimeout();
+    this.clearConnectionTimeout();
+
+    // so that destroying a still pending stream below is not reported as a failure
+    this.connecting = false;
 
     if (this.userMedia) {
       // prevents https://github.com/binarykitchen/videomail-client/issues/114
