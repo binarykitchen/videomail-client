@@ -5,5 +5,11 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
+  "json.schemas": [
+    {
+      "fileMatch": ["/package.json"],
+      "url": "https://json.schemastore.org/package.json"
+    }
+  ],
   "prettier.configPath": "./prettier.config.js"
 }
