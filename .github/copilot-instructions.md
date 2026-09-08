@@ -66,6 +66,14 @@ But here are the default specs for the main Videomail website itself:
 - The package is designed to be fast and responsive, with minimal latency when recording videos.
 - There are WebSocket reconnection strategies in place to ensure that video recording continues even if the connection is temporarily lost.
 
+## Comments
+
+- We do not like long comments.
+- Keep them concise, the human way.
+- Avoid redundant comments that state the obvious.
+- Add emojis and some humor to make comments more engaging.
+- Add line-breaks in between paragraphs to improve readability.
+
 ## Tests
 
 ### Unit Tests
