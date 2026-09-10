@@ -50,7 +50,13 @@ export interface Videomail {
   dateCreatedServerPretty: string;
   dateUpdated?: number;
   dateUpdatedServerPretty?: string;
+  // That''s when the video flagged as expired
   expired?: boolean;
+  // That's when the Videomail server has deleted
+  // the video of the expired videomail but keeps the metadata.
+  orphaned?: boolean;
+  // This is for any Videomail that is meant to be permanent
+  permanent?: boolean;
   expiresAfter: number;
   expiresAfterIso: string;
   expiresAfterServerPretty: string;
