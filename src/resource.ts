@@ -13,7 +13,6 @@ import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import VideomailError from "./util/error/VideomailError";
 import getBrowser from "./util/getBrowser";
-import getCapacitorDeviceMetadata from "./util/getCapacitorDeviceMetadata";
 import { FormInputs, FormMethod, FormMethodType } from "./wrappers/form";
 
 class Resource {
@@ -133,12 +132,10 @@ class Resource {
 
     const url = `${this.options.apiUrl}/client-error/`;
 
-    const capacitorDevice = await getCapacitorDeviceMetadata();
     const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
     const enumerateDevices = await navigator.mediaDevices.enumerateDevices();
 
     const fullVideomailErrorData: FullVideomailErrorData = {
-      capacitorDevice,
       browser: err.browser,
       code: err.code,
       cookie: err.cookie,
