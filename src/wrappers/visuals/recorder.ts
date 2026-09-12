@@ -88,6 +88,10 @@ class Recorder extends Despot {
   private key?: string | undefined;
   private waitingTime?: number | undefined;
 
+  private connectingStartedAt?: number | undefined;
+  private lastCloseEvent?:
+    { code: number; reason: string; wasClean: boolean } | undefined;
+
   private pingInterval?: number | undefined;
 
   private frame?: Frame;
@@ -243,8 +247,12 @@ class Recorder extends Despot {
    * an opaque error event (deliberately, to avoid leaking network information) followed
    * by a close with code 1006. Without reporting it here the recorder would sit on
    * "Connecting …" forever, which is what users see when the socket URL is unreachable.
+   *
+   * To make "Terror Reports" actually useful, we build the explanation from whatever
+   * we can still observe client-side: whether the device is online at all, how long
+   * we waited (instant refusal vs full timeout) and the raw close code/reason, if any.
    */
-  private failConnection(params: { url2Connect: string; explanation: string }) {
+  private failConnection(params: { url2Connect: string; cause: "timeout" | "closed" }) {
     if (this.connectionFailed || this.connected || this.unloaded) {
       return;
     }
@@ -254,6 +262,31 @@ class Recorder extends Despot {
 
     this.clearConnectionTimeout();
 
+    const { url2Connect, cause } = params;
+
+    const online = navigator.onLine;
+    const elapsedMs = this.connectingStartedAt
+      ? Date.now() - this.connectingStartedAt
+      : undefined;
+    const closeEvent = this.lastCloseEvent;
+
+    // Full technical detail goes into the log lines shipped with the error report.
+    this.options.logger.debug(
+      `Recorder: failConnection() diagnostic - cause=${cause}, online=${online}, elapsedMs=${elapsedMs ?? "unknown"}, closeCode=${closeEvent?.code ?? "none"}, closeReason=${closeEvent?.reason || "none"}, wasClean=${closeEvent?.wasClean ?? "unknown"}`,
+    );
+
+    let explanation: string;
+
+    if (!online) {
+      explanation =
+        "Your device appears to be offline. Please check your internet connection and try again.";
+    } else if (cause === "timeout") {
+      explanation = `The server at ${url2Connect} did not respond within ${this.options.timeouts.connection}ms, even though your device is online. This usually points to a firewall or proxy silently dropping the connection. Please try a different network. If the problem persists, contact us.`;
+    } else {
+      const closeSuffix = closeEvent ? ` (close code ${closeEvent.code})` : "";
+      explanation = `The connection to ${url2Connect} was refused or could not be reached${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
+    }
+
     if (this.stream) {
       this.stream.destroy();
       this.stream = undefined;
@@ -261,7 +294,7 @@ class Recorder extends Despot {
 
     const err = createError({
       message: "Unable to connect to the server",
-      explanation: params.explanation,
+      explanation,
       options: this.options,
     });
 
@@ -401,6 +434,8 @@ class Recorder extends Despot {
     if (!this.connected) {
       this.connecting = true;
       this.connectionFailed = false;
+      this.connectingStartedAt = Date.now();
+      this.lastCloseEvent = undefined;
 
       this.emit("CONNECTING");
 
@@ -462,6 +497,19 @@ class Recorder extends Despot {
 
       try {
         nativeSocket = new WebSocket(url2Connect);
+
+        /*
+         * Capture the raw close code/reason directly from the native socket before
+         * websocket-stream gets a chance to obscure it. This is our only source of
+         * truth for *why* a connection never opened (e.g. 1006 = abnormal closure).
+         */
+        nativeSocket.addEventListener("close", (event) => {
+          this.lastCloseEvent = {
+            code: event.code,
+            reason: event.reason,
+            wasClean: event.wasClean,
+          };
+        });
       } catch (exc) {
         this.connecting = this.connected = false;
 
@@ -521,10 +569,7 @@ class Recorder extends Despot {
          * nor a close event ever arrives and only the OS level timeout would end it.
          */
         this.connectionTimeout = window.setTimeout(() => {
-          this.failConnection({
-            url2Connect,
-            explanation: `The server at ${url2Connect} did not respond within ${connectionTimeoutMs}ms. Please check your internet connection and try again. If the problem persists, contact us.`,
-          });
+          this.failConnection({ url2Connect, cause: "timeout" });
         }, connectionTimeoutMs);
 
         // useful for debugging streams
@@ -554,10 +599,7 @@ class Recorder extends Despot {
           this.connecting = this.connected = false;
 
           if (neverConnected) {
-            this.failConnection({
-              url2Connect,
-              explanation: `The connection to ${url2Connect} was refused or could not be reached. Please check your internet connection and try again. If the problem persists, contact us.`,
-            });
+            this.failConnection({ url2Connect, cause: "closed" });
           } else if (this.userMediaLoaded) {
             this.initSocket();
           }
