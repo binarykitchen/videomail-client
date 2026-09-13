@@ -271,9 +271,9 @@ class Recorder extends Despot {
     const closeEvent = this.lastCloseEvent;
 
     // Full technical detail goes into the log lines shipped with the error report.
-    this.options.logger.debug(
-      `Recorder: failConnection() diagnostic - cause=${cause}, online=${online}, elapsedMs=${elapsedMs ?? "unknown"}, closeCode=${closeEvent?.code ?? "none"}, closeReason=${closeEvent?.reason || "none"}, wasClean=${closeEvent?.wasClean ?? "unknown"}`,
-    );
+    const debugLine = `Recorder: failConnection() diagnostic - cause=${cause}, online=${online}, elapsedMs=${elapsedMs ?? "unknown"}, closeCode=${closeEvent?.code ?? "none"}, closeReason=${closeEvent?.reason || "none"}, wasClean=${closeEvent?.wasClean ?? "unknown"}`;
+
+    this.options.logger.debug(debugLine);
 
     let explanation: string;
 
@@ -283,8 +283,9 @@ class Recorder extends Despot {
     } else if (cause === "timeout") {
       explanation = `The server at ${url2Connect} did not respond within ${this.options.timeouts.connection}ms, even though your device is online. This usually points to a firewall or proxy silently dropping the connection. Please try a different network. If the problem persists, contact us.`;
     } else {
+      // Debug line is temporary
       const closeSuffix = closeEvent ? ` (close code ${closeEvent.code})` : "";
-      explanation = `The connection to ${url2Connect} was refused or could not be reached${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
+      explanation = `The connection to ${url2Connect} was refused or could not be reached${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.\n\nDebug info: ${debugLine}`;
     }
 
     if (this.stream) {
