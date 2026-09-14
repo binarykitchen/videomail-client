@@ -4,9 +4,10 @@ function inspect(element: unknown) {
   return util
     .inspect(element, {
       colors: false,
-      compact: true,
+      compact: false,
       depth: 4,
       breakLength: Infinity,
+      showHidden: true,
     })
     .replace(/\s+/gu, " ")
     .replace(/\r?\n/gu, "");

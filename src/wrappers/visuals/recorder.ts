@@ -283,9 +283,8 @@ class Recorder extends Despot {
     } else if (cause === "timeout") {
       explanation = `The server at ${url2Connect} did not respond within ${this.options.timeouts.connection}ms, even though your device is online. This usually points to a firewall or proxy silently dropping the connection. Please try a different network. If the problem persists, contact us.`;
     } else {
-      // Debug line is temporary
       const closeSuffix = closeEvent ? ` (close code ${closeEvent.code})` : "";
-      explanation = `The connection to ${url2Connect} was refused or could not be reached${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.\n\nDebug info: ${debugLine}`;
+      explanation = `The connection to ${url2Connect} was refused or could not be reached${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
     }
 
     if (this.stream) {
