@@ -2,6 +2,7 @@ import Resource from "../../resource";
 import { VideomailClientOptions } from "../../types/options";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../pretty";
+import { version as videomailClientVersion } from "./../../../package.json";
 import HTTPVideomailError from "./HTTPVideomailError";
 import VideomailError, { ErrData } from "./VideomailError";
 
@@ -238,6 +239,11 @@ function createError(errorParams: ErrorParams) {
     videomailError.constraint = err.constraint;
     videomailError.usedConstraints = err.usedConstraints;
   }
+
+  videomailError.versions = {
+    videomailClient: videomailClientVersion,
+    videomailNinjaFormPlugin: options.versions?.videomailNinjaFormPlugin,
+  };
 
   if (options.reportErrors) {
     const resource = new Resource(options);

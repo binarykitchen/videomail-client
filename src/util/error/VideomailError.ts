@@ -1,5 +1,6 @@
 import { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
+import { VideomailErrorVersions } from "../../types/error";
 import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../getBrowser";
 import HTTPVideomailError from "./HTTPVideomailError";
@@ -32,6 +33,7 @@ class VideomailError extends HTTPVideomailError {
   public os?: IOS | undefined;
   public screen: string;
   public orientation?: string | undefined;
+  public versions?: VideomailErrorVersions | undefined;
 
   private readonly classList?: string[] | undefined;
 

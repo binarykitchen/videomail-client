@@ -157,10 +157,6 @@ class Resource {
       supportedConstraints,
       enumerateDevices,
       usedConstraints: err.usedConstraints,
-      versions: {
-        videomailClient: videomailClientVersion,
-        videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
-      },
     };
 
     await superagent(FormMethod.POST, url)

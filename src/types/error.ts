@@ -1,6 +1,14 @@
 import { ErrorObject } from "serialize-error";
 import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
+export interface VideomailErrorVersions {
+  videomailNinjaFormPlugin?: string | undefined;
+  videomailClient: string;
+  // Injected by the videomail itself (private)
+  videomailUI?: string | undefined;
+  videomailServer?: string | undefined;
+}
+
 // Make sure these are only native, primitive types, not fully bloated objects
 export interface VideomailErrorData {
   // These two are for unhandled promise rejection events.
@@ -22,20 +30,13 @@ export interface VideomailErrorData {
   status?: number | undefined;
   stack?: string | undefined;
   type?: string | undefined;
+  versions?: VideomailErrorVersions | undefined;
 
   // CSP & Security Policy Violation Related
   blockedURI?: string | undefined;
   effectiveDirective?: string | undefined;
   violatedDirective?: string | undefined;
   originalPolicy?: string | undefined;
-}
-
-interface VideomailErrorVersions {
-  videomailNinjaFormPlugin?: string | undefined;
-  videomailClient: string;
-  // Injected by the videomail itself (private)
-  videomailUI?: string | undefined;
-  videomailServer?: string | undefined;
 }
 
 export interface FullVideomailErrorData extends VideomailErrorData {
@@ -48,7 +49,6 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   orientation?: string | undefined;
   os?: IOS | undefined;
   screen: string;
-  versions?: VideomailErrorVersions | undefined;
   clientIp?: string | null | undefined;
   userAgent?: string | null | undefined;
   isBot?: boolean | undefined;
