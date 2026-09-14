@@ -22,6 +22,7 @@ import useFullWidth from "../../util/html/dimensions/useFullWidth";
 import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
+import isAutomatedUserAgent from "../../util/isAutomatedUserAgent";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
 import { UnloadParams } from "../container";
@@ -432,6 +433,16 @@ class Recorder extends Despot {
 
   private initSocket(cb?: () => void) {
     if (!this.connected) {
+      // Skip WebSocket initialization for explicit crawler user agents.
+      // These requests will no longer generate generic connection-error report
+      if (isAutomatedUserAgent()) {
+        this.connecting = false;
+        this.options.logger.debug(
+          "Recorder: skipping web socket connection for an automated crawler",
+        );
+        return;
+      }
+
       this.connecting = true;
       this.connectionFailed = false;
       this.connectingStartedAt = Date.now();
@@ -599,7 +610,11 @@ class Recorder extends Despot {
           this.connecting = this.connected = false;
 
           if (neverConnected) {
-            this.failConnection({ url2Connect, cause: "closed" });
+            // Defer by one event loop tick,
+            // allowing the native CloseEvent listener to run first.
+            window.setTimeout(() => {
+              this.failConnection({ url2Connect, cause: "closed" });
+            }, 0);
           } else if (this.userMediaLoaded) {
             this.initSocket();
           }

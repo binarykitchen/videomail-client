@@ -17,8 +17,8 @@ class CollectLogger {
   private lifo(level: string, parameters: string[]) {
     const line = parameters.join();
 
-    if (this.stack.length > this.options.logStackSize) {
-      this.stack.pop();
+    if (this.stack.length >= this.options.logStackSize) {
+      this.stack.shift();
     }
 
     this.stack.push(`[${level}] ${line}`);
