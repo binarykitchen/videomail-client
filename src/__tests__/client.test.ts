@@ -13,7 +13,7 @@ describe("Client", () => {
 
   it("constructor throws error when width is not divisible by two", () => {
     expect(() => {
-      new VideomailClient({ video: { width: 99 } });
+      new VideomailClient({ reportErrors: false, video: { width: 99 } });
     }).toThrow(/Width must be divisible by two/u);
   });
 

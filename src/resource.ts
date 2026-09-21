@@ -132,8 +132,20 @@ class Resource {
 
     const url = `${this.options.apiUrl}/client-error/`;
 
-    const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
-    const enumerateDevices = await navigator.mediaDevices.enumerateDevices();
+    let supportedConstraints: MediaTrackSupportedConstraints | undefined;
+    let enumerateDevices: MediaDeviceInfo[] | undefined;
+
+    try {
+      // It can be undefined when the page is not served over HTTPS.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (navigator.mediaDevices) {
+        supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+        enumerateDevices = await navigator.mediaDevices.enumerateDevices();
+      }
+    } catch {
+      supportedConstraints = undefined;
+      enumerateDevices = undefined;
+    }
 
     const fullVideomailErrorData: FullVideomailErrorData = {
       browser: err.browser,

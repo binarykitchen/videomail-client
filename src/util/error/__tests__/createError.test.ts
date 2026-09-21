@@ -4,7 +4,7 @@ import VideomailError from "../VideomailError";
 
 describe("createError fn", () => {
   it("a default videomail error can be created", () => {
-    const defaultOptions = mergeWithDefaultOptions();
+    const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const error = createError({ options: defaultOptions });
 
     expect(error.message).toBe("(undefined message)");
@@ -12,7 +12,7 @@ describe("createError fn", () => {
   });
 
   it("a videomail error with a custom message and explanation can be created", () => {
-    const defaultOptions = mergeWithDefaultOptions();
+    const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const error = createError({
       options: defaultOptions,
       message: "i am message",
@@ -24,7 +24,7 @@ describe("createError fn", () => {
   });
 
   it("a videomail error does not re-create a videomail error", () => {
-    const defaultOptions = mergeWithDefaultOptions();
+    const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const error = createError({
       options: defaultOptions,
       err: new VideomailError("i am another message", defaultOptions),

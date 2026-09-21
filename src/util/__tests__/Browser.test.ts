@@ -24,7 +24,7 @@ describe("Browser class", () => {
   });
 
   it("getNoAccessIssue returns error", () => {
-    const defaultOptions = mergeWithDefaultOptions();
+    const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const browser = new Browser(defaultOptions);
 
     const err = browser.getNoAccessIssue();
