@@ -7,7 +7,7 @@ const config: Config = {
   // }
   // https://github.com/release-it/release-it/tree/main?tab=readme-ov-file#hooks
   hooks: {
-    "after:init": [
+    "before:init": [
       "node --run prettier",
       "node --run lint",
       "node --run types",
