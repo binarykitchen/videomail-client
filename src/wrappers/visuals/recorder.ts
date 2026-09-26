@@ -33,6 +33,8 @@ import UserMedia from "./userMedia";
 // credits http://1lineart.kulaone.com/#/
 const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";
 
+const INITIAL_CONNECTION_RETRY_DELAY = 1e3;
+
 interface WriteStreamParams {
   frameNumber?: number;
   onFlushedCallback?: (params: WriteStreamParams) => void;
@@ -68,6 +70,7 @@ class Recorder extends Despot {
   private userMediaTimeout?: number | undefined;
   private retryTimeout?: number | undefined;
   private connectionTimeout?: number | undefined;
+  private connectionRetryTimeout?: number | undefined;
 
   private frameProgress?: string | undefined;
   private sampleProgress?: string | undefined;
@@ -90,6 +93,7 @@ class Recorder extends Despot {
   private waitingTime?: number | undefined;
 
   private connectingStartedAt?: number | undefined;
+  private connectionRetryStartedAt?: number | undefined;
   private lastCloseEvent?:
     { code: number; reason: string; wasClean: boolean } | undefined;
 
@@ -243,6 +247,55 @@ class Recorder extends Despot {
     this.connectionTimeout = undefined;
   }
 
+  private clearConnectionRetryTimeout() {
+    if (!this.connectionRetryTimeout) {
+      return;
+    }
+
+    this.options.logger.debug("Recorder: clearConnectionRetryTimeout()");
+
+    window.clearTimeout(this.connectionRetryTimeout);
+    this.connectionRetryTimeout = undefined;
+  }
+
+  private retryInitialConnection(url2Connect: string) {
+    const retryStartedAt = this.connectionRetryStartedAt;
+
+    if (!retryStartedAt) {
+      return false;
+    }
+
+    const retryElapsedMs = Date.now() - retryStartedAt;
+
+    if (retryElapsedMs >= this.options.timeouts.connection) {
+      this.connectionRetryStartedAt = undefined;
+      return false;
+    }
+
+    const retryRemainingMs = this.options.timeouts.connection - retryElapsedMs;
+
+    this.options.logger.debug(
+      `Recorder: retrying initial web socket connection to ${url2Connect}`,
+    );
+
+    this.connecting = false;
+
+    if (this.stream) {
+      this.stream.destroy();
+      this.stream = undefined;
+    }
+
+    this.connectionRetryTimeout = window.setTimeout(
+      () => {
+        this.connectionRetryTimeout = undefined;
+        this.initSocket();
+      },
+      Math.min(INITIAL_CONNECTION_RETRY_DELAY, retryRemainingMs),
+    );
+
+    return true;
+  }
+
   /*
    * A web socket that never reaches OPEN gives us no usable detail: the browser fires
    * an opaque error event (deliberately, to avoid leaking network information) followed
@@ -258,12 +311,16 @@ class Recorder extends Despot {
       return;
     }
 
-    this.connectionFailed = true;
-    this.connecting = false;
-
     this.clearConnectionTimeout();
 
     const { url2Connect, cause } = params;
+
+    if (this.retryInitialConnection(url2Connect)) {
+      return;
+    }
+
+    this.connectionFailed = true;
+    this.connecting = false;
 
     const online = navigator.onLine;
     const elapsedMs = this.connectingStartedAt
@@ -572,7 +629,16 @@ class Recorder extends Despot {
       }
 
       if (this.stream) {
-        const connectionTimeoutMs = this.options.timeouts.connection;
+        if (!this.userMediaLoaded && !this.connectionRetryStartedAt) {
+          this.connectionRetryStartedAt = Date.now();
+        }
+
+        const connectionRetryElapsedMs = this.connectionRetryStartedAt
+          ? Date.now() - this.connectionRetryStartedAt
+          : 0;
+        const connectionTimeoutMs = this.connectionRetryStartedAt
+          ? Math.max(0, this.options.timeouts.connection - connectionRetryElapsedMs)
+          : this.options.timeouts.connection;
 
         /*
          * Covers the case where the connection stalls instead of being refused, for
@@ -630,6 +696,7 @@ class Recorder extends Despot {
           if (!this.connected && !isClosing && !this.unloaded) {
             this.connected = true;
             this.connecting = this.unloaded = false;
+            this.connectionRetryStartedAt = undefined;
 
             this.emit("CONNECTED");
 
@@ -1227,6 +1294,8 @@ class Recorder extends Despot {
 
     this.clearUserMediaTimeout();
     this.clearConnectionTimeout();
+    this.clearConnectionRetryTimeout();
+    this.connectionRetryStartedAt = undefined;
 
     // so that destroying a still pending stream below is not reported as a failure
     this.connecting = false;
