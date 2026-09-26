@@ -12,11 +12,22 @@ type Story = StoryObj<PartialVideomailClientOptions>;
 
 // With an invalid whitelist key, you don't get whitelisted
 //
-// By default the whitelist key is "videomail-client-demo" which works on localhost only
+// By default the whitelist key is "videomail-client-demo" which works on
+// localhost only.
+//
 // To run the videomail client on your site, you'll have to register it at
 // https://www.videomail.io/whitelist to obtain a valid whitelist key
 export const InvalidWhitelistKey: Story = {
-  args: { whitelistKey: "invalid-whitelist-key" },
+  name: "Invalid Whitelist Key",
+  args: {
+    whitelistKey: "invalid-whitelist-key",
+    audio: {
+      enabled: true,
+    },
+    video: {
+      width: 320,
+    },
+  },
   render: (args) => {
     const videomailClient = new VideomailClient(args);
     return videomailClient.show();
