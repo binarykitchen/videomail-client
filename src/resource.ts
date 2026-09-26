@@ -151,6 +151,7 @@ class Resource {
       // Always good to know the version of the client the videomail was submitted with
       versions: {
         videomailClient: videomailClientVersion,
+        videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
       },
       browser: err.browser,
       code: err.code,
