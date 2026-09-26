@@ -2,7 +2,7 @@ import { serializeError } from "serialize-error";
 import superagent from "superagent";
 import Response from "superagent/lib/node/response";
 
-import { version as videomailClientVersion } from "./../package.json";
+import { version as videomailClientVersion } from "../package.json";
 import Constants from "./constants";
 import { FullVideomailErrorData } from "./types/error";
 import { VideomailIdentifier } from "./types/identifier";
@@ -148,6 +148,10 @@ class Resource {
     }
 
     const fullVideomailErrorData: FullVideomailErrorData = {
+      // Always good to know the version of the client the videomail was submitted with
+      versions: {
+        videomailClient: videomailClientVersion,
+      },
       browser: err.browser,
       code: err.code,
       cookie: err.cookie,
