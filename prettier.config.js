@@ -9,6 +9,7 @@ const config = {
     "prettier-plugin-packagejson",
     "prettier-plugin-jsdoc",
   ],
+  useTabs: false,
 };
 
 export default config;
