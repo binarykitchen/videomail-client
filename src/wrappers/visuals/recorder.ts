@@ -271,8 +271,22 @@ class Recorder extends Despot {
       : undefined;
     const closeEvent = this.lastCloseEvent;
 
-    // Full technical detail goes into the log lines shipped with the error report.
-    const debugLine = `Recorder: failConnection() diagnostic - cause=${cause}, online=${online}, elapsedMs=${elapsedMs ?? "unknown"}, closeCode=${closeEvent?.code ?? "none"}, closeReason=${closeEvent?.reason || "none"}, wasClean=${closeEvent?.wasClean ?? "unknown"}`;
+    const diagnosticLines = [
+      `  • cause: ${cause}`,
+      `  • closeCode: ${closeEvent?.code ?? "undefined"}`,
+      `  • closeReason: ${closeEvent?.reason || "undefined"}`,
+      `  • elapsedMs: ${elapsedMs ?? "undefined"}`,
+      `  • online: ${online}`,
+      `  • unloaded: ${this.unloaded ?? "undefined"}`,
+      `  • userMediaLoaded: ${this.userMediaLoaded ?? "undefined"}`,
+      `  • userMediaLoading: ${this.userMediaLoading}`,
+      `  • wasClean: ${closeEvent?.wasClean ?? "undefined"}`,
+    ];
+
+    const debugLine = [
+      "🔎 Recorder: failConnection() diagnostic",
+      ...diagnosticLines,
+    ].join("\n");
 
     this.options.logger.debug(debugLine);
 
