@@ -606,19 +606,22 @@ class Recorder extends Despot {
             `${PIPE_SYMBOL}Stream has closed, connecting=${this.connecting}, connected=${this.connected},`,
           );
 
-          const neverConnected = this.connecting && !this.connected;
+          const tryReconnect = this.connecting && this.userMediaLoaded;
 
-          this.clearConnectionTimeout();
-          this.connecting = this.connected = false;
+          this.connected = false;
 
-          if (neverConnected) {
+          if (tryReconnect) {
+            // Allow it to reconnect automatically.
+            //
+            // We have reconnect mechanisms in place in case of temporary network issues or
+            // while hot-reloading during development.
+            this.initSocket();
+          } else {
             // Defer by one event loop tick,
             // allowing the native CloseEvent listener to run first.
             window.setTimeout(() => {
               this.failConnection({ url2Connect, cause: "closed" });
             }, 0);
-          } else if (this.userMediaLoaded) {
-            this.initSocket();
           }
         });
 
@@ -1415,9 +1418,9 @@ class Recorder extends Despot {
       return;
     }
 
-    // reconnect when needed
+    // Reconnect when needed
     if (!this.connected) {
-      this.options.logger.debug("Recorder: reconnecting before recording ...");
+      this.options.logger.debug("Recorder: reconnecting before recording …");
 
       this.initSocket(() => {
         this.once("USER_MEDIA_READY", this.record.bind(this));
