@@ -603,10 +603,10 @@ class Recorder extends Despot {
 
         this.stream.on("close", () => {
           this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream has closed, connecting=${this.connecting}, connected=${this.connected},`,
+            `${PIPE_SYMBOL}Stream has closed, connecting=${this.connecting}, connected=${this.connected}, userMediaLoaded=${this.userMediaLoaded}`,
           );
 
-          const tryReconnect = this.connecting && this.userMediaLoaded;
+          const tryReconnect = this.connected && this.userMediaLoaded;
 
           this.connected = false;
 
@@ -616,7 +616,10 @@ class Recorder extends Despot {
             // We have reconnect mechanisms in place in case of temporary network issues or
             // while hot-reloading during development.
             this.initSocket();
-          } else {
+          } else if (!this.connecting) {
+            // Now report the closed connection but only when
+            // no reconnection attempt is in progress.
+            //
             // Defer by one event loop tick,
             // allowing the native CloseEvent listener to run first.
             window.setTimeout(() => {
