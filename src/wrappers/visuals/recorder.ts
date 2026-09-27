@@ -1,7 +1,7 @@
 import animitter from "animitter";
 import AudioSample from "audio-sample";
 import Frame from "canvas-to-buffer";
-import { deserializeError } from "serialize-error";
+import { deserializeError, serializeError } from "serialize-error";
 import websocket from "websocket-stream";
 
 import Constants from "../../constants";
@@ -12,6 +12,7 @@ import { VideomailClientOptions } from "../../types/options";
 import { RecordingStats } from "../../types/RecordingStats";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
+import getEventDetails from "../../util/error/getEventDetails";
 import getWebSocketDiagnostic from "../../util/error/getWebSocketDiagnostic";
 import VideomailError from "../../util/error/VideomailError";
 import getBrowser from "../../util/getBrowser";
@@ -92,6 +93,7 @@ class Recorder extends Despot {
   private connectingStartedAt?: number | undefined;
   private lastCloseEvent?:
     { code: number; reason: string; wasClean: boolean } | undefined;
+  private lastSocketError?: Record<string, unknown> | undefined;
 
   private pingInterval?: number | undefined;
 
@@ -253,7 +255,10 @@ class Recorder extends Despot {
    * we can still observe client-side: whether the device is online at all, how long
    * we waited (instant refusal vs full timeout) and the raw close code/reason, if any.
    */
-  private failConnection(params: { url2Connect: string; cause: "timeout" | "closed" }) {
+  private failConnection(params: {
+    url2Connect: string;
+    cause: "timeout" | "closed" | "error";
+  }) {
     if (this.connectionFailed || this.connected || this.unloaded) {
       return;
     }
@@ -270,6 +275,7 @@ class Recorder extends Despot {
       ? Date.now() - this.connectingStartedAt
       : undefined;
     const closeEvent = this.lastCloseEvent;
+    const socketError = this.lastSocketError;
 
     const diagnosticLines = [
       `  • cause: ${cause}`,
@@ -281,6 +287,7 @@ class Recorder extends Despot {
       `  • userMediaLoaded: ${this.userMediaLoaded ?? "undefined"}`,
       `  • userMediaLoading: ${this.userMediaLoading}`,
       `  • wasClean: ${closeEvent?.wasClean ?? "undefined"}`,
+      `  • socketError: ${socketError ? pretty(socketError) : "undefined"}`,
     ];
 
     const debugLine = [
@@ -297,6 +304,8 @@ class Recorder extends Despot {
         "Your device appears to be offline. Please check your internet connection and try again.";
     } else if (cause === "timeout") {
       explanation = `The server at ${url2Connect} did not respond within ${this.options.timeouts.connection}ms, even though your device is online. This usually points to a firewall or proxy silently dropping the connection. Please try a different network. If the problem persists, contact us.`;
+    } else if (cause === "error") {
+      explanation = `The WebSocket reported an error while connecting to ${url2Connect}. Details: ${pretty(socketError ?? {})} Please check your internet connection and try again. If the problem persists, contact us.`;
     } else {
       const closeSuffix = closeEvent ? ` (code ${closeEvent.code})` : "";
       explanation = `Connection to ${url2Connect} is closed${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
@@ -311,6 +320,9 @@ class Recorder extends Despot {
       message: "Unable to connect to the server",
       explanation,
       options: this.options,
+      exc: socketError
+        ? new Error("WebSocket connection error", { cause: socketError })
+        : undefined,
     });
 
     this.emit("ERROR", { err });
@@ -461,6 +473,7 @@ class Recorder extends Despot {
       this.connectionFailed = false;
       this.connectingStartedAt = Date.now();
       this.lastCloseEvent = undefined;
+      this.lastSocketError = undefined;
 
       this.emit("CONNECTING");
 
@@ -534,6 +547,10 @@ class Recorder extends Despot {
             reason: event.reason,
             wasClean: event.wasClean,
           };
+        });
+
+        nativeSocket.addEventListener("error", (event) => {
+          this.lastSocketError = getEventDetails(event);
         });
       } catch (exc) {
         this.connecting = this.connected = false;
@@ -683,9 +700,36 @@ class Recorder extends Despot {
         });
 
         this.stream.on("error", (err) => {
+          if (typeof Event !== "undefined" && err instanceof Event) {
+            this.lastSocketError = getEventDetails(err);
+          } else {
+            this.lastSocketError = serializeError(err);
+          }
+
           this.options.logger.debug(
             `${PIPE_SYMBOL}Stream *error* event emitted: ${pretty(err)}`,
           );
+
+          if (!this.connected) {
+            this.failConnection({ url2Connect, cause: "error" });
+            return;
+          }
+
+          const streamError =
+            err instanceof Error
+              ? err
+              : new Error("WebSocket stream emitted an error event", {
+                  cause: this.lastSocketError ?? err,
+                });
+
+          this.emit("ERROR", {
+            err: createError({
+              message: "WebSocket stream error",
+              explanation: `The WebSocket stream emitted an error event. Details: ${pretty(err)}`,
+              options: this.options,
+              exc: streamError,
+            }),
+          });
         });
 
         // just experimental

@@ -37,6 +37,13 @@ describe("pretty", () => {
     expect(pretty(nested)).toEqual("{ a: { b: 'c' } }");
   });
 
+  it("should include useful details for browser events", () => {
+    const event = new Event("error");
+
+    expect(pretty(event)).toContain("type: 'error'");
+    expect(pretty(event)).toContain("isTrusted: false");
+  });
+
   it("should handle errors", () => {
     const error = new Error("Hello I am an error", { cause: "because of me" });
 

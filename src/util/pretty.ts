@@ -1,5 +1,7 @@
 import util from "node:util";
 
+import getEventDetails from "./error/getEventDetails";
+
 function inspect(element: unknown) {
   return util
     .inspect(element, {
@@ -23,6 +25,10 @@ function pretty(anything: unknown) {
     }
 
     return "(No HTML identifier available)";
+  }
+
+  if (typeof Event !== "undefined" && anything instanceof Event) {
+    return inspect(getEventDetails(anything));
   }
 
   return inspect(anything);
