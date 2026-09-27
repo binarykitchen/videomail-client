@@ -284,8 +284,8 @@ class Recorder extends Despot {
     } else if (cause === "timeout") {
       explanation = `The server at ${url2Connect} did not respond within ${this.options.timeouts.connection}ms, even though your device is online. This usually points to a firewall or proxy silently dropping the connection. Please try a different network. If the problem persists, contact us.`;
     } else {
-      const closeSuffix = closeEvent ? ` (close code ${closeEvent.code})` : "";
-      explanation = `The connection to ${url2Connect} was refused or could not be reached${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
+      const closeSuffix = closeEvent ? ` (code ${closeEvent.code})` : "";
+      explanation = `Connection to ${url2Connect} is closed${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
     }
 
     if (this.stream) {
@@ -602,7 +602,9 @@ class Recorder extends Despot {
          */
 
         this.stream.on("close", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream has closed`);
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream has closed, connecting=${this.connecting}, connected=${this.connected},`,
+          );
 
           const neverConnected = this.connecting && !this.connected;
 
@@ -620,8 +622,10 @@ class Recorder extends Despot {
           }
         });
 
-        this.stream.on("connect", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
+        this.stream.on("connect", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
+          );
 
           this.clearConnectionTimeout();
 
@@ -672,44 +676,62 @@ class Recorder extends Despot {
           );
         });
 
-        this.stream.on("preend", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("preend", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *preend* event emitted with args: ${pretty(args)}`,
+          );
         });
 
         this.stream.on("end", () => {
           this.options.logger.debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
         });
 
-        this.stream.on("drain", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *drain* event emitted`);
+        this.stream.on("drain", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *drain* event emitted with args: ${pretty(args)}`,
+          );
         });
 
-        this.stream.on("pipe", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *pipe* event emitted`);
+        this.stream.on("pipe", (src) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *pipe* event emitted with src: ${pretty(src)}`,
+          );
         });
 
-        this.stream.on("unpipe", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *unpipe* event emitted`);
+        this.stream.on("unpipe", (src) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *unpipe* event emitted with src: ${pretty(src)}`,
+          );
         });
 
-        this.stream.on("resume", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *resume* event emitted`);
+        this.stream.on("resume", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *resume* event emitted with args: ${pretty(args)}`,
+          );
         });
 
-        this.stream.on("uncork", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *uncork* event emitted`);
+        this.stream.on("uncork", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *uncork* event emitted with args: ${pretty(args)}`,
+          );
         });
 
-        this.stream.on("readable", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("readable", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *readable* event emitted with args: ${pretty(args)}`,
+          );
         });
 
-        this.stream.on("prefinish", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("prefinish", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *prefinish* event emitted with args: ${pretty(args)}`,
+          );
         });
 
-        this.stream.on("finish", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *preend* event emitted`);
+        this.stream.on("finish", (args) => {
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Stream *finish* event emitted with args: ${pretty(args)}`,
+          );
         });
       }
     }
