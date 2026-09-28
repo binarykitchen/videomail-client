@@ -1,11 +1,6 @@
-export type Contents = Record<
-  string,
-  string | number | boolean | undefined | Record<string, unknown>
->;
-
 import pretty from "./pretty";
 
-function summarize(title: string, contents: Contents) {
+function summarize(title: string, contents: object) {
   const lines = Object.entries(contents)
     .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
     .map(([key, value]) => {

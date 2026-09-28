@@ -1,8 +1,8 @@
-import summarize, { Contents } from "../summarize";
+import summarize from "../summarize";
 
 describe("summarize", () => {
   it("sorts contents and formats values", () => {
-    const contents: Contents = {
+    const contents = {
       zebra: true,
       alpha: undefined,
       nested: { value: "test" },

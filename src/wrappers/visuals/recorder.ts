@@ -26,7 +26,7 @@ import showElement from "../../util/html/showElement";
 import isAutomatedUserAgent from "../../util/isAutomatedUserAgent";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
-import summarize, { Contents } from "../../util/summarize";
+import summarize from "../../util/summarize";
 import { UnloadParams } from "../container";
 import Visuals from "../visuals";
 import Replay from "./replay";
@@ -278,7 +278,7 @@ class Recorder extends Despot {
     const closeEvent = this.lastCloseEvent;
     const socketError = this.lastSocketError;
 
-    const contents: Contents = {
+    const contents = {
       cause,
       closeCode: closeEvent?.code,
       closeReason: closeEvent?.reason,
