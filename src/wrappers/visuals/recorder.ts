@@ -26,6 +26,7 @@ import showElement from "../../util/html/showElement";
 import isAutomatedUserAgent from "../../util/isAutomatedUserAgent";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/pretty";
+import summarize, { Contents } from "../../util/summarize";
 import { UnloadParams } from "../container";
 import Visuals from "../visuals";
 import Replay from "./replay";
@@ -277,23 +278,21 @@ class Recorder extends Despot {
     const closeEvent = this.lastCloseEvent;
     const socketError = this.lastSocketError;
 
-    const diagnosticLines = [
-      `  • cause: ${cause}`,
-      `  • closeCode: ${closeEvent?.code ?? "undefined"}`,
-      `  • closeReason: ${closeEvent?.reason || "undefined"}`,
-      `  • elapsedMs: ${elapsedMs ?? "undefined"}`,
-      `  • online: ${online}`,
-      `  • unloaded: ${this.unloaded ?? "undefined"}`,
-      `  • userMediaLoaded: ${this.userMediaLoaded ?? "undefined"}`,
-      `  • userMediaLoading: ${this.userMediaLoading}`,
-      `  • wasClean: ${closeEvent?.wasClean ?? "undefined"}`,
-      `  • socketError: ${socketError ? pretty(socketError) : "undefined"}`,
-    ];
+    const contents: Contents = {
+      cause,
+      closeCode: closeEvent?.code,
+      closeReason: closeEvent?.reason,
+      elapsedMs,
+      online,
+      unloaded: this.unloaded,
+      userMediaLoaded: this.userMediaLoaded,
+      userMediaLoading: this.userMediaLoading,
+      wasClean: closeEvent?.wasClean,
+      socketError,
+      blocking: this.blocking,
+    };
 
-    const debugLine = [
-      "🔎 Recorder: failConnection() diagnostic",
-      ...diagnosticLines,
-    ].join("\n");
+    const debugLine = summarize("Recorder: failConnection() diagnostic", contents);
 
     this.options.logger.debug(debugLine);
 
@@ -305,7 +304,7 @@ class Recorder extends Despot {
     } else if (cause === "timeout") {
       explanation = `The server at ${url2Connect} did not respond within ${this.options.timeouts.connection}ms, even though your device is online. This usually points to a firewall or proxy silently dropping the connection. Please try a different network. If the problem persists, contact us.`;
     } else if (cause === "error") {
-      explanation = `The WebSocket reported an error while connecting to ${url2Connect}. Details: ${pretty(socketError ?? {})} Please check your internet connection and try again. If the problem persists, contact us.`;
+      explanation = `An error occurred while connecting to ${url2Connect}. Please check your internet connection and try again. If the problem persists, contact us.`;
     } else {
       const closeSuffix = closeEvent ? ` (code ${closeEvent.code})` : "";
       explanation = `Connection to ${url2Connect} is closed${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
@@ -633,9 +632,14 @@ class Recorder extends Despot {
          */
 
         this.stream.on("close", () => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream has closed, connecting=${this.connecting}, connected=${this.connected}, userMediaLoaded=${this.userMediaLoaded}`,
-          );
+          const debugLine = summarize(`${PIPE_SYMBOL}Stream has closed:`, {
+            connecting: this.connecting,
+            connected: this.connected,
+            userMediaLoaded: this.userMediaLoaded,
+            blocking: this.blocking,
+          });
+
+          this.options.logger.debug(debugLine);
 
           const tryReconnect = this.connected && this.userMediaLoaded;
 
@@ -644,12 +648,12 @@ class Recorder extends Despot {
           if (tryReconnect) {
             // Allow it to reconnect automatically.
             //
-            // We have reconnect mechanisms in place in case of temporary network issues or
-            // while hot-reloading during development.
+            // We have reconnect mechanisms in place in case of
+            // temporary network issues or while hot-reloading during development.
             this.initSocket();
-          } else if (!this.connecting) {
+          } else if (!this.connecting && !this.blocking) {
             // Now report the closed connection but only when
-            // no reconnection attempt is in progress.
+            // no reconnection attempt is in progress and no previous error message has been emitted leading it to be blocked.
             //
             // Defer by one event loop tick,
             // allowing the native CloseEvent listener to run first.
@@ -706,9 +710,11 @@ class Recorder extends Despot {
             this.lastSocketError = serializeError(err);
           }
 
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *error* event emitted: ${pretty(err)}`,
-          );
+          const debugLine = summarize(`${PIPE_SYMBOL}Stream *error* event emitted:`, {
+            error: serializeError(err),
+          });
+
+          this.options.logger.debug(debugLine);
 
           if (!this.connected) {
             this.failConnection({ url2Connect, cause: "error" });
@@ -1040,9 +1046,12 @@ class Recorder extends Despot {
 
     try {
       if (command.args) {
-        this.options.logger.debug(
-          `Server commanded: ${command.command} with ${pretty(command.args)}`,
+        const debugLine = summarize(
+          `Server commanded: ${command.command} with:`,
+          command.args,
         );
+
+        this.options.logger.debug(debugLine);
       } else {
         this.options.logger.debug(`Server commanded: ${command.command}`);
       }
