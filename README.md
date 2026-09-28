@@ -11,29 +11,30 @@
 [downloads-image]: https://img.shields.io/npm/dm/videomail-client.svg?style=flat
 [downloads-url]: https://npmjs.org/package/videomail-client
 
-Record videos in contact forms!
+Record webcam videos in contact forms.
 
-Finally you can encode any webcam recordings from modern browsers and mobiles into MP4 + WebM within seconds.
-This without the need for Flash, Java nor any other plugins / addons. Just TypeScript, compiled into ESM with their declarations.
+The client captures image frames with `navigator.mediaDevices.getUserMedia()`, streams them to the Videomail service over WebSocket, and receives an encoded video. No browser plugins are required. The package includes ESM, CommonJS, UMD, and TypeScript declaration builds.
 
-- <a href="#demo">Live Demo
-- <a href="#storybook">Storybook (examples)</a>
-- <a href="#options">Options</a>
-- <a href="#api">API</a>
-- <a href="#form">Form Submissions</a>
-- <a href="#whatisstored">What gets stored on the videomail server?</a>
-- <a href="#whitelist">Whitelist</a>
-- <a href="#compatibility">Backward compatibility</a>
-- <a href="#addons">Addons</a>
-- <a href="#notes">Notes</a>
+- [Live demo](#demo)
+- [Storybook examples](#storybook)
+- [Installation](#installation)
+- [Options](#options)
+- [API](#api)
+- [Form submissions](#form)
+- [Privacy and error reporting](#privacy)
+- [Stored videomail data](#whatisstored)
+- [Whitelist](#whitelist)
+- [Browser compatibility](#compatibility)
+- [Add-ons](#addons)
+- [Notes](#notes)
 
 <a name="demo"></a>
 
 ## Live Demo
 
-Have fun on [videomail-client.netlify.app](https://videomail-client.netlify.app)
+Try it at [videomail-client.netlify.app](https://videomail-client.netlify.app).
 
-### Real world usages
+### Real-world usage
 
 There is a full version with all its features on [videomail.io](https://videomail.io).
 
@@ -41,30 +42,44 @@ And there is more:
 
 - [https://wfdeaf.org/contact](https://wfdeaf.org/contact)
 - [https://www.deaf.org.nz/contact](https://www.deaf.org.nz/contact)
-- ...
-
-And many more out there. We are rolling ...
+- And other sites using the package or its WordPress integration.
 
 <a name="storybook"></a>
 
-## Storybook (examples)
+## Storybook examples
 
 To check out some examples in your browser locally, just run these two commands:
 
 1. `npm install`
 2. `npm run storybook`
 
-That's it. Easy as apple pie.
+Storybook starts an HTTPS development server at `https://localhost:8443` using the certificates in `etc/ssl-certs`.
+
+<a name="installation"></a>
+
+## Installation
+
+```sh
+npm install videomail-client
+```
+
+```ts
+import { VideomailClient } from "videomail-client";
+
+const videomailClient = new VideomailClient({
+  whitelistKey: "your-whitelist-key",
+});
+```
 
 <a name="options"></a>
 
 ## Options
 
-There are many options you can pass onto the VideomailClient constructor. Check out the annotated source code at [src/options.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/options.ts)
+You can pass options to the `VideomailClient` constructor. See the annotated defaults in [src/options.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/options.ts).
 
-In most cases, these defaults are good enough. Only one option, `whitelistKey` should be changed when you deploy your own site, see <a href="#whitelist">Whitelist</a>.
+The defaults suit most integrations. Set `whitelistKey` when deploying on your own site; see [Whitelist](#whitelist).
 
-Looking at the examples in the `/src/stories` folder should give you some ideas how to use these options.
+The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
 
 <a name="api"></a>
 
@@ -79,8 +94,9 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 - <a href="#startOver">`videomailClient.startOver()`</a>
 - <a href="#getByAlias">`videomailClient.getByAlias()`</a>
 - <a href="#getByKey">`videomailClient.getByKey()`</a>
+- <a href="#getThreadByAlias">`videomailClient.getThreadByAlias()`</a>
+- <a href="#getThreadByKey">`videomailClient.getThreadByKey()`</a>
 - <a href="#unload">`videomailClient.unload()`</a>
-- <a href="#hide">`videomailClient.hide()`</a>
 - <a href="#isDirty">`videomailClient.isDirty()`</a>
 - <a href="#isRecording">`videomailClient.isRecording()`</a>
 - <a href="#isBuilt">`videomailClient.isBuilt()`</a>
@@ -92,7 +108,7 @@ Looking at the examples in the `/src/stories` folder should give you some ideas 
 
 ### new VideomailClient([options])
 
-The constructor accepts a JSON with optional <a href="#options">options</a>. Example:
+The constructor accepts an optional [options](#options) object:
 
 ```ts
 const videomailClient = new VideomailClient({ whitelistKey: "my whitelist key" });
@@ -102,16 +118,15 @@ const videomailClient = new VideomailClient({ whitelistKey: "my whitelist key" }
 
 ### videomailClient.on([event,] [callback])
 
-The VideomailClient class is inherited from EventEmitter and emits lots of useful events for your app. Here an example:
+`VideomailClient` provides an event-emitter-style API. `on()` returns an unsubscribe function:
 
 ```ts
 videomailClient.on("FORM_READY", () => {
-  // form is ready for recording
+  // The form is ready for recording.
 });
 
 videomailClient.on("SUBMITTED", ({ videomail, response }) => {
-  // continue with your own app logic in your javascript code if you want to process
-  // something else further after form submission.
+  // Continue with application-specific submission handling.
 });
 ```
 
@@ -119,11 +134,11 @@ videomailClient.on("SUBMITTED", ({ videomail, response }) => {
 
 Check them out at [src/types/events/index.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/types/events/index.ts)
 
-They should be self-explanatory. If not, ask for better documentation. Then, some of these events may come with parameters.
+Some events include typed parameters exported by the package.
 
-The videomail client already comes with internal error handling mechanism so there is no need to add code to display errors. But depending on your app logic you might want to process errors further with your own error listeners.
+The client includes default visual error handling. Applications can also subscribe to the `ERROR` event for custom logging or recovery.
 
-By the way, all videomail errors are instances of `VideomailError`, inherited from the native Error class and come with additional attributes, useful for debugging weird errors.
+Videomail errors extend the native `Error` class and include additional diagnostic data.
 
 <a name="show"></a>
 
@@ -135,15 +150,15 @@ Automatically fills the DOM with a form for video recording. By default the HTML
 
 ### videomailClient.record()
 
-Forcefully starts recording without the need to press on a record button. Useful for special situations.
+Starts recording without requiring the user to press the record button.
 
 <a name="replay"></a>
 
 ### videomailClient.replay(videomail[, parentElementId])
 
-Manually adds a video container for the given videomail inside the parent element. See stories for some inspiration.
+Adds a video player for the supplied videomail.
 
-If the `parentElement` is an ID (string), then it will be resolved into a DOM element internally. If no parent element is given, then a replay container within the containerId is automatically generated.
+If `replayParentElementId` is supplied, the player is inserted into that element. Otherwise, the client uses or creates a replay container within the configured container.
 
 Also note that, when the parent element already contains a video container like this
 
@@ -151,22 +166,40 @@ Also note that, when the parent element already contains a video container like 
 <video class="replay"></video>
 ```
 
-then this will be used instead of adding a new dom element.
+the client reuses it instead of creating another DOM element.
 
 <a name="startOver"></a>
 
 ### videomailClient.startOver()
 
-Start all over again, resets everything and go back to the ready state. Useful if you want to submit another videomail within the same instance.
+Resets the client and returns it to the ready state so the same instance can record another videomail.
 
 <a name="getByAlias"></a>
 
 ### videomailClient.getByAlias(alias)
 
-Queries a videomail (JSON) asynchronously by a given alias for further queries or processing. There are two ways to get the alias:
+Returns a videomail asynchronously for the given alias. You can obtain the alias from:
 
 1. The form submission to your own server has it under `videomail_alias` in the form body.
-2. Get the alias from the `submitted` event and use it further within your code.
+2. The `SUBMITTED` event payload.
+
+<a name="getByKey"></a>
+
+### videomailClient.getByKey(key)
+
+Returns a videomail asynchronously for its unique key.
+
+<a name="getThreadByAlias"></a>
+
+### videomailClient.getThreadByAlias(alias)
+
+Returns the videomail thread containing the given alias.
+
+<a name="getThreadByKey"></a>
+
+### videomailClient.getThreadByKey(key)
+
+Returns the videomail thread containing the given key.
 
 <a name="unload"></a>
 
@@ -184,39 +217,43 @@ Hides all the visuals (but does not unload anything).
 
 ### videomailClient.isDirty()
 
-Returns true when a video has been recorded and a form exists. Useful when checking something before closing the window, i.E. this use case: show a window confirmation dialog to make sure the user didn't forget to submit the recorded video.
+Returns `true` when a video has been recorded but not submitted. This can be used before navigation to warn about an unsent recording.
 
 <a name="isRecording"></a>
 
 ### videomailClient.isRecording()
 
-Returns true when a video is currently being recorded.
+Returns `true` while a video is being recorded.
+
+<a name="isBuilt"></a>
+
+### videomailClient.isBuilt()
+
+Returns `true` after the client UI has been built and before it is unloaded.
 
 <a name="submit"></a>
 
 ### videomailClient.submit()
 
-For advanced use only: especially when the submit button is covered with other HTML layers and the videomail client fails to process the click event.
-Calling this function will manually trigger a submission of the recorded videomail. But only when everything else is valid. Nothing will happen when invalid.
+Manually triggers submission when the client and form are valid. This is useful when another UI layer owns the visible submit control.
 
 <a name="getLogLines"></a>
 
 ### videomailClient.getLogLines()
 
-For advanced use only: returns you a collection of log lines that show what code has been covered recently. Useful if you want to debug something tricky.
+Returns the recently collected log lines when the configured logger supports collection.
 
 <a name="setLimitSeconds"></a>
 
-### videomailClient.setLimitSeconds()
+### videomailClient.setLimitSeconds(limitSeconds)
 
-For advanced use only: sets the recording time limit in seconds. Useful if you want to dynamically change the recording duration.
+Updates the recording time limit for subsequent recording activity.
 
 <a name="whatisstored"></a>
 
-## What gets stored on the videomail server?
+## Stored videomail data
 
-Here is an example JSON showing what videomail meta data exists, gets stored on the server and you can grab yourself for further use.
-It's emitted in the SUBMITTED event under the videomail object:
+The `SUBMITTED` event includes a `videomail` object. The exact response can evolve, but its shape follows the exported `Videomail` type. A shortened example is shown below:
 
 ```json
 {
@@ -235,83 +272,82 @@ It's emitted in the SUBMITTED event under the videomail object:
   },
   "width": 320,
   "height": 240,
-  "videomailClientVersion": "2.4.11",
   "whitelistKey": "videomail-client-demo",
   "alias": "some-subject-183622500964",
   "dateCreated": 1541130589811,
   "url": "https://videomail.io/videomail/some-subject-150322500964",
   "key": "11e8-de52-55ac2630-b22b-71959562a989",
-  "expirationPretty": "1 hour",
   "expiresAfter": 1541134189811,
+  "expiresAfterIso": "2018-11-02T04:49:49.811Z",
+  "expiresAfterServerPretty": "Nov 2, 2018, 5:49 PM",
   "siteName": "Videomail Client Example",
   "webm": "https://videomail.io/videomail/some-subject-183622500964/type/webm/",
   "poster": "https://videomail.io/videomail/some-subject-183622500964/poster/",
-  "dateCreatedPretty": "Nov 2, 2018, 4:49 PM",
-  "expiresAfterPretty": "Nov 2, 2018, 5:49 PM",
-  "expiresAfterIso": "2018-11-02T04:49:49.811Z"
+  "dateCreatedServerPretty": "Nov 2, 2018, 4:49 PM",
+  "replyUrl": "https://videomail.io/reply/some-subject-183622500964",
+  "sending": false,
+  "versions": {
+    "videomailClient": "15.7.14"
+  }
 }
 ```
 
-You also can get all the above using the `videomailClient.getByKey()` API call.
+You can also retrieve this data with `videomailClient.getByKey()`.
 
 <a name="form"></a>
 
 ## Form Submissions
 
-By default the videomail-client interrupts the form submission with `e.preventDefault()` and submits the videomail itself to the videomail server first. The videomail server replies with useful data, such as the videomail alias, other meta data and only then the real form submission is resumed.
+By default, the client prevents the initial form submission and submits the videomail to the Videomail server first. After the server returns the alias and metadata, the client submits the original form.
 
-If this doesn't seem to work on your side, then this is mostly because the form and the submit button couldn't be found and the submission event is fired too late. To fix this, you'll need to correct the selectors under options. Here are the important ones regarding forms:
+If this does not work, verify that the configured selectors identify the form and its submit button:
 
 ```ts
 selectors: {
-  "formId": null,
-  "submitButtonId": null,
-  "submitButtonSelector": null
-},
+  formId: undefined,
+  submitButtonId: undefined,
+  submitButtonSelector: undefined,
+}
 ```
 
-When these are null (defaults), the videomail-client tries to detect these automatically. But it can happen that detection fails because the form is somewhere else under the DOM or the submit button does not have the `type=submit` etc.
+When these values are `undefined` (the defaults), the client detects the nearest form and a button with `type="submit"` automatically.
 
 ### Include videomail meta data in Form Submissions
 
-If you want to include videomail meta data in the form submission to your own server, enable the `submitWithVideomail` option.
-Otherwise only the videomail alias is in the form body and will have to call `videomail.getByAlias(alias)` to retrieve these later on.
+Enable `submitWithVideomail` to include videomail metadata in the submission to your server. Otherwise the form body contains the videomail alias, which can later be resolved with `videomailClient.getByAlias(alias)`.
+
+<a name="privacy"></a>
+
+## Privacy and error reporting
+
+Recording sends webcam frames, and audio samples when enabled, to the configured Videomail service for encoding. The package does not provide offline recording.
+
+The `reportErrors` option defaults to `true`. When an error occurs, the client can send the error, recent client logs, browser and operating-system details, page location, screen and orientation data, supported media constraints, and enumerated media-device information to the configured API. Set `reportErrors: false` if your privacy policy requires local-only error handling.
 
 <a name="whitelist"></a>
 
 ## Whitelist
 
-Examples will work right away on [https://localhost:8443](https://localhost:8443). This is because localhost is whitelisted on the remote Videomail server. `https://localhost` and `https://localhost:443` are whitelisted too for local development. Other IP addresses won't work. If this is a problem, contact me and I can whitelist more.
+Examples work at [https://localhost:8443](https://localhost:8443) because localhost is allowed by the remote Videomail server. `https://localhost` and `https://localhost:443` are also available for local development. Other origins require their own whitelist entry.
 
-In other words, if your web server is connected through a domain besides localhost, the Videomail-Client is restricted from sending the media packets to the remote Videomail server which is responsible for storing and sending videomails. To fix that, just lodge a whitelist request at [https://videomail.io/whitelist](https://videomail.io/whitelist). Then you should get a new whitelist key and a list of whitelisted URLs for your own usage.
+For a deployed domain, request access at [videomail.io/whitelist](https://videomail.io/whitelist). You will receive a whitelist key for the approved origins.
 
 <a name="compatibility"></a>
 
-## Backward compatibility
+## Browser compatibility
 
-Forget the old IE, Safari below version 11 and ancient iPhones/iPads because they don't support `getUserMedia()`. Do not blame me but Apple + Microsoft _chuckle_ - for now, these browsers work like a charm:
+Recording requires a secure context (`https://` or localhost) and support for `navigator.mediaDevices.getUserMedia()`, WebSocket, Canvas, and Web Audio when audio is enabled. Current evergreen desktop and mobile browsers are supported. Internet Explorer is not supported.
 
-- Firefox >= 34
-- Google Chrome >= 32
-- Microsoft Edge >= 12
-- Internet Explorer >= 12
-- Opera >= 26
-- Chrome for Android >= 39
-- Android Browser >= 37
-- Safari >= 11
-
-Source: [http://caniuse.com/#search=getUserMedia](http://caniuse.com/#search=getUserMedia)
-
-PS: On Safari and iPhones/iPads you can play the videomails fine without any issues. Repeating: there is just no recording functionality for them yet until Apple made a move.
+See [Can I Use: Media Capture from DOM Elements](https://caniuse.com/stream) and test the [live demo](#demo) in the browsers required by your integration.
 
 <a name="addons"></a>
 
-## Addons
+## Add-ons
 
-There is a Videomail WordPress addon, wicked!
+There is also a Videomail WordPress add-on:
 <https://wordpress.org/plugins/videomail-for-ninja-forms/>
 
-It's an extension of the popular form builder called Ninja Forms. When the videomail addon is installed, then you can just drag and drop a live webcam input into the form! And tell what should happen upon submission. So easy.
+It extends the Ninja Forms form builder with a webcam input and submission integration.
 
 <a name="notes"></a>
 
@@ -319,12 +355,11 @@ It's an extension of the popular form builder called Ninja Forms. When the video
 
 ### Changelog
 
-Too hard to maintain. Just do `git log` or look here
-<https://github.com/binarykitchen/videomail-client/commits/master>
+A separate changelog is not maintained. Use `git log` or the [commit history](https://github.com/binarykitchen/videomail-client/commits/master).
 
 ### Noise
 
-Here some noise about Videomail in the wild:
+Videomail in the wild:
 
 - [LimpingChicken](http://limpingchicken.com/2017/06/29/michael-heuberger-ive-created-a-web-form-to-send-emails-in-sign-language/)
 
@@ -336,7 +371,7 @@ Bear with me, there are lots of problems to crack, especially with the performan
 
 ### Credits
 
-These guys helped inspired me for this awesome project. Thank you so much:
+These people helped inspire the project:
 
 - Heath Sadler (Designer)
 - Stefan Weber (Designer)
@@ -352,8 +387,8 @@ They all deserve lots of love in return. Thank you so much.
 
 ### Code quality
 
-I admit, code isn't top notch and needs lots of rewrites. Believe me or not, I already rewrote about three times in the last four years. Good example that software hardly can be perfect. And since I am already honest here, I think stability and bug fixes come first before perfection otherwise you'll loose users. Reality you know.
+The project prioritizes stability and bug fixes over large rewrites. Its implementation has evolved several times as browser media APIs and integration requirements have changed.
 
 ### Final philosophy
 
-This planet is completely sold. And talk is overrated. That's why my primary goal is not to turn this into a commercial product, yet to promote a cool but underestimated language: Sign Language.
+The primary goal is to make Sign Language easier to use in email and web forms.
