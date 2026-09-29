@@ -1,4 +1,4 @@
-import { createNanoEvents } from "nanoevents";
+import { createNanoEvents, Emitter } from "nanoevents";
 
 import { VideomailEvents } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
@@ -7,15 +7,26 @@ import pretty from "./pretty";
 
 class Despot {
   private readonly name: string;
+  private readonly emitter: Emitter<VideomailEvents>;
   protected options: VideomailClientOptions;
 
-  // The one and only, instantiate it only once and keep it global.
-  // https://github.com/ai/nanoevents
-  protected static EMITTER = createNanoEvents<VideomailEvents>();
+  private static readonly emitters = new WeakMap<
+    VideomailClientOptions,
+    Emitter<VideomailEvents>
+  >();
 
   protected constructor(name: string, options: VideomailClientOptions) {
     this.name = name;
     this.options = options;
+
+    let emitter = Despot.emitters.get(options);
+
+    if (!emitter) {
+      emitter = createNanoEvents<VideomailEvents>();
+      Despot.emitters.set(options, emitter);
+    }
+
+    this.emitter = emitter;
   }
 
   protected emit<E extends keyof VideomailEvents>(
@@ -36,18 +47,18 @@ class Despot {
     }
 
     try {
-      Despot.EMITTER.emit(eventName, ...params);
+      this.emitter.emit(eventName, ...params);
     } catch (exc) {
       if (exc instanceof VideomailError) {
-        Despot.EMITTER.emit("ERROR", { err: exc });
+        this.emitter.emit("ERROR", { err: exc });
       } else {
-        Despot.EMITTER.emit("ERROR", { exc });
+        this.emitter.emit("ERROR", { exc });
       }
     }
   }
 
   public on<E extends keyof VideomailEvents>(eventName: E, callback: VideomailEvents[E]) {
-    return Despot.EMITTER.on(eventName, callback);
+    return this.emitter.on(eventName, callback);
   }
 
   public once<E extends keyof VideomailEvents>(
@@ -72,16 +83,16 @@ class Despot {
     return unbind;
   }
 
-  protected static getListeners<E extends keyof VideomailEvents>(eventName: E) {
-    return Despot.EMITTER.events[eventName];
+  protected getListeners<E extends keyof VideomailEvents>(eventName: E) {
+    return this.emitter.events[eventName];
   }
 
-  protected static removeListener(eventName: keyof VideomailEvents) {
-    delete Despot.EMITTER.events[eventName];
+  protected removeListener(eventName: keyof VideomailEvents) {
+    delete this.emitter.events[eventName];
   }
 
-  protected static removeAllListeners() {
-    Despot.EMITTER.events = {};
+  protected removeAllListeners() {
+    this.emitter.events = {};
   }
 }
 

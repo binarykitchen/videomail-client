@@ -117,7 +117,7 @@ class UserMedia extends Despot {
   }
 
   private audioRecord(audioCallback: AudioProcessCB) {
-    Despot.removeListener("SENDING_FIRST_FRAME");
+    this.removeListener("SENDING_FIRST_FRAME");
     this.audioRecorder?.record(audioCallback);
   }
 
@@ -147,7 +147,7 @@ class UserMedia extends Despot {
       this.options.logger.debug("UserMedia: unloadAllEventListeners()");
 
       this.unloadRemainingEventListeners();
-      Despot.removeListener("SENDING_FIRST_FRAME");
+      this.removeListener("SENDING_FIRST_FRAME");
 
       this.rawVisualUserMedia?.removeEventListener("play", onPlay);
       this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);

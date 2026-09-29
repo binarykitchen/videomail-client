@@ -342,7 +342,7 @@ class Form extends Despot {
 
     this.removeAllInputListeners();
 
-    Despot.removeAllListeners();
+    this.removeAllListeners();
     this.stopListeningToSubmitEvents();
 
     this.resetForm();

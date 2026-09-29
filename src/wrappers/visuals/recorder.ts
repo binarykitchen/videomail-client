@@ -841,7 +841,7 @@ class Recorder extends Despot {
       `Recorder: userMediaErrorCallback(), name: ${err.name}, message: ${err.message} and Webcam characteristics: ${characteristics ? pretty(characteristics) : "none"}`,
     );
 
-    const errorListeners = Despot.getListeners("ERROR");
+    const errorListeners = this.getListeners("ERROR");
 
     if (errorListeners?.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
@@ -1024,7 +1024,7 @@ class Recorder extends Despot {
 
       this.userMediaLoading = false;
 
-      const errorListeners = Despot.getListeners("ERROR");
+      const errorListeners = this.getListeners("ERROR");
 
       if (errorListeners?.length) {
         this.emit("ERROR", { exc });

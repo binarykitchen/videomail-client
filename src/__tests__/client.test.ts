@@ -44,6 +44,28 @@ describe("Client", () => {
     expect(onHideSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("isolates events between client instances", () => {
+    const firstClient = new VideomailClient();
+    const secondClient = new VideomailClient();
+    const firstListener = vi.fn();
+    const secondListener = vi.fn();
+
+    firstClient.on("HIDE", firstListener);
+    secondClient.on("HIDE", secondListener);
+
+    firstClient.show();
+    firstClient.hide();
+
+    expect(firstListener).toHaveBeenCalledOnce();
+    expect(secondListener).not.toHaveBeenCalled();
+
+    secondClient.show();
+    secondClient.hide();
+
+    expect(firstListener).toHaveBeenCalledOnce();
+    expect(secondListener).toHaveBeenCalledOnce();
+  });
+
   it("on unload, hidden and not built", () => {
     const videomailClient = new VideomailClient();
 

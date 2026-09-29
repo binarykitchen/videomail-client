@@ -496,7 +496,7 @@ class Container extends Despot {
     } catch (exc) {
       this.emit("ERROR", { exc });
     } finally {
-      Despot.removeAllListeners();
+      this.removeAllListeners();
 
       this.built = this.submitted = false;
     }

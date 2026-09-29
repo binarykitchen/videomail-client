@@ -641,7 +641,7 @@ class Buttons extends Despot {
       this.reset();
 
       this.options.logger.debug("Buttons: unload()");
-      Despot.removeAllListeners();
+      this.removeAllListeners();
 
       this.hide();
 

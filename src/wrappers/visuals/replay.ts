@@ -320,7 +320,7 @@ class Replay extends Despot {
   public unload(params?: UnloadParams) {
     this.options.logger.debug("Replay: unload()");
 
-    Despot.removeAllListeners();
+    this.removeAllListeners();
 
     if (params?.startingOver) {
       this.hide();

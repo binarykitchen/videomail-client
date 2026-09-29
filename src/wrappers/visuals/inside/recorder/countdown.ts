@@ -37,7 +37,7 @@ class Countdown {
         if (this.countdown < 1) {
           this.fire(cb);
         } else if (this.countdownElement) {
-          this.countdownElement.innerHTML = this.countdown.toString();
+          this.countdownElement.textContent = this.countdown.toString();
         }
       }
     }
@@ -55,7 +55,7 @@ class Countdown {
     }
 
     this.countdown = this.options.video.countdown;
-    this.countdownElement.innerHTML = this.countdown.toString();
+    this.countdownElement.textContent = this.countdown.toString();
 
     this.show();
 
