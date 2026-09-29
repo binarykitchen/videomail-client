@@ -21,6 +21,25 @@ class Replay extends Despot {
   private built = false;
   private replayElement?: HTMLVideoElement | undefined | null;
   private videomail?: Videomail | undefined;
+  private canPlayThroughHandler?: (() => void) | undefined;
+
+  private readonly togglePlayback = (e: Event) => {
+    e.preventDefault();
+
+    if (this.replayElement?.paused) {
+      this.replayElement.play().catch((exc: unknown) => {
+        const err = createError({
+          message: `Failed to play replay video upon ${e.type} event.`,
+          exc,
+          options: this.options,
+        });
+
+        this.emit("ERROR", { err });
+      });
+    } else {
+      this.replayElement?.pause();
+    }
+  };
 
   constructor(visuals: Visuals, options: VideomailClientOptions) {
     super("Replay", options);
@@ -217,23 +236,21 @@ class Replay extends Despot {
     // this forces to actually fetch the videos from the server
     this.replayElement.load();
 
-    if (!this.videomail) {
-      this.replayElement.addEventListener(
+    if (this.canPlayThroughHandler) {
+      this.replayElement.removeEventListener(
         "canplaythrough",
-        () => {
-          this.emit("PREVIEW_SHOWN");
-        },
-        { once: true },
-      );
-    } else {
-      this.replayElement.addEventListener(
-        "canplaythrough",
-        () => {
-          this.emit("REPLAY_SHOWN");
-        },
-        { once: true },
+        this.canPlayThroughHandler,
       );
     }
+
+    const eventName = this.videomail ? "REPLAY_SHOWN" : "PREVIEW_SHOWN";
+    this.canPlayThroughHandler = () => {
+      this.canPlayThroughHandler = undefined;
+      this.emit(eventName);
+    };
+    this.replayElement.addEventListener("canplaythrough", this.canPlayThroughHandler, {
+      once: true,
+    });
   }
 
   public build(replayParentElement: HTMLElement) {
@@ -273,44 +290,8 @@ class Replay extends Despot {
         this.show(params?.width, params?.height, params?.hasAudio);
       });
 
-      this.replayElement.addEventListener(
-        "touchstart",
-        (e) => {
-          e.preventDefault();
-
-          if (this.replayElement?.paused) {
-            this.replayElement.play().catch((exc: unknown) => {
-              throw createError({
-                message:
-                  "Failed to play replay video while paused upon touchstart event.",
-                exc,
-                options: this.options,
-              });
-            });
-          } else {
-            this.replayElement?.pause();
-          }
-        },
-        {
-          passive: true,
-        },
-      );
-
-      this.replayElement.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        if (this.replayElement?.paused) {
-          this.replayElement.play().catch((exc: unknown) => {
-            throw createError({
-              message: "Failed to play replay video while paused upon click event.",
-              exc,
-              options: this.options,
-            });
-          });
-        } else {
-          this.replayElement?.pause();
-        }
-      });
+      this.replayElement.addEventListener("touchstart", this.togglePlayback);
+      this.replayElement.addEventListener("click", this.togglePlayback);
     }
 
     this.built = true;
@@ -320,6 +301,17 @@ class Replay extends Despot {
 
   public unload(params?: UnloadParams) {
     this.options.logger.debug("Replay: unload()");
+
+    if (this.canPlayThroughHandler) {
+      this.replayElement?.removeEventListener(
+        "canplaythrough",
+        this.canPlayThroughHandler,
+      );
+      this.canPlayThroughHandler = undefined;
+    }
+
+    this.replayElement?.removeEventListener("touchstart", this.togglePlayback);
+    this.replayElement?.removeEventListener("click", this.togglePlayback);
 
     this.removeAllListeners();
 
@@ -422,8 +414,8 @@ class Replay extends Despot {
 
         this.replayElement.appendChild(source);
       }
-    } else if (src) {
-      source.setAttribute("src", src);
+    } else if (url) {
+      source.setAttribute("src", url);
     } else {
       source.remove();
     }
