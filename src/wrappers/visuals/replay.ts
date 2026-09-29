@@ -84,7 +84,7 @@ class Replay extends Despot {
       }
     }
 
-    if (!widthValue) {
+    if (!widthValue && (videoHeight > 0 || this.options.video.height)) {
       const newWidthDimensions = calculateWidth(
         responsive,
         this.options,
@@ -97,7 +97,7 @@ class Replay extends Despot {
       widthValue = newWidth;
     }
 
-    if (!heightValue) {
+    if (!heightValue && (videoWidth > 0 || this.options.video.width)) {
       let element = this.visuals.getElement();
 
       if (!element) {
@@ -130,6 +130,8 @@ class Replay extends Despot {
 
   public setVideomail(newVideomail: Videomail, playerOnly = false) {
     this.videomail = newVideomail;
+
+    this.replayElement?.setAttribute("controls", "controls");
 
     if (this.videomail.mp4) {
       this.setMp4Source(this.videomail.mp4);
@@ -206,9 +208,8 @@ class Replay extends Despot {
     if (hasAudio) {
       /*
        * https://github.com/binarykitchen/videomail-client/issues/115
-       * do not set mute to false as this will mess up. just do not mention this attribute at all
        */
-      this.replayElement.setAttribute("volume", "1");
+      this.replayElement.volume = 1;
     } else if (!isAudioEnabled(this.options)) {
       this.replayElement.setAttribute("muted", "true");
     }
