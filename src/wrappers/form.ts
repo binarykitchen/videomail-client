@@ -26,6 +26,9 @@ export type FormMethodType = (typeof FormMethod)[keyof typeof FormMethod];
 class Form extends Despot {
   private readonly container: Container;
   private readonly formElement: HTMLFormElement;
+  private readonly validate = (event: Event) => {
+    this.container.validate(event);
+  };
 
   private keyInput?: HTMLInputElement | null;
 
@@ -114,7 +117,7 @@ class Form extends Despot {
     for (const formControl of this.formElement.elements) {
       const name = formControl.getAttribute("name");
 
-      if (name) {
+      if (name && this.isRegisteredFormField(formControl)) {
         let value = videomail[name];
         const tagName = formControl.tagName;
 
@@ -126,27 +129,34 @@ class Form extends Despot {
           );
         }
 
-        switch (tagName) {
-          case "INPUT": {
-            const inputControl = formControl as HTMLInputElement;
+        if (value !== undefined && value !== null) {
+          switch (tagName) {
+            case "INPUT": {
+              const inputControl = formControl as HTMLInputElement;
 
-            if (Array.isArray(value)) {
-              inputControl.value = value.join(", ");
-            } else {
-              inputControl.value = value;
+              if (Array.isArray(value)) {
+                inputControl.value = value.join(", ");
+              } else {
+                inputControl.value = String(value);
+              }
+              break;
             }
-            break;
+            case "TEXTAREA": {
+              const textArea = formControl as HTMLTextAreaElement;
+              textArea.value = String(value);
+              break;
+            }
+            case "SELECT": {
+              const select = formControl as HTMLSelectElement;
+              select.value = String(value);
+              break;
+            }
+            default:
+              throw createError({
+                message: `Unsupported form control tag name ${tagName} found`,
+                options: this.options,
+              });
           }
-          case "TEXTAREA": {
-            const textArea = formControl as HTMLTextAreaElement;
-            textArea.value = value;
-            break;
-          }
-          default:
-            throw createError({
-              message: `Unsupported form control tag name $${tagName} found`,
-              options: this.options,
-            });
         }
 
         // Always disable them, they can't be changed
@@ -238,16 +248,10 @@ class Form extends Despot {
         const inputElement = inputElements[i];
         const type = inputElement?.getAttribute("type");
 
-        if (type === "radio" || type === "select") {
-          inputElement?.addEventListener(
-            "change",
-            this.container.validate.bind(this.container),
-          );
+        if (type === "radio" || inputElement?.tagName === "SELECT") {
+          inputElement?.addEventListener("change", this.validate);
         } else {
-          inputElement?.addEventListener(
-            "input",
-            this.container.validate.bind(this.container),
-          );
+          inputElement?.addEventListener("input", this.validate);
         }
       }
     }
@@ -318,16 +322,10 @@ class Form extends Despot {
     for (const inputElement of inputElements) {
       const type = inputElement.getAttribute("type");
 
-      if (type === "radio" || type === "select") {
-        inputElement.removeEventListener(
-          "change",
-          this.container.validate.bind(this.container),
-        );
+      if (type === "radio" || inputElement.tagName === "SELECT") {
+        inputElement.removeEventListener("change", this.validate);
       } else {
-        inputElement.removeEventListener(
-          "input",
-          this.container.validate.bind(this.container),
-        );
+        inputElement.removeEventListener("input", this.validate);
       }
     }
   }
@@ -361,7 +359,7 @@ class Form extends Despot {
       const type = inputElement.getAttribute("type");
 
       if (type?.toLowerCase() === "hidden") {
-        inputElement.setAttribute("value", "");
+        (inputElement as HTMLInputElement).value = "";
       }
     }
   }
