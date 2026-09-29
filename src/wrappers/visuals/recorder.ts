@@ -70,6 +70,7 @@ class Recorder extends Despot {
   private userMediaTimeout?: number | undefined;
   private retryTimeout?: number | undefined;
   private connectionTimeout?: number | undefined;
+  private stopTimeout?: number | undefined;
 
   private frameProgress?: string | undefined;
   private sampleProgress?: string | undefined;
@@ -163,6 +164,8 @@ class Recorder extends Despot {
   }
 
   private sendPings() {
+    this.stopPings();
+
     this.pingInterval = window.setInterval(() => {
       this.options.logger.debug("Recorder: pinging...");
       this.writeStream(Buffer.from(""));
@@ -170,7 +173,12 @@ class Recorder extends Despot {
   }
 
   private stopPings() {
-    clearInterval(this.pingInterval);
+    if (this.pingInterval === undefined) {
+      return;
+    }
+
+    window.clearInterval(this.pingInterval);
+    this.pingInterval = undefined;
   }
 
   private onAudioSample(audioSample: AudioSample) {
@@ -225,7 +233,7 @@ class Recorder extends Despot {
   }
 
   private clearRetryTimeout() {
-    if (!this.retryTimeout) {
+    if (this.retryTimeout === undefined) {
       return;
     }
 
@@ -236,7 +244,7 @@ class Recorder extends Despot {
   }
 
   private clearConnectionTimeout() {
-    if (!this.connectionTimeout) {
+    if (this.connectionTimeout === undefined) {
       return;
     }
 
@@ -854,13 +862,12 @@ class Recorder extends Despot {
       } else {
         // Do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
         this.options.logger.debug(`Recorder: ignore user media error ${pretty(err)}`);
-      }
 
-      // Retry after a while
-      this.retryTimeout = window.setTimeout(
-        this.initSocket.bind(this),
-        this.options.timeouts.userMedia,
-      );
+        this.retryTimeout = window.setTimeout(() => {
+          this.retryTimeout = undefined;
+          this.loadUserMedia();
+        }, this.options.timeouts.userMedia);
+      }
     } else if (this.unloaded) {
       /*
        * This can happen when a container is unloaded but some user media related callbacks
@@ -1235,7 +1242,8 @@ class Recorder extends Despot {
      * to show up upon the STOPPING event so that we can evaluate
      * the right video type
      */
-    setTimeout(() => {
+    this.stopTimeout = window.setTimeout(() => {
+      this.stopTimeout = undefined;
       this.stopTime = Date.now();
 
       const videoType = this.replay.getVideoType();
@@ -1322,6 +1330,9 @@ class Recorder extends Despot {
 
     this.clearUserMediaTimeout();
     this.clearConnectionTimeout();
+    this.clearRetryTimeout();
+    this.clearStopTimeout();
+    this.stopPings();
 
     // so that destroying a still pending stream below is not reported as a failure
     this.connecting = false;
@@ -1372,12 +1383,21 @@ class Recorder extends Despot {
   }
 
   private clearUserMediaTimeout() {
-    if (this.userMediaTimeout) {
+    if (this.userMediaTimeout !== undefined) {
       this.options.logger.debug("Recorder: clearUserMediaTimeout()");
 
       window.clearTimeout(this.userMediaTimeout);
       this.userMediaTimeout = undefined;
     }
+  }
+
+  private clearStopTimeout() {
+    if (this.stopTimeout === undefined) {
+      return;
+    }
+
+    window.clearTimeout(this.stopTimeout);
+    this.stopTimeout = undefined;
   }
 
   public validate() {
