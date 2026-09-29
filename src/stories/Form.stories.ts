@@ -205,7 +205,7 @@ export const ContactForm: Story = {
 
       if (statusHeader) {
         // Refer to above msw for the mocked response
-        statusHeader.innerHTML = response.status.toString();
+        statusHeader.textContent = response.status.toString();
       }
 
       videomailClient.replay(videomail, "viewVideo");
@@ -276,7 +276,7 @@ export const VideoSubmissionOnly: Story = {
         const element = document.querySelector(`a.${name}`);
 
         if (element) {
-          element.innerHTML = videomail[name];
+          element.textContent = String(videomail[name]);
           element.setAttribute("href", videomail[name]);
 
           if (element.parentElement) {
@@ -364,7 +364,7 @@ export const Stretch: Story = {
       const statusHeader = document.querySelector("h3.status");
 
       if (statusHeader) {
-        statusHeader.innerHTML = response.status.toString();
+        statusHeader.textContent = response.status.toString();
       }
 
       videomailClient.replay(videomail, "viewVideo");
@@ -468,7 +468,7 @@ export const WithCCAndBCC: Story = {
       const statusHeader = document.querySelector("h3.status");
 
       if (statusHeader) {
-        statusHeader.innerHTML = response.status.toString();
+        statusHeader.textContent = response.status.toString();
       }
 
       videomailClient.replay(videomail, "viewVideo");

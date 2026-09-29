@@ -42,9 +42,9 @@ class Visuals extends Despot {
   private buildNoScriptTag() {
     let noScriptElement = this.container.querySelector("noscript");
 
-    if (noScriptElement) {
+    if (!noScriptElement) {
       noScriptElement = document.createElement("noscript");
-      noScriptElement.innerHTML = "Please enable Javascript";
+      noScriptElement.textContent = "Please enable JavaScript";
 
       this.visualsElement?.appendChild(noScriptElement);
     }

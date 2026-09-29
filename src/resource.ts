@@ -1,6 +1,6 @@
 import { serializeError } from "serialize-error";
 import superagent from "superagent";
-import Response from "superagent/lib/node/response";
+import type Response from "superagent/lib/node/response";
 
 import { version as videomailClientVersion } from "../package.json";
 import Constants from "./constants";
@@ -51,7 +51,8 @@ class Resource {
     identifierValue: string,
     identifierType: VideomailIdentifier,
   ) {
-    const url = `${this.options.apiUrl}/videomail/${identifierName}/${identifierValue}/${identifierType}`;
+    const encodedIdentifier = encodeURIComponent(identifierValue);
+    const url = `${this.options.apiUrl}/videomail/${identifierName}/${encodedIdentifier}/${identifierType}`;
 
     try {
       const request = await superagent("get", url)
@@ -90,9 +91,14 @@ class Resource {
         });
       }
 
-      if (videomail.key) {
-        url += videomail.key;
+      if (!videomail.key) {
+        throw createError({
+          message: "A videomail key is required when updating a videomail.",
+          options: this.options,
+        });
       }
+
+      url += encodeURIComponent(videomail.key);
     }
 
     try {

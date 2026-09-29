@@ -1,7 +1,7 @@
 import "./../styles/main.styl";
 
 import Visibility from "document-visibility";
-import Response from "superagent/lib/node/response";
+import type Response from "superagent/lib/node/response";
 
 import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";

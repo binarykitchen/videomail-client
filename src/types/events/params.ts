@@ -1,4 +1,4 @@
-import Response from "superagent/lib/node/response";
+import type Response from "superagent/lib/node/response";
 
 import VideomailError from "../../util/error/VideomailError";
 import { RecordingStats } from "../RecordingStats";

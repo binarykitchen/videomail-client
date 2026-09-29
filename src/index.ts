@@ -10,7 +10,10 @@ export type { FullVideomailErrorData, VideomailErrorData } from "./types/error";
 export type { VideomailEvents } from "./types/events";
 export type * from "./types/events/params";
 export type { VideomailIdentifier } from "./types/identifier";
-export type { VideomailClientOptions } from "./types/options";
+export type {
+  PartialVideomailClientOptions,
+  VideomailClientOptions,
+} from "./types/options";
 export type {
   ReactionKey,
   ReactionLabel,
