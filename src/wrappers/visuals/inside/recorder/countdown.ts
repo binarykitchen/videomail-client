@@ -9,6 +9,7 @@ class Countdown {
 
   private countdownElement?: HTMLElement | null | undefined;
   private intervalId?: number | undefined;
+  private fireTimeoutId?: number | undefined;
   private countdown?: number | undefined;
   private paused = false;
 
@@ -22,7 +23,8 @@ class Countdown {
     this.hide();
 
     // keep all callbacks async
-    setTimeout(function () {
+    this.fireTimeoutId = window.setTimeout(() => {
+      this.fireTimeoutId = undefined;
       cb();
     }, 0);
   }
@@ -54,6 +56,7 @@ class Countdown {
       );
     }
 
+    this.unload();
     this.countdown = this.options.video.countdown;
     this.countdownElement.textContent = this.countdown.toString();
 
@@ -92,14 +95,21 @@ class Countdown {
   }
 
   public isCountingDown() {
-    return Boolean(this.intervalId);
+    return this.intervalId !== undefined;
   }
 
   public unload() {
-    clearInterval(this.intervalId);
+    if (this.intervalId !== undefined) {
+      window.clearInterval(this.intervalId);
+    }
+
+    if (this.fireTimeoutId !== undefined) {
+      window.clearTimeout(this.fireTimeoutId);
+    }
 
     this.paused = false;
     this.intervalId = undefined;
+    this.fireTimeoutId = undefined;
   }
 
   public hide() {
