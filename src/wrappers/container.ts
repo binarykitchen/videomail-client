@@ -56,6 +56,39 @@ class Container extends Despot {
   private containerElement?: HTMLElement | null | undefined;
 
   private built = false;
+  private stopListeningToVisibility?: (() => void) | undefined;
+
+  private readonly handleWindowResize = () => {
+    if (this.built) {
+      this.emit("WINDOW_RESIZE", "container");
+    }
+  };
+
+  private readonly handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    this.unload({ e });
+  };
+
+  private readonly handleKeyDown = (e: KeyboardEvent) => {
+    const element = e.target as HTMLElement;
+    const tagName = element.tagName;
+    const isEditable = element.isContentEditable || element.contentEditable === "true";
+
+    if (
+      !isEditable &&
+      tagName &&
+      tagName.toUpperCase() !== "INPUT" &&
+      tagName.toUpperCase() !== "TEXTAREA" &&
+      e.code === "Space"
+    ) {
+      e.preventDefault();
+
+      if (this.options.enablePause) {
+        this.visuals.pauseOrResume();
+      } else {
+        this.visuals.recordOrStop();
+      }
+    }
+  };
 
   public constructor(options: VideomailClientOptions) {
     super("Container", options);
@@ -245,27 +278,15 @@ class Container extends Despot {
     this.options.logger.debug(`Container: initEvents (playerOnly = ${playerOnly})`);
 
     if (this.options.recalculateDimensionsOnWindowResize) {
-      window.addEventListener("resize", () => {
-        if (!this.built) {
-          return;
-        }
-
-        this.emit("WINDOW_RESIZE", "container");
-      });
+      window.addEventListener("resize", this.handleWindowResize);
     }
 
     if (this.options.enableAutoUnload) {
-      window.addEventListener(
-        "beforeunload",
-        (e) => {
-          this.unload({ e });
-        },
-        { once: true },
-      );
+      window.addEventListener("beforeunload", this.handleBeforeUnload, { once: true });
     }
 
     if (!playerOnly) {
-      this.visibility.onChange((visible) => {
+      this.stopListeningToVisibility = this.visibility.onChange((visible) => {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (this.built) {
           if (visible) {
@@ -290,34 +311,7 @@ class Container extends Despot {
 
     if (this.options.enableSpace) {
       if (!playerOnly) {
-        window.addEventListener("keydown", (e: KeyboardEvent) => {
-          const element = e.target as HTMLElement;
-          const tagName = element.tagName;
-
-          const isEditable =
-            element.isContentEditable || element.contentEditable === "true";
-
-          // beware of rich text editors, hence the isEditable check (wordpress plugin issue)
-          if (
-            !isEditable &&
-            // Because of https://github.com/binarykitchen/videomail-client/issues/190
-            tagName &&
-            tagName.toUpperCase() !== "INPUT" &&
-            tagName.toUpperCase() !== "TEXTAREA"
-          ) {
-            const code = e.code;
-
-            if (code === "Space") {
-              e.preventDefault();
-
-              if (this.options.enablePause) {
-                this.visuals.pauseOrResume();
-              } else {
-                this.visuals.recordOrStop();
-              }
-            }
-          }
-        });
+        window.addEventListener("keydown", this.handleKeyDown);
       }
     }
 
@@ -388,6 +382,15 @@ class Container extends Despot {
     }
 
     this.endWaiting();
+  }
+
+  private removeBrowserEventListeners() {
+    window.removeEventListener("resize", this.handleWindowResize);
+    window.removeEventListener("beforeunload", this.handleBeforeUnload);
+    window.removeEventListener("keydown", this.handleKeyDown);
+
+    this.stopListeningToVisibility?.();
+    this.stopListeningToVisibility = undefined;
   }
 
   private hideMySelf() {
@@ -496,6 +499,7 @@ class Container extends Despot {
     } catch (exc) {
       this.emit("ERROR", { exc });
     } finally {
+      this.removeBrowserEventListeners();
       this.removeAllListeners();
 
       this.built = this.submitted = false;

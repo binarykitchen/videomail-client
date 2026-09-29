@@ -75,6 +75,34 @@ describe("Client", () => {
     expect(videomailClient.isBuilt()).toBe(false);
   });
 
+  it("removes its window listeners on unload", () => {
+    const addEventListener = vi.spyOn(window, "addEventListener");
+    const removeEventListener = vi.spyOn(window, "removeEventListener");
+    const videomailClient = new VideomailClient({
+      enableAutoUnload: true,
+      enableSpace: true,
+      recalculateDimensionsOnWindowResize: true,
+    });
+
+    videomailClient.show();
+
+    const listenerFor = (eventName: string) =>
+      addEventListener.mock.calls.find(([type]) => type === eventName)?.[1];
+
+    const resizeListener = listenerFor("resize");
+    const beforeUnloadListener = listenerFor("beforeunload");
+    const keydownListener = listenerFor("keydown");
+
+    videomailClient.unload();
+
+    expect(removeEventListener).toHaveBeenCalledWith("resize", resizeListener);
+    expect(removeEventListener).toHaveBeenCalledWith(
+      "beforeunload",
+      beforeUnloadListener,
+    );
+    expect(removeEventListener).toHaveBeenCalledWith("keydown", keydownListener);
+  });
+
   it("not dirty when just shown", () => {
     const videomailClient = new VideomailClient();
     videomailClient.show();
