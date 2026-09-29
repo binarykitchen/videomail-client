@@ -1,6 +1,7 @@
 import "./../styles/main.styl";
 
 import Visibility from "document-visibility";
+import purify from "dompurify";
 import type Response from "superagent/lib/node/response";
 
 import { ShowParams, StartOverParams } from "../client";
@@ -818,7 +819,7 @@ class Container extends Despot {
     } finally {
       if (response?.text && response.type === "text/html") {
         // server replied with HTML contents - display these
-        document.body.innerHTML = response.text;
+        document.body.innerHTML = purify.sanitize(response.text);
       }
 
       this.endWaiting();

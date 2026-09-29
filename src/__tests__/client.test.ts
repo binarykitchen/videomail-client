@@ -20,9 +20,12 @@ describe("Client", () => {
   it("showing it sets its built flag to true", () => {
     const videomailClient = new VideomailClient();
 
-    videomailClient.show();
+    const container = videomailClient.show();
 
     expect(videomailClient.isBuilt()).toBe(true);
+    expect(container.querySelector("noscript")?.textContent).toBe(
+      "Please enable JavaScript",
+    );
   });
 
   it("hiding emits hide event", () => {

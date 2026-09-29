@@ -136,7 +136,7 @@ class Buttons extends Despot {
 
       buttonElement = adjustButton(buttonElement, show, type, disabled);
 
-      buttonElement.innerHTML = text;
+      buttonElement.textContent = text;
 
       // double check that submit button is already in the buttonsElement container
       if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {

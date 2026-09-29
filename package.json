@@ -71,6 +71,7 @@
     "deepmerge": "4.3.1",
     "defined": "1.0.1",
     "document-visibility": "1.0.1",
+    "dompurify": "3.4.16",
     "get-form-data": "3.0.0",
     "is-power-of-two": "1.0.0",
     "nanoevents": "10.0.0",
