@@ -33,6 +33,15 @@ class UserMedia extends Despot {
 
   private videoTrackLabel?: string | undefined;
 
+  private readonly outputEvent = (e: Event) => {
+    this.logEvent(e.type, { readyState: this.rawVisualUserMedia?.readyState });
+    this.rawVisualUserMedia?.removeEventListener(e.type, this.outputEvent);
+  };
+
+  private readonly handleMediaError = (event: Event) => {
+    this.options.logger.warn(`Caught video element error event: ${pretty(event)}`);
+  };
+
   constructor(recorder: Recorder, options: VideomailClientOptions) {
     super("UserMedia", options);
 
@@ -40,11 +49,7 @@ class UserMedia extends Despot {
     this.rawVisualUserMedia = recorder.getRawVisualUserMedia();
 
     MEDIA_EVENTS.forEach((eventName) => {
-      this.rawVisualUserMedia?.addEventListener(
-        eventName,
-        this.outputEvent.bind(this),
-        false,
-      );
+      this.rawVisualUserMedia?.addEventListener(eventName, this.outputEvent, false);
     });
   }
 
@@ -66,8 +71,10 @@ class UserMedia extends Despot {
     if (localMediaStream) {
       this.attachMediaStream(localMediaStream);
     } else {
-      this.rawVisualUserMedia?.removeAttribute("srcObject");
-      this.rawVisualUserMedia?.removeAttribute("src");
+      if (this.rawVisualUserMedia) {
+        this.rawVisualUserMedia.srcObject = null;
+        this.rawVisualUserMedia.removeAttribute("src");
+      }
 
       this.currentVisualStream = undefined;
     }
@@ -82,14 +89,13 @@ class UserMedia extends Despot {
   }
 
   private hasInvalidDimensions() {
-    if (
-      (this.rawVisualUserMedia?.videoWidth && this.rawVisualUserMedia.videoWidth < 3) ||
-      (this.rawVisualUserMedia?.height && this.rawVisualUserMedia.height < 3)
-    ) {
-      return true;
+    if (!this.rawVisualUserMedia) {
+      return false;
     }
 
-    return false;
+    return (
+      this.rawVisualUserMedia.videoWidth < 3 || this.rawVisualUserMedia.videoHeight < 3
+    );
   }
 
   private logEvent(eventType: string, params) {
@@ -98,22 +104,14 @@ class UserMedia extends Despot {
     );
   }
 
-  private outputEvent(e: Event) {
-    this.logEvent(e.type, { readyState: this.rawVisualUserMedia?.readyState });
-
-    // remove myself
-    this.rawVisualUserMedia?.removeEventListener(e.type, this.outputEvent.bind(this));
-  }
-
   public unloadRemainingEventListeners() {
     this.options.logger.debug("UserMedia: unloadRemainingEventListeners()");
 
     MEDIA_EVENTS.forEach((eventName) => {
-      this.rawVisualUserMedia?.removeEventListener(
-        eventName,
-        this.outputEvent.bind(this),
-      );
+      this.rawVisualUserMedia?.removeEventListener(eventName, this.outputEvent);
     });
+
+    this.rawVisualUserMedia?.removeEventListener("error", this.handleMediaError);
   }
 
   private audioRecord(audioCallback: AudioProcessCB) {
@@ -326,9 +324,8 @@ class UserMedia extends Despot {
        * Error can be an object with the code MEDIA_ERR_NETWORK or higher.
        * networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
        */
-      this.rawVisualUserMedia?.addEventListener("error", (err) => {
-        this.options.logger.warn(`Caught video element error event: ${pretty(err)}`);
-      });
+      this.rawVisualUserMedia?.removeEventListener("error", this.handleMediaError);
+      this.rawVisualUserMedia?.addEventListener("error", this.handleMediaError);
 
       this.setVisualStream(localMediaStream);
 
@@ -343,7 +340,9 @@ class UserMedia extends Despot {
   }
 
   public isReady() {
-    return Boolean(this.rawVisualUserMedia?.src);
+    return Boolean(
+      this.rawVisualUserMedia?.srcObject || this.rawVisualUserMedia?.currentSrc,
+    );
   }
 
   public stop(visualStream?: MediaStream, params?: StopParams) {
