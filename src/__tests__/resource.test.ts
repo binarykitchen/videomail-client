@@ -8,4 +8,13 @@ describe("Resource class", () => {
       new Resource(defaultOptions);
     }).not.toThrow();
   });
+
+  it("rejects an update without a videomail key", async () => {
+    const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
+    const resource = new Resource(defaultOptions);
+
+    await expect(resource.put({})).rejects.toThrow(
+      "A videomail key is required when updating a videomail.",
+    );
+  });
 });

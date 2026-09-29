@@ -1,7 +1,6 @@
 import AudioSample from "audio-sample";
 import isPOT from "is-power-of-two";
 
-import options from "../../../options";
 import { VideomailClientOptions } from "../../../types/options";
 import UserMedia from "../../../wrappers/visuals/userMedia";
 import createError from "../../error/createError";
@@ -98,7 +97,7 @@ class AudioRecorder {
       });
     }
 
-    if (!this.options.audio.volume || options.audio.volume > 1) {
+    if (this.options.audio.volume < 0 || this.options.audio.volume > 1) {
       throw createError({
         message: "Audio volume must be between zero and one.",
         options: this.options,
@@ -160,12 +159,13 @@ class AudioRecorder {
           this.options.logger.debug("AudioRecorder: audio context is closed");
           this.vcAudioContext = undefined;
         })
-        .catch(function (err: unknown) {
+        .catch((err: unknown) => {
           if (err instanceof Error) {
-            throw createError({ err, options });
+            this.options.logger.error(createError({ err, options: this.options }));
+            return;
           }
 
-          throw err;
+          this.options.logger.error(err);
         });
     }
   }
