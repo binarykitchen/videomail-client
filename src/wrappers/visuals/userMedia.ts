@@ -93,9 +93,9 @@ class UserMedia extends Despot {
       return false;
     }
 
-    return (
-      this.rawVisualUserMedia.videoWidth < 3 || this.rawVisualUserMedia.videoHeight < 3
-    );
+    const { videoWidth, videoHeight } = this.rawVisualUserMedia;
+
+    return (videoWidth > 0 && videoWidth < 3) || (videoHeight > 0 && videoHeight < 3);
   }
 
   private logEvent(eventType: string, params) {
