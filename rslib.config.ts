@@ -30,11 +30,11 @@ export default defineConfig({
     },
     {
       format: "cjs",
-      // This will include all the JS code into one single file without
-      // the use of require()
-      autoExternal: false,
       syntax: "es2015",
       output: {
+        // This will include all the JS code into one single file without
+        // the use of require()
+        autoExternal: false,
         distPath: {
           root: "./dist/cjs/",
         },
@@ -42,11 +42,11 @@ export default defineConfig({
     },
     {
       format: "umd",
-      // This will include all the JS code into one single file without
-      // the use of require()
-      autoExternal: false,
       umdName: "VideomailClient",
       output: {
+        // This will include all the JS code into one single file without
+        // the use of require()
+        autoExternal: false,
         distPath: {
           root: "./dist/umd/",
         },
