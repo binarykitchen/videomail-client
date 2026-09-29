@@ -33,7 +33,7 @@ class PausedNote {
 
       this.hide();
 
-      this.pausedHeaderElement.innerHTML = this.options.text.pausedHeader;
+      this.pausedHeaderElement.textContent = this.options.text.pausedHeader;
 
       this.pausedBlockElement.appendChild(this.pausedHeaderElement);
 
@@ -47,7 +47,7 @@ class PausedNote {
         }
 
         if (this.options.text.pausedHint) {
-          this.pausedHintElement.innerHTML = this.options.text.pausedHint;
+          this.pausedHintElement.textContent = this.options.text.pausedHint;
         }
       }
 
@@ -55,10 +55,10 @@ class PausedNote {
     } else {
       this.hide();
 
-      this.pausedHeaderElement.innerHTML = this.options.text.pausedHeader;
+      this.pausedHeaderElement.textContent = this.options.text.pausedHeader;
 
       if (this.options.text.pausedHint && this.pausedHintElement) {
-        this.pausedHintElement.innerHTML = this.options.text.pausedHint;
+        this.pausedHintElement.textContent = this.options.text.pausedHint;
       }
     }
   }

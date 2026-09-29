@@ -94,7 +94,7 @@ class RecordTimer {
     }
 
     if (this.recordTimerElement) {
-      this.recordTimerElement.innerHTML = `${mins}:${pad(secs)}`;
+      this.recordTimerElement.textContent = `${mins}:${pad(secs)}`;
     }
   }
 

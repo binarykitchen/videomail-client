@@ -26,7 +26,7 @@ class FacingMode extends Despot {
     if (!this.facingModeElement) {
       this.facingModeElement = document.createElement("button");
       this.facingModeElement.classList.add("facingMode");
-      this.facingModeElement.innerHTML = "⤾";
+      this.facingModeElement.textContent = "⤾";
 
       this.facingModeElement.onclick = (e?) => {
         e?.preventDefault();

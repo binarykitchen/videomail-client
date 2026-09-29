@@ -287,7 +287,7 @@ class Notifier extends Despot {
     if (message.length > 0) {
       if (this.messageElement) {
         const problem = messageOptions?.problem;
-        this.messageElement.innerHTML = (problem ? "&#x2639; " : "") + message;
+        this.messageElement.textContent = (problem ? "\u2639 " : "") + message;
       } else {
         this.options.logger.warn("There is no message element for displaying a message");
       }
@@ -316,7 +316,7 @@ class Notifier extends Despot {
       }
     }
 
-    this.explanationElement.innerHTML = explanation;
+    this.explanationElement.textContent = explanation;
 
     showElement(this.explanationElement);
   }

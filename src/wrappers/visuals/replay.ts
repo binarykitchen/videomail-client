@@ -55,7 +55,7 @@ class Replay extends Despot {
         // Do not overwrite when already set before, e
         // e.g. with a React component adding links to the body
         if (empty) {
-          attributeContainer.innerHTML = newVideomail[attribute];
+          attributeContainer.textContent = String(newVideomail[attribute]);
         }
       }
     });
