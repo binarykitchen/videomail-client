@@ -58,6 +58,11 @@
     "types:config": "tsc --showConfig"
   },
   "prettier": "./prettier.config.js",
+  "overrides": {
+    "websocket-stream": {
+      "ws": "8.22.0"
+    }
+  },
   "dependencies": {
     "animitter": "3.0.0",
     "audio-sample": "7.0.0",
