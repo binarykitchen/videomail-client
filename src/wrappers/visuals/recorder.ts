@@ -971,11 +971,14 @@ class Recorder extends Despot {
     }
 
     this.options.logger.debug(
-      `Recorder: our webcam constraints are: ${pretty(constraints)}`,
+      summarize(`Recorder: our webcam constraints are:`, constraints),
     );
 
     this.options.logger.debug(
-      `Recorder: available webcam constraints are: ${pretty(navigator.mediaDevices.getSupportedConstraints())}`,
+      summarize(
+        `Recorder: available webcam constraints are:`,
+        navigator.mediaDevices.getSupportedConstraints(),
+      ),
     );
 
     const streamPromise = navigator.mediaDevices.getUserMedia(constraints);
