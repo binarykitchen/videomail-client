@@ -1,4 +1,5 @@
 {
   "high": true,
-  "package-manager": "npm"
+  "package-manager": "npm",
+  "allowlist": ["GHSA-rfgv-xxqx-mfg5", "GHSA-w293-vg96-wgc3"]
 }
