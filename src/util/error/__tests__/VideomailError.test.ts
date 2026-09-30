@@ -6,11 +6,19 @@ describe("videomailError class", () => {
     const defaultOptions = mergeWithDefaultOptions();
     const error = new VideomailError("i am error", defaultOptions);
 
-    expect(error.message).toBe("i am error");
-    expect(error.explanation).toBeUndefined();
-    expect(error.getClassList()).toBeUndefined();
-    expect(error instanceof Error).toBe(true);
-    expect(error instanceof VideomailError).toBe(true);
+    expect({
+      classList: error.getClassList(),
+      explanation: error.explanation,
+      isError: error instanceof Error,
+      isVideomailError: error instanceof VideomailError,
+      message: error.message,
+    }).toEqual({
+      classList: undefined,
+      explanation: undefined,
+      isError: true,
+      isVideomailError: true,
+      message: "i am error",
+    });
   });
 
   it("an explanation can be passed over", () => {
@@ -22,7 +30,9 @@ describe("videomailError class", () => {
       { explanation: "i am explanation" },
     );
 
-    expect(error.message).toBe("i am error with explanation");
-    expect(error.explanation).toBe("i am explanation");
+    expect(error).toMatchObject({
+      explanation: "i am explanation",
+      message: "i am error with explanation",
+    });
   });
 });

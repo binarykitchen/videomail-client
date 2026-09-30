@@ -23,9 +23,11 @@ describe("pretty", () => {
     expect(pretty(obj)).toEqual("{ test: 'value' }");
   });
 
-  it("should handle null and undefined", () => {
-    expect(pretty(null)).toEqual("null");
-    expect(pretty(undefined)).toEqual("undefined");
+  it.each([
+    [null, "null"],
+    [undefined, "undefined"],
+  ])("should format %s as %s", (value, expected) => {
+    expect(pretty(value)).toEqual(expected);
   });
 
   it("should handle arrays", () => {
@@ -40,14 +42,22 @@ describe("pretty", () => {
   it("should include useful details for browser events", () => {
     const event = new Event("error");
 
-    expect(pretty(event)).toContain("type: 'error'");
-    expect(pretty(event)).toContain("isTrusted: false");
+    const output = pretty(event);
+
+    expect([
+      output.includes("type: 'error'"),
+      output.includes("isTrusted: false"),
+    ]).toEqual([true, true]);
   });
 
   it("should handle errors", () => {
     const error = new Error("Hello I am an error", { cause: "because of me" });
 
-    expect(pretty(error)).toContain("Error: Hello I am an error");
-    expect(pretty(error)).toContain("[cause]: 'because of me'");
+    const output = pretty(error);
+
+    expect([
+      output.includes("Error: Hello I am an error"),
+      output.includes("[cause]: 'because of me'"),
+    ]).toEqual([true, true]);
   });
 });

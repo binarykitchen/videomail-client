@@ -1,6 +1,12 @@
-import { trimEmails } from "../trimEmail";
+import { trimEmail, trimEmails } from "../trimEmail";
 
 describe("trimEmail", () => {
+  suite("trimEmail()", () => {
+    it("removes every space and comma separator", () => {
+      expect(trimEmail("a, b, c")).toBe("abc");
+    });
+  });
+
   suite("trimEmails()", () => {
     it("converts a single string into a set", () => {
       expect(trimEmails("a@here.com")).toStrictEqual(["a@here.com"]);

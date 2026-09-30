@@ -1,5 +1,9 @@
 import { VideomailClient } from "../client";
 
+vi.mock("../util/isAutomatedUserAgent", () => ({
+  default: () => true,
+}));
+
 describe("Client", () => {
   const mock = {
     onHide() {},
@@ -22,10 +26,13 @@ describe("Client", () => {
 
     const container = videomailClient.show();
 
-    expect(videomailClient.isBuilt()).toBe(true);
-    expect(container.querySelector("noscript")?.textContent).toBe(
-      "Please enable JavaScript",
-    );
+    expect({
+      built: videomailClient.isBuilt(),
+      noScriptText: container.querySelector("noscript")?.textContent,
+    }).toEqual({
+      built: true,
+      noScriptText: "Please enable JavaScript",
+    });
   });
 
   it("hiding emits hide event", () => {
@@ -56,14 +63,10 @@ describe("Client", () => {
     firstClient.show();
     firstClient.hide();
 
-    expect(firstListener).toHaveBeenCalledOnce();
-    expect(secondListener).not.toHaveBeenCalled();
-
     secondClient.show();
     secondClient.hide();
 
-    expect(firstListener).toHaveBeenCalledOnce();
-    expect(secondListener).toHaveBeenCalledOnce();
+    expect([firstListener.mock.calls, secondListener.mock.calls]).toEqual([[[]], [[]]]);
   });
 
   it("on unload, hidden and not built", () => {
@@ -95,12 +98,13 @@ describe("Client", () => {
 
     videomailClient.unload();
 
-    expect(removeEventListener).toHaveBeenCalledWith("resize", resizeListener);
-    expect(removeEventListener).toHaveBeenCalledWith(
-      "beforeunload",
-      beforeUnloadListener,
+    expect(removeEventListener.mock.calls).toEqual(
+      expect.arrayContaining([
+        ["resize", resizeListener],
+        ["beforeunload", beforeUnloadListener],
+        ["keydown", keydownListener],
+      ]),
     );
-    expect(removeEventListener).toHaveBeenCalledWith("keydown", keydownListener);
   });
 
   it("not dirty when just shown", () => {

@@ -163,7 +163,7 @@ export default defineConfig([
     rules: {
       ...vitest.configs.recommended.rules,
       "vitest/prefer-expect-assertions": "off",
-      "vitest/max-expects": "off",
+      "vitest/max-expects": ["error", { max: 1 }],
       "vitest/prefer-lowercase-title": "off",
       "vitest/prefer-describe-function-title": "off",
       // Allow hooks inside test files

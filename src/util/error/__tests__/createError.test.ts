@@ -7,8 +7,10 @@ describe("createError fn", () => {
     const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const error = createError({ options: defaultOptions });
 
-    expect(error.message).toBe("(undefined message)");
-    expect(error.explanation).toBeUndefined();
+    expect(error).toMatchObject({
+      explanation: undefined,
+      message: "(undefined message)",
+    });
   });
 
   it("a videomail error with a custom message and explanation can be created", () => {
@@ -19,8 +21,10 @@ describe("createError fn", () => {
       explanation: "i am explanation",
     });
 
-    expect(error.message).toBe("i am message");
-    expect(error.explanation).toBe("i am explanation");
+    expect(error).toMatchObject({
+      explanation: "i am explanation",
+      message: "i am message",
+    });
   });
 
   it("a videomail error does not re-create a videomail error", () => {
@@ -30,7 +34,9 @@ describe("createError fn", () => {
       err: new VideomailError("i am another message", defaultOptions),
     });
 
-    expect(error.message).toBe("i am another message");
-    expect(error.explanation).toBeUndefined();
+    expect(error).toMatchObject({
+      explanation: undefined,
+      message: "i am another message",
+    });
   });
 });

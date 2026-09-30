@@ -15,12 +15,21 @@ describe("Browser class", () => {
     const defaultOptions = mergeWithDefaultOptions();
     const browser = new Browser(defaultOptions);
 
-    expect(browser.isAndroid()).toBe(false);
-    expect(browser.isChromeBased()).toBe(false);
-    expect(browser.isFirefox()).toBe(false);
-    expect(browser.isIOS()).toBe(false);
-    expect(browser.isMobile()).toBe(false);
-    expect(browser.isOkSafari()).toBe(false);
+    expect({
+      android: browser.isAndroid(),
+      chromeBased: browser.isChromeBased(),
+      firefox: browser.isFirefox(),
+      ios: browser.isIOS(),
+      mobile: browser.isMobile(),
+      okSafari: browser.isOkSafari(),
+    }).toEqual({
+      android: false,
+      chromeBased: false,
+      firefox: false,
+      ios: false,
+      mobile: false,
+      okSafari: false,
+    });
   });
 
   it("getNoAccessIssue returns error", () => {
@@ -29,9 +38,9 @@ describe("Browser class", () => {
 
     const err = browser.getNoAccessIssue();
 
-    expect(err.message).toBe("Unable to access webcam");
-    expect(err.explanation).toBe(
-      "Your system does not let your browser access your webcam",
-    );
+    expect(err).toMatchObject({
+      explanation: "Your system does not let your browser access your webcam",
+      message: "Unable to access webcam",
+    });
   });
 });

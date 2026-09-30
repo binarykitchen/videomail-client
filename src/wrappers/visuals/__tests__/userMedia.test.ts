@@ -1,4 +1,4 @@
-import options from "../../../options";
+import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Recorder from "../recorder";
 import UserMedia from "../userMedia";
 
@@ -24,7 +24,7 @@ describe("UserMedia", () => {
     const recorder = {
       getRawVisualUserMedia: () => videoElement,
     } as Recorder;
-    const userMedia = new UserMedia(recorder, options);
+    const userMedia = new UserMedia(recorder, mergeWithDefaultOptions());
     const readyCallback = vi.fn();
     const endedEarlyCallback = vi.fn();
 
@@ -35,14 +35,12 @@ describe("UserMedia", () => {
 
     videoElement.dispatchEvent(new Event("play"));
 
-    expect(endedEarlyCallback).not.toHaveBeenCalled();
-
     Object.defineProperties(videoElement, {
       videoWidth: { configurable: true, value: 320 },
       videoHeight: { configurable: true, value: 240 },
     });
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
-    expect(readyCallback).toHaveBeenCalledOnce();
+    expect([endedEarlyCallback.mock.calls, readyCallback.mock.calls]).toEqual([[], [[]]]);
   });
 });
