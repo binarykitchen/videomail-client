@@ -92,14 +92,14 @@ class AudioRecorder {
 
     if (!isPOT(bufferSize)) {
       throw createError({
-        message: "Audio buffer size must be a power of two.",
+        message: `Audio buffer size must be a power of two. The current buffer size is ${bufferSize}.`,
         options: this.options,
       });
     }
 
     if (this.options.audio.volume < 0 || this.options.audio.volume > 1) {
       throw createError({
-        message: "Audio volume must be between zero and one.",
+        message: `Audio volume must be between zero and one. The current volume is ${this.options.audio.volume}.`,
         options: this.options,
       });
     }
