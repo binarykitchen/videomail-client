@@ -1,10 +1,10 @@
+import AudioRecorder, { AudioProcessCB } from "../../media/AudioRecorder";
+import getFirstVideoTrack from "../../media/getFirstVideoTrack";
+import MEDIA_EVENTS from "../../media/mediaEvents";
 import { Dimension } from "../../types/dimension";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
-import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
-import getFirstVideoTrack from "../../util/html/media/getFirstVideoTrack";
-import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
 import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "./../../util/pretty";
@@ -26,6 +26,8 @@ class UserMedia extends Despot {
 
   private audioRecorder?: AudioRecorder | undefined;
   private currentVisualStream?: MediaStream | undefined;
+  private initGeneration = 0;
+  private removeInitListeners?: (() => void) | undefined;
 
   private onPlayReached = false;
   private onLoadedMetaDataReached = false;
@@ -54,10 +56,16 @@ class UserMedia extends Despot {
   }
 
   private attachMediaStream(stream: MediaStream) {
-    this.currentVisualStream = stream;
-
     if (this.rawVisualUserMedia) {
       this.rawVisualUserMedia.srcObject = stream;
+      const previousStream = this.currentVisualStream;
+      this.currentVisualStream = stream;
+
+      if (previousStream && previousStream !== stream) {
+        previousStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
     } else {
       throw createError({
         message: "Error attaching stream to element.",
@@ -107,6 +115,9 @@ class UserMedia extends Despot {
   public unloadRemainingEventListeners() {
     this.options.logger.debug("UserMedia: unloadRemainingEventListeners()");
 
+    this.removeInitListeners?.();
+    this.removeInitListeners = undefined;
+
     MEDIA_EVENTS.forEach((eventName) => {
       this.rawVisualUserMedia?.removeEventListener(eventName, this.outputEvent);
     });
@@ -126,6 +137,9 @@ class UserMedia extends Despot {
     endedEarlyCallback: (err) => void,
     switchingFacingMode?: ConstrainDOMString,
   ) {
+    this.removeInitListeners?.();
+    const initGeneration = ++this.initGeneration;
+
     this.stop(localMediaStream, {
       aboutToInitialize: true,
       switchingFacingMode,
@@ -177,6 +191,10 @@ class UserMedia extends Despot {
               }
             })
             .catch((exc: unknown) => {
+              if (initGeneration !== this.initGeneration) {
+                return;
+              }
+
               /*
                * Promise can be interrupted, i.E. when switching tabs
                * and promise can get resumed when switching back to tab, hence
@@ -187,11 +205,14 @@ class UserMedia extends Despot {
                   `Caught pending user media promise exception: ${exc.toString()}`,
                 );
               } else {
-                throw createError({
-                  message: "Failed to play user media upon play event.",
-                  exc,
-                  options: this.options,
-                });
+                unloadAllEventListeners();
+                endedEarlyCallback(
+                  createError({
+                    message: "Failed to play user media upon play event.",
+                    exc,
+                    options: this.options,
+                  }),
+                );
               }
             });
         }
@@ -201,7 +222,13 @@ class UserMedia extends Despot {
       }
     };
 
+    let initialized = false;
+
     const fireCallbacks = () => {
+      if (initGeneration !== this.initGeneration || initialized) {
+        return;
+      }
+
       const readyState = this.rawVisualUserMedia?.readyState;
 
       // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
@@ -213,18 +240,35 @@ class UserMedia extends Despot {
       );
 
       if (this.onPlayReached && this.onLoadedMetaDataReached) {
-        videoCallback();
+        initialized = true;
 
         if (this.audioRecorder) {
-          try {
-            this.audioRecorder.init(localMediaStream);
-            this.on("SENDING_FIRST_FRAME", () => {
-              this.audioRecord(audioCallback);
+          const audioRecorder = this.audioRecorder;
+
+          void audioRecorder
+            .init(localMediaStream)
+            .then(() => {
+              if (
+                initGeneration !== this.initGeneration ||
+                this.audioRecorder !== audioRecorder
+              ) {
+                return;
+              }
+
+              this.on("SENDING_FIRST_FRAME", () => {
+                this.audioRecord(audioCallback);
+              });
+              videoCallback();
+            })
+            .catch((exc: unknown) => {
+              if (initGeneration === this.initGeneration) {
+                unloadAllEventListeners();
+                this.stop();
+                endedEarlyCallback(exc);
+              }
             });
-          } catch (exc) {
-            unloadAllEventListeners();
-            endedEarlyCallback(exc);
-          }
+        } else {
+          videoCallback();
         }
       }
     };
@@ -317,6 +361,10 @@ class UserMedia extends Despot {
 
       this.rawVisualUserMedia?.addEventListener("loadedmetadata", onLoadedMetaData);
       this.rawVisualUserMedia?.addEventListener("play", onPlay);
+      this.removeInitListeners = () => {
+        this.rawVisualUserMedia?.removeEventListener("play", onPlay);
+        this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
+      };
 
       /*
        * experimental, not sure if this is ever needed/called? since 2 apr 2017
@@ -351,6 +399,9 @@ class UserMedia extends Despot {
 
       // Do not stop "too much" when going to initialize anyway
       if (!params?.aboutToInitialize) {
+        this.initGeneration++;
+        this.removeInitListeners?.();
+        this.removeInitListeners = undefined;
         chosenStream ??= this.currentVisualStream;
 
         const tracks = chosenStream?.getTracks();

@@ -1,10 +1,11 @@
 import AudioSample from "audio-sample";
 import isPOT from "is-power-of-two";
 
-import { VideomailClientOptions } from "../../../types/options";
-import UserMedia from "../../../wrappers/visuals/userMedia";
-import createError from "../../error/createError";
-import getBrowser from "../../getBrowser";
+import { VideomailClientOptions } from "../types/options";
+import createError from "../util/error/createError";
+import getBrowser from "../util/getBrowser";
+import UserMedia from "../wrappers/visuals/userMedia";
+import processorUrl from "./pcm-processor.worklet.ts?url";
 
 const CHANNELS = 1;
 
@@ -100,6 +101,7 @@ class AudioRecorder {
       throw createError({ message: "Webcam has no audio", exc, options: this.options });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!context.audioWorklet) {
       this.stop();
       throw createError({
@@ -109,8 +111,7 @@ class AudioRecorder {
     }
 
     try {
-      const moduleUrl = new URL("./pcm-processor.worklet.js", import.meta.url);
-      await context.audioWorklet.addModule(moduleUrl.toString());
+      await context.audioWorklet.addModule(processorUrl);
 
       if (this.generation !== generation) {
         return;
@@ -158,6 +159,7 @@ class AudioRecorder {
 
     if (this.worklet) {
       this.worklet.port.onmessage = null;
+      this.worklet.port.close();
       this.worklet.disconnect();
       this.worklet = undefined;
     }

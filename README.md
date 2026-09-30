@@ -81,6 +81,17 @@ The defaults suit most integrations. Set `whitelistKey` when deploying on your o
 
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
 
+### Audio recording
+
+Audio is disabled by default. When enabled, the client samples mono PCM using
+`AudioWorklet`. The `audio.bufferSize` option accepts `"auto"` or a power of two
+between 256 and 16384; `audio.volume` must be between 0 and 1.
+
+Deploy the complete `dist` output, including `pcm-processor.worklet.js`. The
+ESM, CommonJS, and UMD builds emit the processor under `static/assets`. The hosting origin and Content Security Policy must
+permit the browser to load that module. Browsers without `AudioWorklet` cannot
+record audio; video-only recording remains available.
+
 <a name="api"></a>
 
 ## API
@@ -336,7 +347,7 @@ For a deployed domain, request access at [videomail.io/whitelist](https://videom
 
 ## Browser compatibility
 
-Recording requires a secure context (`https://` or localhost) and support for `navigator.mediaDevices.getUserMedia()`, WebSocket, Canvas, and Web Audio when audio is enabled. Current evergreen desktop and mobile browsers are supported. Internet Explorer is not supported.
+Recording requires a secure context (`https://` or localhost) and support for `navigator.mediaDevices.getUserMedia()`, WebSocket, Canvas, and `AudioWorklet` when audio is enabled. Current evergreen desktop and mobile browsers are supported. Internet Explorer is not supported.
 
 See [Can I Use: Media Capture from DOM Elements](https://caniuse.com/stream) and test the [live demo](#demo) in the browsers required by your integration.
 

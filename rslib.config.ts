@@ -68,7 +68,19 @@ export default defineConfig({
   plugins: [pluginStylus(), pluginNodePolyfill()],
   tools: {
     htmlPlugin: false,
-    rspack: (_config, { appendPlugins }) => {
+    rspack: (config, { appendPlugins }) => {
+      config.module.rules?.unshift({
+        test: /pcm-processor\.worklet\.ts$/u,
+        type: "asset/resource",
+        generator: { filename: "static/assets/pcm-processor.worklet.js" },
+        use: [
+          {
+            loader: "builtin:swc-loader",
+            options: { jsc: { parser: { syntax: "typescript" } } },
+          },
+        ],
+      });
+
       // To run this, use the `npm run build:prod:doc` command
       if (process.env.RSDOCTOR) {
         appendPlugins(

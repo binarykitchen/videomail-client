@@ -1,11 +1,11 @@
 import defined from "defined";
 import { IResult, UAParser } from "ua-parser-js";
 
+import canPlayType from "../media/canPlayType";
 import { BrowserStats } from "../types/BrowserStats";
 import { VideomailClientOptions } from "../types/options";
 import { VideoType, VideoTypeType } from "../types/VideoType";
 import createError from "./error/createError";
-import canPlayType from "./html/media/canPlayType";
 
 const FALLBACK_VIDEO_TYPE = VideoType.MP4;
 

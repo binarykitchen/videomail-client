@@ -80,10 +80,17 @@ class Recorder extends Despot {
 
   private userMediaLoaded?: boolean | undefined;
   private userMediaLoading = false;
+  private mediaRequest = 0;
+  private pendingRecord = false;
+  private cancelPendingReady?: (() => void) | undefined;
   private submitting = false;
   private unloaded?: boolean;
   private stopTime?: number | undefined;
   private stream?: websocket.WebSocketDuplex | undefined;
+  private removeSocketListeners?: (() => void) | undefined;
+  private readonly connectionCallbacks: (() => void)[] = [];
+  private socketAttempt = 0;
+  private stalledConnectionRetries = 0;
   private connecting = false;
   private connected = false;
   private connectionFailed = false;
@@ -211,6 +218,7 @@ class Recorder extends Despot {
 
       this.userMediaLoading = this.blocking = this.unloaded = this.submitting = false;
       this.userMediaLoaded = true;
+      this.clearUserMediaTimeout();
 
       if (!switchingFacingMode) {
         this.loop = this.createLoop();
@@ -254,6 +262,23 @@ class Recorder extends Despot {
     this.connectionTimeout = undefined;
   }
 
+  private clearPendingRecord() {
+    this.pendingRecord = false;
+    this.cancelPendingReady?.();
+    this.cancelPendingReady = undefined;
+  }
+
+  private discardSocket() {
+    const stream = this.stream;
+    this.stream = undefined;
+    this.removeSocketListeners?.();
+    this.removeSocketListeners = undefined;
+
+    if (stream && !stream.destroyed) {
+      stream.destroy();
+    }
+  }
+
   private isOnline() {
     return navigator.onLine;
   }
@@ -278,6 +303,8 @@ class Recorder extends Despot {
 
     this.connectionFailed = true;
     this.connecting = false;
+    this.connectionCallbacks.length = 0;
+    this.clearPendingRecord();
 
     this.clearConnectionTimeout();
 
@@ -322,10 +349,7 @@ class Recorder extends Despot {
       explanation = `Connection to ${url2Connect} is closed${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
     }
 
-    if (this.stream) {
-      this.stream.destroy();
-      this.stream = undefined;
-    }
+    this.discardSocket();
 
     const err = createError({
       message: "Unable to connect to the server",
@@ -469,11 +493,27 @@ class Recorder extends Despot {
   }
 
   private initSocket(cb?: () => void) {
+    if (this.connected) {
+      cb?.();
+      return;
+    }
+
+    if (cb) {
+      this.connectionCallbacks.push(cb);
+    }
+
+    if (this.connecting) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!this.connected) {
       // Skip WebSocket initialization for explicit crawler user agents.
       // These requests will no longer generate generic connection-error report
       if (isAutomatedUserAgent()) {
         this.connecting = false;
+        this.connectionCallbacks.length = 0;
+        this.clearPendingRecord();
         this.options.logger.debug(
           "Recorder: skipping web socket connection for an automated crawler",
         );
@@ -481,6 +521,7 @@ class Recorder extends Despot {
       }
 
       this.connecting = true;
+      const socketAttempt = ++this.socketAttempt;
       this.connectionFailed = false;
       this.connectingStartedAt = Date.now();
       this.lastCloseEvent = undefined;
@@ -519,6 +560,8 @@ class Recorder extends Despot {
         url2Connect = socketUrlObj.toString();
       } catch (exc) {
         this.connecting = this.connected = false;
+        this.connectionCallbacks.length = 0;
+        this.clearPendingRecord();
 
         const err = createError({
           message: "Invalid WebSocket URL",
@@ -537,6 +580,9 @@ class Recorder extends Despot {
       );
 
       let nativeSocket: WebSocket;
+      let stream: websocket.WebSocketDuplex | undefined;
+      const isCurrentSocket = () =>
+        this.socketAttempt === socketAttempt && this.stream === stream && !this.unloaded;
 
       /*
        * Build the native socket first and then wrap it as a stream.
@@ -552,19 +598,34 @@ class Recorder extends Despot {
          * websocket-stream gets a chance to obscure it. This is our only source of
          * truth for *why* a connection never opened (e.g. 1006 = abnormal closure).
          */
-        nativeSocket.addEventListener("close", (event) => {
+        const onSocketClose = (event: CloseEvent) => {
+          if (!isCurrentSocket()) {
+            return;
+          }
+
           this.lastCloseEvent = {
             code: event.code,
             reason: event.reason,
             wasClean: event.wasClean,
           };
-        });
+        };
 
-        nativeSocket.addEventListener("error", (event) => {
-          this.lastSocketError = getEventDetails(event);
-        });
+        const onSocketError = (event: Event) => {
+          if (isCurrentSocket()) {
+            this.lastSocketError = getEventDetails(event);
+          }
+        };
+
+        nativeSocket.addEventListener("close", onSocketClose);
+        nativeSocket.addEventListener("error", onSocketError);
+        this.removeSocketListeners = () => {
+          nativeSocket.removeEventListener("close", onSocketClose);
+          nativeSocket.removeEventListener("error", onSocketError);
+        };
       } catch (exc) {
         this.connecting = this.connected = false;
+        this.connectionCallbacks.length = 0;
+        this.clearPendingRecord();
 
         const diagnostic = getWebSocketDiagnostic(url2Connect);
 
@@ -598,9 +659,15 @@ class Recorder extends Despot {
       }
 
       try {
-        this.stream = websocket(nativeSocket);
+        stream = websocket(nativeSocket);
+        this.stream = stream;
       } catch (exc) {
         this.connecting = this.connected = false;
+        this.connectionCallbacks.length = 0;
+        this.clearPendingRecord();
+        this.removeSocketListeners();
+        this.removeSocketListeners = undefined;
+        nativeSocket.close();
 
         const err = createError({
           message: `Failed to create a stream to ${url2Connect}`,
@@ -611,13 +678,23 @@ class Recorder extends Despot {
         });
 
         this.emit("ERROR", { err });
+        return;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.stream) {
         const connectionTimeoutMs = this.options.timeouts.connection;
 
         this.connectionTimeout = window.setTimeout(() => {
-          if (this.isOnline() && this.isUserMediaLoaded()) {
+          if (!isCurrentSocket()) {
+            return;
+          }
+
+          if (
+            this.isOnline() &&
+            this.isUserMediaLoaded() &&
+            this.stalledConnectionRetries < 1
+          ) {
             // Most likely because the Videomail server has restarted during a deployment.
             // In that case, reconnecting is the appropriate action.
 
@@ -625,6 +702,9 @@ class Recorder extends Despot {
               `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
             );
 
+            this.stalledConnectionRetries++;
+            this.connecting = false;
+            this.discardSocket();
             this.initSocket();
           } else {
             /*
@@ -655,6 +735,10 @@ class Recorder extends Despot {
          */
 
         this.stream.on("close", () => {
+          if (!isCurrentSocket()) {
+            return;
+          }
+
           const debugLine = summarize(`${PIPE_SYMBOL}Stream has closed:`, {
             connecting: this.connecting,
             connected: this.connected,
@@ -667,6 +751,10 @@ class Recorder extends Despot {
           const tryReconnect = this.connected && this.userMediaLoaded;
 
           this.connected = false;
+          this.connecting = false;
+          this.clearConnectionTimeout();
+          this.stopPings();
+          this.discardSocket();
 
           if (tryReconnect) {
             // Allow it to reconnect automatically.
@@ -674,38 +762,56 @@ class Recorder extends Despot {
             // We have reconnect mechanisms in place in case of
             // temporary network issues or while hot-reloading during development.
             this.initSocket();
-          } else if (!this.connecting && !this.blocking) {
+          } else if (!this.blocking) {
+            this.clearPendingRecord();
             // Now report the closed connection but only when
             // no reconnection attempt is in progress and no previous error message has been emitted leading it to be blocked.
             //
             // Defer by one event loop tick,
             // allowing the native CloseEvent listener to run first.
             window.setTimeout(() => {
-              this.failConnection({ url2Connect, cause: "closed" });
+              if (this.socketAttempt === socketAttempt && !this.unloaded) {
+                this.failConnection({ url2Connect, cause: "closed" });
+              }
             }, 0);
           }
         });
 
         this.stream.on("connect", (args) => {
+          if (!isCurrentSocket()) {
+            return;
+          }
+
           this.options.logger.debug(
             `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
           );
 
           this.clearConnectionTimeout();
 
-          const isClosing = this.stream?.socket.readyState === WebSocket.CLOSING;
+          const isClosing = stream.socket.readyState === WebSocket.CLOSING;
 
           if (!this.connected && !isClosing && !this.unloaded) {
             this.connected = true;
             this.connecting = this.unloaded = false;
+            this.stalledConnectionRetries = 0;
 
             this.emit("CONNECTED");
 
-            cb?.();
+            for (const callback of this.connectionCallbacks.splice(0)) {
+              // A connected listener can unload the recorder before waiters run.
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              if (!this.unloaded) {
+                callback();
+              }
+            }
           }
         });
 
         this.stream.on("data", (data: Uint8Array) => {
+          if (!isCurrentSocket()) {
+            return;
+          }
+
           this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
           try {
@@ -727,6 +833,10 @@ class Recorder extends Despot {
         });
 
         this.stream.on("error", (err) => {
+          if (!isCurrentSocket()) {
+            return;
+          }
+
           if (typeof Event !== "undefined" && err instanceof Event) {
             this.lastSocketError = getEventDetails(err);
           } else {
@@ -855,6 +965,10 @@ class Recorder extends Despot {
   }
 
   private userMediaErrorCallback(err, usedConstraints: MediaStreamConstraints) {
+    if (this.unloaded) {
+      return;
+    }
+
     this.userMediaLoading = false;
     this.clearUserMediaTimeout();
 
@@ -880,17 +994,11 @@ class Recorder extends Despot {
 
         this.retryTimeout = window.setTimeout(() => {
           this.retryTimeout = undefined;
-          this.loadUserMedia();
+          if (!this.unloaded) {
+            this.loadUserMedia();
+          }
         }, this.options.timeouts.userMedia);
       }
-    } else if (this.unloaded) {
-      /*
-       * This can happen when a container is unloaded but some user media related callbacks
-       * are still in process. In that case ignore error.
-       */
-      this.options.logger.debug(
-        `Recorder: already unloaded. Not going to throw error ${pretty(err)}`,
-      );
     } else {
       this.options.logger.debug(
         `Recorder: no error listeners attached but throwing error ${pretty(err)}`,
@@ -909,8 +1017,12 @@ class Recorder extends Despot {
   private getUserMediaCallback(
     localStream: MediaStream,
     params?: VideomailUserMediaReadyParams,
+    mediaRequest = this.mediaRequest,
   ) {
     if (!this.userMedia) {
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
       throw new Error("No user media is defined");
     }
 
@@ -920,22 +1032,35 @@ class Recorder extends Despot {
 
     if (this.showUserMedia()) {
       try {
-        this.clearUserMediaTimeout();
-
         this.userMedia.init(
           localStream,
           () => {
-            this.onUserMediaReady(params);
+            if (mediaRequest === this.mediaRequest && !this.unloaded) {
+              this.onUserMediaReady(params);
+            }
           },
           this.onAudioSample.bind(this),
           (err) => {
-            this.emit("ERROR", { err });
+            if (mediaRequest === this.mediaRequest && !this.unloaded) {
+              this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
+            }
           },
           params?.switchingFacingMode,
         );
       } catch (exc) {
+        localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        this.userMediaLoading = false;
+        this.clearUserMediaTimeout();
         this.emit("ERROR", { exc });
       }
+    } else {
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      this.userMediaLoading = false;
+      this.clearUserMediaTimeout();
     }
   }
 
@@ -945,6 +1070,8 @@ class Recorder extends Despot {
     );
 
     this.emit("ASKING_WEBCAM_PERMISSION");
+    const mediaRequest = ++this.mediaRequest;
+    this.userMediaLoading = true;
 
     const constraints: MediaStreamConstraints = {
       video: {
@@ -1000,10 +1127,19 @@ class Recorder extends Despot {
 
     streamPromise
       .then((localStream) => {
-        this.getUserMediaCallback(localStream, params);
+        if (this.unloaded || mediaRequest !== this.mediaRequest) {
+          localStream.getTracks().forEach((track) => {
+            track.stop();
+          });
+          return;
+        }
+
+        this.getUserMediaCallback(localStream, params, mediaRequest);
       })
       .catch((reason: unknown) => {
-        this.userMediaErrorCallback(reason, constraints);
+        if (!this.unloaded && mediaRequest === this.mediaRequest) {
+          this.userMediaErrorCallback(reason, constraints);
+        }
       });
   }
 
@@ -1033,7 +1169,9 @@ class Recorder extends Despot {
       }
 
       this.userMediaTimeout = window.setTimeout(() => {
-        if (!this.isReady()) {
+        if (!this.userMediaLoaded) {
+          this.mediaRequest++;
+          this.userMediaLoading = false;
           const err = getBrowser(this.options).getNoAccessIssue();
           this.emit("ERROR", { err });
         }
@@ -1161,8 +1299,7 @@ class Recorder extends Despot {
       this.options.logger.debug(`Reconnecting for the command ${command} …`);
 
       this.initSocket(() => {
-        this.writeCommand(command, args);
-        cb?.();
+        this.writeCommand(command, args, cb);
       });
     } else if (this.stream) {
       if (args) {
@@ -1189,14 +1326,16 @@ class Recorder extends Despot {
        * }
        */
 
-      this.writeStream(Buffer.from(JSON.stringify(commandObj)));
-
-      if (cb) {
-        // keep all callbacks async
-        setTimeout(function () {
-          cb();
-        }, 0);
-      }
+      this.writeStream(
+        Buffer.from(JSON.stringify(commandObj)),
+        cb
+          ? {
+              onFlushedCallback: () => {
+                queueMicrotask(cb);
+              },
+            }
+          : undefined,
+      );
     }
   }
 
@@ -1318,6 +1457,8 @@ class Recorder extends Despot {
     this.options.logger.debug("Recorder: reInitializeAudio()");
 
     this.clearUserMediaTimeout();
+    this.mediaRequest++;
+    this.userMediaLoading = false;
 
     // important to free memory
     this.userMedia?.stop();
@@ -1351,6 +1492,12 @@ class Recorder extends Despot {
     this.clearRetryTimeout();
     this.clearStopTimeout();
     this.stopPings();
+    this.mediaRequest++;
+    this.userMediaLoading = false;
+    this.socketAttempt++;
+    this.connectionCallbacks.length = 0;
+    this.stalledConnectionRetries = 0;
+    this.clearPendingRecord();
 
     // so that destroying a still pending stream below is not reported as a failure
     this.connecting = false;
@@ -1369,8 +1516,7 @@ class Recorder extends Despot {
        */
       this.options.logger.debug(`Recorder: destroying stream ...`);
 
-      this.stream.destroy();
-      this.stream = undefined;
+      this.discardSocket();
     }
 
     this.unloaded = true;
@@ -1528,10 +1674,32 @@ class Recorder extends Despot {
 
     // Reconnect when needed
     if (!this.connected) {
+      if (this.pendingRecord) {
+        return;
+      }
+
+      this.pendingRecord = true;
       this.options.logger.debug("Recorder: reconnecting before recording …");
 
       this.initSocket(() => {
-        this.once("USER_MEDIA_READY", this.record.bind(this));
+        this.cancelPendingReady = this.once("SERVER_READY", () => {
+          if (!this.pendingRecord || this.unloaded) {
+            return;
+          }
+
+          this.cancelPendingReady = undefined;
+          this.pendingRecord = false;
+
+          if (this.userMediaLoaded || this.options.loadUserMediaOnRecord) {
+            this.record();
+          } else {
+            this.once("USER_MEDIA_READY", () => {
+              if (!this.unloaded) {
+                this.record();
+              }
+            });
+          }
+        });
       });
 
       return;
