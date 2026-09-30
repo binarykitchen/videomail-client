@@ -254,6 +254,10 @@ class Recorder extends Despot {
     this.connectionTimeout = undefined;
   }
 
+  private isOnline() {
+    return navigator.onLine;
+  }
+
   /*
    * A web socket that never reaches OPEN gives us no usable detail: the browser fires
    * an opaque error event (deliberately, to avoid leaking network information) followed
@@ -279,7 +283,7 @@ class Recorder extends Despot {
 
     const { url2Connect, cause } = params;
 
-    const online = navigator.onLine;
+    const online = this.isOnline();
     const elapsedMs = this.connectingStartedAt
       ? Date.now() - this.connectingStartedAt
       : undefined;
@@ -612,13 +616,24 @@ class Recorder extends Despot {
       if (this.stream) {
         const connectionTimeoutMs = this.options.timeouts.connection;
 
-        /*
-         * Covers the case where the connection stalls instead of being refused, for
-         * example when packets to the host are silently dropped. Then neither an error
-         * nor a close event ever arrives and only the OS level timeout would end it.
-         */
         this.connectionTimeout = window.setTimeout(() => {
-          this.failConnection({ url2Connect, cause: "timeout" });
+          if (this.isOnline() && this.isUserMediaLoaded()) {
+            // Most likely because the Videomail server has restarted during a deployment.
+            // In that case, reconnecting is the appropriate action.
+
+            this.options.logger.debug(
+              `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
+            );
+
+            this.initSocket();
+          } else {
+            /*
+             * Covers the case where the connection stalls instead of being refused, for
+             * example when packets to the host are silently dropped. Then neither an error
+             * nor a close event ever arrives and only the OS level timeout would end it.
+             */
+            this.failConnection({ url2Connect, cause: "timeout" });
+          }
         }, connectionTimeoutMs);
 
         // useful for debugging streams
