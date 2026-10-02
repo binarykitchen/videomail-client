@@ -211,6 +211,7 @@ class Recorder extends Despot {
 
       this.userMediaLoading = this.blocking = this.unloaded = this.submitting = false;
       this.userMediaLoaded = true;
+      this.clearUserMediaTimeout();
 
       if (!switchingFacingMode) {
         this.loop = this.createLoop();
@@ -475,364 +476,373 @@ class Recorder extends Despot {
   }
 
   private initSocket(cb?: () => void) {
-    if (!this.connected) {
-      // Skip WebSocket initialization for explicit crawler user agents.
-      // These requests will no longer generate generic connection-error report
-      if (isAutomatedUserAgent()) {
-        this.connecting = false;
-        this.options.logger.debug(
-          "Recorder: skipping web socket connection for an automated crawler",
-        );
-        return;
-      }
+    if (this.connected) {
+      // Already connected :)
+      cb?.();
+      return;
+    }
 
-      this.connecting = true;
-      this.connectionFailed = false;
-      this.connectingStartedAt = Date.now();
-      this.lastCloseEvent = undefined;
-      this.lastSocketError = undefined;
+    if (this.connecting) {
+      // Already connecting, so just return and wait for the connection to complete.
+      return;
+    }
 
-      this.emit("CONNECTING");
-
-      // https://github.com/maxogden/websocket-stream#binary-sockets
-
-      /*
-       * We use query parameters here because we cannot set custom headers in web sockets,
-       * see https://github.com/websockets/ws/issues/467
-       */
-
-      let url2Connect: string;
-
-      try {
-        /*
-         * Use the URL API to validate and normalize socketUrl before use.
-         *
-         * Plain string concatenation with encodeURIComponent cannot detect a
-         * malformed socketUrl (e.g. trailing whitespace from WordPress config)
-         * and lets an invalid string reach the WebSocket constructor, which
-         * throws a cryptic "the provided URL is invalid" error with no context.
-         *
-         * new URL() throws immediately with a clear message when socketUrl is bad,
-         * and URLSearchParams encodes the query parameter correctly.
-         */
-        const socketUrlObj = new URL(this.options.socketUrl);
-
-        socketUrlObj.searchParams.set(
-          Constants.WHITELIST_KEY_LABEL,
-          this.options.whitelistKey,
-        );
-
-        url2Connect = socketUrlObj.toString();
-      } catch (exc) {
-        this.connecting = this.connected = false;
-
-        const err = createError({
-          message: "Invalid WebSocket URL",
-          explanation: `The configured socketUrl "${this.options.socketUrl}" is not a valid URL. Please check your videomail-client configuration.`,
-          options: this.options,
-          exc,
-        });
-
-        this.emit("ERROR", { err });
-
-        return;
-      }
-
+    // Skip WebSocket initialization for explicit crawler user agents.
+    // These requests will no longer generate generic connection-error report
+    if (isAutomatedUserAgent()) {
+      this.connecting = false;
       this.options.logger.debug(
-        `Recorder: initializing web socket stream to ${url2Connect}`,
+        "Recorder: skipping web socket connection for an automated crawler",
+      );
+      return;
+    }
+
+    this.connecting = true;
+    this.connectionFailed = false;
+    this.connectingStartedAt = Date.now();
+    this.lastCloseEvent = undefined;
+    this.lastSocketError = undefined;
+
+    this.emit("CONNECTING");
+
+    // https://github.com/maxogden/websocket-stream#binary-sockets
+
+    /*
+     * We use query parameters here because we cannot set custom headers in web sockets,
+     * see https://github.com/websockets/ws/issues/467
+     */
+
+    let url2Connect: string;
+
+    try {
+      /*
+       * Use the URL API to validate and normalize socketUrl before use.
+       *
+       * Plain string concatenation with encodeURIComponent cannot detect a
+       * malformed socketUrl (e.g. trailing whitespace from WordPress config)
+       * and lets an invalid string reach the WebSocket constructor, which
+       * throws a cryptic "the provided URL is invalid" error with no context.
+       *
+       * new URL() throws immediately with a clear message when socketUrl is bad,
+       * and URLSearchParams encodes the query parameter correctly.
+       */
+      const socketUrlObj = new URL(this.options.socketUrl);
+
+      socketUrlObj.searchParams.set(
+        Constants.WHITELIST_KEY_LABEL,
+        this.options.whitelistKey,
       );
 
-      let nativeSocket: WebSocket;
+      url2Connect = socketUrlObj.toString();
+    } catch (exc) {
+      this.connecting = this.connected = false;
+
+      const err = createError({
+        message: "Invalid WebSocket URL",
+        explanation: `The configured socketUrl "${this.options.socketUrl}" is not a valid URL. Please check your videomail-client configuration.`,
+        options: this.options,
+        exc,
+      });
+
+      this.emit("ERROR", { err });
+
+      return;
+    }
+
+    this.options.logger.debug(
+      `Recorder: initializing web socket stream to ${url2Connect}`,
+    );
+
+    let nativeSocket: WebSocket;
+
+    /*
+     * Build the native socket first and then wrap it as a stream.
+     * This avoids browser/runtime quirks around websocket-stream passing
+     * protocol arguments through to the WebSocket constructor.
+     */
+
+    try {
+      nativeSocket = new WebSocket(url2Connect);
 
       /*
-       * Build the native socket first and then wrap it as a stream.
-       * This avoids browser/runtime quirks around websocket-stream passing
-       * protocol arguments through to the WebSocket constructor.
+       * Capture the raw close code/reason directly from the native socket before
+       * websocket-stream gets a chance to obscure it. This is our only source of
+       * truth for *why* a connection never opened (e.g. 1006 = abnormal closure).
+       */
+      nativeSocket.addEventListener("close", (event) => {
+        this.lastCloseEvent = {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        };
+      });
+
+      nativeSocket.addEventListener("error", (event) => {
+        this.lastSocketError = getEventDetails(event);
+      });
+    } catch (exc) {
+      this.connecting = this.connected = false;
+
+      const diagnostic = getWebSocketDiagnostic(url2Connect);
+
+      // Useful for temporary full technical diagnostic regardless of cause
+      // this.options.logger.debug(`Recorder: WebSocket diagnostic: ${diagnostic.text}`);
+
+      /*
+       * Use a clearly distinct message for crawler/bot failures so the
+       * server can filter these from email alerts while still logging them.
+       * A real user never reaches this branch with probeBase failing.
+       */
+      const message = diagnostic.looksAutomated
+        ? "Automated crawler: WebSocket not supported in this environment"
+        : `Failed to construct WebSocket to ${url2Connect}`;
+
+      const explanation = diagnostic.looksAutomated
+        ? "Headless crawlers cannot use Videomail's WebSocket. No action needed."
+        : `Please check your connection and try again. If the problem persists, contact us. Diagnostic: ${diagnostic.text}`;
+
+      const err = createError({
+        message,
+        explanation,
+        options: this.options,
+        exc,
+      });
+
+      this.emit("ERROR", { err });
+
+      // No need to continue further
+      return;
+    }
+
+    try {
+      this.stream = websocket(nativeSocket);
+    } catch (exc) {
+      this.connecting = this.connected = false;
+
+      const err = createError({
+        message: `Failed to create a stream to ${url2Connect}`,
+        explanation:
+          "Please check your connection and try again. If the problem persists, contact us.",
+        options: this.options,
+        exc,
+      });
+
+      this.emit("ERROR", { err });
+    }
+
+    if (this.stream) {
+      const connectionTimeoutMs = this.options.timeouts.connection;
+
+      this.connectionTimeout = window.setTimeout(() => {
+        if (this.isOnline() && this.isUserMediaLoaded()) {
+          // Most likely because the Videomail server has restarted during a deployment.
+          // In that case, reconnecting is the appropriate action.
+
+          this.options.logger.debug(
+            `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
+          );
+
+          this.initSocket();
+        } else {
+          /*
+           * Covers the case where the connection stalls instead of being refused, for
+           * example when packets to the host are silently dropped. Then neither an error
+           * nor a close event ever arrives and only the OS level timeout would end it.
+           */
+          this.failConnection({ url2Connect, cause: "timeout" });
+        }
+      }, connectionTimeoutMs);
+
+      // useful for debugging streams
+
+      /*
+       * if (!stream.originalEmit) {
+       *   stream.originalEmit = stream.emit
+       * }
        */
 
-      try {
-        nativeSocket = new WebSocket(url2Connect);
+      /*
+       * stream.emit = function (type) {
+       *   if (stream) {
+       *     this.options.logger.debug(PIPE_SYMBOL + 'Debugging stream event:', type)
+       *     var args = Array.prototype.slice.call(arguments, 0)
+       *     return stream.originalEmit.apply(stream, args)
+       *   }
+       * }
+       */
 
-        /*
-         * Capture the raw close code/reason directly from the native socket before
-         * websocket-stream gets a chance to obscure it. This is our only source of
-         * truth for *why* a connection never opened (e.g. 1006 = abnormal closure).
-         */
-        nativeSocket.addEventListener("close", (event) => {
-          this.lastCloseEvent = {
-            code: event.code,
-            reason: event.reason,
-            wasClean: event.wasClean,
-          };
+      this.stream.on("close", () => {
+        const debugLine = summarize(`${PIPE_SYMBOL}Stream has closed:`, {
+          connecting: this.connecting,
+          connected: this.connected,
+          userMediaLoaded: this.userMediaLoaded,
+          blocking: this.blocking,
         });
 
-        nativeSocket.addEventListener("error", (event) => {
-          this.lastSocketError = getEventDetails(event);
-        });
-      } catch (exc) {
-        this.connecting = this.connected = false;
+        this.options.logger.debug(debugLine);
 
-        const diagnostic = getWebSocketDiagnostic(url2Connect);
+        const tryReconnect = this.connected && this.userMediaLoaded;
 
-        // Useful for temporary full technical diagnostic regardless of cause
-        // this.options.logger.debug(`Recorder: WebSocket diagnostic: ${diagnostic.text}`);
+        this.connected = false;
 
-        /*
-         * Use a clearly distinct message for crawler/bot failures so the
-         * server can filter these from email alerts while still logging them.
-         * A real user never reaches this branch with probeBase failing.
-         */
-        const message = diagnostic.looksAutomated
-          ? "Automated crawler: WebSocket not supported in this environment"
-          : `Failed to construct WebSocket to ${url2Connect}`;
+        if (tryReconnect) {
+          // Allow it to reconnect automatically.
+          //
+          // We have reconnect mechanisms in place in case of
+          // temporary network issues or while hot-reloading during development.
+          this.initSocket();
+        } else if (!this.connecting && !this.blocking) {
+          // Now report the closed connection but only when
+          // no reconnection attempt is in progress and no previous error message has been emitted leading it to be blocked.
+          //
+          // Defer by one event loop tick,
+          // allowing the native CloseEvent listener to run first.
+          window.setTimeout(() => {
+            this.failConnection({ url2Connect, cause: "closed" });
+          }, 0);
+        }
+      });
 
-        const explanation = diagnostic.looksAutomated
-          ? "Headless crawlers cannot use Videomail's WebSocket. No action needed."
-          : `Please check your connection and try again. If the problem persists, contact us. Diagnostic: ${diagnostic.text}`;
+      this.stream.on("connect", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
+        );
 
-        const err = createError({
-          message,
-          explanation,
-          options: this.options,
-          exc,
-        });
+        this.clearConnectionTimeout();
 
-        this.emit("ERROR", { err });
+        const isClosing = this.stream?.socket.readyState === WebSocket.CLOSING;
 
-        // No need to continue further
-        return;
-      }
+        if (!this.connected && !isClosing && !this.unloaded) {
+          this.connected = true;
+          this.connecting = this.unloaded = false;
 
-      try {
-        this.stream = websocket(nativeSocket);
-      } catch (exc) {
-        this.connecting = this.connected = false;
+          this.emit("CONNECTED");
 
-        const err = createError({
-          message: `Failed to create a stream to ${url2Connect}`,
-          explanation:
-            "Please check your connection and try again. If the problem persists, contact us.",
-          options: this.options,
-          exc,
-        });
+          cb?.();
+        }
+      });
 
-        this.emit("ERROR", { err });
-      }
+      this.stream.on("data", (data: Uint8Array) => {
+        this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
-      if (this.stream) {
-        const connectionTimeoutMs = this.options.timeouts.connection;
+        try {
+          const command = JSON.parse(data.toString());
+          this.executeCommand(command);
+        } catch (exc) {
+          this.options.logger.error(`Failed to parse command: ${exc}`);
 
-        this.connectionTimeout = window.setTimeout(() => {
-          if (this.isOnline() && this.isUserMediaLoaded()) {
-            // Most likely because the Videomail server has restarted during a deployment.
-            // In that case, reconnecting is the appropriate action.
-
-            this.options.logger.debug(
-              `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
-            );
-
-            this.initSocket();
-          } else {
-            /*
-             * Covers the case where the connection stalls instead of being refused, for
-             * example when packets to the host are silently dropped. Then neither an error
-             * nor a close event ever arrives and only the OS level timeout would end it.
-             */
-            this.failConnection({ url2Connect, cause: "timeout" });
-          }
-        }, connectionTimeoutMs);
-
-        // useful for debugging streams
-
-        /*
-         * if (!stream.originalEmit) {
-         *   stream.originalEmit = stream.emit
-         * }
-         */
-
-        /*
-         * stream.emit = function (type) {
-         *   if (stream) {
-         *     this.options.logger.debug(PIPE_SYMBOL + 'Debugging stream event:', type)
-         *     var args = Array.prototype.slice.call(arguments, 0)
-         *     return stream.originalEmit.apply(stream, args)
-         *   }
-         * }
-         */
-
-        this.stream.on("close", () => {
-          const debugLine = summarize(`${PIPE_SYMBOL}Stream has closed:`, {
-            connecting: this.connecting,
-            connected: this.connected,
-            userMediaLoaded: this.userMediaLoaded,
-            blocking: this.blocking,
+          const err = createError({
+            message: "Invalid server command",
+            // toString() since https://github.com/binarykitchen/videomail.io/issues/288
+            explanation: `Contact us. The invalid command was: ${data.toString()}.`,
+            options: this.options,
+            exc,
           });
 
-          this.options.logger.debug(debugLine);
+          this.emit("ERROR", { err });
+        }
+      });
 
-          const tryReconnect = this.connected && this.userMediaLoaded;
+      this.stream.on("error", (err) => {
+        if (typeof Event !== "undefined" && err instanceof Event) {
+          this.lastSocketError = getEventDetails(err);
+        } else {
+          this.lastSocketError = serializeError(err);
+        }
 
-          this.connected = false;
-
-          if (tryReconnect) {
-            // Allow it to reconnect automatically.
-            //
-            // We have reconnect mechanisms in place in case of
-            // temporary network issues or while hot-reloading during development.
-            this.initSocket();
-          } else if (!this.connecting && !this.blocking) {
-            // Now report the closed connection but only when
-            // no reconnection attempt is in progress and no previous error message has been emitted leading it to be blocked.
-            //
-            // Defer by one event loop tick,
-            // allowing the native CloseEvent listener to run first.
-            window.setTimeout(() => {
-              this.failConnection({ url2Connect, cause: "closed" });
-            }, 0);
-          }
+        const debugLine = summarize(`${PIPE_SYMBOL}Stream *error* event emitted:`, {
+          error: serializeError(err),
         });
 
-        this.stream.on("connect", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
-          );
+        this.options.logger.debug(debugLine);
 
-          this.clearConnectionTimeout();
+        if (!this.connected) {
+          this.failConnection({ url2Connect, cause: "error" });
+          return;
+        }
 
-          const isClosing = this.stream?.socket.readyState === WebSocket.CLOSING;
+        const streamError =
+          err instanceof Error
+            ? err
+            : new Error("WebSocket stream emitted an error event", {
+                cause: this.lastSocketError ?? err,
+              });
 
-          if (!this.connected && !isClosing && !this.unloaded) {
-            this.connected = true;
-            this.connecting = this.unloaded = false;
-
-            this.emit("CONNECTED");
-
-            cb?.();
-          }
+        this.emit("ERROR", {
+          err: createError({
+            message: "WebSocket stream error",
+            explanation: `The WebSocket stream emitted an error event. Details: ${pretty(err)}`,
+            options: this.options,
+            exc: streamError,
+          }),
         });
+      });
 
-        this.stream.on("data", (data: Uint8Array) => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
+      // just experimental
 
-          try {
-            const command = JSON.parse(data.toString());
-            this.executeCommand(command);
-          } catch (exc) {
-            this.options.logger.error(`Failed to parse command: ${exc}`);
+      this.stream.on("drain", () => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *drain* event emitted (should not happen!)`,
+        );
+      });
 
-            const err = createError({
-              message: "Invalid server command",
-              // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-              explanation: `Contact us. The invalid command was: ${data.toString()}.`,
-              options: this.options,
-              exc,
-            });
+      this.stream.on("preend", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *preend* event emitted with args: ${pretty(args)}`,
+        );
+      });
 
-            this.emit("ERROR", { err });
-          }
-        });
+      this.stream.on("end", () => {
+        this.options.logger.debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
+      });
 
-        this.stream.on("error", (err) => {
-          if (typeof Event !== "undefined" && err instanceof Event) {
-            this.lastSocketError = getEventDetails(err);
-          } else {
-            this.lastSocketError = serializeError(err);
-          }
+      this.stream.on("drain", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *drain* event emitted with args: ${pretty(args)}`,
+        );
+      });
 
-          const debugLine = summarize(`${PIPE_SYMBOL}Stream *error* event emitted:`, {
-            error: serializeError(err),
-          });
+      this.stream.on("pipe", (src) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *pipe* event emitted with src: ${pretty(src)}`,
+        );
+      });
 
-          this.options.logger.debug(debugLine);
+      this.stream.on("unpipe", (src) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *unpipe* event emitted with src: ${pretty(src)}`,
+        );
+      });
 
-          if (!this.connected) {
-            this.failConnection({ url2Connect, cause: "error" });
-            return;
-          }
+      this.stream.on("resume", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *resume* event emitted with args: ${pretty(args)}`,
+        );
+      });
 
-          const streamError =
-            err instanceof Error
-              ? err
-              : new Error("WebSocket stream emitted an error event", {
-                  cause: this.lastSocketError ?? err,
-                });
+      this.stream.on("uncork", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *uncork* event emitted with args: ${pretty(args)}`,
+        );
+      });
 
-          this.emit("ERROR", {
-            err: createError({
-              message: "WebSocket stream error",
-              explanation: `The WebSocket stream emitted an error event. Details: ${pretty(err)}`,
-              options: this.options,
-              exc: streamError,
-            }),
-          });
-        });
+      this.stream.on("readable", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *readable* event emitted with args: ${pretty(args)}`,
+        );
+      });
 
-        // just experimental
+      this.stream.on("prefinish", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *prefinish* event emitted with args: ${pretty(args)}`,
+        );
+      });
 
-        this.stream.on("drain", () => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *drain* event emitted (should not happen!)`,
-          );
-        });
-
-        this.stream.on("preend", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *preend* event emitted with args: ${pretty(args)}`,
-          );
-        });
-
-        this.stream.on("end", () => {
-          this.options.logger.debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
-        });
-
-        this.stream.on("drain", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *drain* event emitted with args: ${pretty(args)}`,
-          );
-        });
-
-        this.stream.on("pipe", (src) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *pipe* event emitted with src: ${pretty(src)}`,
-          );
-        });
-
-        this.stream.on("unpipe", (src) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *unpipe* event emitted with src: ${pretty(src)}`,
-          );
-        });
-
-        this.stream.on("resume", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *resume* event emitted with args: ${pretty(args)}`,
-          );
-        });
-
-        this.stream.on("uncork", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *uncork* event emitted with args: ${pretty(args)}`,
-          );
-        });
-
-        this.stream.on("readable", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *readable* event emitted with args: ${pretty(args)}`,
-          );
-        });
-
-        this.stream.on("prefinish", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *prefinish* event emitted with args: ${pretty(args)}`,
-          );
-        });
-
-        this.stream.on("finish", (args) => {
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Stream *finish* event emitted with args: ${pretty(args)}`,
-          );
-        });
-      }
+      this.stream.on("finish", (args) => {
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Stream *finish* event emitted with args: ${pretty(args)}`,
+        );
+      });
     }
   }
 

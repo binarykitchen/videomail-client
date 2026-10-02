@@ -1,4 +1,4 @@
-import { VideoType } from "../../../../types/VideoType";
+import { VideoType } from "../../types/VideoType";
 import canPlayType from "../canPlayType";
 
 describe("canPlayType", () => {

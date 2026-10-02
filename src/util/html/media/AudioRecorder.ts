@@ -97,7 +97,11 @@ class AudioRecorder {
       });
     }
 
-    if (this.options.audio.volume < 0 || this.options.audio.volume > 1) {
+    if (
+      !Number.isFinite(this.options.audio.volume) ||
+      this.options.audio.volume < 0 ||
+      this.options.audio.volume > 1
+    ) {
       throw createError({
         message: `Audio volume must be between zero and one. The current volume is ${this.options.audio.volume}.`,
         options: this.options,

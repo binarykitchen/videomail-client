@@ -55,7 +55,7 @@ function createAudioEvent() {
     inputBuffer: {
       getChannelData: vi.fn(() => new Float32Array([0.25])),
     },
-  } as AudioProcessEvent;
+  };
 }
 
 describe("AudioRecorder", () => {

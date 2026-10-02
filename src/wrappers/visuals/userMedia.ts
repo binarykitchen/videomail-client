@@ -1,10 +1,10 @@
+import getFirstVideoTrack from "../../media/getFirstVideoTrack";
+import MEDIA_EVENTS from "../../media/mediaEvents";
 import { Dimension } from "../../types/dimension";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
-import getFirstVideoTrack from "../../util/html/media/getFirstVideoTrack";
-import MEDIA_EVENTS from "../../util/html/media/mediaEvents";
 import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "./../../util/pretty";
@@ -319,10 +319,12 @@ class UserMedia extends Despot {
       this.rawVisualUserMedia?.addEventListener("play", onPlay);
 
       /*
-       * experimental, not sure if this is ever needed/called? since 2 apr 2017
+       * Experimental, not sure if this is ever needed/called? since 2 apr 2017
        * An error occurs while fetching the media data.
+       *
        * Error can be an object with the code MEDIA_ERR_NETWORK or higher.
-       * networkState equals either NETWORK_EMPTY or NETWORK_IDLE, depending on when the download was aborted.
+       * networkState equals either NETWORK_EMPTY or NETWORK_IDLE,
+       * depending on when the download was aborted.
        */
       this.rawVisualUserMedia?.removeEventListener("error", this.handleMediaError);
       this.rawVisualUserMedia?.addEventListener("error", this.handleMediaError);
