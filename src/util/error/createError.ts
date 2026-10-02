@@ -7,6 +7,7 @@ import HTTPVideomailError from "./HTTPVideomailError";
 import VideomailError, { ErrData } from "./VideomailError";
 
 interface ErrorParams {
+  cause?: unknown;
   err?: HTTPVideomailError;
   exc?: unknown;
   message?: string;
@@ -220,6 +221,7 @@ function createError(errorParams: ErrorParams) {
   options.logger.debug(`VideomailError: create(${args})`);
 
   const errData: ErrData = {
+    cause: errorParams.cause,
     explanation,
     logLines,
     err,

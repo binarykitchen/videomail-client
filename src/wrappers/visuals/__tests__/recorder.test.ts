@@ -5,6 +5,13 @@ import type Replay from "../replay";
 
 interface RecorderInternals {
   connected: boolean;
+  connectingStartedAt?: number;
+  failConnection(params: {
+    url2Connect: string;
+    cause: "timeout" | "closed" | "error";
+  }): void;
+  lastCloseEvent?: { code: number; reason: string; wasClean: boolean };
+  lastSocketError?: Record<string, unknown>;
 }
 
 function createFixture() {
@@ -162,5 +169,45 @@ describe("Recorder", () => {
     buildWithoutConnecting(recorder);
 
     expect(recorder.getRawVisualUserMedia()).toBeInstanceOf(HTMLVideoElement);
+  });
+
+  it("reports structured WebSocket connection diagnostics", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+
+    const internals = recorder as unknown as RecorderInternals;
+    internals.connectingStartedAt = Date.now() - 120;
+    internals.lastCloseEvent = {
+      code: 1006,
+      reason: "",
+      wasClean: false,
+    };
+    internals.lastSocketError = {
+      type: "error",
+      isTrusted: true,
+    };
+
+    let reportedError: Error | undefined;
+    recorder.on("ERROR", ({ err }) => {
+      reportedError = err;
+    });
+
+    internals.failConnection({
+      url2Connect: "wss://videomail.io/ws",
+      cause: "error",
+    });
+
+    expect(reportedError?.cause).toMatchObject({
+      cause: "error",
+      closeCode: 1006,
+      closeReason: "",
+      online: navigator.onLine,
+      secureContext: globalThis.isSecureContext,
+      socketError: { type: "error", isTrusted: true },
+      timeoutMs: options.timeouts.connection,
+      url: "wss://videomail.io/ws",
+      wasClean: false,
+      elapsedMs: expect.any(Number),
+    });
   });
 });

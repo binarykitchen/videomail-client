@@ -296,12 +296,17 @@ class Recorder extends Despot {
       closeReason: closeEvent?.reason,
       elapsedMs,
       online,
+      secureContext: globalThis.isSecureContext,
+      socketReadyState: this.stream?.socket.readyState,
+      timeoutMs: this.options.timeouts.connection,
+      url: url2Connect,
       unloaded: this.unloaded,
       userMediaLoaded: this.userMediaLoaded,
       userMediaLoading: this.userMediaLoading,
       wasClean: closeEvent?.wasClean,
       socketError,
       blocking: this.blocking,
+      visibilityState: document.visibilityState,
     };
 
     const debugLine = summarize("Recorder: failConnection() diagnostic", contents);
@@ -331,6 +336,7 @@ class Recorder extends Despot {
       message: "Unable to connect to the server",
       explanation,
       options: this.options,
+      cause: contents,
       exc: socketError
         ? new Error("WebSocket connection error", { cause: socketError })
         : undefined,
