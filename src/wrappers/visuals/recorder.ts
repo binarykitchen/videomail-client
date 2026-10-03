@@ -255,6 +255,17 @@ class Recorder extends Despot {
     this.connectionTimeout = undefined;
   }
 
+  private discardSocket() {
+    this.options.logger.debug(`Recorder: discarding socket stream ...`);
+
+    const stream = this.stream;
+    this.stream = undefined;
+
+    if (stream && !stream.destroyed) {
+      stream.destroy();
+    }
+  }
+
   private isOnline() {
     return navigator.onLine;
   }
@@ -328,10 +339,7 @@ class Recorder extends Despot {
       explanation = `Connection to ${url2Connect} is closed${closeSuffix}. Please check your internet connection and try again. If the problem persists, contact us.`;
     }
 
-    if (this.stream) {
-      this.stream.destroy();
-      this.stream = undefined;
-    }
+    this.discardSocket();
 
     const err = createError({
       message: "Unable to connect to the server",
@@ -1389,10 +1397,7 @@ class Recorder extends Despot {
        * Force to disconnect socket right now to clean temp files on server
        * event listeners will do the rest
        */
-      this.options.logger.debug(`Recorder: destroying stream ...`);
-
-      this.stream.destroy();
-      this.stream = undefined;
+      this.discardSocket();
     }
 
     this.unloaded = true;
