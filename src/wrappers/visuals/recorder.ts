@@ -477,13 +477,19 @@ class Recorder extends Despot {
 
   private initSocket(cb?: () => void) {
     if (this.connected) {
-      // Already connected :)
+      this.options.logger.debug(
+        "Recorder: already **connected**. Not going to initialize a new WebSocket connection.",
+      );
+
       cb?.();
       return;
     }
 
     if (this.connecting) {
-      // Already connecting, so just return and wait for the connection to complete.
+      this.options.logger.debug(
+        "Recorder: already **connecting**. Not going to initialize a new WebSocket connection.",
+      );
+
       return;
     }
 
