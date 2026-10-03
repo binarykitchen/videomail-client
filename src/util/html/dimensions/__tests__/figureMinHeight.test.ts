@@ -1,7 +1,16 @@
+import Resource from "../../../../resource";
 import mergeWithDefaultOptions from "../../../options/mergeWithDefaultOptions";
 import figureMinHeight from "../figureMinHeight";
 
 describe("figureMinHeight", () => {
+  beforeEach(() => {
+    vi.spyOn(Resource.prototype, "reportError").mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("uses the smaller supplied height", () => {
     const options = mergeWithDefaultOptions({ video: { height: 480 } });
 
