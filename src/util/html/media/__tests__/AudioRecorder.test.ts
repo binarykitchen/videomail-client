@@ -1,4 +1,3 @@
-import Resource from "../../../../resource";
 import UserMedia from "../../../../wrappers/visuals/userMedia";
 import mergeWithDefaultOptions from "../../../options/mergeWithDefaultOptions";
 import AudioRecorder from "../AudioRecorder";
@@ -61,7 +60,6 @@ function createAudioEvent() {
 
 describe("AudioRecorder", () => {
   beforeEach(() => {
-    vi.spyOn(Resource.prototype, "reportError").mockResolvedValue(undefined);
     vi.stubGlobal("AudioContext", FakeAudioContext);
   });
 

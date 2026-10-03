@@ -1,12 +1,7 @@
-import Resource from "../../../../resource";
 import mergeWithDefaultOptions from "../../../options/mergeWithDefaultOptions";
 import limitHeight from "../limitHeight";
 
 describe("limitHeight", () => {
-  beforeEach(() => {
-    vi.spyOn(Resource.prototype, "reportError").mockResolvedValue(undefined);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });

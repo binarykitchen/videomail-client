@@ -1,12 +1,7 @@
-import Resource from "../../../../resource";
 import mergeWithDefaultOptions from "../../../options/mergeWithDefaultOptions";
 import figureMinHeight from "../figureMinHeight";
 
 describe("figureMinHeight", () => {
-  beforeEach(() => {
-    vi.spyOn(Resource.prototype, "reportError").mockResolvedValue(undefined);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
