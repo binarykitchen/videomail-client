@@ -965,6 +965,17 @@ class Recorder extends Despot {
   }
 
   private userMediaErrorCallback(err, usedConstraints: MediaStreamConstraints) {
+    if (this.unloaded) {
+      /*
+       * This can happen when a container is unloaded but some user media related callbacks
+       * are still in process. In that case ignore error.
+       */
+      this.options.logger.debug(
+        `Recorder: already unloaded. Not going to throw error ${pretty(err)}`,
+      );
+      return;
+    }
+
     this.userMediaLoading = false;
     this.clearUserMediaTimeout();
 
@@ -990,17 +1001,12 @@ class Recorder extends Despot {
 
         this.retryTimeout = window.setTimeout(() => {
           this.retryTimeout = undefined;
-          this.loadUserMedia();
+
+          if (!this.unloaded) {
+            this.loadUserMedia();
+          }
         }, this.options.timeouts.userMedia);
       }
-    } else if (this.unloaded) {
-      /*
-       * This can happen when a container is unloaded but some user media related callbacks
-       * are still in process. In that case ignore error.
-       */
-      this.options.logger.debug(
-        `Recorder: already unloaded. Not going to throw error ${pretty(err)}`,
-      );
     } else {
       this.options.logger.debug(
         `Recorder: no error listeners attached but throwing error ${pretty(err)}`,
@@ -1021,7 +1027,11 @@ class Recorder extends Despot {
     params?: VideomailUserMediaReadyParams,
   ) {
     if (!this.userMedia) {
-      throw new Error("No user media is defined");
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      throw createError({ message: "No user media is defined", options: this.options });
     }
 
     this.options.logger.debug(
@@ -1039,12 +1049,17 @@ class Recorder extends Despot {
           },
           this.onAudioSample.bind(this),
           (err) => {
-            this.emit("ERROR", { err });
+            this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
           },
           params?.switchingFacingMode,
         );
       } catch (exc) {
-        this.emit("ERROR", { exc });
+        localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        this.userMediaLoading = false;
+        this.clearUserMediaTimeout();
+        this.userMediaErrorCallback(exc, { audio: isAudioEnabled(this.options) });
       }
     }
   }
@@ -1055,6 +1070,7 @@ class Recorder extends Despot {
     );
 
     this.emit("ASKING_WEBCAM_PERMISSION");
+    this.userMediaLoading = true;
 
     const constraints: MediaStreamConstraints = {
       video: {
@@ -1110,6 +1126,12 @@ class Recorder extends Despot {
 
     streamPromise
       .then((localStream) => {
+        if (this.unloaded) {
+          localStream.getTracks().forEach((track) => {
+            track.stop();
+          });
+          return;
+        }
         this.getUserMediaCallback(localStream, params);
       })
       .catch((reason: unknown) => {
@@ -1143,7 +1165,8 @@ class Recorder extends Despot {
       }
 
       this.userMediaTimeout = window.setTimeout(() => {
-        if (!this.isReady()) {
+        if (!this.userMediaLoaded) {
+          this.userMediaLoading = false;
           const err = getBrowser(this.options).getNoAccessIssue();
           this.emit("ERROR", { err });
         }
@@ -1271,8 +1294,7 @@ class Recorder extends Despot {
       this.options.logger.debug(`Reconnecting for the command ${command} …`);
 
       this.initSocket(() => {
-        this.writeCommand(command, args);
-        cb?.();
+        this.writeCommand(command, args, cb);
       });
     } else if (this.stream) {
       if (args) {
@@ -1428,6 +1450,7 @@ class Recorder extends Despot {
     this.options.logger.debug("Recorder: reInitializeAudio()");
 
     this.clearUserMediaTimeout();
+    this.userMediaLoading = false;
 
     // important to free memory
     this.userMedia?.stop();
@@ -1463,7 +1486,9 @@ class Recorder extends Despot {
     this.clearStopTimeout();
     this.stopPings();
 
-    // so that destroying a still pending stream below is not reported as a failure
+    this.userMediaLoading = false;
+
+    // So that destroying a still pending stream below is not reported as a failure
     this.connecting = false;
     this.reconnecting = false;
     this.reconnectAttempts = 0;
@@ -1474,7 +1499,7 @@ class Recorder extends Despot {
     }
 
     if (this.submitting) {
-      // server will disconnect socket automatically after submitting
+      // Server will disconnect socket automatically after submitting
     } else if (this.stream) {
       /*
        * Force to disconnect socket right now to clean temp files on server
@@ -1488,7 +1513,7 @@ class Recorder extends Despot {
   }
 
   public reset() {
-    // no need to reset when already unloaded
+    // No need to reset when already unloaded
     if (!this.unloaded) {
       this.options.logger.debug("Recorder: reset()");
 
@@ -1641,7 +1666,21 @@ class Recorder extends Despot {
       this.options.logger.debug("Recorder: reconnecting before recording …");
 
       this.initSocket(() => {
-        this.once("USER_MEDIA_READY", this.record.bind(this));
+        this.once("SERVER_READY", () => {
+          if (this.unloaded) {
+            return;
+          }
+
+          if (this.userMediaLoaded || this.options.loadUserMediaOnRecord) {
+            this.record();
+          } else {
+            this.once("USER_MEDIA_READY", () => {
+              if (!this.unloaded) {
+                this.record();
+              }
+            });
+          }
+        });
       });
 
       return;
