@@ -69,6 +69,7 @@ class Recorder extends Despot {
 
   private userMediaTimeout?: number | undefined;
   private retryTimeout?: number | undefined;
+  private reconnectTimeout?: number | undefined;
   private connectionTimeout?: number | undefined;
   private stopTimeout?: number | undefined;
 
@@ -87,6 +88,8 @@ class Recorder extends Despot {
   private connecting = false;
   private connected = false;
   private connectionFailed = false;
+  private reconnecting = false;
+  private reconnectAttempts = 0;
   private blocking = false;
   private built = false;
   private key?: string | undefined;
@@ -255,6 +258,68 @@ class Recorder extends Despot {
     this.connectionTimeout = undefined;
   }
 
+  private clearReconnectTimeout() {
+    if (this.reconnectTimeout === undefined) {
+      return;
+    }
+
+    this.options.logger.debug("Recorder: clearReconnectTimeout()");
+
+    window.clearTimeout(this.reconnectTimeout);
+    this.reconnectTimeout = undefined;
+  }
+
+  private handleConnectionFailure(params: {
+    url2Connect: string;
+    cause: "timeout" | "closed" | "error";
+  }) {
+    if (this.retryConnection(params)) {
+      return;
+    }
+
+    this.failConnection(params);
+  }
+
+  private retryConnection(params: {
+    url2Connect: string;
+    cause: "timeout" | "closed" | "error";
+  }) {
+    if (
+      !this.reconnecting ||
+      !this.userMediaLoaded ||
+      !this.isOnline() ||
+      this.unloaded ||
+      this.blocking
+    ) {
+      return false;
+    }
+
+    if (this.reconnectTimeout !== undefined) {
+      return true;
+    }
+
+    const delayMs = Math.min(1000 * 2 ** this.reconnectAttempts, 10000);
+    this.reconnectAttempts++;
+    this.connecting = false;
+
+    this.clearConnectionTimeout();
+    this.discardSocket();
+
+    this.options.logger.debug(
+      `Recorder: WebSocket reconnect failed (${params.cause}); retrying in ${delayMs}ms.`,
+    );
+
+    this.reconnectTimeout = window.setTimeout(() => {
+      this.reconnectTimeout = undefined;
+
+      if (this.reconnecting && !this.unloaded && !this.blocking) {
+        this.initSocket();
+      }
+    }, delayMs);
+
+    return true;
+  }
+
   private discardSocket() {
     this.options.logger.debug(`Recorder: discarding socket stream ...`);
 
@@ -290,7 +355,10 @@ class Recorder extends Despot {
 
     this.connectionFailed = true;
     this.connecting = false;
+    this.reconnecting = false;
+    this.reconnectAttempts = 0;
 
+    this.clearReconnectTimeout();
     this.clearConnectionTimeout();
 
     const { url2Connect, cause } = params;
@@ -501,6 +569,8 @@ class Recorder extends Despot {
       return;
     }
 
+    this.clearReconnectTimeout();
+
     // Skip WebSocket initialization for explicit crawler user agents.
     // These requests will no longer generate generic connection-error report
     if (isAutomatedUserAgent()) {
@@ -656,14 +726,15 @@ class Recorder extends Despot {
             `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
           );
 
-          this.initSocket();
+          this.reconnecting = true;
+          this.handleConnectionFailure({ url2Connect, cause: "timeout" });
         } else {
           /*
            * Covers the case where the connection stalls instead of being refused, for
            * example when packets to the host are silently dropped. Then neither an error
            * nor a close event ever arrives and only the OS level timeout would end it.
            */
-          this.failConnection({ url2Connect, cause: "timeout" });
+          this.handleConnectionFailure({ url2Connect, cause: "timeout" });
         }
       }, connectionTimeoutMs);
 
@@ -704,6 +775,7 @@ class Recorder extends Despot {
           //
           // We have reconnect mechanisms in place in case of
           // temporary network issues or while hot-reloading during development.
+          this.reconnecting = true;
           this.initSocket();
         } else if (!this.connecting && !this.blocking) {
           // Now report the closed connection but only when
@@ -712,7 +784,7 @@ class Recorder extends Despot {
           // Defer by one event loop tick,
           // allowing the native CloseEvent listener to run first.
           window.setTimeout(() => {
-            this.failConnection({ url2Connect, cause: "closed" });
+            this.handleConnectionFailure({ url2Connect, cause: "closed" });
           }, 0);
         }
       });
@@ -729,6 +801,9 @@ class Recorder extends Despot {
         if (!this.connected && !isClosing && !this.unloaded) {
           this.connected = true;
           this.connecting = this.unloaded = false;
+          this.reconnecting = false;
+          this.reconnectAttempts = 0;
+          this.clearReconnectTimeout();
 
           this.emit("CONNECTED");
 
@@ -771,7 +846,7 @@ class Recorder extends Despot {
         this.options.logger.debug(debugLine);
 
         if (!this.connected) {
-          this.failConnection({ url2Connect, cause: "error" });
+          this.handleConnectionFailure({ url2Connect, cause: "error" });
           return;
         }
 
@@ -1378,12 +1453,15 @@ class Recorder extends Despot {
 
     this.clearUserMediaTimeout();
     this.clearConnectionTimeout();
+    this.clearReconnectTimeout();
     this.clearRetryTimeout();
     this.clearStopTimeout();
     this.stopPings();
 
     // so that destroying a still pending stream below is not reported as a failure
     this.connecting = false;
+    this.reconnecting = false;
+    this.reconnectAttempts = 0;
 
     if (this.userMedia) {
       // prevents https://github.com/binarykitchen/videomail-client/issues/114

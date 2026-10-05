@@ -6,12 +6,19 @@ import type Replay from "../replay";
 interface RecorderInternals {
   connected: boolean;
   connectingStartedAt?: number;
+  handleConnectionFailure(params: {
+    url2Connect: string;
+    cause: "timeout" | "closed" | "error";
+  }): void;
+  initSocket(): void;
   failConnection(params: {
     url2Connect: string;
     cause: "timeout" | "closed" | "error";
   }): void;
   lastCloseEvent?: { code: number; reason: string; wasClean: boolean };
   lastSocketError?: Record<string, unknown>;
+  reconnecting: boolean;
+  userMediaLoaded?: boolean;
 }
 
 function createFixture() {
@@ -209,5 +216,64 @@ describe("Recorder", () => {
       wasClean: false,
       elapsedMs: expect.any(Number),
     });
+  });
+
+  it("retries reconnect failures without reporting an error", () => {
+    vi.useFakeTimers();
+
+    try {
+      const { options, recorder } = createFixture();
+      options.reportErrors = false;
+
+      const internals = recorder as unknown as RecorderInternals;
+      internals.reconnecting = true;
+      internals.userMediaLoaded = true;
+
+      const initSocket = vi.spyOn(internals, "initSocket");
+      let reportedError: Error | undefined;
+      recorder.on("ERROR", ({ err }) => {
+        reportedError = err;
+      });
+
+      internals.handleConnectionFailure({
+        url2Connect: "wss://videomail.io/ws",
+        cause: "error",
+      });
+
+      const attemptsBeforeRetry = initSocket.mock.calls.length;
+      vi.advanceTimersByTime(1000);
+
+      expect({
+        attemptsBeforeRetry,
+        attemptsAfterRetry: initSocket.mock.calls.length,
+        reportedError,
+        reconnecting: internals.reconnecting,
+      }).toEqual({
+        attemptsBeforeRetry: 0,
+        attemptsAfterRetry: 1,
+        reportedError: undefined,
+        reconnecting: true,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("still reports a failure before any connection was established", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+
+    const internals = recorder as unknown as RecorderInternals;
+    let reportedError: Error | undefined;
+    recorder.on("ERROR", ({ err }) => {
+      reportedError = err;
+    });
+
+    internals.handleConnectionFailure({
+      url2Connect: "wss://videomail.io/ws",
+      cause: "error",
+    });
+
+    expect(reportedError?.message).toBe("Unable to connect to the server");
   });
 });
