@@ -48,6 +48,8 @@ interface PauseParams {
   event?: MouseEvent;
 }
 
+type ConnectionFailureReason = "timeout" | "closed" | "error";
+
 class Recorder extends Despot {
   private readonly visuals: Visuals;
   private readonly replay: Replay;
@@ -271,7 +273,7 @@ class Recorder extends Despot {
 
   private handleConnectionFailure(params: {
     url2Connect: string;
-    cause: "timeout" | "closed" | "error";
+    cause: ConnectionFailureReason;
   }) {
     if (this.retryConnection(params)) {
       return;
@@ -282,8 +284,10 @@ class Recorder extends Despot {
 
   private retryConnection(params: {
     url2Connect: string;
-    cause: "timeout" | "closed" | "error";
+    cause: ConnectionFailureReason;
   }) {
+    // Only retry if we are in a reconnecting state, the user media is loaded,
+    // the device is online, and we are not unloaded or blocking.
     if (
       !this.reconnecting ||
       !this.userMediaLoaded ||
@@ -298,6 +302,7 @@ class Recorder extends Despot {
       return true;
     }
 
+    // This is an established connection retry with backoff — 1s, 2s, 4s, up to 10s
     const delayMs = Math.min(1000 * 2 ** this.reconnectAttempts, 10000);
     this.reconnectAttempts++;
     this.connecting = false;
@@ -347,7 +352,7 @@ class Recorder extends Despot {
    */
   private failConnection(params: {
     url2Connect: string;
-    cause: "timeout" | "closed" | "error";
+    cause: ConnectionFailureReason;
   }) {
     if (this.connectionFailed || this.connected || this.unloaded) {
       return;
