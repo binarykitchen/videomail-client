@@ -302,8 +302,8 @@ class Recorder extends Despot {
       return true;
     }
 
-    // This is an established connection retry with backoff — 500ms, 1s, 2s, 4s, up to 10s
-    const delayMs = Math.min(500 * 2 ** this.reconnectAttempts, 10000);
+    // This is an established connection retry with backoff — 1s, 2s, 4s, up to 10s
+    const delayMs = Math.min(1000 * 2 ** this.reconnectAttempts, 10000);
     this.reconnectAttempts++;
     this.connecting = false;
 
@@ -311,7 +311,7 @@ class Recorder extends Despot {
     this.discardSocket();
 
     this.options.logger.debug(
-      `Recorder: WebSocket reconnect failed (${params.cause}); retrying in ${delayMs}ms.`,
+      `Recorder: retrying WebSocket connection in ${delayMs}ms (cause ${params.cause}).`,
     );
 
     this.reconnectTimeout = window.setTimeout(() => {
