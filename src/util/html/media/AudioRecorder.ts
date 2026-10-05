@@ -90,7 +90,7 @@ class AudioRecorder {
       }
     }
 
-    if (!isPOT(bufferSize)) {
+    if (bufferSize === undefined || !isPOT(bufferSize)) {
       throw createError({
         message: `Audio buffer size must be a power of two. The current buffer size is ${bufferSize}.`,
         options: this.options,

@@ -54,10 +54,18 @@ class UserMedia extends Despot {
   }
 
   private attachMediaStream(stream: MediaStream) {
-    this.currentVisualStream = stream;
-
     if (this.rawVisualUserMedia) {
       this.rawVisualUserMedia.srcObject = stream;
+
+      const previousStream = this.currentVisualStream;
+      this.currentVisualStream = stream;
+
+      // Stop all tracks of the previous stream if it exists and is different from the current stream
+      if (previousStream && previousStream !== stream) {
+        previousStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
     } else {
       throw createError({
         message: "Error attaching stream to element.",
@@ -187,11 +195,13 @@ class UserMedia extends Despot {
                   `Caught pending user media promise exception: ${exc.toString()}`,
                 );
               } else {
-                throw createError({
-                  message: "Failed to play user media upon play event.",
-                  exc,
-                  options: this.options,
-                });
+                endedEarlyCallback(
+                  createError({
+                    message: "Failed to play user media upon play event.",
+                    exc,
+                    options: this.options,
+                  }),
+                );
               }
             });
         }
@@ -213,18 +223,21 @@ class UserMedia extends Despot {
       );
 
       if (this.onPlayReached && this.onLoadedMetaDataReached) {
-        videoCallback();
-
         if (this.audioRecorder) {
           try {
             this.audioRecorder.init(localMediaStream);
             this.on("SENDING_FIRST_FRAME", () => {
               this.audioRecord(audioCallback);
             });
+
+            videoCallback();
           } catch (exc) {
             unloadAllEventListeners();
+            this.stop();
             endedEarlyCallback(exc);
           }
+        } else {
+          videoCallback();
         }
       }
     };
