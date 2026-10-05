@@ -1040,16 +1040,18 @@ class Recorder extends Despot {
 
     if (this.showUserMedia()) {
       try {
-        this.clearUserMediaTimeout();
-
         this.userMedia.init(
           localStream,
           () => {
-            this.onUserMediaReady(params);
+            if (!this.unloaded) {
+              this.onUserMediaReady(params);
+            }
           },
           this.onAudioSample.bind(this),
           (err) => {
-            this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
+            if (!this.unloaded) {
+              this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
+            }
           },
           params?.switchingFacingMode,
         );
@@ -1057,10 +1059,17 @@ class Recorder extends Despot {
         localStream.getTracks().forEach((track) => {
           track.stop();
         });
+
         this.userMediaLoading = false;
         this.clearUserMediaTimeout();
-        this.userMediaErrorCallback(exc, { audio: isAudioEnabled(this.options) });
+        this.emit("ERROR", { exc });
       }
+    } else {
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      this.userMediaLoading = false;
+      this.clearUserMediaTimeout();
     }
   }
 
@@ -1135,7 +1144,9 @@ class Recorder extends Despot {
         this.getUserMediaCallback(localStream, params);
       })
       .catch((reason: unknown) => {
-        this.userMediaErrorCallback(reason, constraints);
+        if (!this.unloaded) {
+          this.userMediaErrorCallback(reason, constraints);
+        }
       });
   }
 
@@ -1321,14 +1332,16 @@ class Recorder extends Despot {
        * }
        */
 
-      this.writeStream(Buffer.from(JSON.stringify(commandObj)));
-
-      if (cb) {
-        // keep all callbacks async
-        setTimeout(function () {
-          cb();
-        }, 0);
-      }
+      this.writeStream(
+        Buffer.from(JSON.stringify(commandObj)),
+        cb
+          ? {
+              onFlushedCallback: () => {
+                queueMicrotask(cb);
+              },
+            }
+          : undefined,
+      );
     }
   }
 

@@ -195,6 +195,7 @@ class UserMedia extends Despot {
                   `Caught pending user media promise exception: ${exc.toString()}`,
                 );
               } else {
+                unloadAllEventListeners();
                 endedEarlyCallback(
                   createError({
                     message: "Failed to play user media upon play event.",
