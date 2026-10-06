@@ -9,7 +9,6 @@ export type { EmailAddress, EmailAddresses } from "./types/EmailAddress";
 export type { FullVideomailErrorData, VideomailErrorData } from "./types/error";
 export type { VideomailEvents } from "./types/events";
 export type * from "./types/events/params";
-export type { VideomailIdentifier } from "./types/identifier";
 export type {
   PartialVideomailClientOptions,
   VideomailClientOptions,
@@ -26,6 +25,7 @@ export { Reactions } from "./types/reaction";
 export type { RecordingStats } from "./types/RecordingStats";
 export type { VideomailThread } from "./types/thread";
 export type { PartialVideomail, Videomail } from "./types/Videomail";
+export type { VideomailIdentifierType } from "./types/Videomail";
 export type { VideoTypeType } from "./types/VideoType";
 
 // TODO Will sort this out later after the TS v10 release

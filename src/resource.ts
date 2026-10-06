@@ -5,10 +5,9 @@ import type Response from "superagent/lib/node/response";
 import { version as videomailClientVersion } from "../package.json";
 import Constants from "./constants";
 import { FullVideomailErrorData } from "./types/error";
-import { VideomailIdentifier } from "./types/identifier";
 import { VideomailClientOptions } from "./types/options";
 import { VideomailThread } from "./types/thread";
-import { PartialVideomail, Videomail } from "./types/Videomail";
+import { PartialVideomail, Videomail, VideomailIdentifierType } from "./types/Videomail";
 import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import VideomailError from "./util/error/VideomailError";
@@ -49,7 +48,7 @@ class Resource {
   private async get(
     identifierName: string,
     identifierValue: string,
-    identifierType: VideomailIdentifier,
+    identifierType: VideomailIdentifierType,
   ) {
     const encodedIdentifier = encodeURIComponent(identifierValue);
     const url = `${this.options.apiUrl}/videomail/${identifierName}/${encodedIdentifier}/${identifierType}`;

@@ -8,6 +8,8 @@ import { RecordingStats } from "./RecordingStats";
 import { UserKey } from "./user";
 import VideoFormat from "./VideoFormat";
 
+export type VideomailIdentifierType = "snapshot" | "thread";
+
 // Remember, only primitive types are supported.
 // LevelDB can't store for example Sets or Maps.
 export interface Videomail {
