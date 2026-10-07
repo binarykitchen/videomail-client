@@ -1,3 +1,4 @@
+// Specs see https://github.com/IBM/audit-ci#config-file-specification
 {
   "high": true,
   "package-manager": "npm",
@@ -6,6 +7,6 @@
     "GHSA-w293-vg96-wgc3",
     "GHSA-c475-qrg2-pj4r",
     "GHSA-vfj7-8cjw-p6xm",
-    "GHSA-68fv-2mgg-jv7q"
-  ]
+    "GHSA-68fv-2mgg-jv7q",
+  ],
 }

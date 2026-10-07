@@ -41,7 +41,7 @@
     "dist"
   ],
   "scripts": {
-    "audit": "audit-ci --config audit-ci.json",
+    "audit": "audit-ci --config audit-ci.jsonc",
     "build:prod": "cross-env NODE_ENV=production rslib build",
     "build:prod:doc": "cross-env RSDOCTOR=true npm run build:prod",
     "build:storybook": "storybook build",
