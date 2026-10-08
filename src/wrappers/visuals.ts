@@ -357,6 +357,10 @@ class Visuals extends Despot {
     return this.recorder.getRecordingStats();
   }
 
+  public getRecordingDimensions() {
+    return this.recorder.getRecordingDimensions();
+  }
+
   public getAudioSampleRate() {
     return this.recorder.getAudioSampleRate();
   }

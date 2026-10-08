@@ -2,9 +2,7 @@
 
 [![Test Runner for videomail-client](https://github.com/binarykitchen/videomail-client/actions/workflows/ci.yml/badge.svg)](https://github.com/binarykitchen/videomail-client/actions/workflows/ci.yml)
 
-[![npm][npm-image]][npm-url]
-[![downloads][downloads-image]][downloads-url]
-[![Netlify Status](https://api.netlify.com/api/v1/badges/3c9df5b4-8b85-4081-950a-d5df2dbd9926/deploy-status)](https://app.netlify.com/sites/videomail-client/deploys)
+[![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![Netlify Status](https://api.netlify.com/api/v1/badges/3c9df5b4-8b85-4081-950a-d5df2dbd9926/deploy-status)](https://app.netlify.com/sites/videomail-client/deploys)
 
 [npm-image]: https://img.shields.io/npm/v/videomail-client.svg?style=flat
 [npm-url]: https://npmjs.org/package/videomail-client
@@ -255,6 +253,8 @@ Updates the recording time limit for subsequent recording activity.
 
 The `SUBMITTED` event includes a `videomail` object. The exact response can evolve, but its shape follows the exported `Videomail` type. A shortened example is shown below:
 
+For new recordings, submitted `width` and `height` describe the captured canvas frames, not the browser viewport or the resized preview. These dimensions survive stopping the camera and are replaced when recording again.
+
 ```json
 {
   "subject": "some subject",
@@ -344,8 +344,7 @@ See [Can I Use: Media Capture from DOM Elements](https://caniuse.com/stream) and
 
 ## Add-ons
 
-There is also a Videomail WordPress add-on:
-<https://wordpress.org/plugins/videomail-for-ninja-forms/>
+There is also a Videomail WordPress add-on: <https://wordpress.org/plugins/videomail-for-ninja-forms/>
 
 It extends the Ninja Forms form builder with a webcam input and submission integration.
 

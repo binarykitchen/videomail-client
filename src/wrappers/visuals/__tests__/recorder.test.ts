@@ -2,6 +2,7 @@ import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptio
 import type Visuals from "../../visuals";
 import Recorder from "../recorder";
 import type Replay from "../replay";
+import UserMedia from "../userMedia";
 
 interface RecorderInternals {
   connected: boolean;
@@ -19,6 +20,12 @@ interface RecorderInternals {
   lastSocketError?: Record<string, unknown>;
   reconnecting: boolean;
   userMediaLoaded?: boolean;
+  userMedia?: UserMedia;
+  loop?: {
+    on: () => void;
+    start: () => void;
+    dispose: () => void;
+  };
 }
 
 function createFixture() {
@@ -51,7 +58,86 @@ function buildWithoutConnecting(recorder: Recorder) {
   recorder.build();
 }
 
+function recordFrames(width = 320, height = 240) {
+  const fixture = createFixture();
+  const { recorder, options } = fixture;
+  buildWithoutConnecting(recorder);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  vi.spyOn(canvas, "getContext").mockReturnValue({} as CanvasRenderingContext2D);
+  vi.spyOn(canvas, "toDataURL").mockReturnValue("data:image/jpeg;base64,/9j/2Q==");
+  const userMedia = new UserMedia(recorder, options);
+  vi.spyOn(userMedia, "createCanvas").mockReturnValue(canvas);
+  vi.spyOn(userMedia, "record").mockImplementation(() => undefined);
+  vi.spyOn(userMedia, "stop").mockImplementation(() => undefined);
+  const internals = recorder as unknown as RecorderInternals;
+  internals.userMedia = userMedia;
+  internals.userMediaLoaded = true;
+  internals.loop = { on: vi.fn(), start: vi.fn(), dispose: vi.fn() };
+  recorder.record();
+  return { ...fixture, canvas, userMedia };
+}
+
 describe("Recorder", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("retains captured frame dimensions after the camera and canvas are reset", () => {
+    const { recorder } = recordFrames();
+
+    recorder.reset();
+
+    expect(recorder.getRecordingDimensions()).toEqual({ width: 320, height: 240 });
+  });
+
+  it("retains portrait frame dimensions without assuming a landscape ratio", () => {
+    const { recorder } = recordFrames(240, 320);
+
+    recorder.reset();
+
+    expect(recorder.getRecordingDimensions()).toEqual({ width: 240, height: 320 });
+  });
+
+  it("does not expose mutable captured frame dimensions", () => {
+    const { recorder } = recordFrames();
+    const dimensions = recorder.getRecordingDimensions();
+    if (!dimensions) {
+      throw new Error("Expected recorded frame dimensions");
+    }
+    dimensions.height = 863;
+
+    expect(recorder.getRecordingDimensions()).toEqual({ width: 320, height: 240 });
+  });
+
+  it("clears captured dimensions when the recorder is unloaded", () => {
+    const { recorder } = recordFrames();
+
+    recorder.unload();
+
+    expect(recorder.getRecordingDimensions()).toBeUndefined();
+  });
+
+  it("updates captured dimensions when recording again", () => {
+    const { recorder, canvas } = recordFrames();
+    canvas.width = 640;
+    canvas.height = 360;
+
+    recorder.record();
+
+    expect(recorder.getRecordingDimensions()).toEqual({ width: 640, height: 360 });
+  });
+
+  it("clears previous dimensions when a new canvas is invalid", () => {
+    const { recorder, canvas } = recordFrames();
+    canvas.width = 0;
+
+    recorder.record();
+
+    expect(recorder.getRecordingDimensions()).toBeUndefined();
+  });
+
   it("starts disconnected", () => {
     const { recorder } = createFixture();
 

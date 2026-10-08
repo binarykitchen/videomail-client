@@ -407,11 +407,16 @@ class Container extends Despot {
     if (method === FormMethod.POST) {
       videomailFormData.recordingStats = this.visuals.getRecordingStats();
 
-      const widthDimension = this.visuals.getRecorderWidth(true);
-      const heightDimension = this.visuals.getRecorderHeight(true);
+      const dimensions = this.visuals.getRecordingDimensions();
+      if (!dimensions) {
+        throw createError({
+          message: "Recorded frame dimensions are missing.",
+          options: this.options,
+        });
+      }
 
-      videomailFormData.width = widthDimension?.value;
-      videomailFormData.height = heightDimension?.value;
+      videomailFormData.width = dimensions.width;
+      videomailFormData.height = dimensions.height;
 
       return await this.resource.post(videomailFormData);
     } else if (method === FormMethod.PUT) {

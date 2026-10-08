@@ -79,6 +79,7 @@ class Recorder extends Despot {
   private sampleProgress?: string | undefined;
 
   private canvas?: HTMLCanvasElement | undefined;
+  private recordingDimensions?: Pick<HTMLCanvasElement, "width" | "height"> | undefined;
   private ctx?: CanvasRenderingContext2D | undefined | null;
 
   private userMediaLoaded?: boolean | undefined;
@@ -1452,6 +1453,7 @@ class Recorder extends Despot {
   public back(cb: () => void) {
     this.emit("GOING_BACK");
 
+    this.recordingDimensions = undefined;
     this.unloaded = false;
 
     this.show();
@@ -1468,6 +1470,7 @@ class Recorder extends Despot {
     // important to free memory
     this.userMedia?.stop();
 
+    this.recordingDimensions = undefined;
     this.userMediaLoaded = this.key = this.canvas = this.ctx = undefined;
 
     this.loadUserMedia();
@@ -1491,6 +1494,7 @@ class Recorder extends Despot {
     this.options.logger.debug(`Recorder: unload()${prettyCause}`);
 
     this.reset();
+    this.recordingDimensions = undefined;
 
     this.clearUserMediaTimeout();
     this.clearConnectionTimeout();
@@ -1714,6 +1718,8 @@ class Recorder extends Despot {
       return;
     }
 
+    this.recordingDimensions = undefined;
+
     try {
       if (!this.userMedia) {
         throw new Error("No user media defined, unable to create canvas");
@@ -1747,6 +1753,11 @@ class Recorder extends Despot {
 
       return;
     }
+
+    this.recordingDimensions = {
+      width: this.canvas.width,
+      height: this.canvas.height,
+    };
 
     this.frame = new Frame(
       this.canvas,
@@ -2049,6 +2060,11 @@ class Recorder extends Despot {
     };
 
     return dimension;
+  }
+
+  public getRecordingDimensions() {
+    // Stopping releases the camera and canvas before the form is submitted.
+    return this.recordingDimensions && { ...this.recordingDimensions };
   }
 
   public getRecorderHeight(responsive: boolean, useBoundingClientRect?: boolean) {

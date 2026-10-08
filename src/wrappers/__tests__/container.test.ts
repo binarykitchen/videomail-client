@@ -1,5 +1,6 @@
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import Container from "../container";
+import { FormInputs, FormMethod, FormMethodType } from "../form";
 
 interface ContainerInternals {
   options: ReturnType<typeof mergeWithDefaultOptions>;
@@ -7,7 +8,13 @@ interface ContainerInternals {
     record: () => void;
     setLimitSeconds: (limitSeconds: number) => void;
     show: () => void;
+    getRecordingDimensions: () => { width: number; height: number } | undefined;
+    getRecorderWidth: (responsive: boolean) => { unit: string; value: number };
+    getRecorderHeight: (responsive: boolean) => { unit: string; value: number };
   };
+  form?: { transformFormData: (inputs: FormInputs) => FormInputs };
+  resource: { post: (data: FormInputs) => Promise<unknown> };
+  submitVideomail: (inputs: FormInputs, method: FormMethodType) => Promise<unknown>;
 }
 
 function getInternals(container: Container) {
@@ -18,6 +25,40 @@ describe("Container", () => {
   afterEach(() => {
     document.body.innerHTML = "";
     document.documentElement.classList.remove("wait");
+    vi.restoreAllMocks();
+  });
+
+  it("submits captured frame dimensions rather than stopped-media or viewport dimensions", async () => {
+    const container = new Container(mergeWithDefaultOptions());
+    const internals = getInternals(container);
+    internals.form = { transformFormData: (inputs) => ({ ...inputs }) };
+    vi.spyOn(internals.visuals, "getRecordingDimensions").mockReturnValue({
+      width: 320,
+      height: 240,
+    });
+    vi.spyOn(internals.visuals, "getRecorderWidth").mockReturnValue({
+      unit: "px",
+      value: 320,
+    });
+    vi.spyOn(internals.visuals, "getRecorderHeight").mockReturnValue({
+      unit: "px",
+      value: 863,
+    });
+    const post = vi.spyOn(internals.resource, "post").mockResolvedValue({});
+
+    await internals.submitVideomail({}, FormMethod.POST);
+
+    expect(post.mock.calls[0]?.[0]).toMatchObject({ width: 320, height: 240 });
+  });
+
+  it("rejects submission when no captured dimensions are available", async () => {
+    const container = new Container(mergeWithDefaultOptions());
+    const internals = getInternals(container);
+    internals.form = { transformFormData: (inputs) => ({ ...inputs }) };
+
+    await expect(internals.submitVideomail({}, FormMethod.POST)).rejects.toThrow(
+      "Recorded frame dimensions are missing.",
+    );
   });
 
   it("starts unbuilt without a container element", () => {
