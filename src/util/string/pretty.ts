@@ -1,6 +1,6 @@
 import util from "node:util";
 
-import getEventDetails from "./error/getEventDetails";
+import getEventDetails from "../error/getEventDetails";
 
 function inspect(element: unknown) {
   return util

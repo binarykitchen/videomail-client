@@ -1,7 +1,7 @@
 import { VideomailClientOptions } from "../../../../types/options";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
-import pad from "../../../../util/pad";
+import pad from "../../../../util/string/pad";
 import Visuals from "../../../visuals";
 import RecordNote from "./recordNote";
 

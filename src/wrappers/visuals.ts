@@ -8,7 +8,7 @@ import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import isHidden from "../util/html/isHidden";
 import showElement from "../util/html/showElement";
-import pretty from "../util/pretty";
+import pretty from "../util/string/pretty";
 import Container, { UnloadParams } from "./container";
 import RecorderInsides from "./visuals/inside/recorderInsides";
 import Notifier from "./visuals/notifier";

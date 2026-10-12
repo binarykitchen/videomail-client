@@ -3,7 +3,7 @@ import { createNanoEvents, Emitter } from "nanoevents";
 import { VideomailEvents } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
 import VideomailError from "./error/VideomailError";
-import pretty from "./pretty";
+import pretty from "./string/pretty";
 
 class Despot {
   private readonly name: string;

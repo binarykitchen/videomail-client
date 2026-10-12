@@ -1,4 +1,4 @@
-import pretty from "../pretty";
+import pretty from "../string/pretty";
 
 describe("pretty", () => {
   it("should return element ID with # prefix for HTML elements with ID", () => {

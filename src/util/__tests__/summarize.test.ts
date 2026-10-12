@@ -1,4 +1,4 @@
-import summarize from "../summarize";
+import summarize from "../string/summarize";
 
 describe("summarize", () => {
   it("sorts contents and formats values", () => {

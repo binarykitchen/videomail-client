@@ -7,7 +7,7 @@ import createError from "../../util/error/createError";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
 import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
-import pretty from "./../../util/pretty";
+import pretty from "../../util/string/pretty";
 import Recorder from "./recorder";
 
 const EVENT_ASCII = "|—O—|";

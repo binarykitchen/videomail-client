@@ -1,6 +1,6 @@
 const EMAIL_SEPARATOR_REGEX = /[ ,]+/gu;
 
-// fixes https://github.com/binarykitchen/videomail-client/issues/71
+// Fixes https://github.com/binarykitchen/videomail-client/issues/71
 function trimEmail(email: string) {
   return email.replace(EMAIL_SEPARATOR_REGEX, "");
 }

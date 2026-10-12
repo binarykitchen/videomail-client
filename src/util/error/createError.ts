@@ -1,7 +1,7 @@
 import Resource from "../../resource";
 import { VideomailClientOptions } from "../../types/options";
 import { isAudioEnabled } from "../options/audio";
-import pretty from "../pretty";
+import pretty from "../string/pretty";
 import { version as videomailClientVersion } from "./../../../package.json";
 import HTTPVideomailError from "./HTTPVideomailError";
 import VideomailError, { ErrData } from "./VideomailError";

@@ -1,4 +1,4 @@
-import pad from "../pad";
+import pad from "../string/pad";
 
 describe("pad", () => {
   it.each([

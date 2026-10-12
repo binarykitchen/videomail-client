@@ -20,7 +20,7 @@ import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import showElement from "../util/html/showElement";
 import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
-import pretty from "../util/pretty";
+import pretty from "../util/string/pretty";
 import Buttons from "./buttons";
 import Form, { FormInputs, FormMethod, FormMethodType } from "./form";
 import Visuals from "./visuals";

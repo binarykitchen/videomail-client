@@ -13,7 +13,7 @@ import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
-import pretty from "../../util/pretty";
+import pretty from "../../util/string/pretty";
 import Visuals from "../visuals";
 
 const NOTIFIER_MESSAGE_ID = "notifierMessage";

@@ -9,7 +9,7 @@ import getValidity from "../util/getValidity";
 import hideElement from "../util/html/hideElement";
 import isNotButton from "../util/html/isNotButton";
 import showElement from "../util/html/showElement";
-import pretty from "../util/pretty";
+import pretty from "../util/string/pretty";
 import { trimEmail, trimEmails } from "../util/trimEmail";
 import Container from "./container";
 

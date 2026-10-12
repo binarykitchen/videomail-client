@@ -1,4 +1,4 @@
-function pad(n: number): string {
+function pad(n: number) {
   const absNum = Math.abs(n);
   if (absNum < 10) {
     return n < 0 ? `-0${absNum}` : `0${absNum}`;
