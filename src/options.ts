@@ -1,7 +1,7 @@
 import { VideomailClientOptions } from "./types/options";
-import isProductionMode from "./util/isProductionMode";
+import isProduction from "./util/env/isProduction";
 
-const PRODUCTION = isProductionMode();
+const PRODUCTION = isProduction();
 
 const options: VideomailClientOptions = {
   logger: console, // define logging instance. defaults to console.

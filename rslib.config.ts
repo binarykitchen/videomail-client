@@ -6,7 +6,7 @@ import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import { defineConfig } from "@rslib/core";
 
 import { NodeEnvType } from "./src/types/env.ts";
-import isProductionMode from "./src/util/isProductionMode.ts";
+import isProduction from "./src/util/env/isProduction";
 
 const rootDir = process.cwd();
 
@@ -53,7 +53,7 @@ export default defineConfig({
       },
     },
   ],
-  mode: isProductionMode() ? NodeEnvType.PRODUCTION : NodeEnvType.DEVELOPMENT,
+  mode: isProduction() ? NodeEnvType.PRODUCTION : NodeEnvType.DEVELOPMENT,
   output: {
     target: "web",
     injectStyles: true,
