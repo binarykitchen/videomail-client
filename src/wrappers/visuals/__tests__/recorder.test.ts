@@ -6,6 +6,25 @@ import UserMedia from "../userMedia";
 
 interface RecorderInternals {
   connected: boolean;
+  stream?: {
+    destroyed: boolean;
+    write(buffer: Buffer, callback: () => void): boolean;
+    destroy(): void;
+  };
+  streamBackpressured: boolean;
+  mediaTransmissionStarted: boolean;
+  recordingTransportFailed: boolean;
+  recordingActive: boolean;
+  framesCount: number;
+  samplesCount: number;
+  confirmedFrameNumber: number;
+  writeStream(buffer: Buffer): void;
+  onAudioSample(audioSample: { toBuffer: () => Buffer }): void;
+  handleStreamDrain(stream: {
+    destroyed: boolean;
+    write(buffer: Buffer, callback: () => void): boolean;
+  }): void;
+  handleStreamClose(url2Connect: string): void;
   connectingStartedAt?: number;
   handleConnectionFailure(params: {
     url2Connect: string;
@@ -23,7 +42,9 @@ interface RecorderInternals {
   userMedia?: UserMedia;
   loop?: {
     on: () => void;
+    isRunning: () => boolean;
     start: () => void;
+    stop: () => void;
     dispose: () => void;
   };
 }
@@ -74,7 +95,13 @@ function recordFrames(width = 320, height = 240) {
   const internals = recorder as unknown as RecorderInternals;
   internals.userMedia = userMedia;
   internals.userMediaLoaded = true;
-  internals.loop = { on: vi.fn(), start: vi.fn(), dispose: vi.fn() };
+  internals.loop = {
+    on: vi.fn(),
+    isRunning: vi.fn(() => false),
+    start: vi.fn(),
+    stop: vi.fn(),
+    dispose: vi.fn(),
+  };
   recorder.record();
   return { ...fixture, canvas, userMedia };
 }
@@ -361,5 +388,203 @@ describe("Recorder", () => {
     });
 
     expect(reportedError?.message).toBe("Unable to connect to the server");
+  });
+
+  it("pauses video writes under backpressure and resumes after queued writes drain", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    const writtenBuffers: Buffer[] = [];
+    let isRunning = true;
+    let writeCount = 0;
+    const loop = {
+      isRunning: vi.fn(() => isRunning),
+      start: vi.fn(() => {
+        isRunning = true;
+      }),
+      stop: vi.fn(() => {
+        isRunning = false;
+      }),
+    };
+    const stream = {
+      destroyed: false,
+      destroy: vi.fn(),
+      write: vi.fn((buffer: Buffer, callback: () => void) => {
+        writtenBuffers.push(buffer);
+        callback();
+        writeCount++;
+        return writeCount > 1;
+      }),
+    };
+    internals.loop = { ...loop, on: vi.fn(), dispose: vi.fn() };
+    internals.recordingActive = true;
+    internals.stream = stream;
+
+    const firstBuffer = Buffer.from("first");
+    const secondBuffer = Buffer.from("second");
+    internals.writeStream(firstBuffer);
+    internals.writeStream(secondBuffer);
+    const buffersBeforeDrain = [...writtenBuffers];
+    const stopsBeforeDrain = loop.stop.mock.calls.length;
+
+    internals.handleStreamDrain(stream);
+
+    expect({
+      buffersBeforeDrain,
+      buffersAfterDrain: writtenBuffers,
+      stopsBeforeDrain,
+      startsAfterDrain: loop.start.mock.calls.length,
+      streamBackpressured: internals.streamBackpressured,
+    }).toEqual({
+      buffersBeforeDrain: [firstBuffer],
+      buffersAfterDrain: [firstBuffer, secondBuffer],
+      stopsBeforeDrain: 1,
+      startsAfterDrain: 1,
+      streamBackpressured: false,
+    });
+  });
+
+  it("queues audio samples in order while the socket is backpressured", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    const writtenBuffers: Buffer[] = [];
+    let writeCount = 0;
+    const stream = {
+      destroyed: false,
+      destroy: vi.fn(),
+      write: vi.fn((buffer: Buffer, callback: () => void) => {
+        writtenBuffers.push(buffer);
+        callback();
+        writeCount++;
+        return writeCount > 1;
+      }),
+    };
+    internals.stream = stream;
+    const firstBuffer = Buffer.from("sample one");
+    const secondBuffer = Buffer.from("sample two");
+
+    internals.onAudioSample({ toBuffer: () => firstBuffer });
+    internals.onAudioSample({ toBuffer: () => secondBuffer });
+    const buffersBeforeDrain = [...writtenBuffers];
+    const samplesCount = internals.samplesCount;
+
+    internals.handleStreamDrain(stream);
+
+    expect({
+      buffersBeforeDrain,
+      buffersAfterDrain: writtenBuffers,
+      samplesCount,
+    }).toEqual({
+      buffersBeforeDrain: [firstBuffer],
+      buffersAfterDrain: [firstBuffer, secondBuffer],
+      samplesCount: 2,
+    });
+  });
+
+  it("stops a recording when the bounded write queue fills", () => {
+    const { options, recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    const stream = {
+      destroyed: false,
+      destroy: vi.fn(() => {
+        stream.destroyed = true;
+      }),
+      write: vi.fn(() => false),
+    };
+    options.reportErrors = false;
+    internals.stream = stream;
+    internals.streamBackpressured = true;
+    internals.mediaTransmissionStarted = true;
+
+    let reportedError: Error | undefined;
+    recorder.on("ERROR", ({ err }) => {
+      reportedError = err;
+    });
+
+    internals.writeStream(Buffer.alloc(1_048_577));
+
+    expect({
+      error: reportedError?.message,
+      failed: internals.recordingTransportFailed,
+      streamBackpressured: internals.streamBackpressured,
+      destroyCalls: stream.destroy.mock.calls.length,
+    }).toEqual({
+      error: "WebSocket send buffer limit exceeded",
+      failed: true,
+      streamBackpressured: false,
+      destroyCalls: 1,
+    });
+  });
+
+  it("fails a video-only recording when backpressure never drains", () => {
+    vi.useFakeTimers();
+
+    try {
+      const { options, recorder } = createFixture();
+      const internals = recorder as unknown as RecorderInternals;
+      const stream = {
+        destroyed: false,
+        destroy: vi.fn(() => {
+          stream.destroyed = true;
+        }),
+        write: vi.fn((_buffer: Buffer, callback: () => void) => {
+          callback();
+          return false;
+        }),
+      };
+      options.reportErrors = false;
+      options.timeouts.connection = 100;
+      internals.stream = stream;
+      internals.mediaTransmissionStarted = true;
+
+      let reportedError: Error | undefined;
+      recorder.on("ERROR", ({ err }) => {
+        reportedError = err;
+      });
+
+      internals.writeStream(Buffer.from("frame"));
+      vi.advanceTimersByTime(100);
+
+      expect({
+        error: reportedError?.message,
+        failed: internals.recordingTransportFailed,
+        destroyCalls: stream.destroy.mock.calls.length,
+      }).toEqual({
+        error: "WebSocket write timed out",
+        failed: true,
+        destroyCalls: 1,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("fails instead of reconnecting when the socket closes after media was sent", () => {
+    const { options, recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    options.reportErrors = false;
+    internals.connected = true;
+    internals.userMediaLoaded = true;
+    internals.mediaTransmissionStarted = true;
+    internals.framesCount = 4;
+    internals.confirmedFrameNumber = 2;
+
+    let reportedError: Error | undefined;
+    recorder.on("ERROR", ({ err }) => {
+      reportedError = err;
+    });
+
+    internals.handleStreamClose("wss://videomail.io/ws");
+
+    expect({
+      error: reportedError?.message,
+      connected: internals.connected,
+      failed: internals.recordingTransportFailed,
+      reconnecting: internals.reconnecting,
+    }).toEqual({
+      error: "Recording interrupted",
+      connected: false,
+      failed: true,
+      reconnecting: false,
+    });
   });
 });

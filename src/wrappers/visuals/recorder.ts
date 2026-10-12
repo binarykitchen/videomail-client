@@ -10,6 +10,7 @@ import { Dimension } from "../../types/dimension";
 import { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import { RecordingStats } from "../../types/RecordingStats";
+import BoundedWriteQueue from "../../util/boundedWriteQueue";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import getEventDetails from "../../util/error/getEventDetails";
@@ -53,6 +54,7 @@ type ConnectionFailureReason = "timeout" | "closed" | "error";
 class Recorder extends Despot {
   private readonly visuals: Visuals;
   private readonly replay: Replay;
+  private readonly pendingWrites = new BoundedWriteQueue<WriteStreamParams>();
 
   private loop?: any;
 
@@ -73,6 +75,7 @@ class Recorder extends Despot {
   private retryTimeout?: number | undefined;
   private reconnectTimeout?: number | undefined;
   private connectionTimeout?: number | undefined;
+  private backpressureTimeout?: number | undefined;
   private stopTimeout?: number | undefined;
 
   private frameProgress?: string | undefined;
@@ -88,6 +91,12 @@ class Recorder extends Despot {
   private unloaded?: boolean;
   private stopTime?: number | undefined;
   private stream?: websocket.WebSocketDuplex | undefined;
+  private streamBackpressured = false;
+  private resumeAfterDrain = false;
+  // Once media starts, a replacement socket cannot safely resume this take.
+  private mediaTransmissionStarted = false;
+  private recordingActive = false;
+  private recordingTransportFailed = false;
   private connecting = false;
   private connected = false;
   private connectionFailed = false;
@@ -119,6 +128,10 @@ class Recorder extends Despot {
     this.facingMode = options.video.facingMode;
   }
 
+  private hasExceededWebSocketSendBuffer(buffer: Buffer, opts?: WriteStreamParams) {
+    return buffer.length > 0 && !this.pendingWrites.enqueue(buffer, opts);
+  }
+
   private writeStream(buffer: Buffer, opts?: WriteStreamParams) {
     if (this.stream) {
       if (this.stream.destroyed) {
@@ -132,32 +145,43 @@ class Recorder extends Despot {
           options: this.options,
         });
 
-        this.emit("ERROR", { err });
+        this.handleWriteFailure(err);
+      } else if (this.streamBackpressured) {
+        // Keep extra chunks in our bounded queue, not the writable's buffer.
+        if (this.hasExceededWebSocketSendBuffer(buffer, opts)) {
+          this.failMediaTransmission(
+            createError({
+              message: "WebSocket send buffer limit exceeded",
+              explanation:
+                "The connection to the server is too slow to keep up with this recording. The recording has been stopped; please start a new one.",
+              options: this.options,
+            }),
+          );
+        }
       } else {
-        const onFlushedCallback = opts?.onFlushedCallback;
+        this.writeToStream(this.stream, buffer, opts);
+      }
+    }
+  }
+
+  private writeToStream(
+    stream: websocket.WebSocketDuplex,
+    buffer: Buffer,
+    opts?: WriteStreamParams,
+  ) {
+    const onFlushedCallback = opts?.onFlushedCallback;
+
+    try {
+      const canContinue = stream.write(buffer, () => {
+        if (!onFlushedCallback) {
+          return;
+        }
 
         try {
-          this.stream.write(buffer, () => {
-            if (!onFlushedCallback) {
-              return;
-            }
-
-            try {
-              onFlushedCallback(opts);
-            } catch (exc) {
-              const err = createError({
-                message: "Failed to write stream buffer",
-                explanation: `stream.write() failed because of ${pretty(exc)}`,
-                options: this.options,
-                exc,
-              });
-
-              this.emit("ERROR", { err });
-            }
-          });
+          onFlushedCallback(opts);
         } catch (exc) {
           const err = createError({
-            message: "Failed writing to server",
+            message: "Failed to write stream buffer",
             explanation: `stream.write() failed because of ${pretty(exc)}`,
             options: this.options,
             exc,
@@ -165,8 +189,225 @@ class Recorder extends Despot {
 
           this.emit("ERROR", { err });
         }
+      });
+
+      if (!canContinue) {
+        // This chunk was accepted; wait for drain before submitting another.
+        this.streamBackpressured = true;
+        this.startBackpressureTimeout();
+        this.pauseForBackpressure();
+        return false;
       }
+
+      return true;
+    } catch (exc) {
+      const err = createError({
+        message: "Failed writing to server",
+        explanation: `stream.write() failed because of ${pretty(exc)}`,
+        options: this.options,
+        exc,
+      });
+
+      this.handleWriteFailure(err);
+      return false;
     }
+  }
+
+  private flushPendingWrites(stream: websocket.WebSocketDuplex) {
+    if (this.isStaleStream(stream)) {
+      return;
+    }
+
+    this.streamBackpressured = false;
+    this.clearBackpressureTimeout();
+
+    // Preserve media order and stop again if the writable fills during the flush.
+    let pendingWrite = this.pendingWrites.dequeue();
+
+    while (pendingWrite) {
+      if (!this.writeToStream(stream, pendingWrite.buffer, pendingWrite.params)) {
+        return;
+      }
+
+      pendingWrite = this.pendingWrites.dequeue();
+    }
+
+    this.resumeRecordingAfterDrain();
+  }
+
+  private isStaleStream(stream: websocket.WebSocketDuplex) {
+    return this.stream !== stream || stream.destroyed;
+  }
+
+  private canPauseForBackpressure() {
+    return Boolean(
+      this.recordingActive && !this.userMedia?.isPaused() && this.loop?.isRunning(),
+    );
+  }
+
+  private pauseForBackpressure() {
+    if (!this.canPauseForBackpressure()) {
+      return;
+    }
+
+    // Stop producing frames until the outgoing stream can accept more data.
+    this.resumeAfterDrain = true;
+    this.loop.stop();
+  }
+
+  private resumeRecordingAfterDrain() {
+    if (!this.resumeAfterDrain) {
+      return;
+    }
+
+    this.resumeAfterDrain = false;
+
+    if (this.canResumeAfterDrain()) {
+      this.loop?.start();
+    }
+  }
+
+  private canResumeAfterDrain() {
+    return this.recordingActive && !this.userMedia?.isPaused();
+  }
+
+  private handleWriteFailure(err: VideomailError) {
+    if (this.mediaTransmissionStarted) {
+      this.failMediaTransmission(err);
+      return;
+    }
+
+    this.emit("ERROR", { err });
+  }
+
+  private failMediaTransmission(err: VideomailError) {
+    if (this.recordingTransportFailed) {
+      return;
+    }
+
+    // Without a server replay protocol, a partial take cannot be recovered.
+    this.recordingTransportFailed = true;
+    this.recordingActive = false;
+    this.mediaTransmissionStarted = false;
+    this.streamBackpressured = false;
+    this.resumeAfterDrain = false;
+    this.pendingWrites.clear();
+    this.connected = false;
+    this.connecting = false;
+    this.reconnecting = false;
+
+    this.clearReconnectTimeout();
+    this.clearBackpressureTimeout();
+    this.discardSocket();
+    this.reset();
+
+    this.framesCount = this.samplesCount = 0;
+    this.confirmedFrameNumber = this.confirmedSampleNumber = 0;
+    delete this.recordingStats;
+    this.recordingDimensions = undefined;
+
+    this.emit("ERROR", { err });
+  }
+
+  private startBackpressureTimeout() {
+    if (!this.shouldStartBackpressureTimeout()) {
+      return;
+    }
+
+    // A stalled socket may never drain, so bound how long the take can wait.
+    this.backpressureTimeout = window.setTimeout(() => {
+      this.backpressureTimeout = undefined;
+
+      if (this.shouldIgnoreBackpressureTimeout()) {
+        return;
+      }
+
+      const err = createError({
+        message: "WebSocket write timed out",
+        explanation:
+          "The server stopped accepting recording data. The recording has been stopped; please check your connection and start a new one.",
+        options: this.options,
+      });
+
+      this.failMediaTransmission(err);
+    }, this.options.timeouts.connection);
+  }
+
+  private shouldStartBackpressureTimeout() {
+    return this.backpressureTimeout === undefined && this.mediaTransmissionStarted;
+  }
+
+  private shouldIgnoreBackpressureTimeout() {
+    return !this.streamBackpressured || this.recordingTransportFailed;
+  }
+
+  private failInterruptedRecording() {
+    // Progress confirmations do not tell us how to replay missing media safely.
+    const unconfirmedFrames = Math.max(0, this.framesCount - this.confirmedFrameNumber);
+    const unconfirmedSamples = Math.max(
+      0,
+      this.samplesCount - this.confirmedSampleNumber,
+    );
+    const err = createError({
+      message: "Recording interrupted",
+      explanation:
+        "The server connection closed before this recording completed. It cannot be safely resumed, so it has been stopped. Please start a new recording.",
+      options: this.options,
+      cause: { unconfirmedFrames, unconfirmedSamples },
+    });
+
+    this.failMediaTransmission(err);
+  }
+
+  private handleStreamDrain(stream: websocket.WebSocketDuplex) {
+    this.options.logger.debug(`${PIPE_SYMBOL}Stream *drain* event emitted`);
+    this.flushPendingWrites(stream);
+  }
+
+  private canReconnectAfterStreamClose() {
+    return Boolean(this.connected && this.userMediaLoaded);
+  }
+
+  private shouldReportStreamClose() {
+    return !this.connecting && !this.blocking;
+  }
+
+  private handleStreamClose(url2Connect: string) {
+    const debugLine = summarize(`${PIPE_SYMBOL}Stream has closed:`, {
+      connecting: this.connecting,
+      connected: this.connected,
+      userMediaLoaded: this.userMediaLoaded,
+      blocking: this.blocking,
+    });
+
+    this.options.logger.debug(debugLine);
+
+    const canReconnect = this.canReconnectAfterStreamClose();
+
+    this.connected = false;
+
+    if (this.shouldIgnoreStreamClose()) {
+      return;
+    }
+
+    if (this.mediaTransmissionStarted) {
+      this.failInterruptedRecording();
+    } else if (canReconnect) {
+      // Before media starts, reconnecting cannot leave a gap in the take.
+      this.pendingWrites.clear();
+      this.streamBackpressured = false;
+      this.resumeAfterDrain = false;
+      this.reconnecting = true;
+      this.initSocket();
+    } else if (this.shouldReportStreamClose()) {
+      window.setTimeout(() => {
+        this.handleConnectionFailure({ url2Connect, cause: "closed" });
+      }, 0);
+    }
+  }
+
+  private shouldIgnoreStreamClose() {
+    return this.recordingTransportFailed || Boolean(this.unloaded);
   }
 
   private sendPings() {
@@ -188,7 +429,12 @@ class Recorder extends Despot {
   }
 
   private onAudioSample(audioSample: AudioSample) {
+    if (this.recordingTransportFailed) {
+      return;
+    }
+
     this.samplesCount++;
+    this.mediaTransmissionStarted = true;
 
     const audioBuffer = audioSample.toBuffer();
 
@@ -261,6 +507,15 @@ class Recorder extends Despot {
     this.connectionTimeout = undefined;
   }
 
+  private clearBackpressureTimeout() {
+    if (this.backpressureTimeout === undefined) {
+      return;
+    }
+
+    window.clearTimeout(this.backpressureTimeout);
+    this.backpressureTimeout = undefined;
+  }
+
   private clearReconnectTimeout() {
     if (this.reconnectTimeout === undefined) {
       return;
@@ -287,15 +542,7 @@ class Recorder extends Despot {
     url2Connect: string;
     cause: ConnectionFailureReason;
   }) {
-    // Only retry if we are in a reconnecting state, the user media is loaded,
-    // the device is online, and we are not unloaded or blocking.
-    if (
-      !this.reconnecting ||
-      !this.userMediaLoaded ||
-      !this.isOnline() ||
-      this.unloaded ||
-      this.blocking
-    ) {
+    if (!this.canRetryConnection()) {
       return false;
     }
 
@@ -318,7 +565,7 @@ class Recorder extends Despot {
     this.reconnectTimeout = window.setTimeout(() => {
       this.reconnectTimeout = undefined;
 
-      if (this.reconnecting && !this.unloaded && !this.blocking) {
+      if (this.shouldContinueReconnect()) {
         this.initSocket();
       }
     }, delayMs);
@@ -326,8 +573,27 @@ class Recorder extends Despot {
     return true;
   }
 
+  private canRetryConnection() {
+    return Boolean(
+      this.reconnecting &&
+      this.userMediaLoaded &&
+      this.isOnline() &&
+      !this.unloaded &&
+      !this.blocking,
+    );
+  }
+
+  private shouldContinueReconnect() {
+    return this.reconnecting && !this.unloaded && !this.blocking;
+  }
+
   private discardSocket() {
     this.options.logger.debug(`Recorder: discarding socket stream ...`);
+
+    this.clearBackpressureTimeout();
+    this.pendingWrites.clear();
+    this.streamBackpressured = false;
+    this.resumeAfterDrain = false;
 
     const stream = this.stream;
     this.stream = undefined;
@@ -355,7 +621,7 @@ class Recorder extends Despot {
     url2Connect: string;
     cause: ConnectionFailureReason;
   }) {
-    if (this.connectionFailed || this.connected || this.unloaded) {
+    if (this.shouldIgnoreConnectionFailure()) {
       return;
     }
 
@@ -426,6 +692,10 @@ class Recorder extends Despot {
     });
 
     this.emit("ERROR", { err });
+  }
+
+  private shouldIgnoreConnectionFailure() {
+    return this.connectionFailed || this.connected || Boolean(this.unloaded);
   }
 
   private calculateFrameProgress() {
@@ -503,6 +773,11 @@ class Recorder extends Despot {
     }
 
     const hasAudio = this.samplesCount > 0;
+
+    // A server preview completes the prior take and allows another recording.
+    this.mediaTransmissionStarted = false;
+    this.recordingActive = false;
+    this.recordingTransportFailed = false;
 
     this.confirmedFrameNumber =
       this.confirmedSampleNumber =
@@ -720,7 +995,13 @@ class Recorder extends Despot {
       this.emit("ERROR", { err });
     }
 
-    if (this.stream) {
+    /*
+      Why this? Because it matters for event handlers.
+      Because it's a reference to the stream that matters for event handlers.
+    */
+    const stream = this.stream;
+
+    if (stream) {
       const connectionTimeoutMs = this.options.timeouts.connection;
 
       this.connectionTimeout = window.setTimeout(() => {
@@ -762,40 +1043,11 @@ class Recorder extends Despot {
        * }
        */
 
-      this.stream.on("close", () => {
-        const debugLine = summarize(`${PIPE_SYMBOL}Stream has closed:`, {
-          connecting: this.connecting,
-          connected: this.connected,
-          userMediaLoaded: this.userMediaLoaded,
-          blocking: this.blocking,
-        });
-
-        this.options.logger.debug(debugLine);
-
-        const tryReconnect = this.connected && this.userMediaLoaded;
-
-        this.connected = false;
-
-        if (tryReconnect) {
-          // Allow it to reconnect automatically.
-          //
-          // We have reconnect mechanisms in place in case of
-          // temporary network issues or while hot-reloading during development.
-          this.reconnecting = true;
-          this.initSocket();
-        } else if (!this.connecting && !this.blocking) {
-          // Now report the closed connection but only when
-          // no reconnection attempt is in progress and no previous error message has been emitted leading it to be blocked.
-          //
-          // Defer by one event loop tick,
-          // allowing the native CloseEvent listener to run first.
-          window.setTimeout(() => {
-            this.handleConnectionFailure({ url2Connect, cause: "closed" });
-          }, 0);
-        }
+      stream.on("close", () => {
+        this.handleStreamClose(url2Connect);
       });
 
-      this.stream.on("connect", (args) => {
+      stream.on("connect", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
         );
@@ -817,7 +1069,7 @@ class Recorder extends Despot {
         }
       });
 
-      this.stream.on("data", (data: Uint8Array) => {
+      stream.on("data", (data: Uint8Array) => {
         this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
         try {
@@ -838,7 +1090,7 @@ class Recorder extends Despot {
         }
       });
 
-      this.stream.on("error", (err) => {
+      stream.on("error", (err) => {
         if (typeof Event !== "undefined" && err instanceof Event) {
           this.lastSocketError = getEventDetails(err);
         } else {
@@ -863,6 +1115,11 @@ class Recorder extends Despot {
                 cause: this.lastSocketError ?? err,
               });
 
+        if (this.mediaTransmissionStarted) {
+          this.failInterruptedRecording();
+          return;
+        }
+
         this.emit("ERROR", {
           err: createError({
             message: "WebSocket stream error",
@@ -873,67 +1130,57 @@ class Recorder extends Despot {
         });
       });
 
-      // just experimental
-
-      this.stream.on("drain", () => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *drain* event emitted (should not happen!)`,
-        );
+      stream.on("drain", () => {
+        this.handleStreamDrain(stream);
       });
 
-      this.stream.on("preend", (args) => {
+      stream.on("preend", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *preend* event emitted with args: ${pretty(args)}`,
         );
       });
 
-      this.stream.on("end", () => {
+      stream.on("end", () => {
         this.options.logger.debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
       });
 
-      this.stream.on("drain", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *drain* event emitted with args: ${pretty(args)}`,
-        );
-      });
-
-      this.stream.on("pipe", (src) => {
+      stream.on("pipe", (src) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *pipe* event emitted with src: ${pretty(src)}`,
         );
       });
 
-      this.stream.on("unpipe", (src) => {
+      stream.on("unpipe", (src) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *unpipe* event emitted with src: ${pretty(src)}`,
         );
       });
 
-      this.stream.on("resume", (args) => {
+      stream.on("resume", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *resume* event emitted with args: ${pretty(args)}`,
         );
       });
 
-      this.stream.on("uncork", (args) => {
+      stream.on("uncork", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *uncork* event emitted with args: ${pretty(args)}`,
         );
       });
 
-      this.stream.on("readable", (args) => {
+      stream.on("readable", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *readable* event emitted with args: ${pretty(args)}`,
         );
       });
 
-      this.stream.on("prefinish", (args) => {
+      stream.on("prefinish", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *prefinish* event emitted with args: ${pretty(args)}`,
         );
       });
 
-      this.stream.on("finish", (args) => {
+      stream.on("finish", (args) => {
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *finish* event emitted with args: ${pretty(args)}`,
         );
@@ -1089,37 +1336,7 @@ class Recorder extends Despot {
       audio: isAudioEnabled(this.options),
     };
 
-    // TODO Improve typings or add an external library for that
-    if (params?.switchingFacingMode && constraints.video && constraints.video !== true) {
-      constraints.video.facingMode = params.switchingFacingMode;
-    }
-
-    if (this.options.video.width && constraints.video && constraints.video !== true) {
-      const idealWidth = this.options.video.width;
-
-      if (idealWidth) {
-        constraints.video.width = { ideal: idealWidth };
-      }
-    } else if (constraints.video && constraints.video !== true) {
-      /*
-       * otherwise try to apply the same width as the element is having
-       * but there is no 100% guarantee that this will happen. not
-       * all webcam drivers behave the same way
-       */
-      const limitedWidth = this.limitWidth();
-
-      if (limitedWidth?.value) {
-        constraints.video.width = { ideal: limitedWidth.value };
-      }
-    }
-
-    if (this.options.video.height && constraints.video && constraints.video !== true) {
-      const idealHeight = this.options.video.height;
-
-      if (idealHeight) {
-        constraints.video.height = { ideal: idealHeight };
-      }
-    }
+    this.configureVideoConstraints(constraints, params);
 
     this.options.logger.debug(
       summarize(`Recorder: our webcam constraints are:`, constraints),
@@ -1149,6 +1366,40 @@ class Recorder extends Despot {
           this.userMediaErrorCallback(reason, constraints);
         }
       });
+  }
+
+  private configureVideoConstraints(
+    constraints: MediaStreamConstraints,
+    params?: VideomailUserMediaReadyParams,
+  ) {
+    const videoConstraints =
+      typeof constraints.video === "object" ? constraints.video : undefined;
+
+    if (!videoConstraints) {
+      return;
+    }
+
+    if (params?.switchingFacingMode) {
+      videoConstraints.facingMode = params.switchingFacingMode;
+    }
+
+    if (this.options.video.width) {
+      videoConstraints.width = { ideal: this.options.video.width };
+    } else {
+      /*
+       * Use the current element width as an ideal; camera drivers may still
+       * choose a different size.
+       */
+      const limitedWidth = this.limitWidth();
+
+      if (limitedWidth?.value) {
+        videoConstraints.width = { ideal: limitedWidth.value };
+      }
+    }
+
+    if (this.options.video.height) {
+      videoConstraints.height = { ideal: this.options.video.height };
+    }
   }
 
   private loadUserMedia(params?: VideomailUserMediaReadyParams) {
@@ -1359,10 +1610,10 @@ class Recorder extends Despot {
   }
 
   private getAvgInterval() {
-    const intervalSum = this.getIntervalSum();
+    const intervalSum = this.getIntervalSum() ?? 0;
 
     // Explicitly reject undefined and invalid values (zero or negative).
-    if (intervalSum === undefined || intervalSum <= 0) {
+    if (!this.hasValidInterval(intervalSum)) {
       return undefined;
     }
 
@@ -1370,14 +1621,18 @@ class Recorder extends Despot {
   }
 
   private getAvgFps() {
-    const intervalSum = this.getIntervalSum();
+    const intervalSum = this.getIntervalSum() ?? 0;
 
     // Explicitly reject undefined and invalid values (zero or negative).
-    if (intervalSum === undefined || intervalSum <= 0) {
+    if (!this.hasValidInterval(intervalSum)) {
       return undefined;
     }
 
     return (this.framesCount / intervalSum) * 1000;
+  }
+
+  private hasValidInterval(intervalSum: number) {
+    return intervalSum > 0;
   }
 
   public getRecordingStats() {
@@ -1394,6 +1649,8 @@ class Recorder extends Despot {
     }
 
     this.options.logger.debug(`Recorder: stop(${params ? pretty(params) : ""})`);
+
+    this.recordingActive = false;
 
     const limitReached = params?.limitReached;
 
@@ -1493,6 +1750,8 @@ class Recorder extends Despot {
     const prettyCause = cause ? `, cause: ${cause}` : "";
     this.options.logger.debug(`Recorder: unload()${prettyCause}`);
 
+    this.recordingActive = false;
+    this.mediaTransmissionStarted = false;
     this.reset();
     this.recordingDimensions = undefined;
 
@@ -1603,7 +1862,12 @@ class Recorder extends Despot {
     this.emit("RESUMING");
 
     this.userMedia?.resume();
-    this.loop.start();
+    if (!this.streamBackpressured) {
+      this.loop.start();
+    } else {
+      // Honor the resume request once the queued writes have drained.
+      this.resumeAfterDrain = true;
+    }
   }
 
   private onFlushed(opts: WriteStreamParams) {
@@ -1615,6 +1879,10 @@ class Recorder extends Despot {
   }
 
   private draw(_deltaTime, elapsedTime: number) {
+    if (this.recordingTransportFailed) {
+      return;
+    }
+
     if (!this.userMedia) {
       throw new Error("No user media defined, unable to draw on canvas");
     }
@@ -1651,6 +1919,7 @@ class Recorder extends Despot {
 
           const frameBuffer = Buffer.concat([this.recordingBuffer, frameControlBuffer]);
 
+          this.mediaTransmissionStarted = true;
           this.writeStream(frameBuffer, {
             frameNumber: this.framesCount,
             onFlushedCallback: this.onFlushed.bind(this),
@@ -1766,6 +2035,10 @@ class Recorder extends Despot {
     );
 
     this.options.logger.debug("Recorder: record()");
+    // Start a fresh transport-failure window for this take.
+    this.recordingActive = true;
+    this.recordingTransportFailed = false;
+    this.mediaTransmissionStarted = false;
     this.userMedia.record();
 
     this.emit("RECORDING", { framesCount: this.framesCount });
