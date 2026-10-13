@@ -13,7 +13,10 @@ interface ContainerInternals {
     getRecorderHeight: (responsive: boolean) => { unit: string; value: number };
   };
   form?: { transformFormData: (inputs: FormInputs) => FormInputs };
-  resource: { post: (data: FormInputs) => Promise<unknown> };
+  resource: {
+    form: (data: Record<string, unknown>, url: string) => Promise<unknown>;
+    post: (data: FormInputs) => Promise<unknown>;
+  };
   submitVideomail: (inputs: FormInputs, method: FormMethodType) => Promise<unknown>;
 }
 
@@ -59,6 +62,105 @@ describe("Container", () => {
     await expect(internals.submitVideomail({}, FormMethod.POST)).rejects.toThrow(
       "Recorded frame dimensions are missing.",
     );
+  });
+
+  it("submits the host form after Videomail and includes metadata when enabled", async () => {
+    const container = new Container(
+      mergeWithDefaultOptions({ submitWithVideomail: true }),
+    );
+    const internals = getInternals(container);
+    const videomail = { alias: "video-alias" };
+    const response = { body: { videomail } };
+    const requestOrder: string[] = [];
+    const submitVideomail = vi
+      .spyOn(internals, "submitVideomail")
+      .mockImplementation(() => {
+        requestOrder.push("videomail");
+        return Promise.resolve(response);
+      });
+    const submitHostForm = vi.spyOn(internals.resource, "form").mockImplementation(() => {
+      requestOrder.push("host");
+      return Promise.resolve({});
+    });
+    const formData = {
+      [internals.options.selectors.keyInputName]: "video-key",
+      email: "ada@example.com",
+    };
+
+    await container.submitAll(formData, FormMethod.POST, "/contact", true);
+
+    expect({
+      videoRequest: submitVideomail.mock.calls[0],
+      hostRequest: submitHostForm.mock.calls[0],
+      requestOrder,
+    }).toEqual({
+      videoRequest: [formData, FormMethod.POST],
+      hostRequest: [{ ...formData, videomail }, "/contact"],
+      requestOrder: ["videomail", "host"],
+    });
+  });
+
+  it("leaves host-form submission to integrations when auto-submission is disabled", async () => {
+    const container = new Container(
+      mergeWithDefaultOptions({ enableAutoSubmission: false }),
+    );
+    const internals = getInternals(container);
+    vi.spyOn(internals, "submitVideomail").mockResolvedValue({
+      body: { videomail: { alias: "video-alias" } },
+    });
+    const submitHostForm = vi.spyOn(internals.resource, "form").mockResolvedValue({});
+
+    await container.submitAll(
+      { [internals.options.selectors.keyInputName]: "video-key" },
+      FormMethod.POST,
+      "/contact",
+      true,
+    );
+
+    expect(submitHostForm).not.toHaveBeenCalled();
+  });
+
+  it("does not submit a second request without an explicit host action", async () => {
+    const container = new Container(mergeWithDefaultOptions());
+    const internals = getInternals(container);
+    vi.spyOn(internals, "submitVideomail").mockResolvedValue({
+      body: { videomail: { alias: "video-alias" } },
+    });
+    const submitHostForm = vi.spyOn(internals.resource, "form").mockResolvedValue({});
+
+    await container.submitAll(
+      { [internals.options.selectors.keyInputName]: "video-key" },
+      FormMethod.POST,
+      internals.options.apiUrl,
+    );
+
+    expect(submitHostForm).not.toHaveBeenCalled();
+  });
+
+  it("retries a failed host submission without resubmitting Videomail", async () => {
+    const container = new Container(mergeWithDefaultOptions());
+    const internals = getInternals(container);
+    const submitVideomail = vi.spyOn(internals, "submitVideomail").mockResolvedValue({
+      body: { videomail: { alias: "video-alias" } },
+    });
+    const submitHostForm = vi
+      .spyOn(internals.resource, "form")
+      .mockRejectedValueOnce(new Error("Host unavailable"))
+      .mockResolvedValueOnce({});
+    const error = vi.fn();
+    container.on("ERROR", error);
+    const formData = {
+      [internals.options.selectors.keyInputName]: "video-key",
+    };
+
+    await container.submitAll(formData, FormMethod.POST, "/contact", true);
+    await container.submitAll(formData, FormMethod.POST, "/contact", true);
+
+    expect({
+      videoRequests: submitVideomail.mock.calls.length,
+      hostRequests: submitHostForm.mock.calls.length,
+      errors: error.mock.calls.length,
+    }).toEqual({ videoRequests: 1, hostRequests: 2, errors: 1 });
   });
 
   it("starts unbuilt without a container element", () => {

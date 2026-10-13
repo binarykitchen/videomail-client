@@ -51,6 +51,7 @@ class Container extends Despot {
 
   private hasError = false;
   private submitted = false;
+  private pendingHostSubmission: { key: string; response: Response } | undefined;
   private lastValidation = false;
 
   private containerElement?: HTMLElement | null | undefined;
@@ -508,6 +509,7 @@ class Container extends Despot {
       this.removeAllListeners();
 
       this.built = this.submitted = false;
+      this.pendingHostSubmission = undefined;
     }
   }
 
@@ -570,6 +572,7 @@ class Container extends Despot {
       this.options.logger.debug(`Container: startOver(keepHidden = ${keepHidden})`);
 
       this.submitted = false;
+      this.pendingHostSubmission = undefined;
 
       const replay = this.getReplay();
 
@@ -781,11 +784,27 @@ class Container extends Despot {
     return this.buttons.isReady();
   }
 
-  public async submitAll(formData: FormInputs, method: FormMethodType, url: string) {
+  private getPendingHostSubmissionResponse(
+    key: string | undefined,
+  ): Response | undefined {
+    return this.pendingHostSubmission?.key === key
+      ? this.pendingHostSubmission?.response
+      : undefined;
+  }
+
+  public async submitAll(
+    formData: FormInputs,
+    method: FormMethodType,
+    url: string,
+    // True when the form has an explicit host action, not the API URL fallback.
+    hasHostAction = false,
+  ) {
     let response: Response | undefined;
+    let hostResponse: Response | undefined;
+    const videomailKey = formData[this.options.selectors.keyInputName];
 
     try {
-      const hasVideomailKey = Boolean(formData[this.options.selectors.keyInputName]);
+      const hasVideomailKey = Boolean(videomailKey);
 
       /*
        * !hasVideomailKey makes it possible to submit form when videomail itself
@@ -818,7 +837,25 @@ class Container extends Despot {
          * will want to highlight which one input are wrong.
          */
       } else {
-        response = await this.submitVideomail(formData, method);
+        response =
+          this.getPendingHostSubmissionResponse(videomailKey) ??
+          (await this.submitVideomail(formData, method));
+
+        if (this.options.enableAutoSubmission && hasHostAction) {
+          if (videomailKey) {
+            this.pendingHostSubmission = { key: videomailKey, response };
+          }
+
+          const hostFormData: Record<string, unknown> = { ...formData };
+
+          if (this.options.submitWithVideomail) {
+            hostFormData.videomail = response.body.videomail;
+          }
+
+          hostResponse = await this.resource.form(hostFormData, url);
+          this.pendingHostSubmission = undefined;
+        }
+
         this.submitted = true;
         this.emit("SUBMITTED", { videomail: response.body.videomail, response });
       }
@@ -826,9 +863,11 @@ class Container extends Despot {
       const err = createError({ exc, options: this.options });
       this.emit("ERROR", { err });
     } finally {
-      if (response?.text && response.type === "text/html") {
+      const finalResponse = hostResponse ?? response;
+
+      if (finalResponse?.text && finalResponse.type === "text/html") {
         // server replied with HTML contents - display these
-        document.body.innerHTML = purify.sanitize(response.text);
+        document.body.innerHTML = purify.sanitize(finalResponse.text);
       }
 
       this.endWaiting();

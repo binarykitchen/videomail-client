@@ -388,6 +388,7 @@ class Form extends Despot {
       this.options.logger.debug("Form: doTheSubmit()");
     }
 
+    const hasHostAction = this.formElement.hasAttribute("action");
     const url = this.formElement.getAttribute("action") ?? this.options.apiUrl;
     const method = this.formElement.getAttribute("method");
 
@@ -405,7 +406,7 @@ class Form extends Despot {
     }
 
     if (this.container.hasElement()) {
-      await this.container.submitAll(this.getData(), chosenMethod, url);
+      await this.container.submitAll(this.getData(), chosenMethod, url, hasHostAction);
     }
 
     // important to stop submission

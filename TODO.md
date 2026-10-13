@@ -14,13 +14,13 @@ Prioritized by potential user impact, especially loss of a recording or a form s
 
 ## 2. Make host-form submission match the advertised two-step contract (critical)
 
-- [ ] Addressed
+- [x] Addressed
 
-**Evidence:** The [README's Form Submissions section](README.md#L299) and [ContactForm story](src/stories/Form.stories.ts#L76) promise a Videomail request followed by the original form request. In [`submitAll`](src/wrappers/container.ts#L784), a form with `videomail_key` only calls `submitVideomail`; the `resource.form` call is in the _no-key_ branch. [`submitWithVideomail`](src/options.ts#L16) is advertised as controlling metadata forwarded to the host, but the option has no reader in `src` beyond its definition and type.
+**Behavior:** With an explicit form `action` and auto-submission enabled, the client submits Videomail first and POSTs the original form after success. `submitWithVideomail` adds the returned metadata to that host request. Forms without an explicit action remain API-only, and integrations can disable auto-submission to own the host request.
 
-**Why it matters:** An integrator following those examples can see `SUBMITTED` even though their contact form never reached its own server. Setting `submitWithVideomail` does not change that outcome.
+**Coverage:** Tests verify request order, metadata forwarding, no-action behavior, integration-owned submission, and retrying a failed host request without uploading Videomail again.
 
-**Next step:** Decide and document who owns the host request. If the client owns it, post the form after Videomail succeeds, forward the alias/metadata according to the option, and test request order and failure handling. If integrations must do it themselves, correct the README, story, and option contract before relying on them.
+**Next step:** Smoke-test the explicit-action flow against a controllable host endpoint and Videomail test server.
 
 ## 3. Minimize sensitive data in automatic error reports (critical)
 

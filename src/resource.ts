@@ -12,7 +12,7 @@ import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import VideomailError from "./util/error/VideomailError";
 import getBrowser from "./util/getBrowser";
-import { FormInputs, FormMethod, FormMethodType } from "./wrappers/form";
+import { FormMethod, FormMethodType } from "./wrappers/form";
 
 class Resource {
   private readonly options: VideomailClientOptions;
@@ -229,7 +229,7 @@ class Resource {
     return await this.write(FormMethod.PUT, videomail);
   }
 
-  public async form(formData: FormInputs, url: string) {
+  public async form(formData: Record<string, unknown>, url: string) {
     let formType: string;
 
     switch (this.options.enctype) {

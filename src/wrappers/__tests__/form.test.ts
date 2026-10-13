@@ -203,7 +203,16 @@ describe("Form", () => {
       { subject: "Hello" },
       "put",
       "https://example.test/send",
+      true,
     );
+  });
+
+  it("does not mark the API fallback as a host-form action", async () => {
+    const { form, options, submitAll } = createFixture();
+
+    await form.doTheSubmit();
+
+    expect(submitAll).toHaveBeenCalledWith({}, "post", options.apiUrl, false);
   });
 
   it("returns false to prevent native submission", async () => {

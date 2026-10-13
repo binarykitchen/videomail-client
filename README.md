@@ -298,7 +298,9 @@ You can also retrieve this data with `videomailClient.getByKey()`.
 
 ## Form Submissions
 
-By default, the client prevents the initial form submission and submits the videomail to the Videomail server first. After the server returns the alias and metadata, the client submits the original form.
+With `enableAutoSubmission` enabled (the default), a recorded video and an explicit form `action` produce two requests: the client sends Videomail first, then POSTs the original form fields to that action after success. Without a recorded video, the client POSTs the form directly to its action.
+
+For first-party Videomail forms without an explicit `action`, a recorded video is sent in one request to the Videomail API; listen for `SUBMITTED` to handle the response. Set `enableAutoSubmission: false` when a host framework owns form submission, then let that integration resume its submission after `SUBMITTED`.
 
 If this does not work, verify that the configured selectors identify the form and its submit button:
 
@@ -314,7 +316,7 @@ When these values are `undefined` (the defaults), the client detects the nearest
 
 ### Include videomail meta data in Form Submissions
 
-Enable `submitWithVideomail` to include videomail metadata in the submission to your server. Otherwise the form body contains the videomail alias, which can later be resolved with `videomailClient.getByAlias(alias)`.
+When the client sends the second, host-form request, enable `submitWithVideomail` to include full videomail metadata under the `videomail` key. Otherwise the original form fields include the videomail alias, which can later be resolved with `videomailClient.getByAlias(alias)`.
 
 <a name="privacy"></a>
 
