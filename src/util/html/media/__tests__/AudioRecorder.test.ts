@@ -80,12 +80,48 @@ describe("AudioRecorder", () => {
     );
   });
 
-  it("sets the configured input volume", () => {
-    const recorder = createRecorder();
+  it.each([0, 0.2, 0.4, 1])("sets the configured input gain to %s", (volume) => {
+    const options = mergeWithDefaultOptions({
+      audio: { bufferSize: 1024, volume },
+    });
+    const recorder = new AudioRecorder(createUserMedia(), options);
 
     recorder.init({} as MediaStream);
 
-    expect(FakeAudioContext.latest.gainNode.gain.value).toBe(0.4);
+    expect(FakeAudioContext.latest.gainNode.gain.value).toBe(volume);
+  });
+
+  it("uses unity input gain by default", () => {
+    const options = mergeWithDefaultOptions({ audio: { bufferSize: 1024 } });
+    const recorder = new AudioRecorder(createUserMedia(), options);
+
+    recorder.init({} as MediaStream);
+
+    expect(FakeAudioContext.latest.gainNode.gain.value).toBe(1);
+  });
+
+  it("connects the microphone only to the input gain", () => {
+    const recorder = createRecorder();
+    recorder.init({} as MediaStream);
+    const { audioInput, gainNode } = FakeAudioContext.latest;
+
+    expect(audioInput.connect.mock.calls).toEqual([[gainNode]]);
+  });
+
+  it("connects the input gain only to the script processor", () => {
+    const recorder = createRecorder();
+    recorder.init({} as MediaStream);
+    const { gainNode, scriptProcessor } = FakeAudioContext.latest;
+
+    expect(gainNode.connect.mock.calls).toEqual([[scriptProcessor]]);
+  });
+
+  it("keeps the script processor connected to the destination", () => {
+    const recorder = createRecorder();
+    recorder.init({} as MediaStream);
+    const { scriptProcessor, destination } = FakeAudioContext.latest;
+
+    expect(scriptProcessor.connect.mock.calls).toEqual([[destination]]);
   });
 
   it("rejects a buffer size that is not a power of two", () => {

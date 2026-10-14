@@ -68,8 +68,8 @@ const options: VideomailClientOptions = {
   audio: {
     enabled: false, // set to true for experimental audio recording
     switch: false, // enables a switcher for audio recording (on/off)
-    // must be between 0 .. 1 but 0.20 is recommended to avoid distorting at the higher volume peaks
-    volume: 0.2,
+    // Recording gain from 0 (silence) to 1 (unchanged microphone level).
+    volume: 1,
     /*
      * Decides how often the audio is being sampled,
      *

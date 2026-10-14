@@ -75,6 +75,12 @@ The defaults suit most integrations. Set `whitelistKey` when deploying on your o
 
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
 
+### Audio
+
+Audio recording is experimental and disabled by default. Set `audio.enabled` to `true` to enable it.
+
+`audio.volume` controls recording gain from `0` (silence) to `1` (unchanged microphone level, the default). It does not control playback volume or enable audible microphone monitoring.
+
 ## API
 
 - [`new VideomailClient()`](#new-videomailclientoptions)

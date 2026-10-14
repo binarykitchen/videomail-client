@@ -121,15 +121,19 @@ class AudioRecorder {
       CHANNELS,
     );
 
-    // connect stream to our scriptProcessor
-    this.audioInput.connect(this.scriptProcessor);
+    // Connect this path: microphone -> volume control -> recorder -> browser output.
+    // We go left to right to make it easy to read.
+    // We could connect the last part first and still get the same path.
 
-    // connect our scriptProcessor to the previous destination
-    this.scriptProcessor.connect(this.getAudioContext().destination);
-
-    // connect volume
+    // First, apply the volume setting to the microphone data.
     this.audioInput.connect(volume);
+
+    // Next, send the adjusted data to the recorder.
     volume.connect(this.scriptProcessor);
+
+    // Last, give the recorder an output so it keeps working.
+    // This output contains only zeros, so no microphone audio is played back.
+    this.scriptProcessor.connect(this.getAudioContext().destination);
   }
 
   public record(cb: AudioProcessCB) {
