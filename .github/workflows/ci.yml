@@ -28,25 +28,26 @@ jobs:
       - name: 📦 Install npm dependencies
         run: npm ci
 
-      - name: 🔎 Run prettier
-        run: node --run prettier
+      - parallel:
+          - name: 🔎 Run prettier
+            run: node --run prettier
 
-      - name: 🔎 Run linter
-        run: node --run lint
+          - name: 🔎 Run linter
+            run: node --run lint
 
-      - name: 🔎 Check types
-        run: node --run types
+          - name: 🔎 Check types
+            run: node --run types
 
-      - name: 🔨 Build
-        run: node --run build:prod
+          - name: 🔨 Build
+            run: node --run build:prod
 
-      - name: 🔎 Audit (detect vulnerabilities)
-        run: node --run audit
+          - name: 🔎 Audit (detect vulnerabilities)
+            run: node --run audit
 
-      - name: 🔎 Run tests
-        run: node --run test
+          - name: 🔎 Run tests
+            run: node --run test
 
-      - name: 🔎 Run Chromatic
-        env:
-          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-        run: npm run chromatic -- --project-token="$CHROMATIC_PROJECT_TOKEN"
+          - name: 🔎 Run Chromatic
+            env:
+              CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+            run: npm run chromatic -- --project-token="$CHROMATIC_PROJECT_TOKEN"
