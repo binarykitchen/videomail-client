@@ -18,9 +18,6 @@ class VideomailError extends HTTPVideomailError {
   public logLines?: string[] | undefined;
   public whitelistKey: string | undefined;
 
-  // TODO Cookie, singular? It should be in plural, although there is the global document.cookie ...
-  public cookie: string[] | undefined;
-
   // It might be duplicate with all the other attributes,
   // but always safe to attach the original error just in case.
   public err?: Error | undefined;
@@ -77,14 +74,6 @@ class VideomailError extends HTTPVideomailError {
     this.device = usefulClientData.device.type ? usefulClientData.device : undefined;
     this.engine = usefulClientData.engine;
     this.os = usefulClientData.os;
-
-    let cookie: string[] | undefined;
-
-    if (global.document.cookie.length > 0) {
-      cookie = global.document.cookie.split(",").map((c) => c.trim());
-    }
-
-    this.cookie = cookie && cookie.length > 0 ? cookie : undefined;
 
     this.screen = [screen.width, screen.height, screen.colorDepth].join("×");
 

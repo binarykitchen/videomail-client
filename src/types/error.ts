@@ -41,7 +41,6 @@ export interface VideomailErrorData {
 
 export interface FullVideomailErrorData extends VideomailErrorData {
   browser: IBrowser;
-  cookie?: string[] | undefined;
   cpu?: ICPU | undefined;
   device?: IDevice | undefined;
   engine: IEngine;

@@ -10,6 +10,7 @@ import { VideomailThread } from "./types/thread";
 import { PartialVideomail, Videomail, VideomailIdentifierType } from "./types/Videomail";
 import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
+import sanitizeErrorReport from "./util/error/sanitizeErrorReport";
 import VideomailError from "./util/error/VideomailError";
 import getBrowser from "./util/getBrowser";
 import { FormMethod, FormMethodType } from "./wrappers/form";
@@ -160,7 +161,6 @@ class Resource {
       },
       browser: err.browser,
       code: err.code,
-      cookie: err.cookie,
       cause: err.cause instanceof Error ? serializeError(err.cause) : err.cause,
       cpu: err.cpu,
       device: err.device,
@@ -187,7 +187,7 @@ class Resource {
       .set("Timezone-Id", this.timezoneId)
       .withCredentials()
       // Note you cant send the Error instance itself, it has to be a plain JSON
-      .send(fullVideomailErrorData)
+      .send(sanitizeErrorReport(fullVideomailErrorData))
       .timeout(this.options.timeouts.connection);
   }
 
