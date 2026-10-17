@@ -24,6 +24,47 @@ function getInternals(container: Container) {
   return container as unknown as ContainerInternals;
 }
 
+function buildExternalSubmitFixture(
+  formId = "someForm",
+  submitMarkup = `<input id="external-submit" type="button" value="Submit">`,
+) {
+  document.body.innerHTML = `
+    <form action="/contact" method="post">
+      <input name="from" type="email" value="signer@example.test" required>
+      <input name="subject" value="Hello" required>
+      <div id="videomail-target"></div>
+    </form>
+    ${submitMarkup}
+  `;
+  const formElement = document.querySelector("form");
+  const submitButton = document.querySelector<HTMLInputElement | HTMLButtonElement>(
+    "#external-submit",
+  );
+
+  if (!formElement || !submitButton) {
+    throw new Error("Missing external submit fixture controls");
+  }
+
+  if (formId) {
+    formElement.id = formId;
+  }
+
+  const container = new Container(
+    mergeWithDefaultOptions({
+      enableAutoValidation: false,
+      selectors: {
+        containerId: "videomail-target",
+        formId,
+        submitButtonSelector: "#external-submit",
+      },
+    }),
+  );
+  const submitAll = vi.spyOn(container, "submitAll").mockResolvedValue(undefined);
+  container.build();
+
+  return { container, formElement, submitButton, submitAll };
+}
+
 describe("Container", () => {
   afterEach(() => {
     document.body.innerHTML = "";
@@ -203,6 +244,189 @@ describe("Container", () => {
     container.build();
 
     expect(container.hasForm()).toBe(true);
+  });
+
+  it("associates an external submit input with its host form", () => {
+    const { formElement, submitButton } = buildExternalSubmitFixture();
+
+    expect(submitButton.form).toBe(formElement);
+  });
+
+  it("keeps recorder controls out of implicit form submission", () => {
+    const { formElement } = buildExternalSubmitFixture();
+
+    expect(
+      Array.from(formElement.querySelectorAll("button")).every(
+        (button) => button.type === "button",
+      ),
+    ).toBe(true);
+  });
+
+  it.each([
+    ["input", `<input id="external-submit" type="button" value="Submit">`],
+    ["button", `<button id="external-submit" type="button">Submit</button>`],
+  ])("submits the host form from an external %s click", (_name, markup) => {
+    const { submitButton, submitAll } = buildExternalSubmitFixture("someForm", markup);
+
+    submitButton.click();
+
+    expect(submitAll).toHaveBeenCalledWith(
+      {
+        from: "signer@example.test",
+        subject: "Hello",
+        videomail_key: "",
+      },
+      "post",
+      "/contact",
+      true,
+    );
+  });
+
+  it("supports requestSubmit with the external submit control", () => {
+    const { formElement, submitButton, submitAll } = buildExternalSubmitFixture();
+
+    formElement.requestSubmit(submitButton);
+
+    expect(submitAll).toHaveBeenCalledOnce();
+  });
+
+  it("preserves existing host click and submit handlers", () => {
+    const { container, formElement, submitButton, submitAll } =
+      buildExternalSubmitFixture();
+    const hostClick = vi.fn();
+    const hostSubmit = vi.fn();
+    submitButton.onclick = hostClick;
+    formElement.onsubmit = hostSubmit;
+    container.build();
+    submitButton.disabled = false;
+
+    submitButton.click();
+
+    expect({
+      clicks: hostClick.mock.calls.length,
+      submits: hostSubmit.mock.calls.length,
+      requests: submitAll.mock.calls.length,
+    }).toEqual({ clicks: 1, submits: 1, requests: 1 });
+  });
+
+  it("honors cancelled external button clicks", () => {
+    const { submitButton, submitAll } = buildExternalSubmitFixture();
+    submitButton.onclick = (event) => {
+      event.preventDefault();
+    };
+
+    submitButton.click();
+
+    expect(submitAll).not.toHaveBeenCalled();
+  });
+
+  it("preserves native validation for the external submit control", () => {
+    const { formElement, submitButton, submitAll } = buildExternalSubmitFixture();
+    const sender = formElement.querySelector<HTMLInputElement>("[name='from']");
+    if (sender) {
+      sender.value = "";
+    }
+
+    submitButton.click();
+
+    expect(submitAll).not.toHaveBeenCalled();
+  });
+
+  it("blocks overlapping requests from the external submit control", async () => {
+    const { submitButton, submitAll } = buildExternalSubmitFixture();
+    const pendingSubmission = Promise.withResolvers<undefined>();
+    submitAll.mockReturnValueOnce(pendingSubmission.promise);
+
+    submitButton.click();
+    submitButton.click();
+    pendingSubmission.resolve(undefined);
+    await pendingSubmission.promise;
+
+    expect(submitAll).toHaveBeenCalledOnce();
+  });
+
+  it("associates an external control when the form has no ID", () => {
+    const { formElement, submitButton } = buildExternalSubmitFixture("");
+
+    expect(submitButton.form).toBe(formElement);
+  });
+
+  it("keeps the association stable across repeated builds", () => {
+    const { container, formElement, submitButton } = buildExternalSubmitFixture("");
+    const formId = formElement.id;
+
+    container.build();
+
+    expect({ id: formElement.id, owner: submitButton.form }).toEqual({
+      id: formId,
+      owner: formElement,
+    });
+  });
+
+  it("restores the external control's original association on unload", () => {
+    const { container, submitButton } = buildExternalSubmitFixture(
+      "someForm",
+      `<input id="external-submit" type="button" value="Submit" form="other-form">`,
+    );
+
+    container.unload();
+
+    expect(submitButton.getAttribute("form")).toBe("other-form");
+  });
+
+  it("preserves an existing correct association on unload", () => {
+    const { container, submitButton } = buildExternalSubmitFixture(
+      "someForm",
+      `<input id="external-submit" type="button" value="Submit" form="someForm">`,
+    );
+
+    container.unload();
+
+    expect(submitButton.getAttribute("form")).toBe("someForm");
+  });
+
+  it("removes a generated form ID and association on unload", () => {
+    const { container, formElement, submitButton } = buildExternalSubmitFixture("");
+
+    container.unload();
+
+    expect({
+      formId: formElement.getAttribute("id"),
+      association: submitButton.getAttribute("form"),
+    }).toEqual({ formId: null, association: null });
+  });
+
+  it("preserves the host form ID on unload", () => {
+    const { container, formElement } = buildExternalSubmitFixture();
+
+    container.unload();
+
+    expect(formElement.id).toBe("someForm");
+  });
+
+  it("removes the client submit listener on unload", () => {
+    const { container, formElement, submitAll } = buildExternalSubmitFixture();
+    container.unload();
+
+    const nativeSubmissionAllowed = formElement.dispatchEvent(
+      new SubmitEvent("submit", { bubbles: true, cancelable: true }),
+    );
+
+    expect({ nativeSubmissionAllowed, requests: submitAll.mock.calls.length }).toEqual({
+      nativeSubmissionAllowed: true,
+      requests: 0,
+    });
+  });
+
+  it("reconnects an external submit control after unloading and rebuilding", () => {
+    const { container, submitButton, submitAll } = buildExternalSubmitFixture("");
+    container.unload();
+    container.build();
+    submitButton.disabled = false;
+
+    submitButton.click();
+
+    expect(submitAll).toHaveBeenCalledOnce();
   });
 
   it("queries inside the built container", () => {

@@ -112,7 +112,7 @@ class Buttons extends Despot {
     clickHandler?: ClickHandler,
     show?: boolean,
     id?: string,
-    type?: ButtonType,
+    type: ButtonType = "button",
     selector?,
     disabled = true,
   ) {

@@ -24,13 +24,15 @@ export const FormMethod = {
 export type FormMethodType = (typeof FormMethod)[keyof typeof FormMethod];
 
 class Form extends Despot {
+  private static nextFormId = 0;
+
   private readonly container: Container;
   private readonly formElement: HTMLFormElement;
-  private readonly validate = (event: Event) => {
-    this.container.validate(event);
-  };
-
   private keyInput?: HTMLInputElement | null;
+  private submitButton: HTMLButtonElement | undefined;
+  private submitButtonFormAttribute: string | null = null;
+  private generatedFormId: string | undefined;
+  private isSubmitting = false;
 
   private readonly FORM_FIELDS = {};
 
@@ -56,6 +58,16 @@ class Form extends Despot {
       sendCopy: options.selectors.sendCopyInputName,
     };
   }
+
+  private readonly validate = (event: Event) => {
+    this.container.validate(event);
+  };
+
+  private readonly handleSubmit = (event: SubmitEvent) => {
+    if (!event.defaultPrevented) {
+      void this.doTheSubmit(event);
+    }
+  };
 
   private getData() {
     return getFormData(this.formElement, { includeDisabled: true }) as FormInputs;
@@ -364,28 +376,69 @@ class Form extends Despot {
     }
   }
 
-  private startListeningToSubmitEvents() {
+  private connectSubmitButton() {
     const submitButton = this.container.getSubmitButton();
 
-    if (submitButton) {
-      submitButton.onclick = this.doTheSubmit.bind(this);
+    if (!submitButton) {
+      return;
     }
+
+    if (submitButton.form === this.formElement) {
+      return;
+    }
+
+    if (!this.formElement.id) {
+      let formId: string;
+
+      do {
+        formId = `videomail-form-${Form.nextFormId++}`;
+      } while (document.getElementById(formId));
+
+      this.formElement.id = formId;
+      this.generatedFormId = formId;
+    }
+
+    this.submitButton = submitButton;
+    this.submitButtonFormAttribute = submitButton.getAttribute("form");
+    submitButton.setAttribute("form", this.formElement.id);
+  }
+
+  private startListeningToSubmitEvents() {
+    this.connectSubmitButton();
+    this.formElement.addEventListener("submit", this.handleSubmit);
   }
 
   private stopListeningToSubmitEvents() {
-    const submitButton = this.container.getSubmitButton();
+    this.formElement.removeEventListener("submit", this.handleSubmit);
 
-    if (submitButton) {
-      submitButton.onclick = null;
+    if (this.submitButton) {
+      if (this.submitButtonFormAttribute === null) {
+        this.submitButton.removeAttribute("form");
+      } else {
+        this.submitButton.setAttribute("form", this.submitButtonFormAttribute);
+      }
+
+      this.submitButton = undefined;
+      this.submitButtonFormAttribute = null;
     }
+
+    if (this.generatedFormId === this.formElement.id) {
+      this.formElement.removeAttribute("id");
+    }
+
+    this.generatedFormId = undefined;
   }
 
-  public async doTheSubmit(e?) {
+  public async doTheSubmit(e?: Event) {
     if (e) {
       this.options.logger.debug(`Form: doTheSubmit(${pretty(e)})`);
       e.preventDefault();
     } else {
       this.options.logger.debug("Form: doTheSubmit()");
+    }
+
+    if (this.isSubmitting) {
+      return false;
     }
 
     const hasHostAction = this.formElement.hasAttribute("action");
@@ -406,7 +459,13 @@ class Form extends Despot {
     }
 
     if (this.container.hasElement()) {
-      await this.container.submitAll(this.getData(), chosenMethod, url, hasHostAction);
+      this.isSubmitting = true;
+
+      try {
+        await this.container.submitAll(this.getData(), chosenMethod, url, hasHostAction);
+      } finally {
+        this.isSubmitting = false;
+      }
     }
 
     // important to stop submission
