@@ -6,6 +6,7 @@ import UserMedia from "../userMedia";
 
 interface RecorderInternals {
   connected: boolean;
+  key?: string;
   stream?: {
     destroyed: boolean;
     write(buffer: Buffer, callback: () => void): boolean;
@@ -25,6 +26,8 @@ interface RecorderInternals {
     write(buffer: Buffer, callback: () => void): boolean;
   }): void;
   handleStreamClose(url2Connect: string): void;
+  handleStreamError(url2Connect: string, err: unknown): void;
+  preview(args: { key: string; duration: number }): void;
   connectingStartedAt?: number;
   handleConnectionFailure(params: {
     url2Connect: string;
@@ -107,6 +110,8 @@ function recordFrames(width = 320, height = 240) {
 }
 
 describe("Recorder", () => {
+  const PREVIEW_KEY = "00000000-0000-6000-8000-000000000001";
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -179,6 +184,14 @@ describe("Recorder", () => {
 
   it("starts invalid for submission", () => {
     const { recorder } = createFixture();
+
+    expect(recorder.validate()).toBe(false);
+  });
+
+  it("does not validate an empty recorder just because its socket is connected", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    internals.connected = true;
 
     expect(recorder.validate()).toBe(false);
   });
@@ -586,5 +599,177 @@ describe("Recorder", () => {
       failed: true,
       reconnecting: false,
     });
+  });
+
+  it("keeps an encoded preview usable after an abnormal socket close", () => {
+    vi.useFakeTimers();
+
+    try {
+      const { options, recorder } = recordFrames();
+      const internals = recorder as unknown as RecorderInternals;
+      options.reportErrors = false;
+      internals.mediaTransmissionStarted = true;
+      recorder.reset();
+      internals.preview({ key: PREVIEW_KEY, duration: 182.031 });
+      internals.lastCloseEvent = { code: 1006, reason: "", wasClean: false };
+
+      let reportedError: Error | undefined;
+      recorder.on("ERROR", ({ err }) => {
+        reportedError = err;
+      });
+
+      internals.handleStreamClose("wss://videomail.io/ws");
+      vi.runOnlyPendingTimers();
+
+      expect({
+        connected: recorder.isConnected(),
+        key: internals.key,
+        valid: recorder.validate(),
+        reportedError,
+      }).toEqual({
+        connected: false,
+        key: PREVIEW_KEY,
+        valid: true,
+        reportedError: undefined,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("invalidates the previous preview when the recorder is reset", () => {
+    const { recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    recorder.reset();
+    internals.preview({ key: PREVIEW_KEY, duration: 182.031 });
+
+    recorder.reset();
+
+    expect(recorder.validate()).toBe(false);
+  });
+
+  it("reconnects and clears the old preview when recording again after disconnect", () => {
+    const { recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    recorder.reset();
+    internals.preview({ key: PREVIEW_KEY, duration: 182.031 });
+    internals.handleStreamClose("wss://videomail.io/ws");
+    const initSocket = vi
+      .spyOn(internals, "initSocket")
+      .mockImplementation(() => undefined);
+
+    recorder.back(() => undefined);
+
+    expect({
+      connectionAttempts: initSocket.mock.calls.length,
+      key: internals.key,
+      valid: recorder.validate(),
+    }).toEqual({ connectionAttempts: 1, key: undefined, valid: false });
+  });
+
+  it("stops pause heartbeats when the preview socket closes", () => {
+    vi.useFakeTimers();
+
+    try {
+      const { recorder } = recordFrames();
+      const internals = recorder as unknown as RecorderInternals;
+      recorder.pause();
+      recorder.reset();
+      internals.preview({ key: PREVIEW_KEY, duration: 182.031 });
+
+      internals.handleStreamClose("wss://videomail.io/ws");
+
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each(["before", "after"])(
+    "preserves a completed preview when a stream error arrives %s close",
+    (order) => {
+      const { options, recorder } = recordFrames();
+      const internals = recorder as unknown as RecorderInternals;
+      options.reportErrors = false;
+      recorder.reset();
+      internals.preview({ key: PREVIEW_KEY, duration: 182.031 });
+      const stream = {
+        destroyed: false,
+        destroy: vi.fn(() => {
+          stream.destroyed = true;
+        }),
+        write: vi.fn(() => true),
+      };
+      internals.stream = stream;
+
+      let reportedError: Error | undefined;
+      recorder.on("ERROR", ({ err }) => {
+        reportedError = err;
+      });
+
+      if (order === "after") {
+        internals.handleStreamClose("wss://videomail.io/ws");
+      }
+
+      internals.handleStreamError("wss://videomail.io/ws", new Error("ECONNRESET"));
+
+      if (order === "before") {
+        internals.handleStreamClose("wss://videomail.io/ws");
+      }
+
+      expect({
+        connected: recorder.isConnected(),
+        key: internals.key,
+        valid: recorder.validate(),
+        reportedError,
+        destroyCalls: stream.destroy.mock.calls.length,
+      }).toEqual({
+        connected: false,
+        key: PREVIEW_KEY,
+        valid: true,
+        reportedError: undefined,
+        destroyCalls: 1,
+      });
+    },
+  );
+
+  it("ignores a deferred connection failure after the server completed a preview", () => {
+    const { options, recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    options.reportErrors = false;
+    recorder.reset();
+    internals.preview({ key: PREVIEW_KEY, duration: 182.031 });
+    internals.connected = false;
+
+    let reportedError: Error | undefined;
+    recorder.on("ERROR", ({ err }) => {
+      reportedError = err;
+    });
+
+    internals.failConnection({ url2Connect: "wss://videomail.io/ws", cause: "closed" });
+
+    expect({ valid: recorder.validate(), reportedError }).toEqual({
+      valid: true,
+      reportedError: undefined,
+    });
+  });
+
+  it("still fails an unfinished recording when its stream emits an error", () => {
+    const { options, recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    options.reportErrors = false;
+    internals.connected = true;
+    internals.mediaTransmissionStarted = true;
+    internals.framesCount = 4;
+    internals.confirmedFrameNumber = 2;
+
+    let reportedError: Error | undefined;
+    recorder.on("ERROR", ({ err }) => {
+      reportedError = err;
+    });
+
+    internals.handleStreamError("wss://videomail.io/ws", new Error("ECONNRESET"));
+
+    expect(reportedError?.message).toBe("Recording interrupted");
   });
 });

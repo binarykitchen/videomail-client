@@ -385,6 +385,7 @@ class Recorder extends Despot {
     const canReconnect = this.canReconnectAfterStreamClose();
 
     this.connected = false;
+    this.stopPings();
 
     if (this.shouldIgnoreStreamClose()) {
       return;
@@ -407,7 +408,54 @@ class Recorder extends Despot {
   }
 
   private shouldIgnoreStreamClose() {
-    return this.recordingTransportFailed || Boolean(this.unloaded);
+    return this.recordingTransportFailed || Boolean(this.unloaded) || this.validate();
+  }
+
+  private handleStreamError(url2Connect: string, err: unknown) {
+    if (typeof Event !== "undefined" && err instanceof Event) {
+      this.lastSocketError = getEventDetails(err);
+    } else {
+      this.lastSocketError = serializeError(err);
+    }
+
+    const debugLine = summarize(`${PIPE_SYMBOL}Stream *error* event emitted:`, {
+      error: serializeError(err),
+    });
+
+    this.options.logger.debug(debugLine);
+
+    if (this.validate()) {
+      this.connected = false;
+      this.stopPings();
+      this.discardSocket();
+      return;
+    }
+
+    if (!this.connected) {
+      this.handleConnectionFailure({ url2Connect, cause: "error" });
+      return;
+    }
+
+    const streamError =
+      err instanceof Error
+        ? err
+        : new Error("WebSocket stream emitted an error event", {
+            cause: this.lastSocketError ?? err,
+          });
+
+    if (this.mediaTransmissionStarted) {
+      this.failInterruptedRecording();
+      return;
+    }
+
+    this.emit("ERROR", {
+      err: createError({
+        message: "WebSocket stream error",
+        explanation: `The WebSocket stream emitted an error event. Details: ${pretty(err)}`,
+        options: this.options,
+        exc: streamError,
+      }),
+    });
   }
 
   private sendPings() {
@@ -423,6 +471,8 @@ class Recorder extends Despot {
     if (this.pingInterval === undefined) {
       return;
     }
+
+    this.options.logger.debug("Recorder: stopping pings...");
 
     window.clearInterval(this.pingInterval);
     this.pingInterval = undefined;
@@ -695,7 +745,9 @@ class Recorder extends Despot {
   }
 
   private shouldIgnoreConnectionFailure() {
-    return this.connectionFailed || this.connected || Boolean(this.unloaded);
+    return (
+      this.connectionFailed || this.connected || Boolean(this.unloaded) || this.validate()
+    );
   }
 
   private calculateFrameProgress() {
@@ -1091,43 +1143,7 @@ class Recorder extends Despot {
       });
 
       stream.on("error", (err) => {
-        if (typeof Event !== "undefined" && err instanceof Event) {
-          this.lastSocketError = getEventDetails(err);
-        } else {
-          this.lastSocketError = serializeError(err);
-        }
-
-        const debugLine = summarize(`${PIPE_SYMBOL}Stream *error* event emitted:`, {
-          error: serializeError(err),
-        });
-
-        this.options.logger.debug(debugLine);
-
-        if (!this.connected) {
-          this.handleConnectionFailure({ url2Connect, cause: "error" });
-          return;
-        }
-
-        const streamError =
-          err instanceof Error
-            ? err
-            : new Error("WebSocket stream emitted an error event", {
-                cause: this.lastSocketError ?? err,
-              });
-
-        if (this.mediaTransmissionStarted) {
-          this.failInterruptedRecording();
-          return;
-        }
-
-        this.emit("ERROR", {
-          err: createError({
-            message: "WebSocket stream error",
-            explanation: `The WebSocket stream emitted an error event. Details: ${pretty(err)}`,
-            options: this.options,
-            exc: streamError,
-          }),
-        });
+        this.handleStreamError(url2Connect, err);
       });
 
       stream.on("drain", () => {
@@ -1710,6 +1726,7 @@ class Recorder extends Despot {
   public back(cb: () => void) {
     this.emit("GOING_BACK");
 
+    this.key = undefined;
     this.recordingDimensions = undefined;
     this.unloaded = false;
 
@@ -1830,7 +1847,7 @@ class Recorder extends Despot {
   }
 
   public validate() {
-    return this.connected && this.canvas === undefined;
+    return Boolean(this.key) && this.canvas === undefined;
   }
 
   public isReady() {
