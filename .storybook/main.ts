@@ -18,6 +18,10 @@ const config: StorybookConfig = {
       },
     },
   },
+  core: {
+    disableTelemetry: true,
+    disableWhatsNewNotifications: true,
+  },
   staticDirs: ["./public"],
   // Useful trick to alter HTTP header if needed
   // rsbuildFinal: (config) => {

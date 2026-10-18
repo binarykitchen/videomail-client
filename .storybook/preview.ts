@@ -20,21 +20,31 @@ const preview: Preview = {
       const worker = setupWorker();
 
       await worker.start({
-        onUnhandledRequest: (request, print) => {
-          const origin = new URL(request.url).origin;
+        onUnhandledFrame: ({ frame, defaults }) => {
+          if (frame.data) {
+            // @ts-expect-error MSW shall fix this typing sooner or later
+            const request = frame.data.request as Request;
+            const origin = new URL(request.url).origin;
 
-          if (
-            origin.startsWith("https://videomail.io") ||
-            origin.startsWith("wss://videomail.io") ||
-            origin.startsWith("https://videos.pond5.com") ||
-            origin.startsWith("https://s1.dmcdn.net")
-          ) {
-            // Bypass mocking for the real videomail server or assets
-            return;
+            if (frame.protocol === "http") {
+              if (
+                origin.startsWith("https://videomail.io") ||
+                origin.startsWith("https://videos.pond5.com") ||
+                origin.startsWith("https://s1.dmcdn.net")
+              ) {
+                // Bypass mocking for the real videomail server or assets
+                return;
+              }
+            } else if (frame.protocol === "ws") {
+              if (origin.startsWith("wss://videomail.io")) {
+                // Bypass mocking for the real videomail WebSocket server
+                return;
+              }
+            }
           }
 
           // Use the worker's native warning print tool for unhandled requests
-          print.warning();
+          defaults.warn();
         },
       });
 
