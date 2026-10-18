@@ -53,7 +53,7 @@
     "prettier:fix": "prettier --write ./etc ./src ./.storybook *.ts *.js",
     "quality": "npm run test && npm run prettier && npm run lint && npm run types && npm run audit",
     "release": "release-it --only-version --config ./etc/release-it.ts",
-    "storybook": "cross-env BROWSER=chromium storybook dev -p 8443 --https --ssl-cert ./etc/ssl-certs/localhost.crt --ssl-key ./etc/ssl-certs/localhost.key",
+    "storybook": "cross-env BROWSER=chromium storybook dev -p 8443 -h localhost --https --ssl-cert ./etc/ssl-certs/localhost.crt --ssl-key ./etc/ssl-certs/localhost.key",
     "test": "cross-env ENVIRON=test vitest --watch=false",
     "types": "tsc --noEmit",
     "types:config": "tsc --showConfig"
