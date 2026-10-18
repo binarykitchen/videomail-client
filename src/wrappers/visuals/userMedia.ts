@@ -1,6 +1,7 @@
 import getFirstVideoTrack from "../../media/getFirstVideoTrack";
 import MEDIA_EVENTS from "../../media/mediaEvents";
 import { Dimension } from "../../types/dimension";
+import type { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
@@ -13,8 +14,8 @@ import Recorder from "./recorder";
 const EVENT_ASCII = "|—O—|";
 
 interface StopParams {
-  aboutToInitialize: boolean;
-  switchingFacingMode: any;
+  aboutToInitialize?: boolean;
+  preserveRecordingState?: boolean;
 }
 
 class UserMedia extends Despot {
@@ -32,6 +33,8 @@ class UserMedia extends Despot {
   private playingPromiseReached = false;
 
   private videoTrackLabel?: string | undefined;
+  private clearInitializationListeners?: (() => void) | undefined;
+  private initializationId = 0;
 
   private readonly outputEvent = (e: Event) => {
     this.logEvent(e.type, { readyState: this.rawVisualUserMedia?.readyState });
@@ -88,6 +91,29 @@ class UserMedia extends Despot {
     }
   }
 
+  public async restorePlayback() {
+    if (!this.rawVisualUserMedia) {
+      throw new Error("No camera preview is available.");
+    }
+
+    await this.rawVisualUserMedia.play();
+    await this.audioRecorder?.resume();
+  }
+
+  public hasLiveStream() {
+    // An active stream can still contain an ended, disabled, or muted track.
+    const videoReady = this.currentVisualStream
+      ?.getVideoTracks()
+      .some((track) => track.readyState === "live" && track.enabled && !track.muted);
+    const audioReady =
+      !isAudioEnabled(this.options) ||
+      this.currentVisualStream
+        ?.getAudioTracks()
+        .some((track) => track.readyState === "live" && track.enabled && !track.muted);
+
+    return Boolean(this.currentVisualStream?.active && videoReady && audioReady);
+  }
+
   private hasEnded() {
     if (this.rawVisualUserMedia?.ended) {
       return this.rawVisualUserMedia.ended;
@@ -115,6 +141,8 @@ class UserMedia extends Despot {
   public unloadRemainingEventListeners() {
     this.options.logger.debug("UserMedia: unloadRemainingEventListeners()");
 
+    this.clearInitializationListeners?.();
+
     MEDIA_EVENTS.forEach((eventName) => {
       this.rawVisualUserMedia?.removeEventListener(eventName, this.outputEvent);
     });
@@ -131,13 +159,17 @@ class UserMedia extends Despot {
     localMediaStream: MediaStream,
     videoCallback: () => void,
     audioCallback: AudioProcessCB,
-    endedEarlyCallback: (err) => void,
-    switchingFacingMode?: ConstrainDOMString,
+    endedEarlyCallback: (err: unknown) => void,
+    params?: Pick<VideomailUserMediaReadyParams, "switchingFacingMode" | "recovering">,
   ) {
+    this.clearInitializationListeners?.();
+    // Replacing a stream must not clear the paused take's recording flags.
     this.stop(localMediaStream, {
       aboutToInitialize: true,
-      switchingFacingMode,
+      preserveRecordingState: Boolean(params?.switchingFacingMode || params?.recovering),
     });
+    // Ignore async play/audio results from an older initialization or stopped stream.
+    const initializationId = ++this.initializationId;
 
     // Reset states
     this.onPlayReached = false;
@@ -159,6 +191,12 @@ class UserMedia extends Despot {
       this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
     };
 
+    this.clearInitializationListeners = () => {
+      this.rawVisualUserMedia?.removeEventListener("play", onPlay);
+      this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
+      this.clearInitializationListeners = undefined;
+    };
+
     const play = () => {
       // Resets the media element and restarts the media resource.
       // Any pending events are discarded.
@@ -177,6 +215,9 @@ class UserMedia extends Despot {
           this.rawVisualUserMedia
             .play()
             .then(() => {
+              if (initializationId !== this.initializationId) {
+                return;
+              }
               if (!this.playingPromiseReached) {
                 this.options.logger.debug(
                   "UserMedia: play promise successful. Playing now.",
@@ -185,12 +226,15 @@ class UserMedia extends Despot {
               }
             })
             .catch((exc: unknown) => {
+              if (initializationId !== this.initializationId) {
+                return;
+              }
               /*
                * Promise can be interrupted, i.E. when switching tabs
                * and promise can get resumed when switching back to tab, hence
                * do not treat this like an error
                */
-              if (exc instanceof Error) {
+              if (exc instanceof Error && !params?.recovering) {
                 this.options.logger.warn(
                   `Caught pending user media promise exception: ${exc.toString()}`,
                 );
@@ -227,17 +271,40 @@ class UserMedia extends Despot {
         if (this.audioRecorder) {
           try {
             this.audioRecorder.init(localMediaStream);
-            this.on("SENDING_FIRST_FRAME", () => {
-              this.audioRecord(audioCallback);
-            });
 
-            videoCallback();
+            const onAudioReady = () => {
+              if (
+                initializationId !== this.initializationId ||
+                this.currentVisualStream !== localMediaStream
+              ) {
+                return;
+              }
+
+              // Resumed takes may not emit SENDING_FIRST_FRAME again; reattach audio now.
+              if (this.recording) {
+                this.audioRecord(audioCallback);
+              } else {
+                this.on("SENDING_FIRST_FRAME", () => {
+                  this.audioRecord(audioCallback);
+                });
+              }
+
+              this.clearInitializationListeners?.();
+              videoCallback();
+            };
+
+            if (params?.recovering) {
+              this.audioRecorder.resume().then(onAudioReady).catch(endedEarlyCallback);
+            } else {
+              onAudioReady();
+            }
           } catch (exc) {
             unloadAllEventListeners();
-            this.stop();
+            this.stop(undefined, { preserveRecordingState: Boolean(params?.recovering) });
             endedEarlyCallback(exc);
           }
         } else {
+          this.clearInitializationListeners?.();
           videoCallback();
         }
       }
@@ -347,7 +414,8 @@ class UserMedia extends Despot {
 
       play();
     } catch (exc) {
-      this.emit("ERROR", { exc });
+      unloadAllEventListeners();
+      endedEarlyCallback(exc);
     }
   }
 
@@ -367,6 +435,8 @@ class UserMedia extends Despot {
 
       // Do not stop "too much" when going to initialize anyway
       if (!params?.aboutToInitialize) {
+        this.initializationId++;
+        this.clearInitializationListeners?.();
         chosenStream ??= this.currentVisualStream;
 
         const tracks = chosenStream?.getTracks();
@@ -387,7 +457,7 @@ class UserMedia extends Despot {
        * Don't have to reset these states when just switching camera
        * while still recording or pausing
        */
-      if (!params?.switchingFacingMode) {
+      if (!params?.preserveRecordingState) {
         this.paused = this.recording = false;
       }
     } catch (exc) {

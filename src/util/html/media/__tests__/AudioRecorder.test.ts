@@ -6,12 +6,18 @@ class FakeAudioContext {
   public static latest: FakeAudioContext;
 
   public readonly close = vi.fn(() => Promise.resolve());
+  public state = "running";
+  public readonly resume = vi.fn(() => {
+    this.state = "running";
+    return Promise.resolve();
+  });
   public readonly createGain = vi.fn(() => this.gainNode);
   public readonly createMediaStreamSource = vi.fn(() => this.audioInput);
   public readonly createScriptProcessor = vi.fn(() => this.scriptProcessor);
   public readonly destination = {} as AudioDestinationNode;
   public readonly gainNode = {
     connect: vi.fn(),
+    disconnect: vi.fn(),
     gain: { value: 0 },
   };
   public readonly audioInput = {
@@ -21,6 +27,7 @@ class FakeAudioContext {
   public readonly sampleRate = 48_000;
   public readonly scriptProcessor = {
     connect: vi.fn(),
+    disconnect: vi.fn(),
     onaudioprocess: null as ((event: AudioProcessEvent) => void) | null,
   };
 
@@ -200,6 +207,49 @@ describe("AudioRecorder", () => {
     recorder.stop();
 
     expect(FakeAudioContext.latest.close).toHaveBeenCalledOnce();
+  });
+
+  it("disconnects the old microphone graph before reattaching without changing sample rate", () => {
+    const recorder = createRecorder();
+    recorder.init({} as MediaStream);
+    const originalContext = FakeAudioContext.latest;
+
+    recorder.init({} as MediaStream);
+
+    expect({
+      sameContext: FakeAudioContext.latest === originalContext,
+      inputDisconnects: originalContext.audioInput.disconnect.mock.calls.length,
+      gainDisconnects: originalContext.gainNode.disconnect.mock.calls.length,
+      processorDisconnects: originalContext.scriptProcessor.disconnect.mock.calls.length,
+      sampleRate: recorder.getSampleRate(),
+    }).toEqual({
+      sameContext: true,
+      inputDisconnects: 1,
+      gainDisconnects: 1,
+      processorDisconnects: 1,
+      sampleRate: 48_000,
+    });
+  });
+
+  it("resumes a suspended audio context before capture can continue", async () => {
+    const recorder = createRecorder();
+    recorder.init({} as MediaStream);
+    FakeAudioContext.latest.state = "suspended";
+
+    await recorder.resume();
+
+    expect(FakeAudioContext.latest.resume).toHaveBeenCalledOnce();
+  });
+
+  it("propagates audio context recovery failure", async () => {
+    const recorder = createRecorder();
+    recorder.init({} as MediaStream);
+    FakeAudioContext.latest.state = "suspended";
+    FakeAudioContext.latest.resume.mockRejectedValue(
+      new DOMException("Denied", "NotAllowedError"),
+    );
+
+    await expect(recorder.resume()).rejects.toThrow("Denied");
   });
 
   it("returns the audio context sample rate", () => {

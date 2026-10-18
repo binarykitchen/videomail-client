@@ -6,6 +6,7 @@ import UserMedia from "../userMedia";
 
 interface RecorderInternals {
   connected: boolean;
+  emit: (event: "SUBMITTING" | "BLOCKING") => void;
   key?: string;
   stream?: {
     destroyed: boolean;
@@ -18,6 +19,7 @@ interface RecorderInternals {
   recordingActive: boolean;
   framesCount: number;
   samplesCount: number;
+  recordingAudioSampleRate?: number;
   confirmedFrameNumber: number;
   writeStream(buffer: Buffer): void;
   onAudioSample(audioSample: { toBuffer: () => Buffer }): void;
@@ -41,6 +43,7 @@ interface RecorderInternals {
   lastCloseEvent?: { code: number; reason: string; wasClean: boolean };
   lastSocketError?: Record<string, unknown>;
   reconnecting: boolean;
+  submitting: boolean;
   userMediaLoaded?: boolean;
   userMedia?: UserMedia;
   loop?: {
@@ -49,6 +52,7 @@ interface RecorderInternals {
     start: () => void;
     stop: () => void;
     dispose: () => void;
+    complete?: () => void;
   };
 }
 
@@ -109,11 +113,360 @@ function recordFrames(width = 320, height = 240) {
   return { ...fixture, canvas, userMedia };
 }
 
+function createRecoveryFixture() {
+  vi.useFakeTimers();
+  const fixture = recordFrames();
+  fixture.options.reportErrors = false;
+  const internals = fixture.recorder as unknown as RecorderInternals;
+  const loop = internals.loop;
+  if (!loop) {
+    throw new Error("Expected a recorder loop");
+  }
+  loop.complete = vi.fn();
+  const stoppedTrack = vi.fn();
+  const stream = { getTracks: () => [{ stop: stoppedTrack }] } as unknown as MediaStream;
+  const getUserMedia = vi.fn(() => Promise.resolve(stream));
+  vi.stubGlobal("navigator", {
+    userAgent: navigator.userAgent,
+    mediaDevices: {
+      getUserMedia,
+      getSupportedConstraints: () => ({}),
+    },
+  });
+  const live = vi.spyOn(fixture.userMedia, "hasLiveStream").mockReturnValue(false);
+  const restorePlayback = vi
+    .spyOn(fixture.userMedia, "restorePlayback")
+    .mockResolvedValue();
+  const initialize = vi
+    .spyOn(fixture.userMedia, "init")
+    .mockImplementation((_stream, ready) => {
+      live.mockReturnValue(true);
+      ready();
+    });
+  fixture.recorder.pause();
+  vi.mocked(loop.start).mockClear();
+
+  return {
+    ...fixture,
+    getUserMedia,
+    initialize,
+    internals,
+    live,
+    loop,
+    restorePlayback,
+    stoppedTrack,
+    stream,
+  };
+}
+
 describe("Recorder", () => {
   const PREVIEW_KEY = "00000000-0000-6000-8000-000000000001";
 
   afterEach(() => {
+    if (vi.isFakeTimers()) {
+      vi.clearAllTimers();
+    }
+    vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("does not resume recording without a live camera stream", () => {
+    vi.useFakeTimers();
+
+    try {
+      const { recorder } = recordFrames();
+      recorder.pause();
+
+      recorder.resume();
+
+      expect(recorder.isPaused()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("recovers the camera without resetting or resuming the paused take", async () => {
+    const { recorder, internals, loop, canvas, resetReplay } = createRecoveryFixture();
+    internals.framesCount = 42;
+    internals.samplesCount = 17;
+    internals.confirmedFrameNumber = 40;
+    const resetsBefore = resetReplay.mock.calls.length;
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      paused: recorder.isPaused(),
+      frames: internals.framesCount,
+      samples: internals.samplesCount,
+      confirmed: internals.confirmedFrameNumber,
+      dimensions: recorder.getRecordingDimensions(),
+      canvasWidth: canvas.width,
+      loopStarts: vi.mocked(loop.start).mock.calls.length,
+      previewResets: resetReplay.mock.calls.length - resetsBefore,
+    }).toEqual({
+      restored: true,
+      paused: true,
+      frames: 42,
+      samples: 17,
+      confirmed: 40,
+      dimensions: { width: 320, height: 240 },
+      canvasWidth: 320,
+      loopStarts: 0,
+      previewResets: 0,
+    });
+  });
+
+  it("shares one camera request across repeated recovery calls", async () => {
+    const { recorder, getUserMedia } = createRecoveryFixture();
+
+    const first = recorder.recoverCamera();
+    const second = recorder.recoverCamera();
+    await first;
+
+    expect({
+      sameRequest: first === second,
+      requests: getUserMedia.mock.calls.length,
+    }).toEqual({ sameRequest: true, requests: 1 });
+  });
+
+  it("pauses an interrupted active take before reopening its camera", async () => {
+    const { recorder, userMedia, loop } = createRecoveryFixture();
+    userMedia.resume();
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      paused: recorder.isPaused(),
+      starts: vi.mocked(loop.start).mock.calls.length,
+    }).toEqual({ restored: true, paused: true, starts: 0 });
+  });
+
+  it("restores an idle camera without starting a recording", async () => {
+    const { recorder, userMedia, internals, loop } = createRecoveryFixture();
+    internals.recordingActive = false;
+    userMedia.resume();
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      recording: internals.recordingActive,
+      starts: vi.mocked(loop.start).mock.calls.length,
+    }).toEqual({ restored: true, recording: false, starts: 0 });
+  });
+
+  it("does not reacquire a healthy camera", async () => {
+    const { recorder, getUserMedia, live, restorePlayback } = createRecoveryFixture();
+    live.mockReturnValue(true);
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      requests: getUserMedia.mock.calls.length,
+      playback: restorePlayback.mock.calls.length,
+      paused: recorder.isPaused(),
+    }).toEqual({ restored: true, requests: 0, playback: 1, paused: true });
+  });
+
+  it("reports playback failure without reacquiring healthy camera tracks", async () => {
+    const { recorder, getUserMedia, live, restorePlayback } = createRecoveryFixture();
+    live.mockReturnValue(true);
+    restorePlayback.mockRejectedValue(new DOMException("Denied", "NotAllowedError"));
+    const failed = vi.fn();
+    recorder.on("CAMERA_RECOVERY_FAILED", failed);
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      requests: getUserMedia.mock.calls.length,
+      errors: failed.mock.calls.length,
+      paused: recorder.isPaused(),
+    }).toEqual({ restored: false, requests: 0, errors: 1, paused: true });
+  });
+
+  it("waits for camera recovery after an explicit Resume request", async () => {
+    const { recorder, getUserMedia, stream, loop } = createRecoveryFixture();
+    const pending = Promise.withResolvers<MediaStream>();
+    getUserMedia.mockReturnValue(pending.promise);
+
+    recorder.resume();
+    const pausedWhileWaiting = recorder.isPaused();
+    pending.resolve(stream);
+    await pending.promise;
+
+    expect({
+      pausedWhileWaiting,
+      pausedAfterReady: recorder.isPaused(),
+      loopStarts: vi.mocked(loop.start).mock.calls.length,
+    }).toEqual({ pausedWhileWaiting: true, pausedAfterReady: false, loopStarts: 1 });
+  });
+
+  it("waits for media initialization even when the new tracks are already live", async () => {
+    const { recorder, initialize, live, loop } = createRecoveryFixture();
+    const initialization: { ready?: () => void } = {};
+    initialize.mockImplementation((_stream, ready) => {
+      live.mockReturnValue(true);
+      initialization.ready = ready;
+    });
+
+    const recovery = recorder.recoverCamera();
+    await Promise.resolve();
+    recorder.resume();
+    const startsBeforeReady = vi.mocked(loop.start).mock.calls.length;
+    initialization.ready?.();
+    await recovery;
+
+    expect({
+      startsBeforeReady,
+      startsAfterReady: vi.mocked(loop.start).mock.calls.length,
+    }).toEqual({ startsBeforeReady: 0, startsAfterReady: 1 });
+  });
+
+  it("rejects a changed audio sample rate without losing the original PCM metadata", async () => {
+    const { recorder, internals, userMedia } = createRecoveryFixture();
+    internals.recordingAudioSampleRate = 48_000;
+    internals.samplesCount = 17;
+    vi.spyOn(userMedia, "getAudioSampleRate").mockReturnValue(44_100);
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      paused: recorder.isPaused(),
+      sampleRate: recorder.getAudioSampleRate(),
+      samples: internals.samplesCount,
+    }).toEqual({ restored: false, paused: true, sampleRate: 48_000, samples: 17 });
+  });
+
+  it("reports denied permissions without resetting the captured take", async () => {
+    const { recorder, getUserMedia, internals } = createRecoveryFixture();
+    internals.framesCount = 42;
+    internals.samplesCount = 17;
+    getUserMedia.mockRejectedValue(new DOMException("Denied", "NotAllowedError"));
+    const failed = vi.fn();
+    const fatal = vi.fn();
+    recorder.on("CAMERA_RECOVERY_FAILED", failed);
+    recorder.on("ERROR", fatal);
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      paused: recorder.isPaused(),
+      frames: internals.framesCount,
+      samples: internals.samplesCount,
+      recoverableErrors: failed.mock.calls.length,
+      fatalErrors: fatal.mock.calls.length,
+    }).toEqual({
+      restored: false,
+      paused: true,
+      frames: 42,
+      samples: 17,
+      recoverableErrors: 1,
+      fatalErrors: 0,
+    });
+  });
+
+  it("allows a camera retry after permission failure", async () => {
+    const { recorder, getUserMedia, stream } = createRecoveryFixture();
+    getUserMedia.mockRejectedValueOnce(new DOMException("Denied", "NotAllowedError"));
+
+    await recorder.recoverCamera();
+    getUserMedia.mockResolvedValue(stream);
+    const restored = await recorder.recoverCamera();
+
+    expect({ restored, requests: getUserMedia.mock.calls.length }).toEqual({
+      restored: true,
+      requests: 2,
+    });
+  });
+
+  it.each(["pause", "stop", "reset", "unload", "submission", "blocking"])(
+    "stops a late camera stream after %s cancels recovery",
+    async (action) => {
+      const { recorder, getUserMedia, stream, initialize, stoppedTrack, internals } =
+        createRecoveryFixture();
+      const pending = Promise.withResolvers<MediaStream>();
+      getUserMedia.mockReturnValue(pending.promise);
+
+      const recovery = recorder.recoverCamera();
+      if (action === "pause") {
+        recorder.pause();
+      }
+      if (action === "stop") {
+        recorder.stop();
+      }
+      if (action === "reset") {
+        recorder.reset();
+      }
+      if (action === "unload") {
+        recorder.unload();
+      }
+      if (action === "submission") {
+        internals.emit("SUBMITTING");
+      }
+      if (action === "blocking") {
+        internals.emit("BLOCKING");
+      }
+      pending.resolve(stream);
+      await pending.promise;
+      const restored = await recovery;
+
+      expect({
+        restored,
+        attached: initialize.mock.calls.length,
+        stopped: stoppedTrack.mock.calls.length,
+      }).toEqual({ restored: false, attached: 0, stopped: 1 });
+    },
+  );
+
+  it("times out camera recovery and stops a stream that arrives later", async () => {
+    const { recorder, options, getUserMedia, stream, stoppedTrack } =
+      createRecoveryFixture();
+    const pending = Promise.withResolvers<MediaStream>();
+    getUserMedia.mockReturnValue(pending.promise);
+
+    const recovery = recorder.recoverCamera();
+    await vi.advanceTimersByTimeAsync(options.timeouts.userMedia);
+    const restored = await recovery;
+    pending.resolve(stream);
+    await pending.promise;
+
+    expect({
+      restored,
+      paused: recorder.isPaused(),
+      stopped: stoppedTrack.mock.calls.length,
+    }).toEqual({ restored: false, paused: true, stopped: 1 });
+  });
+
+  it("leaves an unsent preview untouched without requesting the camera", async () => {
+    const { recorder, internals, getUserMedia } = createRecoveryFixture();
+    internals.key = PREVIEW_KEY;
+
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      key: internals.key,
+      requests: getUserMedia.mock.calls.length,
+    }).toEqual({ restored: false, key: PREVIEW_KEY, requests: 0 });
+  });
+
+  it("does not request the camera during submission", async () => {
+    const { recorder, internals, getUserMedia } = createRecoveryFixture();
+    internals.submitting = true;
+
+    const restored = await recorder.recoverCamera();
+
+    expect({ restored, requests: getUserMedia.mock.calls.length }).toEqual({
+      restored: false,
+      requests: 0,
+    });
   });
 
   it("retains captured frame dimensions after the camera and canvas are reset", () => {

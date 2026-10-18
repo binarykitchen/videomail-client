@@ -1,3 +1,5 @@
+import type { VideomailCameraRecoveryFailedParams } from "../../types/events/params";
+import createError from "../../util/error/createError";
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import type Container from "../container";
 import Visuals from "../visuals";
@@ -30,6 +32,7 @@ function createFixture(overrides = {}) {
 describe("Visuals", () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it("reports hidden before it is built", () => {
@@ -158,6 +161,53 @@ describe("Visuals", () => {
     visuals.resume();
 
     expect(resume).toHaveBeenCalledOnce();
+  });
+
+  it("keeps camera recovery failure nonfatal and allows a retry", async () => {
+    const { visuals, options } = createFixture();
+    options.reportErrors = false;
+    visuals.build();
+    const recorder = visuals.getRecorder();
+    const reset = vi.spyOn(recorder, "reset");
+    const recover = vi.spyOn(recorder, "recoverCamera").mockResolvedValue(true);
+    const err = createError({ message: "Camera recovery failed", options });
+    const events = recorder as unknown as {
+      emit: (
+        event: "CAMERA_RECOVERY_FAILED",
+        params: VideomailCameraRecoveryFailedParams,
+      ) => void;
+    };
+
+    events.emit("CAMERA_RECOVERY_FAILED", { err });
+    const notified = Boolean(visuals.isNotifying());
+    await visuals.recoverCamera();
+
+    expect({
+      notified,
+      resets: reset.mock.calls.length,
+      recoveries: recover.mock.calls.length,
+      notificationAfterRetry: Boolean(visuals.isNotifying()),
+    }).toEqual({
+      notified: true,
+      resets: 0,
+      recoveries: 1,
+      notificationAfterRetry: false,
+    });
+  });
+
+  it("does not request the camera while another notification or encoding is active", async () => {
+    const { visuals } = createFixture();
+    vi.spyOn(visuals, "isNotifying").mockReturnValue(true);
+    const recover = vi
+      .spyOn(visuals.getRecorder(), "recoverCamera")
+      .mockResolvedValue(true);
+
+    const restored = await visuals.recoverCamera();
+
+    expect({ restored, recoveries: recover.mock.calls.length }).toEqual({
+      restored: false,
+      recoveries: 0,
+    });
   });
 
   it("uses recorder validation when replay is hidden", () => {

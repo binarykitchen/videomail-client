@@ -23,6 +23,7 @@ class AudioRecorder {
   // eslint-disable-next-line @typescript-eslint/no-deprecated
   private scriptProcessor?: ScriptProcessorNode | undefined;
   private audioInput?: MediaStreamAudioSourceNode;
+  private volume?: GainNode;
   private vcAudioContext?: AudioContext | undefined;
 
   private readonly userMedia: UserMedia;
@@ -63,11 +64,26 @@ class AudioRecorder {
     cb(new AudioSample(float32Array));
   }
 
+  private disconnect() {
+    if (this.scriptProcessor) {
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      this.scriptProcessor.onaudioprocess = null;
+      this.scriptProcessor.disconnect();
+    }
+
+    this.audioInput?.disconnect();
+    this.volume?.disconnect();
+  }
+
   public init(localMediaStream: MediaStream) {
     this.options.logger.debug("AudioRecorder: init()");
 
+    // Detach old nodes to avoid duplicate samples, but reuse the context/sample rate.
+    this.disconnect();
+
     // creates an audio node from the microphone incoming stream
     const volume = this.getAudioContext().createGain();
+    this.volume = volume;
 
     try {
       this.audioInput = this.getAudioContext().createMediaStreamSource(localMediaStream);
@@ -147,17 +163,18 @@ class AudioRecorder {
     }
   }
 
+  public async resume() {
+    const context = this.getAudioContext();
+
+    if (context.state !== "running") {
+      await context.resume();
+    }
+  }
+
   public stop() {
     this.options.logger.debug("AudioRecorder: stop()");
 
-    if (this.scriptProcessor) {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      this.scriptProcessor.onaudioprocess = null;
-    }
-
-    if (this.audioInput) {
-      this.audioInput.disconnect();
-    }
+    this.disconnect();
 
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/close
     if (this.hasAudioContext()) {

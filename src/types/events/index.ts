@@ -1,5 +1,6 @@
 import { FormReadyParams } from "../../wrappers/container";
 import {
+  VideomailCameraRecoveryFailedParams,
   VideomailErrorParams,
   VideomailInvalidParams,
   VideomailPreviewParams,
@@ -23,6 +24,8 @@ export interface VideomailEvents {
   BLOCKING: () => void;
   // all dom elements are ready, are in the DOM
   BUILT: () => void;
+  CAMERA_RECOVERING: () => void;
+  CAMERA_RECOVERY_FAILED: (params: VideomailCameraRecoveryFailedParams) => void;
   // socket is connected to server
   CONNECTED: () => void;
   // socket is connecting to server

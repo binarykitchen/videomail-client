@@ -4,6 +4,9 @@ import { FormInputs, FormMethod, FormMethodType } from "../form";
 
 interface ContainerInternals {
   options: ReturnType<typeof mergeWithDefaultOptions>;
+  visibility: {
+    onChange: (listener: (visible: boolean) => void) => () => void;
+  };
   visuals: {
     record: () => void;
     setLimitSeconds: (limitSeconds: number) => void;
@@ -22,6 +25,26 @@ interface ContainerInternals {
 
 function getInternals(container: Container) {
   return container as unknown as ContainerInternals;
+}
+
+function createVisibilityFixture(enableAutoPause = true) {
+  const container = new Container(
+    mergeWithDefaultOptions({ enableAutoPause, enablePause: true }),
+  );
+  const visibility: { change?: (visible: boolean) => void } = {};
+  const unsubscribe = vi.fn();
+  vi.spyOn(getInternals(container).visibility, "onChange").mockImplementation(
+    (listener) => {
+      visibility.change = listener;
+      return unsubscribe;
+    },
+  );
+  const pause = vi.spyOn(container, "pause").mockImplementation(() => undefined);
+  const resume = vi.spyOn(container, "resume").mockImplementation(() => undefined);
+  const recover = vi.spyOn(container, "recoverCamera").mockResolvedValue(true);
+  container.build();
+
+  return { container, pause, resume, recover, unsubscribe, visibility };
 }
 
 function buildExternalSubmitFixture(
@@ -70,6 +93,52 @@ describe("Container", () => {
     document.body.innerHTML = "";
     document.documentElement.classList.remove("wait");
     vi.restoreAllMocks();
+  });
+
+  it.each(["recording", "paused", "countdown"])(
+    "pauses %s when the document goes into the background",
+    (state) => {
+      const { container, visibility, pause } = createVisibilityFixture();
+      vi.spyOn(container, "isRecording").mockReturnValue(state === "recording");
+      vi.spyOn(container, "isPaused").mockReturnValue(state === "paused");
+      vi.spyOn(container, "isCountingDown").mockReturnValue(state === "countdown");
+
+      visibility.change?.(false);
+
+      expect(pause).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("recovers on foreground without silently resuming a countdown or take", () => {
+    const { container, visibility, resume, recover } = createVisibilityFixture();
+    vi.spyOn(container, "isCountingDown").mockReturnValue(true);
+
+    visibility.change?.(true);
+
+    expect({
+      recoveries: recover.mock.calls.length,
+      resumes: resume.mock.calls.length,
+    }).toEqual({ recoveries: 1, resumes: 0 });
+  });
+
+  it("leaves automatic lifecycle handling disabled when configured", () => {
+    const { visibility, pause, recover } = createVisibilityFixture(false);
+
+    visibility.change?.(false);
+    visibility.change?.(true);
+
+    expect({
+      pauses: pause.mock.calls.length,
+      recoveries: recover.mock.calls.length,
+    }).toEqual({ pauses: 0, recoveries: 0 });
+  });
+
+  it("removes the visibility listener when unloaded", () => {
+    const { container, unsubscribe } = createVisibilityFixture();
+
+    container.unload();
+
+    expect(unsubscribe).toHaveBeenCalledOnce();
   });
 
   it("submits captured frame dimensions rather than stopped-media or viewport dimensions", async () => {

@@ -88,6 +88,8 @@ Audio recording is experimental and disabled by default. Set `audio.enabled` to 
 - [`videomailClient.show()`](#videomailclientshow)
 - [`videomailClient.hide()`](#videomailclienthide)
 - [`videomailClient.record()`](#videomailclientrecord)
+- [`videomailClient.pause()`](#videomailclientpause)
+- [`videomailClient.recoverCamera()`](#videomailclientrecovercamera)
 - [`videomailClient.replay()`](#videomailclientreplayvideomail-parentelementid)
 - [`videomailClient.startOver()`](#videomailclientstartover)
 - [`videomailClient.getByAlias()`](#videomailclientgetbyaliasalias)
@@ -143,6 +145,22 @@ Automatically fills the DOM with a form for video recording. By default the HTML
 ### videomailClient.record()
 
 Starts recording without requiring the user to press the record button.
+
+### videomailClient.pause()
+
+Pauses an active recording or countdown without discarding it. Idle cameras and unsent previews are left alone. Useful for native applications. To resume, refer to the next function `videomailClient.recoverCamera()`.
+
+### videomailClient.recoverCamera()
+
+Returns a `Promise<boolean>` indicating whether camera recovery succeeds. It restores playback for live tracks or requests a replacement stream when camera or microphone tracks have ended. Duplicate calls share the pending recovery. An unbuilt client, unsent preview, encoding, or submission is left alone and returns `false`.
+
+Recovery preserves captured frame dimensions, frame/sample counters, and the audio sample rate. Foreground recovery never resumes capture or a countdown automatically. The user must explicitly choose Resume; that action waits for recovery before sending more frames.
+
+With automatic pause enabled, browser visibility changes pause capture and recover the camera on return. Native hosts should call `pause()` on background and `recoverCamera()` on foreground through their own lifecycle integration. The client has no Capacitor dependency. Do not call `startOver()` to recover a paused take.
+
+`CAMERA_RECOVERING` signals the start of recovery. `USER_MEDIA_READY` includes `recovering: true` after a replacement stream is initialized. `CAMERA_RECOVERY_FAILED` provides an `err` when access, playback, audio initialization, or the recovery deadline fails. The default notification does not reset the take; the user can retry Resume or stop to keep the recorded part. Stop, reset, unload, and submission cancel pending recovery, and late streams are stopped.
+
+This does not reconnect a lost recording WebSocket or survive process termination. Physical-device camera and microphone validation remains necessary.
 
 ### videomailClient.replay(videomail[, parentElementId])
 

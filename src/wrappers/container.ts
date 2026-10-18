@@ -291,17 +291,14 @@ class Container extends Despot {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (this.built) {
           if (visible) {
-            if (isAutoPauseEnabled(this.options) && this.isCountingDown()) {
-              this.resume();
+            if (isAutoPauseEnabled(this.options)) {
+              void this.recoverCamera();
             }
 
             this.emit("VISIBLE");
           } else {
-            if (
-              isAutoPauseEnabled(this.options) &&
-              (this.isCountingDown() || this.isRecording())
-            ) {
-              this.pause();
+            if (isAutoPauseEnabled(this.options)) {
+              this.suspend();
             }
 
             this.emit("INVISIBLE");
@@ -626,6 +623,20 @@ class Container extends Despot {
 
   public pause(params?: { event: MouseEvent }) {
     this.visuals.pause(params);
+  }
+
+  public suspend() {
+    if (this.built && (this.isCountingDown() || this.isRecording() || this.isPaused())) {
+      this.pause();
+    }
+  }
+
+  public recoverCamera() {
+    if (!this.built || this.hasError || this.submitted) {
+      return Promise.resolve(false);
+    }
+
+    return this.visuals.recoverCamera();
   }
 
   // That code needs a good rewrite :(

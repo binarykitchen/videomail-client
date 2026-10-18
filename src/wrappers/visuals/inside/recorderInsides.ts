@@ -74,11 +74,16 @@ class RecorderInsides extends Despot {
       this.facingMode?.show();
     });
 
+    this.on("CAMERA_RECOVERING", () => {
+      this.facingMode?.hide();
+    });
+
     this.on("RECORDING", () => {
       this.startRecording();
     });
 
     this.on("RESUMING", () => {
+      this.hidePause();
       this.resumeRecording();
     });
 

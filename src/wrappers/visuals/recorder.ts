@@ -62,6 +62,7 @@ class Recorder extends Despot {
 
   private samplesCount = 0;
   private framesCount = 0;
+  private recordingAudioSampleRate?: number | undefined;
 
   private recordingStats?: RecordingStats;
 
@@ -87,6 +88,10 @@ class Recorder extends Despot {
 
   private userMediaLoaded?: boolean | undefined;
   private userMediaLoading = false;
+  private mediaRequestId = 0;
+  private cameraRecovery?: Promise<boolean> | undefined;
+  private resolveCameraRecovery?: ((restored: boolean) => void) | undefined;
+  private resumeAfterCameraRecovery = false;
   private submitting = false;
   private unloaded?: boolean;
   private stopTime?: number | undefined;
@@ -479,8 +484,13 @@ class Recorder extends Despot {
   }
 
   private onAudioSample(audioSample: AudioSample) {
-    if (this.recordingTransportFailed) {
+    if (this.recordingTransportFailed || this.cameraRecovery) {
       return;
+    }
+
+    const sampleRate = this.userMedia?.getAudioSampleRate();
+    if (sampleRate && sampleRate > 0) {
+      this.recordingAudioSampleRate ??= sampleRate;
     }
 
     this.samplesCount++;
@@ -511,11 +521,30 @@ class Recorder extends Despot {
 
       const switchingFacingMode = params?.switchingFacingMode;
 
+      if (params?.recovering) {
+        if (!this.userMedia?.hasLiveStream()) {
+          this.failCameraRecovery(new Error("The restored camera has no live tracks."));
+          return;
+        }
+
+        // One take has one PCM sample rate; mixing rates would desynchronize audio.
+        if (
+          this.recordingAudioSampleRate !== undefined &&
+          this.userMedia.getAudioSampleRate() !== this.recordingAudioSampleRate
+        ) {
+          this.failCameraRecovery(
+            new Error("The audio sample rate changed during recovery."),
+          );
+          return;
+        }
+      }
+
       this.userMediaLoading = this.blocking = this.unloaded = this.submitting = false;
       this.userMediaLoaded = true;
       this.clearUserMediaTimeout();
 
-      if (!switchingFacingMode) {
+      // Keep the existing loop and its timing when restoring a paused take.
+      if (!switchingFacingMode && !params?.recovering) {
         this.loop = this.createLoop();
       }
 
@@ -527,11 +556,20 @@ class Recorder extends Despot {
 
       this.emit("USER_MEDIA_READY", {
         switchingFacingMode: params?.switchingFacingMode,
+        recovering: params?.recovering,
         paused: this.isPaused(),
         recordWhenReady: params?.recordWhenReady,
       });
+
+      if (params?.recovering) {
+        this.finishCameraRecovery(true);
+      }
     } catch (exc) {
-      this.emit("ERROR", { exc });
+      if (params?.recovering) {
+        this.failCameraRecovery(exc);
+      } else {
+        this.emit("ERROR", { exc });
+      }
     }
   }
 
@@ -1229,6 +1267,11 @@ class Recorder extends Despot {
   }
 
   private userMediaErrorCallback(err, usedConstraints: MediaStreamConstraints) {
+    if (this.cameraRecovery) {
+      this.failCameraRecovery(err);
+      return;
+    }
+
     if (this.unloaded) {
       /*
        * This can happen when a container is unloaded but some user media related callbacks
@@ -1289,6 +1332,7 @@ class Recorder extends Despot {
   private getUserMediaCallback(
     localStream: MediaStream,
     params?: VideomailUserMediaReadyParams,
+    requestId = this.mediaRequestId,
   ) {
     if (!this.userMedia) {
       localStream.getTracks().forEach((track) => {
@@ -1307,17 +1351,17 @@ class Recorder extends Despot {
         this.userMedia.init(
           localStream,
           () => {
-            if (!this.unloaded) {
+            if (!this.unloaded && requestId === this.mediaRequestId) {
               this.onUserMediaReady(params);
             }
           },
           this.onAudioSample.bind(this),
           (err) => {
-            if (!this.unloaded) {
+            if (!this.unloaded && requestId === this.mediaRequestId) {
               this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
             }
           },
-          params?.switchingFacingMode,
+          params,
         );
       } catch (exc) {
         localStream.getTracks().forEach((track) => {
@@ -1326,7 +1370,7 @@ class Recorder extends Despot {
 
         this.userMediaLoading = false;
         this.clearUserMediaTimeout();
-        this.emit("ERROR", { exc });
+        this.userMediaErrorCallback(exc, { audio: isAudioEnabled(this.options) });
       }
     } else {
       localStream.getTracks().forEach((track) => {
@@ -1334,6 +1378,7 @@ class Recorder extends Despot {
       });
       this.userMediaLoading = false;
       this.clearUserMediaTimeout();
+      this.cancelCameraRecovery();
     }
   }
 
@@ -1344,6 +1389,7 @@ class Recorder extends Despot {
 
     this.emit("ASKING_WEBCAM_PERMISSION");
     this.userMediaLoading = true;
+    const requestId = ++this.mediaRequestId;
 
     const constraints: MediaStreamConstraints = {
       video: {
@@ -1369,16 +1415,16 @@ class Recorder extends Despot {
 
     streamPromise
       .then((localStream) => {
-        if (this.unloaded) {
+        if (this.unloaded || requestId !== this.mediaRequestId) {
           localStream.getTracks().forEach((track) => {
             track.stop();
           });
           return;
         }
-        this.getUserMediaCallback(localStream, params);
+        this.getUserMediaCallback(localStream, params, requestId);
       })
       .catch((reason: unknown) => {
-        if (!this.unloaded) {
+        if (!this.unloaded && requestId === this.mediaRequestId) {
           this.userMediaErrorCallback(reason, constraints);
         }
       });
@@ -1395,8 +1441,8 @@ class Recorder extends Despot {
       return;
     }
 
-    if (params?.switchingFacingMode) {
-      videoConstraints.facingMode = params.switchingFacingMode;
+    if (params?.switchingFacingMode || params?.recovering) {
+      videoConstraints.facingMode = params.switchingFacingMode || this.facingMode;
     }
 
     if (this.options.video.width) {
@@ -1447,7 +1493,7 @@ class Recorder extends Despot {
         if (!this.userMediaLoaded) {
           this.userMediaLoading = false;
           const err = getBrowser(this.options).getNoAccessIssue();
-          this.emit("ERROR", { err });
+          this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
         }
       }, this.options.timeouts.userMedia);
 
@@ -1460,6 +1506,11 @@ class Recorder extends Despot {
       this.options.logger.debug("Recorder: failed to load genuine user media");
 
       this.userMediaLoading = false;
+
+      if (this.cameraRecovery) {
+        this.failCameraRecovery(exc);
+        return;
+      }
 
       const errorListeners = this.getListeners("ERROR");
 
@@ -1656,10 +1707,12 @@ class Recorder extends Despot {
   }
 
   public getAudioSampleRate() {
-    return this.userMedia?.getAudioSampleRate();
+    return this.recordingAudioSampleRate ?? this.userMedia?.getAudioSampleRate();
   }
 
   public stop(params?: StopParams) {
+    this.cancelCameraRecovery();
+
     if (!this.userMedia) {
       throw new Error("No user media defined, unable to stop");
     }
@@ -1711,7 +1764,8 @@ class Recorder extends Despot {
 
       if (isAudioEnabled(this.options) && this.userMedia) {
         this.recordingStats.samplesCount = this.samplesCount;
-        this.recordingStats.sampleRate = this.userMedia.getAudioSampleRate();
+        this.recordingStats.sampleRate =
+          this.recordingAudioSampleRate ?? this.userMedia.getAudioSampleRate();
       }
 
       this.writeCommand("stop", this.recordingStats, () => {
@@ -1806,6 +1860,8 @@ class Recorder extends Despot {
   }
 
   public reset() {
+    this.cancelCameraRecovery();
+
     // No need to reset when already unloaded
     if (!this.unloaded) {
       this.options.logger.debug("Recorder: reset()");
@@ -1854,7 +1910,114 @@ class Recorder extends Despot {
     return this.userMedia?.isReady();
   }
 
+  private finishCameraRecovery(restored: boolean) {
+    this.clearUserMediaTimeout();
+    const resolve = this.resolveCameraRecovery;
+    const resumeRequested = restored && this.resumeAfterCameraRecovery;
+    this.cameraRecovery = undefined;
+    this.resolveCameraRecovery = undefined;
+    this.resumeAfterCameraRecovery = false;
+    resolve?.(restored);
+
+    // Foreground recovery alone must never restart capture.
+    if (resumeRequested && this.isPaused()) {
+      this.resume();
+    }
+  }
+
+  private cancelCameraRecovery() {
+    if (!this.cameraRecovery) {
+      return;
+    }
+
+    // A permission request can resolve after cancellation; invalidate its result.
+    this.mediaRequestId++;
+    this.userMediaLoading = false;
+    this.userMediaLoaded = false;
+    this.clearUserMediaTimeout();
+    this.userMedia?.stop(undefined, { preserveRecordingState: true });
+    this.finishCameraRecovery(false);
+  }
+
+  private failCameraRecovery(exc: unknown) {
+    this.cancelCameraRecovery();
+    const err = createError({
+      message: "Camera recovery failed",
+      explanation:
+        "Your recording is still paused. Check camera permissions, then try Resume again or stop to keep the recorded part.",
+      exc,
+      options: this.options,
+    });
+    // Generic ERROR handlers can reset the take; this failure must stay retryable.
+    this.emit("CAMERA_RECOVERY_FAILED", { err });
+  }
+
+  public recoverCamera() {
+    // Resume clicks and visibility events can request the same recovery.
+    if (this.cameraRecovery) {
+      return this.cameraRecovery;
+    }
+
+    // Do not replace unsent media or revive a take whose transport already failed.
+    if (
+      !this.built ||
+      this.unloaded ||
+      !this.userMedia ||
+      this.userMediaLoading ||
+      this.submitting ||
+      this.key ||
+      this.stopTimeout !== undefined ||
+      this.recordingTransportFailed
+    ) {
+      return Promise.resolve(false);
+    }
+
+    const liveStream = this.userMedia.hasLiveStream();
+
+    if (liveStream && this.isRecording()) {
+      return Promise.resolve(true);
+    }
+
+    if (!liveStream && this.recordingActive && !this.isPaused()) {
+      this.pause();
+    }
+
+    const recovery = new Promise<boolean>((resolve) => {
+      this.resolveCameraRecovery = resolve;
+    });
+    this.cameraRecovery = recovery;
+    this.emit("CAMERA_RECOVERING");
+
+    // Backgrounding can suspend playback without ending the camera tracks.
+    if (liveStream) {
+      this.userMediaTimeout = window.setTimeout(() => {
+        this.failCameraRecovery(new Error("Camera playback recovery timed out."));
+      }, this.options.timeouts.userMedia);
+
+      this.userMedia
+        .restorePlayback()
+        .then(() => {
+          if (this.cameraRecovery === recovery) {
+            this.finishCameraRecovery(true);
+          }
+        })
+        .catch((exc: unknown) => {
+          if (this.cameraRecovery === recovery) {
+            this.failCameraRecovery(exc);
+          }
+        });
+    } else {
+      this.userMediaLoaded = false;
+      this.loadUserMedia({ recovering: true });
+    }
+
+    return recovery;
+  }
+
   public pause(params?: PauseParams) {
+    this.cancelCameraRecovery();
+    this.resumeAfterDrain = false;
+
     if (params) {
       this.options.logger.debug(
         `pause() at frame ${this.framesCount} with ${pretty(params)}`,
@@ -1872,13 +2035,20 @@ class Recorder extends Despot {
   }
 
   public resume() {
+    // Live tracks may arrive before media initialization and audio are ready.
+    if (this.cameraRecovery || !this.userMedia?.hasLiveStream()) {
+      void this.recoverCamera();
+      this.resumeAfterCameraRecovery = Boolean(this.cameraRecovery);
+      return;
+    }
+
     this.options.logger.debug(`Recorder: resume() with frame ${this.framesCount}`);
 
     this.stopPings();
 
     this.emit("RESUMING");
 
-    this.userMedia?.resume();
+    this.userMedia.resume();
     if (!this.streamBackpressured) {
       this.loop.start();
     } else {
@@ -1960,7 +2130,7 @@ class Recorder extends Despot {
   }
 
   public record() {
-    if (this.unloaded) {
+    if (this.unloaded || this.cameraRecovery) {
       return;
     }
 
@@ -2056,6 +2226,7 @@ class Recorder extends Despot {
     this.recordingActive = true;
     this.recordingTransportFailed = false;
     this.mediaTransmissionStarted = false;
+    this.recordingAudioSampleRate = undefined;
     this.userMedia.record();
 
     this.emit("RECORDING", { framesCount: this.framesCount });
@@ -2169,7 +2340,7 @@ class Recorder extends Despot {
   }
 
   private switchFacingMode() {
-    if (!getBrowser(this.options).isMobile()) {
+    if (this.cameraRecovery || !getBrowser(this.options).isMobile()) {
       return;
     }
 
@@ -2190,6 +2361,7 @@ class Recorder extends Despot {
     this.options.logger.debug("Recorder: initEvents()");
 
     this.on("SUBMITTING", () => {
+      this.cancelCameraRecovery();
       this.submitting = true;
     });
 
@@ -2198,6 +2370,7 @@ class Recorder extends Despot {
     });
 
     this.on("BLOCKING", () => {
+      this.cancelCameraRecovery();
       this.blocking = true;
       this.clearUserMediaTimeout();
     });

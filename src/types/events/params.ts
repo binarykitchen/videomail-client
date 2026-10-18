@@ -8,8 +8,13 @@ import { Videomail } from "../Videomail";
 
 export interface VideomailUserMediaReadyParams {
   switchingFacingMode?: ConstrainDOMString | undefined;
+  recovering?: boolean | undefined;
   recordWhenReady?: boolean | undefined;
   paused?: boolean | undefined;
+}
+
+export interface VideomailCameraRecoveryFailedParams {
+  err: VideomailError;
 }
 
 export interface VideomailErrorParams {

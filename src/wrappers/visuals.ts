@@ -25,6 +25,7 @@ class Visuals extends Despot {
 
   private visualsElement?: HTMLElement | null | undefined;
   private built = false;
+  private cameraRecoveryFailed = false;
 
   constructor(container: Container, options: VideomailClientOptions) {
     super("Visuals", options);
@@ -77,6 +78,19 @@ class Visuals extends Despot {
         this.built = true;
         this.endWaiting();
         this.container.enableForm(false);
+      });
+
+      this.on("CAMERA_RECOVERING", () => {
+        this.clearCameraRecoveryNotice();
+      });
+
+      this.on("CAMERA_RECOVERY_FAILED", ({ err }) => {
+        this.cameraRecoveryFailed = true;
+        this.options.logger.warn(err);
+        if (this.options.displayErrors) {
+          this.notifier.notify(err.message, err.explanation, { problem: true });
+        }
+        this.endWaiting();
       });
 
       this.on("PREVIEW", () => {
@@ -232,6 +246,7 @@ class Visuals extends Despot {
   }
 
   public reset() {
+    this.clearCameraRecoveryNotice();
     this.endWaiting();
     this.recorder.reset();
   }
@@ -245,6 +260,7 @@ class Visuals extends Despot {
   }
 
   public stop(params?: StopParams) {
+    this.clearCameraRecoveryNotice();
     this.recorder.stop(params);
     this.recorderInsides.hidePause();
   }
@@ -252,6 +268,7 @@ class Visuals extends Despot {
   public back(keepHidden = false, cb?) {
     this.options.logger.debug(`Visuals: back(keepHidden = ${keepHidden})`);
 
+    this.cameraRecoveryFailed = false;
     this.replay.hide();
     this.notifier.hide();
 
@@ -286,6 +303,7 @@ class Visuals extends Despot {
 
     this.options.logger.debug(`Visuals: unload(${e ? pretty(e) : ""})`);
 
+    this.cameraRecoveryFailed = false;
     this.recorder.unload(params);
     this.recorderInsides.unload();
     this.replay.unload(params);
@@ -309,18 +327,40 @@ class Visuals extends Despot {
     this.recorderInsides.showPause();
   }
 
-  public resume() {
-    if (this.recorderInsides.isCountingDown()) {
-      this.recorderInsides.resumeCountdown();
-    } else {
-      this.recorder.resume();
+  private clearCameraRecoveryNotice() {
+    if (this.cameraRecoveryFailed) {
+      this.notifier.hide();
+      this.recorder.show();
+      this.cameraRecoveryFailed = false;
+    }
+  }
+
+  public recoverCamera() {
+    if (this.replay.isShown() || (this.isNotifying() && !this.cameraRecoveryFailed)) {
+      return Promise.resolve(false);
     }
 
-    this.recorderInsides.hidePause();
+    this.clearCameraRecoveryNotice();
+    return this.recorder.recoverCamera();
+  }
+
+  public resume() {
+    this.clearCameraRecoveryNotice();
+    if (this.recorderInsides.isCountingDown()) {
+      this.recorderInsides.resumeCountdown();
+      this.recorderInsides.hidePause();
+    } else {
+      this.recorder.resume();
+      if (!this.recorder.isPaused()) {
+        this.recorderInsides.hidePause();
+      }
+    }
   }
 
   public pauseOrResume() {
-    if (this.isRecordable()) {
+    if (this.cameraRecoveryFailed && this.recorder.isPaused()) {
+      this.resume();
+    } else if (this.isRecordable()) {
       if (this.isRecording()) {
         this.pause();
       } else if (this.recorder.isPaused()) {
