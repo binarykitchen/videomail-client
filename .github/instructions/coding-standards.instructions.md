@@ -59,6 +59,27 @@ Like that, if we fine-grade functions, they become easier to reuse and to test. 
     - exported or reusable helpers.
     - pure, vanilla functions not related to React components or hooks.
 
+### Classes
+
+Objected-oriented programming (OOP) is welcome in some places, although we prefer functional programming and composition over heavy class hierarchies. But here are some guidelines:
+
+#### Class attributes
+
+- Define them first. Public first, protected ones next and private ones last.
+- Use the `readonly` modifier whenever possible to indicate immutability.
+
+#### Class constructor
+
+- Keep the constructor simple and focused on initializing the class attributes.
+- Avoid putting complex logic or side effects in the constructor.
+- If initialization requires asynchronous operations, consider using an `init` method instead of doing it in the constructor.
+
+#### Class methods
+
+- Keep methods focused on a single responsibility.
+- The naming convention for functions applies to class methods as well.
+- If there are functions, utilities doing the same job, ensure the method delegates to them rather than duplicating logic.
+
 ## Comments
 
 - We do not like long comments.
