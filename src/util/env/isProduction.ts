@@ -1,5 +1,5 @@
-import { NodeEnvType } from "../../types/env";
-import getNodeEnv from "./getNodeEnv";
+import { NodeEnvType } from "../../types/env.ts";
+import getNodeEnv from "./getNodeEnv.ts";
 
 function isProduction() {
   return getNodeEnv() === NodeEnvType.PRODUCTION;

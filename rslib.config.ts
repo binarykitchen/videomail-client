@@ -6,7 +6,7 @@ import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import { defineConfig } from "@rslib/core";
 
 import { NodeEnvType } from "./src/types/env.ts";
-import isProduction from "./src/util/env/isProduction";
+import isProduction from "./src/util/env/isProduction.ts";
 
 const rootDir = process.cwd();
 
