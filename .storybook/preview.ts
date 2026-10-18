@@ -15,18 +15,25 @@ const preview: Preview = {
   },
 
   // Initialize MSW and pass custom options directly via the loader function
+  //
+  // Remember always to initialize the MSW worker after each upgrade with:
+  // npx msw init .storybook/public
   loaders: [
     mswLoader(async () => {
       const worker = setupWorker();
 
       await worker.start({
         onUnhandledFrame: ({ frame, defaults }) => {
-          if (frame.data) {
-            // @ts-expect-error MSW shall fix this typing sooner or later
-            const request = frame.data.request as Request;
-            const origin = new URL(request.url).origin;
+          const protocol = frame.protocol;
 
-            if (frame.protocol === "http") {
+          if (protocol && frame.data) {
+            if (protocol === "http") {
+              // @ts-expect-error MSW shall fix this typing sooner or later
+              const request = frame.data.request as Request;
+              const url = request.url;
+
+              const origin = new URL(url).origin;
+
               if (
                 origin.startsWith("https://videomail.io") ||
                 origin.startsWith("https://videos.pond5.com") ||
@@ -35,7 +42,10 @@ const preview: Preview = {
                 // Bypass mocking for the real videomail server or assets
                 return;
               }
-            } else if (frame.protocol === "ws") {
+            } else if (protocol === "ws") {
+              // @ts-expect-error MSW shall fix this typing sooner or later
+              const origin = frame.data.connection.client.url.origin as string;
+
               if (origin.startsWith("wss://videomail.io")) {
                 // Bypass mocking for the real videomail WebSocket server
                 return;
