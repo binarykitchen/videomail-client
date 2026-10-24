@@ -1,6 +1,7 @@
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Visuals from "../../visuals";
 import Recorder from "../recorder";
+import type { RecorderLoop } from "../recorder/capture";
 import type Replay from "../replay";
 import UserMedia from "../userMedia";
 
@@ -46,14 +47,10 @@ interface RecorderInternals {
   submitting: boolean;
   userMediaLoaded?: boolean;
   userMedia?: UserMedia;
-  loop?: {
-    on: () => void;
-    isRunning: () => boolean;
-    start: () => void;
-    stop: () => void;
-    dispose: () => void;
-    complete?: () => void;
-  };
+  loop?: Pick<
+    RecorderLoop,
+    "complete" | "dispose" | "isRunning" | "on" | "start" | "stop"
+  >;
 }
 
 function createFixture() {
