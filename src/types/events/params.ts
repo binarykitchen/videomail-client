@@ -53,11 +53,13 @@ export interface VideomailSubmittedParams {
 }
 
 export interface VideomailValidatingParams {
-  targetName?: any;
-  event?: any;
+  targetName?: string | undefined;
+  event?: Event | undefined;
 }
 
 export interface VideomailInvalidParams {
   whyInvalid?: string | undefined;
-  invalidData?: Record<string, string>;
+  invalidData?: VideomailInvalidFormData | undefined;
 }
+
+export type VideomailInvalidFormData = Record<string, string | null | undefined>;

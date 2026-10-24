@@ -6,7 +6,10 @@ import type Response from "superagent/lib/node/response";
 
 import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";
-import { VideomailErrorParams } from "../types/events/params";
+import type {
+  VideomailErrorParams,
+  VideomailInvalidFormData,
+} from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
@@ -23,6 +26,7 @@ import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 import pretty from "../util/string/pretty";
 import Buttons from "./buttons";
 import Form, { FormInputs, FormMethod, FormMethodType } from "./form";
+import isRecipientSelectionValid from "./isRecipientSelectionValid";
 import Visuals from "./visuals";
 
 interface BuildOptions {
@@ -640,7 +644,7 @@ class Container extends Despot {
   }
 
   // That code needs a good rewrite :(
-  public validate(event?, force = false) {
+  public validate(event?: Event, force = false) {
     let runValidation = true;
     let valid = true;
 
@@ -660,7 +664,9 @@ class Container extends Despot {
     }
 
     if (runValidation) {
-      const targetName = event?.target?.name;
+      const target = event?.target;
+      const targetName =
+        target instanceof Element ? target.getAttribute("name") : undefined;
 
       if (targetName) {
         this.emit("VALIDATING", { targetName });
@@ -677,7 +683,7 @@ class Container extends Despot {
       // Not sure why the isRecordAgainButtonEnabled check is needed
       const visualsValid = this.visuals.validate() && isRecordAgainButtonEnabled;
 
-      let invalidData: Record<string, any> | undefined;
+      let invalidData: VideomailInvalidFormData | undefined;
 
       if (this.form) {
         const invalidInput = this.form.getInvalidElement();
@@ -711,52 +717,8 @@ class Container extends Despot {
         }
 
         if (valid) {
-          /*
-           * If CC and/or BCC exist, validate one more time to ensure at least
-           * one recipient is given
-           */
-          const recipients = this.form.getRecipients();
-
-          const toIsConfigured = "to" in recipients;
-          const ccIsConfigured = "cc" in recipients;
-          const bccIsConfigured = "bcc" in recipients;
-
-          const hasTo = recipients.to && recipients.to.length > 0;
-          const hasCc = recipients.cc && recipients.cc.length > 0;
-          const hasBcc = recipients.bcc && recipients.bcc.length > 0;
-
-          if (toIsConfigured) {
-            if (!hasTo) {
-              if (ccIsConfigured && bccIsConfigured) {
-                if (!hasCc && !hasBcc) {
-                  valid = false;
-                }
-              } else if (ccIsConfigured) {
-                if (!hasCc) {
-                  valid = false;
-                }
-              } else if (bccIsConfigured) {
-                if (!hasBcc) {
-                  valid = false;
-                }
-              } else {
-                valid = false;
-              }
-            }
-          } else if (ccIsConfigured) {
-            if (!hasCc) {
-              if (bccIsConfigured && !hasBcc) {
-                valid = false;
-              }
-            }
-          } else if (bccIsConfigured) {
-            // Skip as it's hidden
-          } else {
-            // Form has no input fields for recipients, so don't validate
-            // recipients at all
-          }
-
-          if (!valid) {
+          if (!isRecipientSelectionValid(this.form.getRecipients())) {
+            valid = false;
             whyInvalid = "At least one recipient is required";
           }
         }

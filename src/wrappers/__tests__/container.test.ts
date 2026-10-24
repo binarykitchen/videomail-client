@@ -571,6 +571,21 @@ describe("Container", () => {
     expect(container.validate()).toBe(true);
   });
 
+  it("emits the name of the field being validated", () => {
+    const container = new Container(mergeWithDefaultOptions());
+    const listener = vi.fn();
+    const input = document.createElement("input");
+    input.name = "subject";
+    const event = new Event("input");
+    container.build();
+    container.on("VALIDATING", listener);
+    input.dispatchEvent(event);
+
+    container.validate(event, true);
+
+    expect(listener).toHaveBeenCalledWith({ targetName: "subject" });
+  });
+
   it("emits the audio-enabling event", () => {
     const container = new Container(mergeWithDefaultOptions());
     const listener = vi.fn();
