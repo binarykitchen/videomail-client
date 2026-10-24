@@ -13,6 +13,7 @@ import type {
 import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
 import Despot from "../util/Despot";
+import isRecipientSelectionValid from "../util/email/isRecipientSelectionValid";
 import createError from "../util/error/createError";
 import VideomailError from "../util/error/VideomailError";
 import getBrowser from "../util/getBrowser";
@@ -26,7 +27,6 @@ import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 import pretty from "../util/string/pretty";
 import Buttons from "./buttons";
 import Form, { FormInputs, FormMethod, FormMethodType } from "./form";
-import isRecipientSelectionValid from "./isRecipientSelectionValid";
 import Visuals from "./visuals";
 
 interface BuildOptions {

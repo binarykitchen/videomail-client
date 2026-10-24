@@ -1,4 +1,4 @@
-import type { PartialVideomail } from "../types/Videomail";
+import type { PartialVideomail } from "../../types/Videomail";
 
 type Recipients = Pick<PartialVideomail, "bcc" | "cc" | "to">;
 
