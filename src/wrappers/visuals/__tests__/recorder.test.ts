@@ -501,6 +501,23 @@ describe("Recorder", () => {
     expect(recorder.getRecordingDimensions()).toBeUndefined();
   });
 
+  it("closes the WebSocket when unloaded during submission", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    const destroy = vi.fn();
+    buildWithoutConnecting(recorder);
+    internals.stream = {
+      destroyed: false,
+      write: vi.fn(() => true),
+      destroy,
+    };
+    internals.submitting = true;
+
+    recorder.unload();
+
+    expect(destroy).toHaveBeenCalledOnce();
+  });
+
   it("updates captured dimensions when recording again", () => {
     const { recorder, canvas } = recordFrames();
     canvas.width = 640;

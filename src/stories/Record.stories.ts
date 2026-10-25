@@ -2,8 +2,8 @@ import "./static/css/entertain.css";
 
 import type { Meta, StoryObj } from "@storybook/html";
 
-import { VideomailClient } from "../client";
 import { PartialVideomailClientOptions } from "../types/options";
+import { createStoryClient } from "./util/storyLifecycle";
 
 const meta: Meta<PartialVideomailClientOptions> = {
   title: "Record",
@@ -24,7 +24,7 @@ export const DeaFSimple: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -41,7 +41,7 @@ export const DeadSimple: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -62,7 +62,7 @@ export const SimpleJpegs: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -91,7 +91,7 @@ export const Audio: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -119,7 +119,7 @@ export const ChangingLimit: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     videomailClient.on("ENABLING_AUDIO", function () {
       videomailClient.setLimitSeconds(15);
@@ -152,7 +152,7 @@ export const HighQuality: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -174,7 +174,7 @@ export const AskOnRecord: Story = {
     loadUserMediaOnRecord: true,
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -193,7 +193,7 @@ export const FacingMode: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -220,7 +220,7 @@ export const Entertain: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -264,7 +264,7 @@ export const Inject: Story = {
               </div>
             </div>`,
   play: ({ args }) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     videomailClient.show();
   },
 };
@@ -280,7 +280,7 @@ export const AutoRecord: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     videomailClient.on("USER_MEDIA_READY", function () {
       videomailClient.record();
@@ -299,7 +299,7 @@ export const MobileBreakPoint: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
@@ -313,7 +313,7 @@ export const AutoPlayOnReplay: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };

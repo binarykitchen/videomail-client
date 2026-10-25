@@ -153,17 +153,8 @@ class Recorder extends RecorderCapture {
       this.userMedia.unloadRemainingEventListeners();
     }
 
-    if (this.submitting) {
-      // Server will disconnect socket automatically after submitting
-    } else if (this.stream) {
-      /*
-       * Force to disconnect socket right now to clean temp files on server
-       * event listeners will do the rest
-       */
-      this.discardSocket();
-    }
-
     this.unloaded = true;
+    this.discardSocket();
     this.built = this.connecting = this.connected = false;
   }
 

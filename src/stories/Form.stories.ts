@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/html";
 import { http, HttpResponse } from "msw";
 
-import { Videomail, VideomailClient, VideomailSubmittedParams } from "../index";
+import { Videomail, VideomailSubmittedParams } from "../index";
 import { PartialVideomailClientOptions } from "../types/options";
+import { createStoryClient } from "./util/storyLifecycle";
 
 const meta: Meta<PartialVideomailClientOptions> = {
   title: "Form",
@@ -51,7 +52,7 @@ export const DirectSubmission: Story = {
               <button id="startOver">Start over</button>
             </div>`,
   play: ({ args }) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     const onSubmitted = ({ videomail }: VideomailSubmittedParams) => {
       videomailClient.replay(videomail, "viewVideo");
@@ -171,7 +172,7 @@ export const ContactForm: Story = {
               </div>`,
 
   play: ({ args }) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     const body = document.querySelector<HTMLTextAreaElement>(`#body`);
     const writingOption = document.querySelector<HTMLInputElement>(`#writingOption`);
@@ -269,7 +270,7 @@ export const VideoSubmissionOnly: Story = {
                   <button id="startOver">Start over</button>
                 </div>`,
   play: ({ args }) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     function setAttribute(videomail: Videomail, name: string) {
       if (videomail[name]) {
@@ -358,7 +359,7 @@ export const Stretch: Story = {
                     <button id="startOver">Start over</button>
                   </div>`,
   play: ({ args }) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     const onSubmitted = ({ videomail, response }: VideomailSubmittedParams) => {
       const statusHeader = document.querySelector("h3.status");
@@ -462,7 +463,7 @@ export const WithCCAndBCC: Story = {
                 <button id="startOver">Start over</button>
               </div>`,
   play: ({ args }) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
 
     const onSubmitted = ({ videomail, response }: VideomailSubmittedParams) => {
       const statusHeader = document.querySelector("h3.status");

@@ -201,7 +201,7 @@ Returns the videomail thread containing the given key.
 
 ### videomailClient.unload()
 
-Manually unloads the webcam and all other internal event listeners.
+Manually unloads the webcam, closes the active WebSocket connection, and removes all internal event listeners.
 
 ### videomailClient.hide()
 

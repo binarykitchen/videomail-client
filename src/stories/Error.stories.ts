@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/html";
 
-import { VideomailClient } from "../client";
 import { PartialVideomailClientOptions } from "../types/options";
+import { createStoryClient } from "./util/storyLifecycle";
 
 const meta: Meta<PartialVideomailClientOptions> = {
   title: "Error Handling",
@@ -29,7 +29,7 @@ export const InvalidWhitelistKey: Story = {
     },
   },
   render: (args) => {
-    const videomailClient = new VideomailClient(args);
+    const videomailClient = createStoryClient(args);
     return videomailClient.show();
   },
 };
