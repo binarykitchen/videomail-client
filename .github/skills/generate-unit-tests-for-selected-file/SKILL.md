@@ -1,7 +1,7 @@
 ---
-agent: "agent"
-tools: ["search/codebase", "edit/editFiles", "search"]
+name: generate-unit-tests-for-selected-file
 description: "Generate unit tests for selected file"
+disable-model-invocation: true
 ---
 
 # Unit Test Generation Instructions
