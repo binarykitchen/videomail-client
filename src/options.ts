@@ -71,11 +71,9 @@ const options: VideomailClientOptions = {
     // Recording gain from 0 (silence) to 1 (unchanged microphone level).
     volume: 1,
     /*
-     * Decides how often the audio is being sampled,
-     *
-     * It can be 'auto' or an integer being a power of two like 512 or 2048
-     * the higher the less traffic, but harder to adjust with rubberband
-     * to match with the video length on server side during encoding
+     * PCM frames per transferred batch, not the sample rate.
+     * 'auto' uses 2048; supported powers of two range from 256 to 16384.
+     * Smaller batches reduce latency; larger batches reduce message overhead.
      */
     bufferSize: "auto",
   },

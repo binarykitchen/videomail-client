@@ -269,10 +269,10 @@ class UserMedia extends Despot {
 
       if (this.onPlayReached && this.onLoadedMetaDataReached) {
         if (this.audioRecorder) {
-          try {
-            this.audioRecorder.init(localMediaStream);
+          const initializeAudio = async (audioRecorder: AudioRecorder) => {
+            try {
+              await audioRecorder.init(localMediaStream);
 
-            const onAudioReady = () => {
               if (
                 initializationId !== this.initializationId ||
                 this.currentVisualStream !== localMediaStream
@@ -280,29 +280,44 @@ class UserMedia extends Despot {
                 return;
               }
 
-              // Resumed takes may not emit SENDING_FIRST_FRAME again; reattach audio now.
-              if (this.recording) {
-                this.audioRecord(audioCallback);
-              } else {
-                this.on("SENDING_FIRST_FRAME", () => {
+              const onAudioReady = () => {
+                if (
+                  initializationId !== this.initializationId ||
+                  this.currentVisualStream !== localMediaStream
+                ) {
+                  return;
+                }
+
+                // Resumed takes may not emit SENDING_FIRST_FRAME again; reattach audio now.
+                if (this.recording) {
                   this.audioRecord(audioCallback);
-                });
+                } else {
+                  this.on("SENDING_FIRST_FRAME", () => {
+                    this.audioRecord(audioCallback);
+                  });
+                }
+
+                this.clearInitializationListeners?.();
+                videoCallback();
+              };
+
+              if (params?.recovering) {
+                await audioRecorder.resume();
               }
-
-              this.clearInitializationListeners?.();
-              videoCallback();
-            };
-
-            if (params?.recovering) {
-              this.audioRecorder.resume().then(onAudioReady).catch(endedEarlyCallback);
-            } else {
               onAudioReady();
+            } catch (exc) {
+              if (initializationId !== this.initializationId) {
+                return;
+              }
+              unloadAllEventListeners();
+              this.stop(undefined, {
+                preserveRecordingState: Boolean(params?.recovering),
+              });
+              endedEarlyCallback(exc);
             }
-          } catch (exc) {
-            unloadAllEventListeners();
-            this.stop(undefined, { preserveRecordingState: Boolean(params?.recovering) });
-            endedEarlyCallback(exc);
-          }
+          };
+
+          void initializeAudio(this.audioRecorder);
         } else {
           this.clearInitializationListeners?.();
           videoCallback();
@@ -563,6 +578,7 @@ class UserMedia extends Despot {
 
   public pause() {
     this.paused = true;
+    this.audioRecorder?.updateRecordingState();
   }
 
   public isPaused() {
@@ -571,10 +587,12 @@ class UserMedia extends Despot {
 
   public resume() {
     this.paused = false;
+    this.audioRecorder?.updateRecordingState();
   }
 
   public record() {
     this.recording = true;
+    this.audioRecorder?.updateRecordingState();
   }
 
   public isRecording() {

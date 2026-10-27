@@ -75,11 +75,9 @@ The defaults suit most integrations. Set `whitelistKey` when deploying on your o
 
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
 
-### Audio
+## Audio
 
-Audio recording is experimental and disabled by default. Set `audio.enabled` to `true` to enable it.
-
-`audio.volume` controls recording gain from `0` (silence) to `1` (unchanged microphone level, the default). It does not control playback volume or enable audible microphone monitoring.
+See [docs/AUDIO.md](docs/AUDIO.md) for details on audio recording options and requirements.
 
 ## API
 
@@ -292,7 +290,7 @@ For a deployed domain, request access at [videomail.io/whitelist](https://videom
 
 ## Browser compatibility
 
-Recording requires a secure context (`https://` or localhost) and support for `navigator.mediaDevices.getUserMedia()`, WebSocket, Canvas, and Web Audio when audio is enabled. Current evergreen desktop and mobile browsers are supported. Internet Explorer is not supported.
+Recording requires a secure context (`https://` or localhost) and support for `navigator.mediaDevices.getUserMedia()`, WebSocket, Canvas, and AudioWorklet when audio is enabled. Current evergreen desktop and mobile browsers are supported. Internet Explorer is not supported.
 
 See [Can I Use: Media Capture from DOM Elements](https://caniuse.com/stream) and test the [live demo](#live-demo) in the browsers required by your integration.
 
