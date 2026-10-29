@@ -17,12 +17,9 @@ function createUserMediaConstraints({
   userMediaParams,
 }: UserMediaConstraintsParams) {
   const video: MediaTrackConstraints = {
+    facingMode: userMediaParams?.switchingFacingMode || facingMode,
     frameRate: { ideal: options.video.fps },
   };
-
-  if (userMediaParams?.switchingFacingMode || userMediaParams?.recovering) {
-    video.facingMode = userMediaParams.switchingFacingMode || facingMode;
-  }
 
   if (options.video.width) {
     video.width = { ideal: options.video.width };

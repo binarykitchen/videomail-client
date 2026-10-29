@@ -90,7 +90,7 @@ const options: VideomailClientOptions = {
 
     width: undefined, // or use an integer for exact pixels
     height: undefined, // or use an integer for exact pixels
-    facingMode: "user", // can be 'user', 'environment', 'left' or 'right'. useful for mobiles.
+    facingMode: "user", // preferred initial camera: 'user', 'environment', 'left', 'right'.
     facingModeButton: false,
 
     stretch: false, // Set to true if you want the video to take the full width of the parent container
