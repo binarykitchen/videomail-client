@@ -66,6 +66,63 @@ describe("UserMedia", () => {
     vi.restoreAllMocks();
   });
 
+  describe.each([
+    {
+      description: "missing frame-rate capabilities",
+      getCapabilities: () => ({}),
+    },
+    {
+      description: "missing capability APIs",
+      getCapabilities: undefined,
+    },
+    {
+      description: "throwing capability APIs",
+      getCapabilities: () => {
+        throw new Error("Capabilities unavailable");
+      },
+    },
+    {
+      description: "reported frame rates",
+      getCapabilities: () => ({ frameRate: { min: 1, max: 30 } }),
+    },
+  ])("camera detection with $description", ({ getCapabilities }) => {
+    it("accepts a physical camera through readiness", () => {
+      const { userMedia, videoElement, videoTrack, stream, ready, failed, onAudio } =
+        createMediaFixture();
+      videoTrack.label = "Integrated Camera";
+      Object.defineProperty(videoTrack, "getCapabilities", { value: getCapabilities });
+
+      userMedia.init(stream, ready, onAudio, failed);
+      videoElement.dispatchEvent(new Event("play"));
+      videoElement.dispatchEvent(new Event("loadedmetadata"));
+
+      expect({
+        ready: ready.mock.calls.length,
+        failures: failed.mock.calls,
+        stream: videoElement.srcObject,
+      }).toEqual({ ready: 1, failures: [], stream });
+    });
+
+    it("rejects a known virtual camera before attaching its stream", () => {
+      const { userMedia, videoElement, videoTrack, stream, ready, failed, onAudio } =
+        createMediaFixture();
+      videoTrack.label = "OBS Virtual Camera";
+      Object.defineProperty(videoTrack, "getCapabilities", { value: getCapabilities });
+
+      userMedia.init(stream, ready, onAudio, failed);
+
+      expect({
+        ready: ready.mock.calls.length,
+        failures: failed.mock.calls,
+        attached: Boolean(videoElement.srcObject),
+      }).toEqual({
+        ready: 0,
+        failures: [[new Error("Virtual cameras are not allowed.")]],
+        attached: false,
+      });
+    });
+  });
+
   it("recognizes live camera tracks without resetting recording flags", () => {
     const { userMedia, stream, ready, failed, onAudio } = createMediaFixture();
     userMedia.record();

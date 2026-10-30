@@ -1,18 +1,15 @@
 const VIRTUAL_KEYWORDS = ["obs", "virtual", "manycam", "vcam", "splitcam", "droidcam"];
 
-function isVirtualCamera(videoTrack: MediaStreamTrack) {
-  const capabilities = videoTrack.getCapabilities();
-
-  // Real webcams usually have a range of frame rates or specific hardware controls
-  if (!capabilities.frameRate) {
-    return true;
-  }
-
-  const isVirtual = VIRTUAL_KEYWORDS.some((keyword) =>
+/*
+ * Checks if a video track is likely from a virtual camera based on its label.
+ * Returns true if the label contains any known virtual camera keywords.
+ *
+ * In this check, do not check capabilities. Because missing frame-rate capabilities or an unavailable `getCapabilities()` API do not classify a camera as virtual.
+ */
+function isVirtualCamera(videoTrack: Pick<MediaStreamTrack, "label">) {
+  return VIRTUAL_KEYWORDS.some((keyword) =>
     videoTrack.label.toLowerCase().includes(keyword),
   );
-
-  return isVirtual;
 }
 
 export default isVirtualCamera;
