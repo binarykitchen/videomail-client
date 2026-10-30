@@ -209,7 +209,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       return true;
     }
 
-    // This is an established connection retry with backoff — 1s, 2s, 4s, up to 10s
+    // Back off between retries: 1s, 2s, 4s, up to 10s.
     const delayMs = Math.min(1000 * 2 ** this.reconnectAttempts, 10000);
     this.reconnectAttempts++;
     this.connecting = false;
@@ -251,14 +251,11 @@ abstract class RecorderConnection extends RecorderStreamWriter {
   }
 
   /*
-   * A web socket that never reaches OPEN gives us no usable detail: the browser fires
-   * an opaque error event (deliberately, to avoid leaking network information) followed
-   * by a close with code 1006. Without reporting it here the recorder would sit on
-   * "Connecting …" forever, which is what users see when the socket URL is unreachable.
-   *
-   * To make "Terror Reports" actually useful, we build the explanation from whatever
-   * we can still observe client-side: whether the device is online at all, how long
-   * we waited (instant refusal vs full timeout) and the raw close code/reason, if any.
+   * Browsers hide most details when a socket fails before OPEN.
+   * Report here so the UI does not stay stuck on "Connecting".
+   * Include what we can observe:
+   * - Online status and time spent waiting.
+   * - The native close code and reason, if available.
    */
   private failConnection(params: {
     url2Connect: string;
@@ -363,8 +360,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
     this.clearReconnectTimeout();
 
-    // Skip WebSocket initialization for explicit crawler user agents.
-    // These requests will no longer generate generic connection-error report
+    // Skip known crawlers to avoid connection reports from non-recording clients.
     if (isAutomatedUserAgent()) {
       this.connecting = false;
       this.options.logger.debug(
@@ -384,24 +380,15 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     // https://github.com/maxogden/websocket-stream#binary-sockets
 
     /*
-     * We use query parameters here because we cannot set custom headers in web sockets,
-     * see https://github.com/websockets/ws/issues/467
+     * Browser WebSockets cannot send custom headers. Use a query parameter instead.
+     * See https://github.com/websockets/ws/issues/467.
      */
 
     let url2Connect: string;
 
     try {
-      /*
-       * Use the URL API to validate and normalize socketUrl before use.
-       *
-       * Plain string concatenation with encodeURIComponent cannot detect a
-       * malformed socketUrl (e.g. trailing whitespace from WordPress config)
-       * and lets an invalid string reach the WebSocket constructor, which
-       * throws a cryptic "the provided URL is invalid" error with no context.
-       *
-       * new URL() throws immediately with a clear message when socketUrl is bad,
-       * and URLSearchParams encodes the query parameter correctly.
-       */
+      // Parse the configured URL before opening a socket.
+      // searchParams handles encoding the whitelist key.
       const socketUrlObj = new URL(this.options.socketUrl);
 
       socketUrlObj.searchParams.set(
@@ -432,19 +419,15 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     let nativeSocket: WebSocket;
 
     /*
-     * Build the native socket first and then wrap it as a stream.
-     * This avoids browser/runtime quirks around websocket-stream passing
-     * protocol arguments through to the WebSocket constructor.
+     * Open the native socket before wrapping it as a stream.
+     * This avoids websocket-stream quirks when passing protocol arguments.
      */
 
     try {
       nativeSocket = new WebSocket(url2Connect);
 
-      /*
-       * Capture the raw close code/reason directly from the native socket before
-       * websocket-stream gets a chance to obscure it. This is our only source of
-       * truth for *why* a connection never opened (e.g. 1006 = abnormal closure).
-       */
+      // Keep native close details before the stream wrapper hides them.
+      // Code 1006, for example, means an abnormal close.
       nativeSocket.addEventListener("close", (event) => {
         this.lastCloseEvent = {
           code: event.code,
@@ -684,12 +667,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       const commandObj = { command, args };
 
       /*
-       * todo commented out because for some reasons server does
-       * not accept such a long array of many log lines. to examine later.
-       *
-       * add some useful debug info to examine weird stuff like this one
-       * UnprocessableError: Unable to encode a video with FPS near zero.
-       * todo consider removing this later or have it for debug=1 only?
+       * TODO Revisit sending logs with commands. Large log arrays were rejected.
+       * They may help diagnose near-zero frame rates. Consider debug-only use.
        *
        * if (this.options.logger && options.logger.getLines) {
        *   commandObj.logLines = options.logger.getLines()

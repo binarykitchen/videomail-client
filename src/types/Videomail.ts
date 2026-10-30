@@ -10,12 +10,11 @@ import VideoFormat from "./VideoFormat";
 
 export type VideomailIdentifierType = "snapshot" | "thread";
 
-// Remember, only primitive types are supported.
-// LevelDB can't store for example Sets or Maps.
+// Keep this data serializable for LevelDB. No Sets or Maps.
 export interface Videomail {
   url: string;
 
-  // First, typical email typings
+  // Email fields
 
   subject?: string;
   body?: string;
@@ -45,7 +44,7 @@ export interface Videomail {
   editUrl?: string;
   repeatUrl?: string;
 
-  // Then Videomail specific stuff
+  // Video details
 
   connection?: Record<string, number | string>;
   dateCreated: number;
@@ -53,17 +52,14 @@ export interface Videomail {
   dateUpdated?: number;
   dateUpdatedServerPretty?: string;
 
-  // That's when the video flagged as expired
   expired?: boolean;
   expiresAfter: number;
   expiresAfterIso: string;
   expiresAfterServerPretty: string;
 
-  // That's when the Videomail server has deleted the upload assets such as
-  // videos of the expired videomail but keeps the metadata.
+  // The server deleted the expired video's files, but kept its metadata.
   orphaned?: boolean;
 
-  // This is for any Videomail that is meant to be permanent
   permanent?: boolean;
 
   format?: VideoFormat;
@@ -81,7 +77,7 @@ export interface Videomail {
 
   parentKey?: string | undefined;
 
-  // Now, the social features/types
+  // Social features
 
   userKey?: UserKey | undefined;
 
@@ -93,14 +89,13 @@ export interface Videomail {
 
   shareUrl?: string | undefined;
 
-  // Never stored. Points to the latest public videomail poster of the user, if any.
-  // Used for the Videomail wall.
+  // Not stored. The user's latest public video poster, for the Videomail wall.
   userPublicPoster?: string | undefined;
 
-  // When true, the videomail is visible to the Videomail wall
+  // Visible on the Videomail wall.
   public?: boolean;
 
-  // Then sending stats
+  // Sending stats
 
   sending: boolean;
   sent?: boolean;
@@ -110,12 +105,12 @@ export interface Videomail {
   sentDateServerPretty?: string;
   serverTimePretty?: string;
 
-  // Whitelist stuff
+  // Whitelist
 
   whitelistKey: string;
 
-  // Never stored, for snapshots only and retrieved via whitelist key
-  // Consider removing once all has been migrated to the new whitelist system.
+  // Not stored. Looked up by whitelist key for snapshots only.
+  // TODO Remove once the new whitelist system is fully in use.
   siteName?: string | undefined;
 
   // General info

@@ -1,150 +1,63 @@
-/*
- * taken from
- * https://bbc.github.io/tal/jsdoc/events_mediaevent.js.html
- */
+// Event reference: https://bbc.github.io/tal/jsdoc/events_mediaevent.js.html
 
 const MEDIA_EVENTS = [
-  /*
-   * The user agent begins looking for media data, as part of
-   * the resource selection algorithm.
-   */
+  // The browser starts looking for media.
   "loadstart",
 
-  /*
-   * The user agent is intentionally not currently fetching media data,
-   * but does not have the entire media resource downloaded. networkState equals NETWORK_IDLE
-   */
+  // Fetching is paused, though the download is incomplete (NETWORK_IDLE).
   "suspend",
 
-  /*
-   * Playback has begun. Fired after the play() method has returned,
-   * or when the autoplay attribute has caused playback to begin.
-   * paused is newly false.
-   * 'play', commented out since it has special treatment
-   */
+  // 'play' and 'loadedmetadata' have their own handlers.
 
-  /*
-   * The user agent has just determined the duration and dimensions of the
-   * media resource and the timed tracks are ready.
-   * readyState is newly equal to HAVE_METADATA or greater for the first time.
-   * 'loadedmetadata', commented out since it has special treatment
-   */
-
-  // The user agent is fetching media data.
+  // Media data is arriving.
   "progress",
 
-  /*
-   * The user agent is intentionally not currently fetching media data,
-   * but does not have the entire media resource downloaded.
-   * 'suspend', // commented out, we are already listening to it in code
-   */
-
-  /*
-   * Event The user agent stops fetching the media data before it is completely downloaded,
-   * but not due to an error.  error is an object with the code MEDIA_ERR_ABORTED.
-   */
+  // Fetching stopped before the download finished.
   "abort",
 
-  /*
-   * A media element whose networkState was previously not in the NETWORK_EMPTY
-   * state has just switched to that state (either because of a fatal error
-   * during load that's about to be reported, or because the load() method was
-   * invoked while the resource selection algorithm was already running).
-   */
+  // The element returned to NETWORK_EMPTY after a load reset or failure.
   "emptied",
 
-  /*
-   * The user agent is trying to fetch media data, but data is
-   * unexpectedly not forthcoming
-   */
+  // The browser is waiting for data that has stopped arriving.
   "stalled",
 
-  /*
-   * Playback has been paused. Fired after the pause() method has returned.
-   * paused is newly true.
-   */
+  // Playback paused.
   "pause",
 
-  /*
-   * The user agent can render the media data at the current playback position
-   * for the first time.
-   * readyState newly increased to HAVE_CURRENT_DATA or greater for the first time.
-   */
+  // The first frame at the current position is ready (HAVE_CURRENT_DATA).
   "loadeddata",
 
-  /*
-   * Playback has stopped because the next frame is not available, but the user
-   * agent expects that frame to become available in due course.
-   * readyState is newly equal to or less than HAVE_CURRENT_DATA,
-   * and paused is false. Either seeking is true, or the current playback
-   * position is not contained in any of the ranges in buffered.
-   * It is possible for playback to stop for two other reasons without
-   * paused being false, but those two reasons do not fire this event:
-   * maybe playback ended, or playback stopped due to errors.
-   */
+  // Playback needs more data. This is buffering, not a pause, end, or error.
   "waiting",
 
-  /*
-   * Playback has started. readyState is newly equal to or greater than
-   * HAVE_FUTURE_DATA, paused is false, seeking is false,
-   * or the current playback position is contained in one of the ranges in buffered.
-   */
+  // Playback has started or resumed after buffering.
   "playing",
 
-  /*
-   * The user agent can resume playback of the media data,
-   * but estimates that if playback were to be started now, the media resource
-   * could not be rendered at the current playback rate up to its end without
-   * having to stop for further buffering of content.
-   * readyState newly increased to HAVE_FUTURE_DATA or greater.
-   */
+  // Playback can start, but may need to buffer later (HAVE_FUTURE_DATA).
   "canplay",
 
-  /*
-   * The user agent estimates that if playback were to be started now,
-   * the media resource could be rendered at the current playback rate
-   * all the way to its end without having to stop for further buffering.
-   * readyState is newly equal to HAVE_ENOUGH_DATA.
-   */
+  // The browser expects to play through without buffering (HAVE_ENOUGH_DATA).
   "canplaythrough",
 
-  /*
-   * The seeking IDL attribute changed to true and the seek operation is
-   * taking long enough that the user agent has time to fire the event.
-   */
+  // Moving to a new playback position.
   "seeking",
 
-  // The seeking IDL attribute changed to false.
+  // The new playback position is ready.
   "seeked",
 
-  /*
-   * Playback has stopped because the end of the media resource was reached.
-   * currentTime equals the end of the media resource; ended is true.
-   */
+  // Playback reached the end.
   "ended",
 
-  /*
-   * Either the defaultPlaybackRate or the playbackRate attribute
-   * has just been updated.
-   */
+  // The default or current playback speed changed.
   "ratechange",
 
-  // The duration attribute has just been updated.
+  // The media duration changed.
   "durationchange",
 
-  /*
-   * Either the volume attribute or the muted attribute has changed.
-   * Fired after the relevant attribute's setter has returned.
-   */
+  // The volume or mute setting changed.
   "volumechange",
 
-  // commented out, happen too often
-
-  /*
-   * The current playback position changed as part of normal playback or in
-   * an especially interesting way, for example discontinuously.
-   * 'timeupdate'
-   */
+  // Skip 'timeupdate': it fires too often for logging.
 ];
 
 export default MEDIA_EVENTS;

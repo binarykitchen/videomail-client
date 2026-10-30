@@ -1,5 +1,4 @@
-// Yeah I know it's a joke, yet this helps with typings,
-// what is an email address and what is a bloody normal string :)
+// A name for email strings, not email validation.
 
 type EmailAddress = string;
 type EmailAddresses = EmailAddress[];

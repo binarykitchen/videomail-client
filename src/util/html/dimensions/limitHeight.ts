@@ -2,14 +2,11 @@ import { Dimension } from "../../../types/dimension";
 import { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 
-/*
- * This is difficult to compute and is not entirely correct.
- * But good enough for now to ensure some stability.
- */
+// A viewport-based estimate. It does not cover every layout yet.
 function limitHeight(
   height: number | undefined,
   options: VideomailClientOptions,
-  // TODO Remove later once we have narrowed it down
+  // TODO Remove once the sizing issue is tracked down.
   calledFrom: string,
 ) {
   const dimension: Dimension = {

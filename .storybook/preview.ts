@@ -18,9 +18,7 @@ const preview: Preview = {
     },
   },
 
-  // Initialize MSW and pass custom options directly via the loader function
-  //
-  // Remember always to initialize the MSW worker after each upgrade with:
+  // Refresh the MSW worker after each upgrade:
   // npx msw init .storybook/public
   loaders: [
     mswLoader(async () => {
@@ -32,7 +30,7 @@ const preview: Preview = {
 
           if (protocol && frame.data) {
             if (protocol === "http") {
-              // @ts-expect-error MSW shall fix this typing sooner or later
+              // @ts-expect-error MSW does not narrow HTTP frame data here.
               const request = frame.data.request as Request;
               const url = request.url;
 
@@ -43,21 +41,21 @@ const preview: Preview = {
                 origin.startsWith("https://videos.pond5.com") ||
                 origin.startsWith("https://s1.dmcdn.net")
               ) {
-                // Bypass mocking for the real videomail server or assets
+                // Let real Videomail and asset requests through.
                 return;
               }
             } else if (protocol === "ws") {
-              // @ts-expect-error MSW shall fix this typing sooner or later
+              // @ts-expect-error MSW does not narrow WebSocket frame data here.
               const origin = frame.data.connection.client.url.origin as string;
 
               if (origin.startsWith("wss://videomail.io")) {
-                // Bypass mocking for the real videomail WebSocket server
+                // Let the real recording connection through.
                 return;
               }
             }
           }
 
-          // Use the worker's native warning print tool for unhandled requests
+          // Warn about anything we have not mocked or allowed.
           defaults.warn();
         },
       });

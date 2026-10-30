@@ -15,9 +15,9 @@ const meta: Meta<PartialVideomailClientOptions> = {
 
 type Story = StoryObj<PartialVideomailClientOptions>;
 
-// DeaF simple with most defaults
+// Start with the defaults: video without audio.
 export const DeaFSimple: Story = {
-  name: "DeaF simple",
+  name: "Simple recording",
   args: {
     video: {
       width: 320,
@@ -29,9 +29,9 @@ export const DeaFSimple: Story = {
   },
 };
 
-// Likewise but with audio for those who do not know Sign Language ;)
+// The same setup, with audio for anyone who wants it.
 export const DeadSimple: Story = {
-  name: "Dead simple",
+  name: "Simple recording with audio",
   args: {
     audio: {
       enabled: true,
@@ -46,7 +46,7 @@ export const DeadSimple: Story = {
   },
 };
 
-// Dead simple too but based on jpeg image frames only
+// Use JPEG frames instead of the default WebP preference.
 export const SimpleJpegs: Story = {
   name: "Using JPEG image frames",
   args: {
@@ -67,7 +67,7 @@ export const SimpleJpegs: Story = {
   },
 };
 
-// With audio, custom button text and without auto-pause + no countdown
+// Let users toggle audio. Skip auto-pause and the countdown.
 export const Audio: Story = {
   name: "With audio switcher",
   args: {
@@ -133,12 +133,10 @@ export const ChangingLimit: Story = {
   },
 };
 
-// High quality: High FPS, near HD quality, short duration and without auto-pause
-//
-// This example shows that your browser cannot meet the FPS requirements due to
-// performance issues and will use a lower one instead.
+// Aim for 40 fps and larger frames, without auto-pause.
+// The browser may lower the frame rate if it cannot keep up.
 export const HighQuality: Story = {
-  name: "High Quality (40 fps)",
+  name: "High quality (40 fps)",
   args: {
     enableAutoPause: false,
     video: {
@@ -157,12 +155,9 @@ export const HighQuality: Story = {
   },
 };
 
-// Only when clicking on record button, ask for webcam access
-//
-// With the option loadUserMediaOnRecord, the user won't be asked for webcam access on
-// page load but later, only when the record button is being pressed.
+// Ask for camera access on Record, not on page load.
 export const AskOnRecord: Story = {
-  name: "Ask upon recording",
+  name: "Ask for access on Record",
   args: {
     audio: {
       enabled: true,
@@ -179,10 +174,9 @@ export const AskOnRecord: Story = {
   },
 };
 
-// With a facing mode button to switch camera for mobiles
-// Only seen when you are on mobile.
+// Show a camera switch button on mobile.
 export const FacingMode: Story = {
-  name: "Facing mode for mobiles",
+  name: "Switch cameras on mobile",
   args: {
     audio: {
       enabled: true,
@@ -198,7 +192,7 @@ export const FacingMode: Story = {
   },
 };
 
-// Entertain user while waiting and disable pause/resume buttons
+// Show animations while encoding, without pause/resume controls.
 export const Entertain: Story = {
   name: "Entertain while encoding",
   args: {
@@ -225,9 +219,9 @@ export const Entertain: Story = {
   },
 };
 
-// Accept existing HTML, start recording asap and allow 10 min recording wohooo
+// Reuse existing markup and allow up to 10 minutes per recording.
 export const Inject: Story = {
-  name: "Inject to existing HTML code",
+  name: "Use existing HTML",
   args: {
     enableAutoPause: true,
     selectors: {
@@ -244,7 +238,7 @@ export const Inject: Story = {
   },
   render: () => `<div id="videomail2" class="videomail">
               <div class="da_window">
-                <noscript>Please enable Javascript</noscript>
+                <noscript>Please enable JavaScript to record a video.</noscript>
                 <p class="recordNote" style="display: none"></p>
                 <p class="recordTimer" style="display: none"></p>
                 <div class="paused" style="display: none">

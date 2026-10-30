@@ -1,24 +1,11 @@
 /*
- * Background
- * ----------
- * From June 2026 onwards we observed repeated "Failed to construct WebSocket:
- * the provided URL is invalid" errors from deafhistorycollections.com.au.
- * All originated from Tencent cloud IPs (Beijing, AS45090) that set
- * languages=zh-CN,zh and spoofed macOS/Chrome user-agents.
+ * Some crawlers report "the provided URL is invalid" for valid WebSocket URLs.
+ * During investigation:
+ * - URL parsing succeeded and the page used HTTPS.
+ * - Both a bare wss:// URL and a simple query threw SyntaxError on construction.
+ * - User agents looked like Chrome, and navigator.webdriver was false.
  *
- * Investigation findings:
- * - The constructed URL itself was always valid and clean.
- * - new URL(socketUrl) succeeded; parsed protocol was correctly "wss:".
- * - The page was served over HTTPS (secureContext=true) from the same domain.
- * - probeBase (wss://videomail.io) and probeSimpleQuery (wss://videomail.io/?a=b)
- *   BOTH threw SyntaxError — meaning the runtime cannot construct ANY WebSocket,
- *   not just ours. This is the definitive signal: it is not a URL problem.
- * - navigator.webdriver was false, but modern stealth crawlers hide this flag.
- *
- * Conclusion: these are JavaScript-capable web scrapers / headless crawlers
- * rendering pages for indexing. They execute JS but have no real browser
- * networking stack, so any WebSocket construction fails at the engine level.
- * Real users never trigger probeBase failures.
+ * These probes help separate URL problems from runtimes without working sockets.
  */
 
 function getEdgeCodes(value: string, amount: number, fromEnd?: boolean) {
@@ -41,13 +28,7 @@ function hasControlCharacters(value: string) {
 }
 
 function probeWebSocketConstructor(url: string) {
-  /*
-   * The most reliable bot signal: try constructing a completely trivial WebSocket.
-   * A real browser will accept wss://videomail.io (it may fail to connect, but
-   * the constructor itself never throws for a syntactically valid URL).
-   * Crawlers with no networking stack throw SyntaxError synchronously here,
-   * which conclusively identifies them regardless of spoofed UA or webdriver=false.
-   */
+  // Test construction, not connectivity. Some crawlers fail even on a simple URL.
   try {
     const socket = new WebSocket(url);
     socket.close();
@@ -75,11 +56,7 @@ function getLanguagesValue() {
 function getAutomationSignals(probeBase: string, probeSimpleQuery: string) {
   const reasons: string[] = [];
 
-  /*
-   * webdriver=true is only set by standard Selenium/WebDriver tooling.
-   * Stealth crawlers actively hide it, so absence does NOT prove a real user.
-   * It is kept here as a low-effort early signal when present.
-   */
+  // Some crawlers hide webdriver, so false does not rule out automation.
   if (navigator.webdriver) {
     reasons.push("webdriver=true");
   }
@@ -89,16 +66,12 @@ function getAutomationSignals(probeBase: string, probeSimpleQuery: string) {
     reasons.push("headless_ua_marker");
   }
 
-  // Real browsers always expose at least one language. An empty list is a red flag.
+  // An empty language list can be another automation hint.
   if (navigator.languages.length === 0) {
     reasons.push("no_languages");
   }
 
-  /*
-   * Definitive signal: if even the simplest wss:// URL fails synchronously in
-   * the constructor, this runtime has no functional WebSocket support at all.
-   * No real browser ever fails here for a syntactically valid URL.
-   */
+  // A simple URL failing during construction points to a runtime problem.
   if (probeBase !== "ok") {
     reasons.push("probe_base_failed");
   }
@@ -124,7 +97,7 @@ function getWebSocketDiagnostic(url2Connect: string) {
   try {
     urlParsedProtocol = new URL(url2Connect).protocol;
   } catch (_exc) {
-    // keep fallback value "invalid"
+    // Keep "invalid" when parsing fails.
   }
 
   const urlHasWhitespace = /\s/u.test(url2Connect);

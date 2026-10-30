@@ -4,18 +4,17 @@ import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 export interface VideomailErrorVersions {
   videomailNinjaFormPlugin?: string | undefined;
   videomailClient: string;
-  // Injected by the videomail itself (private)
+  // Added by the private Videomail app.
   videomailUI?: string | undefined;
   videomailServer?: string | undefined;
 }
 
-// Make sure these are only native, primitive types, not fully bloated objects
+// Keep report data serializable; avoid passing live browser objects.
 export interface VideomailErrorData {
-  // These two are for unhandled promise rejection events.
-  // Any other error causes, they shall go into the err (ErrorObject)
+  // cause and promise describe unhandled rejections. Other errors go in err.
   cause?: any;
 
-  // TODO Not sure if this can be reported via API. Needs experimenting. Hence any for now.
+  // TODO Check how promise data can be sent through the API.
   promise?: any;
 
   err?: ErrorObject | undefined;
@@ -32,7 +31,7 @@ export interface VideomailErrorData {
   type?: string | undefined;
   versions?: VideomailErrorVersions | undefined;
 
-  // CSP & Security Policy Violation Related
+  // Content security policy violations.
   blockedURI?: string | undefined;
   effectiveDirective?: string | undefined;
   violatedDirective?: string | undefined;

@@ -1,6 +1,5 @@
 class HTTPVideomailError extends Error {
-  // This helps to distinguish between errors thrown by
-  // the videomail-client package and other errors
+  // Distinguish our errors from errors raised by the host app.
   public override name = "VideomailError";
 
   public code?: string | undefined;

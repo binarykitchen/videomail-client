@@ -71,8 +71,7 @@ class Replay extends Despot {
         const empty =
           !attributeContainer.innerHTML || attributeContainer.innerHTML.length < 1;
 
-        // Do not overwrite when already set before, e
-        // e.g. with a React component adding links to the body
+        // Keep content the host app already supplied, such as links in the body.
         if (empty) {
           attributeContainer.textContent = String(newVideomail[attribute]);
         }
@@ -366,20 +365,19 @@ class Replay extends Despot {
         firstTrack.remove();
       }
     } else {
-      // Insert one then
       const track = document.createElement("track");
 
       track.setAttribute("src", src);
       track.src = src;
 
-      // It's captions, not subtitles. Because for subtitles you must define the language, see
+      // Use captions without requiring a subtitle language.
       // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
       track.kind = "captions";
       track.default = true;
 
       this.replayElement.appendChild(track);
 
-      // Because the local videomail server for development uses a different port, see
+      // The local video server may use a different port.
       // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
       this.replayElement.setAttribute("crossorigin", "anonymous");
     }
@@ -438,7 +436,7 @@ class Replay extends Despot {
 
   private pause(cb) {
     /*
-     * avoids race condition, inspired by
+     * Wait for pending play requests before pausing. See:
      * http://stackoverflow.com/questions/36803176/how-to-prevent-the-play-request-was-interrupted-by-a-call-to-pause-error
      */
     window.setTimeout(() => {
@@ -447,7 +445,8 @@ class Replay extends Despot {
           this.replayElement.pause();
         }
       } catch (exc) {
-        // just ignore, see https://github.com/binarykitchen/videomail.io/issues/386
+        // Log pause failures without blocking reset.
+        // See https://github.com/binarykitchen/videomail.io/issues/386.
         this.options.logger.warn(exc);
       }
 
@@ -456,7 +455,7 @@ class Replay extends Despot {
   }
 
   public reset(cb?) {
-    // pause video to make sure it won't consume any memory
+    // Pause before clearing sources to release playback resources.
     this.pause(() => {
       if (this.replayElement) {
         this.setMp4Source(undefined);
@@ -471,14 +470,12 @@ class Replay extends Despot {
 
   public hide() {
     if (this.replayElement) {
-      // Stop native pipeline execution
       this.replayElement.pause();
 
-      // Remove controls so that on native devices, no black horizontal bar appears
+      // Avoid a leftover black controls bar on mobile.
       this.replayElement.removeAttribute("controls");
 
-      // Release/reset the element,
-      // guard it so it only touches src when one was actually present
+      // Reset only if a source was set.
       if (this.replayElement.hasAttribute("src")) {
         this.replayElement.removeAttribute("src");
         this.replayElement.load();

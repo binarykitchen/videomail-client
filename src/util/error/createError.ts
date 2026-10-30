@@ -41,12 +41,12 @@ function createError(errorParams: ErrorParams) {
 
   switch (errName) {
     case VideomailError.SECURITY_ERROR:
-      message = "The operation was insecure";
-      explanation = "Probably you have disallowed Cookies for this page?";
+      message = "Your browser blocked this action";
+      explanation = "Check this page's camera permissions and security settings.";
       classList.push(VideomailError.BROWSER_PROBLEM);
       break;
     case VideomailError.OVERCONSTRAINED:
-      message = "Invalid webcam constraints";
+      message = "Your webcam cannot use these settings";
 
       if (err && "constraint" in err) {
         const overconstrainedError = err as unknown as OverconstrainedError;
@@ -65,31 +65,29 @@ function createError(errorParams: ErrorParams) {
       break;
     case "MediaDeviceFailedDueToShutdown":
       message = "Webcam is shutting down";
-      explanation =
-        "This happens your webcam is already switching off and not giving you permission to use it.";
+      explanation = "Wait for your webcam to finish switching off, then try again.";
       break;
     case "SourceUnavailableError":
-      message = "Source of your webcam cannot be accessed";
-      explanation = "Probably it is locked from another process or has a hardware error.";
+      message = "Cannot access your webcam";
+      explanation = "Another app may be using it, or there may be a hardware problem.";
       break;
     case "NO_DEVICES_FOUND":
       if (audioEnabled) {
-        message = "No webcam nor microphone found";
-        explanation =
-          "Your browser cannot find a webcam with microphone attached to your machine.";
+        message = "No webcam or microphone found";
+        explanation = "Check that your webcam and microphone are connected.";
       } else {
         message = "No webcam found";
-        explanation = "Your browser cannot find a webcam attached to your machine.";
+        explanation = "Check that your webcam is connected.";
       }
 
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
     case "PermissionDismissedError":
-      message = "Ooops, you didn't give me any permissions?";
+      message = "Camera permission is needed";
       explanation =
-        "Looks like you skipped the webcam permission dialogue.<br/>" +
-        "Please grant access next time the dialogue appears.";
+        "The camera permission prompt was closed.<br/>" +
+        "Please allow access when it appears again.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
@@ -99,9 +97,9 @@ function createError(errorParams: ErrorParams) {
       message = "Permission denied";
 
       explanation =
-        "Cannot access your webcam. This can have two reasons:<br/>" +
-        "a) you blocked access to webcam; or<br/>" +
-        "b) your webcam is already in use.";
+        "We cannot access your webcam. Check these possibilities:" +
+        "<ul><li>Camera access is blocked in your browser settings.</li>" +
+        "<li>Another app is using your webcam.</li></ul>";
 
       classList.push(VideomailError.WEBCAM_PROBLEM);
 
@@ -110,43 +108,41 @@ function createError(errorParams: ErrorParams) {
     case "HARDWARE_UNAVAILABLE":
     case "AbortError": // That's for Firefox
       message = "Webcam is unavailable";
-      explanation = "Maybe it is already busy in another window?";
+      explanation = "Another window may be using it. Close it and try again.";
 
       classList.push(VideomailError.WEBCAM_PROBLEM);
 
       break;
 
     case "NO_VIDEO_FEED":
-      message = "No video feed found!";
-      explanation = "Your webcam is already used in another browser.";
+      message = "No video feed found";
+      explanation = "Another browser may be using your webcam.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
     case VideomailError.STARTING_FAILED:
-      message = "Starting video failed";
-      explanation =
-        "Most likely this happens when the webcam is already active in another browser";
+      message = "Could not start recording";
+      explanation = "Another browser may be using your webcam.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
     case "DevicesNotFoundError":
-      message = "No available webcam could be found";
+      message = "No available webcam found";
       explanation =
-        "Looks like you do not have any webcam attached to your machine; or " +
-        "the one you plugged in is already used.";
+        "Check that your webcam is connected and not being used by another app.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
     case VideomailError.NOT_READABLE_ERROR:
     case VideomailError.TRACK_START_ERROR:
-      message = "No access to webcam";
-      explanation = "Perhaps you are already using it in another browser?";
+      message = "Cannot access your webcam";
+      explanation = "Another browser may be using it. Close it and try again.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
     case VideomailError.INVALID_STATE_ERROR:
-      message = "Invalid state";
-      explanation = "Video recording stream from your webcam already has finished";
+      message = "Your camera stream has ended";
+      explanation = "The webcam stream is no longer active.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
 
@@ -159,14 +155,8 @@ function createError(errorParams: ErrorParams) {
 
       break;
 
-    /*
-     * Chrome has a weird problem where if you try to do a getUserMedia request too early, it
-     * can return a MediaDeviceNotSupported error (even though nothing is wrong and permission
-     * has been granted). Look at userMediaErrorCallback() in recorder, there we do not
-     * emit those kind of errors further and just retry.
-     *
-     * but for whatever reasons, if it happens to reach this code, then investigate this further.
-     */
+    // Chrome can report this if camera access starts too early.
+    // The recorder normally retries; reaching here needs investigation.
     case VideomailError.MEDIA_DEVICE_NOT_SUPPORTED:
       message = "Media device not supported";
 
@@ -183,16 +173,12 @@ function createError(errorParams: ErrorParams) {
         explanation = pretty(explanation);
       }
 
-      /*
-       * It can be that explanation itself is an error object
-       * error objects can be prettified to undefined sometimes
-       */
+      // pretty() may return undefined for an error object.
       if (!explanation && originalExplanation) {
         explanation = `Inspected: ${originalExplanation}`;
       }
 
-      // Last resort, explanation has been defined on Videomail server,
-      // so use it instead.
+      // Fall back to the server's explanation.
       if (!explanation && err?.explanation) {
         explanation = err.explanation;
       }
@@ -201,7 +187,7 @@ function createError(errorParams: ErrorParams) {
         message = err.message;
       }
 
-      // for weird, undefined cases
+      // Keep the error name if no message is available.
       if (!message && errName) {
         message = `${errName} (weird)`;
       }
@@ -227,7 +213,7 @@ function createError(errorParams: ErrorParams) {
     err,
   };
 
-  // Remember, this will create a new error stack trace from there
+  // This starts a new stack trace; errData keeps the original error.
   const videomailError = new VideomailError(
     message ?? "(undefined message)",
     options,
@@ -250,11 +236,8 @@ function createError(errorParams: ErrorParams) {
   if (options.reportErrors) {
     const resource = new Resource(options);
 
-    // Remember, we're reporting the error on API level, and are also throwing it further.
-    // This by intention, because this package is also used by our WordPress plugin where
-    // error handling is unclear.
-    //
-    // Better to report the error and throw it further, than to not report it at all ;)
+    // Report here as well as returning the error.
+    // WordPress integrations may not have their own reporting.
     resource.reportError(videomailError).catch((reason: unknown) => {
       console.error(reason);
     });

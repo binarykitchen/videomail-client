@@ -63,7 +63,7 @@ class UserMedia extends Despot {
       const previousStream = this.currentVisualStream;
       this.currentVisualStream = stream;
 
-      // Stop all tracks of the previous stream if it exists and is different from the current stream
+      // Release the old camera stream, but never stop the one we just attached.
       if (previousStream && previousStream !== stream) {
         previousStream.getTracks().forEach((track) => {
           track.stop();
@@ -198,8 +198,7 @@ class UserMedia extends Despot {
     };
 
     const play = () => {
-      // Resets the media element and restarts the media resource.
-      // Any pending events are discarded.
+      // Reset the media element and discard pending events before playback.
       try {
         this.rawVisualUserMedia?.load();
 
@@ -229,11 +228,8 @@ class UserMedia extends Despot {
               if (initializationId !== this.initializationId) {
                 return;
               }
-              /*
-               * Promise can be interrupted, i.E. when switching tabs
-               * and promise can get resumed when switching back to tab, hence
-               * do not treat this like an error
-               */
+              // Switching tabs can interrupt playback. Warn, but allow a later retry.
+              // Recovery requests still need an explicit failure.
               if (exc instanceof Error && !params?.recovering) {
                 this.options.logger.warn(
                   `Caught pending user media promise exception: ${exc.toString()}`,
@@ -356,7 +352,7 @@ class UserMedia extends Despot {
       }
     };
 
-    // player modifications to perform that must wait until `loadedmetadata` has been triggered
+    // Wait for metadata before using the camera dimensions.
     const onLoadedMetaData = () => {
       this.logEvent("loadedmetadata", {
         readyState: this.rawVisualUserMedia?.readyState,
@@ -414,14 +410,7 @@ class UserMedia extends Despot {
       this.rawVisualUserMedia?.addEventListener("loadedmetadata", onLoadedMetaData);
       this.rawVisualUserMedia?.addEventListener("play", onPlay);
 
-      /*
-       * Experimental, not sure if this is ever needed/called? since 2 apr 2017
-       * An error occurs while fetching the media data.
-       *
-       * Error can be an object with the code MEDIA_ERR_NETWORK or higher.
-       * networkState equals either NETWORK_EMPTY or NETWORK_IDLE,
-       * depending on when the download was aborted.
-       */
+      // Keep a handler for media loading failures, even if they rarely occur.
       this.rawVisualUserMedia?.removeEventListener("error", this.handleMediaError);
       this.rawVisualUserMedia?.addEventListener("error", this.handleMediaError);
 
@@ -448,7 +437,7 @@ class UserMedia extends Despot {
     try {
       let chosenStream = visualStream;
 
-      // Do not stop "too much" when going to initialize anyway
+      // Leave stream cleanup to the upcoming initialization when requested.
       if (!params?.aboutToInitialize) {
         this.initializationId++;
         this.clearInitializationListeners?.();
@@ -468,10 +457,7 @@ class UserMedia extends Despot {
         this.audioRecorder = undefined;
       }
 
-      /*
-       * Don't have to reset these states when just switching camera
-       * while still recording or pausing
-       */
+      // Camera switches must keep the take's recording and pause state.
       if (!params?.preserveRecordingState) {
         this.paused = this.recording = false;
       }

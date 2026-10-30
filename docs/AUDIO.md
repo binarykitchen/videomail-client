@@ -1,10 +1,10 @@
 # Audio
 
-Audio recording is disabled by default. Because it's made for the love of Sign Language.
+Audio is off by default. Sign Language comes first here.
 
 ## Enabling Audio
 
-To enable audio recording, set the `audio.enabled` option to `true` when creating the `VideomailClient` instance. Here is an example:
+Want audio, too? Set `audio.enabled` to `true`:
 
 ```ts
 const videomailClient = new VideomailClient({
@@ -17,10 +17,25 @@ const videomailClient = new VideomailClient({
 
 ## Other Audio Configurations
 
-`audio.volume` controls recording gain from `0` (silence) to `1` (unchanged microphone level, the default). It does not control playback volume or enable audible microphone monitoring.
+`audio.volume` sets the recording gain:
 
-Audio is captured as mono Float32 PCM on the browser's audio rendering thread using `AudioWorkletNode`, at the `AudioContext` sample rate. The existing 16-bit PCM transport to the server is unchanged. Capture does not include microphone pre-roll or paused audio.
+- `0`: silence.
+- `1`: the original microphone level (the default).
 
-`audio.bufferSize` controls the number of PCM frames per transferred batch, not the sample rate or audio fidelity. Use `"auto"` (2048 frames) or a power of two from 256 through 16384. Smaller batches reduce delivery latency; larger batches reduce message overhead.
+It does not change playback volume or play the microphone through your speakers.
 
-Audio requires AudioWorklet support in a secure context. The processor is embedded in the package as a `blob:` module, so no additional worklet asset needs hosting. Sites with a Content Security Policy must allow `blob:` in `script-src` when enabling audio. Unsupported browsers and blocked modules report an initialization error; there is no deprecated ScriptProcessor fallback.
+The browser captures mono Float32 PCM with `AudioWorkletNode`. This runs on the audio rendering thread at the `AudioContext` sample rate. Audio still travels to the server as 16-bit PCM. Nothing is captured before recording starts or while paused.
+
+`audio.bufferSize` sets the PCM frames per batch. It does not change the sample rate or audio quality:
+
+- Use `"auto"` for 2048 frames, or a power of two from 256 to 16384.
+- Smaller batches arrive sooner.
+- Larger batches mean fewer messages.
+
+## Browser requirements
+
+- AudioWorklet support and a secure context are required.
+- The processor ships as a `blob:` module. There's no extra worklet file to host.
+- If your site uses a content security policy, allow `blob:` in `script-src` for audio.
+
+Unsupported browsers and blocked modules report a setup error. There is no fallback to the deprecated ScriptProcessor.

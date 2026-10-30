@@ -179,10 +179,7 @@ abstract class RecorderCapture extends RecorderMedia {
   }
 
   private updateOverallProgress() {
-    /*
-     * when progresses aren't initialized,
-     * then do a first calculation to avoid `infinite` or `null` displays
-     */
+    // Initialize progress before displaying it to avoid infinity or null.
 
     this.frameProgress = this.calculateFrameProgress();
 
@@ -245,10 +242,7 @@ abstract class RecorderCapture extends RecorderMedia {
 
     this.key = args.key;
 
-    /*
-     * We are not serving MP4 videos anymore due to licensing but are keeping code
-     * for compatibility and documentation
-     */
+    // Keep MP4 support for servers that provide it.
     if (args.mp4) {
       this.replay.setMp4Source(
         `${args.mp4 + Constants.WHITELIST_KEY_LABEL}/${this.options.whitelistKey}/videomail.mp4`,
@@ -351,11 +345,7 @@ abstract class RecorderCapture extends RecorderMedia {
 
     this.loop?.complete?.();
 
-    /*
-     * needed to give dom enough time to prepare the replay element
-     * to show up upon the STOPPING event so that we can evaluate
-     * the right video type
-     */
+    // Let STOPPING handlers prepare the player before checking its video type.
     this.stopTimeout = window.setTimeout(() => {
       this.stopTimeout = undefined;
       this.stopTime = Date.now();
@@ -368,8 +358,8 @@ abstract class RecorderCapture extends RecorderMedia {
 
       this.recordingStats = {
         /*
-         * Do not use loop.getFPS() as this will only return the fps from the last delta,
-         * not the average. see https://github.com/hapticdata/animitter/issues/3
+         * loop.getFPS() covers only the last interval, not the take's average.
+         * See https://github.com/hapticdata/animitter/issues/3.
          */
         avgFps: this.getAvgFps(),
         wantedFps: this.options.video.fps,
@@ -396,7 +386,7 @@ abstract class RecorderCapture extends RecorderMedia {
         this.emit("STOPPED", { recordingStats: this.recordingStats });
       });
 
-      // beware, resetting will set framesCount to zero, so leave this here
+      // Reset last: it clears the frame count needed above.
       this.reset();
     }, 60);
   }
@@ -713,7 +703,7 @@ abstract class RecorderCapture extends RecorderMedia {
 
   private setAnimationFrameObject(newObj: RecorderAnimationFrameApi) {
     /*
-     * must stop and then start to make it become effective, see
+     * Restart the loop for the new frame scheduler to take effect. See:
      * https://github.com/hapticdata/animitter/issues/5#issuecomment-292019168
      */
     if (this.loop) {
@@ -749,11 +739,7 @@ abstract class RecorderCapture extends RecorderMedia {
           fn();
           processingTime = Date.now() - start;
         },
-        /*
-         * reducing wanted interval by respecting the time it takes to
-         * compute internally since this is not multi-threaded like
-         * requestAnimationFrame
-         */
+        // Subtract processing time to keep capture close to the target frame rate.
         wantedInterval - processingTime,
       );
 

@@ -1,7 +1,6 @@
 import { ErrorObject } from "serialize-error";
 
-// Do not trust what we receive from server side.
-// Therefore, all of them can be undefined and require additional checks
+// Server data needs checking. Any field may be missing.
 export interface VideomailCommandArgs {
   frame?: number;
   key?: string | undefined;

@@ -26,9 +26,7 @@ class CollectLogger {
     return line;
   }
 
-  // Workaround: since we cannot overwrite console.log without having the
-  // correct file and line number we'll use groupCollapsed() and
-  // trace() instead to get these.
+  // A grouped trace keeps the caller's file and line visible through this wrapper.
   public debug(...args) {
     const output = this.lifo("debug", args);
 
@@ -42,7 +40,7 @@ class CollectLogger {
       } else if (this.logger.debug) {
         this.logger.debug(output);
       } else {
-        // last resort if everything else fails for any weird reasons
+        // Custom loggers may lack debug support.
         console.log(output);
       }
     }

@@ -13,9 +13,15 @@
 [netlify-image]: https://api.netlify.com/api/v1/badges/3c9df5b4-8b85-4081-950a-d5df2dbd9926/deploy-status
 [netlify-url]: https://app.netlify.com/sites/videomail-client/deploys
 
-Record webcam videos in contact forms.
+Bring Sign Language to your contact forms. ✉
 
-The client captures image frames with `navigator.mediaDevices.getUserMedia()`, streams them to the Videomail service over WebSocket, and receives an encoded video. No browser plugins are required. The package includes ESM, CommonJS, UMD, and TypeScript declaration builds.
+Record webcam videos without browser plugins:
+
+- Capture frames with `navigator.mediaDevices.getUserMedia()`.
+- Stream them to Videomail over WebSocket.
+- Get an encoded video back.
+
+Made for Deaf users, and for hearing users learning Sign Language. The package includes ESM, CommonJS, UMD, and TypeScript declaration builds.
 
 - [Live demo](#live-demo)
 - [Storybook examples](#storybook-examples)
@@ -36,9 +42,9 @@ Try it at [videomail-client.netlify.app](https://videomail-client.netlify.app).
 
 ### Real-world usage
 
-There is a full version with all its features on [videomail.io](https://videomail.io).
+Try the full experience at [videomail.io](https://videomail.io).
 
-And there is more:
+You can also find it on:
 
 - [https://wfdeaf.org/contact](https://wfdeaf.org/contact)
 - [https://www.deaf.org.nz/contact](https://www.deaf.org.nz/contact)
@@ -46,7 +52,7 @@ And there is more:
 
 ## Storybook examples
 
-To check out some examples in your browser locally, just run these two commands:
+To try the examples locally:
 
 1. `npm install`
 2. `npm run storybook`
@@ -114,7 +120,7 @@ const videomailClient = new VideomailClient({
 
 ### videomailClient.on()
 
-`VideomailClient` provides an event-emitter-style API. `on()` returns an unsubscribe function:
+Use `on()` to listen for events. It returns an unsubscribe function:
 
 ```ts
 videomailClient.on("FORM_READY", () => {
@@ -122,7 +128,7 @@ videomailClient.on("FORM_READY", () => {
 });
 
 videomailClient.on("SUBMITTED", ({ videomail, response }) => {
-  // Continue with application-specific submission handling.
+  // Handle the submitted video in your app.
 });
 ```
 
@@ -132,13 +138,13 @@ Check them out at [src/types/events/index.ts](https://github.com/binarykitchen/v
 
 Some events include typed parameters exported by the package.
 
-The client includes default visual error handling. Applications can also subscribe to the `ERROR` event for custom logging or recovery.
+The client shows errors by default. Listen for `ERROR` to add your own logging or recovery.
 
-Videomail errors extend the native `Error` class and include additional diagnostic data.
+Videomail errors extend the native `Error` class with details for troubleshooting.
 
 ### videomailClient.show()
 
-Automatically fills the DOM with a form for video recording. By default the HTML element with the ID `videomail` will be filled, see options.
+Adds the recording form to the page. By default, it uses the element with ID `videomail`. You can change this in the [options](#options).
 
 ### videomailClient.record()
 
@@ -146,19 +152,32 @@ Starts recording without requiring the user to press the record button.
 
 ### videomailClient.pause()
 
-Pauses an active recording or countdown without discarding it. Idle cameras and unsent previews are left alone. Useful for native applications. To resume, refer to the next function `videomailClient.recoverCamera()`.
+Pauses a recording or countdown without losing it. Leaves idle cameras and unsent previews alone.
+
+For native apps, pair this with `videomailClient.recoverCamera()` when the app returns to the foreground.
 
 ### videomailClient.recoverCamera()
 
-Returns a `Promise<boolean>` indicating whether camera recovery succeeds. It restores playback for live tracks or requests a replacement stream when camera or microphone tracks have ended. Duplicate calls share the pending recovery. An unbuilt client, unsent preview, encoding, or submission is left alone and returns `false`.
+Returns a `Promise<boolean>`: `true` if camera recovery succeeds.
 
-Recovery preserves captured frame dimensions, frame/sample counters, and the audio sample rate. Foreground recovery never resumes capture or a countdown automatically. The user must explicitly choose Resume; that action waits for recovery before sending more frames.
+- Restarts playback for live tracks.
+- Requests a new stream if camera or microphone tracks have ended.
+- Shares pending recovery across duplicate calls.
+- Returns `false` without changes if the client is unbuilt, has an unsent preview, is encoding, or is submitting.
 
-With automatic pause enabled, browser visibility changes pause capture and recover the camera on return. Native hosts should call `pause()` on background and `recoverCamera()` on foreground through their own lifecycle integration. The client has no Capacitor dependency. Do not call `startOver()` to recover a paused take.
+Recovery keeps frame dimensions, frame/sample counts, and the audio sample rate. It does **not** resume recording or a countdown on its own. The user chooses Resume, which waits for recovery before sending more frames.
 
-`CAMERA_RECOVERING` signals the start of recovery. `USER_MEDIA_READY` includes `recovering: true` after a replacement stream is initialized. `CAMERA_RECOVERY_FAILED` provides an `err` when access, playback, audio initialization, or the recovery deadline fails. The default notification does not reset the take; the user can retry Resume or stop to keep the recorded part. Stop, reset, unload, and submission cancel pending recovery, and late streams are stopped.
+With automatic pause enabled, hiding the page pauses recording. Returning to it recovers the camera. Native apps should call `pause()` when backgrounded and `recoverCamera()` when foregrounded. Wire these into your app's lifecycle; no Capacitor dependency is needed. Use recovery, not `startOver()`, to keep a paused take.
 
-This does not reconnect a lost recording WebSocket or survive process termination. Physical-device camera and microphone validation remains necessary.
+Recovery events:
+
+- `CAMERA_RECOVERING`: recovery has started.
+- `USER_MEDIA_READY` with `recovering: true`: the replacement stream is ready.
+- `CAMERA_RECOVERY_FAILED` with an `err`: access, playback, audio setup, or the recovery deadline failed.
+
+The default failure notice keeps the take. Users can retry Resume or stop to keep what they recorded. Stop, reset, unload, and submission cancel pending recovery. Streams that arrive after cancellation are stopped.
+
+Recovery cannot reconnect a lost recording WebSocket or keep a take after the app process ends. Test the camera and microphone on physical devices, too.
 
 ### videomailClient.replay(videomail[, parentElementId])
 
@@ -166,13 +185,13 @@ Adds a video player for the supplied videomail.
 
 If `replayParentElementId` is supplied, the player is inserted into that element. Otherwise, the client uses or creates a replay container within the configured container.
 
-Also note that, when the parent element already contains a video container like this
+If the parent already has a video element like this:
 
 ```html
 <video class="replay"></video>
 ```
 
-the client reuses it instead of creating another DOM element.
+The client reuses it. No extra element needed.
 
 ### videomailClient.startOver()
 
@@ -180,10 +199,10 @@ Resets the client and returns it to the ready state so the same instance can rec
 
 ### videomailClient.getByAlias(alias)
 
-Returns a videomail asynchronously for the given alias. You can obtain the alias from:
+Returns a videomail asynchronously for the given alias. Find the alias in:
 
-1. The form submission to your own server has it under `videomail_alias` in the form body.
-2. The `SUBMITTED` event payload.
+1. The `videomail_alias` field sent to your server.
+2. The `SUBMITTED` event data.
 
 ### videomailClient.getByKey(key)
 
@@ -199,15 +218,15 @@ Returns the videomail thread containing the given key.
 
 ### videomailClient.unload()
 
-Manually unloads the webcam, closes the active WebSocket connection, and removes all internal event listeners.
+Stops the webcam, closes the active WebSocket connection, and removes all internal event listeners.
 
 ### videomailClient.hide()
 
-Hides all the visuals (but does not unload anything).
+Hides the UI without unloading it.
 
 ### videomailClient.isDirty()
 
-Returns `true` when a video has been recorded but not submitted. This can be used before navigation to warn about an unsent recording.
+Returns `true` when a recorded video has not been submitted. Use it to warn users before they leave an unsent recording.
 
 ### videomailClient.isRecording()
 
@@ -219,23 +238,25 @@ Returns `true` after the client UI has been built and before it is unloaded.
 
 ### videomailClient.submit()
 
-Manually triggers submission after successful client validation.
+Submits the form after client validation succeeds.
 
-When `enableAutoValidation` is `false`, it can be called without a prior client validation event; the integrating application is responsible for validating the form first. This is useful when another UI layer owns the visible submit control.
+With `enableAutoValidation: false`, no client validation event is needed. Your app must validate the form first. This helps when your app provides its own submit button.
 
 ### videomailClient.getLogLines()
 
-Returns the recently collected log lines when the configured logger supports collection.
+Returns recent log lines if your logger collects them.
 
 ### videomailClient.setLimitSeconds(limitSeconds)
 
-Updates the recording time limit for subsequent recording activity.
+Changes the time limit for further recording.
 
 ## Stored videomail data
 
-The `SUBMITTED` event includes a `videomail` object. The exact response can evolve, but its shape follows the exported `Videomail` type. A shortened example is shown below:
+The `SUBMITTED` event includes a `videomail` object. Its fields may evolve; check the exported `Videomail` type for the current shape.
 
-For new recordings, submitted `width` and `height` describe the captured canvas frames, not the browser viewport or the resized preview. These dimensions survive stopping the camera and are replaced when recording again.
+For new recordings, `width` and `height` describe the captured canvas frames. They are not the viewport or resized preview dimensions. They stay available after the camera stops and are replaced when you record again.
+
+Here's a shortened example:
 
 ```json
 {
@@ -278,7 +299,7 @@ You can also retrieve this data with `videomailClient.getByKey()`.
 
 ## Form Submissions
 
-How to configure, inject meta data and test form submissions with the Videomail client can be found in [Form Submissions ✏️](./docs/FORM_SUBMISSIONS.md).
+See [Form Submissions ✏️](./docs/FORM_SUBMISSIONS.md) to set up submissions, include metadata, and test your integration.
 
 ## Privacy and error reporting
 
@@ -286,13 +307,26 @@ Read about our privacy and error reporting practices in [Privacy and error repor
 
 ## Whitelist
 
-Examples work at [https://localhost:8443](https://localhost:8443) because localhost is allowed by the remote Videomail server. `https://localhost` and `https://localhost:443` are also available for local development. Other origins require their own whitelist entry.
+The examples work locally without extra setup. Videomail allows these development origins:
+
+- [https://localhost:8443](https://localhost:8443)
+- `https://localhost`
+- `https://localhost:443`
+
+Other origins need their own whitelist entry.
 
 For a deployed domain, request access at [videomail.io/whitelist](https://videomail.io/whitelist). You will receive a whitelist key for the approved origins.
 
 ## Browser compatibility
 
-Recording requires a secure context (`https://` or localhost) and support for `navigator.mediaDevices.getUserMedia()`, WebSocket, Canvas, and AudioWorklet when audio is enabled. Current evergreen desktop and mobile browsers are supported. Internet Explorer is not supported.
+Recording needs a secure context (`https://` or localhost), plus:
+
+- `navigator.mediaDevices.getUserMedia()`
+- WebSocket
+- Canvas
+- AudioWorklet, if audio is enabled
+
+Current evergreen desktop and mobile browsers are supported. Internet Explorer is not.
 
 See [Can I Use: Media Capture from DOM Elements](https://caniuse.com/stream) and test the [live demo](#live-demo) in the browsers required by your integration.
 
@@ -306,7 +340,7 @@ It extends the Ninja Forms form builder with a webcam input and submission integ
 
 ### Changelog
 
-A separate changelog is not maintained. Use `git log` or the [commit history](https://github.com/binarykitchen/videomail-client/commits/master).
+No separate changelog. Check `git log` or the [commit history](https://github.com/binarykitchen/videomail-client/commits/master).
 
 ### Noise
 
@@ -318,7 +352,7 @@ Videomail in the wild:
 
 This is just the beginning. I will add a lot more over time.
 
-Bear with me, there are lots of problems to crack, especially with the performance, audio part and some unit tests are missing. I do not want to waste too much time on perfection unless it's proven to work then I rewrite piece by piece.
+There's still work to do on performance, audio, and test coverage. We improve things piece by piece, rather than chase perfection in one big rewrite.
 
 ### Credits
 
@@ -338,8 +372,8 @@ They all deserve lots of love in return. Thank you so much.
 
 ### Code quality
 
-The project prioritizes stability and bug fixes over large rewrites. Its implementation has evolved several times as browser media APIs and integration requirements have changed.
+Stability and bug fixes come before big rewrites. The code keeps evolving with browser media APIs and the apps that use it.
 
 ### Final philosophy
 
-The primary goal is to make Sign Language easier to use in email and web forms.
+Make Sign Language at home in email and web forms. That's what we're here for.

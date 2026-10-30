@@ -14,93 +14,93 @@ import {
 } from "./params";
 
 export interface VideomailEvents {
-  // when about to ask for webcam permissions
+  // About to ask for camera permission.
   ASKING_WEBCAM_PERMISSION: () => void;
-  // encoding video
+  // Audio encoding has started.
   BEGIN_AUDIO_ENCODING: () => void;
-  // encoding video
+  // Video encoding has started.
   BEGIN_VIDEO_ENCODING: () => void;
-  // something serious, most likely an error, is shown and blocks
+  // A blocking notice, usually an error, is shown.
   BLOCKING: () => void;
-  // all dom elements are ready, are in the DOM
+  // The UI elements are ready in the DOM.
   BUILT: () => void;
   CAMERA_RECOVERING: () => void;
   CAMERA_RECOVERY_FAILED: (params: VideomailCameraRecoveryFailedParams) => void;
-  // socket is connected to server
+  // The server connection is open.
   CONNECTED: () => void;
-  // socket is connecting to server
+  // Connecting to the server.
   CONNECTING: () => void;
-  // countdown for recording has started
+  // The recording countdown has started.
   COUNTDOWN: () => void;
-  // about to disable audio
+  // About to turn audio off.
   DISABLING_AUDIO: () => void;
-  // socket to server is disconnected
+  // The server connection has closed.
   DISCONNECTED: () => void;
-  // about to enable audio
+  // About to turn audio on.
   ENABLING_AUDIO: () => void;
-  // an error occurred
+  // An error needs handling.
   ERROR: (params: VideomailErrorParams) => void;
-  // for debugging only, is emitted when an event is emitted lol,
+  // For debugging: an event about an event.
   EVENT_EMITTED: () => void;
-  // emitted once when fist frame has been sent to server
+  // The first frame has been sent. Fires once per take.
   FIRST_FRAME_SENT: () => void;
-  // form is ready, available in the DOM
+  // The form is ready in the DOM.
   FORM_READY: (params: FormReadyParams) => void;
-  // switch from replaying back to recording
+  // Switching from replay to recording.
   GOING_BACK: () => void;
-  // emitted when hidden
+  // The UI has been hidden.
   HIDE: () => void;
-  // form is invalid
+  // The form needs corrections.
   INVALID: (params: VideomailInvalidParams) => void;
-  // document just became INvisible
+  // The page has become hidden.
   INVISIBLE: () => void;
-  // raised when webcam knows its dimensions
+  // The camera dimensions are available.
   LOADED_META_DATA: () => void;
-  // asking for webcam access
+  // Loading the camera stream.
   LOADING_USER_MEDIA: () => void;
-  // notifies user about something (not blocking)
+  // A non-blocking notice is shown.
   NOTIFYING: () => void;
-  // recording is being paused
+  // Pausing the recording.
   PAUSED: () => void;
-  // video preview is set
+  // The preview has been set.
   PREVIEW: (params?: VideomailPreviewParams) => void;
-  // video preview is shown
+  // The preview is visible.
   PREVIEW_SHOWN: () => void;
-  // start sending
+  // Upload or encoding progress has changed.
   PROGRESS: (params: VideomailProgressParams) => void;
-  // webcam is recording
+  // Recording is in progress.
   RECORDING: (params: VideomailRecordingParams) => void;
-  // submitted video is shown
+  // The submitted video is visible.
   REPLAY_SHOWN: () => void;
-  // resetting everything to go back to initial state
+  // Resetting to the initial state.
   RESETTING: () => void;
-  // recording is resumed
+  // Resuming the recording.
   RESUMING: () => void;
-  // emitted before the first frame is being computed
+  // About to capture the first frame.
   SENDING_FIRST_FRAME: () => void;
-  // Gets emitted when the ready command is sent through sockets from the server for recording
+  // The server has signalled it is ready to record.
   SERVER_READY: () => void;
-  // starting all over again back to its initial state
+  // Starting a fresh take.
   STARTING_OVER: () => void;
-  // recording has stopped
+  // Recording has stopped.
   STOPPED: (params: VideomailStoppedParams) => void;
-  // recording is being stopped (= preview)
+  // Stopping the recording to prepare a preview.
   STOPPING: (params: VideomailStoppingParams) => void;
-  // form has been successfully submitted
+  // The form was submitted successfully.
   SUBMITTED: (params: VideomailSubmittedParams) => void;
-  // form is being submitted
+  // Submitting the form.
   SUBMITTING: () => void;
-  // to switch camera on mobiles between front and back
+  // Switching between front and back cameras on mobile.
   SWITCH_FACING_MODE: () => void;
   UNLOADING: () => void;
-  // user media (= webcam) is ready, loaded
+  // The camera stream is ready.
   USER_MEDIA_READY: (params: VideomailUserMediaReadyParams) => void;
-  // form is valid
+  // The form passed validation.
   VALID: () => void;
-  // form is being validated
+  // Checking the form.
   VALIDATING: (params?: VideomailValidatingParams) => void;
-  // document just became visible
+  // The page has become visible.
   VISIBLE: () => void;
-  // when window's inner width has changed
+  // The window's inner width has changed.
   WINDOW_RESIZE: (source: string) => void;
 }

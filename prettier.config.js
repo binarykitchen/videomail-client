@@ -17,7 +17,7 @@ const config = {
     },
   ],
   printWidth: 90,
-  // This to keep our documentation fluid, ignoring line length for prose like markdown
+  // Let prose wrap naturally in the reader's editor.
   proseWrap: "never",
   useTabs: false,
 };

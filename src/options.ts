@@ -4,41 +4,32 @@ import isProduction from "./util/env/isProduction";
 const PRODUCTION = isProduction();
 
 const options: VideomailClientOptions = {
-  logger: console, // define logging instance. defaults to console.
-  logStackSize: 30, // limits the stack size of log outputs to collect
-  verbose: !PRODUCTION, // set true to log more info
-  apiUrl: "https://videomail.io/api", // leave as it, permanent API url to post videos
-  socketUrl: "wss://videomail.io/ws", // leave as it, permanent websocket url to send frames
-  whitelistKey: "videomail-client-demo", // Required for API, use https://videomail.io/whitelist
-  enablePause: true, // enable pause/resume button
-  enableAutoPause: true, // automatically pauses when window becomes inactive
-  enableSpace: true, // hitting space can pause recording
-  submitWithVideomail: false, // include full metadata under `videomail` in the host-form submission
-  disableSubmit: false, // set this to true if you do not want to submit videos,
-  // but just want to record and replay these temporarily
-  enableAutoValidation: true, // automatically validates all form inputs if any exist and
-  enableAutoUnload: true, // automatically unloads VC when navigating away
-  /*
-   * does not /enable disable submit button after recording
-   * when something else seems invalid.
-   */
-  enableAutoSubmission: true, // automatically submits the form where the videomail-client
-  /*
-   * appears upon press of submit button. disable it when
-   * you want a framework to deal with the form submission itself.
-   */
+  logger: console, // Swap in your own logger if needed.
+  logStackSize: 30, // Recent log lines to keep in memory.
+  verbose: !PRODUCTION, // Show debug output.
+  apiUrl: "https://videomail.io/api", // API endpoint for videos.
+  socketUrl: "wss://videomail.io/ws", // WebSocket endpoint for frames.
+  whitelistKey: "videomail-client-demo", // Get your key at https://videomail.io/whitelist.
+  enablePause: true, // Show pause/resume controls.
+  enableAutoPause: true, // Pause when the page becomes inactive.
+  enableSpace: true, // Let the space bar pause recording.
+  submitWithVideomail: false, // Include full metadata under `videomail` in your form submission.
+  disableSubmit: false, // Set true to record and replay without submitting.
+  enableAutoValidation: true, // Validate form inputs and update the submit button.
+  enableAutoUnload: true, // Release resources when leaving the page.
+  enableAutoSubmission: true, // Set false if your app handles form submission.
 
-  enctype: "application/json", // enctype for the form submission. currently implemented are:
-  // 'application/json' and 'application/x-www-form-urlencoded'
+  // Supports 'application/json' and 'application/x-www-form-urlencoded'.
+  enctype: "application/json",
 
-  // default CSS selectors you can alter, see examples
+  // Match these to your markup. See the Storybook examples.
   selectors: {
     containerId: undefined,
     containerClass: "videomail",
     replayClass: "replay",
     userMediaClass: "userMedia",
     visualsClass: "visuals",
-    buttonClass: undefined, // can also be used as a default class for all buttons
+    buttonClass: undefined, // Optional shared class for all buttons.
     buttonsClass: "buttons",
 
     recordButtonClass: "record",
@@ -48,67 +39,61 @@ const options: VideomailClientOptions = {
     recordAgainButtonClass: "recordAgain",
     submitButtonClass: "submit",
 
-    subjectInputName: "subject", // the form input name for subject
-    fromInputName: "from", // the form input name for the from email
-    toInputName: "to", // the form input name for the to email
-    ccInputName: "cc", // the form input name for the cc email
-    bccInputName: "bcc", // the form input name for the bcc email
-    bodyInputName: "body", // the form input name for the message (body)
-    sendCopyInputName: "sendCopy", // the form checkbox name for sending myself a copy
+    subjectInputName: "subject",
+    fromInputName: "from",
+    toInputName: "to",
+    ccInputName: "cc",
+    bccInputName: "bcc",
+    bodyInputName: "body",
+    sendCopyInputName: "sendCopy", // Checkbox for sending yourself a copy.
 
     keyInputName: "videomail_key",
     parentKeyInputName: "videomail_parent_key",
 
-    formId: undefined, // automatically detects form if any
-    submitButtonId: undefined, // semi-automatically detects submit button in the form
-    // but if that does not work, try using the
-    submitButtonSelector: undefined, // submitButtonSelector
+    formId: undefined, // Auto-detect the nearest form.
+    submitButtonId: undefined, // Auto-detect its submit button.
+    submitButtonSelector: undefined, // Use this if auto-detection needs a hand.
   },
 
   audio: {
-    enabled: false, // set to true for experimental audio recording
-    switch: false, // enables a switcher for audio recording (on/off)
+    enabled: false, // Opt in to audio recording.
+    switch: false, // Let users toggle audio.
     // Recording gain from 0 (silence) to 1 (unchanged microphone level).
     volume: 1,
     /*
-     * PCM frames per transferred batch, not the sample rate.
-     * 'auto' uses 2048; supported powers of two range from 256 to 16384.
-     * Smaller batches reduce latency; larger batches reduce message overhead.
+     * PCM frames per batch, not the sample rate.
+     * Use 'auto' for 2048, or a power of two from 256 to 16384.
+     * Smaller batches arrive sooner; larger batches mean fewer messages.
      */
     bufferSize: "auto",
   },
 
   video: {
-    fps: 15, // depends on your connection
-    limitSeconds: 30, // recording automatically stops after that limit
-    countdown: 3, // set it to 0 or false to disable it
+    fps: 15, // The connection may limit the actual frame rate.
+    limitSeconds: 30, // Stop recording at this limit.
+    countdown: 3, // Set 0 or false to skip the countdown.
 
-    /*
-     * It is recommended to set one dimension only and leave the other one to auto
-     * because each webcam has a different aspect ratio
-     */
-
-    width: undefined, // or use an integer for exact pixels
-    height: undefined, // or use an integer for exact pixels
-    facingMode: "user", // preferred initial camera: 'user', 'environment', 'left', 'right'.
+    // Set one dimension in pixels. Let the camera's aspect ratio decide the other.
+    width: undefined,
+    height: undefined,
+    facingMode: "user", // Initial camera: 'user', 'environment', 'left', or 'right'.
     facingModeButton: false,
 
-    stretch: false, // Set to true if you want the video to take the full width of the parent container
+    stretch: false, // Fill the parent container's width.
 
-    // If you define one, all video related width will be set to 100% below this breakpoint
+    // Use full width below this breakpoint.
     mobileBreakPoint: undefined,
 
-    // Default is undefined, because ...
-    // ... accessibility. Let the user decide when to play.
+    // Let the user choose when to play.
     autoPlay: undefined,
   },
 
   image: {
     quality: 0.42,
-    types: ["webp", "jpeg"], // recommended settings to make most of all browsers
+    types: ["webp", "jpeg"], // Try WebP first, then JPEG.
   },
 
-  // alter these text for internationalization
+  // Translate or customize the UI text here.
   text: {
     pausedHeader: "Paused",
     pausedHint: undefined,
@@ -127,62 +112,55 @@ const options: VideomailClientOptions = {
   },
 
   notifier: {
-    entertain: false, // when true, user is entertained while waiting, see examples
+    entertain: false, // Show animations while waiting. See the examples.
     entertainClass: "bg",
     entertainLimit: 6,
     entertainInterval: 9000,
   },
 
   timeouts: {
-    userMedia: 20e3, // in milliseconds, increase if you want user give more time to enable webcam
-    connection: 1e4, // in milliseconds, increase if the API is slow
-    pingInterval: 30e3, // in milliseconds, keeps web stream (connection) alive when pausing
+    userMedia: 20e3, // Milliseconds to allow for camera permission.
+    connection: 1e4, // Milliseconds to wait for the connection.
+    pingInterval: 30e3, // Keep the connection alive while paused, in milliseconds.
   },
 
-  loadUserMediaOnRecord: false, // when true, user media is loaded only when record button is pressed
+  loadUserMediaOnRecord: false, // Wait for Record before asking for camera access.
 
   callbacks: {
     /*
-     * A custom callback to tweak form data before posting to server
-     * this is for advanced use only and shouldn't be used if possible
+     * Advanced: adjust form data before sending. Prefer the standard options.
      */
     adjustFormDataBeforePosting: undefined,
 
-    /*
-      Another custom callback to tweak a single form value before populating the form.
-    */
+    // Adjust a value before filling in the form.
     adjustFormValueBeforePopulating: undefined,
   },
 
   defaults: {
-    from: undefined, // define default FROM email address
-    to: undefined, // define default TO email address
-    cc: undefined, // define default CC email address
-    bcc: undefined, // define default BCC email address
-    subject: undefined, // define default subject line
-    body: undefined, // define default body content
+    from: undefined,
+    to: undefined,
+    cc: undefined,
+    bcc: undefined,
+    subject: undefined,
+    body: undefined,
   },
 
-  // show errors inside the container?
+  // Show errors inside the container.
   displayErrors: true,
 
-  // true = all form inputs get disabled and disappear when browser can't record
+  // Hide and disable form inputs if the browser cannot record.
   adjustFormOnBrowserError: true,
 
-  // when true, any errors will be sent to the videomail server for analysis
+  // Send error reports to Videomail for troubleshooting.
   reportErrors: true,
 
-  // This is because we need to set this to false by default for our WordPress plugin unfortunately.
-  // Because WordPress plugins do overlap with each other.
-  //
-  // We will keep the default to `true` but offer an option to correct it on WP side.
+  // WordPress integrations can set false to avoid clashes with other plugins.
   disableFormWhenSubmitting: true,
 
-  // just for testing purposes to simulate browser agent handling
+  // Override the user agent for tests.
   fakeUaString: undefined,
 
-  // Experimental, needs more work:
-  // But for better mobile support, this shall be set to true for now.
+  // Experimental: resize the video area when the window changes size.
   recalculateDimensionsOnWindowResize: false,
 
   versions: {

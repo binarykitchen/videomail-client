@@ -3,8 +3,7 @@ import { serializeError } from "serialize-error";
 function getEventDetails(event: Event) {
   const eventWithErrorDetails = event as unknown as Record<string, unknown>;
 
-  // It is sad, this Event object does not declare any properties :(
-  // So, we will try to catch as many details as possible :shrug:
+  // Copy useful fields explicitly; event properties do not serialize on their own.
   const details: Record<string, unknown> = {
     constructor: event.constructor.name,
     type: event.type,

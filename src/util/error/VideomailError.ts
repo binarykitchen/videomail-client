@@ -18,8 +18,7 @@ class VideomailError extends HTTPVideomailError {
   public logLines?: string[] | undefined;
   public whitelistKey: string | undefined;
 
-  // It might be duplicate with all the other attributes,
-  // but always safe to attach the original error just in case.
+  // Keep the original error for details the report fields may not cover.
   public err?: Error | undefined;
   public promise?: Promise<any> | undefined;
   public reason?: any;
@@ -66,7 +65,6 @@ class VideomailError extends HTTPVideomailError {
 
     this.browser = usefulClientData.browser;
 
-    // Only when architecture is set, pass it over
     if (usefulClientData.cpu.architecture) {
       this.cpu = usefulClientData.cpu;
     }
@@ -88,9 +86,8 @@ class VideomailError extends HTTPVideomailError {
     const stackTarget = errData?.cause ?? errData?.err;
 
     if (stackTarget) {
-      // Extra check needed because it's not available on browser side
+      // captureStackTrace is a V8 feature, not available in every browser.
       if ("captureStackTrace" in Error) {
-        // Maintains proper stack trace for where our error was thrown (only available on V8)
         Error.captureStackTrace(stackTarget, VideomailError);
       }
     }
@@ -104,7 +101,7 @@ class VideomailError extends HTTPVideomailError {
     return this.hasClass(VideomailError.BROWSER_PROBLEM);
   }
 
-  // this one is useful so that the notifier can have different css classes
+  // The notifier uses these classes to style different errors.
   public getClassList() {
     return this.classList;
   }

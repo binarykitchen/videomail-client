@@ -17,10 +17,8 @@ const meta: Meta<PartialVideomailClientOptions> = {
 
 type Story = StoryObj<PartialVideomailClientOptions>;
 
-// Wrap into a form, validation, have a direct submit form and display the record
-//
-// Direct submit forms means, it sends data right away to the videomail.io server.
-// But if you prefer to submit to your own server, look at the other Form examples
+// Validate the form, send straight to Videomail, then show the video.
+// See the other form examples to submit to your own server.
 export const DirectSubmission: Story = {
   args: {
     video: {
@@ -62,7 +60,7 @@ export const DirectSubmission: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver();
-          // Attach again as it has been removed
+          // startOver() removes listeners, so subscribe again.
           videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
@@ -75,15 +73,12 @@ export const DirectSubmission: Story = {
 };
 
 /*
-  A JSON based contact form embracing Sign Language!
+  A JSON contact form with room for Sign Language!
 
-  With the `submitWithVideomail` option, all videomail data is posted as well.
+  `submitWithVideomail` includes the full videomail metadata.
+  Send the video to Videomail first, then POST the form to its action.
 
-  Once you set the method to POST, then two request will be made internally.
-  The first one to the videomail server and the second one to the specified action.
-
-  WARNING: This example does not work on Netlify. If you clone and run that locally or on your
-  own server it works fine ;)
+  The local /contact endpoint is mocked below.
 */
 export const ContactForm: Story = {
   args: {
@@ -112,7 +107,7 @@ export const ContactForm: Story = {
 
   beforeEach({ msw }) {
     msw.use(
-      // Just mock and return it back
+      // Echo the submitted data.
       http.post("https://localhost:8443/contact", async ({ request }) => {
         const videomail = await request.json();
         return HttpResponse.json(videomail);
@@ -135,13 +130,13 @@ export const ContactForm: Story = {
                 <form action="/contact" method="post" id="someForm">
                 <input name="from" type="email" placeholder="Enter your email address" required />
                 <input name="subject" type="text" placeholder="Enter a subject" required />
-                <!-- Just for testing the isRegisteredFormField function, not relevant -->
+                <!-- Check that unregistered fields are handled, too. -->
                 <input name="phone" type="text" placeholder="Enter a phone number" />
                 <fieldset>
                   <legend>How do you want to contact us?</legend>
                   <p>
                     <input type="radio" name="how" id="writingOption" value="writing" checked />
-                    <label for="writingOption">In Writing</label>
+                    <label for="writingOption">In writing</label>
                   </p>
                   <p>
                     <input type="radio" name="how" id="signLanguageOption" value="sign_language" />
@@ -160,7 +155,7 @@ export const ContactForm: Story = {
                 <div id="videomail2"></div>
               </form>
 
-              <!-- Placed outside the form by intention to ensure code works with that scenario as well -->
+              <!-- Check that a submit control outside the form works, too. -->
               <input type="button" value="Submit" disabled />
 
               <div id="viewVideo" style="display: none">
@@ -205,7 +200,7 @@ export const ContactForm: Story = {
       const statusHeader = document.querySelector<HTMLHeadElement>("h3.status");
 
       if (statusHeader) {
-        // Refer to above msw for the mocked response
+        // The MSW handler above supplies this response.
         statusHeader.textContent = response.status.toString();
       }
 
@@ -216,7 +211,7 @@ export const ContactForm: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver({ keepHidden: writingOption?.checked });
-          // Attach again as it has been removed
+          // startOver() removes listeners, so subscribe again.
           videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
@@ -228,13 +223,8 @@ export const ContactForm: Story = {
   },
 };
 
-// This records and submit a video, without any email addresses at all
-//
-// It is very similar to the contact_form.html example with the exception that it does
-// not submit any form data nor won't trigger an email being sent on the server.
-//
-// In the POST response you'll get data about the newly generated videomail,
-// i.E. its ID. It is up to you how to process it further.
+// Submit a video without email addresses or extra form fields.
+// No email is sent. Use the returned videomail data however your app needs.
 export const VideoSubmissionOnly: Story = {
   args: {
     enablePause: false,
@@ -299,7 +289,7 @@ export const VideoSubmissionOnly: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver();
-          // Attach again as it has been removed
+          // startOver() removes listeners, so subscribe again.
           videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
@@ -311,8 +301,7 @@ export const VideoSubmissionOnly: Story = {
   },
 };
 
-// Another form example where the videomail input itself is optional and takes
-// full width of the parent container (stretch = true)
+// Make video optional and fill the parent width with stretch = true.
 export const Stretch: Story = {
   args: {
     video: { limitSeconds: 120, width: 320, countdown: false, stretch: true },

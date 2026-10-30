@@ -22,7 +22,7 @@
       "DOM",
       "DOM.Iterable",
       "ESNext",
-      // Add for ServiceWorker support
+      // Service worker APIs.
       "WebWorker"
     ],
     "types": ["node", "vitest/globals"],
@@ -31,23 +31,22 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
 
-    // This option can help you avoid using certain syntax that cannot be correctly compiled by SWC and Babel, see:
+    // Catch syntax that single-file compilers such as SWC and Babel cannot handle:
     // https://rsbuild.dev/guide/basic/typescript#isolatedmodules
     "isolatedModules": true,
 
-    // Strips all comments from TypeScript files when converting into JavaScript,
-    // you rarely read compiled code so this saves space
+    // Keep compiled output small by stripping comments.
     "removeComments": true,
 
     "noEmit": true,
 
-    // This to speed up CI and avoid external type issues
+    // Speed up CI and skip dependency declaration checks.
     "skipLibCheck": true,
 
     // Keep supporting side-effect style imports without declaration files
     "noUncheckedSideEffectImports": false,
 
-    // So that eslint and prettier written in JS can be included
+    // Include the JavaScript ESLint and Prettier configs.
     "allowJs": true,
 
     // TODO Remove these exceptions and fix more errors one day

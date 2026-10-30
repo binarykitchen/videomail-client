@@ -269,13 +269,8 @@ class Form extends Despot {
     }
 
     this.on("PREVIEW", (params?: VideomailPreviewParams) => {
-      /*
-       * Beware that preview doesn't always come with a key, i.E.
-       * container.show() can emit PREVIEW without a key when a replay already exists
-       * (can happen when showing - hiding - showing videomail over again)
-       */
-
-      // Only emit error if key is missing AND the input has no key (value) yet
+      // Showing an existing replay can emit PREVIEW without a key.
+      // Keep the input's existing key; report an error only if both are missing.
       if (!params?.key && !this.keyInput?.value) {
         const err = createError({
           message: "Videomail key and its value for previewing is missing",
@@ -286,13 +281,9 @@ class Form extends Despot {
       } else if (params?.key && this.keyInput) {
         this.keyInput.value = params.key;
 
-        // Important so that any other JS framework can detect changes
+        // Let the host app know the value changed.
         this.keyInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
-
-      /*
-       * else leave as it and use existing keyInput.value
-       */
     });
 
     this.on("STARTING_OVER", () => {
@@ -309,11 +300,7 @@ class Form extends Despot {
 
     this.on("ERROR", (params: VideomailErrorParams) => {
       const isBrowserProblem = params.err?.isBrowserProblem();
-      /*
-       * Since https://github.com/binarykitchen/videomail-client/issues/60
-       * we hide areas to make it easier for the user to process an error
-       * (= less distractions)
-       */
+      // Hide unusable inputs so users can focus on the error (#60).
       if (isBrowserProblem && this.options.adjustFormOnBrowserError) {
         this.hideAll();
       }

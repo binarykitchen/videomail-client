@@ -99,11 +99,7 @@ class Visuals extends Despot {
 
       this.on("BLOCKING", () => {
         if (!this.options.adjustFormOnBrowserError) {
-          /*
-           * do nothing, user still can enter form inputs
-           * can be useful when you are on i.E. Seeflow's contact page and
-           * still want to tick off the webcam option
-           */
+          // Leave inputs usable so users can choose a text-only message.
         } else {
           this.container.disableForm(true);
         }
@@ -212,10 +208,7 @@ class Visuals extends Despot {
           `.${this.options.selectors.buttonsClass}`,
         );
 
-        /*
-         * Make sure it's placed before the buttons, but only if it's a child
-         * element of the container = inside the container
-         */
+        // Place visuals before the buttons only if they share this container.
         if (buttonsElement && !this.container.isOutsideElementOf(buttonsElement)) {
           this.container.insertBefore(this.visualsElement, buttonsElement);
         } else {
@@ -309,8 +302,7 @@ class Visuals extends Despot {
     this.replay.unload(params);
 
     if (e instanceof Error) {
-      // Don't hide when e is an error so that the error can be still
-      // displayed under visuals > notifier
+      // Keep the notifier visible so users can still read the error.
     } else {
       this.hide();
     }

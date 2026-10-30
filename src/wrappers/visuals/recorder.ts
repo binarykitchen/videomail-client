@@ -29,7 +29,6 @@ class Recorder extends RecorderCapture {
 
   protected override executeCommand(command: VideomailCommand) {
     if (this.unloaded) {
-      // Skip
       return;
     }
 
@@ -51,7 +50,7 @@ class Recorder extends RecorderCapture {
 
           if (!this.userMediaTimeout) {
             if (this.options.loadUserMediaOnRecord) {
-              // Still show it but have it blank
+              // Keep the preview blank until the user chooses Record.
               this.show();
             } else {
               this.loadUserMedia();
@@ -62,18 +61,16 @@ class Recorder extends RecorderCapture {
           this.preview(command.args);
           break;
         case "error": {
-          // Remember on server side the error object is generated using the serializeError fn
+          // The server sends errors serialized with serializeError().
           let explanation = "(No explanation given)";
 
           if (command.args?.err?.message) {
             explanation = command.args.err.message;
           }
 
-          // Sometimes, details and cause in the err instance are still displayed as [object Object]
-          // Needs more time and research, but happens very rarely.
-          // I wouldn't invest too much time on this unless users, you and me, we can reproduce it ;)
+          // TODO Track down rare cases where details or cause display as [object Object].
           const err = createError({
-            message: "Websocket error from Videomail server",
+            message: "WebSocket error from the Videomail server",
             explanation,
             err: deserializeError(command.args?.err),
             options: this.options,
@@ -143,7 +140,7 @@ class Recorder extends RecorderCapture {
 
     this.userMediaLoading = false;
 
-    // So that destroying a still pending stream below is not reported as a failure
+    // Closing a pending stream during unload is not a connection failure.
     this.connecting = false;
     this.reconnecting = false;
     this.reconnectAttempts = 0;
@@ -241,20 +238,14 @@ class Recorder extends RecorderCapture {
 
     this.correctDimensions();
 
-    /*
-     * prevent audio feedback, see
-     * https://github.com/binarykitchen/videomail-client/issues/35
-     */
+    // Mute the live preview to avoid audio feedback (#35).
     this.recorderElement.muted = true;
 
     // for iPhones, see https://github.com/webrtc/samples/issues/929
     this.recorderElement.setAttribute("playsinline", "true");
     this.recorderElement.setAttribute("webkit-playsinline", "webkit-playsinline");
 
-    /*
-     * Add these here, not in CSS because users can configure custom
-     * class names
-     */
+    // Use inline styles because integrations can change the CSS class names.
     this.recorderElement.style.transform = "rotateY(180deg)";
     this.recorderElement.style["-webkit-transform"] = "rotateY(180deg)";
     this.recorderElement.style["-moz-transform"] = "rotateY(180deg)";
@@ -278,10 +269,7 @@ class Recorder extends RecorderCapture {
     this.built = true;
   }
 
-  /*
-   * These two return the true dimensions of the webcam area.
-   * needed because on mobiles they might be different.
-   */
+  // Use the displayed camera dimensions, which can differ on mobile.
   public override getRecorderWidth(responsive: boolean) {
     return this.dimensions.getRecorderWidth(responsive);
   }

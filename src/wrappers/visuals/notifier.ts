@@ -250,7 +250,7 @@ class Notifier extends Despot {
     });
   }
 
-  // Special treatment to deal with race conditions
+  // A racing build may have already created the message element.
   private getMessageElement() {
     if (this.messageElement) {
       return this.messageElement;
@@ -272,7 +272,7 @@ class Notifier extends Despot {
 
       if (this.notifyElement) {
         if (this.explanationElement) {
-          // For rare cases, shouldn't happen to set an explanation without a message
+          // Keep the heading before an explanation that arrived first.
           this.notifyElement.insertBefore(this.messageElement, this.explanationElement);
         } else {
           this.notifyElement.appendChild(this.messageElement);
@@ -429,10 +429,7 @@ class Notifier extends Despot {
       this.cancelEntertainment();
     }
 
-    /*
-     * just as a safety in case if an error is thrown in the middle of the build process
-     * and visuals aren't built/shown yet.
-     */
+    // An error may arrive mid-build, before the visuals are shown.
     this.visuals.showVisuals();
 
     this.show();

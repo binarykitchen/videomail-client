@@ -142,7 +142,7 @@ class Resource {
     let enumerateDevices: MediaDeviceInfo[] | undefined;
 
     try {
-      // It can be undefined when the page is not served over HTTPS.
+      // Insecure pages may not expose mediaDevices.
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (navigator.mediaDevices) {
         supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
@@ -154,7 +154,6 @@ class Resource {
     }
 
     const fullVideomailErrorData: FullVideomailErrorData = {
-      // Always good to know the version of the client the videomail was submitted with
       versions: {
         videomailClient: videomailClientVersion,
         videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
@@ -186,7 +185,7 @@ class Resource {
       .query(queryParams)
       .set("Timezone-Id", this.timezoneId)
       .withCredentials()
-      // Note you cant send the Error instance itself, it has to be a plain JSON
+      // Send plain JSON, not a live Error instance.
       .send(sanitizeErrorReport(fullVideomailErrorData))
       .timeout(this.options.timeouts.connection);
   }
@@ -198,10 +197,9 @@ class Resource {
       newVideomail.versions = {};
     }
 
-    // Always good to know the version of the client the videomail was submitted with
+    // Keep the client version and recording page for troubleshooting.
     newVideomail.versions.videomailClient = videomailClientVersion;
 
-    // Likewise, good to know where it has been recorded
     newVideomail.recordLocation = window.location.href;
 
     const browser = getBrowser(this.options);

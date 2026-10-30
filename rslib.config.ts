@@ -32,8 +32,7 @@ export default defineConfig({
       format: "cjs",
       syntax: "es2015",
       output: {
-        // This will include all the JS code into one single file without
-        // the use of require()
+        // Bundle dependencies so consumers need no extra require() calls.
         autoExternal: false,
         distPath: {
           root: "./dist/cjs/",
@@ -44,8 +43,7 @@ export default defineConfig({
       format: "umd",
       umdName: "VideomailClient",
       output: {
-        // This will include all the JS code into one single file without
-        // the use of require()
+        // Bundle dependencies so consumers need no extra require() calls.
         autoExternal: false,
         distPath: {
           root: "./dist/umd/",
@@ -69,13 +67,9 @@ export default defineConfig({
   tools: {
     htmlPlugin: false,
     rspack: (_config, { appendPlugins }) => {
-      // To run this, use the `npm run build:prod:doc` command
+      // Enable with npm run build:prod:doc.
       if (process.env.RSDOCTOR) {
-        appendPlugins(
-          new RsdoctorRspackPlugin({
-            // plugin options
-          }),
-        );
+        appendPlugins(new RsdoctorRspackPlugin({}));
       }
     },
   },

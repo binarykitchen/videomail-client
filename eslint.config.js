@@ -30,13 +30,8 @@ const ALL_FILES = [
 ];
 
 /*
-  For the record, it's tricky to configure this perfectly.
-  There are plenty of eslint plugins and each maintainer documents it differently.
-
-  The npm run lint:inspect command is very helpful here which uses the @eslint/config-inspector
-
-  If there are performance issues, always can fine-tune with files: {*.*} to narrow it down.
-  But most of the time it's fine not to define fine and trust their defaults/recommendations.
+  ESLint plugins have different config shapes. Use npm run lint:inspect to see what applies.
+  Start with their recommended defaults. Narrow file patterns if linting gets slow.
 */
 export default defineConfig([
   globalIgnores(["dist", "storybook-static", ".storybook/public/mockServiceWorker.js"]),
@@ -89,8 +84,7 @@ export default defineConfig([
       "prefer-destructuring": "off",
       "prefer-named-capture-group": "off",
 
-      // These two are great, but can't be autofixed unfortunately,
-      // hence adding eslint-plugin-simple-import-sort, see further below.
+      // Use simple-import-sort below for autofixable import sorting.
       "sort-imports": "off",
       "sort-keys": "off",
     },
@@ -99,8 +93,7 @@ export default defineConfig([
     name: "general language options",
     files: ALL_FILES,
     languageOptions: {
-      // Ensure the version also supports back to 5 years ago.
-      // This for older devices and whoever doesn't update :)
+      // Leave room for older devices and browsers that have not been updated.
       ecmaVersion: 2020,
       globals: {
         ...globals.browser,
@@ -124,8 +117,7 @@ export default defineConfig([
       },
     },
   },
-  // Can't give it a name because of plugins/extends.
-  // Perhaps can improve it in the next updates or in ESLint v10 ...
+  // Import plugin setup and recommended rules.
   {
     files: ALL_FILES,
     plugins: {
@@ -201,8 +193,7 @@ export default defineConfig([
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/prefer-nullish-coalescing": "off",
 
-      // Prepend "_" in the names of unused function arguments to silence
-      // Our linter for some useful parameters we want to still display
+      // Prefix intentionally unused parameters with "_".
       "@typescript-eslint/no-unused-vars": [
         "error",
         {

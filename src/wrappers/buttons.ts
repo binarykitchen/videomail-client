@@ -91,7 +91,7 @@ class Buttons extends Despot {
 
       radioButtonGroup.appendChild(radioLabel);
 
-      // double check that submit button is already in the buttonsElement container as a child?
+      // Keep Submit last, but only if it belongs to this button container.
       if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
         this.buttonsElement?.insertBefore(radioButtonGroup, this.submitButton);
       } else {
@@ -138,7 +138,7 @@ class Buttons extends Despot {
 
       buttonElement.textContent = text;
 
-      // double check that submit button is already in the buttonsElement container
+      // Keep Submit last, but only if it belongs to this button container.
       if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
         this.buttonsElement?.insertBefore(buttonElement, this.submitButton);
       } else {
@@ -172,10 +172,7 @@ class Buttons extends Despot {
         disableElement(this.submitButton);
       }
 
-      /*
-       * no need to listen to the submit event when it's already listened
-       * within the form element class
-       */
+      // The form already handles submission when one is present.
       if (!this.container.hasForm()) {
         this.replaceClickHandler(this.submitButton, this.submit.bind(this));
       }
@@ -206,10 +203,6 @@ class Buttons extends Despot {
       );
     }
 
-    /*
-     * show stop only when pause is enabled - looks better that way otherwise button
-     * move left and right between record and stop (preview)
-     */
     this.previewButton = this.makeButton(
       this.options.selectors.previewButtonClass,
       this.options.text.buttons.preview,
@@ -358,10 +351,7 @@ class Buttons extends Despot {
   }
 
   private onRecording(params: VideomailRecordingParams) {
-    /*
-     * it is possible to hide while recording, hence
-     * check framesCount first (coming from recorder)
-     */
+    // The UI can be hidden mid-take. Use the frame count to restore its controls.
     if (params.framesCount > 1) {
       this.onFirstFrameSent();
     } else {
@@ -565,10 +555,7 @@ class Buttons extends Despot {
     });
 
     this.on("ERROR", (params: VideomailErrorParams) => {
-      /*
-       * since https://github.com/binarykitchen/videomail-client/issues/60
-       * we hide areas to make it easier for the user
-       */
+      // Hide unusable controls so users can focus on the error (#60).
       if (params.err?.isBrowserProblem() && this.options.adjustFormOnBrowserError) {
         this.hide();
       }
@@ -593,7 +580,7 @@ class Buttons extends Despot {
 
   public isReady() {
     if (!this.recordButton) {
-      // No recordButton? Ok, must be in playerOnly mode. So, not ready for recording
+      // Replay-only mode has no record button.
       return false;
     }
 

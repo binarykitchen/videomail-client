@@ -1,5 +1,6 @@
 ---
-description: "Use when: writing user-facing copy, documentation tone, terminology for Deaf users, or emoji usage"
+applyTo: "**"
+description: "Use when: writing replies, code comments, documentation, user-facing copy, terminology for Deaf users, or emoji usage"
 ---
 
 # Language

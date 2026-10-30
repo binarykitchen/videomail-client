@@ -75,10 +75,8 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   private showUserMedia() {
-    /*
-     * use connected flag to prevent this from happening
-     * https://github.com/binarykitchen/videomail.io/issues/323
-     */
+    // Wait for the connection before showing the camera.
+    // See https://github.com/binarykitchen/videomail.io/issues/323.
     if (!this.connected) {
       return false;
     }
@@ -105,10 +103,7 @@ abstract class RecorderMedia extends RecorderConnection {
     }
 
     if (this.unloaded) {
-      /*
-       * This can happen when a container is unloaded but some user media related callbacks
-       * are still in process. In that case ignore error.
-       */
+      // Camera callbacks can arrive after unload. Log them without showing an error.
       this.options.logger.debug(
         `Recorder: already unloaded. Not going to throw error ${pretty(err)}`,
       );
@@ -135,7 +130,7 @@ abstract class RecorderMedia extends RecorderConnection {
         });
         this.emit("ERROR", { err: videomailError });
       } else {
-        // Do not emit but retry since MEDIA_DEVICE_NOT_SUPPORTED can be a race condition
+        // This can be a startup race. Retry instead of showing an error.
         this.options.logger.debug(`Recorder: ignore user media error ${pretty(err)}`);
 
         this.retryTimeout = window.setTimeout(() => {
@@ -151,7 +146,7 @@ abstract class RecorderMedia extends RecorderConnection {
         `Recorder: no error listeners attached but throwing error ${pretty(err)}`,
       );
 
-      // Weird situation, throw it instead of emitting since there are no error listeners
+      // No listeners remain, so throw rather than lose the error.
       throw createError({
         err,
         message:

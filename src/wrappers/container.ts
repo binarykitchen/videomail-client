@@ -132,7 +132,7 @@ class Container extends Despot {
       const containerId = this.options.selectors.containerId;
 
       if (containerId) {
-        // Note, it can be undefined when e.g. just replaying a videomail or for storybooks
+        // Replay-only views and stories may not have this container.
         this.containerElement = document.getElementById(containerId);
       } else {
         this.containerElement = document.createElement("div");
@@ -148,7 +148,7 @@ class Container extends Despot {
         replayParentElement = document.getElementById(buildOptions.replayParentElementId);
       }
 
-      // Check if the replayParentElement could act as the container element perhaps?
+      // Reuse the replay parent if it also has the container class.
       if (!this.containerElement && replayParentElement) {
         if (
           replayParentElement.classList.contains(this.options.selectors.containerClass)
@@ -165,8 +165,7 @@ class Container extends Despot {
         this.correctDimensions();
       }
 
-      // Building form also applies for when `playerOnly` because of
-      // correcting mode on Videomail. This function will skip if there is no form. Easy.
+      // Replay-only views may still have an edit form. Skip if there is none.
       this.buildForm();
 
       let parentElement: HTMLElement | undefined | null;
@@ -204,7 +203,7 @@ class Container extends Despot {
   }
 
   private getFormElement() {
-    // It's ok to return no form, especially when in replay mode
+    // Replay mode does not always need a form.
     let formElement: HTMLFormElement | undefined | null;
 
     if (this.containerElement?.tagName === "FORM") {
@@ -317,10 +316,7 @@ class Container extends Despot {
       }
     }
 
-    /*
-     * better to keep the one and only error listeners
-     * at one spot, here, because unload() will do a removeAllListeners()
-     */
+    // Register the shared error handler here; unload() removes all listeners.
     this.on("ERROR", (params: VideomailErrorParams) => {
       this.processError(params);
 
@@ -344,10 +340,7 @@ class Container extends Despot {
     }
   }
 
-  /*
-   * This will just set the width but not the height because
-   * it can be a form with more inputs elements
-   */
+  // Set width only. The container may be a form with other inputs.
   private correctDimensions() {
     if (this.options.video.stretch) {
       this.removeDimensions();
@@ -533,10 +526,7 @@ class Container extends Despot {
         this.buttons.adjustButtonsForPause();
       }
 
-      /*
-       * since https://github.com/binarykitchen/videomail-client/issues/60
-       * we hide areas to make it easier for the user
-       */
+      // Bring controls back after hiding them for an error (#60).
       this.buttons.show();
 
       if (this.isReplayShown()) {
@@ -580,7 +570,7 @@ class Container extends Despot {
       replay.hide();
       replay.reset();
 
-      // Rebuild all again and initialise events again
+      // Rebuild the UI and restore its listeners.
       this.build();
 
       this.emit("STARTING_OVER");
@@ -589,11 +579,7 @@ class Container extends Despot {
         this.enableForm(true);
 
         if (keepHidden) {
-          /*
-           * just enable form, do nothing else.
-           * see example contact_form.html when you submit without videomail
-           * and go back
-           */
+          // Keep the recorder hidden when returning to a text-only form.
         } else {
           this.show();
         }
@@ -779,10 +765,7 @@ class Container extends Despot {
     try {
       const hasVideomailKey = Boolean(videomailKey);
 
-      /*
-       * !hasVideomailKey makes it possible to submit form when videomail itself
-       * is not optional
-       */
+      // Without a video, leave submission to the host app if auto-submission is off.
       if (!hasVideomailKey && !this.options.enableAutoSubmission) {
         return;
       }
@@ -803,12 +786,7 @@ class Container extends Despot {
         this.submitted = true;
         this.emit("SUBMITTED", { videomail: response.body, response });
 
-        /*
-         * ... and when the enableAutoSubmission option is false,
-         * then that can mean, leave it to the framework to process with the form
-         * validation/handling/submission itself. for example the ninja form
-         * will want to highlight which one input are wrong.
-         */
+        // With a video key, submit the video before handing off to the host form.
       } else {
         response =
           this.getPendingHostSubmissionResponse(videomailKey) ??
@@ -904,9 +882,7 @@ class Container extends Despot {
   public async submit() {
     this.options.logger.debug("Container: submit()");
 
-    // Why this check?
-    // This check ensures that submission only proceeds if either automatic validation is disabled or;
-    // there is a cached validation result. Without this, the form might be submitted without proper validation.
+    // Auto-validation needs a cached result. Otherwise, the host handles validation.
     if (!this.options.enableAutoValidation || this.lastValidation) {
       return await this.form?.doTheSubmit();
     }

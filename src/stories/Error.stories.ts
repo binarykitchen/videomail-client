@@ -10,15 +10,10 @@ const meta: Meta<PartialVideomailClientOptions> = {
 
 type Story = StoryObj<PartialVideomailClientOptions>;
 
-// With an invalid whitelist key, you don't get whitelisted
-//
-// By default the whitelist key is "videomail-client-demo" which works on
-// localhost only.
-//
-// To run the videomail client on your site, you'll have to register it at
-// https://www.videomail.io/whitelist to obtain a valid whitelist key
+// The demo key works on localhost only. An invalid key shows an error.
+// Get a key for your site at https://www.videomail.io/whitelist.
 export const InvalidWhitelistKey: Story = {
-  name: "Invalid Whitelist Key",
+  name: "Invalid whitelist key",
   args: {
     whitelistKey: "invalid-whitelist-key",
     audio: {

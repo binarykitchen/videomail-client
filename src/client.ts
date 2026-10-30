@@ -51,10 +51,7 @@ class VideomailClient extends Despot {
   }
 
   public build() {
-    /*
-     * It can happen that it gets called twice, i.E. when an error is thrown
-     * in the middle of the build() fn
-     */
+    // An error during setup can trigger another build.
     if (!this.container.isBuilt()) {
       this.options.logger.debug("Client: build()");
       return this.container.build();
@@ -75,8 +72,7 @@ class VideomailClient extends Despot {
     this.container.startOver(params);
   }
 
-  // Useful for altering limit when user has changed options in real-time like
-  // enabling/disabling audio etc
+  // Adjust the limit when options change, such as toggling audio.
   public setLimitSeconds(limitSeconds: number) {
     if (this.options.video.limitSeconds === limitSeconds) {
       this.options.logger.debug(
@@ -97,13 +93,9 @@ class VideomailClient extends Despot {
     this.container.unload({ startingOver });
   }
 
-  /*
-   * Automatically adds a <video> element inside the given parentElement and
-   * loads it with the videomail
-   */
+  // Add a player for this videomail inside the chosen parent.
   public replay(videomail: Videomail, replayParentElementId?: string) {
     if (this.container.isBuilt()) {
-      // Auto unload
       this.container.unload();
     }
 
@@ -156,7 +148,6 @@ class VideomailClient extends Despot {
     return await resource.getThreadByKey(key);
   }
 
-  // Returns true when a video has been recorded but is not submitted yet
   public isDirty() {
     return this.container.isDirty();
   }

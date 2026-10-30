@@ -57,7 +57,7 @@ class RecordTimer {
   public check(elapsedTime: number) {
     const newCountdown = this.getStartSeconds() - Math.floor(elapsedTime / 1e3);
 
-    // performance optimization (another reason we need react here!)
+    // Update the DOM only when the displayed second changes.
     if (newCountdown !== this.countdown) {
       this.countdown = newCountdown;
 
