@@ -8,6 +8,8 @@ For first-party Videomail forms without an explicit `action`, a recorded video i
 
 For programmatic submission, use `form.requestSubmit()` or `videomailClient.submit()`. Native `form.submit()` bypasses submit events and therefore cannot be intercepted.
 
+With `enableAutoValidation: false`, `videomailClient.submit()` does not wait for a client validation result. Validate through the host integration before calling it. `form.requestSubmit()` still applies the browser's native constraint validation.
+
 If this does not work, verify that the configured selectors identify the form and its submit button:
 
 ```ts

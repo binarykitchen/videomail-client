@@ -50,6 +50,7 @@ function createVisibilityFixture(enableAutoPause = true) {
 function buildExternalSubmitFixture(
   formId = "someForm",
   submitMarkup = `<input id="external-submit" type="button" value="Submit">`,
+  enableAutoValidation = false,
 ) {
   document.body.innerHTML = `
     <form action="/contact" method="post">
@@ -74,7 +75,7 @@ function buildExternalSubmitFixture(
 
   const container = new Container(
     mergeWithDefaultOptions({
-      enableAutoValidation: false,
+      enableAutoValidation,
       selectors: {
         containerId: "videomail-target",
         formId,
@@ -351,10 +352,48 @@ describe("Container", () => {
     );
   });
 
-  it("supports requestSubmit with the external submit control", () => {
-    const { formElement, submitButton, submitAll } = buildExternalSubmitFixture();
+  it("supports requestSubmit before automatic validation with the external submit control", () => {
+    const { container, formElement, submitButton, submitAll } =
+      buildExternalSubmitFixture();
+    const validate = vi.spyOn(container, "validate");
 
     formElement.requestSubmit(submitButton);
+
+    expect({
+      submissions: submitAll.mock.calls.length,
+      validations: validate.mock.calls.length,
+    }).toEqual({ submissions: 1, validations: 0 });
+  });
+
+  it("allows manual submission without a validation result when automatic validation is disabled", async () => {
+    const { container, submitAll } = buildExternalSubmitFixture();
+
+    await container.submit();
+
+    expect(submitAll).toHaveBeenCalledOnce();
+  });
+
+  it("still requires validation before manual submission when automatic validation is enabled", async () => {
+    const { container, submitAll } = buildExternalSubmitFixture(
+      "someForm",
+      undefined,
+      true,
+    );
+
+    await container.submit();
+
+    expect(submitAll).not.toHaveBeenCalled();
+  });
+
+  it("blocks overlapping manual submissions when automatic validation is disabled", async () => {
+    const { container, submitAll } = buildExternalSubmitFixture();
+    const pendingSubmission = Promise.withResolvers<undefined>();
+    submitAll.mockReturnValueOnce(pendingSubmission.promise);
+
+    const firstSubmission = container.submit();
+    const secondSubmission = container.submit();
+    pendingSubmission.resolve(undefined);
+    await Promise.all([firstSubmission, secondSubmission]);
 
     expect(submitAll).toHaveBeenCalledOnce();
   });

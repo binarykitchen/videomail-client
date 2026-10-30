@@ -219,7 +219,9 @@ Returns `true` after the client UI has been built and before it is unloaded.
 
 ### videomailClient.submit()
 
-Manually triggers submission when the client and form are valid. This is useful when another UI layer owns the visible submit control.
+Manually triggers submission after successful client validation.
+
+When `enableAutoValidation` is `false`, it can be called without a prior client validation event; the integrating application is responsible for validating the form first. This is useful when another UI layer owns the visible submit control.
 
 ### videomailClient.getLogLines()
 

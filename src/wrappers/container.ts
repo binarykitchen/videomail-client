@@ -904,7 +904,10 @@ class Container extends Despot {
   public async submit() {
     this.options.logger.debug("Container: submit()");
 
-    if (this.lastValidation) {
+    // Why this check?
+    // This check ensures that submission only proceeds if either automatic validation is disabled or;
+    // there is a cached validation result. Without this, the form might be submitted without proper validation.
+    if (!this.options.enableAutoValidation || this.lastValidation) {
       return await this.form?.doTheSubmit();
     }
 
