@@ -78,9 +78,14 @@ describe("Client", () => {
     expect(videomailClient.isBuilt()).toBe(false);
   });
 
-  it("removes its window listeners on unload", () => {
+  it("removes its browser listeners on unload", () => {
     const addEventListener = vi.spyOn(window, "addEventListener");
     const removeEventListener = vi.spyOn(window, "removeEventListener");
+    const addContainerEventListener = vi.spyOn(HTMLElement.prototype, "addEventListener");
+    const removeContainerEventListener = vi.spyOn(
+      HTMLElement.prototype,
+      "removeEventListener",
+    );
     const videomailClient = new VideomailClient({
       enableAutoUnload: true,
       enableSpace: true,
@@ -94,17 +99,22 @@ describe("Client", () => {
 
     const resizeListener = listenerFor("resize");
     const beforeUnloadListener = listenerFor("beforeunload");
-    const keydownListener = listenerFor("keydown");
+    const keydownListener = addContainerEventListener.mock.calls.find(
+      ([type]) => type === "keydown",
+    )?.[1];
 
     videomailClient.unload();
 
-    expect(removeEventListener.mock.calls).toEqual(
-      expect.arrayContaining([
+    expect({
+      window: removeEventListener.mock.calls,
+      container: removeContainerEventListener.mock.calls,
+    }).toEqual({
+      window: expect.arrayContaining([
         ["resize", resizeListener],
         ["beforeunload", beforeUnloadListener],
-        ["keydown", keydownListener],
       ]),
-    );
+      container: expect.arrayContaining([["keydown", keydownListener]]),
+    });
   });
 
   it("not dirty when just shown", () => {
