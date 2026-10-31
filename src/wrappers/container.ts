@@ -35,6 +35,9 @@ interface BuildOptions {
   replayParentElement?: HTMLElement | undefined;
 }
 
+const INTERACTIVE_SPACE_TARGETS =
+  "button, input, select, textarea, a[href], summary, label, audio[controls], video[controls], [contenteditable]:not([contenteditable='false']), [role='button'], [role='link'], [role='checkbox'], [role='radio'], [role='switch'], [role='menuitem'], [role='tab'], [tabindex]:not([tabindex='-1'])";
+
 export interface UnloadParams {
   startingOver?: boolean;
   e?: Event;
@@ -74,24 +77,51 @@ class Container extends Despot {
   };
 
   private readonly handleKeyDown = (e: KeyboardEvent) => {
-    const element = e.target as HTMLElement;
-    const tagName = element.tagName;
-    const isEditable = element.isContentEditable || element.contentEditable === "true";
+    const containerElement = this.containerElement;
+
+    if (!containerElement) {
+      return;
+    }
+
+    // Follow composed events so controls in shadow DOM keep native Space activation.
+    const eventPath = e.composedPath();
+
+    // The nearest client owns the shortcut, so sibling and nested clients stay isolated.
+    const targetContainerIndex = eventPath.findIndex(
+      (eventTarget) =>
+        eventTarget instanceof Element &&
+        eventTarget.classList.contains(this.options.selectors.containerClass),
+    );
+    const targetContainer = eventPath[targetContainerIndex];
+    const isInteractiveTarget = eventPath
+      .slice(0, targetContainerIndex + 1)
+      .some(
+        (eventTarget) =>
+          eventTarget instanceof Element &&
+          eventTarget.matches(INTERACTIVE_SPACE_TARGETS),
+      );
 
     if (
-      !isEditable &&
-      tagName &&
-      tagName.toUpperCase() !== "INPUT" &&
-      tagName.toUpperCase() !== "TEXTAREA" &&
-      e.code === "Space"
+      !eventPath.includes(containerElement) ||
+      targetContainer !== containerElement ||
+      isInteractiveTarget ||
+      e.defaultPrevented ||
+      e.repeat ||
+      e.altKey ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.shiftKey ||
+      e.code !== "Space"
     ) {
-      e.preventDefault();
+      return;
+    }
 
-      if (this.options.enablePause) {
-        this.visuals.pauseOrResume();
-      } else {
-        this.visuals.recordOrStop();
-      }
+    e.preventDefault();
+
+    if (this.options.enablePause) {
+      this.visuals.pauseOrResume();
+    } else {
+      this.visuals.recordOrStop();
     }
   };
 
@@ -313,7 +343,7 @@ class Container extends Despot {
 
     if (this.options.enableSpace) {
       if (!playerOnly) {
-        window.addEventListener("keydown", this.handleKeyDown);
+        this.containerElement?.addEventListener("keydown", this.handleKeyDown);
       }
     }
 
@@ -383,7 +413,7 @@ class Container extends Despot {
   private removeBrowserEventListeners() {
     window.removeEventListener("resize", this.handleWindowResize);
     window.removeEventListener("beforeunload", this.handleBeforeUnload);
-    window.removeEventListener("keydown", this.handleKeyDown);
+    this.containerElement?.removeEventListener("keydown", this.handleKeyDown);
 
     this.stopListeningToVisibility?.();
     this.stopListeningToVisibility = undefined;

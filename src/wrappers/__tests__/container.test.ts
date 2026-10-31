@@ -8,6 +8,8 @@ interface ContainerInternals {
     onChange: (listener: (visible: boolean) => void) => () => void;
   };
   visuals: {
+    pauseOrResume: () => void;
+    recordOrStop: () => void;
     record: () => void;
     setLimitSeconds: (limitSeconds: number) => void;
     show: () => void;
@@ -89,6 +91,31 @@ function buildExternalSubmitFixture(
   return { container, formElement, submitButton, submitAll };
 }
 
+function buildKeyboardClient(containerId: string, enablePause = true) {
+  const container = new Container(
+    mergeWithDefaultOptions({
+      enablePause,
+      selectors: { containerId },
+    }),
+  );
+  const visuals = getInternals(container).visuals;
+  const pauseOrResume = vi.spyOn(visuals, "pauseOrResume");
+  const recordOrStop = vi.spyOn(visuals, "recordOrStop");
+
+  container.build();
+
+  return { container, pauseOrResume, recordOrStop };
+}
+
+function createSpaceKeyEvent(options: KeyboardEventInit = {}) {
+  return new KeyboardEvent("keydown", {
+    code: "Space",
+    bubbles: true,
+    cancelable: true,
+    ...options,
+  });
+}
+
 describe("Container", () => {
   afterEach(() => {
     document.body.innerHTML = "";
@@ -132,6 +159,124 @@ describe("Container", () => {
       pauses: pause.mock.calls.length,
       recoveries: recover.mock.calls.length,
     }).toEqual({ pauses: 0, recoveries: 0 });
+  });
+
+  it("keeps Space inside its client and lets interactive controls handle it", () => {
+    document.body.innerHTML = `
+      <button id="host-button">Host button</button>
+      <select id="host-select"><option>Host option</option></select>
+      <div id="first-client">
+        <button id="client-button">Client button</button>
+        <select id="client-select"><option>Client option</option></select>
+        <div id="first-area"></div>
+      </div>
+      <div id="second-client"><div id="second-area"></div></div>
+    `;
+    const first = buildKeyboardClient("first-client");
+    const second = buildKeyboardClient("second-client");
+    const hostButton = document.querySelector("#host-button");
+    const hostSelect = document.querySelector("#host-select");
+    const clientButton = document.querySelector("#client-button");
+    const clientSelect = document.querySelector("#client-select");
+    const firstArea = document.querySelector("#first-area");
+    const secondArea = document.querySelector("#second-area");
+
+    if (
+      !hostButton ||
+      !hostSelect ||
+      !clientButton ||
+      !clientSelect ||
+      !firstArea ||
+      !secondArea
+    ) {
+      throw new Error("Missing Space shortcut test elements");
+    }
+
+    const hostButtonEvent = createSpaceKeyEvent();
+    const hostSelectEvent = createSpaceKeyEvent();
+    const clientButtonEvent = createSpaceKeyEvent();
+    const clientSelectEvent = createSpaceKeyEvent();
+    const firstClientEvent = createSpaceKeyEvent();
+    const secondClientEvent = createSpaceKeyEvent();
+
+    hostButton.dispatchEvent(hostButtonEvent);
+    hostSelect.dispatchEvent(hostSelectEvent);
+    clientButton.dispatchEvent(clientButtonEvent);
+    clientSelect.dispatchEvent(clientSelectEvent);
+    firstArea.dispatchEvent(firstClientEvent);
+    secondArea.dispatchEvent(secondClientEvent);
+
+    expect({
+      prevented: [
+        hostButtonEvent.defaultPrevented,
+        hostSelectEvent.defaultPrevented,
+        clientButtonEvent.defaultPrevented,
+        clientSelectEvent.defaultPrevented,
+        firstClientEvent.defaultPrevented,
+        secondClientEvent.defaultPrevented,
+      ],
+      firstClientShortcuts: first.pauseOrResume.mock.calls.length,
+      secondClientShortcuts: second.pauseOrResume.mock.calls.length,
+    }).toEqual({
+      prevented: [false, false, false, false, true, true],
+      firstClientShortcuts: 1,
+      secondClientShortcuts: 1,
+    });
+  });
+
+  it("ignores handled, repeated, and modified Space key events", () => {
+    document.body.innerHTML = `<div id="keyboard-client"><div id="keyboard-area"></div></div>`;
+    const { pauseOrResume } = buildKeyboardClient("keyboard-client");
+    const area = document.querySelector("#keyboard-area");
+
+    if (!area) {
+      throw new Error("Missing Space shortcut test area");
+    }
+
+    const alreadyHandled = createSpaceKeyEvent();
+    const repeated = createSpaceKeyEvent({ repeat: true });
+    const modifiedEvents = [
+      createSpaceKeyEvent({ altKey: true }),
+      createSpaceKeyEvent({ ctrlKey: true }),
+      createSpaceKeyEvent({ metaKey: true }),
+      createSpaceKeyEvent({ shiftKey: true }),
+    ];
+
+    area.addEventListener("keydown", (event) => event.preventDefault(), { once: true });
+
+    for (const event of [alreadyHandled, repeated, ...modifiedEvents]) {
+      area.dispatchEvent(event);
+    }
+
+    expect({
+      defaultPrevented: [
+        alreadyHandled.defaultPrevented,
+        repeated.defaultPrevented,
+        ...modifiedEvents.map((event) => event.defaultPrevented),
+      ],
+      shortcuts: pauseOrResume.mock.calls.length,
+    }).toEqual({
+      defaultPrevented: [true, false, false, false, false, false],
+      shortcuts: 0,
+    });
+  });
+
+  it("keeps the Space shortcut action when pausing is disabled", () => {
+    document.body.innerHTML = `<div id="keyboard-client"><div id="keyboard-area"></div></div>`;
+    const { recordOrStop } = buildKeyboardClient("keyboard-client", false);
+    const area = document.querySelector("#keyboard-area");
+
+    if (!area) {
+      throw new Error("Missing Space shortcut test area");
+    }
+
+    const event = createSpaceKeyEvent();
+    area.dispatchEvent(event);
+
+    expect({
+      defaultPrevented: event.defaultPrevented,
+      recordOrStop: recordOrStop.mock.calls.length,
+    }).toEqual({ defaultPrevented: true, recordOrStop: 1 });
   });
 
   it("removes the visibility listener when unloaded", () => {
