@@ -336,11 +336,26 @@ class Visuals extends Despot {
     return this.recorder.recoverCamera();
   }
 
-  public resume() {
+  // Recovery can finish after Stop or unload has already canceled the countdown.
+  private canResumeCountdown(restored: boolean) {
+    return restored && Boolean(this.recorderInsides.isCountingDown());
+  }
+
+  private async resumeCountdown() {
+    const restored = await this.recoverCamera();
+    if (!this.canResumeCountdown(restored)) {
+      return;
+    }
+
+    this.recorder.resumeMediaForCountdown();
+    this.recorderInsides.resumeCountdown();
+    this.recorderInsides.hidePause();
+  }
+
+  public async resume() {
     this.clearCameraRecoveryNotice();
     if (this.recorderInsides.isCountingDown()) {
-      this.recorderInsides.resumeCountdown();
-      this.recorderInsides.hidePause();
+      await this.resumeCountdown();
     } else {
       this.recorder.resume();
       if (!this.recorder.isPaused()) {
@@ -349,14 +364,20 @@ class Visuals extends Despot {
     }
   }
 
+  private resumeFromControl() {
+    void this.resume().catch((exc: unknown) => {
+      this.emit("ERROR", { exc });
+    });
+  }
+
   public pauseOrResume() {
     if (this.cameraRecoveryFailed && this.recorder.isPaused()) {
-      this.resume();
+      this.resumeFromControl();
     } else if (this.isRecordable()) {
       if (this.isRecording()) {
         this.pause();
       } else if (this.recorder.isPaused()) {
-        this.resume();
+        this.resumeFromControl();
       } else if (this.recorder.isReady()) {
         this.recorder.record();
       }

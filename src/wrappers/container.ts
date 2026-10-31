@@ -941,7 +941,9 @@ class Container extends Despot {
   }
 
   public resume() {
-    this.visuals.resume();
+    void this.visuals.resume().catch((exc: unknown) => {
+      this.emit("ERROR", { exc });
+    });
   }
 
   public stop() {

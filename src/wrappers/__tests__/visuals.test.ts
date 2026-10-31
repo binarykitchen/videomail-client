@@ -152,15 +152,108 @@ describe("Visuals", () => {
     expect(pause).toHaveBeenCalledOnce();
   });
 
-  it("delegates resuming when no countdown is active", () => {
+  it("delegates resuming when no countdown is active", async () => {
     const { visuals } = createFixture();
     const resume = vi
       .spyOn(visuals.getRecorder(), "resume")
       .mockImplementation(() => undefined);
 
-    visuals.resume();
+    await visuals.resume();
 
     expect(resume).toHaveBeenCalledOnce();
+  });
+
+  it("waits for camera recovery before resuming a paused countdown", async () => {
+    vi.useFakeTimers();
+    const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });
+    visuals.build();
+    const recorder = visuals.getRecorder();
+    const recovery = Promise.withResolvers<boolean>();
+    vi.spyOn(recorder, "recoverCamera").mockReturnValue(recovery.promise);
+    const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
+    const record = vi.spyOn(recorder, "record").mockImplementation(() => undefined);
+    const recorderEvents = recorder as unknown as {
+      emit: (eventName: "PAUSED") => void;
+    };
+    vi.spyOn(recorder, "pause").mockImplementation(() => {
+      recorderEvents.emit("PAUSED");
+    });
+
+    visuals.record();
+    visuals.pause();
+    const resume = visuals.resume();
+    vi.advanceTimersByTime(1900);
+    const countdownWhileRecovering = visuals
+      .getElement()
+      ?.querySelector(".countdown")?.textContent;
+    recovery.resolve(true);
+    await resume;
+    vi.advanceTimersByTime(2900);
+
+    expect({
+      countdownWhileRecovering,
+      mediaResumes: resumeMedia.mock.calls.length,
+      recordings: record.mock.calls.length,
+    }).toEqual({ countdownWhileRecovering: "3", mediaResumes: 1, recordings: 1 });
+  });
+
+  it("keeps a failed countdown resume paused and allows a recovery retry", async () => {
+    vi.useFakeTimers();
+    const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });
+    visuals.build();
+    const recorder = visuals.getRecorder();
+    vi.spyOn(recorder, "recoverCamera")
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
+    const record = vi.spyOn(recorder, "record").mockImplementation(() => undefined);
+    const recorderEvents = recorder as unknown as {
+      emit: (eventName: "PAUSED") => void;
+    };
+    vi.spyOn(recorder, "pause").mockImplementation(() => {
+      recorderEvents.emit("PAUSED");
+    });
+
+    visuals.record();
+    visuals.pause();
+    await visuals.resume();
+    const recordingsAfterFailure = record.mock.calls.length;
+    await visuals.resume();
+    vi.advanceTimersByTime(2900);
+
+    expect({
+      recordingsAfterFailure,
+      mediaResumes: resumeMedia.mock.calls.length,
+      recordingsAfterRetry: record.mock.calls.length,
+    }).toEqual({ recordingsAfterFailure: 0, mediaResumes: 1, recordingsAfterRetry: 1 });
+  });
+
+  it("does not resume a countdown if unload happens during camera recovery", async () => {
+    vi.useFakeTimers();
+    const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });
+    visuals.build();
+    const recorder = visuals.getRecorder();
+    const recovery = Promise.withResolvers<boolean>();
+    vi.spyOn(recorder, "recoverCamera").mockReturnValue(recovery.promise);
+    const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
+    const recorderEvents = recorder as unknown as {
+      emit: (eventName: "PAUSED") => void;
+    };
+    vi.spyOn(recorder, "pause").mockImplementation(() => {
+      recorderEvents.emit("PAUSED");
+    });
+
+    visuals.record();
+    visuals.pause();
+    const resume = visuals.resume();
+    visuals.unload();
+    recovery.resolve(true);
+    await resume;
+
+    expect({
+      countdownActive: visuals.isCountingDown(),
+      mediaResumes: resumeMedia.mock.calls.length,
+    }).toEqual({ countdownActive: false, mediaResumes: 0 });
   });
 
   it("keeps camera recovery failure nonfatal and allows a retry", async () => {

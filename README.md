@@ -165,7 +165,7 @@ Returns a `Promise<boolean>`: `true` if camera recovery succeeds.
 - Shares pending recovery across duplicate calls.
 - Returns `false` without changes if the client is unbuilt, has an unsent preview, is encoding, or is submitting.
 
-Recovery keeps frame dimensions, frame/sample counts, and the audio sample rate. It does **not** resume recording or a countdown on its own. The user chooses Resume, which waits for recovery before sending more frames.
+Recovery keeps frame dimensions, frame/sample counts, and the audio sample rate. It does **not** resume recording or a countdown on its own. The user chooses Resume, which waits for recovery before sending more frames or restarting a paused countdown.
 
 With automatic pause enabled, hiding the page pauses recording. Returning to it recovers the camera. Native apps should call `pause()` when backgrounded and `recoverCamera()` when foregrounded. Wire these into your app's lifecycle; no Capacitor dependency is needed. Use recovery, not `startOver()`, to keep a paused take.
 

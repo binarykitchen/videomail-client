@@ -500,6 +500,11 @@ abstract class RecorderCapture extends RecorderMedia {
     }
   }
 
+  public resumeMediaForCountdown() {
+    // Re-enable camera/audio without starting frame capture before the countdown ends.
+    this.userMedia?.resume();
+  }
+
   private onFlushed(opts: WriteStreamParams) {
     const frameNumber = opts.frameNumber;
 
