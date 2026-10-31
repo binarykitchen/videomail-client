@@ -274,6 +274,82 @@ describe("Container", () => {
     }).toEqual({ videoRequests: 1, hostRequests: 2, errors: 1 });
   });
 
+  it("restores the form for a UI retry and reuses the uploaded video", async () => {
+    const { container, formElement, submitButton, submitAll } =
+      buildExternalSubmitFixture();
+    submitAll.mockRestore();
+
+    const internals = getInternals(container);
+    const subject = formElement.querySelector<HTMLInputElement>("[name='subject']");
+    const lockedInput = document.createElement("input");
+    lockedInput.name = "locked";
+    lockedInput.disabled = true;
+    formElement.appendChild(lockedInput);
+
+    if (!subject) {
+      throw new Error("Missing subject input");
+    }
+
+    const keyInput = formElement.querySelector<HTMLInputElement>(
+      `[name='${internals.options.selectors.keyInputName}']`,
+    );
+
+    if (!keyInput) {
+      throw new Error("Missing Videomail key input");
+    }
+
+    keyInput.value = "video-key";
+
+    const submitVideomail = vi.spyOn(internals, "submitVideomail").mockResolvedValue({
+      body: { videomail: { alias: "video-alias" } },
+    });
+    const submitHostForm = vi
+      .spyOn(internals.resource, "form")
+      .mockRejectedValueOnce(new Error("Host unavailable"))
+      .mockResolvedValueOnce({});
+    const error = vi.fn();
+    container.on("ERROR", error);
+
+    submitButton.click();
+    await vi.waitFor(() => {
+      if (submitHostForm.mock.calls.length !== 1) {
+        throw new Error("Expected the first host request to settle");
+      }
+    });
+
+    const firstFailureState = {
+      submitEnabled: !submitButton.disabled,
+      subjectEnabled: !subject.disabled,
+      subjectValue: subject.value,
+      lockedInputDisabled: lockedInput.disabled,
+      recoverable: error.mock.calls[0]?.[0].recoverable,
+    };
+
+    subject.value = "Edited for retry";
+    submitButton.click();
+    await vi.waitFor(() => {
+      if (submitHostForm.mock.calls.length !== 2) {
+        throw new Error("Expected the host retry request to settle");
+      }
+    });
+
+    expect({
+      firstFailureState,
+      videoRequests: submitVideomail.mock.calls.length,
+      retriedSubject: submitHostForm.mock.calls[1]?.[0].subject,
+    }).toEqual({
+      firstFailureState: {
+        submitEnabled: true,
+        subjectEnabled: true,
+        subjectValue: "Hello",
+        lockedInputDisabled: true,
+        recoverable: true,
+      },
+      videoRequests: 1,
+      retriedSubject: "Edited for retry",
+    });
+  });
+
   it("starts unbuilt without a container element", () => {
     const container = new Container(mergeWithDefaultOptions());
 

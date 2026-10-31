@@ -401,8 +401,8 @@ class Visuals extends Despot {
     return this.recorder.isPaused();
   }
 
-  public error(err: VideomailError) {
-    this.notifier.error(err);
+  public error(err: VideomailError, blocking = true) {
+    this.notifier.error(err, blocking);
   }
 
   public hide() {

@@ -95,8 +95,10 @@ class RecorderInsides extends Despot {
       this.pauseRecording();
     });
 
-    this.on("ERROR", () => {
-      this.onResetting();
+    this.on("ERROR", ({ recoverable }) => {
+      if (!recoverable) {
+        this.onResetting();
+      }
     });
 
     this.on("RESETTING", () => {

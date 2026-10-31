@@ -232,7 +232,7 @@ class Notifier extends Despot {
     this.entertaining = false;
   }
 
-  public error(err: VideomailError) {
+  public error(err: VideomailError, blocking = true) {
     const message = err.message;
     const explanation = err.explanation;
 
@@ -243,7 +243,7 @@ class Notifier extends Despot {
     }
 
     this.notify(message, explanation, {
-      blocking: true,
+      blocking,
       problem: true,
       classList: err.getClassList(),
       removeDimensions: getBrowser(this.options).isMobile(),

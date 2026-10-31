@@ -33,6 +33,7 @@ class Form extends Despot {
   private submitButtonFormAttribute: string | null = null;
   private generatedFormId: string | undefined;
   private isSubmitting = false;
+  private readonly submissionDisabledStates = new Map<Element, boolean>();
 
   private readonly FORM_FIELDS = {};
 
@@ -236,6 +237,29 @@ class Form extends Despot {
 
   public enable(buttonsToo: boolean) {
     this.setDisabled(false, buttonsToo);
+  }
+
+  public disableForSubmission() {
+    // Remember existing locks so a failed request only unlocks controls we locked.
+    for (const formControl of this.formElement.elements) {
+      this.submissionDisabledStates.set(
+        formControl,
+        formControl.hasAttribute("disabled"),
+      );
+      formControl.setAttribute("disabled", "disabled");
+    }
+  }
+
+  public restoreAfterFailedSubmission() {
+    for (const [formControl, wasDisabled] of this.submissionDisabledStates) {
+      if (wasDisabled) {
+        formControl.setAttribute("disabled", "disabled");
+      } else {
+        formControl.removeAttribute("disabled");
+      }
+    }
+
+    this.submissionDisabledStates.clear();
   }
 
   public build() {

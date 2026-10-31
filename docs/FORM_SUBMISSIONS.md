@@ -18,6 +18,8 @@ With `enableAutoSubmission` enabled (the default):
 
 If your app handles submission itself, set `enableAutoSubmission: false`. Let your integration continue after `SUBMITTED`.
 
+If an automatic submission fails, the client restores the controls it disabled so users can edit and retry. A host-form retry reuses the already-uploaded video instead of uploading it again.
+
 ## Submitting from code
 
 Use `form.requestSubmit()` or `videomailClient.submit()`. Native `form.submit()` skips submit events, so the client cannot intercept it.

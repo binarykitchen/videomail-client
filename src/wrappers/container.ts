@@ -266,14 +266,15 @@ class Container extends Despot {
     }
 
     if (this.options.displayErrors && params.err) {
-      this.visuals.error(params.err);
+      this.visuals.error(params.err, !params.recoverable);
     } else if (
       this.options.displayErrors &&
       params.exc &&
       params.exc instanceof VideomailError
     ) {
-      this.visuals.error(params.exc);
-    } else {
+      this.visuals.error(params.exc, !params.recoverable);
+    } else if (!params.recoverable) {
+      // A retryable submit must not reset the take when errors are hidden.
       this.visuals.reset();
     }
   }
@@ -760,6 +761,7 @@ class Container extends Despot {
   ) {
     let response: Response | undefined;
     let hostResponse: Response | undefined;
+    let submissionFailed = false;
     const videomailKey = formData[this.options.selectors.keyInputName];
 
     try {
@@ -776,7 +778,7 @@ class Container extends Despot {
       this.beginWaiting();
 
       if (this.options.disableFormWhenSubmitting) {
-        this.disableForm(true);
+        this.form?.disableForSubmission();
       }
 
       this.emit("SUBMITTING");
@@ -794,6 +796,7 @@ class Container extends Despot {
 
         if (this.options.enableAutoSubmission && hasHostAction) {
           if (videomailKey) {
+            // Keep the video response so a failed host request can retry without re-uploading.
             this.pendingHostSubmission = { key: videomailKey, response };
           }
 
@@ -811,10 +814,15 @@ class Container extends Despot {
         this.emit("SUBMITTED", { videomail: response.body.videomail, response });
       }
     } catch (exc) {
+      submissionFailed = true;
       const err = createError({ exc, options: this.options });
-      this.emit("ERROR", { err });
+      this.emit("ERROR", { err, recoverable: true });
     } finally {
       const finalResponse = hostResponse ?? response;
+
+      if (submissionFailed && this.options.disableFormWhenSubmitting) {
+        this.form?.restoreAfterFailedSubmission();
+      }
 
       if (finalResponse?.text && finalResponse.type === "text/html") {
         // server replied with HTML contents - display these
