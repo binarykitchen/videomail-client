@@ -33,3 +33,11 @@ Warn the user before a requested scan or refresh would be unusually expensive.
 If memory and repository instructions conflict, follow the current repository instructions.
 
 If AI-focused instructions contradict human documentation, stop relying on the disputed rule and report the contradiction to the user.
+
+## Skills
+
+We maintain various skills in [self-contained folders](.github/skills) with instructions available for specialized tasks that an AI agent can leverage to perform specific functions effectively.
+
+## Documentation
+
+Refer to [.github/instructions/documentation.instructions.md](.github/instructions/documentation.instructions.md) for documentation instructions.

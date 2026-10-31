@@ -23,6 +23,7 @@ When analyzing all tracked project files, like code, documentation, workflow, co
    - include references to the relevant files, lines of code, or documentation sections where the issue occurs.
    - include checkboxes for each issue to track their resolution
    - use emojis to visually indicate the type, the severity, and the time effort required for each issue separately (one emoji for each aspect)
+   - to explain what these emojis are for, please provide a legend at the beginning of the `TODO.md` document.
 
 5. Limit that TODO list to the top ten most significant issues.
 6. Order it by impact and severity.
