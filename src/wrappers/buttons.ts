@@ -271,9 +271,16 @@ class Buttons extends Despot {
   }
 
   private onUserMediaReady(params: VideomailUserMediaReadyParams) {
-    this.onFormReady();
+    this.onFormReady(params);
 
     showElement(this.buttonsElement);
+
+    if (params.recovering && params.paused) {
+      // Recovery restores this take; keep its Resume/Stop controls, not a fresh Record action. 🎥
+      hideElement(this.recordButton);
+      disableElement(this.recordButton);
+      return;
+    }
 
     showElement(this.audioOnRadioPair);
     showElement(this.audioOffRadioPair);

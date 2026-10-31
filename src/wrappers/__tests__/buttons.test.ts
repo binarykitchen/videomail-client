@@ -117,6 +117,67 @@ describe("Buttons", () => {
     expect(element.querySelector<HTMLElement>(".resume")?.style.display).toBe("none");
   });
 
+  it("preserves paused-take controls through camera recovery, resume, and stop", () => {
+    const { buttons, element } = createFixture();
+    buttons.build();
+    emit(buttons, "USER_MEDIA_READY", {
+      recordWhenReady: false,
+      switchingFacingMode: false,
+    });
+    emit(buttons, "FIRST_FRAME_SENT");
+    emit(buttons, "PAUSED");
+    emit(buttons, "USER_MEDIA_READY", {
+      paused: true,
+      recovering: true,
+      recordWhenReady: false,
+      switchingFacingMode: false,
+    });
+
+    const record = element.querySelector<HTMLButtonElement>(".record");
+    const resume = element.querySelector<HTMLButtonElement>(".resume");
+    const preview = element.querySelector<HTMLButtonElement>(".preview");
+    const pausedTake = {
+      record: [record?.disabled, record?.style.display],
+      resume: [resume?.disabled, resume?.style.display],
+      stop: [preview?.disabled, preview?.style.display],
+    };
+
+    emit(buttons, "RESUMING");
+    const resumedTake = {
+      pause: [
+        element.querySelector<HTMLButtonElement>(".pause")?.disabled,
+        element.querySelector<HTMLButtonElement>(".pause")?.style.display,
+      ],
+      record: [record?.disabled, record?.style.display],
+      resume: [resume?.disabled, resume?.style.display],
+    };
+
+    emit(buttons, "STOPPING");
+    const stoppedTake = {
+      pause: element.querySelector<HTMLButtonElement>(".pause")?.style.display,
+      resume: resume?.style.display,
+      stop: preview?.disabled,
+    };
+
+    expect({ pausedTake, resumedTake, stoppedTake }).toEqual({
+      pausedTake: {
+        record: [true, "none"],
+        resume: [false, ""],
+        stop: [false, ""],
+      },
+      resumedTake: {
+        pause: [false, ""],
+        record: [true, "none"],
+        resume: [false, "none"],
+      },
+      stoppedTake: {
+        pause: "none",
+        resume: "none",
+        stop: true,
+      },
+    });
+  });
+
   it("enables submit after the form becomes valid", () => {
     const { buttons } = createFixture();
     buttons.build();
