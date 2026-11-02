@@ -8,7 +8,7 @@ import type { RecordingStats } from "../../../types/RecordingStats";
 import createError from "../../../util/error/createError";
 import getEventDetails from "../../../util/error/getEventDetails";
 import getWebSocketDiagnostic from "../../../util/error/getWebSocketDiagnostic";
-import isAutomatedUserAgent from "../../../util/isAutomatedUserAgent";
+import getAutomationSignals from "../../../util/getAutomationSignals";
 import pretty from "../../../util/string/pretty";
 import summarize from "../../../util/string/summarize";
 import RecorderStreamWriter, { PIPE_SYMBOL } from "./streamWriter";
@@ -41,6 +41,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
   protected lastSocketError?: Record<string, unknown> | undefined;
 
   protected pingInterval?: number | undefined;
+
+  private connectionOpenedAt?: number | undefined;
 
   protected abstract executeCommand(command: VideomailCommand): void;
   public abstract isUserMediaLoaded(): boolean | undefined;
@@ -87,14 +89,43 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       this.reconnecting = true;
       this.initSocket();
     } else if (this.shouldReportStreamClose()) {
+      const stream = this.stream;
       window.setTimeout(() => {
-        this.handleConnectionFailure({ url2Connect, cause: "closed" });
+        if (this.stream === stream) {
+          this.handleConnectionFailure({ url2Connect, cause: "closed" });
+        }
       }, 0);
     }
   }
 
   private shouldIgnoreStreamClose() {
-    return this.recordingTransportFailed || Boolean(this.unloaded) || this.validate();
+    return (
+      this.recordingTransportFailed ||
+      Boolean(this.unloaded) ||
+      this.validate() ||
+      (this.blocking && !this.mediaTransmissionStarted)
+    );
+  }
+
+  protected closeIdleConnection(reason: string) {
+    if (this.mediaTransmissionStarted) {
+      return;
+    }
+
+    // Clear ownership before destroy(): late events must not replace the primary error.
+    this.options.logger.debug(
+      summarize("Recorder: closing idle connection", {
+        reason,
+        connected: this.connected,
+        connecting: this.connecting,
+        visibilityState: document.visibilityState,
+      }),
+    );
+    this.connected = this.connecting = this.reconnecting = false;
+    this.clearConnectionTimeout();
+    this.clearReconnectTimeout();
+    this.stopPings();
+    this.discardSocket();
   }
 
   private handleStreamError(url2Connect: string, err: unknown) {
@@ -110,38 +141,23 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
     this.options.logger.debug(debugLine);
 
-    if (this.validate()) {
+    if (this.shouldIgnoreStreamClose()) {
       this.connected = false;
       this.stopPings();
       this.discardSocket();
       return;
     }
 
-    if (!this.connected) {
-      this.handleConnectionFailure({ url2Connect, cause: "error" });
-      return;
-    }
-
-    const streamError =
-      err instanceof Error
-        ? err
-        : new Error("WebSocket stream emitted an error event", {
-            cause: this.lastSocketError ?? err,
-          });
-
     if (this.mediaTransmissionStarted) {
       this.failInterruptedRecording();
       return;
     }
 
-    this.emit("ERROR", {
-      err: createError({
-        message: "WebSocket stream error",
-        explanation: `The WebSocket stream emitted an error event. Details: ${pretty(err)}`,
-        options: this.options,
-        exc: streamError,
-      }),
-    });
+    // An idle transport error follows the same recovery path as an idle close.
+    this.reconnecting ||= this.canReconnectAfterStreamClose();
+    this.connected = false;
+    this.stopPings();
+    this.handleConnectionFailure({ url2Connect, cause: "error" });
   }
 
   protected sendPings() {
@@ -268,6 +284,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     this.connectionFailed = true;
     this.connecting = false;
     this.reconnecting = false;
+    const reconnectAttempts = this.reconnectAttempts;
     this.reconnectAttempts = 0;
 
     this.clearReconnectTimeout();
@@ -284,6 +301,14 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
     const contents = {
       cause,
+      transportPhase: this.connectionOpenedAt === undefined ? "initial" : "idle",
+      mediaTransmissionStarted: this.mediaTransmissionStarted,
+      recordingActive: this.recordingActive,
+      framesCount: this.framesCount,
+      samplesCount: this.samplesCount,
+      reconnectAttempts,
+      connectionOpenedAt: this.connectionOpenedAt,
+      automation: getAutomationSignals(),
       closeCode: closeEvent?.code,
       closeReason: closeEvent?.reason,
       elapsedMs,
@@ -336,7 +361,11 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
   private shouldIgnoreConnectionFailure() {
     return (
-      this.connectionFailed || this.connected || Boolean(this.unloaded) || this.validate()
+      this.connectionFailed ||
+      this.connected ||
+      Boolean(this.unloaded) ||
+      this.validate() ||
+      (this.blocking && !this.mediaTransmissionStarted)
     );
   }
 
@@ -361,7 +390,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     this.clearReconnectTimeout();
 
     // Skip known crawlers to avoid connection reports from non-recording clients.
-    if (isAutomatedUserAgent()) {
+    const automation = getAutomationSignals();
+    if (automation.userAgentMatched) {
       this.connecting = false;
       this.options.logger.debug(
         "Recorder: skipping web socket connection for an automated crawler",
@@ -429,6 +459,9 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       // Keep native close details before the stream wrapper hides them.
       // Code 1006, for example, means an abnormal close.
       nativeSocket.addEventListener("close", (event) => {
+        if (this.stream?.socket !== nativeSocket) {
+          return;
+        }
         this.lastCloseEvent = {
           code: event.code,
           reason: event.reason,
@@ -437,6 +470,9 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       });
 
       nativeSocket.addEventListener("error", (event) => {
+        if (this.stream?.socket !== nativeSocket) {
+          return;
+        }
         this.lastSocketError = getEventDetails(event);
       });
     } catch (exc) {
@@ -450,7 +486,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       /*
        * Use a clearly distinct message for crawler/bot failures so the
        * server can filter these from email alerts while still logging them.
-       * A real user never reaches this branch with probeBase failing.
+       * Failed probes alone do not establish that the visitor is automated.
        */
       const message = diagnostic.looksAutomated
         ? "Automated crawler: WebSocket not supported in this environment"
@@ -465,6 +501,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
         explanation,
         options: this.options,
         exc,
+        cause: { automation },
       });
 
       this.emit("ERROR", { err });
@@ -538,20 +575,26 @@ abstract class RecorderConnection extends RecorderStreamWriter {
        */
 
       stream.on("close", () => {
-        this.handleStreamClose(url2Connect);
+        if (this.stream === stream) {
+          this.handleStreamClose(url2Connect);
+        }
       });
 
       stream.on("connect", (args) => {
+        if (this.stream !== stream) {
+          return;
+        }
         this.options.logger.debug(
           `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
         );
 
         this.clearConnectionTimeout();
 
-        const isClosing = this.stream?.socket.readyState === WebSocket.CLOSING;
+        const isClosing = stream.socket.readyState === WebSocket.CLOSING;
 
         if (!this.connected && !isClosing && !this.unloaded) {
           this.connected = true;
+          this.connectionOpenedAt = Date.now();
           this.connecting = this.unloaded = false;
           this.reconnecting = false;
           this.reconnectAttempts = 0;
@@ -564,6 +607,9 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       });
 
       stream.on("data", (data: Uint8Array) => {
+        if (this.stream !== stream) {
+          return;
+        }
         this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
         try {
@@ -585,11 +631,15 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       });
 
       stream.on("error", (err) => {
-        this.handleStreamError(url2Connect, err);
+        if (this.stream === stream) {
+          this.handleStreamError(url2Connect, err);
+        }
       });
 
       stream.on("drain", () => {
-        this.handleStreamDrain(stream);
+        if (this.stream === stream) {
+          this.handleStreamDrain(stream);
+        }
       });
 
       stream.on("preend", (args) => {

@@ -6,6 +6,7 @@ import BoundedWriteQueue from "../../../util/boundedWriteQueue";
 import Despot from "../../../util/Despot";
 import createError from "../../../util/error/createError";
 import VideomailError from "../../../util/error/VideomailError";
+import getAutomationSignals from "../../../util/getAutomationSignals";
 import pretty from "../../../util/string/pretty";
 
 export const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";
@@ -288,7 +289,13 @@ abstract class RecorderStreamWriter extends Despot {
       explanation:
         "The server connection closed before this recording completed. It cannot be safely resumed, so it has been stopped. Please start a new recording.",
       options: this.options,
-      cause: { unconfirmedFrames, unconfirmedSamples },
+      cause: {
+        transportPhase: "recording",
+        mediaTransmissionStarted: true,
+        automation: getAutomationSignals(),
+        unconfirmedFrames,
+        unconfirmedSamples,
+      },
     });
 
     this.failMediaTransmission(err);

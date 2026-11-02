@@ -175,6 +175,7 @@ class Recorder extends RecorderCapture {
       this.cancelCameraRecovery();
       this.blocking = true;
       this.clearUserMediaTimeout();
+      this.closeIdleConnection("blocking-error");
     });
 
     this.on("PREVIEW", () => {

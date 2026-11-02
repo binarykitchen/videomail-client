@@ -1,8 +1,13 @@
 import { describe, expect, test } from "vitest";
 
+import getAutomationSignals from "../getAutomationSignals";
 import isAutomatedUserAgent from "../isAutomatedUserAgent";
 
 describe("isAutomatedUserAgent", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   test.each([
     "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
     "Mozilla/5.0 (compatible; Bytespider; spider-feedback@bytedance.com)",
@@ -18,4 +23,16 @@ describe("isAutomatedUserAgent", () => {
 
     expect(isAutomatedUserAgent(userAgent)).toBe(false);
   });
+
+  test.each([true, false])(
+    "keeps webdriver=%s distinct from user-agent detection",
+    (webdriver) => {
+      vi.stubGlobal("navigator", {
+        userAgent: "Mozilla/5.0 Chrome/156.0.0.0",
+        webdriver,
+      });
+
+      expect(getAutomationSignals()).toEqual({ webdriver, userAgentMatched: false });
+    },
+  );
 });

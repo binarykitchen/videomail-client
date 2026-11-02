@@ -12,6 +12,9 @@ This is not about programming language. More philosophical and user-oriented.
 - Less is more. Keep it simple.
 - At the same time, let's not sound too _stiff_.
 - Avoid long sentences. Instead, break them down into bullet points.
+- Make sure any 20 years old without software background can understand the text.
+- Add Emojis and be expressive.
+- Avoid jargon.
 
 ## Wordings
 

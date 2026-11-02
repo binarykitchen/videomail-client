@@ -8,6 +8,8 @@
  * These probes help separate URL problems from runtimes without working sockets.
  */
 
+import getAutomationSignals from "../getAutomationSignals";
+
 function getEdgeCodes(value: string, amount: number, fromEnd?: boolean) {
   const chars = fromEnd ? value.slice(-amount) : value.slice(0, amount);
   const codes = Array.from(chars, (char) => String(char.codePointAt(0))).join(".");
@@ -53,16 +55,17 @@ function getLanguagesValue() {
   return navigator.language || "none";
 }
 
-function getAutomationSignals(probeBase: string, probeSimpleQuery: string) {
+function getDiagnosticSignals(probeBase: string, probeSimpleQuery: string) {
   const reasons: string[] = [];
+  const automation = getAutomationSignals();
 
   // Some crawlers hide webdriver, so false does not rule out automation.
-  if (navigator.webdriver) {
+  if (automation.webdriver) {
     reasons.push("webdriver=true");
   }
 
   // Some headless runtimes still leak their identity in the UA string.
-  if (/HeadlessChrome|PhantomJS|puppeteer|playwright/iu.test(navigator.userAgent)) {
+  if (automation.userAgentMatched) {
     reasons.push("headless_ua_marker");
   }
 
@@ -81,7 +84,8 @@ function getAutomationSignals(probeBase: string, probeSimpleQuery: string) {
   }
 
   return {
-    looksAutomated: reasons.length > 0,
+    // Socket failures and language settings are diagnostics, not proof of a bot.
+    looksAutomated: automation.webdriver || automation.userAgentMatched,
     reasons: reasons.length > 0 ? reasons.join(",") : "none",
   };
 }
@@ -106,7 +110,7 @@ function getWebSocketDiagnostic(url2Connect: string) {
   const probeBase = probeWebSocketConstructor("wss://videomail.io");
   const probeWithSimpleQuery = probeWebSocketConstructor("wss://videomail.io/?a=b");
   const languages = getLanguagesValue();
-  const automationSignals = getAutomationSignals(probeBase, probeWithSimpleQuery);
+  const automationSignals = getDiagnosticSignals(probeBase, probeWithSimpleQuery);
 
   const diagnosticPairs = [
     `webdriver=${String(navigator.webdriver)}`,

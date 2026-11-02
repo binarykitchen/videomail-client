@@ -7,12 +7,15 @@ import UserMedia from "../userMedia";
 
 interface RecorderInternals {
   connected: boolean;
+  connecting: boolean;
+  blocking: boolean;
   emit: (event: "SUBMITTING" | "BLOCKING") => void;
   key?: string;
   stream?: {
     destroyed: boolean;
     write(buffer: Buffer, callback: () => void): boolean;
     destroy(): void;
+    emit?(event: string, ...args: unknown[]): boolean;
   };
   streamBackpressured: boolean;
   mediaTransmissionStarted: boolean;
@@ -46,6 +49,9 @@ interface RecorderInternals {
   reconnecting: boolean;
   submitting: boolean;
   userMediaLoaded?: boolean;
+  connectionOpenedAt?: number;
+  closeIdleConnection(reason: string): void;
+  userMediaErrorCallback(err: Error, constraints: MediaStreamConstraints): void;
   userMedia?: UserMedia;
   loop?: Pick<
     RecorderLoop,
@@ -768,6 +774,220 @@ describe("Recorder", () => {
     });
 
     expect(reportedError?.message).toBe("Unable to connect to the server");
+  });
+
+  it("marks initial transport failures separately from recorded-media failures", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const internals = recorder as unknown as RecorderInternals;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+
+    internals.handleConnectionFailure({ url2Connect: options.socketUrl, cause: "error" });
+
+    expect(reported).toHaveBeenCalledWith(
+      expect.objectContaining({
+        err: expect.objectContaining({
+          cause: expect.objectContaining({
+            transportPhase: "initial",
+            mediaTransmissionStarted: false,
+            framesCount: 0,
+            samplesCount: 0,
+            automation: { webdriver: false, userAgentMatched: false },
+          }),
+        }),
+      }),
+    );
+  });
+
+  it("keeps camera denial as the primary error and closes the idle socket", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    buildWithoutConnecting(recorder);
+    const internals = recorder as unknown as RecorderInternals;
+    const destroy = vi.fn();
+    internals.stream = { destroyed: false, destroy, write: vi.fn(() => true) };
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+
+    internals.userMediaErrorCallback(
+      new DOMException("Camera access denied", "NotAllowedError"),
+      { video: true },
+    );
+
+    expect({
+      message: reported.mock.calls[0]?.[0].err.message,
+      errors: reported.mock.calls.length,
+      closed: destroy.mock.calls.length,
+      connected: internals.connected,
+    }).toEqual({ message: "Permission denied", errors: 1, closed: 1, connected: false });
+  });
+
+  it("does not replace a blocking camera error with a later idle socket error", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    buildWithoutConnecting(recorder);
+    const internals = recorder as unknown as RecorderInternals;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+    internals.emit("BLOCKING");
+
+    internals.handleStreamError(options.socketUrl, new Event("error"));
+    internals.handleStreamClose(options.socketUrl);
+
+    expect(reported).not.toHaveBeenCalled();
+  });
+
+  it("reconnects an idle camera-ready socket error without emitting a fatal error", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const internals = recorder as unknown as RecorderInternals;
+    internals.connected = true;
+    internals.userMediaLoaded = true;
+    const reconnect = vi
+      .spyOn(internals, "initSocket")
+      .mockImplementation(() => undefined);
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+
+    internals.handleStreamError(options.socketUrl, new Event("error"));
+    vi.advanceTimersByTime(1000);
+
+    expect({
+      attempts: reconnect.mock.calls.length,
+      errors: reported.mock.calls.length,
+    }).toEqual({ attempts: 1, errors: 0 });
+  });
+
+  it("preserves backoff when a reconnection attempt emits an error", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const internals = recorder as unknown as RecorderInternals;
+    internals.reconnecting = true;
+    internals.userMediaLoaded = true;
+    const reconnect = vi
+      .spyOn(internals, "initSocket")
+      .mockImplementation(() => undefined);
+
+    internals.handleStreamError(options.socketUrl, new Event("error"));
+    vi.advanceTimersByTime(1000);
+
+    expect(reconnect).toHaveBeenCalledOnce();
+  });
+
+  it("cancels a pending idle reconnect when an error becomes blocking", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    buildWithoutConnecting(recorder);
+    const internals = recorder as unknown as RecorderInternals;
+    internals.userMediaLoaded = true;
+    internals.reconnecting = true;
+    const reconnect = vi
+      .spyOn(internals, "initSocket")
+      .mockImplementation(() => undefined);
+    internals.handleConnectionFailure({ url2Connect: options.socketUrl, cause: "error" });
+
+    internals.emit("BLOCKING");
+    vi.advanceTimersByTime(1000);
+
+    expect(reconnect).not.toHaveBeenCalled();
+  });
+
+  it("reports idle failure diagnostics when no camera is loaded", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const internals = recorder as unknown as RecorderInternals;
+    internals.connected = true;
+    internals.connectionOpenedAt = Date.now() - 14000;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+
+    internals.handleStreamError(options.socketUrl, new Event("error"));
+
+    expect(reported).toHaveBeenCalledWith(
+      expect.objectContaining({
+        err: expect.objectContaining({
+          cause: expect.objectContaining({
+            transportPhase: "idle",
+            mediaTransmissionStarted: false,
+          }),
+        }),
+      }),
+    );
+  });
+
+  it("ignores late error, connect and data events from a discarded socket", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    vi.stubGlobal(
+      "WebSocket",
+      vi.fn(function () {
+        return { readyState: 0, OPEN: 1, addEventListener: vi.fn(), close: vi.fn() };
+      }),
+    );
+    const internals = recorder as unknown as RecorderInternals;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+    internals.initSocket();
+    const previous = internals.stream;
+    if (!previous?.emit) {
+      throw new Error("Expected a WebSocket stream");
+    }
+    internals.closeIdleConnection("test-camera-denial");
+    internals.initSocket();
+
+    previous.emit("error", new Error("Late transport error"));
+    previous.emit("close");
+    previous.emit("connect");
+    previous.emit("data", Buffer.from("invalid command"));
+
+    expect({
+      errors: reported.mock.calls.length,
+      connected: internals.connected,
+      connecting: internals.connecting,
+      replaced: internals.stream !== previous,
+    }).toEqual({ errors: 0, connected: false, connecting: true, replaced: true });
+    internals.closeIdleConnection("test-cleanup");
+  });
+
+  it("does not fail a replacement socket from an already queued close callback", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const internals = recorder as unknown as RecorderInternals;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+    internals.stream = { destroyed: false, destroy: vi.fn(), write: vi.fn(() => true) };
+    internals.handleStreamClose(options.socketUrl);
+    internals.closeIdleConnection("test-camera-denial");
+    internals.stream = { destroyed: false, destroy: vi.fn(), write: vi.fn(() => true) };
+
+    vi.runAllTimers();
+
+    expect(reported).not.toHaveBeenCalled();
+  });
+
+  it("does not hide an unfinished recording failure behind a blocking notification", () => {
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const internals = recorder as unknown as RecorderInternals;
+    internals.blocking = true;
+    internals.connected = true;
+    internals.mediaTransmissionStarted = true;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+
+    internals.handleStreamError(options.socketUrl, new Event("error"));
+
+    expect(reported).toHaveBeenCalledWith(
+      expect.objectContaining({
+        err: expect.objectContaining({ message: "Recording interrupted" }),
+      }),
+    );
   });
 
   it("pauses video writes under backpressure and resumes after queued writes drain", () => {

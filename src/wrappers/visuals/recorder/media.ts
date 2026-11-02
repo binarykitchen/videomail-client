@@ -121,6 +121,11 @@ abstract class RecorderMedia extends RecorderConnection {
 
     const errorListeners = this.getListeners("ERROR");
 
+    if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
+      // Camera denial is the useful error; don't leave an idle socket behind it.
+      this.closeIdleConnection("camera-access-failed");
+    }
+
     if (errorListeners?.length) {
       if (err.name !== VideomailError.MEDIA_DEVICE_NOT_SUPPORTED) {
         const videomailError = createError({
