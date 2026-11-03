@@ -479,6 +479,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       this.connecting = this.connected = false;
 
       const diagnostic = getWebSocketDiagnostic(url2Connect);
+      const connectionPhase = this.connectionOpenedAt === undefined ? "initial" : "idle";
 
       // Useful for temporary full technical diagnostic regardless of cause
       // this.options.logger.debug(`Recorder: WebSocket diagnostic: ${diagnostic.text}`);
@@ -488,9 +489,17 @@ abstract class RecorderConnection extends RecorderStreamWriter {
        * server can filter these from email alerts while still logging them.
        * Failed probes alone do not establish that the visitor is automated.
        */
-      const message = diagnostic.looksAutomated
-        ? "Automated crawler: WebSocket not supported in this environment"
-        : `Failed to construct WebSocket to ${url2Connect}`;
+
+      let message: string;
+
+      if (diagnostic.looksAutomated) {
+        message = "Automated crawler: WebSocket not supported in this environment";
+      } else {
+        /*
+          `Failed to construct WebSocket` means construction threw before a usable socket existed, unlike a later handshake or stream failure.
+        */
+        message = `Failed to construct WebSocket to ${url2Connect}`;
+      }
 
       const explanation = diagnostic.looksAutomated
         ? "Headless crawlers cannot use Videomail's WebSocket. No action needed."
@@ -501,7 +510,14 @@ abstract class RecorderConnection extends RecorderStreamWriter {
         explanation,
         options: this.options,
         exc,
-        cause: { automation },
+        // Keep constructor failures distinct from handshake and stream failures.
+        cause: {
+          automation,
+          transportStage: "constructor",
+          transportPhase: this.mediaTransmissionStarted ? "recording" : connectionPhase,
+          mediaTransmissionStarted: this.mediaTransmissionStarted,
+          webSocketDiagnostic: diagnostic.details,
+        },
       });
 
       this.emit("ERROR", { err });

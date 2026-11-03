@@ -31,12 +31,6 @@ Structured server response bodies and other diagnostic fields stay available. No
 
 Local `ERROR` events and `getLogLines()` keep their original diagnostic content. Set `reportErrors: false` to handle errors locally only.
 
-## WebSocket failures
-
-Connection reports distinguish `initial`, `idle`, and `recording` transport phases. Diagnostics include whether media transmission has started, frame/sample counts, retry attempts, close details, online status, and page visibility.
-
-The Videomail service keeps recognized pre-recording transport failures in structured logs instead of emailing every occurrence. Client error events, user-visible recovery guidance, and reports for unexpected recording failures remain available.
-
 ## How long data stays
 
 The default logger keeps the latest 30 lines in memory. Change this with `logStackSize`. Debug lines are included even when `verbose` is `false`.

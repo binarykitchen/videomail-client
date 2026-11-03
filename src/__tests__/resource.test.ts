@@ -118,6 +118,27 @@ describe("Resource class", () => {
     expect(secrets.filter((secret) => outgoing.includes(secret))).toEqual([]);
   });
 
+  it("preserves structured constructor evidence in the outgoing server report", async () => {
+    const { resource, error } = createReportFixture();
+    error.cause = {
+      transportStage: "constructor",
+      transportPhase: "initial",
+      mediaTransmissionStarted: false,
+      webSocketDiagnostic: {
+        version: 4,
+        constructor: { name: "WrappedSocket", arity: 2, nativeLike: false },
+        endpoint: "wss://example.test/ws",
+        probeBase: "SyntaxError:The provided URL is invalid.",
+      },
+    };
+
+    await resource.reportError(error);
+
+    expect(reportRequest.send).toHaveBeenCalledWith(
+      expect.objectContaining({ cause: error.cause }),
+    );
+  });
+
   it.each([
     "sessionToken",
     "X-CSRF-Token",

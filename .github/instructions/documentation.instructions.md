@@ -6,6 +6,17 @@ description: "Use when: creating or editing Markdown documentation, READMEs, or 
 
 All must be written in Markdown format.
 
+## Preferences
+
+- Documentation shall be more like a welcoming, entertaining way for:
+  - guidance for new developers rather than exhaustive technical references.
+  - coming with a collection of useful links and advices.
+  - simple steps to figure out this or that problem etc.
+  - explain important decisions made during development for historical context.
+- Generally, we do not want to bloat up documentation. Humans hate too much documentation ;)
+- Anything else should be documented inline, inside the code base itself, close to the relevant code.
+  - The only exception is that if it's being repeated too much in the code base, move it to documentation instead.
+
 ## Outdated/Duplicate contents
 
 - Regularly review documentation under `docs/` to remove outdated content.
@@ -74,3 +85,7 @@ Keep them short, to the point.
 ### Validation
 
 When changing markdown files, run markdown linting or the repo's markdown formatter before handover so documentation changes do not introduce markdownlint errors.
+
+## External Libraries
+
+If external libraries used in this repository already have documentation, link to it instead of duplicating content here. This keeps our documentation concise and avoids redundancy.

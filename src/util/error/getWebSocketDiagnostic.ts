@@ -1,11 +1,12 @@
 /*
- * Some crawlers report "the provided URL is invalid" for valid WebSocket URLs.
+ * Some browser environments reject valid WebSocket URLs during construction.
+ *
  * During investigation:
  * - URL parsing succeeded and the page used HTTPS.
  * - Both a bare wss:// URL and a simple query threw SyntaxError on construction.
  * - User agents looked like Chrome, and navigator.webdriver was false.
  *
- * These probes help separate URL problems from runtimes without working sockets.
+ * These probes test construction, not connectivity or the visitor's identity.
  */
 
 import getAutomationSignals from "../getAutomationSignals";
@@ -69,7 +70,7 @@ function getDiagnosticSignals(probeBase: string, probeSimpleQuery: string) {
     reasons.push("headless_ua_marker");
   }
 
-  // An empty language list can be another automation hint.
+  // Language settings are context, not proof of automation.
   if (navigator.languages.length === 0) {
     reasons.push("no_languages");
   }
@@ -90,16 +91,34 @@ function getDiagnosticSignals(probeBase: string, probeSimpleQuery: string) {
   };
 }
 
-function getWebSocketDiagnostic(url2Connect: string) {
-  const wsCtorFingerprint = String(globalThis.WebSocket)
-    .slice(0, 80)
-    .replace(/\s+/gu, " ");
-  const wsCtorNative = wsCtorFingerprint.includes("[native code]");
+function getConstructorDetails() {
+  const socketConstructor: unknown = globalThis.WebSocket;
+  const available = typeof socketConstructor === "function";
+  let name: string | undefined;
+  let arity: number | undefined;
+  let nativeLike = false;
 
+  if (available) {
+    name = socketConstructor.name.slice(0, 80);
+    arity = socketConstructor.length;
+    nativeLike = Function.prototype.toString
+      .call(socketConstructor)
+      .includes("[native code]");
+  }
+
+  // Native-looking functions can still be proxies; do not treat this as bot evidence.
+  return { available, name, arity, nativeLike };
+}
+
+function getWebSocketDiagnostic(url2Connect: string) {
+  const constructor = getConstructorDetails();
   let urlParsedProtocol = "invalid";
+  let endpoint: string | undefined;
 
   try {
-    urlParsedProtocol = new URL(url2Connect).protocol;
+    const url = new URL(url2Connect);
+    urlParsedProtocol = url.protocol;
+    endpoint = `${url.origin}${url.pathname}`;
   } catch (_exc) {
     // Keep "invalid" when parsing fails.
   }
@@ -111,10 +130,30 @@ function getWebSocketDiagnostic(url2Connect: string) {
   const probeWithSimpleQuery = probeWebSocketConstructor("wss://videomail.io/?a=b");
   const languages = getLanguagesValue();
   const automationSignals = getDiagnosticSignals(probeBase, probeWithSimpleQuery);
+  const details = {
+    version: 4,
+    constructor,
+    endpoint,
+    urlLength: url2Connect.length,
+    urlParsedProtocol,
+    urlHasWhitespace,
+    urlHasControlChars,
+    urlHasReplacementChar,
+    probeBase,
+    probeSimpleQuery: probeWithSimpleQuery,
+    locationProtocol: location.protocol,
+    secureContext: globalThis.isSecureContext,
+    online: navigator.onLine,
+    languages,
+    visibilityState: document.visibilityState,
+    topLevel: window.top === window,
+  };
 
   const diagnosticPairs = [
     `webdriver=${String(navigator.webdriver)}`,
-    `wsCtorNative=${String(wsCtorNative)}`,
+    `wsCtorNative=${String(constructor.nativeLike)}`,
+    `wsCtorName=${constructor.name ?? "unavailable"}`,
+    `wsCtorArity=${constructor.arity ?? "unavailable"}`,
     `looksAutomated=${String(automationSignals.looksAutomated)}`,
     `automationReasons=${automationSignals.reasons}`,
     `urlLen=${url2Connect.length}`,
@@ -134,8 +173,9 @@ function getWebSocketDiagnostic(url2Connect: string) {
   ];
 
   return {
-    text: `websocketDiagnostics(v3): ${diagnosticPairs.join("; ")}`,
+    text: `websocketDiagnostics(v4): ${diagnosticPairs.join("; ")}`,
     looksAutomated: automationSignals.looksAutomated,
+    details,
   };
 }
 
