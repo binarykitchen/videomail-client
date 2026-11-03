@@ -76,7 +76,7 @@
     "get-form-data": "3.0.0",
     "is-power-of-two": "1.0.0",
     "nanoevents": "10.0.0",
-    "serialize-error": "13.0.2",
+    "serialize-error": "13.1.0",
     "superagent": "10.4.1",
     "ua-parser-js": "2.0.10",
     "websocket-stream": "5.5.2"
@@ -101,14 +101,14 @@
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.28",
     "audit-ci": "7.1.0",
-    "chromatic": "18.13.6",
+    "chromatic": "18.13.9",
     "cross-env": "10.1.0",
     "eslint": "10.14.0",
     "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-de-morgan": "2.3.0",
     "eslint-plugin-depend": "1.5.0",
     "eslint-plugin-import-x": "4.17.1",
-    "eslint-plugin-package-json": "1.13.0",
+    "eslint-plugin-package-json": "1.14.0",
     "eslint-plugin-regexp": "3.3.3",
     "eslint-plugin-simple-import-sort": "14.0.0",
     "globals": "17.14.0",
@@ -126,7 +126,7 @@
     "type-fest": "5.10.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   },
   "engines": {
     "node": "^26.12.0",
