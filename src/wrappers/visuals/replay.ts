@@ -357,6 +357,10 @@ class Replay extends Despot {
     const tracks = this.replayElement.getElementsByTagName("track");
     const firstTrack = tracks[0];
 
+    // Always set crossorigin to anonymous for the video element.
+    // This for native apps and for handling cross-origin requests correctly in the browser.
+    this.replayElement.setAttribute("crossorigin", "anonymous");
+
     if (firstTrack) {
       if (src) {
         firstTrack.setAttribute("src", src);
@@ -376,10 +380,6 @@ class Replay extends Despot {
       track.default = true;
 
       this.replayElement.appendChild(track);
-
-      // The local video server may use a different port.
-      // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
-      this.replayElement.setAttribute("crossorigin", "anonymous");
     }
   }
 
