@@ -239,9 +239,10 @@ class Recorder extends RecorderCapture {
 
     this.correctDimensions();
 
-    // Mute the live preview to avoid audio feedback (#35).
+    // Mute the live preview to avoid audio feedback
     this.recorderElement.muted = true;
     this.recorderElement.defaultMuted = true;
+
     this.recorderElement.autoplay = true;
 
     // for iPhones, see https://github.com/webrtc/samples/issues/929

@@ -177,6 +177,7 @@ class UserMedia extends Despot {
     }
 
     this.stopWatchingPlayback?.();
+
     this.stopWatchingPlayback = watchCameraPlayback(this.rawVisualUserMedia, () => {
       this.stopWatchingPlayback = undefined;
       void this.recorder.recoverCameraAfterStall();
