@@ -110,16 +110,28 @@ class UserMedia extends Despot {
     }
   }
 
-  public hasLiveStream() {
-    // An active stream can still contain an ended, disabled, or muted track.
+  private isVideoReady() {
     const videoReady = this.currentVisualStream
       ?.getVideoTracks()
       .some((track) => track.readyState === "live" && track.enabled && !track.muted);
+
+    return Boolean(videoReady);
+  }
+
+  private isAudioReady() {
     const audioReady =
       !isAudioEnabled(this.options) ||
       this.currentVisualStream
         ?.getAudioTracks()
         .some((track) => track.readyState === "live" && track.enabled && !track.muted);
+
+    return Boolean(audioReady);
+  }
+
+  // An active stream can still contain an ended, disabled, or muted track.
+  public hasLiveStream() {
+    const videoReady = this.isVideoReady();
+    const audioReady = this.isAudioReady();
 
     return Boolean(this.currentVisualStream?.active && videoReady && audioReady);
   }
