@@ -4,14 +4,14 @@ General instructions for AI coding agents working with this repository.
 
 ## Instruction Files
 
-This file is the tool-neutral entry point for AI agents working in this repository. [.github/copilot-instructions.md](.github/copilot-instructions.md) adds GitHub Copilot-specific context, while files under [.github/instructions/](.github/instructions/) provide scoped guidance.
+This file is the tool-neutral entry point for AI agents working in this repository. [.github/copilot-instructions.md](.github/copilot-instructions.md) adds GitHub Copilot-specific context, while files under `.github/instructions/` provide scoped guidance.
 
 Use this precedence order for repository guidance:
 
 1. The user's current request
 2. This file and `.github/copilot-instructions.md`
 3. Applicable files under `.github/instructions/`
-4. Relevant human documentation under [Readme](./README.md)
+4. Relevant human documentation under [docs/](./docs/)
 
 ## Instruction Refresh Policy
 
@@ -20,6 +20,8 @@ Read the current contents of a file before editing it. Re-read an instruction fi
 Current repository instructions override cached repository context, assumptions, and memory notes.
 
 Warn the user before a requested scan or refresh would be unusually expensive.
+
+If an instruction file is too large to load fully, tell the user and suggest splitting it into smaller files.
 
 ### Loading Strategy
 
