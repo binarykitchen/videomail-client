@@ -1,10 +1,12 @@
 import getFirstVideoTrack from "../../media/getFirstVideoTrack";
 import MEDIA_EVENTS from "../../media/mediaEvents";
+import watchCameraPlayback from "../../media/watchCameraPlayback";
 import { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
+import getBrowser from "../../util/getBrowser";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
 import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
@@ -28,12 +30,13 @@ class UserMedia extends Despot {
   private audioRecorder?: AudioRecorder | undefined;
   private currentVisualStream?: MediaStream | undefined;
 
-  private onPlayReached = false;
+  private onPlayingReached = false;
   private onLoadedMetaDataReached = false;
   private playingPromiseReached = false;
 
   private videoTrackLabel?: string | undefined;
   private clearInitializationListeners?: (() => void) | undefined;
+  private stopWatchingPlayback?: (() => void) | undefined;
   private initializationId = 0;
 
   private readonly outputEvent = (e: Event) => {
@@ -96,8 +99,15 @@ class UserMedia extends Despot {
       throw new Error("No camera preview is available.");
     }
 
+    const initializationId = this.initializationId;
+    this.stopWatchingPlayback?.();
+    this.stopWatchingPlayback = undefined;
+
     await this.rawVisualUserMedia.play();
     await this.audioRecorder?.resume();
+    if (initializationId === this.initializationId) {
+      this.watchPlayback();
+    }
   }
 
   public hasLiveStream() {
@@ -142,6 +152,8 @@ class UserMedia extends Despot {
     this.options.logger.debug("UserMedia: unloadRemainingEventListeners()");
 
     this.clearInitializationListeners?.();
+    this.stopWatchingPlayback?.();
+    this.stopWatchingPlayback = undefined;
 
     MEDIA_EVENTS.forEach((eventName) => {
       this.rawVisualUserMedia?.removeEventListener(eventName, this.outputEvent);
@@ -153,6 +165,22 @@ class UserMedia extends Despot {
   private audioRecord(audioCallback: AudioProcessCB) {
     this.removeListener("SENDING_FIRST_FRAME");
     this.audioRecorder?.record(audioCallback);
+  }
+
+  private watchPlayback() {
+    if (
+      !this.rawVisualUserMedia ||
+      !this.currentVisualStream ||
+      !getBrowser(this.options).isIOS()
+    ) {
+      return;
+    }
+
+    this.stopWatchingPlayback?.();
+    this.stopWatchingPlayback = watchCameraPlayback(this.rawVisualUserMedia, () => {
+      this.stopWatchingPlayback = undefined;
+      void this.recorder.recoverCameraAfterStall();
+    });
   }
 
   public init(
@@ -172,7 +200,7 @@ class UserMedia extends Despot {
     const initializationId = ++this.initializationId;
 
     // Reset states
-    this.onPlayReached = false;
+    this.onPlayingReached = false;
     this.onLoadedMetaDataReached = false;
     this.playingPromiseReached = false;
     this.videoTrackLabel = undefined;
@@ -187,25 +215,19 @@ class UserMedia extends Despot {
       this.unloadRemainingEventListeners();
       this.removeListener("SENDING_FIRST_FRAME");
 
-      this.rawVisualUserMedia?.removeEventListener("play", onPlay);
+      this.rawVisualUserMedia?.removeEventListener("playing", onPlaying);
       this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
     };
 
     this.clearInitializationListeners = () => {
-      this.rawVisualUserMedia?.removeEventListener("play", onPlay);
+      this.rawVisualUserMedia?.removeEventListener("playing", onPlaying);
       this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
       this.clearInitializationListeners = undefined;
     };
 
     const play = () => {
-      // Reset the media element and discard pending events before playback.
       try {
-        this.rawVisualUserMedia?.load();
-
-        /*
-         * Fixes https://github.com/binarykitchen/videomail.io/issues/401, see
-         * https://github.com/MicrosoftEdge/Demos/blob/master/photocapture/scripts/demo.js#L27
-         */
+        // Assigning srcObject already loads the stream; load() restarts that pipeline.
         if (this.rawVisualUserMedia?.paused) {
           this.options.logger.debug(
             `UserMedia: play(): media.readyState=${this.rawVisualUserMedia.readyState}, media.paused=${this.rawVisualUserMedia.paused}, media.ended=${this.rawVisualUserMedia.ended}, media.played=${pretty(this.rawVisualUserMedia.played)}`,
@@ -238,7 +260,7 @@ class UserMedia extends Despot {
                 unloadAllEventListeners();
                 endedEarlyCallback(
                   createError({
-                    message: "Failed to play user media upon play event.",
+                    message: "Failed to start camera playback.",
                     exc,
                     options: this.options,
                   }),
@@ -252,6 +274,14 @@ class UserMedia extends Despot {
       }
     };
 
+    const notifyReady = () => {
+      this.clearInitializationListeners?.();
+      videoCallback();
+      if (initializationId === this.initializationId) {
+        this.watchPlayback();
+      }
+    };
+
     const fireCallbacks = () => {
       const readyState = this.rawVisualUserMedia?.readyState;
 
@@ -259,11 +289,11 @@ class UserMedia extends Despot {
       this.options.logger.debug(
         `UserMedia: fireCallbacks(` +
           `readyState=${readyState}, ` +
-          `onPlayReached=${this.onPlayReached}, ` +
+          `onPlayingReached=${this.onPlayingReached}, ` +
           `onLoadedMetaDataReached=${this.onLoadedMetaDataReached})`,
       );
 
-      if (this.onPlayReached && this.onLoadedMetaDataReached) {
+      if (this.onPlayingReached && this.onLoadedMetaDataReached) {
         if (this.audioRecorder) {
           const initializeAudio = async (audioRecorder: AudioRecorder) => {
             try {
@@ -293,8 +323,7 @@ class UserMedia extends Despot {
                   });
                 }
 
-                this.clearInitializationListeners?.();
-                videoCallback();
+                notifyReady();
               };
 
               if (params?.recovering) {
@@ -315,15 +344,14 @@ class UserMedia extends Despot {
 
           void initializeAudio(this.audioRecorder);
         } else {
-          this.clearInitializationListeners?.();
-          videoCallback();
+          notifyReady();
         }
       }
     };
 
-    const onPlay = () => {
+    const onPlaying = () => {
       try {
-        this.logEvent("play", {
+        this.logEvent("playing", {
           readyState: this.rawVisualUserMedia?.readyState,
           audio: isAudioEnabled(this.options),
           width: this.rawVisualUserMedia?.width,
@@ -332,7 +360,7 @@ class UserMedia extends Despot {
           videoHeight: this.rawVisualUserMedia?.videoHeight,
         });
 
-        this.rawVisualUserMedia?.removeEventListener("play", onPlay);
+        this.rawVisualUserMedia?.removeEventListener("playing", onPlaying);
 
         if (this.hasEnded() || this.hasInvalidDimensions()) {
           endedEarlyCallback(
@@ -343,7 +371,8 @@ class UserMedia extends Despot {
             }),
           );
         } else {
-          this.onPlayReached = true;
+          // A play event only changes paused; playing means playback has started.
+          this.onPlayingReached = true;
           fireCallbacks();
         }
       } catch (exc) {
@@ -408,7 +437,7 @@ class UserMedia extends Despot {
       }
 
       this.rawVisualUserMedia?.addEventListener("loadedmetadata", onLoadedMetaData);
-      this.rawVisualUserMedia?.addEventListener("play", onPlay);
+      this.rawVisualUserMedia?.addEventListener("playing", onPlaying);
 
       // Keep a handler for media loading failures, even if they rarely occur.
       this.rawVisualUserMedia?.removeEventListener("error", this.handleMediaError);
@@ -435,6 +464,8 @@ class UserMedia extends Despot {
 
   public stop(visualStream?: MediaStream, params?: StopParams) {
     try {
+      this.stopWatchingPlayback?.();
+      this.stopWatchingPlayback = undefined;
       let chosenStream = visualStream;
 
       // Leave stream cleanup to the upcoming initialization when requested.
@@ -597,6 +628,9 @@ class UserMedia extends Despot {
     return {
       audioSampleRate: this.getAudioSampleRate(),
       muted: this.rawVisualUserMedia?.muted,
+      paused: this.rawVisualUserMedia?.paused,
+      currentTime: this.rawVisualUserMedia?.currentTime,
+      readyState: this.rawVisualUserMedia?.readyState,
       width: this.rawVisualUserMedia?.width,
       height: this.rawVisualUserMedia?.height,
       videoWidth: this.rawVisualUserMedia?.videoWidth,
