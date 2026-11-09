@@ -1,9 +1,9 @@
 import { ShowParams } from "../client";
 import { Dimension } from "../types/dimension";
 import { VideomailClientOptions } from "../types/options";
+import getBrowser from "../util/browser/getBrowser";
 import Despot from "../util/Despot";
 import VideomailError from "../util/error/VideomailError";
-import getBrowser from "../util/getBrowser";
 import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import isHidden from "../util/html/isHidden";

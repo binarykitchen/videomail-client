@@ -1,6 +1,6 @@
 import { VideomailClientOptions } from "../../../types/options";
+import getBrowser from "../../../util/browser/getBrowser";
 import Despot from "../../../util/Despot";
-import getBrowser from "../../../util/getBrowser";
 import Visuals from "../../visuals";
 import Countdown from "./recorder/countdown";
 import FacingMode from "./recorder/facingMode";

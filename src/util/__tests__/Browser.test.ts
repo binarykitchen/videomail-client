@@ -32,6 +32,32 @@ describe("Browser class", () => {
     });
   });
 
+  it.each([
+    {
+      android: false,
+      mobile: true,
+      os: "iOS",
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    },
+    {
+      android: true,
+      mobile: true,
+      os: "Android",
+      userAgent:
+        "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+    },
+  ])("detects $os", ({ android, mobile, userAgent }) => {
+    const options = mergeWithDefaultOptions({ fakeUaString: userAgent });
+    const browser = new Browser(options);
+
+    expect({
+      android: browser.isAndroid(),
+      ios: browser.isIOS(),
+      mobile: browser.isMobile(),
+    }).toEqual({ android, ios: !android, mobile });
+  });
+
   it("getNoAccessIssue returns error", () => {
     const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const browser = new Browser(defaultOptions);

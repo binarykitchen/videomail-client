@@ -1,4 +1,4 @@
-import getBrowser from "../../../util/getBrowser";
+import getBrowser from "../../../util/browser/getBrowser";
 import AudioRecorder from "../../../util/html/media/AudioRecorder";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Recorder from "../recorder";

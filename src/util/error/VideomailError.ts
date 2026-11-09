@@ -2,7 +2,7 @@ import { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
 import { VideomailErrorVersions } from "../../types/error";
 import { VideomailClientOptions } from "../../types/options";
-import getBrowser from "../getBrowser";
+import getBrowser from "../browser/getBrowser";
 import HTTPVideomailError from "./HTTPVideomailError";
 
 export interface ErrData extends ErrorOptions {

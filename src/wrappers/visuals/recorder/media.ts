@@ -2,9 +2,9 @@ import type AudioSample from "audio-sample";
 
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
+import getBrowser from "../../../util/browser/getBrowser";
 import createError from "../../../util/error/createError";
 import VideomailError from "../../../util/error/VideomailError";
-import getBrowser from "../../../util/getBrowser";
 import hideElement from "../../../util/html/hideElement";
 import isHidden from "../../../util/html/isHidden";
 import showElement from "../../../util/html/showElement";

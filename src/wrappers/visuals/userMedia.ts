@@ -4,9 +4,9 @@ import watchCameraPlayback from "../../media/watchCameraPlayback";
 import { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
+import getBrowser from "../../util/browser/getBrowser";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
-import getBrowser from "../../util/getBrowser";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
 import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
@@ -167,18 +167,28 @@ class UserMedia extends Despot {
     this.audioRecorder?.record(audioCallback);
   }
 
-  private watchPlayback() {
+  private getIOSCameraPlaybackTarget() {
     if (
       !this.rawVisualUserMedia ||
       !this.currentVisualStream ||
       !getBrowser(this.options).isIOS()
     ) {
+      return undefined;
+    }
+
+    return this.rawVisualUserMedia;
+  }
+
+  private watchPlayback() {
+    const videoElement = this.getIOSCameraPlaybackTarget();
+
+    if (!videoElement) {
       return;
     }
 
     this.stopWatchingPlayback?.();
 
-    this.stopWatchingPlayback = watchCameraPlayback(this.rawVisualUserMedia, () => {
+    this.stopWatchingPlayback = watchCameraPlayback(videoElement, () => {
       this.stopWatchingPlayback = undefined;
       void this.recorder.recoverCameraAfterStall();
     });

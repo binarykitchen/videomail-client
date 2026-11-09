@@ -1,5 +1,5 @@
-import { VideomailClientOptions } from "../types/options";
-import Browser from "./Browser";
+import { VideomailClientOptions } from "../../types/options";
+import Browser from "../Browser";
 
 let browser: Browser | undefined;
 

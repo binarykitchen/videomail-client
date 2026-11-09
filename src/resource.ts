@@ -8,11 +8,11 @@ import { FullVideomailErrorData } from "./types/error";
 import { VideomailClientOptions } from "./types/options";
 import { VideomailThread } from "./types/thread";
 import { PartialVideomail, Videomail, VideomailIdentifierType } from "./types/Videomail";
+import getBrowser from "./util/browser/getBrowser";
 import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import sanitizeErrorReport from "./util/error/sanitizeErrorReport";
 import VideomailError from "./util/error/VideomailError";
-import getBrowser from "./util/getBrowser";
 import { FormMethod, FormMethodType } from "./wrappers/form";
 
 class Resource {

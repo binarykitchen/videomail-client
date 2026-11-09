@@ -12,11 +12,11 @@ import type {
 } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
+import getBrowser from "../util/browser/getBrowser";
 import Despot from "../util/Despot";
 import isRecipientSelectionValid from "../util/email/isRecipientSelectionValid";
 import createError from "../util/error/createError";
 import VideomailError from "../util/error/VideomailError";
-import getBrowser from "../util/getBrowser";
 import getValidity from "../util/getValidity";
 import limitHeight from "../util/html/dimensions/limitHeight";
 import limitWidth from "../util/html/dimensions/limitWidth";
