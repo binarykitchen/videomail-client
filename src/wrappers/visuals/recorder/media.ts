@@ -37,6 +37,8 @@ abstract class RecorderMedia extends RecorderConnection {
 
   protected resumeAfterCameraRecovery = false;
 
+  private automaticCameraRecoveryAttempted = false;
+
   protected submitting = false;
 
   protected built = false;
@@ -219,6 +221,11 @@ abstract class RecorderMedia extends RecorderConnection {
       `Recorder: loadGenuineUserMedia(${params ? pretty(params) : ""})`,
     );
 
+    // A new take or camera/audio selection gets its own automatic-retry budget.
+    if (!params?.recovering) {
+      this.automaticCameraRecoveryAttempted = false;
+    }
+
     this.emit("ASKING_WEBCAM_PERMISSION");
     this.userMediaLoading = true;
     const requestId = ++this.mediaRequestId;
@@ -396,6 +403,19 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   public recoverCamera() {
+    return this.restoreCamera(false);
+  }
+
+  public recoverCameraAfterStall() {
+    return this.restoreCamera(true);
+  }
+
+  /*
+    _stalled_ means the camera preview has stopped delivering frames—even if the browser still reports the camera tracks as live.
+
+    It’s not about a stalled network connection.
+  */
+  private restoreCamera(stalled: boolean) {
     // Resume clicks and visibility events can request the same recovery.
     if (this.cameraRecovery) {
       return this.cameraRecovery;
@@ -415,7 +435,12 @@ abstract class RecorderMedia extends RecorderConnection {
       return Promise.resolve(false);
     }
 
-    const liveStream = this.userMedia.hasLiveStream();
+    if (!stalled) {
+      this.automaticCameraRecoveryAttempted = false;
+    }
+
+    // WebKit can keep tracks live while the preview stops delivering frames.
+    const liveStream = !stalled && this.userMedia.hasLiveStream();
 
     if (liveStream && this.isRecording()) {
       return Promise.resolve(true);
@@ -423,6 +448,29 @@ abstract class RecorderMedia extends RecorderConnection {
 
     if (!liveStream && this.recordingActive && !this.isPaused()) {
       this.pause();
+    }
+
+    if (!liveStream) {
+      this.options.logger.debug(
+        `Recorder: replacing camera stream ${pretty(this.userMedia.getCharacteristics())}`,
+      );
+
+      // Release the old capture session before asking iOS for another one.
+      this.userMedia.stop(undefined, { preserveRecordingState: true });
+      this.userMediaLoaded = false;
+    }
+
+    if (stalled) {
+      if (this.automaticCameraRecoveryAttempted) {
+        this.failCameraRecovery(
+          new Error("The camera stopped delivering frames after an automatic restart."),
+        );
+        return Promise.resolve(false);
+      }
+
+      // One automatic restart, then leave the take safe for an explicit retry.
+      this.automaticCameraRecoveryAttempted = true;
+      this.options.logger.warn("Recorder: camera preview stalled; recovering.");
     }
 
     const recovery = new Promise<boolean>((resolve) => {
@@ -450,7 +498,6 @@ abstract class RecorderMedia extends RecorderConnection {
           }
         });
     } else {
-      this.userMediaLoaded = false;
       this.loadUserMedia({ recovering: true });
     }
 
