@@ -357,10 +357,6 @@ class Replay extends Despot {
     const tracks = this.replayElement.getElementsByTagName("track");
     const firstTrack = tracks[0];
 
-    // Always set crossorigin to anonymous for the video element.
-    // This for native apps and for handling cross-origin requests correctly in the browser.
-    this.replayElement.setAttribute("crossorigin", "anonymous");
-
     if (firstTrack) {
       if (src) {
         firstTrack.setAttribute("src", src);
