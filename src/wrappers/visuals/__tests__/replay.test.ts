@@ -3,8 +3,6 @@ import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptio
 import type Visuals from "../../visuals";
 import Replay from "../replay";
 
-let loadMock: ReturnType<typeof vi.spyOn>;
-
 function createFixture() {
   const parent = document.createElement("div");
   const visualsElement = document.createElement("div");
@@ -21,13 +19,11 @@ function createFixture() {
 
 describe("Replay", () => {
   beforeEach(() => {
-    loadMock = vi
-      .spyOn(HTMLMediaElement.prototype, "load")
-      .mockImplementation(() => undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => undefined);
   });
 
   afterEach(() => {
-    loadMock.mockRestore();
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     vi.useRealTimers();
   });
@@ -47,6 +43,35 @@ describe("Replay", () => {
     replay.build(visualsElement);
 
     expect(replay.getElement()?.getAttribute("playsinline")).toBe("true");
+  });
+
+  it.each(["mp4", "webm"])("sets CORS before assigning a %s preview source", (type) => {
+    const { replay, visualsElement } = createFixture();
+    replay.build(visualsElement);
+    let crossOriginWhenSourceWasAssigned: string | null | undefined;
+    vi.spyOn(HTMLSourceElement.prototype, "src", "set").mockImplementation(() => {
+      crossOriginWhenSourceWasAssigned = replay.getElement()?.crossOrigin;
+    });
+
+    if (type === "mp4") {
+      replay.setMp4Source("https://example.test/preview.mp4");
+    } else {
+      replay.setWebMSource("https://example.test/preview.webm");
+    }
+
+    expect(crossOriginWhenSourceWasAssigned).toBe("anonymous");
+  });
+
+  it("preserves an existing explicit CORS mode", () => {
+    const { replay, visualsElement } = createFixture();
+    const element = document.createElement("video");
+    element.className = "replay";
+    element.crossOrigin = "use-credentials";
+    visualsElement.appendChild(element);
+
+    replay.build(visualsElement);
+
+    expect(element.crossOrigin).toBe("use-credentials");
   });
 
   it("adds an MP4 source", () => {

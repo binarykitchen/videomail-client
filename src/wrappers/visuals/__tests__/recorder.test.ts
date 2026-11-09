@@ -53,6 +53,7 @@ interface RecorderInternals {
   connectionOpenedAt?: number;
   closeIdleConnection(reason: string): void;
   userMediaErrorCallback(err: Error, constraints: MediaStreamConstraints): void;
+  loadGenuineUserMedia(): void;
   userMedia?: UserMedia;
   loop?: Pick<
     RecorderLoop,
@@ -175,6 +176,19 @@ describe("Recorder", () => {
     vi.unstubAllGlobals();
   });
 
+  it("prepares muted inline autoplay before requesting the camera", () => {
+    const { recorder, element } = createFixture();
+
+    buildWithoutConnecting(recorder);
+
+    expect(element.querySelector("video")).toMatchObject({
+      muted: true,
+      defaultMuted: true,
+      autoplay: true,
+      playsInline: true,
+    });
+  });
+
   it("does not resume recording without a live camera stream", () => {
     vi.useFakeTimers();
 
@@ -233,6 +247,105 @@ describe("Recorder", () => {
       sameRequest: first === second,
       requests: getUserMedia.mock.calls.length,
     }).toEqual({ sameRequest: true, requests: 1 });
+  });
+
+  it("releases the old capture session before requesting its replacement", async () => {
+    const { recorder, userMedia, getUserMedia } = createRecoveryFixture();
+    const stop = vi.spyOn(userMedia, "stop");
+
+    await recorder.recoverCamera();
+
+    expect(stop).toHaveBeenCalledBefore(getUserMedia);
+  });
+
+  it("replaces live but frozen camera tracks without resuming or losing the take", async () => {
+    const { recorder, userMedia, live, getUserMedia, internals, loop } =
+      createRecoveryFixture();
+    live.mockReturnValue(true);
+    userMedia.resume();
+    internals.framesCount = 42;
+    internals.samplesCount = 17;
+
+    const restored = await recorder.recoverCameraAfterStall();
+
+    expect({
+      restored,
+      requests: getUserMedia.mock.calls.length,
+      paused: recorder.isPaused(),
+      frames: internals.framesCount,
+      samples: internals.samplesCount,
+      starts: vi.mocked(loop.start).mock.calls.length,
+    }).toEqual({
+      restored: true,
+      requests: 1,
+      paused: true,
+      frames: 42,
+      samples: 17,
+      starts: 0,
+    });
+  });
+
+  it("limits repeated stalls to one automatic restart and keeps the take retryable", async () => {
+    const { recorder, getUserMedia, internals } = createRecoveryFixture();
+    const failed = vi.fn();
+    const fatal = vi.fn();
+    recorder.on("CAMERA_RECOVERY_FAILED", failed);
+    recorder.on("ERROR", fatal);
+    internals.framesCount = 42;
+    await recorder.recoverCameraAfterStall();
+
+    const restored = await recorder.recoverCameraAfterStall();
+
+    expect({
+      restored,
+      requests: getUserMedia.mock.calls.length,
+      recoverable: failed.mock.calls.length,
+      fatal: fatal.mock.calls.length,
+      frames: internals.framesCount,
+      paused: recorder.isPaused(),
+    }).toEqual({
+      restored: false,
+      requests: 1,
+      recoverable: 1,
+      fatal: 0,
+      frames: 42,
+      paused: true,
+    });
+  });
+
+  it("allows an explicit recovery to reset the automatic retry budget", async () => {
+    const { recorder, getUserMedia } = createRecoveryFixture();
+    await recorder.recoverCameraAfterStall();
+    await recorder.recoverCameraAfterStall();
+    await recorder.recoverCamera();
+
+    await recorder.recoverCameraAfterStall();
+
+    expect(getUserMedia).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives a fresh camera request its own automatic retry budget", async () => {
+    const { recorder, getUserMedia, internals } = createRecoveryFixture();
+    await recorder.recoverCameraAfterStall();
+    await recorder.recoverCameraAfterStall();
+
+    internals.loadGenuineUserMedia();
+    await Promise.resolve();
+    await recorder.recoverCameraAfterStall();
+
+    expect(getUserMedia).toHaveBeenCalledTimes(3);
+  });
+
+  it("never replaces an unsent preview after a stale stall callback", async () => {
+    const { recorder, getUserMedia, internals } = createRecoveryFixture();
+    internals.key = PREVIEW_KEY;
+
+    const restored = await recorder.recoverCameraAfterStall();
+
+    expect({ restored, requests: getUserMedia.mock.calls.length }).toEqual({
+      restored: false,
+      requests: 0,
+    });
   });
 
   it("pauses an interrupted active take before reopening its camera", async () => {

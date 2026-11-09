@@ -1,3 +1,4 @@
+import getBrowser from "../../../util/getBrowser";
 import AudioRecorder from "../../../util/html/media/AudioRecorder";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Recorder from "../recorder";
@@ -9,6 +10,7 @@ vi.mock("../../../util/error/createError", () => ({
 
 function createMediaFixture(audio = false) {
   const videoElement = document.createElement("video");
+  const recoverCameraAfterStall = vi.fn();
   const videoTrack = {
     enabled: true,
     getCapabilities: () => ({ frameRate: { max: 30, min: 1 } }),
@@ -33,12 +35,13 @@ function createMediaFixture(audio = false) {
     getAudioTracks: () => (audio ? [audioTrack] : []),
   };
   const stream = media as unknown as MediaStream;
-  const recorder = { getRawVisualUserMedia: () => videoElement } as Recorder;
-  const userMedia = new UserMedia(
-    recorder,
-    mergeWithDefaultOptions({ audio: { enabled: audio } }),
-  );
-  vi.spyOn(videoElement, "load").mockImplementation(() => undefined);
+  const recorder = {
+    getRawVisualUserMedia: () => videoElement,
+    recoverCameraAfterStall,
+  } as unknown as Recorder;
+  const options = mergeWithDefaultOptions({ audio: { enabled: audio } });
+  const userMedia = new UserMedia(recorder, options);
+  const load = vi.spyOn(videoElement, "load").mockImplementation(() => undefined);
   vi.spyOn(videoElement, "play").mockResolvedValue();
   Object.defineProperties(videoElement, {
     videoWidth: { configurable: true, value: 320 },
@@ -58,12 +61,112 @@ function createMediaFixture(audio = false) {
     ready,
     failed,
     onAudio,
+    options,
+    recoverCameraAfterStall,
+    load,
   };
 }
 
 describe("UserMedia", () => {
   afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
     vi.restoreAllMocks();
+    document.body.replaceChildren();
+  });
+
+  it("does not reload an attached live camera stream", () => {
+    const { userMedia, load, stream, ready, failed, onAudio } = createMediaFixture();
+
+    userMedia.init(stream, ready, onAudio, failed);
+
+    expect(load).not.toHaveBeenCalled();
+  });
+
+  it("does not report readiness from play before playback actually starts", () => {
+    const { userMedia, videoElement, stream, ready, failed, onAudio } =
+      createMediaFixture();
+
+    userMedia.init(stream, ready, onAudio, failed);
+    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("loadedmetadata"));
+
+    expect(ready).not.toHaveBeenCalled();
+  });
+
+  it("reports readiness when metadata and actual playback are available", () => {
+    const { userMedia, videoElement, stream, ready, failed, onAudio } =
+      createMediaFixture();
+
+    userMedia.init(stream, ready, onAudio, failed);
+    videoElement.dispatchEvent(new Event("loadedmetadata"));
+    videoElement.dispatchEvent(new Event("playing"));
+
+    expect(ready).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it("asks the recorder to recover a frozen iOS preview", () => {
+    vi.useFakeTimers();
+    const fixture = createMediaFixture();
+    const { userMedia, videoElement, stream, ready, failed, onAudio } = fixture;
+    vi.spyOn(getBrowser(fixture.options), "isIOS").mockReturnValue(true);
+    vi.spyOn(document, "hidden", "get").mockReturnValue(false);
+    vi.spyOn(videoElement, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(0, 0, 320, 240),
+    );
+    document.body.appendChild(videoElement);
+
+    userMedia.init(stream, ready, onAudio, failed);
+    videoElement.dispatchEvent(new Event("loadedmetadata"));
+    videoElement.dispatchEvent(new Event("playing"));
+    vi.advanceTimersByTime(3000);
+
+    expect(fixture.recoverCameraAfterStall).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it.each(["stop", "unload"])("stops monitoring iOS playback on %s", (action) => {
+    vi.useFakeTimers();
+    const fixture = createMediaFixture();
+    const { userMedia, videoElement, stream, ready, failed, onAudio } = fixture;
+    vi.spyOn(getBrowser(fixture.options), "isIOS").mockReturnValue(true);
+    vi.spyOn(document, "hidden", "get").mockReturnValue(false);
+    vi.spyOn(videoElement, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(0, 0, 320, 240),
+    );
+    document.body.appendChild(videoElement);
+    userMedia.init(stream, ready, onAudio, failed);
+    videoElement.dispatchEvent(new Event("loadedmetadata"));
+    videoElement.dispatchEvent(new Event("playing"));
+
+    if (action === "stop") {
+      userMedia.stop();
+    } else {
+      userMedia.unloadRemainingEventListeners();
+    }
+    vi.advanceTimersByTime(10_000);
+
+    expect(fixture.recoverCameraAfterStall).not.toHaveBeenCalled();
+  });
+
+  it("gives restored iOS playback a fresh frame deadline", async () => {
+    vi.useFakeTimers();
+    const fixture = createMediaFixture();
+    const { userMedia, videoElement, stream, ready, failed, onAudio } = fixture;
+    vi.spyOn(getBrowser(fixture.options), "isIOS").mockReturnValue(true);
+    vi.spyOn(document, "hidden", "get").mockReturnValue(false);
+    vi.spyOn(videoElement, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(0, 0, 320, 240),
+    );
+    document.body.appendChild(videoElement);
+    userMedia.init(stream, ready, onAudio, failed);
+    videoElement.dispatchEvent(new Event("loadedmetadata"));
+    videoElement.dispatchEvent(new Event("playing"));
+    vi.advanceTimersByTime(2000);
+
+    await userMedia.restorePlayback();
+    vi.advanceTimersByTime(2000);
+
+    expect(fixture.recoverCameraAfterStall).not.toHaveBeenCalled();
   });
 
   describe.each([
@@ -93,7 +196,7 @@ describe("UserMedia", () => {
       Object.defineProperty(videoTrack, "getCapabilities", { value: getCapabilities });
 
       userMedia.init(stream, ready, onAudio, failed);
-      videoElement.dispatchEvent(new Event("play"));
+      videoElement.dispatchEvent(new Event("playing"));
       videoElement.dispatchEvent(new Event("loadedmetadata"));
 
       expect({
@@ -192,7 +295,7 @@ describe("UserMedia", () => {
     userMedia.init(stream, ready, onAudio, failed, { recovering: true });
 
     userMedia.stop();
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
     expect(ready).not.toHaveBeenCalled();
@@ -227,7 +330,7 @@ describe("UserMedia", () => {
     userMedia.pause();
 
     userMedia.init(stream, ready, onAudio, failed, { recovering: true });
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
     await vi.waitFor(() => {
       expect({
@@ -246,7 +349,7 @@ describe("UserMedia", () => {
     vi.spyOn(AudioRecorder.prototype, "init").mockReturnValue(pending.promise);
 
     userMedia.init(stream, ready, onAudio, failed);
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
     const readyBeforeInitialization = ready.mock.calls.length;
@@ -273,7 +376,7 @@ describe("UserMedia", () => {
     userMedia.record();
     userMedia.pause();
     userMedia.init(stream, ready, onAudio, failed, { recovering: true });
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
     userMedia.stop();
@@ -290,7 +393,7 @@ describe("UserMedia", () => {
     vi.spyOn(AudioRecorder.prototype, "init").mockRejectedValue(error);
 
     userMedia.init(stream, ready, onAudio, failed);
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
     await vi.waitFor(() => {
@@ -308,7 +411,7 @@ describe("UserMedia", () => {
     const pending = Promise.withResolvers<undefined>();
     vi.spyOn(AudioRecorder.prototype, "init").mockReturnValue(pending.promise);
     userMedia.init(stream, ready, onAudio, failed);
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
     userMedia.stop();
@@ -330,10 +433,10 @@ describe("UserMedia", () => {
       .mockReturnValueOnce(pending.promise)
       .mockResolvedValue();
     userMedia.init(stream, ready, onAudio, failed);
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
     userMedia.init(replacementStream, ready, onAudio, failed);
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
     pending.reject(new Error("old module failed"));
     await pending.promise.catch(() => undefined);
@@ -358,7 +461,7 @@ describe("UserMedia", () => {
       .mockReturnValue(resuming.promise);
 
     userMedia.init(stream, ready, onAudio, failed, { recovering: true });
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
     const resumesBeforeInitialization = resume.mock.calls.length;
     initializing.resolve(undefined);
@@ -391,7 +494,7 @@ describe("UserMedia", () => {
     userMedia.pause();
 
     userMedia.init(stream, ready, onAudio, failed, { recovering: true });
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
     videoElement.dispatchEvent(new Event("loadedmetadata"));
 
     await vi.waitFor(() => {
@@ -449,7 +552,7 @@ describe("UserMedia", () => {
 
     userMedia.init(stream, readyCallback, vi.fn(), endedEarlyCallback);
 
-    videoElement.dispatchEvent(new Event("play"));
+    videoElement.dispatchEvent(new Event("playing"));
 
     Object.defineProperties(videoElement, {
       videoWidth: { configurable: true, value: 320 },
