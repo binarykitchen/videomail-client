@@ -161,7 +161,7 @@ For native apps, pair this with `videomailClient.recoverCamera()` when the app r
 Returns a `Promise<boolean>`: `true` if camera recovery succeeds.
 
 - Restarts playback for live tracks.
-- Requests a new stream if camera or microphone tracks have ended.
+- Releases the old capture session before requesting a replacement for ended or muted tracks.
 - Shares pending recovery across duplicate calls.
 - Returns `false` without changes if the client is unbuilt, has an unsent preview, is encoding, or is submitting.
 
@@ -176,6 +176,12 @@ Recovery events:
 - `CAMERA_RECOVERY_FAILED` with an `err`: access, playback, audio setup, or the recovery deadline failed.
 
 The default failure notice keeps the take. Users can retry Resume or stop to keep what they recorded. Stop, reset, unload, and submission cancel pending recovery. Streams that arrive after cancellation are stopped.
+
+On iOS, a visible camera preview with no new frames for three seconds triggers one automatic camera restart. Live tracks alone do not prove that the picture is moving.
+
+An active take stays paused after that restart. A second stall shows the retryable failure notice instead of repeatedly reopening the camera; an explicit recovery allows another attempt.
+
+Background and offscreen previews are not treated as frozen. Camera initialization waits for actual playback and does not reload an attached live stream.
 
 Recovery cannot reconnect a lost recording WebSocket or keep a take after the app process ends. Test the camera and microphone on physical devices, too.
 
@@ -192,6 +198,8 @@ If the parent already has a video element like this:
 ```
 
 The client reuses it. No extra element needed.
+
+Replay elements default to `crossorigin="anonymous"` before video sources are assigned, including previews without captions. An explicit CORS mode on an existing element is preserved; the server must allow the embedding origin.
 
 ### videomailClient.startOver()
 
