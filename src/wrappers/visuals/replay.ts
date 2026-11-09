@@ -269,6 +269,11 @@ class Replay extends Despot {
       throw new Error("There is no replayElement to build on");
     }
 
+    // Native previews need an origin header, even when there are no captions.
+    if (!this.replayElement.hasAttribute("crossorigin")) {
+      this.replayElement.crossOrigin = "anonymous";
+    }
+
     this.hide();
 
     if (this.options.video.autoPlay) {
