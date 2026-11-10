@@ -189,6 +189,47 @@ describe("Recorder", () => {
     });
   });
 
+  it("initializes a lazy silent camera without starting a recording", async () => {
+    const { recorder } = createFixture();
+    buildWithoutConnecting(recorder);
+    const internals = recorder as unknown as RecorderInternals;
+    const userMedia = internals.userMedia;
+    if (!userMedia) {
+      throw new Error("Expected the lazy camera to be built.");
+    }
+    const live = vi.spyOn(userMedia, "hasLiveStream").mockReturnValue(false);
+    const mediaStream = {
+      getTracks: () => [{ stop: vi.fn() }],
+    } as unknown as MediaStream;
+    const getUserMedia = vi.fn().mockResolvedValue(mediaStream);
+    vi.stubGlobal("navigator", {
+      userAgent: navigator.userAgent,
+      mediaDevices: {
+        getUserMedia,
+        getSupportedConstraints: () => ({}),
+      },
+    });
+    vi.spyOn(userMedia, "init").mockImplementation((_stream, ready) => {
+      live.mockReturnValue(true);
+      ready();
+    });
+
+    // This opens the first preview, rather than restoring an already-recorded take.
+    const restored = await recorder.recoverCamera();
+
+    expect({
+      restored,
+      hasRecordingLoop: Boolean(internals.loop),
+      recording: recorder.isRecording(),
+      audio: getUserMedia.mock.calls[0]?.[0]?.audio,
+    }).toEqual({
+      restored: true,
+      hasRecordingLoop: true,
+      recording: false,
+      audio: false,
+    });
+  });
+
   it("does not resume recording without a live camera stream", () => {
     vi.useFakeTimers();
 

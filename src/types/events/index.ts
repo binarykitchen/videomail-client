@@ -30,7 +30,8 @@ export interface VideomailEvents {
   CONNECTED: () => void;
   // Connecting to the server.
   CONNECTING: () => void;
-  // The recording countdown has started.
+  // The recording countdown has started or resumed.
+  // Restoring the camera on foreground alone does not fire this event.
   COUNTDOWN: () => void;
   // About to turn audio off.
   DISABLING_AUDIO: () => void;

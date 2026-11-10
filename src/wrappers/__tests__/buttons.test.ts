@@ -1,6 +1,7 @@
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import Buttons from "../buttons";
 import type Container from "../container";
+import Visuals from "../visuals";
 
 function createFixture(overrides = {}) {
   const element = document.createElement("div");
@@ -43,6 +44,63 @@ function emit(buttons: Buttons, eventName: string, params?) {
     emit: (name: string, eventParams?: unknown) => void;
   };
   emitter.emit(eventName, params);
+}
+
+// Real buttons, overlays, and countdown; fake camera/capture keep this hardware-free.
+function createCountdownFixture() {
+  const element = document.createElement("div");
+  const options = mergeWithDefaultOptions({
+    video: { countdown: 3, stretch: true },
+  });
+  const container = {
+    appendChild: (child: HTMLElement) => element.appendChild(child),
+    beginWaiting: vi.fn(),
+    enableForm: vi.fn(),
+    endWaiting: vi.fn(),
+    hasForm: () => false,
+    insertBefore: (child: HTMLElement, reference: HTMLElement) =>
+      element.insertBefore(child, reference),
+    isCountingDown: () => visuals.isCountingDown(),
+    isOutsideElementOf: () => false,
+    limitHeight: (height: number) => ({ unit: "px", value: height }),
+    limitWidth: (width: number) => ({ unit: "px", value: width }),
+    pause: () => {
+      visuals.pause();
+    },
+    querySelector: (selector: string) => element.querySelector(selector),
+    record: () => {
+      visuals.record();
+    },
+    resume: () => visuals.resume(),
+    stop: () => {
+      visuals.stop();
+    },
+    submit: vi.fn().mockResolvedValue(undefined),
+    validate: vi.fn(),
+  } as unknown as Container;
+  const visuals = new Visuals(container, options);
+  const buttons = new Buttons(container, options);
+  buttons.build();
+  visuals.build();
+  const recorder = visuals.getRecorder();
+  let paused = false;
+  const record = vi.spyOn(recorder, "record").mockImplementation(() => undefined);
+  const recovery = vi.spyOn(recorder, "recoverCamera").mockResolvedValue(true);
+  vi.spyOn(recorder, "isPaused").mockImplementation(() => paused);
+  vi.spyOn(recorder, "pause").mockImplementation(() => {
+    paused = true;
+    emit(buttons, "PAUSED");
+  });
+  vi.spyOn(recorder, "resumeMediaForCountdown").mockImplementation(() => {
+    paused = false;
+  });
+  emit(buttons, "USER_MEDIA_READY", {});
+  element.querySelector<HTMLButtonElement>(".record")?.click();
+  // One countdown tick puts us at 2, before a single video frame has been captured.
+  vi.advanceTimersByTime(950);
+  visuals.pause();
+
+  return { buttons, element, record, recovery, visuals };
 }
 
 describe("Buttons", () => {
@@ -107,14 +165,157 @@ describe("Buttons", () => {
     expect([resume?.disabled, resume?.style.display]).toEqual([false, ""]);
   });
 
-  it("keeps pause controls unchanged during a countdown", () => {
+  it("shows an enabled resume control for a paused countdown", () => {
     const { buttons, element, isCountingDown } = createFixture();
     isCountingDown.mockReturnValue(true);
     buttons.build();
 
     emit(buttons, "PAUSED");
 
-    expect(element.querySelector<HTMLElement>(".resume")?.style.display).toBe("none");
+    const resume = element.querySelector<HTMLButtonElement>(".resume");
+    expect([resume?.disabled, resume?.style.display]).toEqual([false, ""]);
+  });
+
+  describe("countdown background recovery", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    it("keeps 2 paused after foreground recovery and exposes Resume", async () => {
+      const { element, visuals, record } = createCountdownFixture();
+
+      await visuals.recoverCamera();
+      vi.advanceTimersByTime(10_000);
+      const resume = element.querySelector<HTMLButtonElement>(".resume");
+
+      expect({
+        countdown: element.querySelector(".countdown")?.textContent,
+        pausedOverlay: element.querySelector<HTMLElement>(".paused")?.style.display,
+        resume: [resume?.disabled, resume?.style.display],
+        recordingCalls: record.mock.calls.length,
+      }).toEqual({
+        countdown: "2",
+        pausedOverlay: "",
+        resume: [false, ""],
+        recordingCalls: 0,
+      });
+    });
+
+    it("continues from 2 after clicking Resume and starts exactly one take", async () => {
+      const { element, record } = createCountdownFixture();
+
+      element.querySelector<HTMLButtonElement>(".resume")?.click();
+      await Promise.resolve();
+      const resumedAt = element.querySelector(".countdown")?.textContent;
+      vi.advanceTimersByTime(2000);
+
+      expect({ resumedAt, recordings: record.mock.calls.length }).toEqual({
+        resumedAt: "2",
+        recordings: 1,
+      });
+    });
+
+    it("waits for camera recovery before continuing the countdown", async () => {
+      const { element, record, recovery } = createCountdownFixture();
+      const pending = Promise.withResolvers<boolean>();
+      recovery.mockReturnValue(pending.promise);
+      element.querySelector<HTMLButtonElement>(".resume")?.click();
+      vi.advanceTimersByTime(10_000);
+      const whileRecovering = element.querySelector(".countdown")?.textContent;
+
+      pending.resolve(true);
+      await pending.promise;
+      await Promise.resolve();
+      vi.advanceTimersByTime(2000);
+
+      expect({ whileRecovering, recordings: record.mock.calls.length }).toEqual({
+        whileRecovering: "2",
+        recordings: 1,
+      });
+    });
+
+    it("hides Resume and does not offer Stop while the resumed countdown runs", async () => {
+      const { element } = createCountdownFixture();
+      element.querySelector<HTMLButtonElement>(".resume")?.click();
+      await Promise.resolve();
+
+      expect({
+        resume: element.querySelector<HTMLElement>(".resume")?.style.display,
+        stop: element.querySelector<HTMLElement>(".preview")?.style.display,
+        pause: element.querySelector<HTMLElement>(".pause")?.style.display,
+        pausedOverlay: element.querySelector<HTMLElement>(".paused")?.style.display,
+      }).toEqual({
+        resume: "none",
+        stop: "none",
+        pause: "none",
+        pausedOverlay: "none",
+      });
+    });
+
+    it("keeps Resume available if camera recovery fails", async () => {
+      const { element, recovery, record } = createCountdownFixture();
+      recovery.mockResolvedValue(false);
+      element.querySelector<HTMLButtonElement>(".resume")?.click();
+      await Promise.resolve();
+      vi.advanceTimersByTime(5000);
+      const resume = element.querySelector<HTMLButtonElement>(".resume");
+
+      expect({
+        countdown: element.querySelector(".countdown")?.textContent,
+        resume: [resume?.disabled, resume?.style.display],
+        recordings: record.mock.calls.length,
+      }).toEqual({ countdown: "2", resume: [false, ""], recordings: 0 });
+    });
+
+    it("preserves countdown Resume when camera replacement reports readiness", () => {
+      const { buttons, element } = createCountdownFixture();
+
+      emit(buttons, "USER_MEDIA_READY", { recovering: true, paused: true });
+
+      expect({
+        resume: [
+          element.querySelector<HTMLButtonElement>(".resume")?.disabled,
+          element.querySelector<HTMLElement>(".resume")?.style.display,
+        ],
+        record: element.querySelector<HTMLElement>(".record")?.style.display,
+        stop: element.querySelector<HTMLElement>(".preview")?.style.display,
+      }).toEqual({ resume: [false, ""], record: "none", stop: "none" });
+    });
+
+    it("can pause again at 1 and resume without resetting or duplicating the take", async () => {
+      const { element, visuals, record } = createCountdownFixture();
+      element.querySelector<HTMLButtonElement>(".resume")?.click();
+      await Promise.resolve();
+      vi.advanceTimersByTime(950);
+      visuals.pause();
+      vi.advanceTimersByTime(5000);
+      const remaining = element.querySelector(".countdown")?.textContent;
+
+      element.querySelector<HTMLButtonElement>(".resume")?.click();
+      await Promise.resolve();
+      vi.advanceTimersByTime(1000);
+
+      expect({ remaining, recordings: record.mock.calls.length }).toEqual({
+        remaining: "1",
+        recordings: 1,
+      });
+    });
+
+    it("allows the keyboard pause/resume action to continue a paused countdown", async () => {
+      const { visuals, record } = createCountdownFixture();
+
+      visuals.pauseOrResume();
+      await Promise.resolve();
+      vi.advanceTimersByTime(2000);
+
+      expect(record).toHaveBeenCalledExactlyOnceWith();
+    });
   });
 
   it("preserves paused-take controls through camera recovery, resume, and stop", () => {
