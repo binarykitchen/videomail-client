@@ -11,7 +11,7 @@ Use this precedence order for repository guidance:
 1. The user's current request
 2. This file and `.github/copilot-instructions.md`
 3. Applicable files under `.github/instructions/`
-4. Relevant human documentation under [docs/](./docs/)
+4. Relevant human documentation, including the root [README.md](./README.md) and [docs/](./docs/)
 
 ## Instruction Refresh Policy
 

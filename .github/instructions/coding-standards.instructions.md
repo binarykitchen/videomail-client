@@ -17,11 +17,6 @@ Keep it simple. KISS.
 - Prefer the smallest working change, avoid premature abstraction and optimization.
 - Keep functions short and shallow when practical.
 
-### Business logic vs technology-specific code
-
-- Split business logic and technology-specific code as much as possible.
-- So that we can switch technologies without having to rewrite the business logic.
-
 ### Functions
 
 In general: let's keep them **pure, immutable and reusable**.
@@ -32,9 +27,8 @@ Never change function parameters inside the function.
 
 - Each function should do one thing and do it well.
 - If a function is doing more than one thing, split it into focused functions. Use separate files when the functions are independently reusable or the existing folder convention calls for it.
-- Add focused tests under the nearest `__tests__` folder when behavior or regression risk warrants them. Use Vitest and name test files `<name>.test.ts`.
+- Add focused tests under the nearest `__tests__` folder when behavior changes or regression risk warrants them. Use Vitest and name test files `<name>.test.ts`.
 - Keep reusable functions self-contained. Local callbacks and closures may remain near their use.
-- Never declare a function twice.
 - A function may return a value or deliberately perform a side effect.
   - Name accessors with verbs such as `get` and side-effecting operations with verbs that describe the action.
   - If it modifies a parameter, then this is not acceptable. Functions should not have side effects on their parameters. Instead, return a new value and let the caller decide what to do with it.
@@ -43,60 +37,30 @@ Never change function parameters inside the function.
   - Function names should be verbs, not nouns. For example, `getUser()` is better than `user()`.
   - Keep names concise without sacrificing meaning. A very long name can indicate that the function has too many responsibilities.
 
-Like that, if we fine-grade functions, they become easier to reuse and to test. They also become more readable, because they have a clear purpose and a clear name.
+This makes functions easier to reuse and test. They are also easier to read when each has a clear purpose and name.
+
+#### Function naming conventions
+
+- If it returns a boolean, always start with `is`, `has`, `can`, or `should`.
+- Otherwise if it returns a value, name it according to what it represents.
+  - For example, `getUser()` should return a user object, and `calculateTotal()` should return a total value.
+  - Prefixing with a verb is always a great idea.
 
 #### Return behaviour
 
-- Prefer returning early, instead of nesting the main logic inside an `if` statement. This reduces indentation and improves readability.
-- Return expressions directly when the result is already clear. Introduce a named constant when it clarifies intent or supports debugging.
+- Return simple expressions directly.
+- Use a named constant when it clarifies intent or helps with debugging.
 
 #### Function declarations over arrow functions
 
 - Prefer `function foo() {}` declarations over `const foo = () => {}` arrow function expressions.
 - Prefer declarations for named functions when either form is equally clear.
-- Exception: inline callbacks passed directly as arguments (e.g. event handlers, array methods) may use arrow syntax for brevity where no `this` ambiguity exists.
-  - The one-primary-job-per-file rule applies to
-    - exported or reusable helpers.
-    - pure, vanilla functions not related to React components or hooks.
+- Use arrow functions for inline callbacks when they are clearer and do not create `this` ambiguity.
 
-### Classes
+#### Function arguments
 
-Objected-oriented programming (OOP) is welcome in some places, although we prefer functional programming and composition over heavy class hierarchies. But here are some guidelines:
-
-#### Class attributes
-
-- Define them first. Public first, protected ones next and private ones last.
-- Use the `readonly` modifier whenever possible to indicate immutability.
-
-#### Class constructor
-
-- Keep the constructor simple and focused on initializing the class attributes.
-- Avoid putting complex logic or side effects in the constructor.
-- If initialization requires asynchronous operations, consider using an `init` method instead of doing it in the constructor.
-
-#### Class methods
-
-- Keep methods focused on a single responsibility.
-- The naming convention for functions applies to class methods as well.
-- If there are functions, utilities doing the same job, ensure the method delegates to them rather than duplicating logic.
-
-## Comments
-
-- We do not like long comments.
-- Keep them concise, the human way, and easy to read. Emojis are encouraged.
-- Avoid redundant comments that state the obvious.
-- **But** when it's a complicated or non-obvious piece of code, provide a clear and concise explanation.
-- For important, non-obvious behavior or complexity like long if-else chains, **always** add a short inline comment explaining intent or consequence.
-- When it comes to routine, self-explanatory code, keep it uncommented.
-- Add emojis and some humor to make comments more engaging.
-- Add line-breaks in between paragraphs to improve readability.
-- When it comes to language in comments:
-  - Use clear and plain language that is easy to understand.
-  - Remember that it's mostly for (tired) human readers, not for machines.
-  - Links or ASCII diagrams are welcome whenever they help clarify the intent or behavior of the code.
-  - Avoid jargon or overly technical terms unless necessary.
-
-Add a comment when non-obvious intent, constraints, or tradeoffs would otherwise be lost. Do not add comments merely to record that code changed.
+- Keep argument lists small. Group related values in a named object only when it clarifies the function's contract.
+- Many arguments can signal that a function has too many responsibilities; consider splitting it into focused helpers.
 
 ## If-else conditions
 
@@ -106,12 +70,9 @@ We have plenty of those and they reflect our business logic which is crucial. At
 
 - Avoid deeply nested conditionals.
 - Very short ternary expressions are acceptable for simple value choices.
-- Put all if-checks in constant expressions whenever possible.
-- Avoid early returns unless it's a performance optimization.
-  - Because, in an ideal world, each function should only return the value at the end of the function, not before.
-  - Also makes debugging easier, as you have a single exit point to inspect.
+- Use guard clauses when they reduce nesting or avoid unnecessary work.
 - Do not compute a value before an if-else if it is needed only in one branch.
-- If an if condition comes with more than one check, replace it with a self-descriptive helper function.
+- Extract compound conditions into a clearly named helper when that improves readability.
   - Why? With a good function name, no comment is needed to explain the condition ;)
 
 ### Multi-step branches
@@ -124,22 +85,12 @@ We have plenty of those and they reflect our business logic which is crucial. At
 
 - Prefer `async`/`await` when it makes asynchronous control flow clearer. Returning an existing promise directly is fine when no additional handling is needed.
 
-### How to write comments
-
-- Keep them very short and to the point.
-- Do not sound too stiff, and not too formal.
-- Try a more casual, cool, modern tone.
-- Include emojis, because this project is for Sign Language users, using visual expressions.
-- Replace weak verb + adverb pairs with stronger alternatives.
-- Adding emojis is fine, but do not overdo it. Use them only when they add value to the comment.
-
 ## Specific rules
 
 ### Spreading operators
 
-- Use spread syntax only when it is the clearest immutable operation.
-  - But really, we prefer `Object.assign`, `Array.concat`, or `Array.from` when those APIs better express the intended behavior.
-  - It is about human readability and understanding, not just code brevity.
+- Use spread syntax when it clearly expresses an immutable copy.
+- Prefer an explicit API such as `Object.assign` or `Array.from` when it better communicates intent.
 
 ### Avoid unnecessary work
 
@@ -150,16 +101,6 @@ We have plenty of those and they reflect our business logic which is crucial. At
 
 - Do not pass explicit default parameters or options when omitting them keeps the code simpler and the behavior stays the same.
 - Prefer the library's built-in defaults unless the code needs to override them for a concrete behavior change.
-
-### Package management
-
-- Never use `npm install --legacy-peer-deps`, `npm uninstall --legacy-peer-deps`, or any other npm command with `--legacy-peer-deps`.
-- About `npx`:
-  - It is a convenience tool for running binaries from npm packages without installing them globally. However, it can lead to inconsistent behavior and versioning issues.
-  - For a starter, always declare project dependencies in `package.json`, install them with `npm ci` or `npm install`, and invoke local binaries from `node_modules/.bin`.
-  - For convenience it is okay to use `npx` for one-off commands, but avoid it for project scripts and automation.
-- Resolve peer dependency conflicts properly by upgrading, downgrading, replacing, or removing the conflicting packages.
-- If a dependency tree cannot be resolved cleanly, stop and report the conflicting packages and versions to the user instead of applying any workaround flag.
 
 ### Formatting and validation before handover
 
