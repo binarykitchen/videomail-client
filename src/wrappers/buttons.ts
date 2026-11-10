@@ -331,14 +331,17 @@ class Buttons extends Despot {
   }
 
   public adjustButtonsForPause() {
-    if (!this.isCountingDown()) {
-      if (this.pauseButton) {
-        hideElement(this.pauseButton);
-      }
+    // The Paused overlay is not a button; even 3-2-1 needs an explicit way to continue.
+    hideElement(this.pauseButton);
+    hideElement(this.recordButton);
+    showElement(this.resumeButton);
+    enableElement(this.resumeButton);
 
-      showElement(this.resumeButton);
-      enableElement(this.resumeButton);
-      hideElement(this.recordButton);
+    if (this.isCountingDown()) {
+      // The countdown needs Resume too, but there are no captured frames to preview yet.
+      hideElement(this.previewButton);
+      disableElement(this.previewButton);
+    } else {
       showElement(this.previewButton);
       enableElement(this.previewButton);
     }
@@ -388,7 +391,13 @@ class Buttons extends Despot {
   }
 
   private onCountdown() {
+    // Starting or continuing 3-2-1 is not capture yet; first-frame handling restores Stop.
     disableElement(this.recordButton);
+    hideElement(this.recordButton);
+    hideElement(this.recordAgainButton);
+    hideElement(this.pauseButton);
+    hideElement(this.resumeButton);
+    hideElement(this.previewButton);
     disableElement(this.audioOffRadioPair);
     disableElement(this.audioOnRadioPair);
   }

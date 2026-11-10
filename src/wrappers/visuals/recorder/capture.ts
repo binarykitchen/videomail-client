@@ -140,8 +140,8 @@ abstract class RecorderCapture extends RecorderMedia {
       this.userMediaLoaded = true;
       this.clearUserMediaTimeout();
 
-      // Keep the existing loop and its timing when restoring a paused take.
-      if (!switchingFacingMode && !params?.recovering) {
+      // Recovery can be the first activation. Create its loop, but keep an existing take's timing.
+      if (!this.loop || (!switchingFacingMode && !params?.recovering)) {
         this.loop = this.createLoop();
       }
 

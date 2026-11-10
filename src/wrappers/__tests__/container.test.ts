@@ -16,6 +16,7 @@ interface ContainerInternals {
     getRecordingDimensions: () => { width: number; height: number } | undefined;
     getRecorderWidth: (responsive: boolean) => { unit: string; value: number };
     getRecorderHeight: (responsive: boolean) => { unit: string; value: number };
+    isUserMediaLoaded: () => boolean | undefined;
   };
   form?: { transformFormData: (inputs: FormInputs) => FormInputs };
   resource: {
@@ -29,9 +30,13 @@ function getInternals(container: Container) {
   return container as unknown as ContainerInternals;
 }
 
-function createVisibilityFixture(enableAutoPause = true) {
+function createVisibilityFixture(enableAutoPause = true, loadUserMediaOnRecord = false) {
   const container = new Container(
-    mergeWithDefaultOptions({ enableAutoPause, enablePause: true }),
+    mergeWithDefaultOptions({
+      enableAutoPause,
+      enablePause: true,
+      loadUserMediaOnRecord,
+    }),
   );
   const visibility: { change?: (visible: boolean) => void } = {};
   const unsubscribe = vi.fn();
@@ -147,6 +152,23 @@ describe("Container", () => {
       recoveries: recover.mock.calls.length,
       resumes: resume.mock.calls.length,
     }).toEqual({ recoveries: 1, resumes: 0 });
+  });
+
+  it("does not bypass lazy camera consent when the app foregrounds", () => {
+    const { visibility, recover } = createVisibilityFixture(true, true);
+
+    visibility.change?.(true);
+
+    expect(recover).not.toHaveBeenCalled();
+  });
+
+  it("still recovers a lazy camera after the user has enabled it", () => {
+    const { container, visibility, recover } = createVisibilityFixture(true, true);
+    vi.spyOn(getInternals(container).visuals, "isUserMediaLoaded").mockReturnValue(true);
+
+    visibility.change?.(true);
+
+    expect(recover).toHaveBeenCalledExactlyOnceWith();
   });
 
   it("leaves automatic lifecycle handling disabled when configured", () => {

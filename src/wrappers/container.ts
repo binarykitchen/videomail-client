@@ -325,7 +325,14 @@ class Container extends Despot {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (this.built) {
           if (visible) {
-            if (isAutoPauseEnabled(this.options)) {
+            // Foregrounding must not activate a lazy camera before the user's first tap.
+            // A paused take is different: it may need recovery after its stream stopped.
+            if (
+              isAutoPauseEnabled(this.options) &&
+              (!this.options.loadUserMediaOnRecord ||
+                this.visuals.isUserMediaLoaded() ||
+                this.isPaused())
+            ) {
               void this.recoverCamera();
             }
 

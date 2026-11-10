@@ -167,6 +167,14 @@ Returns a `Promise<boolean>`: `true` if camera recovery succeeds.
 
 Recovery keeps frame dimensions, frame/sample counts, and the audio sample rate. It does **not** resume recording or a countdown on its own. The user chooses Resume, which waits for recovery before sending more frames or restarting a paused countdown.
 
+Paused countdowns show an enabled Resume button, including before the first frame. Resume continues from the remaining number after camera recovery; `COUNTDOWN` fires again when it continues.
+
+The same pause/resume keyboard action works during a countdown. Returning to the foreground alone never starts capture.
+
+To enable a preview from a user gesture, set `loadUserMediaOnRecord: true`, wait for `SERVER_READY`, then call `recoverCamera()` directly from an Enable camera button's click handler. Initial activation prepares the recording loop without starting a take; the user can choose Record afterward.
+
+Automatic visibility recovery leaves an unstarted lazy camera alone. Native lifecycle handlers should also wait until the user has enabled it.
+
 With automatic pause enabled, hiding the page pauses recording. Returning to it recovers the camera. Native apps should call `pause()` when backgrounded and `recoverCamera()` when foregrounded. Wire these into your app's lifecycle; no Capacitor dependency is needed. Use recovery, not `startOver()`, to keep a paused take.
 
 Recovery events:

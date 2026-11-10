@@ -342,6 +342,7 @@ class Visuals extends Despot {
   }
 
   private async resumeCountdown() {
+    // Keep the remaining number frozen until the camera is usable again.
     const restored = await this.recoverCamera();
     if (!this.canResumeCountdown(restored)) {
       return;
@@ -350,6 +351,8 @@ class Visuals extends Despot {
     this.recorder.resumeMediaForCountdown();
     this.recorderInsides.resumeCountdown();
     this.recorderInsides.hidePause();
+    // Use COUNTDOWN, not RESUMING: the recording timer must not start yet.
+    this.emit("COUNTDOWN");
   }
 
   public async resume() {
@@ -371,7 +374,14 @@ class Visuals extends Despot {
   }
 
   public pauseOrResume() {
-    if (this.cameraRecoveryFailed && this.recorder.isPaused()) {
+    if (this.isCountingDown()) {
+      // A countdown is not recordable yet, but Space must still pause or resume it.
+      if (this.recorder.isPaused()) {
+        this.resumeFromControl();
+      } else {
+        this.pause();
+      }
+    } else if (this.cameraRecoveryFailed && this.recorder.isPaused()) {
       this.resumeFromControl();
     } else if (this.isRecordable()) {
       if (this.isRecording()) {
