@@ -116,8 +116,6 @@ abstract class RecorderCapture extends RecorderMedia {
         `Recorder: onUserMediaReady(${params ? pretty(params) : ""})`,
       );
 
-      const switchingFacingMode = params?.switchingFacingMode;
-
       if (params?.recovering) {
         if (!this.userMedia?.hasLiveStream()) {
           this.failCameraRecovery(new Error("The restored camera has no live tracks."));
@@ -140,8 +138,7 @@ abstract class RecorderCapture extends RecorderMedia {
       this.userMediaLoaded = true;
       this.clearUserMediaTimeout();
 
-      // Recovery can be the first activation. Create its loop, but keep an existing take's timing.
-      if (!this.loop || (!switchingFacingMode && !params?.recovering)) {
+      if (this.shouldCreateNewLoopForMediaReady(params)) {
         this.loop = this.createLoop();
       }
 
@@ -168,6 +165,11 @@ abstract class RecorderCapture extends RecorderMedia {
         this.emit("ERROR", { exc });
       }
     }
+  }
+
+  private shouldCreateNewLoopForMediaReady(params?: VideomailUserMediaReadyParams) {
+    // Recovery and camera switches keep the current take's timing.
+    return !this.loop || (!params?.switchingFacingMode && !params?.recovering);
   }
 
   private calculateFrameProgress() {
