@@ -69,6 +69,9 @@ We have plenty of those and they reflect our business logic which is crucial. At
 ### General
 
 - Avoid deeply nested conditionals.
+- Keep each `if` condition understandable at a glance. Do not leave conditions that make readers mentally combine several business rules, nested groups, or negated clauses.
+  - Extract complex decisions into clearly named boolean helpers (`should...`, `can...`, `is...`, or `has...`), or use named boolean variables for a one-off local decision.
+  - Keep simple guards and obvious combinations inline; do not add a helper for every operator.
 - Very short ternary expressions are acceptable for simple value choices.
 - Use guard clauses when they reduce nesting or avoid unnecessary work.
 - Do not compute a value before an if-else if it is needed only in one branch.
