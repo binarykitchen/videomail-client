@@ -39,6 +39,22 @@ export interface VideomailErrorData {
 }
 
 export interface FullVideomailErrorData extends VideomailErrorData {
+  diagnostics?: string[] | undefined;
+  native?:
+    | {
+        platform: string;
+        app?: { id: string; version: string; build: string } | undefined;
+        device?:
+          | {
+              model: string;
+              manufacturer: string;
+              operatingSystem: string;
+              osVersion: string;
+              isVirtual: boolean;
+            }
+          | undefined;
+      }
+    | undefined;
   browser: IBrowser;
   cpu?: ICPU | undefined;
   device?: IDevice | undefined;
