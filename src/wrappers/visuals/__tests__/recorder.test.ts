@@ -1088,28 +1088,104 @@ describe("Recorder", () => {
     expect(reconnect).not.toHaveBeenCalled();
   });
 
-  it("reports idle failure diagnostics when no camera is loaded", () => {
-    const { options, recorder } = createFixture();
-    options.reportErrors = false;
+  it("closes an unused socket when the app backgrounds before camera consent", () => {
+    const { recorder } = createFixture();
+    buildWithoutConnecting(recorder);
     const internals = recorder as unknown as RecorderInternals;
-    internals.connected = true;
-    internals.connectionOpenedAt = Date.now() - 14000;
-    const reported = vi.fn();
-    recorder.on("ERROR", reported);
+    const destroy = vi.fn();
+    internals.stream = { destroyed: false, destroy, write: vi.fn(() => true) };
 
-    internals.handleStreamError(options.socketUrl, new Event("error"));
+    recorder.suspendConnection();
 
-    expect(reported).toHaveBeenCalledWith(
-      expect.objectContaining({
-        err: expect.objectContaining({
-          cause: expect.objectContaining({
-            transportPhase: "idle",
-            mediaTransmissionStarted: false,
-          }),
-        }),
-      }),
-    );
+    expect({
+      closed: destroy.mock.calls.length,
+      connected: internals.connected,
+      connecting: internals.connecting,
+      stream: internals.stream,
+    }).toEqual({ closed: 1, connected: false, connecting: false, stream: undefined });
   });
+
+  it("recovers an unused connection without enabling the camera or duplicating sockets", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    const reconnect = vi.spyOn(internals, "initSocket").mockImplementation(() => {
+      internals.connecting = true;
+    });
+    const loadCamera = vi.spyOn(internals, "loadGenuineUserMedia");
+
+    recorder.recoverConnection();
+    recorder.recoverConnection();
+
+    expect({
+      attempts: reconnect.mock.calls.length,
+      cameraRequests: loadCamera.mock.calls.length,
+    }).toEqual({ attempts: 1, cameraRequests: 0 });
+  });
+
+  it("does not replace a socket after media transmission has started", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    internals.mediaTransmissionStarted = true;
+    const destroy = vi.fn();
+    internals.stream = { destroyed: false, destroy, write: vi.fn(() => true) };
+    const reconnect = vi.spyOn(internals, "initSocket");
+
+    recorder.suspendConnection();
+    recorder.recoverConnection();
+
+    expect({
+      closed: destroy.mock.calls.length,
+      attempts: reconnect.mock.calls.length,
+    }).toEqual({ closed: 0, attempts: 0 });
+  });
+
+  it("defers foreground recovery while offline", () => {
+    const { recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    const reconnect = vi
+      .spyOn(internals, "initSocket")
+      .mockImplementation(() => undefined);
+
+    recorder.recoverConnection();
+    const attemptsWhileOffline = reconnect.mock.calls.length;
+    online.mockReturnValue(true);
+    recorder.recoverConnection();
+
+    expect({ attemptsWhileOffline, attempts: reconnect.mock.calls.length }).toEqual({
+      attemptsWhileOffline: 0,
+      attempts: 1,
+    });
+  });
+
+  it.each(["close", "error"])(
+    "reconnects an idle %s before the user has enabled the camera",
+    (event) => {
+      vi.useFakeTimers();
+      const { options, recorder } = createFixture();
+      options.reportErrors = false;
+      const internals = recorder as unknown as RecorderInternals;
+      internals.connected = true;
+      internals.userMediaLoaded = false;
+      const reconnect = vi
+        .spyOn(internals, "initSocket")
+        .mockImplementation(() => undefined);
+      const reported = vi.fn();
+      recorder.on("ERROR", reported);
+
+      if (event === "error") {
+        internals.handleStreamError(options.socketUrl, new Event("error"));
+      } else {
+        internals.handleStreamClose(options.socketUrl);
+      }
+      vi.advanceTimersByTime(1000);
+
+      expect({
+        attempts: reconnect.mock.calls.length,
+        errors: reported.mock.calls.length,
+      }).toEqual({ attempts: 1, errors: 0 });
+    },
+  );
 
   it("ignores late error, connect and data events from a discarded socket", () => {
     vi.useFakeTimers();

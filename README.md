@@ -93,6 +93,7 @@ See [docs/AUDIO.md](docs/AUDIO.md) for details on audio recording options and re
 - [`videomailClient.hide()`](#videomailclienthide)
 - [`videomailClient.record()`](#videomailclientrecord)
 - [`videomailClient.pause()`](#videomailclientpause)
+- [`videomailClient.recoverConnection()`](#videomailclientrecoverconnection)
 - [`videomailClient.recoverCamera()`](#videomailclientrecovercamera)
 - [`videomailClient.replay()`](#videomailclientreplayvideomail-parentelementid)
 - [`videomailClient.startOver()`](#videomailclientstartover)
@@ -152,9 +153,17 @@ Starts recording without requiring the user to press the record button.
 
 ### videomailClient.pause()
 
-Pauses a recording or countdown without losing it. Leaves idle cameras and unsent previews alone.
+Pauses a recording or countdown without losing it. Closes unused WebSockets before the operating system suspends them, while leaving idle cameras and unsent previews alone.
 
-For native apps, pair this with `videomailClient.recoverCamera()` when the app returns to the foreground.
+For native apps, call `recoverConnection()` when the app returns to the foreground, then `recoverCamera()` if the user has already enabled the camera.
+
+### videomailClient.recoverConnection()
+
+Reconnects unused transport without requesting camera permission, resetting the form or starting a take. Call it when a native app foregrounds or its network connection returns. It returns immediately; `CONNECTING` and `CONNECTED` report connection progress.
+
+Duplicate calls leave an open or connecting socket alone. Recovery waits for another call while offline, and ignores unbuilt, unloaded, submitted or blocked clients. Once media has been sent, it never moves the take into a new server session.
+
+Idle socket errors and closes also retry before camera activation. The client keeps its existing retry backoff; initial connection errors and lost recording sessions are still reported.
 
 ### videomailClient.recoverCamera()
 
@@ -175,7 +184,7 @@ To enable a preview from a user gesture, set `loadUserMediaOnRecord: true`, wait
 
 Automatic visibility recovery leaves an unstarted lazy camera alone. Native lifecycle handlers should also wait until the user has enabled it.
 
-With automatic pause enabled, hiding the page pauses recording. Returning to it recovers the camera. Native apps should call `pause()` when backgrounded and `recoverCamera()` when foregrounded. Wire these into your app's lifecycle; no Capacitor dependency is needed. Use recovery, not `startOver()`, to keep a paused take.
+With automatic pause enabled, hiding the page pauses recording and closes unused transport. Returning to it recovers transport and, after camera activation, the camera. Native apps should call `pause()` when backgrounded and `recoverConnection()` when foregrounded, followed by `recoverCamera()` only after the user has enabled it. Wire these into your app's lifecycle; no Capacitor dependency is needed. Use recovery, not `startOver()`, to keep a paused take.
 
 Recovery events:
 

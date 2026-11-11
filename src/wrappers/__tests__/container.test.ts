@@ -162,6 +162,20 @@ describe("Container", () => {
     expect(recover).not.toHaveBeenCalled();
   });
 
+  it("recovers transport before lazy camera consent on foreground", () => {
+    const { container, visibility, recover } = createVisibilityFixture(true, true);
+    const recoverConnection = vi
+      .spyOn(container, "recoverConnection")
+      .mockImplementation(() => undefined);
+
+    visibility.change?.(true);
+
+    expect({
+      connections: recoverConnection.mock.calls.length,
+      cameraRequests: recover.mock.calls.length,
+    }).toEqual({ connections: 1, cameraRequests: 0 });
+  });
+
   it("still recovers a lazy camera after the user has enabled it", () => {
     const { container, visibility, recover } = createVisibilityFixture(true, true);
     vi.spyOn(getInternals(container).visuals, "isUserMediaLoaded").mockReturnValue(true);

@@ -1,4 +1,5 @@
 import { VideomailClient } from "../client";
+import Container from "../wrappers/container";
 
 vi.mock("../util/isAutomatedUserAgent", () => ({
   default: () => true,
@@ -129,5 +130,29 @@ describe("Client", () => {
     videomailClient.show();
 
     expect(videomailClient.isRecording()).toBe(false);
+  });
+
+  it("keeps public pause delegated to safe lifecycle suspension", () => {
+    const suspend = vi
+      .spyOn(Container.prototype, "suspend")
+      .mockImplementation(() => undefined);
+    const videomailClient = new VideomailClient();
+
+    videomailClient.pause();
+
+    expect(suspend).toHaveBeenCalledExactlyOnceWith();
+    suspend.mockRestore();
+  });
+
+  it("exposes transport-only recovery through the public client API", () => {
+    const recover = vi
+      .spyOn(Container.prototype, "recoverConnection")
+      .mockImplementation(() => undefined);
+    const videomailClient = new VideomailClient();
+
+    videomailClient.recoverConnection();
+
+    expect(recover).toHaveBeenCalledExactlyOnceWith();
+    recover.mockRestore();
   });
 });

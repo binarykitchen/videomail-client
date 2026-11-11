@@ -325,6 +325,7 @@ class Container extends Despot {
         // built? see https://github.com/binarykitchen/videomail.io/issues/326
         if (this.built) {
           if (visible) {
+            this.recoverConnection();
             if (this.shouldRecoverCameraWhenVisible()) {
               void this.recoverCamera();
             }
@@ -657,8 +658,19 @@ class Container extends Despot {
   }
 
   public suspend() {
-    if (this.built && (this.isCountingDown() || this.isRecording() || this.isPaused())) {
+    if (!this.built) {
+      return;
+    }
+
+    this.visuals.getRecorder().suspendConnection();
+    if (this.isCountingDown() || this.isRecording() || this.isPaused()) {
       this.pause();
+    }
+  }
+
+  public recoverConnection() {
+    if (this.built && !this.hasError && !this.submitted) {
+      this.visuals.getRecorder().recoverConnection();
     }
   }
 

@@ -53,7 +53,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
   }
 
   private canReconnectAfterStreamClose() {
-    return Boolean(this.connected && this.userMediaLoaded);
+    // Lazy-camera apps still need to recover an established, unused connection.
+    return this.connected || this.reconnecting;
   }
 
   private shouldReportStreamClose() {
@@ -126,6 +127,30 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     this.clearReconnectTimeout();
     this.stopPings();
     this.discardSocket();
+  }
+
+  public suspendConnection() {
+    // Mobile operating systems suspend WebSockets; an unused session can be replaced.
+    this.closeIdleConnection("background");
+  }
+
+  public recoverConnection() {
+    if (
+      this.mediaTransmissionStarted ||
+      this.unloaded ||
+      this.blocking ||
+      this.validate() ||
+      this.connected ||
+      this.connecting ||
+      !this.isOnline()
+    ) {
+      return;
+    }
+
+    // Reconnect transport only: camera permission still requires the user's choice.
+    this.reconnecting = true;
+    this.reconnectAttempts = 0;
+    this.initSocket();
   }
 
   private handleStreamError(url2Connect: string, err: unknown) {
@@ -249,13 +274,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
   }
 
   private canRetryConnection() {
-    return Boolean(
-      this.reconnecting &&
-      this.userMediaLoaded &&
-      this.isOnline() &&
-      !this.unloaded &&
-      !this.blocking,
-    );
+    return this.reconnecting && this.isOnline() && !this.unloaded && !this.blocking;
   }
 
   private shouldContinueReconnect() {
