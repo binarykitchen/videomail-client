@@ -1,6 +1,6 @@
 import type AudioSample from "audio-sample";
-import { isErrorLike } from "serialize-error";
 
+import requestMediaStreamWithPermissions from "../../../media/requestMediaStream";
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
 import getBrowser from "../../../util/browser/getBrowser";
@@ -16,13 +16,6 @@ import type Visuals from "../../visuals";
 import UserMedia from "../userMedia";
 import RecorderConnection from "./connection";
 import createUserMediaConstraints from "./mediaConstraints";
-
-const OPTIONAL_AUDIO_ERRORS = [
-  "NotAllowedError",
-  "PermissionDeniedError",
-  "NotFoundError",
-  "DevicesNotFoundError",
-];
 
 abstract class RecorderMedia extends RecorderConnection {
   protected readonly visuals: Visuals;
@@ -232,43 +225,15 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   private requestMediaStream(constraints: MediaStreamConstraints, requestId: number) {
-    const getPermission = this.shouldFollowMicrophonePermission()
-      ? this.options.audio.getPermission
-      : undefined;
-    let audioRequested = Boolean(constraints.audio);
-    const streamPromise = getPermission
-      ? getPermission().then((permission) => {
-          if (this.unloaded || requestId !== this.mediaRequestId) {
-            return undefined;
-          }
-          audioRequested = permission !== "denied" && Boolean(constraints.audio);
-          return navigator.mediaDevices.getUserMedia({
-            ...constraints,
-            audio: audioRequested,
-          });
-        })
-      : navigator.mediaDevices.getUserMedia(constraints);
-    if (!this.shouldFollowMicrophonePermission() || !constraints.audio) {
-      return streamPromise;
-    }
+    const followsMicrophonePermission = this.shouldFollowMicrophonePermission();
 
-    return streamPromise.catch((exc: unknown) => {
-      if (this.unloaded || requestId !== this.mediaRequestId) {
-        return undefined;
-      }
-
-      const canUseCameraOnly =
-        audioRequested &&
-        // WebRTC DOMExceptions need not have the stack expected by isErrorLike().
-        (exc instanceof Error || exc instanceof DOMException || isErrorLike(exc)) &&
-        OPTIONAL_AUDIO_ERRORS.includes(exc.name);
-
-      if (!canUseCameraOnly) {
-        throw exc;
-      }
-
-      // A denied microphone must not deny silent video. Camera denial still propagates.
-      return navigator.mediaDevices.getUserMedia({ ...constraints, audio: false });
+    return requestMediaStreamWithPermissions({
+      constraints,
+      followsMicrophonePermission,
+      getPermission: followsMicrophonePermission
+        ? this.options.audio.getPermission
+        : undefined,
+      isRequestCurrent: () => !this.unloaded && requestId === this.mediaRequestId,
     });
   }
 
