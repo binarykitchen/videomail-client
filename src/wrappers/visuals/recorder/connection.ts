@@ -135,15 +135,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
   }
 
   public recoverConnection() {
-    if (
-      this.mediaTransmissionStarted ||
-      this.unloaded ||
-      this.blocking ||
-      this.validate() ||
-      this.connected ||
-      this.connecting ||
-      !this.isOnline()
-    ) {
+    if (!this.canRecoverConnection()) {
       return;
     }
 
@@ -151,6 +143,23 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     this.reconnecting = true;
     this.reconnectAttempts = 0;
     this.initSocket();
+  }
+
+  private canRecoverConnection() {
+    return (
+      this.canReplaceTransport() &&
+      !this.validate() &&
+      this.isConnectionIdle() &&
+      this.isOnline()
+    );
+  }
+
+  private canReplaceTransport() {
+    return !this.mediaTransmissionStarted && !this.unloaded && !this.blocking;
+  }
+
+  private isConnectionIdle() {
+    return !this.connected && !this.connecting;
   }
 
   private handleStreamError(url2Connect: string, err: unknown) {

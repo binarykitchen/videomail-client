@@ -663,23 +663,32 @@ class Container extends Despot {
     }
 
     this.visuals.getRecorder().suspendConnection();
-    if (this.isCountingDown() || this.isRecording() || this.isPaused()) {
+
+    if (this.shouldPauseForConnectionSuspension()) {
       this.pause();
     }
   }
 
+  private shouldPauseForConnectionSuspension() {
+    return this.isCountingDown() || this.isRecording() || this.isPaused();
+  }
+
   public recoverConnection() {
-    if (this.built && !this.hasError && !this.submitted) {
+    if (this.canRecover()) {
       this.visuals.getRecorder().recoverConnection();
     }
   }
 
   public recoverCamera() {
-    if (!this.built || this.hasError || this.submitted) {
+    if (!this.canRecover()) {
       return Promise.resolve(false);
     }
 
     return this.visuals.recoverCamera();
+  }
+
+  private canRecover() {
+    return this.built && !this.hasError && !this.submitted;
   }
 
   // That code needs a good rewrite :(
