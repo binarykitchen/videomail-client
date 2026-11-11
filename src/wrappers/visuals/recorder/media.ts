@@ -233,8 +233,12 @@ abstract class RecorderMedia extends RecorderConnection {
       getPermission: followsMicrophonePermission
         ? this.options.audio.getPermission
         : undefined,
-      isRequestCurrent: () => !this.unloaded && requestId === this.mediaRequestId,
+      isRequestCurrent: () => this.isRequestCurrent(requestId),
     });
+  }
+
+  private isRequestCurrent(requestId: number) {
+    return !this.unloaded && requestId === this.mediaRequestId;
   }
 
   private loadGenuineUserMedia(params?: VideomailUserMediaReadyParams) {
@@ -306,11 +310,7 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   protected loadUserMedia(params?: VideomailUserMediaReadyParams) {
-    if (
-      this.userMediaLoaded &&
-      this.shouldFollowMicrophonePermission() &&
-      !params?.recordWhenReady
-    ) {
+    if (this.shouldReloadUserMediaForMicrophonePermission(params)) {
       // Server readiness can follow foreground recovery; refresh idle permissions then.
       void this.recoverCamera();
       return;
@@ -375,6 +375,16 @@ abstract class RecorderMedia extends RecorderConnection {
         throw exc; // throw it further
       }
     }
+  }
+
+  private shouldReloadUserMediaForMicrophonePermission(
+    params?: VideomailUserMediaReadyParams,
+  ) {
+    return (
+      this.userMediaLoaded &&
+      this.shouldFollowMicrophonePermission() &&
+      !params?.recordWhenReady
+    );
   }
 
   protected isNotifying() {
