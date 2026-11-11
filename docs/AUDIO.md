@@ -17,6 +17,16 @@ const videomailClient = new VideomailClient({
 
 ## Other Audio Configurations
 
+### Native permission-based audio
+
+For native integrations whose OS microphone setting replaces an in-app audio switch, set `audio.followPermissions: true` and `audio.switch: false`. Optionally supply `audio.getPermission`, an async function returning the standard `"granted"`, `"denied"` or `"prompt"` state from a read-only native permission API.
+
+A denied state requests camera-only capture directly. Otherwise, capture requests the microphone and falls back to video-only when microphone access is denied or no microphone exists. Camera denial and unrelated capture errors still fail normally. This mode is opt-in; the usual audio-off default and browser audio controls do not change.
+
+`USER_MEDIA_READY` includes `audioEnabled` after permission-based capture, so the host can update its controls, recording allowance and price using the effective stream. Idle recovery re-reads microphone access; once media transmission starts, the take's audio format stays fixed. Do not reset a paused take just to apply a new permission setting.
+
+### Gain and buffering
+
 `audio.volume` sets the recording gain:
 
 - `0`: silence.

@@ -7,6 +7,8 @@ import { Videomail } from "../Videomail";
 // All these event params are always exported from this library
 
 export interface VideomailUserMediaReadyParams {
+  // Effective audio state after permission-based capture has selected its stream.
+  audioEnabled?: boolean | undefined;
   // Requested camera facing mode when readiness follows a camera switch.
   switchingFacingMode?: ConstrainDOMString | undefined;
   // True when the ready stream replaces one lost during an existing take.

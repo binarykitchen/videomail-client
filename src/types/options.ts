@@ -60,6 +60,9 @@ export interface VideomailClientOptions {
   audio: {
     enabled?: boolean | undefined;
     switch?: boolean | undefined;
+    // Let microphone access decide audio without blocking an otherwise usable camera.
+    followPermissions?: boolean | undefined;
+    getPermission?: (() => Promise<PermissionState>) | undefined;
     volume: number;
     bufferSize?: number | "auto";
   };

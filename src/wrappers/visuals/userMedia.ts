@@ -230,6 +230,10 @@ class UserMedia extends Despot {
 
     if (isAudioEnabled(this.options)) {
       this.audioRecorder ??= new AudioRecorder(this, this.options);
+    } else {
+      // A permission change may replace an audio preview with a camera-only stream.
+      this.audioRecorder?.stop();
+      this.audioRecorder = undefined;
     }
 
     const unloadAllEventListeners = () => {

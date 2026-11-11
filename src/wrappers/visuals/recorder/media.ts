@@ -1,4 +1,5 @@
 import type AudioSample from "audio-sample";
+import { isErrorLike } from "serialize-error";
 
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
@@ -15,6 +16,13 @@ import type Visuals from "../../visuals";
 import UserMedia from "../userMedia";
 import RecorderConnection from "./connection";
 import createUserMediaConstraints from "./mediaConstraints";
+
+const OPTIONAL_AUDIO_ERRORS = [
+  "NotAllowedError",
+  "PermissionDeniedError",
+  "NotFoundError",
+  "DevicesNotFoundError",
+];
 
 abstract class RecorderMedia extends RecorderConnection {
   protected readonly visuals: Visuals;
@@ -216,6 +224,54 @@ abstract class RecorderMedia extends RecorderConnection {
     }
   }
 
+  private shouldFollowMicrophonePermission() {
+    // Audio format cannot change after frames or samples belong to the current take.
+    return Boolean(
+      this.options.audio.followPermissions && !this.mediaTransmissionStarted,
+    );
+  }
+
+  private requestMediaStream(constraints: MediaStreamConstraints, requestId: number) {
+    const getPermission = this.shouldFollowMicrophonePermission()
+      ? this.options.audio.getPermission
+      : undefined;
+    let audioRequested = Boolean(constraints.audio);
+    const streamPromise = getPermission
+      ? getPermission().then((permission) => {
+          if (this.unloaded || requestId !== this.mediaRequestId) {
+            return undefined;
+          }
+          audioRequested = permission !== "denied" && Boolean(constraints.audio);
+          return navigator.mediaDevices.getUserMedia({
+            ...constraints,
+            audio: audioRequested,
+          });
+        })
+      : navigator.mediaDevices.getUserMedia(constraints);
+    if (!this.shouldFollowMicrophonePermission() || !constraints.audio) {
+      return streamPromise;
+    }
+
+    return streamPromise.catch((exc: unknown) => {
+      if (this.unloaded || requestId !== this.mediaRequestId) {
+        return undefined;
+      }
+
+      const canUseCameraOnly =
+        audioRequested &&
+        // WebRTC DOMExceptions need not have the stack expected by isErrorLike().
+        (exc instanceof Error || exc instanceof DOMException || isErrorLike(exc)) &&
+        OPTIONAL_AUDIO_ERRORS.includes(exc.name);
+
+      if (!canUseCameraOnly) {
+        throw exc;
+      }
+
+      // A denied microphone must not deny silent video. Camera denial still propagates.
+      return navigator.mediaDevices.getUserMedia({ ...constraints, audio: false });
+    });
+  }
+
   private loadGenuineUserMedia(params?: VideomailUserMediaReadyParams) {
     this.options.logger.debug(
       `Recorder: loadGenuineUserMedia(${params ? pretty(params) : ""})`,
@@ -237,6 +293,10 @@ abstract class RecorderMedia extends RecorderConnection {
       options: this.options,
       userMediaParams: params,
     });
+    const followsMicrophonePermission = this.shouldFollowMicrophonePermission();
+    if (followsMicrophonePermission) {
+      constraints.audio = true;
+    }
 
     this.options.logger.debug(
       summarize(`Recorder: our webcam constraints are:`, constraints),
@@ -249,17 +309,29 @@ abstract class RecorderMedia extends RecorderConnection {
       ),
     );
 
-    const streamPromise = navigator.mediaDevices.getUserMedia(constraints);
+    const streamPromise = this.requestMediaStream(constraints, requestId);
 
     streamPromise
       .then((localStream) => {
+        if (!localStream) {
+          return;
+        }
         if (this.unloaded || requestId !== this.mediaRequestId) {
           localStream.getTracks().forEach((track) => {
             track.stop();
           });
           return;
         }
-        this.getUserMediaCallback(localStream, params, requestId);
+
+        if (followsMicrophonePermission) {
+          const audioEnabled = localStream
+            .getAudioTracks()
+            .some((track) => track.readyState === "live" && track.enabled);
+          this.options.audio.enabled = audioEnabled;
+          this.getUserMediaCallback(localStream, { ...params, audioEnabled }, requestId);
+        } else {
+          this.getUserMediaCallback(localStream, params, requestId);
+        }
       })
       .catch((reason: unknown) => {
         if (!this.unloaded && requestId === this.mediaRequestId) {
@@ -269,6 +341,16 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   protected loadUserMedia(params?: VideomailUserMediaReadyParams) {
+    if (
+      this.userMediaLoaded &&
+      this.shouldFollowMicrophonePermission() &&
+      !params?.recordWhenReady
+    ) {
+      // Server readiness can follow foreground recovery; refresh idle permissions then.
+      void this.recoverCamera();
+      return;
+    }
+
     if (this.userMediaLoaded) {
       this.options.logger.debug(
         "Recorder: skipping loadUserMedia() because it is already loaded",
@@ -439,8 +521,11 @@ abstract class RecorderMedia extends RecorderConnection {
       this.automaticCameraRecoveryAttempted = false;
     }
 
-    // WebKit can keep tracks live while the preview stops delivering frames.
-    const liveStream = !stalled && this.userMedia.hasLiveStream();
+    // Idle native previews re-check permissions after returning from app settings.
+    const liveStream =
+      !stalled &&
+      !this.shouldFollowMicrophonePermission() &&
+      this.userMedia.hasLiveStream();
 
     if (liveStream && this.isRecording()) {
       return Promise.resolve(true);
