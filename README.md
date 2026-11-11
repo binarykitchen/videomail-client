@@ -161,10 +161,6 @@ For native apps, call `recoverConnection()` when the app returns to the foregrou
 
 Reconnects unused transport without requesting camera permission, resetting the form or starting a take. Call it when a native app foregrounds or its network connection returns. It returns immediately; `CONNECTING` and `CONNECTED` report connection progress.
 
-Duplicate calls leave an open or connecting socket alone. Recovery waits for another call while offline, and ignores unbuilt, unloaded, submitted or blocked clients. Once media has been sent, it never moves the take into a new server session.
-
-Idle socket errors and closes also retry before camera activation. The client keeps its existing retry backoff; initial connection errors and lost recording sessions are still reported.
-
 ### videomailClient.recoverCamera()
 
 Returns a `Promise<boolean>`: `true` if camera recovery succeeds.
