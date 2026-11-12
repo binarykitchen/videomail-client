@@ -163,6 +163,14 @@ class Notifier extends Despot {
       return;
     }
 
+    const { width, height, stretch } = this.options.video;
+
+    if (!stretch && width && height) {
+      this.notifyElement.style.width = "100%";
+      this.notifyElement.style.height = "100%";
+      return;
+    }
+
     if (this.options.video.stretch) {
       const heightDimension = this.visuals.getRecorderHeight(true, true);
 

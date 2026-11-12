@@ -99,6 +99,68 @@ describe("Visuals", () => {
     expect(visuals.getRatio()).toBe(0.75);
   });
 
+  it("keeps the configured frame when camera metadata changes after recovery", () => {
+    const { visuals } = createFixture({
+      video: { width: 400, height: 300, stretch: false },
+    });
+    visuals.build();
+    const recorder = visuals.getRecorder();
+    const width = vi.spyOn(recorder, "getRecorderWidth");
+    const height = vi.spyOn(recorder, "getRecorderHeight");
+    const events = visuals as unknown as { emit(event: "LOADED_META_DATA"): void };
+    const dimensions: (string | undefined)[][] = [];
+
+    for (const [cameraWidth, cameraHeight] of [
+      [300, 400],
+      [225, 300],
+      [169, 225],
+    ]) {
+      width.mockReturnValue({ value: cameraWidth, unit: "px" });
+      height.mockReturnValue({ value: cameraHeight, unit: "px" });
+      events.emit("LOADED_META_DATA");
+      const style = visuals.getElement()?.style;
+      dimensions.push([style?.width, style?.height, style?.aspectRatio]);
+    }
+
+    expect(dimensions).toEqual([
+      ["400px", "auto", "400 / 300"],
+      ["400px", "auto", "400 / 300"],
+      ["400px", "auto", "400 / 300"],
+    ]);
+  });
+
+  it("keeps the same frame ratio below the mobile breakpoint", () => {
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(390);
+    const { visuals } = createFixture({
+      video: { width: 400, height: 300, stretch: false, mobileBreakPoint: 740 },
+    });
+
+    visuals.build();
+
+    expect(visuals.getElement()).toMatchObject({
+      style: {
+        width: "100%",
+        height: "auto",
+        maxWidth: "100%",
+        aspectRatio: "400 / 300",
+      },
+    });
+  });
+
+  it("removes the recording frame when switching to a standalone player", () => {
+    const { visuals } = createFixture({
+      video: { width: 400, height: 300, stretch: false },
+    });
+    visuals.build();
+
+    visuals.build(true);
+
+    expect({
+      fixedFrame: visuals.getElement()?.classList.contains("fixedAspectRatio"),
+      ratio: visuals.getElement()?.style.aspectRatio,
+    }).toEqual({ fixedFrame: false, ratio: "" });
+  });
+
   it("delegates width limiting to the container", () => {
     const { limitWidth, visuals } = createFixture();
 

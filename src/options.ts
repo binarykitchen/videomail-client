@@ -73,7 +73,7 @@ const options: VideomailClientOptions = {
     limitSeconds: 30, // Stop recording at this limit.
     countdown: 3, // Set 0 or false to skip the countdown.
 
-    // Set one dimension in pixels. Let the camera's aspect ratio decide the other.
+    // One dimension follows the camera ratio; both reserve a stable display frame.
     width: undefined,
     height: undefined,
     facingMode: "user", // Initial camera: 'user', 'environment', 'left', or 'right'.

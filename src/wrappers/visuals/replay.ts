@@ -200,7 +200,12 @@ class Replay extends Despot {
       Boolean(this.videomail?.mp4) ||
       Boolean(this.videomail?.poster);
 
-    if (hasMedia) {
+    const { width, height, stretch } = this.options.video;
+
+    if (!playerOnly && !stretch && width && height) {
+      this.replayElement.style.width = "100%";
+      this.replayElement.style.height = "100%";
+    } else if (hasMedia) {
       this.correctDimensions(
         true,
         // beware that recorderWidth and videomailHeight can be null sometimes

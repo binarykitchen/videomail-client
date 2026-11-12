@@ -24,7 +24,11 @@ function createFixture() {
   return { element, endWaiting, hideRecorder, notifier, options, visuals };
 }
 
-function emit(notifier: Notifier, eventName: "CONNECTING" | "PROGRESS", params?) {
+function emit(
+  notifier: Notifier,
+  eventName: "CONNECTING" | "PROGRESS" | "USER_MEDIA_READY",
+  params?,
+) {
   const emitter = notifier as unknown as {
     emit: (name: string, eventParams?: unknown) => void;
   };
@@ -66,6 +70,22 @@ describe("Notifier", () => {
     notifier.notify("Connecting …");
 
     expect(element.querySelector("#notifierMessage")?.textContent).toBe("Connecting …");
+  });
+
+  it("keeps encoding notices inside the fixed frame after portrait camera metadata", () => {
+    const { element, notifier, options, visuals } = createFixture();
+    options.video.width = 400;
+    options.video.height = 300;
+    vi.spyOn(visuals, "getRecorderWidth").mockReturnValue({ value: 300, unit: "px" });
+    vi.spyOn(visuals, "getRecorderHeight").mockReturnValue({ value: 400, unit: "px" });
+    notifier.build();
+
+    emit(notifier, "USER_MEDIA_READY");
+    notifier.notify("Encoding");
+
+    expect(element.querySelector(".notifier")).toMatchObject({
+      style: { width: "100%", height: "100%" },
+    });
   });
 
   it("shows an optional explanation", () => {

@@ -13,6 +13,21 @@ green-color         = #00d814
             width 100%
             height 100%
 
+        &.fixedAspectRatio
+            > video
+            > .notifier
+                position absolute
+                inset 0
+
+            > video
+                // Fit pictures without changing captured canvas pixels.
+                object-fit contain
+
+            > .notifier
+                width 100%
+                height 100%
+                overflow auto
+
     .countdown
     .recordTimer
     .recordNote

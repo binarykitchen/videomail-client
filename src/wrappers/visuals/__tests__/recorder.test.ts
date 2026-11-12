@@ -189,6 +189,17 @@ describe("Recorder", () => {
     });
   });
 
+  it("fits the live camera into the configured frame without sizing from metadata", () => {
+    const { recorder, element, options } = createFixture();
+    options.video.stretch = false;
+
+    buildWithoutConnecting(recorder);
+
+    expect(element.querySelector("video")).toMatchObject({
+      style: { width: "100%", height: "100%" },
+    });
+  });
+
   it("initializes a lazy silent camera without starting a recording", async () => {
     const { recorder } = createFixture();
     buildWithoutConnecting(recorder);

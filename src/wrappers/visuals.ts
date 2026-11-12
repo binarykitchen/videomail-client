@@ -25,6 +25,7 @@ class Visuals extends Despot {
 
   private visualsElement?: HTMLElement | null | undefined;
   private built = false;
+  private playerOnly = false;
   private cameraRecoveryFailed = false;
 
   constructor(container: Container, options: VideomailClientOptions) {
@@ -129,6 +130,23 @@ class Visuals extends Despot {
     if (this.options.video.stretch) {
       this.removeDimensions();
     } else if (this.visualsElement) {
+      const { width, height } = this.options.video;
+
+      if (!this.playerOnly && width && height) {
+        // Camera metadata can change after recovery; the display frame must not.
+
+        const fullWidth = useFullWidth(this.options.video.mobileBreakPoint);
+
+        this.visualsElement.classList.add("fixedAspectRatio");
+        this.visualsElement.style.width = fullWidth ? "100%" : `${width}px`;
+        this.visualsElement.style.maxWidth = "100%";
+        this.visualsElement.style.height = "auto";
+        this.visualsElement.style.aspectRatio = `${width} / ${height}`;
+
+        return;
+      }
+
+      this.removeDimensions();
       let heightDimension: Dimension | undefined;
       let widthDimension = useFullWidth(this.options.video.mobileBreakPoint);
 
@@ -159,6 +177,9 @@ class Visuals extends Despot {
 
     this.visualsElement.style.width = "auto";
     this.visualsElement.style.height = "auto";
+    this.visualsElement.style.removeProperty("max-width");
+    this.visualsElement.style.removeProperty("aspect-ratio");
+    this.visualsElement.classList.remove("fixedAspectRatio");
   }
 
   public getRatio() {
@@ -179,6 +200,7 @@ class Visuals extends Despot {
   }
 
   public build(playerOnly = false, parentElement?: HTMLElement | null) {
+    this.playerOnly = playerOnly;
     const parentElementInfo = parentElement
       ? `, parentElement="${pretty(parentElement)}"`
       : "";

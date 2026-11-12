@@ -273,7 +273,7 @@ class Recorder extends RecorderCapture {
     this.built = true;
   }
 
-  // Use the displayed camera dimensions, which can differ on mobile.
+  // Capture follows the source; presentation can use a separate fixed frame.
   public override getRecorderWidth(responsive: boolean) {
     return this.dimensions.getRecorderWidth(responsive);
   }

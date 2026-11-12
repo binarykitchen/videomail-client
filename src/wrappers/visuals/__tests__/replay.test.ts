@@ -3,7 +3,7 @@ import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptio
 import type Visuals from "../../visuals";
 import Replay from "../replay";
 
-function createFixture() {
+function createFixture(overrides = {}) {
   const parent = document.createElement("div");
   const visualsElement = document.createElement("div");
   parent.appendChild(visualsElement);
@@ -12,7 +12,7 @@ function createFixture() {
     isHidden: vi.fn(() => false),
     show: vi.fn(),
   } as unknown as Visuals;
-  const replay = new Replay(visuals, mergeWithDefaultOptions());
+  const replay = new Replay(visuals, mergeWithDefaultOptions(overrides));
 
   return { parent, replay, visuals, visualsElement };
 }
@@ -141,6 +141,43 @@ describe("Replay", () => {
     replay.show(undefined, undefined);
 
     expect(replay.isShown()).toBe(true);
+  });
+
+  it("fits a portrait replay into the same frame as the live camera", () => {
+    const { replay, visualsElement } = createFixture({
+      video: { width: 400, height: 300 },
+    });
+    replay.build(visualsElement);
+
+    replay.setVideomail({
+      width: 300,
+      height: 400,
+      poster: "https://example.test/portrait.jpg",
+    } as Videomail);
+
+    expect(replay.getElement()).toMatchObject({
+      style: { width: "100%", height: "100%" },
+    });
+  });
+
+  it("preserves the original dimensions for a standalone portrait player", () => {
+    const { replay, visualsElement } = createFixture({
+      video: { width: 400, height: 300 },
+    });
+    replay.build(visualsElement);
+
+    replay.setVideomail(
+      {
+        width: 300,
+        height: 400,
+        poster: "https://example.test/portrait.jpg",
+      } as Videomail,
+      true,
+    );
+
+    expect(replay.getElement()).toMatchObject({
+      style: { width: "300px", height: "400px" },
+    });
   });
 
   it("emits PREVIEW_SHOWN when preview media can play", () => {

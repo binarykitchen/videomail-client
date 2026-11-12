@@ -28,6 +28,13 @@ class RecorderDimensions {
       return;
     }
 
+    const { width, height, stretch } = this.context.options.video;
+    if (!stretch && width && height) {
+      recorderElement.style.width = "100%";
+      recorderElement.style.height = "100%";
+      return;
+    }
+
     const widthDimension = useFullWidth(this.context.options.video.mobileBreakPoint);
 
     if (this.context.options.video.stretch || widthDimension) {
