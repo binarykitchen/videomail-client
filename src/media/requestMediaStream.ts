@@ -49,31 +49,39 @@ function retryCameraOnlyAfterAudioError(
   return requestCameraOnly(constraints);
 }
 
-function requestWithOptionalAudio(params: OptionalAudioRequestParams) {
+async function requestWithOptionalAudio(params: OptionalAudioRequestParams) {
   const { constraints, getPermission, isRequestCurrent } = params;
   let audioRequested = Boolean(constraints.audio);
-  const streamPromise = getPermission
-    ? getPermission().then((permission) => {
-        if (!isRequestCurrent()) {
-          return undefined;
-        }
 
-        audioRequested = permission !== "denied" && Boolean(constraints.audio);
+  try {
+    if (getPermission) {
+      const permission = await getPermission();
 
-        return navigator.mediaDevices.getUserMedia({
-          ...constraints,
-          audio: audioRequested,
-        });
-      })
-    : navigator.mediaDevices.getUserMedia(constraints);
+      if (!isRequestCurrent()) {
+        return undefined;
+      }
 
-  if (!constraints.audio) {
-    return streamPromise;
+      audioRequested = permission !== "denied" && Boolean(constraints.audio);
+
+      return await navigator.mediaDevices.getUserMedia({
+        ...constraints,
+        audio: audioRequested,
+      });
+    }
+
+    return await navigator.mediaDevices.getUserMedia(constraints);
+  } catch (error: unknown) {
+    if (!constraints.audio) {
+      throw error;
+    }
+
+    return retryCameraOnlyAfterAudioError(
+      error,
+      constraints,
+      isRequestCurrent,
+      audioRequested,
+    );
   }
-
-  return streamPromise.catch((error: unknown) =>
-    retryCameraOnlyAfterAudioError(error, constraints, isRequestCurrent, audioRequested),
-  );
 }
 
 function requestMediaStream(params: RequestMediaStreamParams) {
