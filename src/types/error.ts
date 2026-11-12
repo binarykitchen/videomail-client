@@ -38,23 +38,23 @@ export interface VideomailErrorData {
   originalPolicy?: string | undefined;
 }
 
+export interface VideomailNativeDevice {
+  model: string;
+  manufacturer: string;
+  operatingSystem: string;
+  osVersion: string;
+  isVirtual: boolean;
+}
+
+export interface VideomailNativeErrorData {
+  platform: string;
+  app?: { id: string; version: string; build: string } | undefined;
+  device?: VideomailNativeDevice | undefined;
+}
+
 export interface FullVideomailErrorData extends VideomailErrorData {
   diagnostics?: string[] | undefined;
-  native?:
-    | {
-        platform: string;
-        app?: { id: string; version: string; build: string } | undefined;
-        device?:
-          | {
-              model: string;
-              manufacturer: string;
-              operatingSystem: string;
-              osVersion: string;
-              isVirtual: boolean;
-            }
-          | undefined;
-      }
-    | undefined;
+  native?: VideomailNativeErrorData | undefined;
   browser: IBrowser;
   cpu?: ICPU | undefined;
   device?: IDevice | undefined;

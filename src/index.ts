@@ -6,7 +6,12 @@ export type { VideomailCommand } from "./types/command";
 export type { VideomailCommandArgs } from "./types/command";
 export type { DeliveryRecord } from "./types/Delivery";
 export type { EmailAddress, EmailAddresses } from "./types/EmailAddress";
-export type { FullVideomailErrorData, VideomailErrorData } from "./types/error";
+export type {
+  FullVideomailErrorData,
+  VideomailErrorData,
+  VideomailNativeDevice,
+  VideomailNativeErrorData,
+} from "./types/error";
 export type { VideomailEvents } from "./types/events";
 export type * from "./types/events/params";
 export type {
