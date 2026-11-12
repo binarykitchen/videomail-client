@@ -344,7 +344,7 @@ describe("AudioRecorder", () => {
     await recorder.init(STREAM);
     const worklet = getWorklet();
 
-    recorder.stop();
+    await recorder.stop();
 
     expect({
       inputs: FakeAudioContext.latest.audioInput.disconnect.mock.calls.length,
@@ -365,19 +365,31 @@ describe("AudioRecorder", () => {
     });
   });
 
-  it("closes the audio context when stopped", async () => {
+  it("waits for the audio context to close when stopped", async () => {
     const recorder = createRecorder();
     await recorder.init(STREAM);
+    const closing = Promise.withResolvers<undefined>();
+    FakeAudioContext.latest.close.mockReturnValue(closing.promise);
+    let stopResolved = false;
 
-    recorder.stop();
+    const stopping = recorder.stop().then(() => {
+      stopResolved = true;
+    });
+    await Promise.resolve();
 
-    expect(FakeAudioContext.latest.close).toHaveBeenCalledOnce();
+    expect({
+      closeCalled: FakeAudioContext.latest.close.mock.calls.length,
+      stopResolved,
+    }).toEqual({ closeCalled: 1, stopResolved: false });
+
+    closing.resolve(undefined);
+    await stopping;
   });
 
   it("does not create an audio context just to stop an unused recorder", () => {
     const recorder = createRecorder();
 
-    recorder.stop();
+    void recorder.stop();
 
     expect(FakeAudioContext.instances).toEqual([]);
   });
@@ -394,8 +406,7 @@ describe("AudioRecorder", () => {
     const recorder = createRecorder();
     await recorder.init(STREAM);
 
-    recorder.stop();
-    recorder.stop();
+    await Promise.all([recorder.stop(), recorder.stop()]);
 
     expect(FakeAudioContext.latest.close).toHaveBeenCalledOnce();
   });
@@ -540,7 +551,7 @@ describe("AudioRecorder", () => {
     FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
     const initialization = recorder.init(STREAM);
 
-    recorder.stop();
+    await recorder.stop();
     pending.resolve(undefined);
     await initialization;
 
@@ -554,7 +565,7 @@ describe("AudioRecorder", () => {
     FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
     const initialization = recorder.init(STREAM);
 
-    recorder.stop();
+    await recorder.stop();
     pending.resolve(undefined);
     await initialization;
 
@@ -568,7 +579,7 @@ describe("AudioRecorder", () => {
     FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
     const initialization = recorder.init(STREAM);
 
-    recorder.stop();
+    await recorder.stop();
     pending.reject(new Error("cancelled module load"));
 
     await expect(initialization).resolves.toBeUndefined();
@@ -580,7 +591,7 @@ describe("AudioRecorder", () => {
     await recorder.init(STREAM);
     const oldContext = FakeAudioContext.latest;
     oldContext.close.mockReturnValue(closing.promise);
-    recorder.stop();
+    void recorder.stop();
 
     await recorder.init(STREAM);
     const newContext = FakeAudioContext.latest;
@@ -668,7 +679,7 @@ describe("AudioRecorder", () => {
     recorder.record(callback);
     const queuedMessage = getWorklet().port.onmessage;
 
-    recorder.stop();
+    await recorder.stop();
     queuedMessage?.(createAudioEvent());
 
     expect(callback).not.toHaveBeenCalled();
@@ -701,11 +712,9 @@ describe("AudioRecorder", () => {
       await recorder.init(STREAM);
       FakeAudioContext.latest.close.mockRejectedValueOnce(error);
 
-      recorder.stop();
+      await recorder.stop();
 
-      await vi.waitFor(() => {
-        expect(onError).toHaveBeenCalledOnce();
-      });
+      expect(onError).toHaveBeenCalledOnce();
     },
   );
 

@@ -372,7 +372,7 @@ describe("UserMedia", () => {
     const pending = Promise.withResolvers<undefined>();
     vi.spyOn(AudioRecorder.prototype, "init").mockReturnValue(pending.promise);
     vi.spyOn(AudioRecorder.prototype, "resume").mockResolvedValue();
-    vi.spyOn(AudioRecorder.prototype, "stop").mockImplementation(() => undefined);
+    vi.spyOn(AudioRecorder.prototype, "stop").mockResolvedValue(undefined);
     userMedia.record();
     userMedia.pause();
     userMedia.init(stream, ready, onAudio, failed, { recovering: true });

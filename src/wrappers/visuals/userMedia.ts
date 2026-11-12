@@ -232,7 +232,7 @@ class UserMedia extends Despot {
       this.audioRecorder ??= new AudioRecorder(this, this.options);
     } else {
       // A permission change may replace an audio preview with a camera-only stream.
-      this.audioRecorder?.stop();
+      void this.audioRecorder?.stop();
       this.audioRecorder = undefined;
     }
 
@@ -511,7 +511,7 @@ class UserMedia extends Despot {
 
         this.setVisualStream();
 
-        this.audioRecorder?.stop();
+        void this.audioRecorder?.stop();
         this.audioRecorder = undefined;
       }
 

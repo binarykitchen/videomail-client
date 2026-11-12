@@ -229,7 +229,7 @@ class AudioRecorder extends Despot {
         this.onAudioProcess(event);
       };
       this.worklet.onprocessorerror = () => {
-        this.stop();
+        void this.stop();
         this.emit("ERROR", {
           err: createError({
             message: "Audio recording processor failed.",
@@ -283,7 +283,7 @@ class AudioRecorder extends Despot {
     }
   }
 
-  public stop() {
+  public async stop() {
     this.options.logger.debug("AudioRecorder: stop()");
 
     this.initializationId++;
@@ -295,19 +295,17 @@ class AudioRecorder extends Despot {
     this.workletReady = undefined;
 
     if (context && context.state !== "closed") {
-      context
-        .close()
-        .then(() => {
-          this.options.logger.debug("AudioRecorder: audio context is closed");
-        })
-        .catch((err: unknown) => {
-          if (err instanceof Error) {
-            this.options.logger.error(createError({ err, options: this.options }));
-            return;
-          }
+      try {
+        await context.close();
+        this.options.logger.debug("AudioRecorder: audio context is closed");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          this.options.logger.error(createError({ err, options: this.options }));
+          return;
+        }
 
-          this.options.logger.error(err);
-        });
+        this.options.logger.error(err);
+      }
     }
   }
 
