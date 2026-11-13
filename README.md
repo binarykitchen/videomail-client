@@ -79,6 +79,8 @@ You can pass options to the `VideomailClient` constructor. See the annotated def
 
 The defaults suit most integrations. Set `whitelistKey` when deploying on your own site; see [Whitelist](#whitelist).
 
+With both `video.width` and `video.height` set and `video.stretch` disabled, the recorder reserves one responsive frame for front/back cameras and recorded previews. On desktop, `width: 400` and `height: 300` reserve a 400×300 frame; smaller screens scale it proportionally. Both video elements fill that frame's height, with the whole picture fitted inside rather than cropped. Host styles should not replace their height with `auto` or impose a separate replay height limit. This display sizing does not change captured canvas pixels.
+
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
 
 ## Audio

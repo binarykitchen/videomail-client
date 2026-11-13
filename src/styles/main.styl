@@ -20,6 +20,9 @@ green-color         = #00d814
                 inset 0
 
             > video
+                // Host styles must not shrink a switched camera or replay inside its frame.
+                min-height 100%
+                max-height 100%
                 // Fit pictures without changing captured canvas pixels.
                 object-fit contain
 
