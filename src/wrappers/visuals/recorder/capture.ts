@@ -168,8 +168,11 @@ abstract class RecorderCapture extends RecorderMedia {
   }
 
   private shouldCreateNewLoopForMediaReady(params?: VideomailUserMediaReadyParams) {
-    // Recovery and camera switches keep the current take's timing.
-    return !this.loop || (!params?.switchingFacingMode && !params?.recovering);
+    // Keep an active take's frame count and elapsed time on the same loop.
+    return (
+      !this.loop ||
+      (!this.recordingActive && !params?.switchingFacingMode && !params?.recovering)
+    );
   }
 
   private calculateFrameProgress() {

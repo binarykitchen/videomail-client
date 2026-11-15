@@ -54,6 +54,7 @@ interface RecorderInternals {
   closeIdleConnection(reason: string): void;
   userMediaErrorCallback(err: Error, constraints: MediaStreamConstraints): void;
   loadGenuineUserMedia(): void;
+  onUserMediaReady(): void;
   userMedia?: UserMedia;
   loop?: Pick<
     RecorderLoop,
@@ -238,6 +239,24 @@ describe("Recorder", () => {
       hasRecordingLoop: true,
       recording: false,
       audio: false,
+    });
+  });
+
+  it("keeps the active capture loop when media reports ready during a take", () => {
+    const { recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    const loop = internals.loop;
+
+    internals.recordingActive = true;
+    internals.framesCount = 115;
+    internals.onUserMediaReady();
+
+    expect({
+      loopChanged: internals.loop !== loop,
+      framesCount: internals.framesCount,
+    }).toEqual({
+      loopChanged: false,
+      framesCount: 115,
     });
   });
 
