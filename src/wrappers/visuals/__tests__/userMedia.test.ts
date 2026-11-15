@@ -75,6 +75,36 @@ describe("UserMedia", () => {
     document.body.replaceChildren();
   });
 
+  it("captures at the configured size even when the preview is narrower", () => {
+    const { userMedia, videoElement, options } = createMediaFixture();
+    options.video.width = 960;
+    options.video.height = 720;
+    Object.defineProperties(videoElement, {
+      videoWidth: { configurable: true, value: 1280 },
+      videoHeight: { configurable: true, value: 960 },
+    });
+
+    const canvas = userMedia.createCanvas();
+
+    expect({ width: canvas.width, height: canvas.height }).toEqual({
+      width: 960,
+      height: 720,
+    });
+  });
+
+  it("does not upscale when the camera cannot meet the configured capture size", () => {
+    const { userMedia, options } = createMediaFixture();
+    options.video.width = 960;
+    options.video.height = 720;
+
+    const canvas = userMedia.createCanvas();
+
+    expect({ width: canvas.width, height: canvas.height }).toEqual({
+      width: 320,
+      height: 240,
+    });
+  });
+
   it("does not reload an attached live camera stream", () => {
     const { userMedia, load, stream, ready, failed, onAudio } = createMediaFixture();
 

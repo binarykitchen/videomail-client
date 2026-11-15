@@ -79,7 +79,11 @@ You can pass options to the `VideomailClient` constructor. See the annotated def
 
 The defaults suit most integrations. Set `whitelistKey` when deploying on your own site; see [Whitelist](#whitelist).
 
-With both `video.width` and `video.height` set and `video.stretch` disabled, the recorder reserves one responsive frame for front/back cameras and recorded previews. On desktop, `width: 400` and `height: 300` reserve a 400×300 frame; smaller screens scale it proportionally. Both video elements fill that frame's height, with the whole picture fitted inside rather than cropped. Host styles should not replace their height with `auto` or impose a separate replay height limit. This display sizing does not change captured canvas pixels.
+With both `video.width` and `video.height` set and `video.stretch` disabled, the recorder reserves one responsive frame for front/back cameras and recorded previews.
+
+On desktop, `width: 400` and `height: 300` reserve a 400×300 frame; smaller screens scale it proportionally. Both video elements fill that frame's height, with the whole picture fitted inside rather than cropped.
+
+Host styles should not replace their height with `auto` or impose a separate replay height limit. Camera constraints use these dimensions as ideals; captured frames use the camera's actual dimensions, capped proportionally to the configured width and height, independently of the preview's on-screen size.
 
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
 
@@ -277,7 +281,7 @@ Changes the time limit for further recording.
 
 The `SUBMITTED` event includes a `videomail` object. Its fields may evolve; check the exported `Videomail` type for the current shape.
 
-For new recordings, `width` and `height` describe the captured canvas frames. They are not the viewport or resized preview dimensions. They stay available after the camera stops and are replaced when you record again.
+For new recordings, `width` and `height` in the submitted data describe the captured canvas frames. They are not the viewport or resized preview dimensions. They stay available after the camera stops and are replaced when you record again.
 
 Here's a shortened example:
 

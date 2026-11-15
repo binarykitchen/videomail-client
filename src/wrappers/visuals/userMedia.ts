@@ -105,7 +105,7 @@ class UserMedia extends Despot {
 
     await this.rawVisualUserMedia.play();
     await this.audioRecorder?.resume();
-    if (initializationId === this.initializationId) {
+    if (this.isCurrentInitialization(initializationId)) {
       this.watchPlayback();
     }
   }
@@ -126,6 +126,11 @@ class UserMedia extends Despot {
         .some((track) => track.readyState === "live" && track.enabled && !track.muted);
 
     return Boolean(audioReady);
+  }
+
+  // Async callbacks from replaced streams must not affect the current initialization.
+  private isCurrentInitialization(initializationId: number) {
+    return initializationId === this.initializationId;
   }
 
   // An active stream can still contain an ended, disabled, or muted track.
@@ -152,6 +157,11 @@ class UserMedia extends Despot {
     const { videoWidth, videoHeight } = this.rawVisualUserMedia;
 
     return (videoWidth > 0 && videoWidth < 3) || (videoHeight > 0 && videoHeight < 3);
+  }
+
+  // Playback and metadata events use the same camera-availability rule.
+  private isCameraAvailable() {
+    return !this.hasEnded() && !this.hasInvalidDimensions();
   }
 
   private logEvent(eventType: string, params) {
@@ -263,7 +273,7 @@ class UserMedia extends Despot {
           this.rawVisualUserMedia
             .play()
             .then(() => {
-              if (initializationId !== this.initializationId) {
+              if (!this.isCurrentInitialization(initializationId)) {
                 return;
               }
               if (!this.playingPromiseReached) {
@@ -274,7 +284,7 @@ class UserMedia extends Despot {
               }
             })
             .catch((exc: unknown) => {
-              if (initializationId !== this.initializationId) {
+              if (!this.isCurrentInitialization(initializationId)) {
                 return;
               }
               // Switching tabs can interrupt playback. Warn, but allow a later retry.
@@ -304,7 +314,7 @@ class UserMedia extends Despot {
     const notifyReady = () => {
       this.clearInitializationListeners?.();
       videoCallback();
-      if (initializationId === this.initializationId) {
+      if (this.isCurrentInitialization(initializationId)) {
         this.watchPlayback();
       }
     };
@@ -327,7 +337,7 @@ class UserMedia extends Despot {
               await audioRecorder.init(localMediaStream);
 
               if (
-                initializationId !== this.initializationId ||
+                !this.isCurrentInitialization(initializationId) ||
                 this.currentVisualStream !== localMediaStream
               ) {
                 return;
@@ -335,7 +345,7 @@ class UserMedia extends Despot {
 
               const onAudioReady = () => {
                 if (
-                  initializationId !== this.initializationId ||
+                  !this.isCurrentInitialization(initializationId) ||
                   this.currentVisualStream !== localMediaStream
                 ) {
                   return;
@@ -358,7 +368,7 @@ class UserMedia extends Despot {
               }
               onAudioReady();
             } catch (exc) {
-              if (initializationId !== this.initializationId) {
+              if (!this.isCurrentInitialization(initializationId)) {
                 return;
               }
               unloadAllEventListeners();
@@ -389,7 +399,7 @@ class UserMedia extends Despot {
 
         this.rawVisualUserMedia?.removeEventListener("playing", onPlaying);
 
-        if (this.hasEnded() || this.hasInvalidDimensions()) {
+        if (!this.isCameraAvailable()) {
           endedEarlyCallback(
             createError({
               message: "Already busy",
@@ -421,7 +431,7 @@ class UserMedia extends Despot {
 
       this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
 
-      if (!this.hasEnded() && !this.hasInvalidDimensions()) {
+      if (this.isCameraAvailable()) {
         this.emit("LOADED_META_DATA");
 
         this.onLoadedMetaDataReached = true;
@@ -524,19 +534,48 @@ class UserMedia extends Despot {
     }
   }
 
+  // Canvas scaling requires both source dimensions.
+  private hasVideoDimensions(dimensions: {
+    videoWidth: number | undefined;
+    videoHeight: number | undefined;
+  }): dimensions is { videoWidth: number; videoHeight: number } {
+    return Boolean(dimensions.videoWidth && dimensions.videoHeight);
+  }
+
   public createCanvas() {
     const canvas = document.createElement("canvas");
-    const rawWidthDimension = this.getRawWidth(true);
+    const videoDimensions = {
+      videoWidth: this.getVideoWidth(),
+      videoHeight: this.getVideoHeight(),
+    };
 
-    if (rawWidthDimension.value) {
-      canvas.width = rawWidthDimension.value;
+    if (!this.hasVideoDimensions(videoDimensions)) {
+      const rawWidthDimension = this.getRawWidth(true);
+      const rawHeight = this.getRawHeight(true);
+
+      if (rawWidthDimension.value) {
+        canvas.width = rawWidthDimension.value;
+      }
+
+      if (rawHeight) {
+        canvas.height = rawHeight;
+      }
+
+      return canvas;
     }
 
-    const rawHeight = this.getRawHeight(true);
+    const { videoWidth, videoHeight } = videoDimensions;
 
-    if (rawHeight) {
-      canvas.height = rawHeight;
-    }
+    // Keep capture resolution independent of the responsive preview element.
+    const captureWidth =
+      this.options.video.width || this.getRawWidth(true).value || videoWidth;
+    const captureHeight =
+      this.options.video.height || this.getRawHeight(true) || videoHeight;
+    const scale = Math.min(1, captureWidth / videoWidth, captureHeight / videoHeight);
+
+    // Fit within the requested dimensions without upscaling or distorting camera output.
+    canvas.width = Math.floor((videoWidth * scale) / 2) * 2;
+    canvas.height = Math.floor((videoHeight * scale) / 2) * 2;
 
     return canvas;
   }
