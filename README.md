@@ -89,6 +89,8 @@ The examples in [src/stories](https://github.com/binarykitchen/videomail-client/
 
 ## Audio
 
+Recording timing includes WebSocket backpressure waits, during which audio continues, but excludes explicit pauses. This keeps playback at the measured capture speed rather than speeding up slower recordings.
+
 See [docs/AUDIO.md](docs/AUDIO.md) for details on audio recording options and requirements.
 
 ## API

@@ -57,6 +57,10 @@ abstract class RecorderCapture extends RecorderMedia {
 
   private sampleProgress?: string | undefined;
 
+  private recordingElapsedTimeMs = 0;
+
+  private recordingStartedAtMs?: number | undefined;
+
   protected canvas?: HTMLCanvasElement | undefined;
 
   protected ctx?: CanvasRenderingContext2D | undefined | null;
@@ -291,16 +295,22 @@ abstract class RecorderCapture extends RecorderMedia {
     this.loop?.dispose();
   }
 
-  private getIntervalSum(): number | undefined {
-    if (!this.loop) {
-      return undefined;
-    }
+  private getIntervalSum() {
+    const activeTimeMs =
+      this.recordingStartedAtMs === undefined
+        ? 0
+        : performance.now() - this.recordingStartedAtMs;
 
-    return this.loop.getElapsedTime();
+    return this.recordingElapsedTimeMs + activeTimeMs;
+  }
+
+  private pauseRecordingClock() {
+    this.recordingElapsedTimeMs = this.getIntervalSum();
+    this.recordingStartedAtMs = undefined;
   }
 
   private getAvgInterval() {
-    const intervalSum = this.getIntervalSum() ?? 0;
+    const intervalSum = this.getIntervalSum();
 
     // Explicitly reject undefined and invalid values (zero or negative).
     if (!this.hasValidInterval(intervalSum)) {
@@ -311,7 +321,7 @@ abstract class RecorderCapture extends RecorderMedia {
   }
 
   private getAvgFps() {
-    const intervalSum = this.getIntervalSum() ?? 0;
+    const intervalSum = this.getIntervalSum();
 
     // Explicitly reject undefined and invalid values (zero or negative).
     if (!this.hasValidInterval(intervalSum)) {
@@ -342,6 +352,8 @@ abstract class RecorderCapture extends RecorderMedia {
 
     this.options.logger.debug(`Recorder: stop(${params ? pretty(params) : ""})`);
 
+    this.pauseRecordingClock();
+    this.userMedia.pause();
     this.recordingActive = false;
 
     const limitReached = params?.limitReached;
@@ -362,10 +374,7 @@ abstract class RecorderCapture extends RecorderMedia {
       }
 
       this.recordingStats = {
-        /*
-         * loop.getFPS() covers only the last interval, not the take's average.
-         * See https://github.com/hapticdata/animitter/issues/3.
-         */
+        // Backpressure stops the frame scheduler, not the take's audio or clock.
         avgFps: this.getAvgFps(),
         wantedFps: this.options.video.fps,
         avgInterval: this.getAvgInterval(),
@@ -425,6 +434,7 @@ abstract class RecorderCapture extends RecorderMedia {
 
   public override reset() {
     this.cancelCameraRecovery();
+    this.pauseRecordingClock();
 
     // No need to reset when already unloaded
     if (!this.unloaded) {
@@ -470,6 +480,7 @@ abstract class RecorderCapture extends RecorderMedia {
     }
 
     this.userMedia?.pause();
+    this.pauseRecordingClock();
     loop.stop();
 
     this.emit("PAUSED");
@@ -497,6 +508,7 @@ abstract class RecorderCapture extends RecorderMedia {
     this.emit("RESUMING");
 
     this.userMedia.resume();
+    this.recordingStartedAtMs ??= performance.now();
     if (!this.streamBackpressured) {
       loop.start();
     } else {
@@ -518,7 +530,7 @@ abstract class RecorderCapture extends RecorderMedia {
     }
   }
 
-  private draw(_deltaTime, elapsedTime: number) {
+  private draw(_deltaTime, _elapsedTime: number) {
     if (this.recordingTransportFailed) {
       return;
     }
@@ -565,7 +577,7 @@ abstract class RecorderCapture extends RecorderMedia {
             onFlushedCallback: this.onFlushed.bind(this),
           });
 
-          this.visuals.checkTimer(elapsedTime);
+          this.visuals.checkTimer(this.getIntervalSum());
         }
       }
     } catch (exc) {
@@ -684,6 +696,10 @@ abstract class RecorderCapture extends RecorderMedia {
 
     this.options.logger.debug("Recorder: record()");
     // Start a fresh transport-failure window for this take.
+    if (!this.recordingActive) {
+      this.recordingElapsedTimeMs = 0;
+      this.recordingStartedAtMs = performance.now();
+    }
     this.recordingActive = true;
     this.recordingTransportFailed = false;
     this.mediaTransmissionStarted = false;
@@ -693,7 +709,8 @@ abstract class RecorderCapture extends RecorderMedia {
     this.emit("RECORDING", { framesCount: this.framesCount });
 
     // see https://github.com/hapticdata/animitter/issues/3
-    loop.on("update", (_deltaTime, elapsedTime) => {
+    loop.on("update", () => {
+      const elapsedTime = this.getIntervalSum();
       let avgFPS: number | undefined;
 
       if (elapsedTime !== 0) {

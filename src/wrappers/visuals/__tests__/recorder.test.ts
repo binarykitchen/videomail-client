@@ -55,6 +55,8 @@ interface RecorderInternals {
   userMediaErrorCallback(err: Error, constraints: MediaStreamConstraints): void;
   loadGenuineUserMedia(): void;
   onUserMediaReady(): void;
+  getIntervalSum(): number;
+  getAvgFps(): number | undefined;
   userMedia?: UserMedia;
   loop?: Pick<
     RecorderLoop,
@@ -258,6 +260,80 @@ describe("Recorder", () => {
       loopChanged: false,
       framesCount: 115,
     });
+  });
+
+  it("includes WebSocket backpressure in the measured recording FPS", () => {
+    const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+    const { recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    let running = true;
+    internals.loop = {
+      isRunning: () => running,
+      start: () => {
+        running = true;
+      },
+      stop: () => {
+        running = false;
+      },
+      on: vi.fn(),
+      dispose: vi.fn(),
+    };
+    const stream = {
+      destroyed: false,
+      destroy: vi.fn(),
+      write: vi.fn((_buffer: Buffer, callback: () => void) => {
+        callback();
+        return false;
+      }),
+    };
+    internals.stream = stream;
+    internals.framesCount = 145;
+    clock.mockReturnValue(100);
+    internals.writeStream(Buffer.from("frame"));
+    clock.mockReturnValue(14_592);
+    internals.handleStreamDrain(stream);
+
+    expect({
+      elapsedTime: internals.getIntervalSum(),
+      fps: internals.getAvgFps(),
+    }).toEqual({ elapsedTime: 14_592, fps: (145 / 14_592) * 1000 });
+  });
+
+  it("excludes an explicit pause from the recording clock", () => {
+    const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+    const { recorder, userMedia } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    vi.spyOn(userMedia, "hasLiveStream").mockReturnValue(true);
+    clock.mockReturnValue(1000);
+    recorder.pause();
+    clock.mockReturnValue(6000);
+    recorder.resume();
+    clock.mockReturnValue(7000);
+
+    expect(internals.getIntervalSum()).toBe(2000);
+  });
+
+  it("does not reset timing when Record is called again during a take", () => {
+    const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+    const { recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    clock.mockReturnValue(1000);
+    recorder.record();
+    clock.mockReturnValue(2000);
+
+    expect(internals.getIntervalSum()).toBe(2000);
+  });
+
+  it("freezes the take's clock immediately when Stop is pressed", () => {
+    vi.useFakeTimers();
+    const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+    const { recorder } = recordFrames();
+    const internals = recorder as unknown as RecorderInternals;
+    clock.mockReturnValue(2000);
+    recorder.stop();
+    clock.mockReturnValue(2060);
+
+    expect(internals.getIntervalSum()).toBe(2000);
   });
 
   it("does not resume recording without a live camera stream", () => {
