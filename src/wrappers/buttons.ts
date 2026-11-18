@@ -392,9 +392,9 @@ class Buttons extends Despot {
   }
 
   private onCountdown() {
-    // Starting or continuing 3-2-1 is not capture yet; first-frame handling restores Stop.
     disableElement(this.recordButton);
-    hideElement(this.recordButton);
+    // Still show it so that the form height does not change abruptly.
+    showElement(this.recordButton);
     hideElement(this.recordAgainButton);
     hideElement(this.pauseButton);
     hideElement(this.resumeButton);
@@ -559,7 +559,7 @@ class Buttons extends Despot {
 
     this.on("CONNECTED", () => {
       if (this.options.loadUserMediaOnRecord) {
-        if (isShown(this.recordButton)) {
+        if (isShown(this.recordButton) && !this.isCountingDown()) {
           enableElement(this.recordButton);
         }
       }
