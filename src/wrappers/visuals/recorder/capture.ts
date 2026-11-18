@@ -153,6 +153,7 @@ abstract class RecorderCapture extends RecorderMedia {
       }
 
       this.emit("USER_MEDIA_READY", {
+        audioEnabled: params?.audioEnabled,
         switchingFacingMode: params?.switchingFacingMode,
         recovering: params?.recovering,
         paused: this.isPaused(),

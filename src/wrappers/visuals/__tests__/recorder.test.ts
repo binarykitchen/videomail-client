@@ -244,6 +244,43 @@ describe("Recorder", () => {
     });
   });
 
+  it.each([
+    ["granted", true],
+    ["denied", false],
+  ] as const)(
+    "reports effective audio when microphone permission is %s",
+    async (permission, audioEnabled) => {
+      const { recorder, options } = createFixture();
+      options.audio.followPermissions = true;
+      options.audio.getPermission = () => Promise.resolve(permission);
+      buildWithoutConnecting(recorder);
+      const mediaStream = {
+        getTracks: () => [],
+        getAudioTracks: () =>
+          audioEnabled ? [{ readyState: "live", enabled: true }] : [],
+      };
+      vi.stubGlobal("navigator", {
+        userAgent: navigator.userAgent,
+        mediaDevices: {
+          getUserMedia: vi.fn(() => Promise.resolve(mediaStream)),
+          getSupportedConstraints: () => ({}),
+        },
+      });
+      vi.spyOn(UserMedia.prototype, "hasLiveStream").mockReturnValue(true);
+      vi.spyOn(UserMedia.prototype, "init").mockImplementation((_stream, ready) => {
+        ready();
+      });
+      const onReady = vi.fn();
+      recorder.on("USER_MEDIA_READY", onReady);
+
+      await recorder.recoverCamera();
+
+      expect(onReady).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ audioEnabled }),
+      );
+    },
+  );
+
   it("keeps the active capture loop when media reports ready during a take", () => {
     const { recorder } = recordFrames();
     const internals = recorder as unknown as RecorderInternals;
