@@ -101,7 +101,7 @@
     "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.28",
     "audit-ci": "7.1.0",
-    "chromatic": "18.14.4",
+    "chromatic": "18.14.6",
     "cross-env": "10.1.0",
     "eslint": "10.15.0",
     "eslint-import-resolver-typescript": "4.4.5",
@@ -113,7 +113,7 @@
     "eslint-plugin-simple-import-sort": "14.0.0",
     "globals": "17.14.0",
     "jsdom": "31.0.1",
-    "msw": "3.0.6",
+    "msw": "3.0.7",
     "msw-storybook-addon": "3.0.3",
     "prettier": "3.10.1",
     "prettier-plugin-curly": "0.4.2",
@@ -125,7 +125,7 @@
     "storybook-html-rsbuild": "3.6.3",
     "type-fest": "5.10.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.2",
+    "typescript-eslint": "8.73.0",
     "vitest": "5.1.0"
   },
   "engines": {

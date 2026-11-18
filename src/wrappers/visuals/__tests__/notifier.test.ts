@@ -1,4 +1,3 @@
-import type VideomailError from "../../../util/error/VideomailError";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Visuals from "../../visuals";
 import Notifier from "../notifier";
@@ -132,7 +131,7 @@ describe("Notifier", () => {
       explanation: "Allow camera access and try again",
       getClassList: () => ["webcam-problem"],
       message: "Camera unavailable",
-    } as VideomailError;
+    };
     notifier.build();
 
     notifier.error(error);
@@ -149,7 +148,7 @@ describe("Notifier", () => {
     const error = {
       getClassList: () => undefined,
       message: "Camera unavailable",
-    } as VideomailError;
+    };
     notifier.on("BLOCKING", listener);
     notifier.build();
 

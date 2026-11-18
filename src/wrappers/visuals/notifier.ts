@@ -7,7 +7,6 @@ import {
 import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../../util/browser/getBrowser";
 import Despot from "../../util/Despot";
-import VideomailError from "../../util/error/VideomailError";
 import useFullWidth from "../../util/html/dimensions/useFullWidth";
 import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
@@ -28,6 +27,12 @@ interface NotifyOptions extends MessageOptions {
   blocking?: boolean;
   classList?: string[] | undefined;
   removeDimensions?: boolean;
+}
+
+interface NotifierError {
+  explanation?: string | undefined;
+  getClassList: () => string[] | undefined;
+  message: string;
 }
 
 class Notifier extends Despot {
@@ -240,7 +245,7 @@ class Notifier extends Despot {
     this.entertaining = false;
   }
 
-  public error(err: VideomailError, blocking = true) {
+  public error(err: NotifierError, blocking = true) {
     const message = err.message;
     const explanation = err.explanation;
 

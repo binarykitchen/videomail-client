@@ -3,12 +3,12 @@ import { VideomailClientOptions } from "../../types/options";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../string/pretty";
 import { version as videomailClientVersion } from "./../../../package.json";
-import HTTPVideomailError from "./HTTPVideomailError";
+import type { HTTPVideomailErrorLike } from "./HTTPVideomailError";
 import VideomailError, { ErrData } from "./VideomailError";
 
 interface ErrorParams {
   cause?: unknown;
-  err?: HTTPVideomailError;
+  err?: HTTPVideomailErrorLike;
   exc?: unknown;
   message?: string;
   explanation?: string;

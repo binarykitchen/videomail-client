@@ -9,4 +9,6 @@ class HTTPVideomailError extends Error {
   public usedConstraints?: MediaStreamConstraints | undefined;
 }
 
+export type HTTPVideomailErrorLike = Pick<HTTPVideomailError, keyof HTTPVideomailError>;
+
 export default HTTPVideomailError;

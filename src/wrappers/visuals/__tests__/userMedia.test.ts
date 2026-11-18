@@ -572,7 +572,7 @@ describe("UserMedia", () => {
     } as unknown as MediaStream;
     const recorder = {
       getRawVisualUserMedia: () => videoElement,
-    } as Recorder;
+    } as unknown as Recorder;
     const userMedia = new UserMedia(recorder, mergeWithDefaultOptions());
     const readyCallback = vi.fn();
     const endedEarlyCallback = vi.fn();
