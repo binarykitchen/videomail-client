@@ -1,6 +1,7 @@
 import contains from "contains";
 
-import {
+import type {
+  FormReadyParams,
   VideomailErrorParams,
   VideomailRecordingParams,
   VideomailUserMediaReadyParams,
@@ -14,7 +15,7 @@ import hideElement from "../util/html/hideElement";
 import isShown from "../util/html/isShown";
 import showElement from "../util/html/showElement";
 import { isAudioEnabled } from "../util/options/audio";
-import Container, { FormReadyParams } from "./container";
+import Container from "./container";
 
 type ClickHandler = (params: { event: MouseEvent }) => void;
 

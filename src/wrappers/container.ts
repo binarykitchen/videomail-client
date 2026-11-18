@@ -2,7 +2,7 @@ import "./../styles/main.styl";
 
 import Visibility from "document-visibility";
 import purify from "dompurify";
-import type Response from "superagent/lib/node/response";
+import type { Response } from "superagent";
 
 import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";
@@ -41,10 +41,6 @@ const INTERACTIVE_SPACE_TARGETS =
 export interface UnloadParams {
   startingOver?: boolean;
   e?: Event;
-}
-
-export interface FormReadyParams {
-  paused?: boolean | undefined;
 }
 
 class Container extends Despot {

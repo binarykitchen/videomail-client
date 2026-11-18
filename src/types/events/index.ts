@@ -1,5 +1,5 @@
-import { FormReadyParams } from "../../wrappers/container";
-import {
+import type {
+  FormReadyParams,
   VideomailCameraRecoveryFailedParams,
   VideomailErrorParams,
   VideomailInvalidParams,

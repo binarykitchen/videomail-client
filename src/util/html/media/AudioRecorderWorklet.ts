@@ -1,6 +1,6 @@
 export const AUDIO_RECORDER_PROCESSOR_NAME = "videomail-pcm-recorder";
 
-export interface AudioRecorderProcessorOptions {
+interface AudioRecorderProcessorOptions {
   processorOptions: {
     bufferSize: number;
   };

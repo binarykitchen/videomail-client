@@ -1,10 +1,14 @@
-import type Response from "superagent/lib/node/response";
+import type { Response } from "superagent";
 
 import VideomailError from "../../util/error/VideomailError";
 import { RecordingStats } from "../RecordingStats";
 import { Videomail } from "../Videomail";
 
 // All these event params are always exported from this library
+
+export interface FormReadyParams {
+  paused?: boolean | undefined;
+}
 
 export interface VideomailUserMediaReadyParams {
   // Effective audio state after permission-based capture has selected its stream.

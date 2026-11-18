@@ -1,6 +1,6 @@
 import { serializeError } from "serialize-error";
+import type { Response } from "superagent";
 import superagent from "superagent";
-import type Response from "superagent/lib/node/response";
 
 import { version as videomailClientVersion } from "../package.json";
 import Constants from "./constants";
