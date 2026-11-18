@@ -88,8 +88,18 @@ abstract class RecorderCapture extends RecorderMedia {
     this.replay = replay;
   }
 
+  // Audio callbacks can still arrive after Stop or while recording is interrupted.
+  private shouldSkipAudioSample() {
+    return (
+      !this.recordingActive ||
+      this.recordingTransportFailed ||
+      Boolean(this.cameraRecovery) ||
+      this.isUserMediaPaused()
+    );
+  }
+
   protected override onAudioSample(audioSample: AudioSample) {
-    if (this.recordingTransportFailed || this.cameraRecovery) {
+    if (this.shouldSkipAudioSample()) {
       return;
     }
 
@@ -436,6 +446,7 @@ abstract class RecorderCapture extends RecorderMedia {
   public override reset() {
     this.cancelCameraRecovery();
     this.pauseRecordingClock();
+    this.recordingActive = false;
 
     // No need to reset when already unloaded
     if (!this.unloaded) {
@@ -548,7 +559,7 @@ abstract class RecorderCapture extends RecorderMedia {
   }
 
   private draw(_deltaTime, _elapsedTime: number) {
-    if (this.recordingTransportFailed) {
+    if (!this.recordingActive || this.recordingTransportFailed) {
       return;
     }
 
