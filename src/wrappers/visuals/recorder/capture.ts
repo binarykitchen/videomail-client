@@ -486,7 +486,9 @@ abstract class RecorderCapture extends RecorderMedia {
 
     this.emit("PAUSED");
 
-    this.sendPings();
+    if (this.connected) {
+      this.sendPings();
+    }
   }
 
   public override resume() {
@@ -518,9 +520,23 @@ abstract class RecorderCapture extends RecorderMedia {
     }
   }
 
+  // Re-enable camera/audio without starting frame capture before the countdown ends.
   public resumeMediaForCountdown() {
+    const cameraReady = !this.cameraRecovery && this.userMedia?.hasLiveStream();
+
+    if (!this.connected || !cameraReady) {
+      this.options.logger.debug(
+        "Recorder: countdown remains paused until connected and the camera is ready.",
+      );
+
+      return false;
+    }
+
     // Re-enable camera/audio without starting frame capture before the countdown ends.
+    this.stopPings();
     this.userMedia?.resume();
+
+    return true;
   }
 
   private onFlushed(opts: WriteStreamParams) {

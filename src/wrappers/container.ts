@@ -368,8 +368,8 @@ class Container extends Despot {
     }
   }
 
+  // Keep lazy cameras unloaded until recording starts, unless a paused take needs recovery.
   private shouldRecoverCameraWhenVisible() {
-    // Keep lazy cameras unloaded until recording starts, unless a paused take needs recovery.
     return (
       isAutoPauseEnabled(this.options) &&
       (!this.options.loadUserMediaOnRecord ||
