@@ -91,9 +91,9 @@ function createCountdownFixture() {
     paused = true;
     emit(buttons, "PAUSED");
   });
-  vi.spyOn(recorder, "resumeMediaForCountdown").mockImplementation(() => {
-    paused = false;
-  });
+  vi.spyOn(recorder, "resumeMediaForCountdown").mockImplementation(
+    () => (paused = false),
+  );
   emit(buttons, "USER_MEDIA_READY", {});
   element.querySelector<HTMLButtonElement>(".record")?.click();
   // One countdown tick puts us at 2, before a single video frame has been captured.
