@@ -1469,6 +1469,7 @@ describe("Recorder", () => {
         return writeCount > 1;
       }),
     };
+    internals.recordingActive = true;
     internals.stream = stream;
     const firstBuffer = Buffer.from("sample one");
     const secondBuffer = Buffer.from("sample two");
