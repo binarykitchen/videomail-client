@@ -1,13 +1,14 @@
+import type { PartialVideomailClientOptions } from "../../types/options";
 import type { Videomail } from "../../types/Videomail";
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import type Container from "../container";
 import Form from "../form";
 
-function createFixture(formMarkup = "") {
+function createFixture(formMarkup = "", overrides: PartialVideomailClientOptions = {}) {
   const formElement = document.createElement("form");
   formElement.innerHTML = formMarkup;
   const submitButton = formElement.querySelector<HTMLButtonElement>("[type='submit']");
-  const submitAll = vi.fn(() => Promise.resolve());
+  const submitAll = vi.fn<Container["submitAll"]>().mockResolvedValue(undefined);
   const validate = vi.fn();
   const container = {
     getSubmitButton: vi.fn(() => submitButton ?? undefined),
@@ -15,7 +16,7 @@ function createFixture(formMarkup = "") {
     submitAll,
     validate,
   } as unknown as Container;
-  const options = mergeWithDefaultOptions();
+  const options = mergeWithDefaultOptions(overrides);
   const form = new Form(container, formElement, options);
 
   return { container, form, formElement, options, submitAll, validate };
@@ -38,6 +39,28 @@ function buildFixture(formMarkup = "") {
 }
 
 describe("Form", () => {
+  const VIDEOMAIL = {
+    alias: "existing-video",
+    body: "Signed message",
+    from: "sender@example.com",
+    to: ["one@example.com", "two@example.com"],
+    cc: ["copy@example.com"],
+    bcc: ["private@example.com"],
+    subject: "Existing subject",
+    key: "existing-video-key",
+    parentKey: "parent-video-key",
+    url: "https://example.test/video",
+    replyUrl: "https://example.test/reply",
+    dateCreated: 0,
+    dateCreatedServerPretty: "Created",
+    expiresAfter: 1,
+    expiresAfterIso: "1970-01-01T00:00:00.001Z",
+    expiresAfterServerPretty: "Expires",
+    sending: false,
+    whitelistKey: "test",
+    versions: { videomailClient: "test" },
+  } satisfies Videomail;
+
   it("transforms registered form fields", () => {
     const { form } = createFixture();
 
@@ -150,6 +173,105 @@ describe("Form", () => {
       subject: "Hello",
       to: "one@example.com, two@example.com",
     });
+  });
+
+  it("submits a loaded replay with its default video and parent key fields", async () => {
+    const { form, options, submitAll } = createFixture(`
+      <input name="subject">
+      <input type="hidden" name="videomail_parent_key">
+    `);
+    form.build();
+
+    form.loadVideomail(VIDEOMAIL);
+    await form.doTheSubmit();
+
+    expect(submitAll).toHaveBeenCalledExactlyOnceWith(
+      {
+        subject: VIDEOMAIL.subject,
+        videomail_key: VIDEOMAIL.key,
+        videomail_parent_key: VIDEOMAIL.parentKey,
+      },
+      "put",
+      options.apiUrl,
+      false,
+    );
+  });
+
+  it("round-trips replay values through custom field names without changing host fields", async () => {
+    const { form, submitAll } = createFixture(
+      `
+        <input name="edit_subject">
+        <textarea name="edit_body"></textarea>
+        <input name="edit_from">
+        <input name="edit_to">
+        <input name="edit_cc">
+        <input name="edit_bcc">
+        <input type="hidden" name="edit_key" value="stale-video-key">
+        <input type="hidden" name="edit_parent">
+        <input name="phone" value="host value">
+      `,
+      {
+        selectors: {
+          subjectInputName: "edit_subject",
+          bodyInputName: "edit_body",
+          fromInputName: "edit_from",
+          toInputName: "edit_to",
+          ccInputName: "edit_cc",
+          bccInputName: "edit_bcc",
+          keyInputName: "edit_key",
+          parentKeyInputName: "edit_parent",
+        },
+      },
+    );
+    form.build();
+
+    form.loadVideomail(VIDEOMAIL);
+    await form.doTheSubmit();
+
+    const submission = submitAll.mock.calls[0];
+    if (!submission) {
+      throw new Error("Expected the replay form to submit.");
+    }
+    const [inputs, method] = submission;
+
+    expect({
+      method,
+      key: inputs.edit_key,
+      phone: inputs.phone,
+      videomail: form.transformFormData(inputs),
+    }).toEqual({
+      method: "put",
+      key: VIDEOMAIL.key,
+      phone: "host value",
+      videomail: {
+        subject: VIDEOMAIL.subject,
+        body: VIDEOMAIL.body,
+        from: VIDEOMAIL.from,
+        to: VIDEOMAIL.to,
+        cc: VIDEOMAIL.cc,
+        bcc: VIDEOMAIL.bcc,
+        key: VIDEOMAIL.key,
+        parentKey: VIDEOMAIL.parentKey,
+      },
+    });
+  });
+
+  it("passes the host field name and canonical value to the population callback", () => {
+    const adjust = vi.fn((_name: string, value: unknown, _videomail: Videomail) =>
+      String(value),
+    );
+    const { form } = createFixture(`<input name="edit_subject">`, {
+      selectors: { subjectInputName: "edit_subject" },
+      callbacks: { adjustFormValueBeforePopulating: adjust },
+    });
+
+    form.loadVideomail(VIDEOMAIL);
+
+    expect(adjust).toHaveBeenCalledExactlyOnceWith(
+      "edit_subject",
+      VIDEOMAIL.subject,
+      VIDEOMAIL,
+    );
   });
 
   it("switches a loaded videomail form to PUT", () => {

@@ -129,12 +129,16 @@ class Form extends Despot {
 
     for (const formControl of this.formElement.elements) {
       const name = formControl.getAttribute("name");
+      const fieldName = this.getVideomailFieldName(formControl);
 
-      if (name && this.isRegisteredFormField(formControl)) {
-        let value = videomail[name];
+      if (name && fieldName) {
+        // Host field names are configurable; stored videos still use keys like "key".
+        // Reuse the submission mapping so a replay edits the correct video.
+        let value = videomail[fieldName];
         const tagName = formControl.tagName;
 
         if (this.options.callbacks.adjustFormValueBeforePopulating) {
+          // Existing integrations expect the host's field name, not the record key.
           value = this.options.callbacks.adjustFormValueBeforePopulating(
             name,
             value,
@@ -209,13 +213,26 @@ class Form extends Despot {
     }
   }
 
-  private isRegisteredFormField(formElement: Element) {
+  private getVideomailFieldName(formElement: Element) {
+    // 1. Read the control's HTML name, e.g. "videomail_key".
     const formElementName = formElement.getAttribute("name");
 
-    const registeredFormFieldNames = Object.values(this.FORM_FIELDS);
-    const isRegistered = registeredFormFieldNames.includes(formElementName);
+    // 2. Build [stored field, HTML name] pairs, e.g. ["key", "videomail_key"].
+    const fieldMappings = Object.entries(this.FORM_FIELDS);
 
-    return isRegistered;
+    // 3. Return the stored field for a match: "videomail_key" -> "key".
+    for (const [fieldName, inputName] of fieldMappings) {
+      if (inputName === formElementName) {
+        return fieldName;
+      }
+    }
+
+    // 4. Leave unmapped controls alone; they have no stored videomail field.
+    return undefined;
+  }
+
+  private isRegisteredFormField(formElement: Element) {
+    return this.getVideomailFieldName(formElement) !== undefined;
   }
 
   private getRegisteredFormElements() {
