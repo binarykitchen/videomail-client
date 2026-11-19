@@ -26,6 +26,9 @@ interface RecorderInternals {
   samplesCount: number;
   recordingAudioSampleRate?: number;
   confirmedFrameNumber: number;
+  canvas?: HTMLCanvasElement;
+  ctx?: CanvasRenderingContext2D | null;
+  draw: (deltaTime: number, elapsedTime: number) => void;
   writeStream(buffer: Buffer): void;
   onAudioSample(audioSample: { toBuffer: () => Buffer }): void;
   handleStreamDrain(stream: {
@@ -101,8 +104,10 @@ function recordFrames(width = 320, height = 240) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  vi.spyOn(canvas, "getContext").mockReturnValue({} as CanvasRenderingContext2D);
-  vi.spyOn(canvas, "toDataURL").mockReturnValue("data:image/jpeg;base64,/9j/2Q==");
+  const context = { drawImage: vi.fn() };
+  vi.spyOn(canvas, "getContext").mockReturnValue(
+    context as unknown as CanvasRenderingContext2D,
+  );
   const userMedia = new UserMedia(recorder, options);
   vi.spyOn(userMedia, "createCanvas").mockReturnValue(canvas);
   vi.spyOn(userMedia, "record").mockImplementation(() => undefined);
@@ -118,7 +123,46 @@ function recordFrames(width = 320, height = 240) {
     dispose: vi.fn(),
   };
   recorder.record();
-  return { ...fixture, canvas, userMedia };
+  return { ...fixture, canvas, context, userMedia };
+}
+
+function prepareFrameCapture({
+  canvas,
+  recorder,
+  userMedia,
+}: ReturnType<typeof recordFrames>) {
+  const internals = recorder as unknown as RecorderInternals;
+  const encodings: {
+    callback: BlobCallback;
+    type: string | undefined;
+    quality: number | undefined;
+  }[] = [];
+  const writes: Buffer[] = [];
+
+  vi.spyOn(canvas, "toBlob").mockImplementation((callback, type, quality) => {
+    encodings.push({ callback, type, quality });
+  });
+  vi.spyOn(userMedia, "getRawVisuals").mockReturnValue(document.createElement("video"));
+  vi.spyOn(userMedia, "isPaused").mockReturnValue(false);
+
+  const stream = {
+    destroyed: false,
+    destroy: vi.fn(),
+    write: vi.fn((buffer: Buffer, callback?: () => void) => {
+      writes.push(Buffer.from(buffer));
+      callback?.();
+      return true;
+    }),
+  };
+  internals.stream = stream;
+
+  return { encodings, internals, stream, writes };
+}
+
+async function flushFrameEncoding() {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }
 
 function createRecoveryFixture() {
@@ -359,6 +403,121 @@ describe("Recorder", () => {
     clock.mockReturnValue(2000);
 
     expect(internals.getIntervalSum()).toBe(2000);
+  });
+
+  it("uses asynchronous format fallback and preserves frame metadata", async () => {
+    const fixture = recordFrames();
+    const { canvas, context, options, recorder } = fixture;
+    const { encodings, internals, writes } = prepareFrameCapture(fixture);
+    const toDataUrl = vi.spyOn(canvas, "toDataURL");
+
+    internals.draw(0, 0);
+    internals.draw(0, 0);
+
+    const firstEncoding = encodings[0];
+    if (!firstEncoding) {
+      throw new Error("Expected the first image encoding request");
+    }
+    firstEncoding.callback(new Blob(["unsupported"], { type: "image/png" }));
+    await flushFrameEncoding();
+
+    const fallbackEncoding = encodings[1];
+    if (!fallbackEncoding) {
+      throw new Error("Expected the JPEG fallback encoding request");
+    }
+    fallbackEncoding.callback(new Blob(["jpeg-frame"], { type: "image/jpeg" }));
+    await flushFrameEncoding();
+
+    expect({
+      encodingTypes: encodings.map(({ type }) => type),
+      encodingQualities: encodings.map(({ quality }) => quality),
+      frameBytes: writes[0]?.toString(),
+      framesCount: internals.framesCount,
+      drawCalls: context.drawImage.mock.calls.length,
+      toDataUrlCalls: toDataUrl.mock.calls.length,
+      expectedQuality: options.image.quality,
+      recordingDimensions: recorder.getRecordingDimensions(),
+    }).toEqual({
+      encodingTypes: ["image/webp", "image/jpeg"],
+      encodingQualities: [options.image.quality, options.image.quality],
+      frameBytes: 'jpeg-frame{"frameNumber":1}',
+      framesCount: 1,
+      drawCalls: 1,
+      toDataUrlCalls: 0,
+      expectedQuality: options.image.quality,
+      recordingDimensions: { width: 320, height: 240 },
+    });
+  });
+
+  it("waits for the accepted frame before sending Stop", async () => {
+    vi.useFakeTimers();
+    const fixture = recordFrames();
+    const { recorder, userMedia } = fixture;
+    const { encodings, internals, writes } = prepareFrameCapture(fixture);
+    vi.spyOn(userMedia, "pause").mockImplementation(() => undefined);
+
+    internals.draw(0, 0);
+    recorder.stop();
+    await vi.advanceTimersByTimeAsync(60);
+    const writesBeforeEncoding = writes.length;
+
+    const encoding = encodings[0];
+    if (!encoding) {
+      throw new Error("Expected an image encoding request");
+    }
+    encoding.callback(new Blob(["last-frame"], { type: "image/webp" }));
+    await flushFrameEncoding();
+
+    expect({
+      writesBeforeEncoding,
+      frameBytes: writes[0]?.toString(),
+      stopCommand: writes[1]?.toString().includes('"command":"stop"'),
+      framesCount: internals.framesCount,
+    }).toEqual({
+      writesBeforeEncoding: 0,
+      frameBytes: 'last-frame{"frameNumber":1}',
+      stopCommand: true,
+      framesCount: 1,
+    });
+  });
+
+  it("discards a late frame after reset before encoding the next take", async () => {
+    const fixture = recordFrames();
+    const { canvas, context, recorder } = fixture;
+    const { encodings, internals, writes } = prepareFrameCapture(fixture);
+
+    internals.draw(0, 0);
+    recorder.reset();
+    internals.userMediaLoaded = true;
+    internals.recordingActive = true;
+    internals.canvas = canvas;
+    internals.ctx = context as unknown as CanvasRenderingContext2D;
+    internals.draw(0, 0);
+
+    const firstEncoding = encodings[0];
+    if (!firstEncoding) {
+      throw new Error("Expected the first image encoding request");
+    }
+    firstEncoding.callback(new Blob(["old-frame"], { type: "image/webp" }));
+    await flushFrameEncoding();
+    internals.draw(0, 0);
+
+    const nextEncoding = encodings[1];
+    if (!nextEncoding) {
+      throw new Error("Expected the next take's image encoding request");
+    }
+    nextEncoding.callback(new Blob(["new-frame"], { type: "image/webp" }));
+    await flushFrameEncoding();
+
+    expect({
+      encodingRequests: encodings.length,
+      writtenFrames: writes.map((buffer) => buffer.toString()),
+      framesCount: internals.framesCount,
+    }).toEqual({
+      encodingRequests: 2,
+      writtenFrames: ['new-frame{"frameNumber":1}'],
+      framesCount: 1,
+    });
   });
 
   it("freezes the take's clock immediately when Stop is pressed", () => {

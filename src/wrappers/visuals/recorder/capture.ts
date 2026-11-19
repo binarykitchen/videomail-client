@@ -1,6 +1,5 @@
 import animitter from "animitter";
 import type AudioSample from "audio-sample";
-import Frame from "canvas-to-buffer";
 
 import Constants from "../../../constants";
 import type { VideomailCommandArgs } from "../../../types/command";
@@ -61,6 +60,12 @@ abstract class RecorderCapture extends RecorderMedia {
 
   private recordingStartedAtMs?: number | undefined;
 
+  private captureGeneration = 0;
+
+  private frameEncoding?: Promise<void> | undefined;
+
+  private stopAfterFrameEncoding = false;
+
   protected canvas?: HTMLCanvasElement | undefined;
 
   protected ctx?: CanvasRenderingContext2D | undefined | null;
@@ -68,10 +73,6 @@ abstract class RecorderCapture extends RecorderMedia {
   protected stopTime?: number | undefined;
 
   protected waitingTime?: number | undefined;
-
-  protected frame?: Frame;
-
-  protected recordingBuffer?: Buffer | undefined;
 
   protected abstract getRecorderWidth(responsive: boolean): Dimension | undefined;
   protected abstract getRecorderHeight(
@@ -248,6 +249,7 @@ abstract class RecorderCapture extends RecorderMedia {
     const hasAudio = this.samplesCount > 0;
 
     // A server preview completes the prior take and allows another recording.
+    this.captureGeneration++;
     this.mediaTransmissionStarted = false;
     this.recordingActive = false;
     this.recordingTransportFailed = false;
@@ -375,45 +377,55 @@ abstract class RecorderCapture extends RecorderMedia {
 
     // Let STOPPING handlers prepare the player before checking its video type.
     this.stopTimeout = window.setTimeout(() => {
-      this.stopTimeout = undefined;
-      this.stopTime = Date.now();
+      this.clearStopTimeout();
 
-      const videoType = this.replay.getVideoType();
-
-      if (!videoType) {
-        throw new Error("Unable to video record when no video type is defined.");
+      // Stop must follow the last captured frame on the same socket.
+      if (this.frameEncoding) {
+        this.stopAfterFrameEncoding = true;
+      } else {
+        this.finishStop();
       }
-
-      this.recordingStats = {
-        // Backpressure stops the frame scheduler, not the take's audio or clock.
-        avgFps: this.getAvgFps(),
-        wantedFps: this.options.video.fps,
-        avgInterval: this.getAvgInterval(),
-        wantedInterval: 1e3 / this.options.video.fps,
-
-        intervalSum: this.getIntervalSum(),
-        framesCount: this.framesCount,
-
-        videoType,
-      };
-
-      if (this.userMedia) {
-        this.recordingStats.videoTrackLabel = this.userMedia.getVideoTrackLabel();
-      }
-
-      if (isAudioEnabled(this.options) && this.userMedia) {
-        this.recordingStats.samplesCount = this.samplesCount;
-        this.recordingStats.sampleRate =
-          this.recordingAudioSampleRate ?? this.userMedia.getAudioSampleRate();
-      }
-
-      this.writeCommand("stop", this.recordingStats, () => {
-        this.emit("STOPPED", { recordingStats: this.recordingStats });
-      });
-
-      // Reset last: it clears the frame count needed above.
-      this.reset();
     }, 60);
+  }
+
+  private finishStop() {
+    this.stopTime = Date.now();
+
+    const videoType = this.replay.getVideoType();
+
+    if (!videoType) {
+      throw new Error("Unable to video record when no video type is defined.");
+    }
+
+    this.recordingStats = {
+      // Backpressure stops the frame scheduler, not the take's audio or clock.
+      avgFps: this.getAvgFps(),
+      wantedFps: this.options.video.fps,
+      avgInterval: this.getAvgInterval(),
+      wantedInterval: 1e3 / this.options.video.fps,
+
+      intervalSum: this.getIntervalSum(),
+      framesCount: this.framesCount,
+
+      videoType,
+    };
+
+    if (this.userMedia) {
+      this.recordingStats.videoTrackLabel = this.userMedia.getVideoTrackLabel();
+    }
+
+    if (isAudioEnabled(this.options) && this.userMedia) {
+      this.recordingStats.samplesCount = this.samplesCount;
+      this.recordingStats.sampleRate =
+        this.recordingAudioSampleRate ?? this.userMedia.getAudioSampleRate();
+    }
+
+    this.writeCommand("stop", this.recordingStats, () => {
+      this.emit("STOPPED", { recordingStats: this.recordingStats });
+    });
+
+    // Reset last: it clears the frame count needed above.
+    this.reset();
   }
 
   public back(cb: () => void) {
@@ -444,6 +456,9 @@ abstract class RecorderCapture extends RecorderMedia {
   }
 
   public override reset() {
+    this.captureGeneration++;
+    this.stopAfterFrameEncoding = false;
+    this.clearStopTimeout();
     this.cancelCameraRecovery();
     this.pauseRecordingClock();
     this.recordingActive = false;
@@ -461,12 +476,7 @@ abstract class RecorderCapture extends RecorderMedia {
 
       this.replay.reset();
 
-      this.userMediaLoaded =
-        this.key =
-        this.canvas =
-        this.ctx =
-        this.recordingBuffer =
-          undefined;
+      this.userMediaLoaded = this.key = this.canvas = this.ctx = undefined;
     }
   }
 
@@ -558,8 +568,102 @@ abstract class RecorderCapture extends RecorderMedia {
     }
   }
 
+  private async getFrameBlob(
+    canvas: HTMLCanvasElement,
+    generation: number,
+    typeIndex = 0,
+    lastError?: unknown,
+  ) {
+    if (generation !== this.captureGeneration) {
+      return undefined;
+    }
+
+    const imageType = this.options.image.types[typeIndex];
+
+    if (imageType === undefined) {
+      throw createError({
+        message: "Failed to extract webcam data.",
+        explanation: `The browser could not encode a frame as ${this.options.image.types
+          .map((type) => `image/${type}`)
+          .join(" or ")}.`,
+        options: this.options,
+        exc: lastError,
+      });
+    }
+
+    const mimeType = `image/${imageType}`;
+
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, mimeType, this.options.image.quality);
+      });
+
+      if (generation !== this.captureGeneration) {
+        return undefined;
+      }
+
+      // Unsupported requests return PNG; only accept the requested format.
+      if (blob?.type === mimeType) {
+        return blob;
+      }
+    } catch (exc) {
+      return this.getFrameBlob(canvas, generation, typeIndex + 1, exc);
+    }
+
+    return this.getFrameBlob(canvas, generation, typeIndex + 1, lastError);
+  }
+
+  private async encodeFrame(
+    canvas: HTMLCanvasElement,
+    frameNumber: number,
+    generation: number,
+  ) {
+    try {
+      const blob = await this.getFrameBlob(canvas, generation);
+
+      if (!blob) {
+        return;
+      }
+
+      const recordingBuffer = Buffer.from(await blob.arrayBuffer());
+
+      if (generation !== this.captureGeneration) {
+        return;
+      }
+
+      const frameControlBuffer = Buffer.from(JSON.stringify({ frameNumber }));
+      const frameBuffer = Buffer.concat([recordingBuffer, frameControlBuffer]);
+
+      this.framesCount = frameNumber;
+      this.mediaTransmissionStarted = true;
+      this.writeStream(frameBuffer, {
+        frameNumber,
+        onFlushedCallback: this.onFlushed.bind(this),
+      });
+
+      this.visuals.checkTimer(this.getIntervalSum());
+    } catch (exc) {
+      if (generation === this.captureGeneration) {
+        this.emit("ERROR", { exc });
+      }
+    }
+  }
+
+  private startFrameEncoding(canvas: HTMLCanvasElement, frameNumber: number) {
+    const generation = this.captureGeneration;
+
+    this.frameEncoding = this.encodeFrame(canvas, frameNumber, generation).finally(() => {
+      this.frameEncoding = undefined;
+
+      if (this.stopAfterFrameEncoding) {
+        this.stopAfterFrameEncoding = false;
+        this.finishStop();
+      }
+    });
+  }
+
   private draw(_deltaTime, _elapsedTime: number) {
-    if (!this.recordingActive || this.recordingTransportFailed) {
+    if (!this.recordingActive || this.recordingTransportFailed || this.frameEncoding) {
       return;
     }
 
@@ -570,43 +674,27 @@ abstract class RecorderCapture extends RecorderMedia {
     try {
       // ctx and stream might become null while unloading
       if (!this.isPaused() && this.stream && this.ctx) {
+        const canvas = this.canvas;
+        const context = this.ctx;
+
+        if (!canvas) {
+          throw new Error("Unable to draw without a canvas");
+        }
+
         if (this.framesCount === 0) {
           this.emit("SENDING_FIRST_FRAME");
         }
 
-        this.framesCount++;
+        const frameNumber = this.framesCount + 1;
 
         const imageSource = this.userMedia.getRawVisuals();
 
-        if (this.canvas && imageSource) {
-          this.ctx.drawImage(imageSource, 0, 0, this.canvas.width, this.canvas.height);
-        } else {
+        if (!imageSource) {
           throw new Error("Unable to draw an image without a defined canvas");
         }
 
-        this.recordingBuffer = this.frame?.toBuffer();
-        const recordingBufferLength = this.recordingBuffer?.length;
-
-        if (!recordingBufferLength) {
-          throw createError({
-            message: "Failed to extract webcam data.",
-            options: this.options,
-          });
-        } else if (this.recordingBuffer) {
-          const frameControlBuffer = Buffer.from(
-            JSON.stringify({ frameNumber: this.framesCount }),
-          );
-
-          const frameBuffer = Buffer.concat([this.recordingBuffer, frameControlBuffer]);
-
-          this.mediaTransmissionStarted = true;
-          this.writeStream(frameBuffer, {
-            frameNumber: this.framesCount,
-            onFlushedCallback: this.onFlushed.bind(this),
-          });
-
-          this.visuals.checkTimer(this.getIntervalSum());
-        }
+        context.drawImage(imageSource, 0, 0, canvas.width, canvas.height);
+        this.startFrameEncoding(canvas, frameNumber);
       }
     } catch (exc) {
       this.emit("ERROR", { exc });
@@ -715,12 +803,6 @@ abstract class RecorderCapture extends RecorderMedia {
       width: this.canvas.width,
       height: this.canvas.height,
     };
-
-    this.frame = new Frame(
-      this.canvas,
-      this.options.image.types,
-      this.options.image.quality,
-    );
 
     this.options.logger.debug("Recorder: record()");
     // Start a fresh transport-failure window for this take.
