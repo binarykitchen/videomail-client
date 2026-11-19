@@ -42,3 +42,4 @@ When analyzing all tracked project files, like code, documentation, workflow, co
 - Regarding completed TODO items:
   - stay in the list as completed items, remain flagged as completed with a checkbox and skip them.
   - it is up to us humans humans to decide based on the context and relevance of the issues.
+  - When summarizing completed work, say the resolved item was checked off in the local TODO list. Do not present its ignored status as a problem or caveat; ignoring it is intentional.
