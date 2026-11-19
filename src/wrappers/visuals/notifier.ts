@@ -15,7 +15,7 @@ import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/string/pretty";
 import Visuals from "../visuals";
 
-const NOTIFIER_MESSAGE_ID = "notifierMessage";
+const NOTIFIER_MESSAGE_CLASS = "notifierMessage";
 
 interface MessageOptions {
   problem?: boolean;
@@ -263,14 +263,14 @@ class Notifier extends Despot {
     });
   }
 
-  // A racing build may have already created the message element.
+  // Keep each heading in its widget; multiple clients share the same document.
   private getMessageElement() {
     if (this.messageElement) {
       return this.messageElement;
     }
 
-    this.messageElement = document.querySelector<HTMLHeadingElement>(
-      `#${NOTIFIER_MESSAGE_ID}`,
+    this.messageElement = this.notifyElement?.querySelector<HTMLHeadingElement>(
+      `.${NOTIFIER_MESSAGE_CLASS}`,
     );
 
     return this.messageElement;
@@ -281,7 +281,7 @@ class Notifier extends Despot {
 
     if (!this.getMessageElement()) {
       this.messageElement = document.createElement("h2");
-      this.messageElement.id = NOTIFIER_MESSAGE_ID;
+      this.messageElement.classList.add(NOTIFIER_MESSAGE_CLASS);
 
       if (this.notifyElement) {
         if (this.explanationElement) {

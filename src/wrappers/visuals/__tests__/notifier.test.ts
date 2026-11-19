@@ -36,6 +36,7 @@ function emit(
 
 describe("Notifier", () => {
   afterEach(() => {
+    document.body.replaceChildren();
     vi.clearAllMocks();
     vi.useRealTimers();
   });
@@ -68,7 +69,31 @@ describe("Notifier", () => {
 
     notifier.notify("Connecting …");
 
-    expect(element.querySelector("#notifierMessage")?.textContent).toBe("Connecting …");
+    expect(element.querySelector(".notifierMessage")?.textContent).toBe("Connecting …");
+  });
+
+  it("keeps notices local to each mounted widget", () => {
+    const first = createFixture();
+    const second = createFixture();
+    document.body.append(first.element, second.element);
+    first.notifier.build();
+    second.notifier.build();
+
+    first.notifier.notify("First notice");
+    second.notifier.notify("Second notice");
+    first.notifier.hide();
+
+    expect({
+      firstMessageDisplay:
+        first.element.querySelector<HTMLHeadingElement>(".notifierMessage")?.style
+          .display,
+      secondMessage: second.element.querySelector(".notifierMessage")?.textContent,
+      secondVisible: second.notifier.isVisible(),
+    }).toEqual({
+      firstMessageDisplay: "none",
+      secondMessage: "Second notice",
+      secondVisible: true,
+    });
   });
 
   it("keeps encoding notices inside the fixed frame after portrait camera metadata", () => {
@@ -163,7 +188,7 @@ describe("Notifier", () => {
 
     emit(notifier, "CONNECTING");
 
-    expect(element.querySelector("#notifierMessage")?.textContent).toBe("Connecting …");
+    expect(element.querySelector(".notifierMessage")?.textContent).toBe("Connecting …");
   });
 
   it("shows combined audio and video progress", () => {
