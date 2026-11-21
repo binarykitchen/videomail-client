@@ -85,6 +85,8 @@ On desktop, `width: 400` and `height: 300` reserve a 400×300 frame; smaller scr
 
 **Record again** keeps the frame visible and releases the previous replay before opening the camera for the next take.
 
+On iOS 27 WebKit, the fixed-frame live preview uses a canvas to avoid [a bug that paints the picture too small](https://bugs.webkit.org/show_bug.cgi?id=330932). Older iOS versions still use the video element for preview. The workaround does not change what the recorder captures or how the replay is displayed.
+
 Host styles should not replace their height with `auto` or impose a separate replay height limit. Camera constraints use these dimensions as ideals; captured frames use the camera's actual dimensions, capped proportionally to the configured width and height, independently of the preview's on-screen size.
 
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.

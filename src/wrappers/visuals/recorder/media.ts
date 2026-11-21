@@ -65,6 +65,7 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   public show() {
+    this.userMedia?.showCanvasPreview();
     showElement(this.recorderElement);
   }
 
@@ -560,6 +561,7 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   public hide() {
+    this.userMedia?.hideCanvasPreview();
     if (!this.isHidden()) {
       if (this.recorderElement) {
         hideElement(this.recorderElement);

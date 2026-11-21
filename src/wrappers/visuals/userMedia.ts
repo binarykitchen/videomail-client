@@ -1,6 +1,7 @@
 import getFirstVideoTrack from "../../media/getFirstVideoTrack";
 import MEDIA_EVENTS from "../../media/mediaEvents";
 import requestMediaStreamWithPermissions from "../../media/requestMediaStream";
+import startCanvasCameraPreview from "../../media/startCanvasCameraPreview";
 import watchCameraPlayback from "../../media/watchCameraPlayback";
 import { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
@@ -9,6 +10,7 @@ import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
+import isHidden from "../../util/html/isHidden";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
 import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
@@ -50,6 +52,7 @@ class UserMedia extends Despot {
   private videoTrackLabel?: string | undefined;
   private clearInitializationListeners?: (() => void) | undefined;
   private stopWatchingPlayback?: (() => void) | undefined;
+  private stopCanvasPreview?: (() => void) | undefined;
   private initializationId = 0;
   private acquisitionId = 0;
   private acquisitionTimeout?: number | undefined;
@@ -85,6 +88,10 @@ class UserMedia extends Despot {
       const previousStream = this.currentVisualStream;
       this.currentVisualStream = stream;
 
+      if (!isHidden(this.rawVisualUserMedia)) {
+        this.showCanvasPreview();
+      }
+
       // Release the old camera stream, but never stop the one we just attached.
       if (previousStream && previousStream !== stream) {
         previousStream.getTracks().forEach((track) => {
@@ -111,6 +118,28 @@ class UserMedia extends Despot {
 
       this.currentVisualStream = undefined;
     }
+  }
+
+  public showCanvasPreview() {
+    const video = this.rawVisualUserMedia;
+
+    if (this.stopCanvasPreview || !video || !this.currentVisualStream) {
+      return;
+    }
+
+    if (
+      video.parentElement?.matches(".videomail .visuals.fixedAspectRatio") &&
+      getBrowser(this.options).shouldUseCanvasCameraPreview()
+    ) {
+      this.stopCanvasPreview = startCanvasCameraPreview(video, (message) => {
+        this.options.logger.warn(message);
+      });
+    }
+  }
+
+  public hideCanvasPreview() {
+    this.stopCanvasPreview?.();
+    this.stopCanvasPreview = undefined;
   }
 
   public async restorePlayback() {
@@ -258,6 +287,7 @@ class UserMedia extends Despot {
   public unloadRemainingEventListeners() {
     this.options.logger.debug("UserMedia: unloadRemainingEventListeners()");
 
+    this.hideCanvasPreview();
     this.clearInitializationListeners?.();
     this.stopWatchingPlayback?.();
     this.stopWatchingPlayback = undefined;
@@ -586,6 +616,7 @@ class UserMedia extends Despot {
 
   public stop(visualStream?: MediaStream, params?: StopParams) {
     try {
+      this.hideCanvasPreview();
       this.cancelAcquisition();
       this.removeListener("SENDING_FIRST_FRAME");
       this.stopWatchingPlayback?.();
