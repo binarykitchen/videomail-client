@@ -116,6 +116,27 @@ describe("Buttons", () => {
     expect(element.querySelectorAll("button")).toHaveLength(6);
   });
 
+  it("builds controls without moving a nested host submit button", () => {
+    const { buttons, element, options } = createFixture({ audio: { switch: true } });
+    const controls = document.createElement("div");
+    controls.className = options.selectors.buttonsClass;
+    const hostWrapper = document.createElement("span");
+    const submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    hostWrapper.append(submitButton);
+    controls.append(hostWrapper);
+    element.append(controls);
+    buttons.setSubmitButton(submitButton);
+
+    buttons.build();
+
+    expect([
+      submitButton.parentElement,
+      controls.querySelector(".record")?.parentElement,
+      controls.querySelector("#audioOnOption")?.parentElement?.parentElement,
+    ]).toEqual([hostWrapper, controls, controls]);
+  });
+
   it("starts in a state that is not ready to record", () => {
     const { buttons } = createFixture();
     buttons.build();

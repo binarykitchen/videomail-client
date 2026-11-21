@@ -1,5 +1,3 @@
-import contains from "contains";
-
 import type {
   FormReadyParams,
   VideomailErrorParams,
@@ -9,25 +7,17 @@ import type {
 import { VideomailClientOptions } from "../types/options";
 import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
-import adjustButton, { ButtonType } from "../util/html/adjustButton";
 import disableElement from "../util/html/disableElement";
 import enableElement from "../util/html/enableElement";
 import hideElement from "../util/html/hideElement";
 import isShown from "../util/html/isShown";
 import showElement from "../util/html/showElement";
 import { isAudioEnabled } from "../util/options/audio";
+import getOrCreateButton from "./buttons/getOrCreateButton";
+import getOrCreateRadioButtonPair from "./buttons/getOrCreateRadioButtonPair";
 import Container from "./container";
 
 type ClickHandler = (params: { event: MouseEvent }) => void;
-
-interface RadioButtonOptions {
-  id: string;
-  name: string;
-  value: string;
-  label: string;
-  checked: boolean;
-  changeHandler: () => void;
-}
 
 class Buttons extends Despot {
   private readonly container: Container;
@@ -69,182 +59,113 @@ class Buttons extends Despot {
     element.onclick = wrappedClickHandler;
   }
 
-  private makeRadioButtonPair(options: RadioButtonOptions) {
-    let radioButtonElement: HTMLInputElement | null | undefined;
-    let radioButtonGroup: HTMLSpanElement | null;
+  /**
+   * Wire up recorder actions without taking over the host form's submission.
+   *
+   * @param buttonsElement - This widget's controls area, which may already contain host
+   *   buttons.
+   */
+  private buildButtons(buttonsElement: HTMLElement) {
+    const { selectors, text, disableSubmit, enableAutoValidation, enablePause, audio } =
+      this.options;
 
-    if (options.id) {
-      radioButtonElement = document.querySelector<HTMLInputElement>(`#${options.id}`);
-    }
-
-    if (!radioButtonElement) {
-      radioButtonElement = document.createElement("input");
-
-      radioButtonElement.id = options.id;
-      radioButtonElement.type = "radio";
-      radioButtonElement.name = options.name;
-      radioButtonElement.value = options.value;
-      radioButtonElement.checked = options.checked;
-
-      radioButtonGroup = document.createElement("span");
-      radioButtonGroup.classList.add("radioGroup");
-
-      radioButtonGroup.appendChild(radioButtonElement);
-
-      const radioLabel = document.createElement("label");
-      radioLabel.htmlFor = options.id;
-      radioLabel.textContent = options.label;
-
-      radioButtonGroup.appendChild(radioLabel);
-
-      // Keep Submit last, but only if it belongs to this button container.
-      if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
-        this.buttonsElement?.insertBefore(radioButtonGroup, this.submitButton);
-      } else {
-        this.buttonsElement?.appendChild(radioButtonGroup);
-      }
-    }
-
-    radioButtonElement.onchange = options.changeHandler;
-
-    disableElement(radioButtonElement);
-
-    return radioButtonElement;
-  }
-
-  private makeButton(
-    buttonClass: string,
-    text: string,
-    clickHandler?: ClickHandler,
-    show?: boolean,
-    id?: string,
-    type: ButtonType = "button",
-    selector?,
-    disabled = true,
-  ) {
-    let buttonElement: HTMLButtonElement | null | undefined;
-
-    if (id) {
-      buttonElement = document.querySelector<HTMLButtonElement>(`#${id}`);
-    } else if (selector) {
-      buttonElement = document.querySelector(selector);
-    } else {
-      buttonElement = this.buttonsElement?.querySelector(`.${buttonClass}`);
-    }
-
-    if (!buttonElement) {
-      buttonElement = document.createElement("button");
-      buttonElement.classList.add(buttonClass);
-
-      if (this.options.selectors.buttonClass) {
-        buttonElement.classList.add(this.options.selectors.buttonClass);
-      }
-
-      buttonElement = adjustButton(buttonElement, show, type, disabled);
-
-      buttonElement.textContent = text;
-
-      // Keep Submit last, but only if it belongs to this button container.
-      if (this.submitButton && contains(this.buttonsElement, this.submitButton)) {
-        this.buttonsElement?.insertBefore(buttonElement, this.submitButton);
-      } else {
-        this.buttonsElement?.appendChild(buttonElement);
-      }
-    } else {
-      buttonElement = adjustButton(buttonElement, show, type, disabled);
-    }
-
-    if (clickHandler) {
-      this.replaceClickHandler(buttonElement, clickHandler);
-    }
-
-    return buttonElement;
-  }
-
-  private buildButtons() {
-    if (!this.options.disableSubmit) {
+    // Resolve Submit first so new controls can be placed before it when it lives here.
+    if (!disableSubmit) {
       if (!this.submitButton) {
-        this.submitButton = this.makeButton(
-          this.options.selectors.submitButtonClass,
-          "Submit",
-          undefined,
-          true,
-          this.options.selectors.submitButtonId,
-          "submit",
-          this.options.selectors.submitButtonSelector,
-          this.options.enableAutoValidation,
-        );
+        this.submitButton = getOrCreateButton(buttonsElement, {
+          className: selectors.submitButtonClass,
+          text: "Submit",
+          sharedClass: selectors.buttonClass,
+          show: true,
+          id: selectors.submitButtonId,
+          type: "submit",
+          selector: selectors.submitButtonSelector,
+          disabled: enableAutoValidation,
+        });
       } else {
         disableElement(this.submitButton);
       }
 
-      // The form already handles submission when one is present.
+      // Only standalone widgets need a click handler. Forms keep their native validation.
       if (!this.container.hasForm()) {
         this.replaceClickHandler(this.submitButton, this.submit.bind(this));
       }
     }
 
-    this.recordButton = this.makeButton(
-      this.options.selectors.recordButtonClass,
-      this.options.text.buttons.record,
+    // New recorder actions start hidden and disabled until recorder events make them available.
+    const addButton = (className: string, label: string, clickHandler: ClickHandler) => {
+      const button = getOrCreateButton(
+        buttonsElement,
+        { className, text: label, sharedClass: selectors.buttonClass },
+        this.submitButton,
+      );
+      this.replaceClickHandler(button, clickHandler);
+      return button;
+    };
+
+    this.recordButton = addButton(
+      selectors.recordButtonClass,
+      text.buttons.record,
       this.record.bind(this),
-      false,
     );
 
-    if (this.options.enablePause) {
-      this.pauseButton = this.makeButton(
-        this.options.selectors.pauseButtonClass,
-        this.options.text.buttons.pause,
+    if (enablePause) {
+      this.pauseButton = addButton(
+        selectors.pauseButtonClass,
+        text.buttons.pause,
         this.container.pause.bind(this.container),
-        false,
       );
-    }
 
-    if (this.options.enablePause) {
-      this.resumeButton = this.makeButton(
-        this.options.selectors.resumeButtonClass,
-        this.options.text.buttons.resume,
+      this.resumeButton = addButton(
+        selectors.resumeButtonClass,
+        text.buttons.resume,
         this.container.resume.bind(this.container),
-        false,
       );
     }
 
-    this.previewButton = this.makeButton(
-      this.options.selectors.previewButtonClass,
-      this.options.text.buttons.preview,
+    this.previewButton = addButton(
+      selectors.previewButtonClass,
+      text.buttons.preview,
       this.container.stop.bind(this.container),
-      false,
     );
 
-    this.recordAgainButton = this.makeButton(
-      this.options.selectors.recordAgainButtonClass,
-      this.options.text.buttons.recordAgain,
+    this.recordAgainButton = addButton(
+      selectors.recordAgainButtonClass,
+      text.buttons.recordAgain,
       this.recordAgain.bind(this),
-      false,
     );
 
-    if (this.options.audio.switch) {
-      this.audioOffRadioPair = this.makeRadioButtonPair({
-        id: "audioOffOption",
-        name: "audio",
-        value: "off",
-        label: this.options.text.audioOff,
-        checked: !isAudioEnabled(this.options),
-        changeHandler: () => {
-          this.container.disableAudio();
+    if (audio.switch) {
+      // Using the same radio name makes the two choices mutually exclusive.
+      this.audioOffRadioPair = getOrCreateRadioButtonPair(
+        buttonsElement,
+        {
+          id: "audioOffOption",
+          name: "audio",
+          value: "off",
+          label: text.audioOff,
+          checked: !isAudioEnabled(this.options),
+          changeHandler: () => {
+            this.container.disableAudio();
+          },
         },
-      });
+        this.submitButton,
+      );
 
-      this.audioOnRadioPair = this.makeRadioButtonPair({
-        id: "audioOnOption",
-        name: "audio",
-        value: "on",
-        label: this.options.text.audioOn,
-        checked: isAudioEnabled(this.options),
-        changeHandler: () => {
-          this.container.enableAudio();
+      this.audioOnRadioPair = getOrCreateRadioButtonPair(
+        buttonsElement,
+        {
+          id: "audioOnOption",
+          name: "audio",
+          value: "on",
+          label: text.audioOn,
+          checked: isAudioEnabled(this.options),
+          changeHandler: () => {
+            this.container.enableAudio();
+          },
         },
-      });
+        this.submitButton,
+      );
     }
   }
 
@@ -635,7 +556,7 @@ class Buttons extends Despot {
 
     hideElement(this.buttonsElement);
 
-    this.buildButtons();
+    this.buildButtons(this.buttonsElement);
 
     if (!this.built) {
       this.initEvents();

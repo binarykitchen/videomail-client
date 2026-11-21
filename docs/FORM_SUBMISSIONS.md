@@ -38,6 +38,8 @@ selectors: {
 
 Leave them `undefined` (the defaults) to find the nearest form and a button with `type="submit"` automatically.
 
+A submit button supplied by your app stays in its existing markup. If you nest it inside another element in the recorder's controls, the client adds recorder buttons without moving your submit button or its wrapper.
+
 ## Include videomail meta data in Form Submissions
 
 Set `submitWithVideomail: true` to include full videomail metadata under `videomail` in the second request to your form's action.
