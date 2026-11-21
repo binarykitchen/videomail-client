@@ -7,6 +7,7 @@ import type {
   VideomailUserMediaReadyParams,
 } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
+import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import adjustButton, { ButtonType } from "../util/html/adjustButton";
 import disableElement from "../util/html/disableElement";
@@ -44,8 +45,12 @@ class Buttons extends Despot {
 
   private built = false;
 
-  constructor(container: Container, options: VideomailClientOptions) {
-    super("Buttons", options);
+  constructor(
+    container: Container,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("Buttons", options, emitter);
 
     this.container = container;
   }

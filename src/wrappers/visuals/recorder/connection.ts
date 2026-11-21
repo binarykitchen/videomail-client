@@ -5,6 +5,7 @@ import Constants from "../../../constants";
 import type { VideomailCommand, VideomailCommandArgs } from "../../../types/command";
 import type { VideomailClientOptions } from "../../../types/options";
 import type { RecordingStats } from "../../../types/RecordingStats";
+import type { DespotEmitter } from "../../../util/Despot";
 import createError from "../../../util/error/createError";
 import getEventDetails from "../../../util/error/getEventDetails";
 import getWebSocketDiagnostic from "../../../util/error/getWebSocketDiagnostic";
@@ -48,8 +49,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
   public abstract isUserMediaLoaded(): boolean | undefined;
   public abstract validate(): boolean;
 
-  protected constructor(options: VideomailClientOptions) {
-    super(options);
+  protected constructor(options: VideomailClientOptions, emitter?: DespotEmitter) {
+    super(options, emitter);
   }
 
   private canReconnectAfterStreamClose() {

@@ -1,3 +1,6 @@
+import { createNanoEvents } from "nanoevents";
+
+import type { VideomailEvents } from "../../types/events";
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import Buttons from "../buttons";
 import type Container from "../container";
@@ -52,6 +55,7 @@ function createCountdownFixture() {
   const options = mergeWithDefaultOptions({
     video: { countdown: 3, stretch: true },
   });
+  const emitter = createNanoEvents<VideomailEvents>();
   const container = {
     appendChild: (child: HTMLElement) => element.appendChild(child),
     beginWaiting: vi.fn(),
@@ -78,8 +82,8 @@ function createCountdownFixture() {
     submit: vi.fn().mockResolvedValue(undefined),
     validate: vi.fn(),
   } as unknown as Container;
-  const visuals = new Visuals(container, options);
-  const buttons = new Buttons(container, options);
+  const visuals = new Visuals(container, options, emitter);
+  const buttons = new Buttons(container, options, emitter);
   buttons.build();
   visuals.build();
   const recorder = visuals.getRecorder();

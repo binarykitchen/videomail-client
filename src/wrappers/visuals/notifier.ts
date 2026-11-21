@@ -6,6 +6,7 @@ import {
 } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../../util/browser/getBrowser";
+import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import useFullWidth from "../../util/html/dimensions/useFullWidth";
 import hideElement from "../../util/html/hideElement";
@@ -47,8 +48,12 @@ class Notifier extends Despot {
   private entertaining = false;
   private built = false;
 
-  constructor(visuals: Visuals, options: VideomailClientOptions) {
-    super("Notifier", options);
+  constructor(
+    visuals: Visuals,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("Notifier", options, emitter);
 
     this.visuals = visuals;
   }
@@ -354,6 +359,12 @@ class Notifier extends Despot {
     }
 
     this.built = true;
+  }
+
+  public unload() {
+    this.cancelEntertainment();
+    this.removeAllListeners();
+    this.built = false;
   }
 
   private hideMessage() {

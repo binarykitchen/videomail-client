@@ -2,6 +2,7 @@ import { ShowParams } from "../client";
 import { Dimension } from "../types/dimension";
 import { VideomailClientOptions } from "../types/options";
 import getBrowser from "../util/browser/getBrowser";
+import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import VideomailError from "../util/error/VideomailError";
 import useFullWidth from "../util/html/dimensions/useFullWidth";
@@ -28,17 +29,21 @@ class Visuals extends Despot {
   private playerOnly = false;
   private cameraRecoveryFailed = false;
 
-  constructor(container: Container, options: VideomailClientOptions) {
-    super("Visuals", options);
+  constructor(
+    container: Container,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("Visuals", options, emitter);
 
     this.container = container;
 
     // Can be overwritten with setter fn
-    this.replay = new Replay(this, options);
+    this.replay = new Replay(this, options, this.emitter);
 
-    this.recorder = new Recorder(this, this.replay, options);
-    this.recorderInsides = new RecorderInsides(this, options);
-    this.notifier = new Notifier(this, options);
+    this.recorder = new Recorder(this, this.replay, options, this.emitter);
+    this.recorderInsides = new RecorderInsides(this, options, this.emitter);
+    this.notifier = new Notifier(this, options, this.emitter);
   }
 
   private buildNoScriptTag() {
@@ -324,6 +329,8 @@ class Visuals extends Despot {
     this.recorder.unload(params);
     this.recorderInsides.unload();
     this.replay.unload(params);
+    this.notifier.unload();
+    this.removeAllListeners();
 
     if (e instanceof Error) {
       // Keep the notifier visible so users can still read the error.

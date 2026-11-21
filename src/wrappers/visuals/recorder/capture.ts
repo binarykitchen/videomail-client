@@ -6,6 +6,7 @@ import type { VideomailCommandArgs } from "../../../types/command";
 import type { Dimension } from "../../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
+import type { DespotEmitter } from "../../../util/Despot";
 import createError from "../../../util/error/createError";
 import { isAudioEnabled } from "../../../util/options/audio";
 import pretty from "../../../util/string/pretty";
@@ -84,8 +85,9 @@ abstract class RecorderCapture extends RecorderMedia {
     visuals: Visuals,
     replay: Replay,
     options: VideomailClientOptions,
+    emitter?: DespotEmitter,
   ) {
-    super(visuals, options);
+    super(visuals, options, emitter);
     this.replay = replay;
   }
 

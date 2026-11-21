@@ -1,31 +1,31 @@
-import { createNanoEvents, Emitter } from "nanoevents";
+import type { Emitter } from "nanoevents";
+import { createNanoEvents } from "nanoevents";
 
 import { VideomailEvents } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
 import VideomailError from "./error/VideomailError";
 import pretty from "./string/pretty";
 
+export type DespotEmitter = Emitter<VideomailEvents>;
+
+interface Subscription {
+  eventName: keyof VideomailEvents;
+  unsubscribe: () => void;
+}
+
 class Despot {
   private readonly name: string;
-  private readonly emitter: Emitter<VideomailEvents>;
+  protected readonly emitter: DespotEmitter;
+  private readonly subscriptions = new Set<Subscription>();
   protected options: VideomailClientOptions;
 
-  private static readonly emitters = new WeakMap<
-    VideomailClientOptions,
-    Emitter<VideomailEvents>
-  >();
-
-  protected constructor(name: string, options: VideomailClientOptions) {
+  protected constructor(
+    name: string,
+    options: VideomailClientOptions,
+    emitter: DespotEmitter = createNanoEvents<VideomailEvents>(),
+  ) {
     this.name = name;
     this.options = options;
-
-    let emitter = Despot.emitters.get(options);
-
-    if (!emitter) {
-      emitter = createNanoEvents<VideomailEvents>();
-      Despot.emitters.set(options, emitter);
-    }
-
     this.emitter = emitter;
   }
 
@@ -58,7 +58,19 @@ class Despot {
   }
 
   public on<E extends keyof VideomailEvents>(eventName: E, callback: VideomailEvents[E]) {
-    return this.emitter.on(eventName, callback);
+    const unsubscribeFromEmitter = this.emitter.on(eventName, callback);
+    const subscription: Subscription = {
+      eventName,
+      unsubscribe: () => {
+        // Keep cleanup scoped to this component even when siblings share an emitter.
+        unsubscribeFromEmitter();
+        this.subscriptions.delete(subscription);
+      },
+    };
+
+    this.subscriptions.add(subscription);
+
+    return subscription.unsubscribe;
   }
 
   public once<E extends keyof VideomailEvents>(
@@ -88,11 +100,17 @@ class Despot {
   }
 
   protected removeListener(eventName: keyof VideomailEvents) {
-    delete this.emitter.events[eventName];
+    this.subscriptions.forEach((subscription) => {
+      if (subscription.eventName === eventName) {
+        subscription.unsubscribe();
+      }
+    });
   }
 
   protected removeAllListeners() {
-    this.emitter.events = {};
+    Array.from(this.subscriptions).forEach(({ unsubscribe }) => {
+      unsubscribe();
+    });
   }
 }
 

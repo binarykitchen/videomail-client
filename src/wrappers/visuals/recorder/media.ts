@@ -3,6 +3,7 @@ import type AudioSample from "audio-sample";
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
 import getBrowser from "../../../util/browser/getBrowser";
+import type { DespotEmitter } from "../../../util/Despot";
 import createError from "../../../util/error/createError";
 import VideomailError from "../../../util/error/VideomailError";
 import hideElement from "../../../util/html/hideElement";
@@ -53,8 +54,12 @@ abstract class RecorderMedia extends RecorderConnection {
   protected abstract isPaused(): boolean | undefined;
   protected abstract isRecording(): boolean;
 
-  protected constructor(visuals: Visuals, options: VideomailClientOptions) {
-    super(options);
+  protected constructor(
+    visuals: Visuals,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super(options, emitter);
     this.visuals = visuals;
     this.facingMode = options.video.facingMode;
   }

@@ -3,6 +3,7 @@ import isPOT from "is-power-of-two";
 
 import type { VideomailClientOptions } from "../../../types/options";
 import type UserMedia from "../../../wrappers/visuals/userMedia";
+import type { DespotEmitter } from "../../Despot";
 import Despot from "../../Despot";
 import createError from "../../error/createError";
 import registerAudioRecorderProcessor, {
@@ -33,8 +34,9 @@ class AudioRecorder extends Despot {
   public constructor(
     userMedia: Pick<UserMedia, "isRecording" | "isPaused">,
     options: VideomailClientOptions,
+    emitter?: DespotEmitter,
   ) {
-    super("AudioRecorder", options);
+    super("AudioRecorder", options, emitter);
     this.userMedia = userMedia;
   }
 

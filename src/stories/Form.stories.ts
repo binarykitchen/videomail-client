@@ -60,8 +60,6 @@ export const DirectSubmission: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver();
-          // startOver() removes listeners, so subscribe again.
-          videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
     };
@@ -211,8 +209,6 @@ export const ContactForm: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver({ keepHidden: writingOption?.checked });
-          // startOver() removes listeners, so subscribe again.
-          videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
     };
@@ -289,8 +285,6 @@ export const VideoSubmissionOnly: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver();
-          // startOver() removes listeners, so subscribe again.
-          videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
     };
@@ -364,8 +358,6 @@ export const Stretch: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver();
-          // Attach again as it has been removed
-          videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
     };
@@ -468,8 +460,6 @@ export const WithCCAndBCC: Story = {
       if (startOverButton) {
         startOverButton.onclick = function () {
           videomailClient.startOver();
-          // Attach again as it has been removed
-          videomailClient.on("SUBMITTED", onSubmitted);
         };
       }
     };

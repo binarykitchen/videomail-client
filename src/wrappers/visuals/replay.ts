@@ -3,6 +3,7 @@ import { VideomailClientOptions } from "../../types/options";
 import { Videomail } from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";
 import getBrowser from "../../util/browser/getBrowser";
+import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
@@ -46,8 +47,12 @@ class Replay extends Despot {
     }
   };
 
-  constructor(visuals: Visuals, options: VideomailClientOptions) {
-    super("Replay", options);
+  constructor(
+    visuals: Visuals,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("Replay", options, emitter);
 
     this.visuals = visuals;
   }

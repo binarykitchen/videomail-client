@@ -70,6 +70,18 @@ describe("Client", () => {
     expect([firstListener.mock.calls, secondListener.mock.calls]).toEqual([[[]], [[]]]);
   });
 
+  it("keeps public listeners across repeated start over cycles", () => {
+    const videomailClient = new VideomailClient();
+    const onStartingOver = vi.fn();
+    videomailClient.on("STARTING_OVER", onStartingOver);
+    videomailClient.show();
+
+    videomailClient.startOver({ keepHidden: true });
+    videomailClient.startOver({ keepHidden: true });
+
+    expect(onStartingOver).toHaveBeenCalledTimes(2);
+  });
+
   it("on unload, hidden and not built", () => {
     const videomailClient = new VideomailClient();
 

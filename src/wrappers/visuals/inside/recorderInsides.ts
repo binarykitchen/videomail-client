@@ -1,5 +1,6 @@
 import { VideomailClientOptions } from "../../../types/options";
 import getBrowser from "../../../util/browser/getBrowser";
+import type { DespotEmitter } from "../../../util/Despot";
 import Despot from "../../../util/Despot";
 import Visuals from "../../visuals";
 import Countdown from "./recorder/countdown";
@@ -18,8 +19,12 @@ class RecorderInsides extends Despot {
 
   private built = false;
 
-  constructor(visuals: Visuals, options: VideomailClientOptions) {
-    super("RecorderInsides", options);
+  constructor(
+    visuals: Visuals,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("RecorderInsides", options, emitter);
 
     this.recordNote = new RecordNote(visuals);
     this.recordTimer = new RecordTimer(visuals, this.recordNote, options);
@@ -31,7 +36,7 @@ class RecorderInsides extends Despot {
     }
 
     if (options.video.facingModeButton && browser.isMobile()) {
-      this.facingMode = new FacingMode(visuals, options);
+      this.facingMode = new FacingMode(visuals, options, this.emitter);
     }
 
     if (options.enablePause) {
@@ -129,6 +134,8 @@ class RecorderInsides extends Despot {
 
   public unload() {
     this.countdown?.unload();
+    this.facingMode?.unload();
+    this.removeAllListeners();
 
     this.built = false;
   }

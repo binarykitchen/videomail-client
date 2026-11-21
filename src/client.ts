@@ -27,7 +27,7 @@ class VideomailClient extends Despot {
 
     this.validateOptions();
 
-    this.container = new Container(this.options);
+    this.container = new Container(this.options, this.emitter);
   }
 
   private validateOptions() {

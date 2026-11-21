@@ -2,6 +2,7 @@ import { deserializeError } from "serialize-error";
 
 import { VideomailCommand } from "../../types/command";
 import type { VideomailClientOptions } from "../../types/options";
+import type { DespotEmitter } from "../../util/Despot";
 import createError from "../../util/error/createError";
 import summarize from "../../util/string/summarize";
 import { UnloadParams } from "../container";
@@ -16,8 +17,13 @@ export type { StopParams } from "./recorder/capture";
 class Recorder extends RecorderCapture {
   private readonly dimensions: RecorderDimensions;
 
-  constructor(visuals: Visuals, replay: Replay, options: VideomailClientOptions) {
-    super(visuals, replay, options);
+  constructor(
+    visuals: Visuals,
+    replay: Replay,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super(visuals, replay, options, emitter);
 
     this.dimensions = new RecorderDimensions({
       options,
@@ -150,6 +156,7 @@ class Recorder extends RecorderCapture {
       this.userMedia.unloadRemainingEventListeners();
     }
 
+    this.removeAllListeners();
     this.unloaded = true;
     this.discardSocket();
     this.built = this.connecting = this.connected = false;
@@ -254,7 +261,7 @@ class Recorder extends RecorderCapture {
     this.recorderElement.style["-webkit-transform"] = "rotateY(180deg)";
     this.recorderElement.style["-moz-transform"] = "rotateY(180deg)";
 
-    this.userMedia ??= new UserMedia(this, this.options);
+    this.userMedia ??= new UserMedia(this, this.options, this.emitter);
 
     this.show();
 

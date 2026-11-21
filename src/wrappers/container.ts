@@ -13,6 +13,7 @@ import type {
 import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
 import getBrowser from "../util/browser/getBrowser";
+import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import isRecipientSelectionValid from "../util/email/isRecipientSelectionValid";
 import createError from "../util/error/createError";
@@ -121,11 +122,11 @@ class Container extends Despot {
     }
   };
 
-  public constructor(options: VideomailClientOptions) {
-    super("Container", options);
+  public constructor(options: VideomailClientOptions, emitter?: DespotEmitter) {
+    super("Container", options, emitter);
 
-    this.visuals = new Visuals(this, options);
-    this.buttons = new Buttons(this, options);
+    this.visuals = new Visuals(this, options, this.emitter);
+    this.buttons = new Buttons(this, options, this.emitter);
     this.resource = new Resource(options);
   }
 
@@ -260,7 +261,7 @@ class Container extends Despot {
     const formElement = this.getFormElement();
 
     if (formElement) {
-      this.form = new Form(this, formElement, this.options);
+      this.form = new Form(this, formElement, this.options, this.emitter);
 
       const submitButton = this.form.findSubmitButton();
 

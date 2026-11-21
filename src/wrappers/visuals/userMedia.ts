@@ -6,6 +6,7 @@ import { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../../util/browser/getBrowser";
+import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
@@ -62,8 +63,12 @@ class UserMedia extends Despot {
     this.options.logger.warn(`Caught video element error event: ${pretty(event)}`);
   };
 
-  constructor(recorder: Recorder, options: VideomailClientOptions) {
-    super("UserMedia", options);
+  constructor(
+    recorder: Recorder,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("UserMedia", options, emitter);
 
     this.recorder = recorder;
     this.rawVisualUserMedia = recorder.getRawVisualUserMedia();
@@ -319,7 +324,7 @@ class UserMedia extends Despot {
     this.videoTrackLabel = undefined;
 
     if (isAudioEnabled(this.options)) {
-      this.audioRecorder ??= new AudioRecorder(this, this.options);
+      this.audioRecorder ??= new AudioRecorder(this, this.options, this.emitter);
     } else {
       // A permission change may replace an audio preview with a camera-only stream.
       void this.audioRecorder?.stop();
@@ -582,6 +587,7 @@ class UserMedia extends Despot {
   public stop(visualStream?: MediaStream, params?: StopParams) {
     try {
       this.cancelAcquisition();
+      this.removeListener("SENDING_FIRST_FRAME");
       this.stopWatchingPlayback?.();
       this.stopWatchingPlayback = undefined;
       let chosenStream = visualStream;

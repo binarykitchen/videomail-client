@@ -1,3 +1,6 @@
+import { createNanoEvents } from "nanoevents";
+
+import type { VideomailEvents } from "../../../types/events";
 import getBrowser from "../../../util/browser/getBrowser";
 import AudioRecorder from "../../../util/html/media/AudioRecorder";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
@@ -10,6 +13,7 @@ vi.mock("../../../util/error/createError", () => ({
 
 function createMediaFixture(audio = false) {
   const videoElement = document.createElement("video");
+  const emitter = createNanoEvents<VideomailEvents>();
   const recoverCameraAfterStall = vi.fn();
   const videoTrack = {
     enabled: true,
@@ -40,7 +44,7 @@ function createMediaFixture(audio = false) {
     recoverCameraAfterStall,
   } as unknown as Recorder;
   const options = mergeWithDefaultOptions({ audio: { enabled: audio } });
-  const userMedia = new UserMedia(recorder, options);
+  const userMedia = new UserMedia(recorder, options, emitter);
   const load = vi.spyOn(videoElement, "load").mockImplementation(() => undefined);
   vi.spyOn(videoElement, "play").mockResolvedValue();
   Object.defineProperties(videoElement, {
@@ -54,6 +58,7 @@ function createMediaFixture(audio = false) {
   return {
     userMedia,
     videoElement,
+    emitter,
     videoTrack,
     audioTrack,
     media,
@@ -370,6 +375,31 @@ describe("UserMedia", () => {
         recording: userMedia.isRecording(),
       }).toEqual({ callback: onAudio, ready: 1, paused: true, recording: true });
     });
+  });
+
+  it("keeps other first-frame listeners when audio processing starts", async () => {
+    const { userMedia, videoElement, stream, ready, failed, onAudio, emitter } =
+      createMediaFixture(true);
+    vi.spyOn(AudioRecorder.prototype, "init").mockResolvedValue();
+    vi.spyOn(AudioRecorder.prototype, "record").mockImplementation(() => undefined);
+    userMedia.init(stream, ready, onAudio, failed);
+    videoElement.dispatchEvent(new Event("playing"));
+    videoElement.dispatchEvent(new Event("loadedmetadata"));
+
+    await vi.waitFor(() => {
+      if (!ready.mock.calls.length) {
+        throw new Error("Expected the camera to be ready before starting audio.");
+      }
+    });
+
+    const otherFirstFrameListener = vi.fn();
+    emitter.on("SENDING_FIRST_FRAME", otherFirstFrameListener);
+    emitter.emit("SENDING_FIRST_FRAME");
+
+    expect({
+      ready: ready.mock.calls.length,
+      otherFirstFrameListeners: otherFirstFrameListener.mock.calls.length,
+    }).toEqual({ ready: 1, otherFirstFrameListeners: 1 });
   });
 
   it("waits for audio initialization before reporting readiness", async () => {

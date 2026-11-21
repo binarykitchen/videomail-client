@@ -1,4 +1,5 @@
 import { VideomailClientOptions } from "../../../../types/options";
+import type { DespotEmitter } from "../../../../util/Despot";
 import Despot from "../../../../util/Despot";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
@@ -8,8 +9,12 @@ class FacingMode extends Despot {
   private readonly visuals: Visuals;
   private facingModeElement?: HTMLElement | null | undefined;
 
-  constructor(visuals: Visuals, options: VideomailClientOptions) {
-    super("Facing Mode", options);
+  constructor(
+    visuals: Visuals,
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+  ) {
+    super("Facing Mode", options, emitter);
 
     this.visuals = visuals;
   }
@@ -54,6 +59,10 @@ class FacingMode extends Despot {
 
   public show() {
     showElement(this.facingModeElement);
+  }
+
+  public unload() {
+    this.removeAllListeners();
   }
 }
 

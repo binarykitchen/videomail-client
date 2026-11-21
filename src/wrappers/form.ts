@@ -3,6 +3,7 @@ import getFormData from "get-form-data";
 import { VideomailErrorParams, VideomailPreviewParams } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import { PartialVideomail, Videomail } from "../types/Videomail";
+import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import { trimEmail, trimEmails } from "../util/email/trimEmail";
 import createError from "../util/error/createError";
@@ -41,8 +42,9 @@ class Form extends Despot {
     container: Container,
     formElement: HTMLFormElement,
     options: VideomailClientOptions,
+    emitter?: DespotEmitter,
   ) {
-    super("Form", options);
+    super("Form", options, emitter);
 
     this.container = container;
     this.formElement = formElement;
