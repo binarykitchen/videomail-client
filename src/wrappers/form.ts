@@ -5,7 +5,6 @@ import { VideomailClientOptions } from "../types/options";
 import { PartialVideomail, Videomail } from "../types/Videomail";
 import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
-import { trimEmail, trimEmails } from "../util/email/trimEmail";
 import createError from "../util/error/createError";
 import getValidity from "../util/getValidity";
 import hideElement from "../util/html/hideElement";
@@ -13,8 +12,14 @@ import isNotButton from "../util/html/isNotButton";
 import showElement from "../util/html/showElement";
 import pretty from "../util/string/pretty";
 import Container from "./container";
+import getFormFieldMappings, {
+  type FormFieldMappings,
+} from "./form/getFormFieldMappings";
+import getVideomailFieldName from "./form/getVideomailFieldName";
+import populateFormFields from "./form/populateFormFields";
+import transformFormFields, { type FormInputs } from "./form/transformFormFields";
 
-export type FormInputs = Record<string, string>;
+export type { FormInputs } from "./form/transformFormFields";
 
 export const FormMethod = {
   POST: "post",
@@ -36,7 +41,7 @@ class Form extends Despot {
   private isSubmitting = false;
   private readonly submissionDisabledStates = new Map<Element, boolean>();
 
-  private readonly FORM_FIELDS = {};
+  private readonly fieldMappings: FormFieldMappings;
 
   constructor(
     container: Container,
@@ -49,17 +54,8 @@ class Form extends Despot {
     this.container = container;
     this.formElement = formElement;
 
-    this.FORM_FIELDS = {
-      subject: options.selectors.subjectInputName,
-      from: options.selectors.fromInputName,
-      to: options.selectors.toInputName,
-      cc: options.selectors.ccInputName,
-      bcc: options.selectors.bccInputName,
-      body: options.selectors.bodyInputName,
-      key: options.selectors.keyInputName,
-      parentKey: options.selectors.parentKeyInputName,
-      sendCopy: options.selectors.sendCopyInputName,
-    };
+    // Share one mapping across validation, replay and submission so renamed fields round-trip.
+    this.fieldMappings = getFormFieldMappings(options.selectors);
   }
 
   private readonly validate = (event: Event) => {
@@ -77,32 +73,7 @@ class Form extends Despot {
   }
 
   public transformFormData(formInputs: FormInputs) {
-    const transformedVideomail: PartialVideomail = {};
-
-    Object.keys(this.FORM_FIELDS).forEach((key) => {
-      const formFieldValue = this.FORM_FIELDS[key];
-
-      if (formFieldValue in formInputs) {
-        const value = formInputs[formFieldValue];
-
-        if (value !== undefined) {
-          switch (key) {
-            case "from":
-              transformedVideomail[key] = trimEmail(value);
-              break;
-            case "to":
-            case "cc":
-            case "bcc":
-              transformedVideomail[key] = trimEmails(value);
-              break;
-            default:
-              transformedVideomail[key] = value;
-          }
-        }
-      }
-    });
-
-    return transformedVideomail;
+    return transformFormFields(formInputs, this.fieldMappings);
   }
 
   public getRecipients() {
@@ -128,67 +99,8 @@ class Form extends Despot {
 
   public loadVideomail(videomail: Videomail) {
     this.options.logger.debug("Form: loadVideomail()");
-
-    for (const formControl of this.formElement.elements) {
-      const name = formControl.getAttribute("name");
-      const fieldName = this.getVideomailFieldName(formControl);
-
-      if (name && fieldName) {
-        // Host field names are configurable; stored videos still use keys like "key".
-        // Reuse the submission mapping so a replay edits the correct video.
-        let value = videomail[fieldName];
-        const tagName = formControl.tagName;
-
-        if (this.options.callbacks.adjustFormValueBeforePopulating) {
-          // Existing integrations expect the host's field name, not the record key.
-          value = this.options.callbacks.adjustFormValueBeforePopulating(
-            name,
-            value,
-            videomail,
-          );
-        }
-
-        if (value !== undefined && value !== null) {
-          switch (tagName) {
-            case "INPUT": {
-              const inputControl = formControl as HTMLInputElement;
-
-              if (Array.isArray(value)) {
-                inputControl.value = value.join(", ");
-              } else {
-                inputControl.value = String(value);
-              }
-              break;
-            }
-            case "TEXTAREA": {
-              const textArea = formControl as HTMLTextAreaElement;
-              textArea.value = String(value);
-              break;
-            }
-            case "SELECT": {
-              const select = formControl as HTMLSelectElement;
-              select.value = String(value);
-              break;
-            }
-            default:
-              throw createError({
-                message: `Unsupported form control tag name ${tagName} found`,
-                options: this.options,
-              });
-          }
-        }
-
-        // Always disable them, they can't be changed
-        if (
-          name === this.options.selectors.toInputName ||
-          name === this.options.selectors.subjectInputName ||
-          name === this.options.selectors.bodyInputName
-        ) {
-          formControl.setAttribute("disabled", "disabled");
-        }
-      }
-    }
-
+    populateFormFields(this.formElement, videomail, this.fieldMappings, this.options);
+    // The next submission updates this video instead of creating another.
     this.formElement.setAttribute("method", FormMethod.PUT);
   }
 
@@ -215,34 +127,12 @@ class Form extends Despot {
     }
   }
 
-  private getVideomailFieldName(formElement: Element) {
-    // 1. Read the control's HTML name, e.g. "videomail_key".
-    const formElementName = formElement.getAttribute("name");
-
-    // 2. Build [stored field, HTML name] pairs, e.g. ["key", "videomail_key"].
-    const fieldMappings = Object.entries(this.FORM_FIELDS);
-
-    // 3. Return the stored field for a match: "videomail_key" -> "key".
-    for (const [fieldName, inputName] of fieldMappings) {
-      if (inputName === formElementName) {
-        return fieldName;
-      }
-    }
-
-    // 4. Leave unmapped controls alone; they have no stored videomail field.
-    return undefined;
-  }
-
-  private isRegisteredFormField(formElement: Element) {
-    return this.getVideomailFieldName(formElement) !== undefined;
-  }
-
   private getRegisteredFormElements() {
     const elements = this.formElement.querySelectorAll("input, textarea, select");
     const registeredElements: Element[] = [];
 
     for (const element of elements) {
-      if (this.isRegisteredFormField(element)) {
+      if (getVideomailFieldName(element.getAttribute("name"), this.fieldMappings)) {
         registeredElements.push(element);
       }
     }
