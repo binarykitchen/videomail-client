@@ -1,5 +1,6 @@
 import getFirstVideoTrack from "../../media/getFirstVideoTrack";
 import MEDIA_EVENTS from "../../media/mediaEvents";
+import requestMediaStreamWithPermissions from "../../media/requestMediaStream";
 import watchCameraPlayback from "../../media/watchCameraPlayback";
 import { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
@@ -14,6 +15,17 @@ import pretty from "../../util/string/pretty";
 import Recorder from "./recorder";
 
 const EVENT_ASCII = "|—O—|";
+
+interface MediaAcquisitionOptions {
+  timeout: number;
+  followsMicrophonePermission: boolean;
+  getPermission?: (() => Promise<PermissionState>) | undefined;
+}
+
+interface MediaAcquisitionCallbacks {
+  onStream: (stream: MediaStream) => void;
+  onError: (reason: unknown) => void;
+}
 
 interface StopParams {
   aboutToInitialize?: boolean;
@@ -38,6 +50,8 @@ class UserMedia extends Despot {
   private clearInitializationListeners?: (() => void) | undefined;
   private stopWatchingPlayback?: (() => void) | undefined;
   private initializationId = 0;
+  private acquisitionId = 0;
+  private acquisitionTimeout?: number | undefined;
 
   private readonly outputEvent = (e: Event) => {
     this.logEvent(e.type, { readyState: this.rawVisualUserMedia?.readyState });
@@ -108,6 +122,72 @@ class UserMedia extends Despot {
     if (this.isCurrentInitialization(initializationId)) {
       this.watchPlayback();
     }
+  }
+
+  private clearAcquisitionTimeout() {
+    if (this.acquisitionTimeout === undefined) {
+      return;
+    }
+
+    window.clearTimeout(this.acquisitionTimeout);
+    this.acquisitionTimeout = undefined;
+  }
+
+  private cancelAcquisition() {
+    this.acquisitionId++;
+    this.clearAcquisitionTimeout();
+  }
+
+  private isCurrentAcquisition(acquisitionId: number) {
+    return acquisitionId === this.acquisitionId;
+  }
+
+  public acquire(
+    constraints: MediaStreamConstraints,
+    options: MediaAcquisitionOptions,
+    callbacks: MediaAcquisitionCallbacks,
+  ) {
+    this.cancelAcquisition();
+    const acquisitionId = ++this.acquisitionId;
+
+    this.acquisitionTimeout = window.setTimeout(() => {
+      if (!this.isCurrentAcquisition(acquisitionId)) {
+        return;
+      }
+
+      this.cancelAcquisition();
+      callbacks.onError(getBrowser(this.options).getNoAccessIssue());
+    }, options.timeout);
+
+    requestMediaStreamWithPermissions({
+      constraints,
+      followsMicrophonePermission: options.followsMicrophonePermission,
+      getPermission: options.getPermission,
+      isRequestCurrent: () => this.isCurrentAcquisition(acquisitionId),
+    }).then(
+      (stream) => {
+        if (!this.isCurrentAcquisition(acquisitionId)) {
+          // A reset or newer request can win while the browser prompt is open.
+          stream?.getTracks().forEach((track) => {
+            track.stop();
+          });
+          return;
+        }
+
+        this.clearAcquisitionTimeout();
+        if (stream) {
+          callbacks.onStream(stream);
+        }
+      },
+      (reason: unknown) => {
+        if (!this.isCurrentAcquisition(acquisitionId)) {
+          return;
+        }
+
+        this.clearAcquisitionTimeout();
+        callbacks.onError(reason);
+      },
+    );
   }
 
   private isVideoReady() {
@@ -501,6 +581,7 @@ class UserMedia extends Despot {
 
   public stop(visualStream?: MediaStream, params?: StopParams) {
     try {
+      this.cancelAcquisition();
       this.stopWatchingPlayback?.();
       this.stopWatchingPlayback = undefined;
       let chosenStream = visualStream;

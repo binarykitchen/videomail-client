@@ -1,6 +1,5 @@
 import type AudioSample from "audio-sample";
 
-import requestMediaStreamWithPermissions from "../../../media/requestMediaStream";
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
 import getBrowser from "../../../util/browser/getBrowser";
@@ -29,8 +28,6 @@ abstract class RecorderMedia extends RecorderConnection {
   protected retryTimeout?: number | undefined;
 
   protected stopTimeout?: number | undefined;
-
-  protected mediaRequestId = 0;
 
   protected cameraRecovery?: Promise<boolean> | undefined;
 
@@ -167,7 +164,6 @@ abstract class RecorderMedia extends RecorderConnection {
   private getUserMediaCallback(
     localStream: MediaStream,
     params?: VideomailUserMediaReadyParams,
-    requestId = this.mediaRequestId,
   ) {
     if (!this.userMedia) {
       localStream.getTracks().forEach((track) => {
@@ -186,13 +182,13 @@ abstract class RecorderMedia extends RecorderConnection {
         this.userMedia.init(
           localStream,
           () => {
-            if (!this.unloaded && requestId === this.mediaRequestId) {
+            if (!this.unloaded) {
               this.onUserMediaReady(params);
             }
           },
           this.onAudioSample.bind(this),
           (err) => {
-            if (!this.unloaded && requestId === this.mediaRequestId) {
+            if (!this.unloaded) {
               this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
             }
           },
@@ -224,23 +220,6 @@ abstract class RecorderMedia extends RecorderConnection {
     );
   }
 
-  private requestMediaStream(constraints: MediaStreamConstraints, requestId: number) {
-    const followsMicrophonePermission = this.shouldFollowMicrophonePermission();
-
-    return requestMediaStreamWithPermissions({
-      constraints,
-      followsMicrophonePermission,
-      getPermission: followsMicrophonePermission
-        ? this.options.audio.getPermission
-        : undefined,
-      isRequestCurrent: () => this.isRequestCurrent(requestId),
-    });
-  }
-
-  private isRequestCurrent(requestId: number) {
-    return !this.unloaded && requestId === this.mediaRequestId;
-  }
-
   private loadGenuineUserMedia(params?: VideomailUserMediaReadyParams) {
     this.options.logger.debug(
       `Recorder: loadGenuineUserMedia(${params ? pretty(params) : ""})`,
@@ -253,7 +232,6 @@ abstract class RecorderMedia extends RecorderConnection {
 
     this.emit("ASKING_WEBCAM_PERMISSION");
     this.userMediaLoading = true;
-    const requestId = ++this.mediaRequestId;
 
     const limitedWidth = this.options.video.width ? undefined : this.visuals.limitWidth();
     const constraints = createUserMediaConstraints({
@@ -278,35 +256,39 @@ abstract class RecorderMedia extends RecorderConnection {
       ),
     );
 
-    const streamPromise = this.requestMediaStream(constraints, requestId);
+    const userMedia = this.userMedia;
+    if (!userMedia) {
+      throw createError({ message: "No user media is defined", options: this.options });
+    }
 
-    streamPromise
-      .then((localStream) => {
-        if (!localStream) {
-          return;
-        }
-        if (this.unloaded || requestId !== this.mediaRequestId) {
-          localStream.getTracks().forEach((track) => {
-            track.stop();
-          });
-          return;
-        }
-
-        if (followsMicrophonePermission) {
-          const audioEnabled = localStream
-            .getAudioTracks()
-            .some((track) => track.readyState === "live" && track.enabled);
-          this.options.audio.enabled = audioEnabled;
-          this.getUserMediaCallback(localStream, { ...params, audioEnabled }, requestId);
-        } else {
-          this.getUserMediaCallback(localStream, params, requestId);
-        }
-      })
-      .catch((reason: unknown) => {
-        if (!this.unloaded && requestId === this.mediaRequestId) {
-          this.userMediaErrorCallback(reason, constraints);
-        }
-      });
+    userMedia.acquire(
+      constraints,
+      {
+        timeout: this.options.timeouts.userMedia,
+        followsMicrophonePermission,
+        getPermission: followsMicrophonePermission
+          ? this.options.audio.getPermission
+          : undefined,
+      },
+      {
+        onStream: (localStream) => {
+          if (followsMicrophonePermission) {
+            const audioEnabled = localStream
+              .getAudioTracks()
+              .some((track) => track.readyState === "live" && track.enabled);
+            this.options.audio.enabled = audioEnabled;
+            this.getUserMediaCallback(localStream, { ...params, audioEnabled });
+          } else {
+            this.getUserMediaCallback(localStream, params);
+          }
+        },
+        onError: (reason) => {
+          if (!this.unloaded) {
+            this.userMediaErrorCallback(reason, constraints);
+          }
+        },
+      },
+    );
   }
 
   protected loadUserMedia(params?: VideomailUserMediaReadyParams) {
@@ -339,14 +321,6 @@ abstract class RecorderMedia extends RecorderConnection {
       if (!navigator.mediaDevices) {
         throw new Error("No media devices are available.");
       }
-
-      this.userMediaTimeout = window.setTimeout(() => {
-        if (!this.userMediaLoaded) {
-          this.userMediaLoading = false;
-          const err = getBrowser(this.options).getNoAccessIssue();
-          this.userMediaErrorCallback(err, { audio: isAudioEnabled(this.options) });
-        }
-      }, this.options.timeouts.userMedia);
 
       this.userMediaLoading = true;
 
@@ -437,8 +411,6 @@ abstract class RecorderMedia extends RecorderConnection {
       return;
     }
 
-    // A permission request can resolve after cancellation; invalidate its result.
-    this.mediaRequestId++;
     this.userMediaLoading = false;
     this.userMediaLoaded = false;
     this.clearUserMediaTimeout();

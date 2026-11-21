@@ -53,9 +53,11 @@ interface RecorderInternals {
   reconnecting: boolean;
   submitting: boolean;
   userMediaLoaded?: boolean;
+  userMediaLoading: boolean;
   connectionOpenedAt?: number;
   closeIdleConnection(reason: string): void;
   userMediaErrorCallback(err: Error, constraints: MediaStreamConstraints): void;
+  loadUserMedia(): void;
   loadGenuineUserMedia(): void;
   onUserMediaReady(): void;
   getIntervalSum(): number;
@@ -168,6 +170,7 @@ async function flushFrameEncoding() {
 function createRecoveryFixture() {
   vi.useFakeTimers();
   const fixture = recordFrames();
+  vi.spyOn(fixture.userMedia, "stop").mockRestore();
   fixture.options.reportErrors = false;
   const internals = fixture.recorder as unknown as RecorderInternals;
   const loop = internals.loop;
@@ -286,6 +289,81 @@ describe("Recorder", () => {
       recording: false,
       audio: false,
     });
+  });
+
+  it("stops a late initial camera stream after reset", async () => {
+    const { recorder } = createFixture();
+    buildWithoutConnecting(recorder);
+    const internals = recorder as unknown as RecorderInternals;
+    const userMedia = internals.userMedia;
+    if (!userMedia) {
+      throw new Error("Expected user media to be built.");
+    }
+
+    const pending = Promise.withResolvers<MediaStream>();
+    const stoppedTrack = vi.fn();
+    const stream = {
+      getTracks: () => [{ stop: stoppedTrack }],
+    } as unknown as MediaStream;
+    const getUserMedia = vi.fn(() => pending.promise);
+    vi.stubGlobal("navigator", {
+      userAgent: navigator.userAgent,
+      mediaDevices: {
+        getUserMedia,
+        getSupportedConstraints: () => ({}),
+      },
+    });
+    const initialize = vi.spyOn(userMedia, "init");
+    internals.loadUserMedia();
+    recorder.reset();
+    pending.resolve(stream);
+    await pending.promise;
+
+    expect({
+      requests: getUserMedia.mock.calls.length,
+      initialized: initialize.mock.calls.length,
+      stopped: stoppedTrack.mock.calls.length,
+      loading: internals.userMediaLoading,
+    }).toEqual({ requests: 1, initialized: 0, stopped: 1, loading: false });
+  });
+
+  it("stops a late initial camera stream after its acquisition times out", async () => {
+    vi.useFakeTimers();
+    const { recorder, options } = createFixture();
+    buildWithoutConnecting(recorder);
+    const internals = recorder as unknown as RecorderInternals;
+    const userMedia = internals.userMedia;
+    if (!userMedia) {
+      throw new Error("Expected user media to be built.");
+    }
+
+    const pending = Promise.withResolvers<MediaStream>();
+    const stoppedTrack = vi.fn();
+    const stream = {
+      getTracks: () => [{ stop: stoppedTrack }],
+    } as unknown as MediaStream;
+    const getUserMedia = vi.fn(() => pending.promise);
+    vi.stubGlobal("navigator", {
+      userAgent: navigator.userAgent,
+      mediaDevices: {
+        getUserMedia,
+        getSupportedConstraints: () => ({}),
+      },
+    });
+    const initialize = vi.spyOn(userMedia, "init");
+    recorder.on("ERROR", vi.fn());
+    internals.loadUserMedia();
+
+    await vi.advanceTimersByTimeAsync(options.timeouts.userMedia);
+    pending.resolve(stream);
+    await pending.promise;
+
+    expect({
+      requests: getUserMedia.mock.calls.length,
+      initialized: initialize.mock.calls.length,
+      stopped: stoppedTrack.mock.calls.length,
+      loading: internals.userMediaLoading,
+    }).toEqual({ requests: 1, initialized: 0, stopped: 1, loading: false });
   });
 
   it.each([

@@ -460,6 +460,8 @@ abstract class RecorderCapture extends RecorderMedia {
     this.stopAfterFrameEncoding = false;
     this.clearStopTimeout();
     this.cancelCameraRecovery();
+    this.clearUserMediaTimeout();
+    this.userMediaLoading = false;
     this.pauseRecordingClock();
     this.recordingActive = false;
 
