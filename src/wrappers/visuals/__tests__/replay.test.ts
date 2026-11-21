@@ -214,6 +214,24 @@ describe("Replay", () => {
     expect(replay.isShown()).toBe(false);
   });
 
+  it("does not report an aborted play request after discarding the preview", async () => {
+    const { replay, visualsElement } = createFixture();
+    replay.build(visualsElement);
+    replay.setMp4Source("https://example.test/video.mp4");
+    replay.show(undefined, undefined);
+    const error = vi.fn();
+    replay.on("ERROR", error);
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValue(
+      new DOMException("Playback was interrupted", "AbortError"),
+    );
+    replay.getElement()?.dispatchEvent(new Event("click"));
+
+    replay.hide({ discardPreview: true });
+    await Promise.resolve();
+
+    expect(error).not.toHaveBeenCalled();
+  });
+
   it("clears video sources when reset", () => {
     vi.useFakeTimers();
     const { replay, visualsElement } = createFixture();

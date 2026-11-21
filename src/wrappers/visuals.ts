@@ -284,13 +284,15 @@ class Visuals extends Despot {
     this.options.logger.debug(`Visuals: back(keepHidden = ${keepHidden})`);
 
     this.cameraRecoveryFailed = false;
-    this.replay.hide();
+    this.replay.hide({ discardPreview: true });
     this.notifier.hide();
 
     if (keepHidden) {
       this.recorder.hide();
       cb?.();
     } else {
+      // The replay and camera share this frame. Keep it visible during the server round trip.
+      this.showVisuals();
       this.recorder.back(cb);
     }
   }

@@ -180,6 +180,50 @@ describe("Visuals", () => {
     expect(record).toHaveBeenCalledOnce();
   });
 
+  it("releases the previous replay before starting another take", () => {
+    const { visuals } = createFixture();
+    visuals.build();
+    visuals.showVisuals();
+
+    const replay = visuals.getReplay();
+    const video = replay.getElement();
+    const load = vi
+      .spyOn(HTMLMediaElement.prototype, "load")
+      .mockImplementation(() => {});
+    replay.setMp4Source("https://example.test/preview.mp4");
+    replay.setWebMSource("https://example.test/preview.webm");
+    replay.show(undefined, undefined);
+
+    const transitions: string[] = [];
+    load.mockImplementation(() => {
+      transitions.push(video?.querySelector("source") ? "reloaded" : "released");
+    });
+    replay.on("PREVIEW_SHOWN", () => {
+      transitions.push("preview shown");
+    });
+    vi.spyOn(visuals.getRecorder(), "back").mockImplementation(() => {
+      transitions.push("camera starting");
+    });
+
+    visuals.recordAgain();
+    video?.dispatchEvent(new Event("canplaythrough"));
+
+    expect(transitions).toEqual(["released", "camera starting"]);
+  });
+
+  it("keeps the frame visible while waiting for the next camera stream", () => {
+    const { visuals } = createFixture({ video: { width: 400, height: 300 } });
+    vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+    vi.spyOn(visuals.getRecorder(), "back").mockImplementation(() => {});
+    visuals.build();
+    visuals.showVisuals();
+    visuals.getReplay().show(undefined, undefined);
+
+    visuals.recordAgain();
+
+    expect(visuals.isHidden()).toBe(false);
+  });
+
   it("emits COUNTDOWN when a countdown is configured", () => {
     vi.useFakeTimers();
     const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });

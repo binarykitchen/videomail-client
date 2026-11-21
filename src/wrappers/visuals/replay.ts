@@ -28,6 +28,11 @@ class Replay extends Despot {
 
     if (this.replayElement?.paused) {
       this.replayElement.play().catch((exc: unknown) => {
+        // Leaving the replay can abort a play request before it settles.
+        if (exc instanceof DOMException && exc.name === "AbortError" && !this.isShown()) {
+          return;
+        }
+
         const err = createError({
           message: `Failed to play replay video upon ${e.type} event.`,
           exc,
@@ -240,13 +245,7 @@ class Replay extends Despot {
     // this forces to actually fetch the videos from the server
     this.replayElement.load();
 
-    if (this.canPlayThroughHandler) {
-      this.replayElement.removeEventListener(
-        "canplaythrough",
-        this.canPlayThroughHandler,
-      );
-    }
-
+    this.removeCanPlayThroughHandler();
     const eventName = this.videomail ? "REPLAY_SHOWN" : "PREVIEW_SHOWN";
     this.canPlayThroughHandler = () => {
       this.canPlayThroughHandler = undefined;
@@ -308,9 +307,7 @@ class Replay extends Despot {
     this.options.logger.debug("Replay: built.");
   }
 
-  public unload(params?: UnloadParams) {
-    this.options.logger.debug("Replay: unload()");
-
+  private removeCanPlayThroughHandler() {
     if (this.canPlayThroughHandler) {
       this.replayElement?.removeEventListener(
         "canplaythrough",
@@ -318,6 +315,12 @@ class Replay extends Despot {
       );
       this.canPlayThroughHandler = undefined;
     }
+  }
+
+  public unload(params?: UnloadParams) {
+    this.options.logger.debug("Replay: unload()");
+
+    this.removeCanPlayThroughHandler();
 
     this.replayElement?.removeEventListener("touchstart", this.togglePlayback);
     this.replayElement?.removeEventListener("click", this.togglePlayback);
@@ -474,22 +477,37 @@ class Replay extends Despot {
     });
   }
 
-  public hide() {
-    if (this.replayElement) {
-      this.replayElement.pause();
-
-      // Avoid a leftover black controls bar on mobile.
-      this.replayElement.removeAttribute("controls");
-
-      // Reset only if a source was set.
-      if (this.replayElement.hasAttribute("src")) {
-        this.replayElement.removeAttribute("src");
-        this.replayElement.load();
-      }
-
-      hideElement(this.replayElement);
-      hideElement(this.replayElement.parentElement);
+  public hide({ discardPreview = false } = {}) {
+    const video = this.replayElement;
+    if (!video) {
+      return;
     }
+
+    video.pause();
+
+    // Avoid a leftover black controls bar on mobile.
+    video.removeAttribute("controls");
+
+    if (discardPreview) {
+      this.removeCanPlayThroughHandler();
+      this.videomail = undefined;
+    }
+
+    // Previews use <source> children. Hiding them does not unload the old player
+    // before the next camera stream starts, and load() alone would select them again.
+    const sources = discardPreview ? video.querySelectorAll("source") : [];
+    if (
+      video.hasAttribute("src") ||
+      sources.length > 0 ||
+      (discardPreview && video.currentSrc)
+    ) {
+      video.removeAttribute("src");
+      sources.forEach((source) => source.remove());
+      video.load();
+    }
+
+    hideElement(video);
+    hideElement(video.parentElement);
   }
 
   public isShown() {

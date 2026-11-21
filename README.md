@@ -83,6 +83,8 @@ With both `video.width` and `video.height` set and `video.stretch` disabled, the
 
 On desktop, `width: 400` and `height: 300` reserve a 400×300 frame; smaller screens scale it proportionally. Both video elements fill that frame's height, with the whole picture fitted inside rather than cropped.
 
+**Record again** keeps the frame visible and releases the previous replay before opening the camera for the next take.
+
 Host styles should not replace their height with `auto` or impose a separate replay height limit. Camera constraints use these dimensions as ideals; captured frames use the camera's actual dimensions, capped proportionally to the configured width and height, independently of the preview's on-screen size.
 
 The examples in [src/stories](https://github.com/binarykitchen/videomail-client/tree/master/src/stories) show common configurations.
