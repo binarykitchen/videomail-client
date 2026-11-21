@@ -72,6 +72,54 @@ function createMediaFixture(audio = false) {
   };
 }
 
+function createCanvasPreviewFixture() {
+  const fixture = createMediaFixture();
+  const { options, videoElement } = fixture;
+  vi.spyOn(getBrowser(options), "shouldUseCanvasCameraPreview").mockReturnValue(true);
+  const container = document.createElement("div");
+  container.className = "videomail";
+  const frame = document.createElement("div");
+  frame.className = "visuals fixedAspectRatio";
+  frame.append(videoElement);
+  container.append(frame);
+  document.body.append(container);
+
+  const drawImage = vi.fn<(image: CanvasImageSource, ...coordinates: number[]) => void>();
+  const context: Pick<CanvasRenderingContext2D, "drawImage"> = { drawImage };
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+    context as CanvasRenderingContext2D,
+  );
+  let drawFrame: (() => void) | undefined;
+  const cancel = vi.fn(() => {
+    drawFrame = undefined;
+  });
+  Object.defineProperties(videoElement, {
+    requestVideoFrameCallback: {
+      value: (callback: () => void) => {
+        drawFrame = callback;
+        return 1;
+      },
+    },
+    cancelVideoFrameCallback: { value: cancel },
+    readyState: { value: HTMLMediaElement.HAVE_CURRENT_DATA },
+  });
+
+  function attachCamera() {
+    fixture.userMedia.init(
+      fixture.stream,
+      fixture.ready,
+      fixture.onAudio,
+      fixture.failed,
+    );
+  }
+
+  function submitFrame() {
+    drawFrame?.();
+  }
+
+  return { ...fixture, frame, drawImage, cancel, attachCamera, submitFrame };
+}
+
 describe("UserMedia", () => {
   afterEach(() => {
     vi.clearAllTimers();
@@ -116,6 +164,75 @@ describe("UserMedia", () => {
     userMedia.init(stream, ready, onAudio, failed);
 
     expect(load).not.toHaveBeenCalled();
+  });
+
+  it("shows decoded camera frames without replacing the original video", () => {
+    const { attachCamera, drawImage, frame, stream, submitFrame, videoElement } =
+      createCanvasPreviewFixture();
+
+    attachCamera();
+    const overlay = frame.querySelector("canvas");
+    submitFrame();
+
+    expect({
+      overlayHiddenFromAssistiveTech: overlay?.getAttribute("aria-hidden"),
+      width: overlay?.width,
+      height: overlay?.height,
+      stream: frame.querySelector("video")?.srcObject,
+      frames: drawImage.mock.calls,
+    }).toEqual({
+      overlayHiddenFromAssistiveTech: "true",
+      width: 320,
+      height: 240,
+      stream,
+      frames: [[videoElement, 0, 0, 320, 240]],
+    });
+  });
+
+  it("keeps the native preview when no fixed frame is configured", () => {
+    const { attachCamera, frame } = createCanvasPreviewFixture();
+    frame.classList.remove("fixedAspectRatio");
+
+    attachCamera();
+
+    expect(frame.querySelector("canvas")).toBeNull();
+  });
+
+  it("cancels the preview frame callback and removes the canvas on stop", () => {
+    const { attachCamera, cancel, drawImage, frame, submitFrame, userMedia } =
+      createCanvasPreviewFixture();
+    attachCamera();
+
+    userMedia.stop();
+    submitFrame();
+
+    expect({
+      overlay: frame.querySelector("canvas"),
+      canceled: cancel.mock.calls.length,
+      frames: drawImage.mock.calls.length,
+    }).toEqual({ overlay: null, canceled: 1, frames: 0 });
+  });
+
+  it("falls back to the native video if drawing the preview fails", () => {
+    const { attachCamera, drawImage, frame, options, stream, submitFrame, videoElement } =
+      createCanvasPreviewFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
+    drawImage.mockImplementation(() => {
+      throw new Error("Unable to draw");
+    });
+
+    attachCamera();
+    submitFrame();
+
+    expect({
+      overlay: frame.querySelector("canvas"),
+      stream: videoElement.srcObject,
+      warnings: warn.mock.calls,
+    }).toEqual({
+      overlay: null,
+      stream,
+      warnings: [[expect.stringContaining("using the native preview")]],
+    });
   });
 
   it("does not report readiness from play before playback actually starts", () => {

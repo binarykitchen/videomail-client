@@ -58,6 +58,45 @@ describe("Browser class", () => {
     }).toEqual({ android, ios: !android, mobile });
   });
 
+  it.each([
+    {
+      name: "Safari 27 with a frozen iOS version in the user agent",
+      platform: "iPhone; CPU iPhone OS 18_7 like Mac OS X",
+      browser: "Version/27.2 Mobile/15E148 Safari/604.1",
+      usesCanvas: true,
+    },
+    {
+      name: "iOS 27 WebView",
+      platform: "iPhone; CPU iPhone OS 27_2 like Mac OS X",
+      browser: "Mobile/15E148",
+      usesCanvas: true,
+    },
+    {
+      name: "Safari 26",
+      platform: "iPhone; CPU iPhone OS 18_7 like Mac OS X",
+      browser: "Version/26.2 Mobile/15E148 Safari/604.1",
+      usesCanvas: false,
+    },
+    {
+      name: "Safari 16 on iPhone",
+      platform: "iPhone; CPU iPhone OS 16_7 like Mac OS X",
+      browser: "Version/16.6 Mobile/15E148 Safari/604.1",
+      usesCanvas: false,
+    },
+    {
+      name: "desktop Safari 27",
+      platform: "Macintosh; Intel Mac OS X 10_15_7",
+      browser: "Version/27.2 Safari/605.1.15",
+      usesCanvas: false,
+    },
+  ])("selects the right live preview for $name", ({ platform, browser, usesCanvas }) => {
+    const options = mergeWithDefaultOptions({
+      fakeUaString: `Mozilla/5.0 (${platform}) AppleWebKit/605.1.15 (KHTML, like Gecko) ${browser}`,
+    });
+
+    expect(new Browser(options).shouldUseCanvasCameraPreview()).toBe(usesCanvas);
+  });
+
   it("getNoAccessIssue returns error", () => {
     const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
     const browser = new Browser(defaultOptions);

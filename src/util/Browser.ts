@@ -28,6 +28,15 @@ class Browser {
     return this.result.os.name === "iOS";
   }
 
+  // Narrow this to unfixed releases once the iOS version with the fix is known.
+  public shouldUseCanvasCameraPreview() {
+    return (
+      this.isIOS() &&
+      this.result.engine.name === "WebKit" &&
+      Number.parseInt(this.result.os.version ?? "", 10) === 27
+    );
+  }
+
   private getBrowserVersion() {
     return this.result.browser.version;
   }
