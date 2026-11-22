@@ -378,14 +378,14 @@ describe("Visuals", () => {
     };
 
     events.emit("CAMERA_RECOVERY_FAILED", { err });
-    const notified = Boolean(visuals.isNotifying());
+    const notified = visuals.isNotifying();
     await visuals.recoverCamera();
 
     expect({
       notified,
       resets: reset.mock.calls.length,
       recoveries: recover.mock.calls.length,
-      notificationAfterRetry: Boolean(visuals.isNotifying()),
+      notificationAfterRetry: visuals.isNotifying(),
     }).toEqual({
       notified: true,
       resets: 0,

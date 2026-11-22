@@ -392,7 +392,7 @@ class Notifier extends Despot {
       return false;
     }
 
-    return this.notifyElement && !isHidden(this.notifyElement);
+    return Boolean(this.notifyElement && !isHidden(this.notifyElement));
   }
 
   public isBuilt() {
