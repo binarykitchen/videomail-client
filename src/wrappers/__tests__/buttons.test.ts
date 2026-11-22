@@ -157,6 +157,17 @@ describe("Buttons", () => {
     expect([recordButton?.disabled, recordButton?.style.display]).toEqual([false, ""]);
   });
 
+  it("shows Record when a lazy connection was established before the form was ready", () => {
+    const { buttons, element } = createFixture({ loadUserMediaOnRecord: true });
+    buttons.build();
+
+    emit(buttons, "CONNECTED");
+    emit(buttons, "FORM_READY", {});
+
+    const recordButton = element.querySelector<HTMLButtonElement>(".record");
+    expect([recordButton?.disabled, recordButton?.style.display]).toEqual([false, ""]);
+  });
+
   it("delegates record button clicks to the container", () => {
     const { buttons, element, record } = createFixture();
     buttons.build();
@@ -350,6 +361,7 @@ describe("Buttons", () => {
       recordWhenReady: false,
       switchingFacingMode: false,
     });
+    emit(buttons, "RECORDING", { framesCount: 0 });
     emit(buttons, "FIRST_FRAME_SENT");
     emit(buttons, "PAUSED");
     emit(buttons, "USER_MEDIA_READY", {
@@ -402,6 +414,33 @@ describe("Buttons", () => {
         stop: true,
       },
     });
+  });
+
+  it("does not replace paused controls when the first frame finishes sending late", () => {
+    const { buttons, element } = createFixture();
+    buttons.build();
+    emit(buttons, "RECORDING", { framesCount: 0 });
+    emit(buttons, "PAUSED");
+
+    emit(buttons, "FIRST_FRAME_SENT");
+
+    expect(element.querySelector<HTMLElement>(".pause")?.style.display).toBe("none");
+  });
+
+  it("restores a paused take when shown after camera recovery while hidden", () => {
+    const { buttons, element } = createFixture();
+    buttons.build();
+    emit(buttons, "PAUSED");
+    emit(buttons, "HIDE");
+    emit(buttons, "USER_MEDIA_READY", { paused: true, recovering: true });
+
+    buttons.show();
+
+    expect(
+      [".record", ".resume", ".preview"].map(
+        (selector) => element.querySelector<HTMLElement>(selector)?.style.display,
+      ),
+    ).toEqual(["none", "", ""]);
   });
 
   it("enables submit after the form becomes valid", () => {

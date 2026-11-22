@@ -561,11 +561,7 @@ class Container extends Despot {
     if (!this.hasError) {
       const paused = this.isPaused();
 
-      if (paused) {
-        this.buttons.adjustButtonsForPause();
-      }
-
-      // Bring controls back after hiding them for an error (#60).
+      // Bring the existing control state back; FORM_READY handles paused takes.
       this.buttons.show();
 
       if (this.isReplayShown()) {

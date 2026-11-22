@@ -1,7 +1,5 @@
 import type {
   FormReadyParams,
-  VideomailErrorParams,
-  VideomailRecordingParams,
   VideomailUserMediaReadyParams,
 } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
@@ -10,14 +8,27 @@ import Despot from "../util/Despot";
 import disableElement from "../util/html/disableElement";
 import enableElement from "../util/html/enableElement";
 import hideElement from "../util/html/hideElement";
-import isShown from "../util/html/isShown";
 import showElement from "../util/html/showElement";
 import { isAudioEnabled } from "../util/options/audio";
 import getOrCreateButton from "./buttons/getOrCreateButton";
 import getOrCreateRadioButtonPair from "./buttons/getOrCreateRadioButtonPair";
+import getRecorderControlView, {
+  type RecorderControlState,
+  type RecorderControlView,
+  type TakePhase,
+} from "./buttons/getRecorderControlView";
 import Container from "./container";
 
 type ClickHandler = (params: { event: MouseEvent }) => void;
+
+const INITIAL_CONTROLS: RecorderControlState = {
+  phase: "unready",
+  shown: true,
+  recordReady: false,
+  audioReady: false,
+  locked: false,
+  previewLocked: false,
+};
 
 class Buttons extends Despot {
   private readonly container: Container;
@@ -34,6 +45,7 @@ class Buttons extends Despot {
   private audioOffRadioPair?: HTMLInputElement | undefined;
 
   private built = false;
+  private controlState = INITIAL_CONTROLS;
 
   constructor(
     container: Container,
@@ -169,211 +181,95 @@ class Buttons extends Despot {
     }
   }
 
-  private onFormReady(params?: FormReadyParams) {
-    // no need to show record button when doing a record again
-    if (!isShown(this.recordAgainButton)) {
-      if (!params?.paused) {
-        showElement(this.recordButton);
+  private renderControls(previous?: RecorderControlView) {
+    const view = getRecorderControlView(this.controlState);
+    const elements: Record<keyof RecorderControlView, (HTMLElement | undefined)[]> = {
+      record: [this.recordButton],
+      pause: [this.pauseButton],
+      resume: [this.resumeButton],
+      preview: [this.previewButton],
+      recordAgain: [this.recordAgainButton],
+      audio: [this.audioOnRadioPair, this.audioOffRadioPair],
+    };
+
+    for (const control of Object.keys(elements) as (keyof RecorderControlView)[]) {
+      const { visible, enabled } = view[control];
+      for (const element of elements[control]) {
+        if (previous?.[control].visible !== visible) {
+          (visible ? showElement : hideElement)(element);
+        }
+
+        // A host form can temporarily lock its controls during submission.
+        if (enabled !== undefined && previous?.[control].enabled !== enabled) {
+          (enabled ? enableElement : disableElement)(element);
+        }
       }
     }
+  }
 
-    if (!params?.paused) {
-      disableElement(this.previewButton);
-      hideElement(this.previewButton);
+  private updateControls(changes: Partial<RecorderControlState>) {
+    const previous = getRecorderControlView(this.controlState);
+    this.controlState = { ...this.controlState, ...changes };
+    this.renderControls(previous);
+  }
+
+  private setPhase(phase: TakePhase) {
+    this.updateControls({ phase, locked: false });
+  }
+
+  private getPausedPhase() {
+    // A paused countdown has no take to stop, but still needs Resume.
+    return this.container.isCountingDown() ? "pausedCountdown" : "pausedTake";
+  }
+
+  private onFormReady(params?: FormReadyParams) {
+    if (params?.paused) {
+      this.setPhase(this.getPausedPhase());
+    } else if (this.controlState.phase === "unready") {
+      this.setPhase("idle");
     }
 
     if (!this.options.enableAutoValidation) {
       enableElement(this.submitButton);
     }
-  }
-
-  private onGoingBack() {
-    hideElement(this.recordAgainButton);
-    showElement(this.recordButton);
-    showElement(this.submitButton);
-  }
-
-  private onReplayShown() {
-    this.hide();
   }
 
   private onUserMediaReady(params: VideomailUserMediaReadyParams) {
-    this.onFormReady(params);
-
-    showElement(this.buttonsElement);
-
-    if (params.recovering && params.paused) {
-      // Recovery restores this take; keep its Resume/Stop controls, not a fresh Record action. 🎥
-      hideElement(this.recordButton);
-      disableElement(this.recordButton);
+    if (params.switchingFacingMode) {
       return;
     }
 
-    showElement(this.audioOnRadioPair);
-    showElement(this.audioOffRadioPair);
+    this.onFormReady(params);
+    showElement(this.buttonsElement);
 
-    if (isShown(this.recordButton) && !params.recordWhenReady) {
-      enableElement(this.recordButton);
-    } else if (isShown(this.recordAgainButton) && !params.recordWhenReady) {
-      enableElement(this.recordAgainButton);
+    if (params.recovering && params.paused) {
+      // Replacing a paused take's camera is not permission to start a new take.
+      this.lockRecordAndAudio();
+      return;
     }
 
-    if (this.options.enableAutoValidation) {
-      disableElement(this.submitButton);
-    }
-
-    if (!params.recordWhenReady) {
-      // The radios were just shown; the helpers also handle a missing audio switch.
-      enableElement(this.audioOnRadioPair);
-      enableElement(this.audioOffRadioPair);
-    }
-  }
-
-  private onResetting() {
-    disableElement(this.submitButton);
-    this.reset();
-  }
-
-  private onPreview() {
-    hideElement(this.recordButton);
-    hideElement(this.previewButton);
-
-    disableElement(this.audioOnRadioPair);
-    disableElement(this.audioOffRadioPair);
-
-    showElement(this.recordAgainButton);
-    enableElement(this.recordAgainButton);
-
-    if (!this.options.enableAutoValidation) {
-      enableElement(this.submitButton);
-    }
-  }
-
-  public enableSubmit() {
-    enableElement(this.submitButton);
-  }
-
-  public adjustButtonsForPause() {
-    // The Paused overlay is not a button; even 3-2-1 needs an explicit way to continue.
-    hideElement(this.pauseButton);
-    hideElement(this.recordButton);
-    showElement(this.resumeButton);
-    enableElement(this.resumeButton);
-
-    if (this.isCountingDown()) {
-      // The countdown needs Resume too, but there are no captured frames to preview yet.
-      hideElement(this.previewButton);
-      disableElement(this.previewButton);
-    } else {
-      showElement(this.previewButton);
-      enableElement(this.previewButton);
-    }
-  }
-
-  private onFirstFrameSent() {
-    hideElement(this.recordButton);
-    hideElement(this.recordAgainButton);
-
-    if (this.pauseButton) {
-      showElement(this.pauseButton);
-      enableElement(this.pauseButton);
-    }
-
-    enableElement(this.previewButton);
-    showElement(this.previewButton);
-  }
-
-  private onRecording(params: VideomailRecordingParams) {
-    // The UI can be hidden mid-take. Use the frame count to restore its controls.
-    if (params.framesCount > 1) {
-      this.onFirstFrameSent();
-    } else {
-      disableElement(this.audioOffRadioPair);
-      disableElement(this.audioOnRadioPair);
-      disableElement(this.recordAgainButton);
-      disableElement(this.recordButton);
-    }
-  }
-
-  private onResuming() {
-    hideElement(this.resumeButton);
-    hideElement(this.recordButton);
-
-    if (this.pauseButton) {
-      enableElement(this.pauseButton);
-      showElement(this.pauseButton);
-    }
-  }
-
-  private onStopping() {
-    disableElement(this.previewButton);
-    disableElement(this.recordButton);
-
-    hideElement(this.pauseButton);
-    hideElement(this.resumeButton);
-  }
-
-  private onCountdown() {
-    disableElement(this.recordButton);
-    // Still show it so that the form height does not change abruptly.
-    showElement(this.recordButton);
-    hideElement(this.recordAgainButton);
-    hideElement(this.pauseButton);
-    hideElement(this.resumeButton);
-    hideElement(this.previewButton);
-    disableElement(this.audioOffRadioPair);
-    disableElement(this.audioOnRadioPair);
-  }
-
-  private onSubmitting() {
-    this.options.logger.debug("Buttons: onSubmitting()");
-    disableElement(this.submitButton);
-    disableElement(this.recordAgainButton);
-  }
-
-  private onSubmitted() {
-    disableElement(this.previewButton);
-    disableElement(this.recordAgainButton);
-    disableElement(this.recordButton);
-    disableElement(this.submitButton);
-  }
-
-  private onInvalid() {
+    const ready = !params.recordWhenReady;
+    this.updateControls({ recordReady: ready, audioReady: ready, locked: false });
     if (this.options.enableAutoValidation) {
       disableElement(this.submitButton);
     }
   }
 
-  private onValid() {
+  private updateSubmitForValidation(valid: boolean) {
     if (this.options.enableAutoValidation) {
-      enableElement(this.submitButton);
+      (valid ? enableElement : disableElement)(this.submitButton);
     }
-  }
-
-  private onHidden() {
-    hideElement(this.recordButton);
-    hideElement(this.previewButton);
-    hideElement(this.recordAgainButton);
-    hideElement(this.resumeButton);
-    hideElement(this.audioOnRadioPair);
-    hideElement(this.audioOffRadioPair);
   }
 
   private lockRecordAndAudio() {
     // Changing the stream or losing transport both make these controls unusable.
-    disableElement(this.recordButton);
-    disableElement(this.audioOnRadioPair);
-    disableElement(this.audioOffRadioPair);
+    this.updateControls({ recordReady: false, audioReady: false });
   }
 
   private recordAgain() {
-    disableElement(this.recordAgainButton);
+    this.updateControls({ previewLocked: true });
     this.container.beginWaiting();
     this.container.recordAgain();
-  }
-
-  private onStartingOver() {
-    showElement(this.submitButton);
   }
 
   private submit() {
@@ -381,119 +277,120 @@ class Buttons extends Despot {
   }
 
   private record() {
-    disableElement(this.recordButton);
+    this.updateControls({ recordReady: false });
     this.container.record();
   }
 
   private initEvents() {
     this.options.logger.debug("Buttons: initEvents()");
 
-    this.on("USER_MEDIA_READY", (params: VideomailUserMediaReadyParams) => {
-      if (!params.switchingFacingMode) {
-        this.onUserMediaReady(params);
+    this.on("USER_MEDIA_READY", this.onUserMediaReady.bind(this));
+    this.on("PREVIEW", () => {
+      this.updateControls({
+        phase: "preview",
+        locked: false,
+        previewLocked: false,
+        recordReady: false,
+        audioReady: false,
+      });
+      if (!this.options.enableAutoValidation) {
+        enableElement(this.submitButton);
       }
     });
-
-    this.on("PREVIEW", () => {
-      this.onPreview();
-    });
-
     this.on("PAUSED", () => {
-      this.adjustButtonsForPause();
+      this.setPhase(this.getPausedPhase());
     });
-
-    this.on("RECORDING", (params: VideomailRecordingParams) => {
-      this.onRecording(params);
+    this.on("RECORDING", ({ framesCount }) => {
+      this.updateControls({
+        phase: framesCount > 1 ? "recording" : "starting",
+        locked: false,
+        recordReady: false,
+        audioReady: false,
+      });
     });
-
     this.on("FIRST_FRAME_SENT", () => {
-      this.onFirstFrameSent();
+      // A write can complete after Pause or Stop. It must not replace those controls.
+      if (this.controlState.phase === "starting") {
+        this.setPhase("recording");
+      }
     });
-
     this.on("RESUMING", () => {
-      this.onResuming();
+      this.setPhase("recording");
     });
-
     this.on("STOPPING", () => {
-      this.onStopping();
+      this.setPhase("stopping");
     });
-
     this.on("COUNTDOWN", () => {
-      this.onCountdown();
+      this.updateControls({
+        phase: "countdown",
+        locked: false,
+        recordReady: false,
+        audioReady: false,
+      });
     });
-
     this.on("SUBMITTING", () => {
-      this.onSubmitting();
+      disableElement(this.submitButton);
+      this.updateControls({ previewLocked: true });
     });
-
     this.on("RESETTING", () => {
-      this.onResetting();
+      disableElement(this.submitButton);
+      // Stop resets capture before the server replies with a preview.
+      this.reset(this.controlState.phase === "stopping" ? "stopping" : "unready");
     });
-
     this.on("INVALID", () => {
-      this.onInvalid();
+      this.updateSubmitForValidation(false);
     });
-
     this.on("VALID", () => {
-      this.onValid();
+      this.updateSubmitForValidation(true);
     });
-
     this.on("SUBMITTED", () => {
-      this.onSubmitted();
+      disableElement(this.submitButton);
+      this.reset();
     });
-
     this.on("HIDE", () => {
-      this.onHidden();
+      this.updateControls({ shown: false });
     });
-
-    this.on("FORM_READY", (params: FormReadyParams) => {
-      this.onFormReady(params);
-    });
-
+    this.on("FORM_READY", this.onFormReady.bind(this));
     this.on("REPLAY_SHOWN", () => {
-      this.onReplayShown();
+      this.hide();
     });
-
     this.on("GOING_BACK", () => {
-      this.onGoingBack();
+      this.setPhase("idle");
+      showElement(this.submitButton);
     });
-
+    this.on("STARTING_OVER", () => {
+      showElement(this.submitButton);
+    });
+    this.on("CONNECTED", () => {
+      // In lazy mode transport can be ready before FORM_READY or camera permission.
+      if (this.options.loadUserMediaOnRecord) {
+        this.updateControls({ recordReady: true });
+      }
+    });
     const lockRecordAndAudio = this.lockRecordAndAudio.bind(this);
     this.on("ENABLING_AUDIO", lockRecordAndAudio);
     this.on("DISABLING_AUDIO", lockRecordAndAudio);
-
-    this.on("STARTING_OVER", () => {
-      this.onStartingOver();
-    });
-
-    this.on("CONNECTED", () => {
-      if (this.options.loadUserMediaOnRecord) {
-        if (isShown(this.recordButton) && !this.isCountingDown()) {
-          enableElement(this.recordButton);
-        }
-      }
-    });
-
     this.on("DISCONNECTED", lockRecordAndAudio);
-
-    this.on("ERROR", (params: VideomailErrorParams) => {
+    this.on("ERROR", ({ err, recoverable }) => {
+      if (recoverable) {
+        this.updateControls({ previewLocked: false });
+      }
       // Hide unusable controls so users can focus on the error (#60).
-      if (params.err?.isBrowserProblem() && this.options.adjustFormOnBrowserError) {
+      if (err?.isBrowserProblem() && this.options.adjustFormOnBrowserError) {
         this.hide();
       }
     });
   }
 
-  public reset() {
-    this.options.logger.debug("Buttons: reset()");
-
-    disableElement(this.pauseButton);
-    disableElement(this.resumeButton);
-    disableElement(this.recordButton);
-    disableElement(this.previewButton);
-    disableElement(this.recordAgainButton);
-    disableElement(this.audioOnRadioPair);
-    disableElement(this.audioOffRadioPair);
+  public reset(phase = this.controlState.phase) {
+    this.controlState = {
+      ...this.controlState,
+      phase,
+      locked: true,
+      recordReady: false,
+      audioReady: false,
+    };
+    this.renderControls();
   }
 
   public isRecordAgainButtonEnabled() {
@@ -536,6 +433,8 @@ class Buttons extends Despot {
     hideElement(this.buttonsElement);
 
     this.buildButtons(this.buttonsElement);
+    this.controlState = INITIAL_CONTROLS;
+    this.renderControls();
 
     if (!this.built) {
       this.initEvents();
@@ -562,23 +461,14 @@ class Buttons extends Despot {
     hideElement(this.buttonsElement);
 
     if (deep) {
-      hideElement(this.recordButton);
-      hideElement(this.pauseButton);
-      hideElement(this.resumeButton);
-      hideElement(this.previewButton);
-      hideElement(this.recordAgainButton);
+      this.updateControls({ shown: false });
       hideElement(this.submitButton);
-      hideElement(this.audioOnRadioPair);
-      hideElement(this.audioOffRadioPair);
     }
   }
 
   public show() {
+    this.updateControls({ shown: true });
     showElement(this.buttonsElement);
-  }
-
-  public isCountingDown() {
-    return this.container.isCountingDown();
   }
 }
 
