@@ -17,6 +17,8 @@ interface ContainerInternals {
     getRecorderWidth: (responsive: boolean) => { unit: string; value: number };
     getRecorderHeight: (responsive: boolean) => { unit: string; value: number };
     isUserMediaLoaded: () => boolean | undefined;
+    isConnected: () => boolean;
+    isReplayShown: () => boolean;
   };
   form?: { transformFormData: (inputs: FormInputs) => FormInputs };
   resource: {
@@ -880,6 +882,20 @@ describe("Container", () => {
     container.validate(event, true);
 
     expect(listener).toHaveBeenCalledWith({ targetName: "subject" });
+  });
+
+  it("validates a replay even after the live camera has been released", () => {
+    const { container } = buildExternalSubmitFixture("", undefined, true);
+    const { visuals } = getInternals(container);
+    vi.spyOn(visuals, "isConnected").mockReturnValue(true);
+    vi.spyOn(visuals, "isUserMediaLoaded").mockReturnValue(false);
+    vi.spyOn(visuals, "isReplayShown").mockReturnValue(true);
+    const valid = vi.fn();
+    container.on("VALID", valid);
+
+    container.validate();
+
+    expect(valid).toHaveBeenCalledOnce();
   });
 
   it("emits the audio-enabling event", () => {

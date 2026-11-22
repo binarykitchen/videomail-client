@@ -393,10 +393,6 @@ class Buttons extends Despot {
     this.renderControls();
   }
 
-  public isRecordAgainButtonEnabled() {
-    return !this.recordAgainButton?.disabled;
-  }
-
   public isReady() {
     if (!this.recordButton) {
       // Replay-only mode has no record button.

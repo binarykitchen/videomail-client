@@ -6,10 +6,7 @@ import type { Response } from "superagent";
 
 import { ShowParams, StartOverParams } from "../client";
 import Resource from "../resource";
-import type {
-  VideomailErrorParams,
-  VideomailInvalidFormData,
-} from "../types/events/params";
+import type { VideomailErrorParams } from "../types/events/params";
 import { VideomailClientOptions } from "../types/options";
 import { Videomail } from "../types/Videomail";
 import getBrowser from "../util/browser/getBrowser";
@@ -28,6 +25,7 @@ import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 import pretty from "../util/string/pretty";
 import Buttons from "./buttons";
 import Form, { FormInputs, FormMethod, FormMethodType } from "./form";
+import { evaluateValidation, getValidationSkip } from "./form/evaluateValidation";
 import Visuals from "./visuals";
 
 interface BuildOptions {
@@ -475,10 +473,6 @@ class Container extends Despot {
     return limitHeight(height, this.options, "containers limitHeight fn");
   }
 
-  private areVisualsHidden() {
-    return this.visuals.isHidden();
-  }
-
   public hasElement() {
     return Boolean(this.containerElement);
   }
@@ -684,102 +678,84 @@ class Container extends Despot {
     return this.built && !this.hasError && !this.submitted;
   }
 
-  // That code needs a good rewrite :(
+  private emitValidating(event?: Event) {
+    const target = event?.target;
+    const targetName = target instanceof Element ? target.getAttribute("name") : null;
+    if (targetName) {
+      this.emit("VALIDATING", { targetName });
+    } else if (event) {
+      this.emit("VALIDATING", { event });
+    } else {
+      this.emit("VALIDATING");
+    }
+  }
+
+  private getFormValidationFacts() {
+    if (!this.form) {
+      return undefined;
+    }
+
+    const input = this.form.getInvalidElement();
+    if (input) {
+      return {
+        invalidInput: {
+          name: input.getAttribute("name"),
+          value: input.getAttribute("value"),
+          missing: getValidity(input)?.valueMissing ?? false,
+        },
+        recipientsValid: false,
+      };
+    }
+
+    return { recipientsValid: isRecipientSelectionValid(this.form.getRecipients()) };
+  }
+
+  private isVideoRequired(cameraLoaded: boolean | undefined, connected: boolean) {
+    // A hidden recorder leaves the host's text-only path available.
+    const cameraAvailable =
+      cameraLoaded || (this.options.loadUserMediaOnRecord && connected);
+    return (
+      !this.visuals.isHidden() &&
+      (cameraAvailable || this.isRecording() || this.isPaused() || this.isCountingDown())
+    );
+  }
+
   public validate(event?: Event, force = false) {
-    let runValidation = true;
-    let valid = true;
+    const cameraLoaded = this.visuals.isUserMediaLoaded();
+    const connected = this.visuals.isConnected();
+    const skip = getValidationSkip({
+      built: this.built,
+      autoValidate: this.options.enableAutoValidation,
+      forced: force,
+      notifying: this.isNotifying(),
+      connected,
+      connecting: this.visuals.isConnecting(),
+      cameraLoaded,
+      replayShown: this.isReplayShown(),
+    });
 
-    if (!this.built) {
-      runValidation = false;
-    } else if (!this.options.enableAutoValidation) {
-      runValidation = false;
-      this.lastValidation = true; // needed so that it can be submitted anyway, see submit()
-    } else if (force) {
-      runValidation = force;
-    } else if (this.isNotifying()) {
-      runValidation = false;
-    } else if (this.visuals.isConnected()) {
-      runValidation = this.visuals.isUserMediaLoaded() ?? this.visuals.isReplayShown();
-    } else if (this.visuals.isConnecting()) {
-      runValidation = false;
+    if (skip) {
+      // Skipping validation must not overwrite the last verdict for auto-submit.
+      this.lastValidation ||= skip.allowManualSubmit;
+      return true;
     }
 
-    if (runValidation) {
-      const target = event?.target;
-      const targetName =
-        target instanceof Element ? target.getAttribute("name") : undefined;
+    this.emitValidating(event);
+    const result = evaluateValidation({
+      videoValid: this.visuals.validate(),
+      videoRequired: Boolean(this.form && this.isVideoRequired(cameraLoaded, connected)),
+      form: this.getFormValidationFacts(),
+    });
 
-      if (targetName) {
-        this.emit("VALIDATING", { targetName });
-      } else if (event) {
-        this.emit("VALIDATING", { event });
-      } else {
-        this.emit("VALIDATING");
-      }
-
-      let whyInvalid: string | undefined;
-
-      const isRecordAgainButtonEnabled = this.buttons.isRecordAgainButtonEnabled();
-
-      // Not sure why the isRecordAgainButtonEnabled check is needed
-      const visualsValid = this.visuals.validate() && isRecordAgainButtonEnabled;
-
-      let invalidData: VideomailInvalidFormData | undefined;
-
-      if (this.form) {
-        const invalidInput = this.form.getInvalidElement();
-
-        if (invalidInput) {
-          const name = invalidInput.getAttribute("name");
-          const validity = getValidity(invalidInput);
-
-          valid = false;
-
-          if (name) {
-            if (validity?.valueMissing) {
-              whyInvalid = `Please fill out field "${name}" ⚠️`;
-            } else {
-              whyInvalid = `Input "${name}" seems wrong 🤔`;
-              invalidData = { [name]: invalidInput.getAttribute("value") };
-            }
-          }
-        } else if (!this.areVisualsHidden() && !visualsValid) {
-          // TODO Improve this check to have this based on `key`
-          if (
-            this.buttonsAreReady() ||
-            this.isRecording() ||
-            this.isPaused() ||
-            this.isCountingDown()
-          ) {
-            valid = false;
-            whyInvalid = "Don't forget to record a video 😉";
-            invalidData = { key: undefined };
-          }
-        }
-
-        if (valid) {
-          if (!isRecipientSelectionValid(this.form.getRecipients())) {
-            valid = false;
-            whyInvalid = "At least one recipient is required";
-          }
-        }
-      } else {
-        valid = visualsValid;
-        whyInvalid = "Because visuals aren't valid";
-      }
-
-      if (valid) {
-        this.emit("VALID");
-      } else if (invalidData) {
-        this.emit("INVALID", { whyInvalid, invalidData });
-      } else {
-        this.emit("INVALID", { whyInvalid });
-      }
-
-      this.lastValidation = valid;
+    if (result.status === "valid") {
+      this.emit("VALID");
+    } else {
+      const { whyInvalid, invalidData } = result;
+      this.emit("INVALID", invalidData ? { whyInvalid, invalidData } : { whyInvalid });
     }
 
-    return valid;
+    this.lastValidation = result.status === "valid";
+    return this.lastValidation;
   }
 
   public disableForm(buttonsToo: boolean) {
@@ -792,10 +768,6 @@ class Container extends Despot {
 
   public hasForm() {
     return Boolean(this.form);
-  }
-
-  private buttonsAreReady() {
-    return this.buttons.isReady();
   }
 
   private getPendingHostSubmissionResponse(
