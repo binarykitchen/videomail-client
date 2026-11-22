@@ -223,13 +223,9 @@ class Buttons extends Despot {
     }
 
     if (!params.recordWhenReady) {
-      if (isShown(this.audioOnRadioPair)) {
-        enableElement(this.audioOnRadioPair);
-      }
-
-      if (isShown(this.audioOffRadioPair)) {
-        enableElement(this.audioOffRadioPair);
-      }
+      // The radios were just shown; the helpers also handle a missing audio switch.
+      enableElement(this.audioOnRadioPair);
+      enableElement(this.audioOffRadioPair);
     }
   }
 
@@ -363,17 +359,8 @@ class Buttons extends Despot {
     hideElement(this.audioOffRadioPair);
   }
 
-  private onEnablingAudio() {
-    this.options.logger.debug("Buttons: onEnablingAudio()");
-
-    disableElement(this.recordButton);
-    disableElement(this.audioOnRadioPair);
-    disableElement(this.audioOffRadioPair);
-  }
-
-  private onDisablingAudio() {
-    this.options.logger.debug("Buttons: onDisablingAudio()");
-
+  private lockRecordAndAudio() {
+    // Changing the stream or losing transport both make these controls unusable.
     disableElement(this.recordButton);
     disableElement(this.audioOnRadioPair);
     disableElement(this.audioOffRadioPair);
@@ -471,13 +458,9 @@ class Buttons extends Despot {
       this.onGoingBack();
     });
 
-    this.on("ENABLING_AUDIO", () => {
-      this.onEnablingAudio();
-    });
-
-    this.on("DISABLING_AUDIO", () => {
-      this.onDisablingAudio();
-    });
+    const lockRecordAndAudio = this.lockRecordAndAudio.bind(this);
+    this.on("ENABLING_AUDIO", lockRecordAndAudio);
+    this.on("DISABLING_AUDIO", lockRecordAndAudio);
 
     this.on("STARTING_OVER", () => {
       this.onStartingOver();
@@ -491,11 +474,7 @@ class Buttons extends Despot {
       }
     });
 
-    this.on("DISCONNECTED", () => {
-      disableElement(this.recordButton);
-      disableElement(this.audioOnRadioPair);
-      disableElement(this.audioOffRadioPair);
-    });
+    this.on("DISCONNECTED", lockRecordAndAudio);
 
     this.on("ERROR", (params: VideomailErrorParams) => {
       // Hide unusable controls so users can focus on the error (#60).
