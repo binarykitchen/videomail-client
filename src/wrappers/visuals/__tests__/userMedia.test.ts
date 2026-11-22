@@ -213,15 +213,43 @@ describe("UserMedia", () => {
     }).toEqual({ overlay: null, canceled: 1, frames: 0 });
   });
 
-  it("falls back to the native video if drawing the preview fails", () => {
+  it("keeps the canvas visible and retries when a camera frame is not yet drawable", () => {
+    const { attachCamera, drawImage, frame, submitFrame, videoElement } =
+      createCanvasPreviewFixture();
+    drawImage.mockImplementationOnce(() => {
+      throw new DOMException("No image data", "InvalidStateError");
+    });
+
+    attachCamera();
+    const overlay = frame.querySelector("canvas");
+    submitFrame();
+    const coveredBetweenFrames = overlay?.isConnected;
+    submitFrame();
+
+    expect({
+      coveredBetweenFrames,
+      overlay: frame.querySelector("canvas"),
+      frames: drawImage.mock.calls,
+    }).toEqual({
+      coveredBetweenFrames: true,
+      overlay,
+      frames: Array.from({ length: 2 }, () => [videoElement, 0, 0, 320, 240]),
+    });
+  });
+
+  it.each([
+    ["an unexpected draw error", new Error("Unable to draw")],
+    ["a repeated missing frame", new DOMException("No image data", "InvalidStateError")],
+  ])("falls back to the native video after %s", (_scenario, error) => {
     const { attachCamera, drawImage, frame, options, stream, submitFrame, videoElement } =
       createCanvasPreviewFixture();
     const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     drawImage.mockImplementation(() => {
-      throw new Error("Unable to draw");
+      throw error;
     });
 
     attachCamera();
+    submitFrame();
     submitFrame();
 
     expect({

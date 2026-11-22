@@ -18,6 +18,7 @@ function startCanvasCameraPreview(
   }
 
   let frameRequest: number | undefined;
+  let hasRetriedMissingFrame = false;
   function stop() {
     if (frameRequest === undefined) {
       return;
@@ -43,10 +44,22 @@ function startCanvasCameraPreview(
 
       try {
         context.drawImage(video, 0, 0, videoWidth, videoHeight);
+        hasRetriedMissingFrame = false;
       } catch (error) {
-        stop();
-        warn(`Canvas camera preview failed; using the native preview: ${String(error)}`);
-        return;
+        // The first frame of a replacement stream may not have drawable pixels yet.
+        if (
+          hasRetriedMissingFrame ||
+          !(error instanceof DOMException) ||
+          error.name !== "InvalidStateError"
+        ) {
+          stop();
+          warn(
+            `Canvas camera preview failed; using the native preview: ${String(error)}`,
+          );
+          return;
+        }
+
+        hasRetriedMissingFrame = true;
       }
     }
     frameRequest = video.requestVideoFrameCallback(drawFrame);

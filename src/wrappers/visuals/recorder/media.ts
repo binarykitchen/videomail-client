@@ -65,8 +65,9 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   public show() {
-    this.userMedia?.showCanvasPreview();
     showElement(this.recorderElement);
+    // After replay, register the frame callback on the now-visible camera element.
+    this.userMedia?.showCanvasPreview();
   }
 
   protected clearRetryTimeout() {

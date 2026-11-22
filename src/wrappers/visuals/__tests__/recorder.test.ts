@@ -1182,6 +1182,24 @@ describe("Recorder", () => {
     expect(recorder.getRawVisualUserMedia()?.style.display).toBe("none");
   });
 
+  it("shows the camera before requesting canvas frames after replay", () => {
+    const { recorder } = createFixture();
+    buildWithoutConnecting(recorder);
+    const video = recorder.getRawVisualUserMedia();
+    if (!video) {
+      throw new Error("Expected a built camera preview");
+    }
+    recorder.hide();
+    const displayWhenRequested: string[] = [];
+    vi.spyOn(UserMedia.prototype, "showCanvasPreview").mockImplementation(() => {
+      displayWhenRequested.push(video.style.display);
+    });
+
+    recorder.show();
+
+    expect(displayWhenRequested).toEqual([""]);
+  });
+
   it("resets replay state", () => {
     const { recorder, resetReplay } = createFixture();
 
