@@ -34,6 +34,9 @@ export default defineConfig({
       output: {
         // Bundle dependencies so consumers need no extra require() calls.
         autoExternal: false,
+        // Rslib leaves library code readable unless asked. Bundled builds are
+        // often served as-is, so shrink them here.
+        minify: true,
         distPath: {
           root: "./dist/cjs/",
         },
@@ -45,6 +48,9 @@ export default defineConfig({
       output: {
         // Bundle dependencies so consumers need no extra require() calls.
         autoExternal: false,
+        // The Ninja Forms plugin serves this file unchanged as index-min.js,
+        // so it has to arrive minified.
+        minify: true,
         distPath: {
           root: "./dist/umd/",
         },

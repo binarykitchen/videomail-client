@@ -56,9 +56,12 @@ The main Videomail website uses these defaults:
 
 ## Performance Metrics
 
-- The rslib bundle is around 50 kB gzipped.
-- The package uses modern JavaScript and TypeScript and aims for low-latency recording.
-- WebSocket reconnection strategies help recording recover from temporary connection loss.
+- `npm run build:prod` prints a size table.
+  - We do not document exact sizes as they may change with each build.
+  - The minified UMD build is supposed to be very small.
+  - The minified CJS build is medium-sized for typical usage scenarios.
+  - The ESM build provides full source code and leaves dependencies to the host app's bundler.
+- The [Ninja Forms plugin](https://github.com/binarykitchen/videomail-for-ninja-forms) serves `dist/umd/index.js` unchanged as `index-min.js`, so keep the UMD build minified.
 
 ## Tests
 
