@@ -14,6 +14,10 @@ class TestComponent extends Despot {
   public fail(exc: unknown) {
     this.emit("ERROR", { exc });
   }
+
+  public progress() {
+    this.emit("PROGRESS", { frameProgress: "50%" });
+  }
 }
 
 describe("Despot", () => {
@@ -57,5 +61,14 @@ describe("Despot", () => {
     component.fail(new Error("Original problem"));
 
     expect(logError).toHaveBeenCalledOnce();
+  });
+
+  it("keeps per-frame progress events out of the collected log lines", () => {
+    const options = mergeWithDefaultOptions();
+    const component = new TestComponent(options);
+
+    component.progress();
+
+    expect(options.logger.getLines?.()).toEqual([]);
   });
 });

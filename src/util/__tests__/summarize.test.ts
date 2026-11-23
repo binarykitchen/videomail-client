@@ -11,7 +11,7 @@ describe("summarize", () => {
     expect(summarize("Diagnostic", contents)).toBe(
       "🔎 Diagnostic\n" +
         "  • alpha: undefined\n" +
-        "  • nested: { value: 'test' }\n" +
+        '  • nested: {"value":"test"}\n' +
         "  • zebra: true",
     );
   });

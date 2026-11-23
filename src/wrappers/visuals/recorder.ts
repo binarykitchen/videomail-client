@@ -14,6 +14,16 @@ import UserMedia from "./userMedia";
 
 export type { StopParams } from "./recorder/capture";
 
+/*
+ * The server confirms every single frame and audio batch. Logging those would
+ * drown out everything else in the few lines attached to error reports.
+ */
+const PROGRESS_COMMANDS = new Set(["confirmFrame", "confirmSample"]);
+
+function isProgressCommand(command: VideomailCommand) {
+  return PROGRESS_COMMANDS.has(command.command);
+}
+
 class Recorder extends RecorderCapture {
   private readonly dimensions: RecorderDimensions;
 
@@ -33,22 +43,30 @@ class Recorder extends RecorderCapture {
     });
   }
 
+  private logCommand(command: VideomailCommand) {
+    if (isProgressCommand(command)) {
+      return;
+    }
+
+    if (command.args) {
+      const debugLine = summarize(
+        `Server commanded: ${command.command} with:`,
+        command.args,
+      );
+
+      this.options.logger.debug(debugLine);
+    } else {
+      this.options.logger.debug(`Server commanded: ${command.command}`);
+    }
+  }
+
   protected override executeCommand(command: VideomailCommand) {
     if (this.unloaded) {
       return;
     }
 
     try {
-      if (command.args) {
-        const debugLine = summarize(
-          `Server commanded: ${command.command} with:`,
-          command.args,
-        );
-
-        this.options.logger.debug(debugLine);
-      } else {
-        this.options.logger.debug(`Server commanded: ${command.command}`);
-      }
+      this.logCommand(command);
 
       switch (command.command) {
         case "ready":

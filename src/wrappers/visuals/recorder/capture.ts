@@ -16,6 +16,10 @@ import RecorderMedia from "./media";
 import { calculateProgress, getConfirmedProgressNumber } from "./progress";
 import type { WriteStreamParams } from "./streamWriter";
 
+// How often to log the frame rate while recording.
+// **Not** every** frame would be noise.
+const FRAME_RATE_LOG_INTERVAL = 30;
+
 interface RecorderAnimationFrameApi {
   requestAnimationFrame(callback: () => void): number;
   cancelAnimationFrame(handle?: number): void;
@@ -617,6 +621,20 @@ abstract class RecorderCapture extends RecorderMedia {
     return this.getFrameBlob(canvas, generation, typeIndex + 1, lastError);
   }
 
+  // A frame rate line every 30 frames (2 s at 15 fps) still shows near-zero rates,
+  // without crowding out the 30 lines that error reports carry.
+  private logFrameRate(frameNumber: number) {
+    if (frameNumber % FRAME_RATE_LOG_INTERVAL !== 0) {
+      return;
+    }
+
+    const avgFps = this.getAvgFps();
+
+    this.options.logger.debug(
+      `Recorder: sent frame ${frameNumber}, avgFps = ${avgFps?.toFixed(1)}`,
+    );
+  }
+
   private async encodeFrame(
     canvas: HTMLCanvasElement,
     frameNumber: number,
@@ -645,6 +663,7 @@ abstract class RecorderCapture extends RecorderMedia {
         onFlushedCallback: this.onFlushed.bind(this),
       });
 
+      this.logFrameRate(frameNumber);
       this.visuals.checkTimer(this.getIntervalSum());
     } catch (exc) {
       if (generation === this.captureGeneration) {
@@ -821,23 +840,6 @@ abstract class RecorderCapture extends RecorderMedia {
     this.userMedia.record();
 
     this.emit("RECORDING", { framesCount: this.framesCount });
-
-    // see https://github.com/hapticdata/animitter/issues/3
-    loop.on("update", () => {
-      const elapsedTime = this.getIntervalSum();
-      let avgFPS: number | undefined;
-
-      if (elapsedTime !== 0) {
-        // x1000 because of milliseconds
-        avgFPS = Math.round((this.framesCount / elapsedTime) * 1000);
-      } else {
-        avgFPS = undefined;
-      }
-
-      this.options.logger.debug(
-        `Recorder updates avgFps = ${avgFPS} at frame ${this.framesCount}`,
-      );
-    });
 
     loop.start();
   }

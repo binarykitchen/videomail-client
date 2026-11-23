@@ -47,19 +47,29 @@ class CollectLogger {
   }
 
   public error(...args) {
-    this.logger.error(this.lifo("error", args));
+    this.output("error", this.lifo("error", args));
   }
 
   public warn(...args) {
-    this.logger.warn(this.lifo("warn", args));
+    this.output("warn", this.lifo("warn", args));
   }
 
   public info(...args) {
-    this.logger.info(this.lifo("info", args));
+    this.output("info", this.lifo("info", args));
+  }
+
+  // A custom logger may lack a method. Fall back to the console instead of crashing.
+  private output(level: "error" | "warn" | "info", line: string) {
+    if (typeof this.logger[level] === "function") {
+      this.logger[level](line);
+    } else {
+      console[level](line);
+    }
   }
 
   public getLines() {
-    return this.stack;
+    // A snapshot: later log lines must not change what a report already holds.
+    return [...this.stack];
   }
 }
 

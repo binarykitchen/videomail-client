@@ -18,9 +18,9 @@ describe("pretty", () => {
     expect(pretty(div)).toEqual("(No HTML identifier available)");
   });
 
-  it("should handle non-HTML elements using inspect", () => {
+  it("formats plain objects as JSON", () => {
     const obj = { test: "value" };
-    expect(pretty(obj)).toEqual("{ test: 'value' }");
+    expect(pretty(obj)).toEqual('{"test":"value"}');
   });
 
   it.each([
@@ -31,12 +31,12 @@ describe("pretty", () => {
   });
 
   it("should handle arrays", () => {
-    expect(pretty([1, 2, 3])).toEqual("[ 1, 2, 3, [length]: 3 ]");
+    expect(pretty([1, 2, 3])).toEqual("[1,2,3]");
   });
 
   it("should handle nested objects", () => {
     const nested = { a: { b: "c" } };
-    expect(pretty(nested)).toEqual("{ a: { b: 'c' } }");
+    expect(pretty(nested)).toEqual('{"a":{"b":"c"}}');
   });
 
   it("should include useful details for browser events", () => {
@@ -45,19 +45,30 @@ describe("pretty", () => {
     const output = pretty(event);
 
     expect([
-      output.includes("type: 'error'"),
-      output.includes("isTrusted: false"),
+      output.includes('"type":"error"'),
+      output.includes('"isTrusted":false'),
     ]).toEqual([true, true]);
   });
 
-  it("should handle errors", () => {
+  it("spells out errors with their cause", () => {
     const error = new Error("Hello I am an error", { cause: "because of me" });
 
-    const output = pretty(error);
+    expect(pretty(error)).toBe('Error: Hello I am an error (cause: "because of me")');
+  });
 
-    expect([
-      output.includes("Error: Hello I am an error"),
-      output.includes("[cause]: 'because of me'"),
-    ]).toEqual([true, true]);
+  it("marks circular references instead of failing", () => {
+    const loop: Record<string, unknown> = { name: "loop" };
+    loop.self = loop;
+
+    expect(pretty(loop)).toBe('{"name":"loop","self":"[Circular]"}');
+  });
+
+  it("caps very long output", () => {
+    const output = pretty("x".repeat(5_000));
+
+    expect({ length: output.length, ending: output.slice(-2) }).toEqual({
+      length: 1_002,
+      ending: " …",
+    });
   });
 });

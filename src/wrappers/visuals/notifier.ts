@@ -320,8 +320,8 @@ class Notifier extends Despot {
   }
 
   private setExplanation(explanation: string) {
-    this.options.logger.debug(`Notifier: setExplanation(${explanation})`);
-
+    // No log line: progress updates land here for every confirmed frame, and
+    // notify() already logs explanations together with their message.
     if (!this.explanationElement) {
       this.explanationElement = document.createElement("p");
       this.explanationElement.classList.add("explanation");

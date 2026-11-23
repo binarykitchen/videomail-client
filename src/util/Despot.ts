@@ -13,6 +13,25 @@ interface Subscription {
   unsubscribe: () => void;
 }
 
+/*
+ * Fired for every confirmed frame and audio batch. Logging them would push
+ * everything useful out of the few lines attached to error reports.
+ */
+const QUIET_EVENTS = new Set<keyof VideomailEvents>(["PROGRESS"]);
+
+// Empty parameters like {} would only add noise to the log line.
+function hasParamsToShow(firstParam: unknown) {
+  if (!firstParam) {
+    return false;
+  }
+
+  if (typeof firstParam !== "object") {
+    return true;
+  }
+
+  return Object.keys(firstParam).filter(Boolean).length > 0;
+}
+
 class Despot {
   private readonly name: string;
   protected readonly emitter: DespotEmitter;
@@ -29,22 +48,26 @@ class Despot {
     this.emitter = emitter;
   }
 
-  protected emit<E extends keyof VideomailEvents>(
+  private logEmit<E extends keyof VideomailEvents>(
     eventName: E,
-    ...params: Parameters<VideomailEvents[E]>
+    params: Parameters<VideomailEvents[E]>,
   ) {
-    const firstParam = params[0];
-    const showParams =
-      firstParam &&
-      (typeof firstParam !== "object" ||
-        (typeof firstParam === "object" &&
-          Object.keys(firstParam).filter(Boolean).length > 0));
+    if (QUIET_EVENTS.has(eventName)) {
+      return;
+    }
 
-    if (showParams) {
+    if (hasParamsToShow(params[0])) {
       this.options.logger.debug(`${this.name} emits ${eventName} with ${pretty(params)}`);
     } else {
       this.options.logger.debug(`${this.name} emits ${eventName}`);
     }
+  }
+
+  protected emit<E extends keyof VideomailEvents>(
+    eventName: E,
+    ...params: Parameters<VideomailEvents[E]>
+  ) {
+    this.logEmit(eventName, params);
 
     // Listeners can't throw out of here; on() guards each one of them.
     this.emitter.emit(eventName, ...params);

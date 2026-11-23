@@ -41,4 +41,33 @@ describe("mergeWithDefaultOptions", () => {
 
     expect(defaultOptions.image.types).toEqual(["webp", "jpeg"]);
   });
+
+  it("keeps a class-based logger and its prototype methods", () => {
+    // Methods on a prototype, like most logging libraries have them.
+    class RecordingLogger {
+      public readonly lines: unknown[] = [];
+
+      public debug(message: unknown) {
+        this.lines.push(message);
+      }
+
+      public info(message: unknown) {
+        this.lines.push(message);
+      }
+
+      public warn(message: unknown) {
+        this.lines.push(message);
+      }
+
+      public error(message: unknown) {
+        this.lines.push(message);
+      }
+    }
+    const logger = new RecordingLogger();
+    const options = mergeWithDefaultOptions({ logger });
+
+    options.logger.error("Camera failed");
+
+    expect(logger.lines).toEqual(["Camera failed"]);
+  });
 });

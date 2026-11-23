@@ -601,24 +601,6 @@ abstract class RecorderConnection extends RecorderStreamWriter {
         }
       }, connectionTimeoutMs);
 
-      // useful for debugging streams
-
-      /*
-       * if (!stream.originalEmit) {
-       *   stream.originalEmit = stream.emit
-       * }
-       */
-
-      /*
-       * stream.emit = function (type) {
-       *   if (stream) {
-       *     this.options.logger.debug(PIPE_SYMBOL + 'Debugging stream event:', type)
-       *     var args = Array.prototype.slice.call(arguments, 0)
-       *     return stream.originalEmit.apply(stream, args)
-       *   }
-       * }
-       */
-
       stream.on("close", () => {
         if (this.stream === stream) {
           this.handleStreamClose(url2Connect);
@@ -655,8 +637,9 @@ abstract class RecorderConnection extends RecorderStreamWriter {
         if (this.stream !== stream) {
           return;
         }
-        this.options.logger.debug(`${PIPE_SYMBOL}Stream *data* event emitted`);
 
+        // No log line: a confirmation arrives for every frame, and
+        // executeCommand() already logs everything else.
         try {
           const command = JSON.parse(data.toString());
           this.executeCommand(command);
@@ -685,58 +668,6 @@ abstract class RecorderConnection extends RecorderStreamWriter {
         if (this.stream === stream) {
           this.handleStreamDrain(stream);
         }
-      });
-
-      stream.on("preend", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *preend* event emitted with args: ${pretty(args)}`,
-        );
-      });
-
-      stream.on("end", () => {
-        this.options.logger.debug(`${PIPE_SYMBOL}Stream *end* event emitted`);
-      });
-
-      stream.on("pipe", (src) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *pipe* event emitted with src: ${pretty(src)}`,
-        );
-      });
-
-      stream.on("unpipe", (src) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *unpipe* event emitted with src: ${pretty(src)}`,
-        );
-      });
-
-      stream.on("resume", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *resume* event emitted with args: ${pretty(args)}`,
-        );
-      });
-
-      stream.on("uncork", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *uncork* event emitted with args: ${pretty(args)}`,
-        );
-      });
-
-      stream.on("readable", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *readable* event emitted with args: ${pretty(args)}`,
-        );
-      });
-
-      stream.on("prefinish", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *prefinish* event emitted with args: ${pretty(args)}`,
-        );
-      });
-
-      stream.on("finish", (args) => {
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *finish* event emitted with args: ${pretty(args)}`,
-        );
       });
     }
   }
