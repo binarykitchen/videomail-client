@@ -182,6 +182,34 @@ describe("Notifier", () => {
     expect(listener).toHaveBeenCalledOnce();
   });
 
+  it("announces notices politely to screen readers", () => {
+    const { element, notifier } = createFixture();
+    notifier.build();
+
+    notifier.notify("Connecting …");
+
+    const notifierElement = element.querySelector(".notifier");
+
+    expect({
+      role: notifierElement?.getAttribute("role"),
+      live: notifierElement?.getAttribute("aria-live"),
+    }).toEqual({ role: "status", live: "polite" });
+  });
+
+  it("announces blocking errors to screen readers right away", () => {
+    const { element, notifier } = createFixture();
+    notifier.build();
+
+    notifier.error({ getClassList: () => undefined, message: "Camera unavailable" });
+
+    const notifierElement = element.querySelector(".notifier");
+
+    expect({
+      role: notifierElement?.getAttribute("role"),
+      live: notifierElement?.getAttribute("aria-live"),
+    }).toEqual({ role: "alert", live: "assertive" });
+  });
+
   it("responds to the connecting event", () => {
     const { element, notifier } = createFixture();
     notifier.build();

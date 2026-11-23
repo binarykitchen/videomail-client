@@ -35,6 +35,21 @@ describe("FacingMode", () => {
     expect(element.querySelector<HTMLElement>(".facingMode")?.style.display).toBe("");
   });
 
+  it("gives the camera-switch button a name and keeps it from submitting forms", () => {
+    const { element, visuals } = createVisuals();
+    const facingMode = new FacingMode(visuals, mergeWithDefaultOptions());
+
+    facingMode.build();
+
+    const button = element.querySelector<HTMLButtonElement>(".facingMode");
+
+    expect({
+      type: button?.type,
+      label: button?.getAttribute("aria-label"),
+      title: button?.title,
+    }).toEqual({ type: "button", label: "Switch camera", title: "Switch camera" });
+  });
+
   it("emits a switch event when clicked", () => {
     const { element, visuals } = createVisuals();
     const facingMode = new FacingMode(visuals, mergeWithDefaultOptions());

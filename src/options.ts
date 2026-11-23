@@ -108,6 +108,8 @@ const options: VideomailClientOptions = {
       resume: "Resume",
       pause: "Pause",
       preview: "Preview",
+      // Accessible name of the ⤾ button on mobile devices.
+      switchCamera: "Switch camera",
     },
   },
 

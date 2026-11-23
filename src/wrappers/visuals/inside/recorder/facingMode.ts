@@ -29,8 +29,15 @@ class FacingMode extends Despot {
     this.facingModeElement = this.visuals.getElement()?.querySelector(".facingMode");
 
     if (!this.facingModeElement) {
+      const switchCameraLabel = this.options.text.buttons.switchCamera;
+
       this.facingModeElement = document.createElement("button");
       this.facingModeElement.classList.add("facingMode");
+      // Without a type, a button inside a form submits it, e.g. on Enter.
+      this.facingModeElement.setAttribute("type", "button");
+      // "⤾" alone means nothing to screen readers, and little to most people.
+      this.facingModeElement.setAttribute("aria-label", switchCameraLabel);
+      this.facingModeElement.title = switchCameraLabel;
       this.facingModeElement.textContent = "⤾";
 
       this.facingModeElement.onclick = (e?) => {

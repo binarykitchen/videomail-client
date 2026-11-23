@@ -30,6 +30,15 @@ describe("Countdown", () => {
     expect(element.querySelector<HTMLElement>(".countdown")?.style.display).toBe("none");
   });
 
+  it("lets screen readers follow the countdown", () => {
+    const { element, visuals } = createVisuals();
+    const countdown = new Countdown(visuals, mergeWithDefaultOptions());
+
+    countdown.build();
+
+    expect(element.querySelector(".countdown")?.getAttribute("aria-live")).toBe("polite");
+  });
+
   it("starts from the configured countdown value", () => {
     const { element, visuals } = createVisuals();
     const options = mergeWithDefaultOptions({ video: { countdown: 3 } });

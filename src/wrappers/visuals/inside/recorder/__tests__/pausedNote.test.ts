@@ -25,6 +25,15 @@ describe("PausedNote", () => {
     expect(element.querySelector(".pausedHeader")?.textContent).toBe("Recording paused");
   });
 
+  it("announces the paused note to screen readers", () => {
+    const { element, visuals } = createVisuals();
+    const pausedNote = new PausedNote(visuals, mergeWithDefaultOptions());
+
+    pausedNote.build();
+
+    expect(element.querySelector(".paused")?.getAttribute("aria-live")).toBe("polite");
+  });
+
   it("builds an optional paused hint", () => {
     const { element, visuals } = createVisuals();
     const options = mergeWithDefaultOptions({

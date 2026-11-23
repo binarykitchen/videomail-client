@@ -88,6 +88,9 @@ class Countdown {
     } else {
       this.hide();
     }
+
+    // Lets screen readers follow "3, 2, 1" without moving focus.
+    this.countdownElement.setAttribute("aria-live", "polite");
   }
 
   public show() {

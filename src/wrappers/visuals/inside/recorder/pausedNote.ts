@@ -61,6 +61,9 @@ class PausedNote {
         this.pausedHintElement.textContent = this.options.text.pausedHint;
       }
     }
+
+    // Announces "Paused" to screen readers when the note appears.
+    this.pausedBlockElement?.setAttribute("aria-live", "polite");
   }
 
   public hide() {

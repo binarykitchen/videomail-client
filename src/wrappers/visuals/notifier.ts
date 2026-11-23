@@ -355,6 +355,9 @@ class Notifier extends Despot {
       this.hide();
     }
 
+    // Live regions must exist before their content changes, or nothing gets read.
+    this.setLiveRegion(false);
+
     if (!this.built) {
       this.initEvents();
     }
@@ -366,6 +369,22 @@ class Notifier extends Despot {
     this.cancelEntertainment();
     this.removeAllListeners();
     this.built = false;
+  }
+
+  /*
+   * Screen readers announce notices without moving focus (WCAG 4.1.3): status
+   * updates politely, blocking problems right away. Helps DeafBlind people on
+   * braille displays, too.
+   */
+  private setLiveRegion(blocking: boolean) {
+    if (!this.notifyElement) {
+      return;
+    }
+
+    this.notifyElement.setAttribute("role", blocking ? "alert" : "status");
+    this.notifyElement.setAttribute("aria-live", blocking ? "assertive" : "polite");
+    // Read the heading and explanation together, not only the part that changed.
+    this.notifyElement.setAttribute("aria-atomic", "true");
   }
 
   private hideMessage() {
@@ -438,6 +457,9 @@ class Notifier extends Despot {
     } else {
       this.emit("NOTIFYING");
     }
+
+    // Set before the text changes, so screen readers use the right urgency.
+    this.setLiveRegion(blocking);
 
     this.visuals.hideReplay();
     this.visuals.hideRecorder();

@@ -102,6 +102,7 @@ export interface VideomailClientOptions {
       resume: string;
       pause: string;
       preview: string;
+      switchCamera: string;
     };
   };
 
