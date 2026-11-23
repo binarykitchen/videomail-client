@@ -37,6 +37,8 @@ export default defineConfig({
         // Rslib leaves library code readable unless asked. Bundled builds are
         // often served as-is, so shrink them here.
         minify: true,
+        // Bundled dependencies come with licenses that require keeping their notices.
+        legalComments: "linked",
         distPath: {
           root: "./dist/cjs/",
         },
@@ -51,6 +53,8 @@ export default defineConfig({
         // The Ninja Forms plugin serves this file unchanged as index-min.js,
         // so it has to arrive minified.
         minify: true,
+        // Bundled dependencies come with licenses that require keeping their notices.
+        legalComments: "linked",
         distPath: {
           root: "./dist/umd/",
         },
