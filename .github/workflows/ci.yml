@@ -8,6 +8,14 @@ on:
   release:
     types: [published]
 
+# Least privilege 🔐
+#
+# CI only reads the code. Without this,
+# the token inherits the repository default, which can push commits and tags.
+# Otherwise, npm install scripts from any of our ~1,000 dev packages would run with that power.
+permissions:
+  contents: read
+
 jobs:
   build-test-lint-check:
     name: Build, Test, Prettier, Lint and Check
@@ -15,7 +23,8 @@ jobs:
 
     steps:
       - name: 🛒 Checkout code
-        uses: actions/checkout@v7
+        # Pinned to a commit SHA because tags can be moved. Bump both together.
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -50,4 +59,11 @@ jobs:
           - name: 🔎 Run Chromatic
             env:
               CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-            run: npm run chromatic -- --project-token="$CHROMATIC_PROJECT_TOKEN"
+            # Pull requests from forks get no secrets. Skip instead of failing them.
+            run: |
+              if [ -z "$CHROMATIC_PROJECT_TOKEN" ]; then
+                echo "Skipping Chromatic: no project token (e.g. a pull request from a fork)."
+                exit 0
+              fi
+
+              npm run chromatic -- --project-token="$CHROMATIC_PROJECT_TOKEN"

@@ -2,5 +2,7 @@
 {
   "high": true,
   "package-manager": "npm",
-  "allowlist": ["GHSA-c475-qrg2-pj4r"]
+  // Allowlist an advisory only with a reason and a plan to remove it again.
+  // audit-ci says "Consider not allowlisting" once an entry is stale.
+  "allowlist": []
 }
