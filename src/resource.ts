@@ -13,6 +13,7 @@ import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import sanitizeErrorReport from "./util/error/sanitizeErrorReport";
 import VideomailError from "./util/error/VideomailError";
+import sanitizeUrl from "./util/url/sanitizeUrl";
 import { FormMethod, FormMethodType } from "./wrappers/form";
 
 class Resource {
@@ -200,7 +201,9 @@ class Resource {
     // Keep the client version and recording page for troubleshooting.
     newVideomail.versions.videomailClient = videomailClientVersion;
 
-    newVideomail.recordLocation = window.location.href;
+    // The page path is all support needs. Credentials, query strings and fragments
+    // can carry tokens or personal data, and this value is stored with the video.
+    newVideomail.recordLocation = sanitizeUrl(window.location.href);
 
     const browser = getBrowser(this.options);
     newVideomail.browserStats = browser.getUsefulData();

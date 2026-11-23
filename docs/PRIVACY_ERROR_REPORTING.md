@@ -2,6 +2,13 @@
 
 Recording sends webcam frames to your configured Videomail service for encoding. Audio samples go along if audio is enabled. There is no offline recording.
 
+## What each videomail stores
+
+Besides the video and its message (subject, body and addresses), each videomail keeps a few details for support:
+
+- The page it was recorded on (`recordLocation`). The client removes URL credentials, query strings and fragments first, because those can carry tokens or personal data.
+- The client version, plus browser and device details (`browserStats`).
+
 ## What error reports contain
 
 `reportErrors` is `true` by default. Reports go to `/client-error/` on `apiUrl`, which defaults to `https://videomail.io/api`.

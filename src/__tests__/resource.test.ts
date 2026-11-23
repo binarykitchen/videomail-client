@@ -319,4 +319,19 @@ describe("Resource class", () => {
       "A videomail key is required when updating a videomail.",
     );
   });
+
+  it("stores the recording page without its query string or fragment", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/contact?email=signer@example.com#access_token=page-secret",
+    );
+    const { resource } = createReportFixture();
+
+    await resource.post({});
+
+    expect(reportRequest.send).toHaveBeenCalledWith(
+      expect.objectContaining({ recordLocation: `${window.location.origin}/contact` }),
+    );
+  });
 });

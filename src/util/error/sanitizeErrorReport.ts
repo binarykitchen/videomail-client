@@ -1,8 +1,8 @@
 import { serializeError } from "serialize-error";
 
 import type { FullVideomailErrorData } from "../../types/error";
+import sanitizeUrl, { REDACTED } from "../url/sanitizeUrl";
 
-const REDACTED = "[redacted]";
 const PRIVATE_FIELDS = [
   "cookies?|set[-_]?cookie",
   "(?:proxy[-_]?)?authorization",
@@ -24,20 +24,6 @@ const LOG_VALUES = [
   /[^\s,;{}[\]]+/u.source,
 ].join("|");
 const PRIVATE_LOG_VALUE = new RegExp(`${LOG_ASSIGNMENT}(?:${LOG_VALUES})`, "giu");
-
-function sanitizeUrl(value: string, base?: string) {
-  try {
-    const url = new URL(value, base);
-    url.username = "";
-    url.password = "";
-    url.search = "";
-    url.hash = "";
-
-    return url.href;
-  } catch {
-    return REDACTED;
-  }
-}
 
 function sanitizeText(text: string) {
   return text
