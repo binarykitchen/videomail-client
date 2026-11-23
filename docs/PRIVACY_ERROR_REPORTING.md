@@ -11,7 +11,9 @@ Besides the video and its message (subject, body and addresses), each videomail 
 
 ## What error reports contain
 
-`reportErrors` is `true` by default. Reports go to `/client-error/` on `apiUrl`, which defaults to `https://videomail.io/api`.
+`reportErrors` is `true` by default.
+
+Reports go to `/client-error/` on `apiUrl`, which defaults to `https://videomail.io/api`. The same error is sent at most once every ten seconds, so a failure that repeats on every frame doesn't flood the inbox.
 
 Reports keep these details for troubleshooting:
 

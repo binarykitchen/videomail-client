@@ -1,10 +1,13 @@
 import Constants from "./constants";
 import Resource from "./resource";
+import type { VideomailEvents } from "./types/events";
 import { PartialVideomailClientOptions } from "./types/options";
 import { Videomail } from "./types/Videomail";
 import Despot from "./util/Despot";
 import createError from "./util/error/createError";
+import ErrorReporter from "./util/error/ErrorReporter";
 import mergeWithDefaultOptions from "./util/options/mergeWithDefaultOptions";
+import pretty from "./util/string/pretty";
 import Container from "./wrappers/container";
 
 export interface StartOverParams {
@@ -18,6 +21,7 @@ export interface ShowParams {
 
 class VideomailClient extends Despot {
   private readonly container: Container;
+  private readonly errorReporter: ErrorReporter;
 
   public static readonly ENC_TYPE_APP_JSON = Constants.public.ENC_TYPE_APP_JSON;
   public static readonly ENC_TYPE_FORM = Constants.public.ENC_TYPE_FORM;
@@ -25,29 +29,56 @@ class VideomailClient extends Despot {
   public constructor(options: PartialVideomailClientOptions = {}) {
     super("VideomailClient", mergeWithDefaultOptions(options));
 
+    this.errorReporter = new ErrorReporter(this.options);
+
     this.validateOptions();
 
-    this.container = new Container(this.options, this.emitter);
+    this.container = new Container(this.options, this.emitter, this.errorReporter);
   }
 
   private validateOptions() {
     const width = this.options.video.width;
 
     if (width !== undefined && width % 2 !== 0) {
-      throw createError({
-        message: "Width must be divisible by two.",
-        options: this.options,
-      });
+      throw this.createReportedError("Width must be divisible by two.");
     }
 
     const height = this.options.video.height;
 
     if (height !== undefined && height % 2 !== 0) {
-      throw createError({
-        message: "Height must be divisible by two.",
-        options: this.options,
-      });
+      throw this.createReportedError("Height must be divisible by two.");
     }
+  }
+
+  private createReportedError(message: string) {
+    const err = createError({ message, options: this.options });
+    this.errorReporter.report(err);
+
+    return err;
+  }
+
+  // The host handles these rejections itself.
+  // We still report them, then pass them on.
+  private async reportFailure<T>(request: Promise<T>) {
+    try {
+      return await request;
+    } catch (exc) {
+      this.errorReporter.report(createError({ exc, options: this.options }));
+      throw exc;
+    }
+  }
+
+  /*
+   * Listeners registered on the client belong to the host app.
+   * A bug in one of them must not reset the user's take, so log it instead of raising an ERROR.
+   */
+  protected override handleListenerFailure(
+    eventName: keyof VideomailEvents,
+    exc: unknown,
+  ) {
+    const details = exc instanceof Error ? (exc.stack ?? exc.message) : pretty(exc);
+
+    this.options.logger.error(`A listener for ${eventName} failed: ${details}`);
   }
 
   public build() {
@@ -108,8 +139,14 @@ class VideomailClient extends Despot {
 
     // Wait until ready to avoid HTTP 416 errors (request range unavailable)
     this.once("REPLAY_SHOWN", () => {
-      this.container.showReplayOnly();
-      this.container.loadForm(videomail);
+      // Our own callback, registered on the host-facing client: raise failures as
+      // ERROR ourselves, so they get displayed and reported like any recorder error.
+      try {
+        this.container.showReplayOnly();
+        this.container.loadForm(videomail);
+      } catch (exc) {
+        this.emit("ERROR", { exc });
+      }
     });
 
     const replay = this.container.getReplay();
@@ -130,22 +167,22 @@ class VideomailClient extends Despot {
 
   public async getByAlias(alias: string) {
     const resource = new Resource(this.options);
-    return await resource.getByAlias(alias);
+    return await this.reportFailure(resource.getByAlias(alias));
   }
 
   public async getByKey(key: string) {
     const resource = new Resource(this.options);
-    return await resource.getByKey(key);
+    return await this.reportFailure(resource.getByKey(key));
   }
 
   public async getThreadByAlias(alias: string) {
     const resource = new Resource(this.options);
-    return await resource.getThreadByAlias(alias);
+    return await this.reportFailure(resource.getThreadByAlias(alias));
   }
 
   public async getThreadByKey(key: string) {
     const resource = new Resource(this.options);
-    return await resource.getThreadByKey(key);
+    return await this.reportFailure(resource.getThreadByKey(key));
   }
 
   public isDirty() {

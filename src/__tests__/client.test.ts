@@ -168,6 +168,20 @@ describe("Client", () => {
     recover.mockRestore();
   });
 
+  it("logs a failing host listener instead of raising an ERROR", () => {
+    const videomailClient = new VideomailClient();
+    const errorListener = vi.fn();
+    videomailClient.on("HIDE", () => {
+      throw new Error("Bug in the host app");
+    });
+    videomailClient.on("ERROR", errorListener);
+    videomailClient.show();
+
+    videomailClient.hide();
+
+    expect(errorListener).not.toHaveBeenCalled();
+  });
+
   describe("when the page is about to go away", () => {
     // A shown client inside a form, holding an unsent preview.
     function createDirtyClient() {

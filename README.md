@@ -145,13 +145,15 @@ videomailClient.on("SUBMITTED", ({ videomail, response }) => {
 });
 ```
 
+If one of your listeners throws, the client logs it and carries on. Other listeners still run, and a recording in progress is never interrupted.
+
 #### Supported events
 
 Check them out at [src/types/events/index.ts](https://github.com/binarykitchen/videomail-client/blob/master/src/types/events/index.ts)
 
 Some events include typed parameters exported by the package.
 
-The client shows errors by default. Listen for `ERROR` to add your own logging or recovery.
+The client shows and reports errors by default, unexpected exceptions included. Listen for `ERROR` to add your own logging or recovery.
 
 Videomail errors extend the native `Error` class with details for troubleshooting.
 

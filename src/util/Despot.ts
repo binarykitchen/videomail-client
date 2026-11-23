@@ -46,19 +46,42 @@ class Despot {
       this.options.logger.debug(`${this.name} emits ${eventName}`);
     }
 
-    try {
-      this.emitter.emit(eventName, ...params);
-    } catch (exc) {
-      if (exc instanceof VideomailError) {
-        this.emitter.emit("ERROR", { err: exc });
-      } else {
-        this.emitter.emit("ERROR", { exc });
-      }
+    // Listeners can't throw out of here; on() guards each one of them.
+    this.emitter.emit(eventName, ...params);
+  }
+
+  /*
+   * A listener registered by one of our components failed. That's a recorder problem,
+   * so it becomes an ERROR, which the container displays and reports.
+   *
+   * VideomailClient overrides this, because its listeners belong to the host app.
+   */
+  protected handleListenerFailure(eventName: keyof VideomailEvents, exc: unknown) {
+    // A failing ERROR listener would only trigger itself again. Log and stop there.
+    if (eventName === "ERROR") {
+      this.options.logger.error(exc);
+      return;
+    }
+
+    if (exc instanceof VideomailError) {
+      this.emit("ERROR", { err: exc });
+    } else {
+      this.emit("ERROR", { exc });
     }
   }
 
   public on<E extends keyof VideomailEvents>(eventName: E, callback: VideomailEvents[E]) {
-    const unsubscribeFromEmitter = this.emitter.on(eventName, callback);
+    // Each listener fails on its own. Nanoevents would otherwise stop at the first
+    // exception and skip everybody else listening to the same event.
+    const guardedCallback = ((...params: Parameters<VideomailEvents[E]>) => {
+      try {
+        (callback as (...args: Parameters<VideomailEvents[E]>) => void)(...params);
+      } catch (exc) {
+        this.handleListenerFailure(eventName, exc);
+      }
+    }) as VideomailEvents[E];
+
+    const unsubscribeFromEmitter = this.emitter.on(eventName, guardedCallback);
     const subscription: Subscription = {
       eventName,
       unsubscribe: () => {

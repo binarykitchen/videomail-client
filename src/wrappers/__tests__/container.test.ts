@@ -1,9 +1,12 @@
+import Resource from "../../resource";
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import Container from "../container";
 import { FormInputs, FormMethod, FormMethodType } from "../form";
 
 interface ContainerInternals {
   options: ReturnType<typeof mergeWithDefaultOptions>;
+  emit: (eventName: "ERROR", params: { exc: unknown }) => void;
+  emitter: { events: Partial<Record<string, unknown[]>> };
   visibility: {
     onChange: (listener: (visible: boolean) => void) => () => void;
   };
@@ -951,5 +954,42 @@ describe("Container", () => {
     container.unload();
 
     expect(container.isBuilt()).toBe(false);
+  });
+
+  describe("when something goes wrong", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("shows and reports an unexpected exception", () => {
+      const container = new Container(mergeWithDefaultOptions());
+      container.build();
+      const report = vi
+        .spyOn(Resource.prototype, "reportError")
+        .mockResolvedValue(undefined);
+      report.mockClear();
+
+      getInternals(container).emit("ERROR", { exc: new Error("Unexpected glitch") });
+
+      expect({
+        notice: container.querySelector(".notifierMessage")?.textContent,
+        reports: report.mock.calls.length,
+      }).toEqual({ notice: "☹ Unexpected glitch", reports: 1 });
+    });
+
+    it("registers its listeners once, even when building keeps failing", () => {
+      document.body.innerHTML = `<div id="notAForm"></div><div id="videomail"></div>`;
+      const container = new Container(
+        mergeWithDefaultOptions({
+          selectors: { containerId: "videomail", formId: "notAForm" },
+        }),
+      );
+
+      container.build();
+      container.build();
+      container.build();
+
+      expect(getInternals(container).emitter.events.ERROR).toHaveLength(1);
+    });
   });
 });

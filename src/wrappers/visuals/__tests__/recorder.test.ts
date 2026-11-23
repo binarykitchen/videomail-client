@@ -1,4 +1,3 @@
-import Resource from "../../../resource";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Visuals from "../../visuals";
 import Recorder from "../recorder";
@@ -1312,12 +1311,9 @@ describe("Recorder", () => {
   });
 
   it.each(["initial", "idle"])(
-    "reports %s constructor failures to the server with structured runtime diagnostics",
+    "raises %s constructor failures with structured runtime diagnostics",
     (phase) => {
       const { recorder } = createFixture();
-      const report = vi
-        .spyOn(Resource.prototype, "reportError")
-        .mockResolvedValue(undefined);
       const internals = recorder as unknown as RecorderInternals;
       if (phase === "idle") {
         internals.connectionOpenedAt = 0;
@@ -1325,24 +1321,28 @@ describe("Recorder", () => {
       vi.stubGlobal("WebSocket", function WrappedSocket() {
         throw new DOMException("The provided URL is invalid.", "SyntaxError");
       });
-      recorder.on("ERROR", vi.fn());
+      const errorListener = vi.fn();
+      recorder.on("ERROR", errorListener);
 
       internals.initSocket();
 
-      expect(report).toHaveBeenCalledWith(
+      // The container reports whatever the recorder raises (see its tests).
+      expect(errorListener).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining("Failed to construct WebSocket"),
-          cause: expect.objectContaining({
-            transportStage: "constructor",
-            transportPhase: phase,
-            mediaTransmissionStarted: false,
-            webSocketDiagnostic: expect.objectContaining({
-              version: 4,
-              constructor: expect.objectContaining({ nativeLike: false }),
-              endpoint: "wss://videomail.io/ws",
+          err: expect.objectContaining({
+            message: expect.stringContaining("Failed to construct WebSocket"),
+            cause: expect.objectContaining({
+              transportStage: "constructor",
+              transportPhase: phase,
+              mediaTransmissionStarted: false,
+              webSocketDiagnostic: expect.objectContaining({
+                version: 4,
+                constructor: expect.objectContaining({ nativeLike: false }),
+                endpoint: "wss://videomail.io/ws",
+              }),
             }),
+            err: expect.objectContaining({ name: "SyntaxError", code: 12 }),
           }),
-          err: expect.objectContaining({ name: "SyntaxError", code: 12 }),
         }),
       );
     },

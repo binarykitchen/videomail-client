@@ -14,6 +14,7 @@ import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import isRecipientSelectionValid from "../util/email/isRecipientSelectionValid";
 import createError from "../util/error/createError";
+import ErrorReporter from "../util/error/ErrorReporter";
 import VideomailError from "../util/error/VideomailError";
 import getValidity from "../util/getValidity";
 import limitHeight from "../util/html/dimensions/limitHeight";
@@ -49,6 +50,7 @@ class Container extends Despot {
   private readonly visuals: Visuals;
   private readonly buttons: Buttons;
   private readonly resource: Resource;
+  private readonly errorReporter: ErrorReporter;
   private form: Form | undefined;
 
   private hasError = false;
@@ -59,6 +61,8 @@ class Container extends Despot {
   private containerElement?: HTMLElement | null | undefined;
 
   private built = false;
+  // Separate from built: a failed build must not register the same listeners again.
+  private eventsInitialized = false;
   private stopListeningToVisibility?: (() => void) | undefined;
 
   private readonly handleWindowResize = () => {
@@ -130,9 +134,15 @@ class Container extends Despot {
     }
   };
 
-  public constructor(options: VideomailClientOptions, emitter?: DespotEmitter) {
+  public constructor(
+    options: VideomailClientOptions,
+    emitter?: DespotEmitter,
+    // Shared with VideomailClient, so both deduplicate reports in one place.
+    errorReporter = new ErrorReporter(options),
+  ) {
     super("Container", options, emitter);
 
+    this.errorReporter = errorReporter;
     this.visuals = new Visuals(this, options, this.emitter);
     this.buttons = new Buttons(this, options, this.emitter);
     this.resource = new Resource(options);
@@ -192,7 +202,7 @@ class Container extends Despot {
         }
       }
 
-      if (!this.built) {
+      if (!this.eventsInitialized) {
         this.initEvents(buildOptions?.playerOnly);
       }
 
@@ -281,34 +291,24 @@ class Container extends Despot {
     }
   }
 
-  private processError(params: VideomailErrorParams) {
+  // From here on every error is a VideomailError, including plain exceptions.
+  private toVideomailError(params: VideomailErrorParams) {
+    return params.err ?? createError({ exc: params.exc, options: this.options });
+  }
+
+  private processError(err: VideomailError, recoverable?: boolean) {
     this.hasError = true;
 
-    if (params.err?.stack) {
-      this.options.logger.error(params.err.stack);
-    } else if (params.err?.message) {
-      this.options.logger.error(params.err.message);
-    } else if (params.exc) {
-      if (params.exc instanceof Error) {
-        if (params.exc.stack) {
-          this.options.logger.error(params.exc.stack);
-        } else if (params.exc.message) {
-          this.options.logger.error(params.exc.message);
-        }
-      } else {
-        this.options.logger.error(params.exc);
-      }
+    this.options.logger.error(err.stack ?? err.message);
+
+    // Our stack only points at createError(); the original one shows the culprit.
+    if (err.err?.stack) {
+      this.options.logger.error(err.err.stack);
     }
 
-    if (this.options.displayErrors && params.err) {
-      this.visuals.error(params.err, !params.recoverable);
-    } else if (
-      this.options.displayErrors &&
-      params.exc &&
-      params.exc instanceof VideomailError
-    ) {
-      this.visuals.error(params.exc, !params.recoverable);
-    } else if (!params.recoverable) {
+    if (this.options.displayErrors) {
+      this.visuals.error(err, !recoverable);
+    } else if (!recoverable) {
       // A retryable submit must not reset the take when errors are hidden.
       this.visuals.reset();
     }
@@ -316,6 +316,8 @@ class Container extends Despot {
 
   private initEvents(playerOnly = false) {
     this.options.logger.debug(`Container: initEvents (playerOnly = ${playerOnly})`);
+
+    this.eventsInitialized = true;
 
     if (this.options.recalculateDimensionsOnWindowResize) {
       window.addEventListener("resize", this.handleWindowResize);
@@ -356,7 +358,11 @@ class Container extends Despot {
 
     // Register the shared error handler here; unload() removes all listeners.
     this.on("ERROR", (params: VideomailErrorParams) => {
-      this.processError(params);
+      const err = this.toVideomailError(params);
+
+      // The one place that reports errors raised while recording. 📮
+      this.errorReporter.report(err);
+      this.processError(err, params.recoverable);
 
       this.endWaiting();
 
@@ -365,6 +371,11 @@ class Container extends Despot {
       if (browser.isMobile()) {
         this.removeDimensions();
       }
+    });
+
+    // A failed recovery keeps the take paused, but it is still worth a report.
+    this.on("CAMERA_RECOVERY_FAILED", ({ err }) => {
+      this.errorReporter.report(err);
     });
 
     this.on("WINDOW_RESIZE", () => {
@@ -546,7 +557,7 @@ class Container extends Despot {
       this.removeBrowserEventListeners();
       this.removeAllListeners();
 
-      this.built = this.submitted = false;
+      this.built = this.submitted = this.eventsInitialized = false;
       this.pendingHostSubmission = undefined;
     }
   }

@@ -26,6 +26,8 @@ class Visuals extends Despot {
 
   private visualsElement?: HTMLElement | null | undefined;
   private built = false;
+  // Separate from built: a failed build must not register the same listeners again.
+  private eventsInitialized = false;
   private playerOnly = false;
   private cameraRecoveryFailed = false;
 
@@ -77,6 +79,8 @@ class Visuals extends Despot {
   }
 
   private initEvents(playerOnly = false) {
+    this.eventsInitialized = true;
+
     if (!playerOnly) {
       this.options.logger.debug(`Visuals: initEvents (playerOnly = ${playerOnly})`);
 
@@ -248,7 +252,7 @@ class Visuals extends Despot {
 
     this.correctDimensions();
 
-    if (!this.built) {
+    if (!this.eventsInitialized) {
       this.initEvents(playerOnly);
     }
 
@@ -331,6 +335,7 @@ class Visuals extends Despot {
     this.replay.unload(params);
     this.notifier.unload();
     this.removeAllListeners();
+    this.eventsInitialized = false;
 
     if (e instanceof Error) {
       // Keep the notifier visible so users can still read the error.

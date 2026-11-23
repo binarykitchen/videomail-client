@@ -1,4 +1,3 @@
-import Resource from "../../resource";
 import { VideomailClientOptions } from "../../types/options";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../string/pretty";
@@ -17,6 +16,17 @@ interface ErrorParams {
   usedConstraints?: MediaStreamConstraints;
 }
 
+// JavaScript can throw anything, e.g. a string. Those deserve a readable error, too.
+function isThrownNonError(exc: unknown) {
+  return exc !== undefined && !(exc instanceof Error);
+}
+
+/*
+ * Turns whatever went wrong into a VideomailError with a friendly message.
+ *
+ * No side effects: it never sends a report. Code that handles an error decides to
+ * report it through ErrorReporter, once.
+ */
 function createError(errorParams: ErrorParams) {
   const { exc, options } = errorParams;
 
@@ -188,6 +198,12 @@ function createError(errorParams: ErrorParams) {
         message = err.message;
       }
 
+      // Keep a thrown string or object visible instead of "(undefined message)".
+      if (!message && isThrownNonError(exc)) {
+        message = "Unexpected error";
+        explanation ??= pretty(exc);
+      }
+
       // Keep the error name if no message is available.
       if (!message && errName) {
         message = `${errName} (weird)`;
@@ -233,16 +249,6 @@ function createError(errorParams: ErrorParams) {
     videomailClient: videomailClientVersion,
     videomailNinjaFormPlugin: options.versions?.videomailNinjaFormPlugin,
   };
-
-  if (options.reportErrors) {
-    const resource = new Resource(options);
-
-    // Report here as well as returning the error.
-    // WordPress integrations may not have their own reporting.
-    resource.reportError(videomailError).catch((reason: unknown) => {
-      console.error(reason);
-    });
-  }
 
   return videomailError;
 }

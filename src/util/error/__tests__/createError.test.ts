@@ -1,3 +1,4 @@
+import Resource from "../../../resource";
 import mergeWithDefaultOptions from "../../options/mergeWithDefaultOptions";
 import createError from "../createError";
 import VideomailError from "../VideomailError";
@@ -121,6 +122,26 @@ describe("createError fn", () => {
     expect(createError({ err, options })).toMatchObject({
       message: "No webcam or microphone found",
       explanation: "Check that your webcam and microphone are connected.",
+    });
+  });
+
+  it("creates an error without sending a report", () => {
+    const report = vi
+      .spyOn(Resource.prototype, "reportError")
+      .mockResolvedValue(undefined);
+    report.mockClear();
+
+    createError({ message: "Camera failed", options: mergeWithDefaultOptions() });
+
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("keeps a thrown string readable", () => {
+    const options = mergeWithDefaultOptions({ reportErrors: false });
+
+    expect(createError({ exc: "Socket went away", options })).toMatchObject({
+      message: "Unexpected error",
+      explanation: expect.stringContaining("Socket went away"),
     });
   });
 });
