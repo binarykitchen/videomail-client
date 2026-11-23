@@ -259,7 +259,18 @@ Hides the UI without unloading it.
 
 ### videomailClient.isDirty()
 
-Returns `true` when a recorded video has not been submitted. Use it to warn users before they leave an unsent recording.
+Returns `true` when a recorded video has not been submitted. Use it to warn users before they leave an unsent recording:
+
+```ts
+window.addEventListener("beforeunload", (event) => {
+  if (videomailClient.isDirty()) {
+    // Ask the browser to confirm before the page goes away.
+    event.preventDefault();
+  }
+});
+```
+
+With `enableAutoUnload` (the default), the client releases the camera only once the page is really leaving (`pagehide`). If the user decides to stay, the take is still there. 🛟
 
 ### videomailClient.isRecording()
 

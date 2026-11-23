@@ -16,7 +16,7 @@ const options: VideomailClientOptions = {
   submitWithVideomail: false, // Include full metadata under `videomail` in your form submission.
   disableSubmit: false, // Set true to record and replay without submitting.
   enableAutoValidation: true, // Validate form inputs and update the submit button.
-  enableAutoUnload: true, // Release resources when leaving the page.
+  enableAutoUnload: true, // Release resources once the page is really leaving (pagehide).
   enableAutoSubmission: true, // Set false if your app handles form submission.
 
   // Supports 'application/json' and 'application/x-www-form-urlencoded'.

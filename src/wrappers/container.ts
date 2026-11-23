@@ -67,7 +67,17 @@ class Container extends Despot {
     }
   };
 
-  private readonly handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  /*
+   * Only pagehide means the page is really leaving. beforeunload fires earlier, while
+   * the host can still cancel leaving to warn about an unsent take (see isDirty()).
+   */
+  private readonly handlePageHide = (e: PageTransitionEvent) => {
+    if (e.persisted) {
+      // The back/forward cache may restore this page, so keep the take paused.
+      this.suspend();
+      return;
+    }
+
     this.unload({ e });
   };
 
@@ -312,7 +322,8 @@ class Container extends Despot {
     }
 
     if (this.options.enableAutoUnload) {
-      window.addEventListener("beforeunload", this.handleBeforeUnload, { once: true });
+      // Do not use { once: true }, because after a back/forward cache restore, pagehide can fire again.
+      window.addEventListener("pagehide", this.handlePageHide);
     }
 
     if (!playerOnly) {
@@ -418,7 +429,7 @@ class Container extends Despot {
 
   private removeBrowserEventListeners() {
     window.removeEventListener("resize", this.handleWindowResize);
-    window.removeEventListener("beforeunload", this.handleBeforeUnload);
+    window.removeEventListener("pagehide", this.handlePageHide);
     this.containerElement?.removeEventListener("keydown", this.handleKeyDown);
 
     this.stopListeningToVisibility?.();

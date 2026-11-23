@@ -34,6 +34,8 @@ class Form extends Despot {
 
   private readonly container: Container;
   private readonly formElement: HTMLFormElement;
+  // The host's own method. Replays switch to PUT; resets must bring this back.
+  private readonly originalMethod: string | null;
   private keyInput?: HTMLInputElement | null;
   private submitButton: HTMLButtonElement | undefined;
   private submitButtonFormAttribute: string | null = null;
@@ -53,6 +55,7 @@ class Form extends Despot {
 
     this.container = container;
     this.formElement = formElement;
+    this.originalMethod = formElement.getAttribute("method");
 
     // Share one mapping across validation, replay and submission so renamed fields round-trip.
     this.fieldMappings = getFormFieldMappings(options.selectors);
@@ -279,8 +282,9 @@ class Form extends Despot {
   }
 
   private resetForm() {
-    // It can be set to put before when e.g. correcting, so revert to default
-    this.formElement.setAttribute("method", "");
+    // Undo a replay's PUT without wiping the host's method. A blank method would
+    // turn a later native submission into a GET.
+    this.restoreOriginalMethod();
 
     // This resets all except hidden inputs
     this.formElement.reset();
@@ -293,6 +297,15 @@ class Form extends Despot {
       if (type?.toLowerCase() === "hidden") {
         (inputElement as HTMLInputElement).value = "";
       }
+    }
+  }
+
+  private restoreOriginalMethod() {
+    // Without a method attribute in the host markup, leave none behind either.
+    if (this.originalMethod === null) {
+      this.formElement.removeAttribute("method");
+    } else {
+      this.formElement.setAttribute("method", this.originalMethod);
     }
   }
 

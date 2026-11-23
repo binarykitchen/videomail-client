@@ -282,6 +282,33 @@ describe("Form", () => {
     expect(formElement.getAttribute("method")).toBe("put");
   });
 
+  describe("after a replay switched it to PUT", () => {
+    // A replay switches the method; unloading must hand the host's markup back.
+    function unloadReplayForm(formElement: HTMLFormElement) {
+      const container = {} as unknown as Container;
+      const form = new Form(container, formElement, mergeWithDefaultOptions());
+      form.loadVideomail({} as Videomail);
+      form.unload();
+    }
+
+    it("restores the host's method on unload", () => {
+      const formElement = document.createElement("form");
+      formElement.setAttribute("method", "post");
+
+      unloadReplayForm(formElement);
+
+      expect(formElement.getAttribute("method")).toBe("post");
+    });
+
+    it("leaves no method behind when the host had none", () => {
+      const formElement = document.createElement("form");
+
+      unloadReplayForm(formElement);
+
+      expect(formElement.hasAttribute("method")).toBe(false);
+    });
+  });
+
   it("disables registered controls loaded from a videomail", () => {
     const { form, formElement } = createFixture(`<input name="subject">`);
 

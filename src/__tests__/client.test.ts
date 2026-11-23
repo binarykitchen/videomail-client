@@ -111,7 +111,7 @@ describe("Client", () => {
       addEventListener.mock.calls.find(([type]) => type === eventName)?.[1];
 
     const resizeListener = listenerFor("resize");
-    const beforeUnloadListener = listenerFor("beforeunload");
+    const pageHideListener = listenerFor("pagehide");
     const keydownListener = addContainerEventListener.mock.calls.find(
       ([type]) => type === "keydown",
     )?.[1];
@@ -124,7 +124,7 @@ describe("Client", () => {
     }).toEqual({
       window: expect.arrayContaining([
         ["resize", resizeListener],
-        ["beforeunload", beforeUnloadListener],
+        ["pagehide", pageHideListener],
       ]),
       container: expect.arrayContaining([["keydown", keydownListener]]),
     });
@@ -166,5 +166,56 @@ describe("Client", () => {
 
     expect(recover).toHaveBeenCalledExactlyOnceWith();
     recover.mockRestore();
+  });
+
+  describe("when the page is about to go away", () => {
+    // A shown client inside a form, holding an unsent preview.
+    function createDirtyClient() {
+      document.body.innerHTML = `<form method="post"><div id="videomail"></div></form>`;
+      const videomailClient = new VideomailClient({
+        selectors: { containerId: "videomail" },
+      });
+      videomailClient.show();
+      vi.spyOn(Container.prototype, "isReplayShown").mockReturnValue(true);
+
+      return videomailClient;
+    }
+
+    function getContainer(videomailClient: VideomailClient) {
+      return (videomailClient as unknown as { container: Container }).container;
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      document.body.innerHTML = "";
+    });
+
+    it("keeps an unsent take while the host can still cancel leaving", () => {
+      const videomailClient = createDirtyClient();
+
+      window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+
+      expect(videomailClient.isDirty()).toBe(true);
+    });
+
+    it("unloads once the page is really leaving", () => {
+      const videomailClient = createDirtyClient();
+
+      window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false }));
+
+      expect(videomailClient.isBuilt()).toBe(false);
+    });
+
+    it("only suspends when the back/forward cache may restore the page", () => {
+      const videomailClient = createDirtyClient();
+      const suspend = vi.spyOn(getContainer(videomailClient), "suspend");
+
+      window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: true }));
+
+      expect({
+        built: videomailClient.isBuilt(),
+        suspensions: suspend.mock.calls.length,
+      }).toEqual({ built: true, suspensions: 1 });
+    });
   });
 });
