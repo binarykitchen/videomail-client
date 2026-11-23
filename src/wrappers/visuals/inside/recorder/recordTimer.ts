@@ -64,7 +64,8 @@ class RecordTimer {
       this.update();
 
       if (this.countdown < 1) {
-        this.visuals.stop();
+        // Say why recording stopped, so the notifier can show "Limit reached".
+        this.visuals.stop({ limitReached: true });
       }
     }
   }

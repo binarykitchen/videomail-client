@@ -60,7 +60,7 @@ describe("createError fn", () => {
     [
       "PermissionDismissedError",
       "Camera permission is needed",
-      "The camera permission prompt was closed.<br/>" +
+      "The camera permission prompt was closed.\n" +
         "Please allow access when it appears again.",
     ],
     ...[
@@ -70,9 +70,9 @@ describe("createError fn", () => {
     ].map((name) => [
       name,
       "Permission denied",
-      "We cannot access your webcam. Check these possibilities:" +
-        "<ul><li>Camera access is blocked in your browser settings.</li>" +
-        "<li>Another app is using your webcam.</li></ul>",
+      "We cannot access your webcam.\n" +
+        "Please allow camera access in your browser settings. " +
+        "Also check that no other app is using your webcam.",
     ]),
     ...["HARDWARE_UNAVAILABLE", "AbortError"].map((name) => [
       name,

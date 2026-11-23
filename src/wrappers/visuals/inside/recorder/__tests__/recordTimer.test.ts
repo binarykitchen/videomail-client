@@ -74,13 +74,13 @@ describe("RecordTimer", () => {
     expect(element.querySelector(".recordTimer")?.classList.contains("nigh")).toBe(true);
   });
 
-  it("stops the visuals when time runs out", () => {
+  it("tells the visuals that the limit was reached when time runs out", () => {
     const { recordTimer, stopVisuals } = createFixture();
     recordTimer.start();
 
     recordTimer.check(100_000);
 
-    expect(stopVisuals).toHaveBeenCalledOnce();
+    expect(stopVisuals).toHaveBeenCalledExactlyOnceWith({ limitReached: true });
   });
 
   it("hides the record note while paused", () => {

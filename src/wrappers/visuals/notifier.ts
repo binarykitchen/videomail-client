@@ -65,7 +65,8 @@ class Notifier extends Despot {
 
     if (limitReached) {
       this.options.logger.debug("Limit reached");
-      lead += `${this.options.text.limitReached}.<br/>`;
+      // Plain text only: the message renders via textContent, so use a line break.
+      lead += `${this.options.text.limitReached}.\n`;
     }
 
     lead += `${this.options.text.sending} …`;

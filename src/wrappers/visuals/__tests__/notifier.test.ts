@@ -25,7 +25,7 @@ function createFixture() {
 
 function emit(
   notifier: Notifier,
-  eventName: "CONNECTING" | "PROGRESS" | "USER_MEDIA_READY",
+  eventName: "CONNECTING" | "PROGRESS" | "STOPPING" | "USER_MEDIA_READY",
   params?,
 ) {
   const emitter = notifier as unknown as {
@@ -189,6 +189,17 @@ describe("Notifier", () => {
     emit(notifier, "CONNECTING");
 
     expect(element.querySelector(".notifierMessage")?.textContent).toBe("Connecting …");
+  });
+
+  it("explains in plain text that the recording limit was reached", () => {
+    const { element, notifier } = createFixture();
+    notifier.build();
+
+    emit(notifier, "STOPPING", { limitReached: true });
+
+    expect(element.querySelector(".notifierMessage")?.textContent).toBe(
+      "Limit reached.\nTeleporting …",
+    );
   });
 
   it("shows combined audio and video progress", () => {

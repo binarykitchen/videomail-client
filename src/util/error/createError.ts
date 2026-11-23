@@ -85,8 +85,9 @@ function createError(errorParams: ErrorParams) {
 
     case "PermissionDismissedError":
       message = "Camera permission is needed";
+      // Notices render as plain text; "\n" becomes a line break (white-space: pre-line).
       explanation =
-        "The camera permission prompt was closed.<br/>" +
+        "The camera permission prompt was closed.\n" +
         "Please allow access when it appears again.";
       classList.push(VideomailError.WEBCAM_PROBLEM);
       break;
@@ -97,9 +98,9 @@ function createError(errorParams: ErrorParams) {
       message = "Permission denied";
 
       explanation =
-        "We cannot access your webcam. Check these possibilities:" +
-        "<ul><li>Camera access is blocked in your browser settings.</li>" +
-        "<li>Another app is using your webcam.</li></ul>";
+        "We cannot access your webcam.\n" +
+        "Please allow camera access in your browser settings. " +
+        "Also check that no other app is using your webcam.";
 
       classList.push(VideomailError.WEBCAM_PROBLEM);
 
