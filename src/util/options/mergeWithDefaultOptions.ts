@@ -7,24 +7,7 @@ import {
 } from "../../types/options";
 import CollectLogger from "../CollectLogger";
 import isTest from "../env/isTest";
-
-function isPlainObject(value: unknown) {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const prototype: unknown = Object.getPrototypeOf(value);
-
-  return prototype === Object.prototype || prototype === null;
-}
-
-/*
- * Only arrays and plain objects get merged. Anything else, like a class-based
- * logger, is taken as it is: cloning it would drop its prototype methods.
- */
-function isMergeable(value: unknown) {
-  return Array.isArray(value) || isPlainObject(value);
-}
+import isMergeable from "../isMergeable";
 
 function mergeWithDefaultOptions(options: PartialVideomailClientOptions = {}) {
   const newOptions = deepmerge(defaultOptions, options, {

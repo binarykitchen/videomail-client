@@ -1,3 +1,4 @@
+import hasMediaToUnload from "../../media/video/hasMediaToUnload";
 import { VideomailPreviewParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
 import { Videomail } from "../../types/Videomail";
@@ -6,12 +7,15 @@ import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
+import isDOMExceptionNamed from "../../util/error/isDOMExceptionNamed";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
+import canCalculateMissingDimension from "../../util/html/dimensions/canCalculateMissingDimension";
 import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
+import hasFixedVideoFrame from "../../util/options/hasFixedVideoFrame";
 import pretty from "../../util/string/pretty";
 import { UnloadParams } from "../container";
 import Visuals from "../visuals";
@@ -30,7 +34,7 @@ class Replay extends Despot {
     if (this.replayElement?.paused) {
       this.replayElement.play().catch((exc: unknown) => {
         // Leaving the replay can abort a play request before it settles.
-        if (exc instanceof DOMException && exc.name === "AbortError" && !this.isShown()) {
+        if (isDOMExceptionNamed(exc, "AbortError") && !this.isShown()) {
           return;
         }
 
@@ -112,7 +116,9 @@ class Replay extends Despot {
       }
     }
 
-    if (!widthValue && (videoHeight > 0 || this.options.video.height)) {
+    if (
+      canCalculateMissingDimension(widthValue, videoHeight, this.options.video.height)
+    ) {
       const newWidthDimensions = calculateWidth(
         responsive,
         this.options,
@@ -125,7 +131,7 @@ class Replay extends Despot {
       widthValue = newWidth;
     }
 
-    if (!heightValue && (videoWidth > 0 || this.options.video.width)) {
+    if (canCalculateMissingDimension(heightValue, videoWidth, this.options.video.width)) {
       let element = this.visuals.getElement();
 
       if (!element) {
@@ -210,9 +216,7 @@ class Replay extends Despot {
       Boolean(this.videomail?.mp4) ||
       Boolean(this.videomail?.poster);
 
-    const { width, height, stretch } = this.options.video;
-
-    if (!playerOnly && !stretch && width && height) {
+    if (!playerOnly && hasFixedVideoFrame(this.options)) {
       this.replayElement.style.width = "100%";
       this.replayElement.style.height = "100%";
     } else if (hasMedia) {
@@ -501,11 +505,8 @@ class Replay extends Despot {
     // Previews use <source> children. Hiding them does not unload the old player
     // before the next camera stream starts, and load() alone would select them again.
     const sources = discardPreview ? video.querySelectorAll("source") : [];
-    if (
-      video.hasAttribute("src") ||
-      sources.length > 0 ||
-      (discardPreview && video.currentSrc)
-    ) {
+
+    if (hasMediaToUnload(video, sources, discardPreview)) {
       video.removeAttribute("src");
       sources.forEach((source) => source.remove());
       video.load();

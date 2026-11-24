@@ -7,6 +7,7 @@ import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
 import getValidity from "../util/getValidity";
+import getValidationEventType from "../util/html/getValidationEventType";
 import hideElement from "../util/html/hideElement";
 import isNotButton from "../util/html/isNotButton";
 import showElement from "../util/html/showElement";
@@ -192,15 +193,11 @@ class Form extends Despot {
     if (this.options.enableAutoValidation) {
       const inputElements = this.getRegisteredFormElements();
 
-      for (let i = 0, len = inputElements.length; i < len; i++) {
-        const inputElement = inputElements[i];
-        const type = inputElement?.getAttribute("type");
-
-        if (type === "radio" || inputElement?.tagName === "SELECT") {
-          inputElement?.addEventListener("change", this.validate);
-        } else {
-          inputElement?.addEventListener("input", this.validate);
-        }
+      for (const inputElement of inputElements) {
+        inputElement.addEventListener(
+          getValidationEventType(inputElement),
+          this.validate,
+        );
       }
     }
 
@@ -255,13 +252,10 @@ class Form extends Despot {
     const inputElements = this.getRegisteredFormElements();
 
     for (const inputElement of inputElements) {
-      const type = inputElement.getAttribute("type");
-
-      if (type === "radio" || inputElement.tagName === "SELECT") {
-        inputElement.removeEventListener("change", this.validate);
-      } else {
-        inputElement.removeEventListener("input", this.validate);
-      }
+      inputElement.removeEventListener(
+        getValidationEventType(inputElement),
+        this.validate,
+      );
     }
   }
 

@@ -4,6 +4,7 @@ import calculateHeight from "../../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../../util/html/dimensions/calculateWidth";
 import getRatio from "../../../util/html/dimensions/getRatio";
 import useFullWidth from "../../../util/html/dimensions/useFullWidth";
+import hasFixedVideoFrame from "../../../util/options/hasFixedVideoFrame";
 import type Visuals from "../../visuals";
 import type UserMedia from "../userMedia";
 
@@ -28,8 +29,7 @@ class RecorderDimensions {
       return;
     }
 
-    const { width, height, stretch } = this.context.options.video;
-    if (!stretch && width && height) {
+    if (hasFixedVideoFrame(this.context.options)) {
       recorderElement.style.width = "100%";
       recorderElement.style.height = "100%";
       return;

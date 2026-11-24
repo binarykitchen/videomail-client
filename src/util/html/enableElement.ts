@@ -1,9 +1,11 @@
+import canUseDisabledAttribute from "./canUseDisabledAttribute";
+
 function enableElement(element?: HTMLElement) {
   if (!element) {
     return;
   }
 
-  if (element.tagName === "INPUT" || element.tagName === "BUTTON") {
+  if (canUseDisabledAttribute(element)) {
     element.removeAttribute("disabled");
   } else {
     element.classList.remove("disabled");

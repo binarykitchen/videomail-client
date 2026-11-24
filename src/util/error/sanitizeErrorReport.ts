@@ -1,6 +1,7 @@
 import { serializeError } from "serialize-error";
 
 import type { FullVideomailErrorData } from "../../types/error";
+import isObjectLike from "../isObjectLike";
 import sanitizeUrl, { REDACTED } from "../url/sanitizeUrl";
 
 const PRIVATE_FIELDS = [
@@ -60,7 +61,7 @@ function sanitizeErrorReport(report: FullVideomailErrorData) {
   const json = JSON.stringify(serializeError(report), redactField);
   const sanitized: unknown = JSON.parse(json);
 
-  if (sanitized === null || typeof sanitized !== "object") {
+  if (!isObjectLike(sanitized)) {
     throw new TypeError("An error report must serialize to an object.");
   }
 

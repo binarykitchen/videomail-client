@@ -1,8 +1,8 @@
 import { createNanoEvents } from "nanoevents";
 
+import AudioRecorder from "../../../media/audio/AudioRecorder";
 import type { VideomailEvents } from "../../../types/events";
 import getBrowser from "../../../util/browser/getBrowser";
-import AudioRecorder from "../../../util/html/media/AudioRecorder";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import type Recorder from "../recorder";
 import UserMedia from "../userMedia";

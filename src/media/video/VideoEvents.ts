@@ -1,6 +1,6 @@
 // Event reference: https://bbc.github.io/tal/jsdoc/events_mediaevent.js.html
 
-const MEDIA_EVENTS = [
+const VIDEO_EVENTS = [
   // The browser starts looking for media.
   "loadstart",
 
@@ -60,4 +60,4 @@ const MEDIA_EVENTS = [
   // Skip 'timeupdate': it fires too often for logging.
 ];
 
-export default MEDIA_EVENTS;
+export default VIDEO_EVENTS;

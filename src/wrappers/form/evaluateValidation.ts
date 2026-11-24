@@ -29,6 +29,21 @@ interface ValidationFacts {
 type ValidationResult =
   { status: "valid" } | ({ status: "invalid" } & VideomailInvalidParams);
 
+/*
+ * Connected, but neither a live camera nor a completed replay is ready yet. A completed
+ * replay is usable even if the live camera was explicitly released.
+ */
+function isWaitingForMedia(
+  gate: Pick<ValidationGate, "connected" | "cameraLoaded" | "replayShown">,
+) {
+  return gate.connected && !gate.cameraLoaded && !gate.replayShown;
+}
+
+// The connection is still opening, so the recorder can't be used yet.
+function isConnectionPending(gate: Pick<ValidationGate, "connected" | "connecting">) {
+  return !gate.connected && gate.connecting;
+}
+
 function getValidationSkip(gate: ValidationGate) {
   if (!gate.built || !gate.autoValidate) {
     return { allowManualSubmit: gate.built && !gate.autoValidate };
@@ -38,9 +53,7 @@ function getValidationSkip(gate: ValidationGate) {
     return undefined;
   }
 
-  // A completed replay is usable even if the live camera was explicitly released.
-  const waitingForMedia = gate.connected && !gate.cameraLoaded && !gate.replayShown;
-  if (gate.notifying || waitingForMedia || (!gate.connected && gate.connecting)) {
+  if (gate.notifying || isWaitingForMedia(gate) || isConnectionPending(gate)) {
     return { allowManualSubmit: false };
   }
 

@@ -13,6 +13,7 @@ import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
+import hasFixedVideoFrame from "../../util/options/hasFixedVideoFrame";
 import pretty from "../../util/string/pretty";
 import Visuals from "../visuals";
 
@@ -174,9 +175,7 @@ class Notifier extends Despot {
       return;
     }
 
-    const { width, height, stretch } = this.options.video;
-
-    if (!stretch && width && height) {
+    if (hasFixedVideoFrame(this.options)) {
       this.notifyElement.style.width = "100%";
       this.notifyElement.style.height = "100%";
       return;

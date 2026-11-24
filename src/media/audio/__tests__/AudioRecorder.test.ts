@@ -1,7 +1,7 @@
 import AudioSample from "audio-sample";
 import type { Mock } from "vitest";
 
-import mergeWithDefaultOptions from "../../../options/mergeWithDefaultOptions";
+import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
 import AudioRecorder from "../AudioRecorder";
 import { AUDIO_RECORDER_PROCESSOR_NAME } from "../AudioRecorderWorklet";
 

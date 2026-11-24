@@ -1,11 +1,13 @@
+import isRecord from "../isRecord";
 import HTTPVideomailError from "./HTTPVideomailError";
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+// Superagent attaches the server's HTTP response to errors from failed requests.
+function hasResponse(exc: unknown): exc is Error & { response: unknown } {
+  return exc instanceof Error && "response" in exc;
 }
 
 function findOriginalExc(exc: unknown) {
-  if (!(exc instanceof Error) || !("response" in exc)) {
+  if (!hasResponse(exc)) {
     return exc;
   }
 

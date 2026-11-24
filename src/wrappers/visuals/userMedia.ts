@@ -1,8 +1,10 @@
-import getFirstVideoTrack from "../../media/getFirstVideoTrack";
-import MEDIA_EVENTS from "../../media/mediaEvents";
-import requestMediaStreamWithPermissions from "../../media/requestMediaStream";
-import startCanvasCameraPreview from "../../media/startCanvasCameraPreview";
-import watchCameraPlayback from "../../media/watchCameraPlayback";
+import AudioRecorder, { AudioProcessCB } from "../../media/audio/AudioRecorder";
+import getFirstVideoTrack from "../../media/video/getFirstVideoTrack";
+import isVirtualCamera from "../../media/video/isVirtualCamera";
+import requestMediaStreamWithPermissions from "../../media/video/requestMediaStream";
+import startCanvasCameraPreview from "../../media/video/startCanvasCameraPreview";
+import VIDEO_EVENTS from "../../media/video/VideoEvents";
+import watchCameraPlayback from "../../media/video/watchCameraPlayback";
 import { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
 import { VideomailClientOptions } from "../../types/options";
@@ -11,8 +13,6 @@ import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
 import isHidden from "../../util/html/isHidden";
-import AudioRecorder, { AudioProcessCB } from "../../util/html/media/AudioRecorder";
-import isVirtualCamera from "../../util/isVirtualCamera";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/string/pretty";
 import Recorder from "./recorder";
@@ -76,7 +76,7 @@ class UserMedia extends Despot {
     this.recorder = recorder;
     this.rawVisualUserMedia = recorder.getRawVisualUserMedia();
 
-    MEDIA_EVENTS.forEach((eventName) => {
+    VIDEO_EVENTS.forEach((eventName) => {
       this.rawVisualUserMedia?.addEventListener(eventName, this.outputEvent, false);
     });
   }
@@ -127,14 +127,20 @@ class UserMedia extends Despot {
       return;
     }
 
-    if (
-      video.parentElement?.matches(".videomail .visuals.fixedAspectRatio") &&
-      getBrowser(this.options).shouldUseCanvasCameraPreview()
-    ) {
+    if (this.shouldUseCanvasPreview(video)) {
       this.stopCanvasPreview = startCanvasCameraPreview(video, (message) => {
         this.options.logger.warn(message);
       });
     }
+  }
+
+  // Only fixed-frame recorders on affected WebKit versions need the canvas workaround.
+  private shouldUseCanvasPreview(video: HTMLVideoElement) {
+    const isInFixedFrame = Boolean(
+      video.parentElement?.matches(".videomail .visuals.fixedAspectRatio"),
+    );
+
+    return isInFixedFrame && getBrowser(this.options).shouldUseCanvasCameraPreview();
   }
 
   public hideCanvasPreview() {
@@ -247,6 +253,14 @@ class UserMedia extends Despot {
     return initializationId === this.initializationId;
   }
 
+  // A newer camera request or a replaced stream makes this setup outdated.
+  private isStaleInitialization(initializationId: number, stream: MediaStream) {
+    return (
+      !this.isCurrentInitialization(initializationId) ||
+      this.currentVisualStream !== stream
+    );
+  }
+
   // An active stream can still contain an ended, disabled, or muted track.
   public hasLiveStream() {
     const videoReady = this.isVideoReady();
@@ -292,7 +306,7 @@ class UserMedia extends Despot {
     this.stopWatchingPlayback?.();
     this.stopWatchingPlayback = undefined;
 
-    MEDIA_EVENTS.forEach((eventName) => {
+    VIDEO_EVENTS.forEach((eventName) => {
       this.rawVisualUserMedia?.removeEventListener(eventName, this.outputEvent);
     });
 
@@ -451,18 +465,12 @@ class UserMedia extends Despot {
             try {
               await audioRecorder.init(localMediaStream);
 
-              if (
-                !this.isCurrentInitialization(initializationId) ||
-                this.currentVisualStream !== localMediaStream
-              ) {
+              if (this.isStaleInitialization(initializationId, localMediaStream)) {
                 return;
               }
 
               const onAudioReady = () => {
-                if (
-                  !this.isCurrentInitialization(initializationId) ||
-                  this.currentVisualStream !== localMediaStream
-                ) {
+                if (this.isStaleInitialization(initializationId, localMediaStream)) {
                   return;
                 }
 

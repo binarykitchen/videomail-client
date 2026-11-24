@@ -447,6 +447,22 @@ abstract class RecorderMedia extends RecorderConnection {
   }
 
   /*
+   * Recovery needs a built recorder that is still in use and isn't loading the camera
+   * already. It must not replace unsent media or revive a take whose transport failed.
+   */
+  private shouldSkipCameraRecovery() {
+    return (
+      !this.built ||
+      Boolean(this.unloaded) ||
+      this.userMediaLoading ||
+      this.submitting ||
+      Boolean(this.key) ||
+      this.stopTimeout !== undefined ||
+      this.recordingTransportFailed
+    );
+  }
+
+  /*
     _stalled_ means the camera preview has stopped delivering frames—even if the browser still reports the camera tracks as live.
 
     It’s not about a stalled network connection.
@@ -457,17 +473,7 @@ abstract class RecorderMedia extends RecorderConnection {
       return this.cameraRecovery;
     }
 
-    // Do not replace unsent media or revive a take whose transport already failed.
-    if (
-      !this.built ||
-      this.unloaded ||
-      !this.userMedia ||
-      this.userMediaLoading ||
-      this.submitting ||
-      this.key ||
-      this.stopTimeout !== undefined ||
-      this.recordingTransportFailed
-    ) {
+    if (!this.userMedia || this.shouldSkipCameraRecovery()) {
       return Promise.resolve(false);
     }
 
@@ -485,11 +491,12 @@ abstract class RecorderMedia extends RecorderConnection {
       return Promise.resolve(true);
     }
 
-    if (!liveStream && this.recordingActive && !this.isPaused()) {
-      this.pause();
-    }
-
     if (!liveStream) {
+      // Pause a running take before its camera gets replaced.
+      if (this.recordingActive && !this.isPaused()) {
+        this.pause();
+      }
+
       this.options.logger.debug(
         `Recorder: replacing camera stream ${pretty(this.userMedia.getCharacteristics())}`,
       );

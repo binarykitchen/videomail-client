@@ -1,4 +1,4 @@
-import watchCameraPlayback from "../watchCameraPlayback.ts";
+import watchCameraPlayback from "../watchCameraPlayback";
 
 function createFixture(withFrameCallbacks = true) {
   const video = document.createElement("video");

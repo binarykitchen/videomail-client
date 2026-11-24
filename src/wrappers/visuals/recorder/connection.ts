@@ -10,6 +10,7 @@ import createError from "../../../util/error/createError";
 import getEventDetails from "../../../util/error/getEventDetails";
 import getWebSocketDiagnostic from "../../../util/error/getWebSocketDiagnostic";
 import getAutomationSignals from "../../../util/getAutomationSignals";
+import isEvent from "../../../util/isEvent";
 import pretty from "../../../util/string/pretty";
 import summarize from "../../../util/string/summarize";
 import RecorderStreamWriter, { PIPE_SYMBOL } from "./streamWriter";
@@ -163,8 +164,13 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     return !this.connected && !this.connecting;
   }
 
+  // Only the first open counts. A closing socket or an unloaded recorder can't connect.
+  private canAcceptOpenedSocket(socket: Pick<WebSocket, "readyState">) {
+    return !this.connected && socket.readyState !== WebSocket.CLOSING && !this.unloaded;
+  }
+
   private handleStreamError(url2Connect: string, err: unknown) {
-    if (typeof Event !== "undefined" && err instanceof Event) {
+    if (isEvent(err)) {
       this.lastSocketError = getEventDetails(err);
     } else {
       this.lastSocketError = serializeError(err);
@@ -617,9 +623,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
         this.clearConnectionTimeout();
 
-        const isClosing = stream.socket.readyState === WebSocket.CLOSING;
-
-        if (!this.connected && !isClosing && !this.unloaded) {
+        if (this.canAcceptOpenedSocket(stream.socket)) {
           this.connected = true;
           this.connectionOpenedAt = Date.now();
           this.connecting = this.unloaded = false;

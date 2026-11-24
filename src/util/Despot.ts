@@ -4,6 +4,7 @@ import { createNanoEvents } from "nanoevents";
 import { VideomailEvents } from "../types/events";
 import { VideomailClientOptions } from "../types/options";
 import VideomailError from "./error/VideomailError";
+import isObjectLike from "./isObjectLike";
 import pretty from "./string/pretty";
 
 export type DespotEmitter = Emitter<VideomailEvents>;
@@ -25,7 +26,7 @@ function hasParamsToShow(firstParam: unknown) {
     return false;
   }
 
-  if (typeof firstParam !== "object") {
+  if (!isObjectLike(firstParam)) {
     return true;
   }
 

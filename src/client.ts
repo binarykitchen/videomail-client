@@ -6,6 +6,7 @@ import { Videomail } from "./types/Videomail";
 import Despot from "./util/Despot";
 import createError from "./util/error/createError";
 import ErrorReporter from "./util/error/ErrorReporter";
+import isOddDimension from "./util/html/dimensions/isOddDimension";
 import mergeWithDefaultOptions from "./util/options/mergeWithDefaultOptions";
 import pretty from "./util/string/pretty";
 import Container from "./wrappers/container";
@@ -37,15 +38,11 @@ class VideomailClient extends Despot {
   }
 
   private validateOptions() {
-    const width = this.options.video.width;
-
-    if (width !== undefined && width % 2 !== 0) {
+    if (isOddDimension(this.options.video.width)) {
       throw this.createReportedError("Width must be divisible by two.");
     }
 
-    const height = this.options.video.height;
-
-    if (height !== undefined && height % 2 !== 0) {
+    if (isOddDimension(this.options.video.height)) {
       throw this.createReportedError("Height must be divisible by two.");
     }
   }

@@ -22,6 +22,7 @@ import limitWidth from "../util/html/dimensions/limitWidth";
 import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import showElement from "../util/html/showElement";
+import isPlainSpacePress from "../util/isPlainSpacePress";
 import { isAutoPauseEnabled, setAudioEnabled } from "../util/options/audio";
 import pretty from "../util/string/pretty";
 import Buttons from "./buttons";
@@ -92,36 +93,7 @@ class Container extends Despot {
       return;
     }
 
-    // Follow composed events so controls in shadow DOM keep native Space activation.
-    const eventPath = e.composedPath();
-
-    // The nearest client owns the shortcut, so sibling and nested clients stay isolated.
-    const targetContainerIndex = eventPath.findIndex(
-      (eventTarget) =>
-        eventTarget instanceof Element &&
-        eventTarget.classList.contains(this.options.selectors.containerClass),
-    );
-    const targetContainer = eventPath[targetContainerIndex];
-    const isInteractiveTarget = eventPath
-      .slice(0, targetContainerIndex + 1)
-      .some(
-        (eventTarget) =>
-          eventTarget instanceof Element &&
-          eventTarget.matches(INTERACTIVE_SPACE_TARGETS),
-      );
-
-    if (
-      !eventPath.includes(containerElement) ||
-      targetContainer !== containerElement ||
-      isInteractiveTarget ||
-      e.defaultPrevented ||
-      e.repeat ||
-      e.altKey ||
-      e.ctrlKey ||
-      e.metaKey ||
-      e.shiftKey ||
-      e.code !== "Space"
-    ) {
+    if (!isPlainSpacePress(e) || !this.isShortcutForThisClient(e, containerElement)) {
       return;
     }
 
@@ -146,6 +118,35 @@ class Container extends Despot {
     this.visuals = new Visuals(this, options, this.emitter);
     this.buttons = new Buttons(this, options, this.emitter);
     this.resource = new Resource(options);
+  }
+
+  /*
+   * The nearest client owns the shortcut, so sibling and nested clients stay isolated.
+   * Interactive targets such as buttons keep their native Space activation.
+   */
+  private isShortcutForThisClient(e: KeyboardEvent, containerElement: HTMLElement) {
+    // Follow composed events so controls in shadow DOM keep native Space activation.
+    const eventPath = e.composedPath();
+
+    const targetContainerIndex = eventPath.findIndex(
+      (eventTarget) =>
+        eventTarget instanceof Element &&
+        eventTarget.classList.contains(this.options.selectors.containerClass),
+    );
+    const targetContainer = eventPath[targetContainerIndex];
+    const isInteractiveTarget = eventPath
+      .slice(0, targetContainerIndex + 1)
+      .some(
+        (eventTarget) =>
+          eventTarget instanceof Element &&
+          eventTarget.matches(INTERACTIVE_SPACE_TARGETS),
+      );
+
+    return (
+      eventPath.includes(containerElement) &&
+      targetContainer === containerElement &&
+      !isInteractiveTarget
+    );
   }
 
   private buildChildren(playerOnly = false, parentElement?: HTMLElement | null) {

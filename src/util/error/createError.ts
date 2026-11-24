@@ -1,4 +1,5 @@
 import { VideomailClientOptions } from "../../types/options";
+import isObjectLike from "../isObjectLike";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../string/pretty";
 import { version as videomailClientVersion } from "./../../../package.json";
@@ -180,7 +181,7 @@ function createError(errorParams: ErrorParams) {
     default: {
       const originalExplanation = explanation;
 
-      if (explanation && typeof explanation === "object") {
+      if (isObjectLike(explanation)) {
         explanation = pretty(explanation);
       }
 

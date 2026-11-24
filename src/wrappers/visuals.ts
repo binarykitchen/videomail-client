@@ -9,6 +9,7 @@ import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import isHidden from "../util/html/isHidden";
 import showElement from "../util/html/showElement";
+import hasFixedVideoFrame from "../util/options/hasFixedVideoFrame";
 import pretty from "../util/string/pretty";
 import Container, { UnloadParams } from "./container";
 import RecorderInsides from "./visuals/inside/recorderInsides";
@@ -141,7 +142,7 @@ class Visuals extends Despot {
     } else if (this.visualsElement) {
       const { width, height } = this.options.video;
 
-      if (!this.playerOnly && width && height) {
+      if (!this.playerOnly && hasFixedVideoFrame(this.options)) {
         // Camera metadata can change after recovery; the display frame must not.
 
         const fullWidth = useFullWidth(this.options.video.mobileBreakPoint);
@@ -364,12 +365,22 @@ class Visuals extends Despot {
   }
 
   public recoverCamera() {
-    if (this.replay.isShown() || (this.isNotifying() && !this.cameraRecoveryFailed)) {
+    if (this.isCameraRecoveryBlocked()) {
       return Promise.resolve(false);
     }
 
     this.clearCameraRecoveryNotice();
     return this.recorder.recoverCamera();
+  }
+
+  /*
+   * Recovery waits while a replay or another notice is on screen. The recovery
+   * failure notice is the exception, because users retry from there.
+   */
+  private isCameraRecoveryBlocked() {
+    const showsOtherNotice = this.isNotifying() && !this.cameraRecoveryFailed;
+
+    return this.replay.isShown() || showsOtherNotice;
   }
 
   // Recovery can finish after Stop or unload has already canceled the countdown.

@@ -1,11 +1,12 @@
 import defined from "defined";
 import { IResult, UAParser } from "ua-parser-js";
 
-import canPlayType from "../media/canPlayType";
-import { BrowserStats } from "../types/BrowserStats";
-import { VideomailClientOptions } from "../types/options";
-import { VideoType, VideoTypeType } from "../types/VideoType";
-import createError from "./error/createError";
+import canPlayType from "../../media/video/canPlayType";
+import isSupportedVideoType from "../../media/video/isSupportedVideoType";
+import { BrowserStats } from "../../types/BrowserStats";
+import { VideomailClientOptions } from "../../types/options";
+import { VideoType, VideoTypeType } from "../../types/VideoType";
+import createError from "../error/createError";
 
 const FALLBACK_VIDEO_TYPE = VideoType.MP4;
 
@@ -97,8 +98,8 @@ class Browser {
       }
     }
 
-    if (this.videoType !== VideoType.WebM && this.videoType !== VideoType.MP4) {
-      // We only support these two. Anything else defaults to the fallback
+    if (!isSupportedVideoType(this.videoType)) {
+      // Anything else defaults to the fallback
       this.videoType = FALLBACK_VIDEO_TYPE;
     }
 

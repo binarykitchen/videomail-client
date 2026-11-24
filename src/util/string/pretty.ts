@@ -1,12 +1,9 @@
 import getEventDetails from "../error/getEventDetails";
+import isEvent from "../isEvent";
+import isObjectLike from "../isObjectLike";
 
 // Long enough for an object's gist, short enough to keep collected logs readable.
 const MAX_PRETTY_LENGTH = 1_000;
-
-function isEvent(value: unknown): value is Event {
-  // Event is missing outside browser-like environments.
-  return typeof Event !== "undefined" && value instanceof Event;
-}
 
 function describeElement(element: HTMLElement) {
   if (element.id) {
@@ -56,7 +53,7 @@ function stringify(value: unknown) {
       return nested.toString();
     }
 
-    if (typeof nested === "object" && nested !== null) {
+    if (isObjectLike(nested)) {
       if (seen.has(nested)) {
         return "[Circular]";
       }

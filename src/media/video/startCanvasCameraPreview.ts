@@ -1,11 +1,12 @@
+import isDOMExceptionNamed from "../../util/error/isDOMExceptionNamed";
+import canUseVideoFrameCallbacks from "./canUseVideoFrameCallbacks";
+import hasDrawableFrame from "./hasDrawableFrame";
+
 function startCanvasCameraPreview(
   video: HTMLVideoElement,
   warn: (message: string) => void,
 ) {
-  if (
-    typeof video.requestVideoFrameCallback !== "function" ||
-    typeof video.cancelVideoFrameCallback !== "function"
-  ) {
+  if (!canUseVideoFrameCallbacks(video)) {
     warn("Video frame callbacks are unavailable; using the native camera preview.");
     return;
   }
@@ -35,8 +36,9 @@ function startCanvasCameraPreview(
       return;
     }
 
-    const { videoWidth, videoHeight, readyState } = video;
-    if (readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && videoWidth && videoHeight) {
+    if (hasDrawableFrame(video)) {
+      const { videoWidth, videoHeight } = video;
+
       if (canvas.width !== videoWidth || canvas.height !== videoHeight) {
         canvas.width = videoWidth;
         canvas.height = videoHeight;
@@ -47,11 +49,7 @@ function startCanvasCameraPreview(
         hasRetriedMissingFrame = false;
       } catch (error) {
         // The first frame of a replacement stream may not have drawable pixels yet.
-        if (
-          hasRetriedMissingFrame ||
-          !(error instanceof DOMException) ||
-          error.name !== "InvalidStateError"
-        ) {
+        if (hasRetriedMissingFrame || !isDOMExceptionNamed(error, "InvalidStateError")) {
           stop();
           warn(
             `Canvas camera preview failed; using the native preview: ${String(error)}`,

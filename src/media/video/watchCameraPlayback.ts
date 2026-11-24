@@ -1,3 +1,4 @@
+import canUseVideoFrameCallbacks from "./canUseVideoFrameCallbacks";
 import isPreviewVisible from "./isPreviewVisible";
 
 const CHECK_INTERVAL_MS = 1000;
@@ -9,7 +10,7 @@ function watchCameraPlayback(video: HTMLVideoElement, onStalled: () => void) {
   let lastMediaTime = video.currentTime;
   let frameRequest: number | undefined;
 
-  const canWatchFrames = typeof video.requestVideoFrameCallback === "function";
+  const canWatchFrames = canUseVideoFrameCallbacks(video);
 
   function requestFrame() {
     if (canWatchFrames && frameRequest === undefined) {

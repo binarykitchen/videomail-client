@@ -4,6 +4,21 @@ import type { FormFieldMappings, FormOnlyFields } from "./getFormFieldMappings";
 import getVideomailFieldName from "./getVideomailFieldName";
 import setFormControlValue from "./setFormControlValue";
 
+// The replay's To, subject and body stay locked, even when a stored value is missing.
+function isLockedReplayField(
+  name: string,
+  selectors: Pick<
+    VideomailClientOptions["selectors"],
+    "toInputName" | "subjectInputName" | "bodyInputName"
+  >,
+) {
+  return [
+    selectors.toInputName,
+    selectors.subjectInputName,
+    selectors.bodyInputName,
+  ].includes(name);
+}
+
 /**
  * Fill the controls that belong to the loaded replay, leaving unrelated host fields
  * alone.
@@ -33,12 +48,7 @@ function populateFormFields(
         : storedValue;
       setFormControlValue(control, value, options);
 
-      // Keep the replay's To, subject and body locked even when a stored value is missing.
-      if (
-        name === selectors.toInputName ||
-        name === selectors.subjectInputName ||
-        name === selectors.bodyInputName
-      ) {
+      if (isLockedReplayField(name, selectors)) {
         control.setAttribute("disabled", "disabled");
       }
     }

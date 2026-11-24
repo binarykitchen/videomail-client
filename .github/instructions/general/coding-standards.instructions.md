@@ -71,9 +71,9 @@ We have plenty of those and they reflect our business logic which is crucial. At
 
 ### Business logic
 
-Move complex inline conditions out to separate functions with descriptive names. Keep simple guards and obvious combinations inline; do not add a helper for every operator.
+Move complex inline conditions _with more than two operands_ out to separate functions or methods with descriptive names. Keep simple guards and obvious combinations inline; do not add a helper for every operator.
 
-Why? It's about splitting down business logic into smaller pieces. In the long run, this will enable us to simplify the main flow and make the business logic easier to understand and maintain.
+Why? It's about splitting down business logic into smaller pieces. In the long run, this will enable us to simplify the main flow and make the business logic easier to understand and maintain. And mostly, it enables us to reuse these pieces across the codebase more effectively.
 
 ### General
 
@@ -84,7 +84,7 @@ Why? It's about splitting down business logic into smaller pieces. In the long r
 - Very short ternary expressions are acceptable for simple value choices.
 - Use guard clauses when they reduce nesting or avoid unnecessary work.
 - Do not compute a value before an if-else if it is needed only in one branch.
-- With a good helper name, no comment is needed to explain the condition ;)
+- Despite of having a good helper name, still add a brief comment explaining the condition for future readers.
 
 ### Multi-step branches
 

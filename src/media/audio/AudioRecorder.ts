@@ -1,14 +1,16 @@
 import AudioSample from "audio-sample";
 import isPOT from "is-power-of-two";
 
-import type { VideomailClientOptions } from "../../../types/options";
-import type UserMedia from "../../../wrappers/visuals/userMedia";
-import type { DespotEmitter } from "../../Despot";
-import Despot from "../../Despot";
-import createError from "../../error/createError";
+import { VideomailClientOptions } from "../../types/options";
+import Despot, { DespotEmitter } from "../../util/Despot";
+import createError from "../../util/error/createError";
+import UserMedia from "../../wrappers/visuals/userMedia";
 import registerAudioRecorderProcessor, {
   AUDIO_RECORDER_PROCESSOR_NAME,
 } from "./AudioRecorderWorklet";
+import canUseAudioWorklet from "./canUseAudioWorklet";
+import isAudioSamplesMessage from "./isAudioSamplesMessage";
+import type { AudioSamplesMessage } from "./types";
 
 const CHANNELS = 1;
 const DEFAULT_BUFFER_SIZE = 2048;
@@ -122,20 +124,20 @@ class AudioRecorder extends Despot {
 
     const message = event.data;
 
-    if (typeof message !== "object" || message === null) {
-      return;
-    }
-    if (!("recordingId" in message) || message.recordingId !== this.recordingId) {
-      return;
-    }
-    if (!("samples" in message) || !(message.samples instanceof Float32Array)) {
-      return;
-    }
-    if (message.samples.length === 0) {
+    if (!this.isCurrentSamplesBatch(message)) {
       return;
     }
 
     callback(new AudioSample(message.samples));
+  }
+
+  // Late batches from an earlier take, or empty ones, must not reach the recording.
+  private isCurrentSamplesBatch(message: unknown): message is AudioSamplesMessage {
+    return (
+      isAudioSamplesMessage(message) &&
+      message.recordingId === this.recordingId &&
+      message.samples.length > 0
+    );
   }
 
   private disconnect() {
@@ -174,10 +176,7 @@ class AudioRecorder extends Despot {
 
     const context = this.getAudioContext();
 
-    if (
-      typeof context.audioWorklet === "undefined" ||
-      typeof window.AudioWorkletNode !== "function"
-    ) {
+    if (!canUseAudioWorklet(context)) {
       throw createError({
         message: "Audio recording requires AudioWorklet support in a secure context.",
         options: this.options,

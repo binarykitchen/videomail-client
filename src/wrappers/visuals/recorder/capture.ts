@@ -131,6 +131,14 @@ abstract class RecorderCapture extends RecorderMedia {
     this.writeStream(audioBuffer);
   }
 
+  // One take has one PCM sample rate; mixing rates would desynchronise audio.
+  private hasAudioSampleRateChanged() {
+    return (
+      this.recordingAudioSampleRate !== undefined &&
+      this.userMedia?.getAudioSampleRate() !== this.recordingAudioSampleRate
+    );
+  }
+
   protected override onUserMediaReady(params?: VideomailUserMediaReadyParams) {
     try {
       this.options.logger.debug(
@@ -143,11 +151,7 @@ abstract class RecorderCapture extends RecorderMedia {
           return;
         }
 
-        // One take has one PCM sample rate; mixing rates would desynchronize audio.
-        if (
-          this.recordingAudioSampleRate !== undefined &&
-          this.userMedia.getAudioSampleRate() !== this.recordingAudioSampleRate
-        ) {
+        if (this.hasAudioSampleRateChanged()) {
           this.failCameraRecovery(
             new Error("The audio sample rate changed during recovery."),
           );
@@ -685,8 +689,17 @@ abstract class RecorderCapture extends RecorderMedia {
     });
   }
 
+  // No take is running, its transport failed, or the previous frame is still encoding.
+  private shouldSkipFrame() {
+    return (
+      !this.recordingActive ||
+      this.recordingTransportFailed ||
+      this.frameEncoding !== undefined
+    );
+  }
+
   private draw(_deltaTime, _elapsedTime: number) {
-    if (!this.recordingActive || this.recordingTransportFailed || this.frameEncoding) {
+    if (this.shouldSkipFrame()) {
       return;
     }
 
