@@ -11,6 +11,16 @@ import createError from "../error/createError";
 
 const FALLBACK_VIDEO_TYPE = VideoType.MP4;
 
+// Since iOS 26, WebKit puts this iOS version into every user agent. Only Safari adds its
+// real one (Version/27.x), so iOS apps, Chrome & in-app browsers on iOS 27 still say 18.7 🙈
+// See frozenVersion in https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/Quirks.cpp
+const FROZEN_IOS_VERSION = "18.7";
+
+// Mac user agents never reveal the iPadOS version, but WebKit 27 added CSS `stretch` sizing.
+function hasWebKit27Features() {
+  return CSS.supports("width", "stretch");
+}
+
 class Browser {
   private readonly options: VideomailClientOptions;
   private readonly result: IResult;
@@ -30,13 +40,30 @@ class Browser {
     return this.result.os.name === "iOS";
   }
 
-  // Narrow this to unfixed releases once the iOS version with the fix is known.
+  // A frozen version may hide an affected iOS 27 WebView, such as our Capacitor app.
+  private mayRunIOS27() {
+    const { version } = this.result.os;
+
+    return Number.parseInt(version ?? "", 10) === 27 || version === FROZEN_IOS_VERSION;
+  }
+
+  // iPads request desktop sites by default, so their WebKit claims to be a Mac. Macs lack touch.
+  private isIPadWithMacUserAgent() {
+    return this.result.os.name === "macOS" && window.navigator.maxTouchPoints > 1;
+  }
+
+  // TODO Narrow Safari to unfixed releases once Apple ships the fix. WebViews never reveal
+  // their iOS version, so drop the frozen & feature checks once most users run a fixed iOS.
   public shouldUseCanvasCameraPreview() {
-    return (
-      this.isIOS() &&
-      this.result.engine.name === "WebKit" &&
-      Number.parseInt(this.result.os.version ?? "", 10) === 27
-    );
+    if (this.result.engine.name !== "WebKit") {
+      return false;
+    }
+
+    if (this.isIOS()) {
+      return this.mayRunIOS27();
+    }
+
+    return this.isIPadWithMacUserAgent() && hasWebKit27Features();
   }
 
   private isChrome() {

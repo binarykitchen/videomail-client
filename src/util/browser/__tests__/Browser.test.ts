@@ -64,10 +64,23 @@ describe("Browser class", () => {
       usesCanvas: true,
     },
     {
-      name: "iOS 27 WebView",
-      platform: "iPhone; CPU iPhone OS 27_2 like Mac OS X",
+      // iOS apps such as Videomail's Capacitor app never reveal iOS 27 in the user agent.
+      name: "an iOS WebView with the frozen version",
+      platform: "iPhone; CPU iPhone OS 18_7 like Mac OS X",
       browser: "Mobile/15E148",
       usesCanvas: true,
+    },
+    {
+      name: "Chrome on iOS with the frozen version",
+      platform: "iPhone; CPU iPhone OS 18_7 like Mac OS X",
+      browser: "CriOS/142.0.0.0 Mobile/15E148 Safari/604.1",
+      usesCanvas: true,
+    },
+    {
+      name: "an iOS 18.7.2 WebView",
+      platform: "iPhone; CPU iPhone OS 18_7_2 like Mac OS X",
+      browser: "Mobile/15E148",
+      usesCanvas: false,
     },
     {
       name: "Safari 26",
@@ -93,6 +106,35 @@ describe("Browser class", () => {
     });
 
     expect(new Browser(options).shouldUseCanvasCameraPreview()).toBe(usesCanvas);
+  });
+
+  describe("on an iPad with a Mac user agent", () => {
+    const IPAD_APP_USER_AGENT =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)";
+
+    afterEach(() => {
+      Reflect.deleteProperty(window.navigator, "maxTouchPoints");
+      vi.restoreAllMocks();
+    });
+
+    it.each([
+      { name: "iPadOS 27", hasWebKit27Features: true, usesCanvas: true },
+      { name: "older iPadOS", hasWebKit27Features: false, usesCanvas: false },
+    ])(
+      "selects the right live preview for $name",
+      ({ hasWebKit27Features, usesCanvas }) => {
+        // jsdom has no touch screen, unlike iPads.
+        Object.defineProperty(window.navigator, "maxTouchPoints", {
+          configurable: true,
+          value: 5,
+        });
+        vi.spyOn(CSS, "supports").mockReturnValue(hasWebKit27Features);
+
+        const options = mergeWithDefaultOptions({ fakeUaString: IPAD_APP_USER_AGENT });
+
+        expect(new Browser(options).shouldUseCanvasCameraPreview()).toBe(usesCanvas);
+      },
+    );
   });
 
   it("getNoAccessIssue returns error", () => {
