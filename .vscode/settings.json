@@ -12,5 +12,6 @@
       "url": "https://json.schemastore.org/package.json"
     }
   ],
-  "prettier.configPath": "./prettier.config.js"
+  "prettier.configPath": "./prettier.config.js",
+  "cSpell.language": "en-GB"
 }

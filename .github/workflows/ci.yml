@@ -23,7 +23,6 @@ jobs:
 
     steps:
       - name: 🛒 Checkout code
-        # Pinned to a commit SHA because tags can be moved. Bump both together.
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
