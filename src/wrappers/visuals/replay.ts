@@ -1,7 +1,7 @@
 import hasMediaToUnload from "../../media/video/hasMediaToUnload";
-import { VideomailPreviewParams } from "../../types/events/params";
-import { VideomailClientOptions } from "../../types/options";
-import { Videomail } from "../../types/Videomail";
+import type { VideomailPreviewParams } from "../../types/events/params";
+import type { VideomailClientOptions } from "../../types/options";
+import type { Videomail } from "../../types/Videomail";
 import { VideoType } from "../../types/VideoType";
 import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
@@ -17,8 +17,8 @@ import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
 import hasFixedVideoFrame from "../../util/options/hasFixedVideoFrame";
 import pretty from "../../util/string/pretty";
-import { UnloadParams } from "../container";
-import Visuals from "../visuals";
+import type { UnloadParams } from "../container";
+import type Visuals from "../visuals";
 
 class Replay extends Despot {
   private readonly visuals: Visuals;

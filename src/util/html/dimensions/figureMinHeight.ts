@@ -1,4 +1,4 @@
-import { VideomailClientOptions } from "../../../types/options";
+import type { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 
 function figureMinHeight(height: number | undefined, options: VideomailClientOptions) {

@@ -1,4 +1,4 @@
-import { ErrorObject } from "serialize-error";
+import type { ErrorObject } from "serialize-error";
 import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
 export interface VideomailErrorVersions {

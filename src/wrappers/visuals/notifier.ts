@@ -1,10 +1,10 @@
-import { Dimension } from "../../types/dimension";
-import {
+import type { Dimension } from "../../types/dimension";
+import type {
   VideomailProgressParams,
   VideomailStoppingParams,
   VideomailUserMediaReadyParams,
 } from "../../types/events/params";
-import { VideomailClientOptions } from "../../types/options";
+import type { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
@@ -17,7 +17,7 @@ import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
 import hasFixedVideoFrame from "../../util/options/hasFixedVideoFrame";
 import pretty from "../../util/string/pretty";
-import Visuals from "../visuals";
+import type Visuals from "../visuals";
 
 const NOTIFIER_MESSAGE_CLASS = "notifierMessage";
 

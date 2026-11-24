@@ -1,8 +1,8 @@
 import Constants from "./constants";
 import Resource from "./resource";
 import type { VideomailEvents } from "./types/events";
-import { PartialVideomailClientOptions } from "./types/options";
-import { Videomail } from "./types/Videomail";
+import type { PartialVideomailClientOptions } from "./types/options";
+import type { Videomail } from "./types/Videomail";
 import Despot from "./util/Despot";
 import createError from "./util/error/createError";
 import ErrorReporter from "./util/error/ErrorReporter";

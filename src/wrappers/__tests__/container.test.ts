@@ -1,7 +1,8 @@
 import Resource from "../../resource";
 import mergeWithDefaultOptions from "../../util/options/mergeWithDefaultOptions";
 import Container from "../container";
-import { FormInputs, FormMethod, FormMethodType } from "../form";
+import type { FormInputs, FormMethodType } from "../form";
+import { FormMethod } from "../form";
 
 interface ContainerInternals {
   options: ReturnType<typeof mergeWithDefaultOptions>;

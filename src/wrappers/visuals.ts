@@ -1,10 +1,10 @@
-import { ShowParams } from "../client";
-import { Dimension } from "../types/dimension";
-import { VideomailClientOptions } from "../types/options";
+import type { ShowParams } from "../client";
+import type { Dimension } from "../types/dimension";
+import type { VideomailClientOptions } from "../types/options";
 import getBrowser from "../util/browser/getBrowser";
 import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
-import VideomailError from "../util/error/VideomailError";
+import type VideomailError from "../util/error/VideomailError";
 import setDimensionStyle from "../util/html/dimensions/setDimensionStyle";
 import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
@@ -12,10 +12,12 @@ import isHidden from "../util/html/isHidden";
 import showElement from "../util/html/showElement";
 import hasFixedVideoFrame from "../util/options/hasFixedVideoFrame";
 import pretty from "../util/string/pretty";
-import Container, { UnloadParams } from "./container";
+import type Container from "./container";
+import type { UnloadParams } from "./container";
 import RecorderInsides from "./visuals/inside/recorderInsides";
 import Notifier from "./visuals/notifier";
-import Recorder, { StopParams } from "./visuals/recorder";
+import type { StopParams } from "./visuals/recorder";
+import Recorder from "./visuals/recorder";
 import Replay from "./visuals/replay";
 
 class Visuals extends Despot {

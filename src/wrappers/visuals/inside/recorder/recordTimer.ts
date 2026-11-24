@@ -1,10 +1,10 @@
-import { VideomailClientOptions } from "../../../../types/options";
+import type { VideomailClientOptions } from "../../../../types/options";
 import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
 import pad from "../../../../util/string/pad";
-import Visuals from "../../../visuals";
-import RecordNote from "./recordNote";
+import type Visuals from "../../../visuals";
+import type RecordNote from "./recordNote";
 
 class RecordTimer {
   private readonly visuals: Visuals;

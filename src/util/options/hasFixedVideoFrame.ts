@@ -1,4 +1,4 @@
-import { VideomailClientOptions } from "../../types/options";
+import type { VideomailClientOptions } from "../../types/options";
 
 /*
  * Fixed width and height without stretch reserve one responsive frame. The camera

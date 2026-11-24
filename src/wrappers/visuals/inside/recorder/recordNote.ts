@@ -1,7 +1,7 @@
 import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
-import Visuals from "../../../visuals";
+import type Visuals from "../../../visuals";
 
 class RecordNote {
   private readonly visuals: Visuals;

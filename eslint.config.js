@@ -171,6 +171,9 @@ export default defineConfig([
     extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
     // TODO Consider removing some of these OFF-rules over time
     rules: {
+      // Mark type-only imports, so import-x/no-cycle only sees real runtime dependencies.
+      "@typescript-eslint/consistent-type-imports": "error",
+
       "@typescript-eslint/no-dynamic-delete": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-empty-function": "off",

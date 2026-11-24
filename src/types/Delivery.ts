@@ -1,4 +1,4 @@
-import { EmailAddress } from "./EmailAddress";
+import type { EmailAddress } from "./EmailAddress";
 
 interface DeliveryReport {
   userKey: string | false;

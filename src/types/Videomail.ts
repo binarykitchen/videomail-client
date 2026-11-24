@@ -1,12 +1,12 @@
-import { PartialDeep } from "type-fest";
+import type { PartialDeep } from "type-fest";
 
-import { BrowserStats } from "./BrowserStats";
-import { DeliveryRecord } from "./Delivery";
-import { EmailAddress, EmailAddresses } from "./EmailAddress";
-import { ReactionsByUserKey, ReactionsPrettyByUserKey } from "./reaction";
-import { RecordingStats } from "./RecordingStats";
-import { UserKey } from "./user";
-import VideoFormat from "./VideoFormat";
+import type { BrowserStats } from "./BrowserStats";
+import type { DeliveryRecord } from "./Delivery";
+import type { EmailAddress, EmailAddresses } from "./EmailAddress";
+import type { ReactionsByUserKey, ReactionsPrettyByUserKey } from "./reaction";
+import type { RecordingStats } from "./RecordingStats";
+import type { UserKey } from "./user";
+import type VideoFormat from "./VideoFormat";
 
 export type VideomailIdentifierType = "snapshot" | "thread";
 

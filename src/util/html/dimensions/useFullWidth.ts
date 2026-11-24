@@ -1,4 +1,4 @@
-import { Dimension } from "../../../types/dimension";
+import type { Dimension } from "../../../types/dimension";
 
 function useFullWidth(mobileBreakPoint?: number) {
   if (mobileBreakPoint === undefined) {

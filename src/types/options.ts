@@ -1,6 +1,6 @@
-import { PartialDeep } from "type-fest";
+import type { PartialDeep } from "type-fest";
 
-import { PartialVideomail, Videomail } from "./Videomail";
+import type { PartialVideomail, Videomail } from "./Videomail";
 
 export interface VideomailClientOptions {
   logger: {

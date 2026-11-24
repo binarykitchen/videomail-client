@@ -1,4 +1,5 @@
-import AudioRecorder, { AudioProcessCB } from "../../media/audio/AudioRecorder";
+import type { AudioProcessCB } from "../../media/audio/AudioRecorder";
+import AudioRecorder from "../../media/audio/AudioRecorder";
 import getFirstVideoTrack from "../../media/video/getFirstVideoTrack";
 import isVirtualCamera from "../../media/video/isVirtualCamera";
 import requestMediaStreamWithPermissions from "../../media/video/requestMediaStream";
@@ -6,9 +7,9 @@ import startCanvasCameraPreview from "../../media/video/startCanvasCameraPreview
 import stopMediaStream from "../../media/video/stopMediaStream";
 import VIDEO_EVENTS from "../../media/video/VideoEvents";
 import watchCameraPlayback from "../../media/video/watchCameraPlayback";
-import { Dimension } from "../../types/dimension";
+import type { Dimension } from "../../types/dimension";
 import type { VideomailUserMediaReadyParams } from "../../types/events/params";
-import { VideomailClientOptions } from "../../types/options";
+import type { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
@@ -16,7 +17,7 @@ import createError from "../../util/error/createError";
 import isHidden from "../../util/html/isHidden";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/string/pretty";
-import Recorder from "./recorder";
+import type Recorder from "./recorder";
 
 const EVENT_ASCII = "|—O—|";
 

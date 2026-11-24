@@ -1,5 +1,5 @@
 import isObjectLike from "../../util/isObjectLike";
-import { AudioSamplesMessage } from "./types";
+import type { AudioSamplesMessage } from "./types";
 
 // The worklet posts { recordingId, samples } batches. Anything else gets ignored.
 function isAudioSamplesMessage(message: unknown): message is AudioSamplesMessage {

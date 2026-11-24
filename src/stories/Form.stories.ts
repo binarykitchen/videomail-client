@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/html";
 import { http, HttpResponse } from "msw";
 
-import { Videomail, VideomailSubmittedParams } from "../index";
-import { PartialVideomailClientOptions } from "../types/options";
+import type { Videomail, VideomailSubmittedParams } from "../index";
+import type { PartialVideomailClientOptions } from "../types/options";
 import { createStoryClient } from "./util/storyLifecycle";
 
 const meta: Meta<PartialVideomailClientOptions> = {

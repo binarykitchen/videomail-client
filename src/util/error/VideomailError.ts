@@ -1,7 +1,7 @@
-import { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
+import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
 
-import { VideomailErrorVersions } from "../../types/error";
-import { VideomailClientOptions } from "../../types/options";
+import type { VideomailErrorVersions } from "../../types/error";
+import type { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../browser/getBrowser";
 import HTTPVideomailError from "./HTTPVideomailError";
 

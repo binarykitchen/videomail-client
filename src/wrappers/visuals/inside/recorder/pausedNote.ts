@@ -1,7 +1,7 @@
-import { VideomailClientOptions } from "../../../../types/options";
+import type { VideomailClientOptions } from "../../../../types/options";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
-import Visuals from "../../../visuals";
+import type Visuals from "../../../visuals";
 
 class PausedNote {
   private readonly visuals: Visuals;

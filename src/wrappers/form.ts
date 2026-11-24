@@ -1,8 +1,8 @@
 import getFormData from "get-form-data";
 
-import { VideomailErrorParams, VideomailPreviewParams } from "../types/events/params";
-import { VideomailClientOptions } from "../types/options";
-import { PartialVideomail, Videomail } from "../types/Videomail";
+import type { VideomailErrorParams, VideomailPreviewParams } from "../types/events/params";
+import type { VideomailClientOptions } from "../types/options";
+import type { PartialVideomail, Videomail } from "../types/Videomail";
 import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import createError from "../util/error/createError";
@@ -13,7 +13,7 @@ import isNotButton from "../util/html/isNotButton";
 import restoreAttribute from "../util/html/restoreAttribute";
 import showElement from "../util/html/showElement";
 import pretty from "../util/string/pretty";
-import Container from "./container";
+import type Container from "./container";
 import getFormFieldMappings, {
   type FormFieldMappings,
 } from "./form/getFormFieldMappings";

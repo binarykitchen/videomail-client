@@ -2,7 +2,7 @@ import type {
   FormReadyParams,
   VideomailUserMediaReadyParams,
 } from "../types/events/params";
-import { VideomailClientOptions } from "../types/options";
+import type { VideomailClientOptions } from "../types/options";
 import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import disableElement from "../util/html/disableElement";
@@ -17,7 +17,7 @@ import getRecorderControlView, {
   type RecorderControlView,
   type TakePhase,
 } from "./buttons/getRecorderControlView";
-import Container from "./container";
+import type Container from "./container";
 
 type ClickHandler = (params: { event: MouseEvent }) => void;
 

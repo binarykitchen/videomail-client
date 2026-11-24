@@ -1,6 +1,6 @@
 import mergeWithDefaultOptions from "../../../../../util/options/mergeWithDefaultOptions";
-import Visuals from "../../../../visuals";
-import RecordNote from "../recordNote";
+import type Visuals from "../../../../visuals";
+import type RecordNote from "../recordNote";
 import RecordTimer from "../recordTimer";
 
 function createFixture(limitSeconds = 100) {

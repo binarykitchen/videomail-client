@@ -1,4 +1,4 @@
-import { Dimension } from "../../../types/dimension";
+import type { Dimension } from "../../../types/dimension";
 
 // Apply a calculated size, or drop the inline one so the stylesheet decides again. 📐
 function setDimensionStyle(

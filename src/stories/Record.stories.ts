@@ -2,7 +2,7 @@ import "./static/css/entertain.css";
 
 import type { Meta, StoryObj } from "@storybook/html";
 
-import { PartialVideomailClientOptions } from "../types/options";
+import type { PartialVideomailClientOptions } from "../types/options";
 import { createStoryClient } from "./util/storyLifecycle";
 
 const meta: Meta<PartialVideomailClientOptions> = {

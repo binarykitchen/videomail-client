@@ -1,4 +1,5 @@
-import { VideoType, VideoTypeType } from "../../types/VideoType";
+import type { VideoTypeType } from "../../types/VideoType";
+import { VideoType } from "../../types/VideoType";
 
 // Videomail only serves MP4 and WebM videos.
 function isSupportedVideoType(

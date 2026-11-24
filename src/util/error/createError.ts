@@ -1,10 +1,11 @@
-import { VideomailClientOptions } from "../../types/options";
+import type { VideomailClientOptions } from "../../types/options";
 import getVersions from "../getVersions";
 import isObjectLike from "../isObjectLike";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../string/pretty";
 import type { HTTPVideomailErrorLike } from "./HTTPVideomailError";
-import VideomailError, { ErrData } from "./VideomailError";
+import type { ErrData } from "./VideomailError";
+import VideomailError from "./VideomailError";
 
 interface ErrorParams {
   cause?: unknown;

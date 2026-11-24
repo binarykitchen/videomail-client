@@ -1,8 +1,8 @@
 import type { Emitter } from "nanoevents";
 import { createNanoEvents } from "nanoevents";
 
-import { VideomailEvents } from "../types/events";
-import { VideomailClientOptions } from "../types/options";
+import type { VideomailEvents } from "../types/events";
+import type { VideomailClientOptions } from "../types/options";
 import VideomailError from "./error/VideomailError";
 import isObjectLike from "./isObjectLike";
 import pretty from "./string/pretty";

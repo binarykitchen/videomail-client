@@ -1,15 +1,15 @@
 import { deserializeError } from "serialize-error";
 
-import { VideomailCommand } from "../../types/command";
+import type { VideomailCommand } from "../../types/command";
 import type { VideomailClientOptions } from "../../types/options";
 import type { DespotEmitter } from "../../util/Despot";
 import createError from "../../util/error/createError";
 import summarize from "../../util/string/summarize";
-import { UnloadParams } from "../container";
-import Visuals from "../visuals";
+import type { UnloadParams } from "../container";
+import type Visuals from "../visuals";
 import RecorderCapture from "./recorder/capture";
 import RecorderDimensions from "./recorder/dimensions";
-import Replay from "./replay";
+import type Replay from "./replay";
 import UserMedia from "./userMedia";
 
 export type { StopParams } from "./recorder/capture";

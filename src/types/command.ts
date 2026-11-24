@@ -1,4 +1,4 @@
-import { ErrorObject } from "serialize-error";
+import type { ErrorObject } from "serialize-error";
 
 // Server data needs checking. Any field may be missing.
 export interface VideomailCommandArgs {

@@ -1,8 +1,8 @@
 import type { Response } from "superagent";
 
-import VideomailError from "../../util/error/VideomailError";
-import { RecordingStats } from "../RecordingStats";
-import { Videomail } from "../Videomail";
+import type VideomailError from "../../util/error/VideomailError";
+import type { RecordingStats } from "../RecordingStats";
+import type { Videomail } from "../Videomail";
 
 // All these event params are always exported from this library
 

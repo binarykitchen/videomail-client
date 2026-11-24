@@ -4,18 +4,19 @@ import superagent from "superagent";
 
 import { version as videomailClientVersion } from "../package.json";
 import Constants from "./constants";
-import { FullVideomailErrorData } from "./types/error";
-import { VideomailClientOptions } from "./types/options";
-import { VideomailThread } from "./types/thread";
-import { PartialVideomail, Videomail, VideomailIdentifierType } from "./types/Videomail";
+import type { FullVideomailErrorData } from "./types/error";
+import type { VideomailClientOptions } from "./types/options";
+import type { VideomailThread } from "./types/thread";
+import type { PartialVideomail, Videomail, VideomailIdentifierType } from "./types/Videomail";
 import getBrowser from "./util/browser/getBrowser";
 import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import sanitizeErrorReport from "./util/error/sanitizeErrorReport";
-import VideomailError from "./util/error/VideomailError";
+import type VideomailError from "./util/error/VideomailError";
 import getVersions from "./util/getVersions";
 import sanitizeUrl from "./util/url/sanitizeUrl";
-import { FormMethod, FormMethodType } from "./wrappers/form";
+import type { FormMethodType } from "./wrappers/form";
+import { FormMethod } from "./wrappers/form";
 
 // Fields the host's defaults can fill in when its form leaves them empty.
 const DEFAULT_FIELDS: readonly string[] = ["from", "to", "cc", "bcc", "subject", "body"];

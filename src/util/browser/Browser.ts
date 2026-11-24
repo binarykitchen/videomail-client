@@ -1,10 +1,12 @@
-import { IResult, UAParser } from "ua-parser-js";
+import type { IResult} from "ua-parser-js";
+import { UAParser } from "ua-parser-js";
 
 import canPlayType from "../../media/video/canPlayType";
 import isSupportedVideoType from "../../media/video/isSupportedVideoType";
-import { BrowserStats } from "../../types/BrowserStats";
-import { VideomailClientOptions } from "../../types/options";
-import { VideoType, VideoTypeType } from "../../types/VideoType";
+import type { BrowserStats } from "../../types/BrowserStats";
+import type { VideomailClientOptions } from "../../types/options";
+import type { VideoTypeType } from "../../types/VideoType";
+import { VideoType } from "../../types/VideoType";
 import createError from "../error/createError";
 
 const FALLBACK_VIDEO_TYPE = VideoType.MP4;

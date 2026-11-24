@@ -1,10 +1,10 @@
-import { VideomailClientOptions } from "../../../../types/options";
+import type { VideomailClientOptions } from "../../../../types/options";
 import type { DespotEmitter } from "../../../../util/Despot";
 import Despot from "../../../../util/Despot";
 import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
-import Visuals from "../../../visuals";
+import type Visuals from "../../../visuals";
 
 class FacingMode extends Despot {
   private readonly visuals: Visuals;

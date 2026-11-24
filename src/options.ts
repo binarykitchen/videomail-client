@@ -1,4 +1,4 @@
-import { VideomailClientOptions } from "./types/options";
+import type { VideomailClientOptions } from "./types/options";
 import isProduction from "./util/env/isProduction";
 
 const PRODUCTION = isProduction();

@@ -1,5 +1,5 @@
-import { Dimension } from "../../../types/dimension";
-import { VideomailClientOptions } from "../../../types/options";
+import type { Dimension } from "../../../types/dimension";
+import type { VideomailClientOptions } from "../../../types/options";
 import createError from "../../error/createError";
 import getOuterWidth from "./getOuterWidth";
 

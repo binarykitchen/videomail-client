@@ -14,7 +14,7 @@ import { isAudioEnabled } from "../../../util/options/audio";
 import pretty from "../../../util/string/pretty";
 import summarize from "../../../util/string/summarize";
 import type Visuals from "../../visuals";
-import UserMedia from "../userMedia";
+import type UserMedia from "../userMedia";
 import RecorderConnection from "./connection";
 import createUserMediaConstraints from "./mediaConstraints";
 

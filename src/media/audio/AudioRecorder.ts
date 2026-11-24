@@ -1,10 +1,11 @@
 import AudioSample from "audio-sample";
 import isPOT from "is-power-of-two";
 
-import { VideomailClientOptions } from "../../types/options";
-import Despot, { DespotEmitter } from "../../util/Despot";
+import type { VideomailClientOptions } from "../../types/options";
+import type { DespotEmitter } from "../../util/Despot";
+import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
-import UserMedia from "../../wrappers/visuals/userMedia";
+import type UserMedia from "../../wrappers/visuals/userMedia";
 import registerAudioRecorderProcessor, {
   AUDIO_RECORDER_PROCESSOR_NAME,
 } from "./AudioRecorderWorklet";

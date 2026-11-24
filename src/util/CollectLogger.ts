@@ -1,5 +1,5 @@
-import { VideomailClientOptions } from "../types/options";
-import Browser from "./browser/Browser";
+import type { VideomailClientOptions } from "../types/options";
+import type Browser from "./browser/Browser";
 import getBrowser from "./browser/getBrowser";
 
 class CollectLogger {

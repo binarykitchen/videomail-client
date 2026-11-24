@@ -1,8 +1,8 @@
-import { VideomailClientOptions } from "../../../../types/options";
+import type { VideomailClientOptions } from "../../../../types/options";
 import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
-import Visuals from "../../../visuals";
+import type Visuals from "../../../visuals";
 
 class Countdown {
   private readonly visuals: Visuals;

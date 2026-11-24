@@ -1,4 +1,4 @@
-import { VideomailClientOptions } from "../../types/options";
+import type { VideomailClientOptions } from "../../types/options";
 
 function isAudioEnabled(options: VideomailClientOptions) {
   return Boolean(options.audio.enabled);

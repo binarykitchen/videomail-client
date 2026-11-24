@@ -1,7 +1,7 @@
 import deepmerge from "deepmerge";
 
 import defaultOptions from "../../options";
-import {
+import type {
   PartialVideomailClientOptions,
   VideomailClientOptions,
 } from "../../types/options";
