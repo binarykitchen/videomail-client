@@ -290,6 +290,24 @@ describe("Resource class", () => {
     );
   });
 
+  it("reports secure-context and media capture API availability", async () => {
+    vi.stubGlobal("isSecureContext", false);
+    vi.stubGlobal("navigator", { userAgent: navigator.userAgent });
+    const { resource, error } = createReportFixture();
+
+    await resource.reportError(error);
+
+    expect(reportRequest.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        diagnostics: [
+          "secureContext=false",
+          "mediaDevices=undefined",
+          "getUserMedia=undefined",
+        ],
+      }),
+    );
+  });
+
   it("handles circular nested error data without dropping the report", async () => {
     const { resource, error } = createReportFixture();
     const cause: { status: number; self?: unknown } = { status: 503 };

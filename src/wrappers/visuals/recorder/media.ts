@@ -318,7 +318,8 @@ abstract class RecorderMedia extends RecorderConnection {
     this.emit("LOADING_USER_MEDIA");
 
     try {
-      // It still can be undefined when not on HTTPS
+      // lib.dom types this as always present, but browsers can omit it outside secure
+      // contexts. TypeScript cannot model that runtime restriction, so keep this guard.
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!navigator.mediaDevices) {
         throw new Error("No media devices are available.");

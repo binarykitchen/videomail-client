@@ -142,6 +142,15 @@ class Resource {
 
   public async reportError(err: VideomailError) {
     const url = `${this.options.apiUrl}/client-error/`;
+    const mediaDevicesType = typeof navigator.mediaDevices;
+    // lib.dom marks this property as required, but secure-context restrictions can omit it.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const getUserMediaType = typeof navigator.mediaDevices?.getUserMedia;
+    const diagnostics = [
+      `secureContext=${String(globalThis.isSecureContext)}`,
+      `mediaDevices=${mediaDevicesType}`,
+      `getUserMedia=${getUserMediaType}`,
+    ];
 
     let supportedConstraints: MediaTrackSupportedConstraints | undefined;
     let enumerateDevices: MediaDeviceInfo[] | undefined;
@@ -160,6 +169,7 @@ class Resource {
 
     const fullVideomailErrorData: FullVideomailErrorData = {
       versions: getVersions(this.options),
+      diagnostics,
       browser: err.browser,
       code: err.code,
       cause: err.cause instanceof Error ? serializeError(err.cause) : err.cause,
