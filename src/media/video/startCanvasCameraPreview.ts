@@ -1,16 +1,12 @@
 import isDOMExceptionNamed from "../../util/error/isDOMExceptionNamed";
-import canUseVideoFrameCallbacks from "./canUseVideoFrameCallbacks";
 import hasDrawableFrame from "./hasDrawableFrame";
+
+const PREVIEW_DRAW_INTERVAL_MS = 1000 / 30;
 
 function startCanvasCameraPreview(
   video: HTMLVideoElement,
   warn: (message: string) => void,
 ) {
-  if (!canUseVideoFrameCallbacks(video)) {
-    warn("Video frame callbacks are unavailable; using the native camera preview.");
-    return;
-  }
-
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   if (!context) {
@@ -19,55 +15,67 @@ function startCanvasCameraPreview(
   }
 
   let frameRequest: number | undefined;
-  let hasRetriedMissingFrame = false;
+  let nextDrawAt = 0;
+  let hasReportedMissingFrame = false;
+
   function stop() {
     if (frameRequest === undefined) {
       return;
     }
 
-    video.cancelVideoFrameCallback(frameRequest);
+    window.cancelAnimationFrame(frameRequest);
     frameRequest = undefined;
+    video.classList.remove("cameraPreviewSource");
     canvas.remove();
     canvas.width = canvas.height = 0;
   }
 
-  const drawFrame = () => {
+  function shouldDrawFrame(now: number) {
+    return !document.hidden && now >= nextDrawAt && hasDrawableFrame(video);
+  }
+
+  // Keep painting independently of WebKit's native video presentation after a handoff.
+  const drawFrame = (now: number) => {
     if (frameRequest === undefined) {
       return;
     }
 
-    if (hasDrawableFrame(video)) {
-      const { videoWidth, videoHeight } = video;
+    frameRequest = window.requestAnimationFrame(drawFrame);
+    if (!shouldDrawFrame(now)) {
+      return;
+    }
+    nextDrawAt = now + PREVIEW_DRAW_INTERVAL_MS;
 
-      if (canvas.width !== videoWidth || canvas.height !== videoHeight) {
-        canvas.width = videoWidth;
-        canvas.height = videoHeight;
+    const { videoWidth, videoHeight } = video;
+    if (canvas.width !== videoWidth || canvas.height !== videoHeight) {
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
+    }
+
+    try {
+      context.drawImage(video, 0, 0, videoWidth, videoHeight);
+      hasReportedMissingFrame = false;
+    } catch (error) {
+      if (!isDOMExceptionNamed(error, "InvalidStateError")) {
+        stop();
+        warn(`Canvas camera preview failed; using the native preview: ${String(error)}`);
+        return;
       }
 
-      try {
-        context.drawImage(video, 0, 0, videoWidth, videoHeight);
-        hasRetriedMissingFrame = false;
-      } catch (error) {
-        // The first frame of a replacement stream may not have drawable pixels yet.
-        if (hasRetriedMissingFrame || !isDOMExceptionNamed(error, "InvalidStateError")) {
-          stop();
-          warn(
-            `Canvas camera preview failed; using the native preview: ${String(error)}`,
-          );
-          return;
-        }
-
-        hasRetriedMissingFrame = true;
+      // Cameras may need several frames before pixels are ready. Do not uncover the bad layer.
+      if (!hasReportedMissingFrame) {
+        warn("⚠️ Canvas camera preview is waiting for drawable frames.");
+        hasReportedMissingFrame = true;
       }
     }
-    frameRequest = video.requestVideoFrameCallback(drawFrame);
   };
 
-  // Cover the native video before its first frame without hiding or replacing it.
+  // Keep the source video laid out and playing, but never present its native picture.
   canvas.className = "cameraPreviewCanvas";
   canvas.setAttribute("aria-hidden", "true");
+  video.classList.add("cameraPreviewSource");
   video.after(canvas);
-  frameRequest = video.requestVideoFrameCallback(drawFrame);
+  frameRequest = window.requestAnimationFrame(drawFrame);
   return stop;
 }
 

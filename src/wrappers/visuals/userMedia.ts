@@ -154,7 +154,8 @@ class UserMedia extends Despot {
   }
 
   public async restorePlayback() {
-    if (!this.rawVisualUserMedia) {
+    const video = this.rawVisualUserMedia;
+    if (!video) {
       throw new Error("No camera preview is available.");
     }
 
@@ -162,7 +163,13 @@ class UserMedia extends Despot {
     this.stopWatchingPlayback?.();
     this.stopWatchingPlayback = undefined;
 
-    await this.rawVisualUserMedia.play();
+    if (!isHidden(video)) {
+      // Returning to the foreground may invalidate the canvas even when the stream survives.
+      this.hideCanvasPreview();
+      this.showCanvasPreview();
+    }
+
+    await video.play();
     await this.audioRecorder?.resume();
     if (this.isCurrentInitialization(initializationId)) {
       this.watchPlayback();

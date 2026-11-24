@@ -89,18 +89,18 @@ function createCanvasPreviewFixture() {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
     context as CanvasRenderingContext2D,
   );
-  let drawFrame: (() => void) | undefined;
-  const cancel = vi.fn(() => {
+  let drawFrame: FrameRequestCallback | undefined;
+  let now = 0;
+  let frameId = 0;
+  vi.spyOn(document, "hidden", "get").mockReturnValue(false);
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+    drawFrame = callback;
+    return ++frameId;
+  });
+  const cancel = vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {
     drawFrame = undefined;
   });
   Object.defineProperties(videoElement, {
-    requestVideoFrameCallback: {
-      value: (callback: () => void) => {
-        drawFrame = callback;
-        return 1;
-      },
-    },
-    cancelVideoFrameCallback: { value: cancel },
     readyState: { value: HTMLMediaElement.HAVE_CURRENT_DATA },
   });
 
@@ -114,7 +114,8 @@ function createCanvasPreviewFixture() {
   }
 
   function submitFrame() {
-    drawFrame?.();
+    now += 40;
+    drawFrame?.(now);
   }
 
   return { ...fixture, frame, drawImage, cancel, attachCamera, submitFrame };
@@ -176,12 +177,14 @@ describe("UserMedia", () => {
 
     expect({
       overlayHiddenFromAssistiveTech: overlay?.getAttribute("aria-hidden"),
+      nativePictureMasked: videoElement.classList.contains("cameraPreviewSource"),
       width: overlay?.width,
       height: overlay?.height,
       stream: frame.querySelector("video")?.srcObject,
       frames: drawImage.mock.calls,
     }).toEqual({
       overlayHiddenFromAssistiveTech: "true",
+      nativePictureMasked: true,
       width: 320,
       height: 240,
       stream,
@@ -199,8 +202,15 @@ describe("UserMedia", () => {
   });
 
   it("cancels the preview frame callback and removes the canvas on stop", () => {
-    const { attachCamera, cancel, drawImage, frame, submitFrame, userMedia } =
-      createCanvasPreviewFixture();
+    const {
+      attachCamera,
+      cancel,
+      drawImage,
+      frame,
+      submitFrame,
+      userMedia,
+      videoElement,
+    } = createCanvasPreviewFixture();
     attachCamera();
 
     userMedia.stop();
@@ -208,20 +218,41 @@ describe("UserMedia", () => {
 
     expect({
       overlay: frame.querySelector("canvas"),
+      restoredNativeStyle: !videoElement.classList.contains("cameraPreviewSource"),
       canceled: cancel.mock.calls.length,
       frames: drawImage.mock.calls.length,
-    }).toEqual({ overlay: null, canceled: 1, frames: 0 });
+    }).toEqual({ overlay: null, restoredNativeStyle: true, canceled: 1, frames: 0 });
   });
 
-  it("keeps the canvas visible and retries when a camera frame is not yet drawable", () => {
-    const { attachCamera, drawImage, frame, submitFrame, videoElement } =
-      createCanvasPreviewFixture();
-    drawImage.mockImplementationOnce(() => {
+  it("keeps the canvas after consecutive unavailable frames on a camera switch", () => {
+    const {
+      attachCamera,
+      drawImage,
+      frame,
+      options,
+      submitFrame,
+      userMedia,
+      ready,
+      onAudio,
+      failed,
+      videoElement,
+    } = createCanvasPreviewFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
+    const missingFrame = () => {
       throw new DOMException("No image data", "InvalidStateError");
-    });
+    };
 
     attachCamera();
+    submitFrame();
+    const { stream: rearStream } = createMediaFixture();
+    userMedia.init(rearStream, ready, onAudio, failed, {
+      switchingFacingMode: "environment",
+    });
+    Object.defineProperty(videoElement, "videoWidth", { value: 180 });
+
+    drawImage.mockImplementationOnce(missingFrame).mockImplementationOnce(missingFrame);
     const overlay = frame.querySelector("canvas");
+    submitFrame();
     submitFrame();
     const coveredBetweenFrames = overlay?.isConnected;
     submitFrame();
@@ -229,23 +260,61 @@ describe("UserMedia", () => {
     expect({
       coveredBetweenFrames,
       overlay: frame.querySelector("canvas"),
-      frames: drawImage.mock.calls,
+      lastFrame: drawImage.mock.lastCall,
+      stream: videoElement.srcObject,
+      warnings: warn.mock.calls,
     }).toEqual({
       coveredBetweenFrames: true,
       overlay,
-      frames: Array.from({ length: 2 }, () => [videoElement, 0, 0, 320, 240]),
+      lastFrame: [videoElement, 0, 0, 180, 240],
+      stream: rearStream,
+      warnings: [[expect.stringContaining("waiting for drawable frames")]],
     });
   });
 
-  it.each([
-    ["an unexpected draw error", new Error("Unable to draw")],
-    ["a repeated missing frame", new DOMException("No image data", "InvalidStateError")],
-  ])("falls back to the native video after %s", (_scenario, error) => {
+  it("repairs the canvas preview when resuming the same live stream", async () => {
+    const {
+      attachCamera,
+      drawImage,
+      frame,
+      options,
+      stream,
+      submitFrame,
+      userMedia,
+      videoElement,
+    } = createCanvasPreviewFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
+    attachCamera();
+    drawImage.mockImplementationOnce(() => {
+      throw new Error("Preview context lost");
+    });
+    submitFrame();
+    const removedDuringSuspension = !frame.querySelector("canvas");
+
+    await userMedia.restorePlayback();
+    submitFrame();
+
+    expect({
+      removedDuringSuspension,
+      overlay: frame.querySelector("canvas")?.isConnected,
+      stream: videoElement.srcObject,
+      frames: drawImage.mock.calls.length,
+      warnings: warn.mock.calls,
+    }).toEqual({
+      removedDuringSuspension: true,
+      overlay: true,
+      stream,
+      frames: 2,
+      warnings: [[expect.stringContaining("Preview context lost")]],
+    });
+  });
+
+  it("falls back to the native video after an unexpected draw error", () => {
     const { attachCamera, drawImage, frame, options, stream, submitFrame, videoElement } =
       createCanvasPreviewFixture();
     const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     drawImage.mockImplementation(() => {
-      throw error;
+      throw new Error("Unable to draw");
     });
 
     attachCamera();
