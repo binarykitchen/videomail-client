@@ -608,16 +608,24 @@ describe("AudioRecorder", () => {
 
   it("cleans up partial graphs when worklet construction fails", async () => {
     const recorder = createRecorder();
-    CREATE_WORKLET.mockImplementationOnce(() => {
+    CREATE_WORKLET.mockImplementationOnce(function () {
       throw new Error("Cannot construct processor");
     });
 
-    await recorder.init(STREAM).catch(() => undefined);
+    const error = await recorder.init(STREAM).catch((exc: unknown) => exc);
 
     expect({
+      error,
       inputs: FakeAudioContext.latest.audioInput.disconnect.mock.calls.length,
       gains: FakeAudioContext.latest.gainNode.disconnect.mock.calls.length,
-    }).toEqual({ inputs: 1, gains: 1 });
+    }).toEqual({
+      error: expect.objectContaining({
+        message: "Failed to connect the audio recorder.",
+        err: expect.objectContaining({ message: "Cannot construct processor" }),
+      }),
+      inputs: 1,
+      gains: 1,
+    });
   });
 
   it("reports worklet processor failures through the existing error event", async () => {

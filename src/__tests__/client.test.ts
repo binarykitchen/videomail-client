@@ -10,6 +10,10 @@ describe("Client", () => {
     onHide() {},
   };
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("constructor with default arguments", () => {
     const videomailClient = new VideomailClient();
 
@@ -71,15 +75,29 @@ describe("Client", () => {
   });
 
   it("keeps public listeners across repeated start over cycles", () => {
+    // jsdom does not calculate the layout needed when rebuilding the recorder.
+    vi.spyOn(document.body, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(0, 0, 400, 300),
+    );
+    vi.spyOn(document.documentElement, "clientHeight", "get").mockReturnValue(300);
     const videomailClient = new VideomailClient();
     const onStartingOver = vi.fn();
+    const onError = vi.fn();
     videomailClient.on("STARTING_OVER", onStartingOver);
-    videomailClient.show();
+    videomailClient.on("ERROR", onError);
 
-    videomailClient.startOver({ keepHidden: true });
-    videomailClient.startOver({ keepHidden: true });
+    try {
+      videomailClient.show();
+      videomailClient.startOver({ keepHidden: true });
+      videomailClient.startOver({ keepHidden: true });
 
-    expect(onStartingOver).toHaveBeenCalledTimes(2);
+      expect({
+        startOvers: onStartingOver.mock.calls.length,
+        errors: onError.mock.calls,
+      }).toEqual({ startOvers: 2, errors: [] });
+    } finally {
+      videomailClient.unload();
+    }
   });
 
   it("on unload, hidden and not built", () => {
@@ -169,17 +187,35 @@ describe("Client", () => {
   });
 
   it("logs a failing host listener instead of raising an ERROR", () => {
-    const videomailClient = new VideomailClient();
+    const logError = vi.fn();
+    const videomailClient = new VideomailClient({ logger: { error: logError } });
     const errorListener = vi.fn();
-    videomailClient.on("HIDE", () => {
+    const unsubscribe = videomailClient.on("HIDE", () => {
       throw new Error("Bug in the host app");
     });
     videomailClient.on("ERROR", errorListener);
-    videomailClient.show();
 
-    videomailClient.hide();
+    try {
+      videomailClient.show();
+      videomailClient.hide();
 
-    expect(errorListener).not.toHaveBeenCalled();
+      expect({
+        errors: errorListener.mock.calls,
+        logs: logError.mock.calls,
+      }).toEqual({
+        errors: [],
+        logs: [
+          [
+            expect.stringContaining(
+              "A listener for HIDE failed: Error: Bug in the host app",
+            ),
+          ],
+        ],
+      });
+    } finally {
+      unsubscribe();
+      videomailClient.unload();
+    }
   });
 
   describe("when the page is about to go away", () => {
@@ -200,7 +236,6 @@ describe("Client", () => {
     }
 
     afterEach(() => {
-      vi.restoreAllMocks();
       document.body.innerHTML = "";
     });
 

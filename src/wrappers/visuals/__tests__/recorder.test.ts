@@ -215,6 +215,7 @@ function createRecoveryFixture() {
 
 describe("Recorder", () => {
   const PREVIEW_KEY = "00000000-0000-6000-8000-000000000001";
+  const CAMERA_STALL_WARNING = "Recorder: camera preview stalled; recovering.";
 
   afterEach(() => {
     if (vi.isFakeTimers()) {
@@ -679,8 +680,9 @@ describe("Recorder", () => {
   });
 
   it("replaces live but frozen camera tracks without resuming or losing the take", async () => {
-    const { recorder, userMedia, live, getUserMedia, internals, loop } =
+    const { recorder, options, userMedia, live, getUserMedia, internals, loop } =
       createRecoveryFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     live.mockReturnValue(true);
     userMedia.resume();
     internals.framesCount = 42;
@@ -695,6 +697,7 @@ describe("Recorder", () => {
       frames: internals.framesCount,
       samples: internals.samplesCount,
       starts: vi.mocked(loop.start).mock.calls.length,
+      warnings: warn.mock.calls,
     }).toEqual({
       restored: true,
       requests: 1,
@@ -702,11 +705,13 @@ describe("Recorder", () => {
       frames: 42,
       samples: 17,
       starts: 0,
+      warnings: [[CAMERA_STALL_WARNING]],
     });
   });
 
   it("limits repeated stalls to one automatic restart and keeps the take retryable", async () => {
-    const { recorder, getUserMedia, internals } = createRecoveryFixture();
+    const { recorder, options, getUserMedia, internals } = createRecoveryFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     const failed = vi.fn();
     const fatal = vi.fn();
     recorder.on("CAMERA_RECOVERY_FAILED", failed);
@@ -723,6 +728,7 @@ describe("Recorder", () => {
       fatal: fatal.mock.calls.length,
       frames: internals.framesCount,
       paused: recorder.isPaused(),
+      warnings: warn.mock.calls,
     }).toEqual({
       restored: false,
       requests: 1,
@@ -730,22 +736,31 @@ describe("Recorder", () => {
       fatal: 0,
       frames: 42,
       paused: true,
+      warnings: [[CAMERA_STALL_WARNING]],
     });
   });
 
   it("allows an explicit recovery to reset the automatic retry budget", async () => {
-    const { recorder, getUserMedia } = createRecoveryFixture();
+    const { recorder, options, getUserMedia } = createRecoveryFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     await recorder.recoverCameraAfterStall();
     await recorder.recoverCameraAfterStall();
     await recorder.recoverCamera();
 
     await recorder.recoverCameraAfterStall();
 
-    expect(getUserMedia).toHaveBeenCalledTimes(2);
+    expect({
+      requests: getUserMedia.mock.calls.length,
+      warnings: warn.mock.calls,
+    }).toEqual({
+      requests: 2,
+      warnings: [[CAMERA_STALL_WARNING], [CAMERA_STALL_WARNING]],
+    });
   });
 
   it("gives a fresh camera request its own automatic retry budget", async () => {
-    const { recorder, getUserMedia, internals } = createRecoveryFixture();
+    const { recorder, options, getUserMedia, internals } = createRecoveryFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     await recorder.recoverCameraAfterStall();
     await recorder.recoverCameraAfterStall();
 
@@ -753,7 +768,13 @@ describe("Recorder", () => {
     await Promise.resolve();
     await recorder.recoverCameraAfterStall();
 
-    expect(getUserMedia).toHaveBeenCalledTimes(3);
+    expect({
+      requests: getUserMedia.mock.calls.length,
+      warnings: warn.mock.calls,
+    }).toEqual({
+      requests: 3,
+      warnings: [[CAMERA_STALL_WARNING], [CAMERA_STALL_WARNING]],
+    });
   });
 
   it("never replaces an unsent preview after a stale stall callback", async () => {

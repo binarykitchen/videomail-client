@@ -466,6 +466,9 @@ describe("Container", () => {
     submitAll.mockRestore();
 
     const internals = getInternals(container);
+    const logError = vi
+      .spyOn(internals.options.logger, "error")
+      .mockImplementation(() => undefined);
     const subject = formElement.querySelector<HTMLInputElement>("[name='subject']");
     const lockedInput = document.createElement("input");
     lockedInput.name = "locked";
@@ -523,6 +526,7 @@ describe("Container", () => {
       firstFailureState,
       videoRequests: submitVideomail.mock.calls.length,
       retriedSubject: submitHostForm.mock.calls[1]?.[0].subject,
+      loggedErrors: logError.mock.calls,
     }).toEqual({
       firstFailureState: {
         submitEnabled: true,
@@ -533,6 +537,10 @@ describe("Container", () => {
       },
       videoRequests: 1,
       retriedSubject: "Edited for retry",
+      loggedErrors: [
+        [expect.stringContaining("VideomailError: Host unavailable")],
+        [expect.stringContaining("Error: Host unavailable")],
+      ],
     });
   });
 
@@ -964,6 +972,9 @@ describe("Container", () => {
     it("shows and reports an unexpected exception", () => {
       const container = new Container(mergeWithDefaultOptions());
       container.build();
+      const logError = vi
+        .spyOn(getInternals(container).options.logger, "error")
+        .mockImplementation(() => undefined);
       const report = vi
         .spyOn(Resource.prototype, "reportError")
         .mockResolvedValue(undefined);
@@ -974,22 +985,45 @@ describe("Container", () => {
       expect({
         notice: container.querySelector(".notifierMessage")?.textContent,
         reports: report.mock.calls.length,
-      }).toEqual({ notice: "☹ Unexpected glitch", reports: 1 });
+        loggedErrors: logError.mock.calls,
+      }).toEqual({
+        notice: "☹ Unexpected glitch",
+        reports: 1,
+        loggedErrors: [
+          [expect.stringContaining("VideomailError: Unexpected glitch")],
+          [expect.stringContaining("Error: Unexpected glitch")],
+        ],
+      });
     });
 
     it("registers its listeners once, even when building keeps failing", () => {
       document.body.innerHTML = `<div id="notAForm"></div><div id="videomail"></div>`;
-      const container = new Container(
-        mergeWithDefaultOptions({
-          selectors: { containerId: "videomail", formId: "notAForm" },
-        }),
-      );
+      const options = mergeWithDefaultOptions({
+        selectors: { containerId: "videomail", formId: "notAForm" },
+      });
+      const container = new Container(options);
+      const logError = vi
+        .spyOn(options.logger, "error")
+        .mockImplementation(() => undefined);
+      const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
 
       container.build();
       container.build();
       container.build();
 
-      expect(getInternals(container).emitter.events.ERROR).toHaveLength(1);
+      const message = "HTML element with ID notAForm is not a form.";
+      expect({
+        listeners: getInternals(container).emitter.events.ERROR?.length,
+        loggedErrors: logError.mock.calls,
+        warnings: warn.mock.calls,
+      }).toEqual({
+        listeners: 1,
+        loggedErrors: Array.from({ length: 3 }, () => [
+          [expect.stringContaining(`VideomailError: ${message}`)],
+          [expect.stringContaining(`Error: ${message}`)],
+        ]).flat(),
+        warnings: [[`Unable to show message ${message} because notifyElement is empty`]],
+      });
     });
   });
 });

@@ -364,6 +364,7 @@ describe("Visuals", () => {
 
   it("keeps camera recovery failure nonfatal and allows a retry", async () => {
     const { visuals, options } = createFixture();
+    const warn = vi.spyOn(options.logger, "warn").mockImplementation(() => undefined);
     options.reportErrors = false;
     visuals.build();
     const recorder = visuals.getRecorder();
@@ -386,11 +387,13 @@ describe("Visuals", () => {
       resets: reset.mock.calls.length,
       recoveries: recover.mock.calls.length,
       notificationAfterRetry: visuals.isNotifying(),
+      warnings: warn.mock.calls,
     }).toEqual({
       notified: true,
       resets: 0,
       recoveries: 1,
       notificationAfterRetry: false,
+      warnings: [[err]],
     });
   });
 
