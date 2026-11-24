@@ -5,17 +5,16 @@ description: "Use when: creating or editing TypeScript or TSX files"
 
 # TypeScript
 
-- The root `./tsconfig.json` covers all the TS configuration.
+- The root `tsconfig.json` is the base TypeScript configuration. Other configs, such as a build config, may extend it.
 
 ## Type safety
 
 - Keep TypeScript strict and type-safe at all times; do not silently loosen types.
 - Avoid introducing explicit or implicit `any`. Use `unknown` or proper type annotations instead.
 - Prefer inference for local values and contextually typed callbacks.
-- Add parameter types to standalone functions when their parameters cannot be inferred.
 - Keep `unknown` for genuinely untrusted input, caught errors, and unspecified external data. Narrow or validate it before use; do not replace it with a guessed type or assertion.
-- Prefer inference, annotations, narrowing, or runtime validation over type assertions. Use assertions or `satisfies` only when they express a contract that cannot be represented clearly another way, and keep them narrow. Avoid `any`.
-- Add explicit parameter types where inference is unavailable or a public boundary benefits from a stable contract. Always infer function return types when possible.
+- Prefer inference, annotations, narrowing, or runtime validation over type assertions. Use assertions or `satisfies` only when they express a contract that cannot be represented clearly another way, and keep them narrow.
+- Add explicit parameter types where inference is unavailable or a public boundary benefits from a stable contract.
 - Do not annotate callback parameters when the receiving API already defines them. Prefer `emails.map((email, index) => ...)`; improve the source type if inference is wrong.
 - Type API request and response boundaries, including library generics that otherwise default to `any`. Static payload types do not replace runtime validation of untrusted input.
 - Prefer public types exported by a direct dependency. Avoid coupling to transitive or lower-level type packages when a type can be derived from the public API signature.
@@ -38,10 +37,10 @@ description: "Use when: creating or editing TypeScript or TSX files"
 
 ## Validation
 
-- Run `npm run types` after cross-stack typing changes so both projects check shared contracts.
+- Run the type check (`npm run types`) after typing changes, especially ones that cross module or package boundaries.
 - Run focused tests when narrowing or validation changes runtime behaviour, and format and lint touched files according to the coding standards.
 
 ## Duplicate types
 
-- Avoid duplicating type definitions across different layers of the application. Centralize shared types in a common location and reference them using `import type`.
+- Avoid duplicating type definitions across different layers of the application. Centralise shared types in a common location and reference them using `import type`.
 - When creating new types, check if an existing type can be reused or extended instead of defining a new one.

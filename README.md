@@ -27,10 +27,11 @@ Made for Deaf users, and for hearing users learning Sign Language. The package i
 - [Storybook examples](#storybook-examples)
 - [Installation](#installation)
 - [Options](#options)
+- [Audio](#audio)
 - [API](#api)
+- [Stored videomail data](#stored-videomail-data)
 - [Form submissions](#form-submissions)
 - [Privacy and error reporting](#privacy-and-error-reporting)
-- [Stored videomail data](#stored-videomail-data)
 - [Whitelist](#whitelist)
 - [Browser compatibility](#browser-compatibility)
 - [Add-ons](#add-ons)
@@ -107,7 +108,7 @@ See [docs/AUDIO.md](docs/AUDIO.md) for details on audio recording options and re
 - [`videomailClient.pause()`](#videomailclientpause)
 - [`videomailClient.recoverConnection()`](#videomailclientrecoverconnection)
 - [`videomailClient.recoverCamera()`](#videomailclientrecovercamera)
-- [`videomailClient.replay()`](#videomailclientreplayvideomail-parentelementid)
+- [`videomailClient.replay()`](#videomailclientreplayvideomail-replayparentelementid)
 - [`videomailClient.startOver()`](#videomailclientstartover)
 - [`videomailClient.getByAlias()`](#videomailclientgetbyaliasalias)
 - [`videomailClient.getByKey()`](#videomailclientgetbykeykey)
@@ -159,7 +160,13 @@ Videomail errors extend the native `Error` class with details for troubleshootin
 
 ### videomailClient.show()
 
-Adds the recording form to the page. By default, it uses the element with ID `videomail`. You can change this in the [options](#options).
+Shows the recording form and returns its container element.
+
+Set `selectors.containerId` in the [options](#options) to use an existing element on your page. Otherwise, the client creates a new `div` with the class `videomail`, and you add the returned element to the page yourself.
+
+### videomailClient.hide()
+
+Hides the UI without unloading it.
 
 ### videomailClient.record()
 
@@ -208,11 +215,11 @@ On iOS, a visible camera preview with no new frames for three seconds triggers o
 
 An active take stays paused after that restart. A second stall shows the retryable failure notice instead of repeatedly reopening the camera; an explicit recovery allows another attempt.
 
-Background and offscreen previews are not treated as frozen. Camera initialization waits for actual playback and does not reload an attached live stream.
+Background and offscreen previews are not treated as frozen. Camera initialisation waits for actual playback and does not reload an attached live stream.
 
 Recovery cannot reconnect a lost recording WebSocket or keep a take after the app process ends. Test the camera and microphone on physical devices, too.
 
-### videomailClient.replay(videomail[, parentElementId])
+### videomailClient.replay(videomail[, replayParentElementId])
 
 Adds a video player for the supplied videomail.
 
@@ -254,10 +261,6 @@ Returns the videomail thread containing the given key.
 ### videomailClient.unload()
 
 Stops the webcam, closes the active WebSocket connection, and removes all internal event listeners.
-
-### videomailClient.hide()
-
-Hides the UI without unloading it.
 
 ### videomailClient.isDirty()
 
@@ -324,7 +327,7 @@ Here's a shortened example:
   "whitelistKey": "videomail-client-demo",
   "alias": "some-subject-183622500964",
   "dateCreated": 1541130589811,
-  "url": "https://videomail.io/videomail/some-subject-150322500964",
+  "url": "https://videomail.io/videomail/some-subject-183622500964",
   "key": "11e8-de52-55ac2630-b22b-71959562a989",
   "expiresAfter": 1541134189811,
   "expiresAfterIso": "2018-11-02T04:49:49.811Z",

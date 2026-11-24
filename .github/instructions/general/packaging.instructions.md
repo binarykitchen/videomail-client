@@ -7,7 +7,7 @@ applyTo: "**/package.json"
 
 - Never use `npm install --legacy-peer-deps`, `npm uninstall --legacy-peer-deps`, or any other npm command with `--legacy-peer-deps`.
 - About `npx`:
-  - It is a convenience tool for running binaries from npm packages without installing them globally. However, it can lead to inconsistent behavior and versioning issues.
+  - It is a convenience tool for running binaries from npm packages without installing them globally. However, it can lead to inconsistent behaviour and versioning issues.
   - For a starter, always declare project dependencies in `package.json`, install them with `npm ci` or `npm install`, and invoke local binaries from `node_modules/.bin`.
   - For convenience it is okay to use `npx` for one-off commands, but avoid it for project scripts and automation.
 - Resolve peer dependency conflicts properly by upgrading, downgrading, replacing, or removing the conflicting packages.

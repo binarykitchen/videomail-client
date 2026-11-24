@@ -30,13 +30,13 @@ Device details help us investigate camera and microphone problems. They are kept
 The client does not read or copy your page's cookies into errors or reports. Before sending a report, it filters an outgoing copy:
 
 - Removes URL credentials, query strings, and fragments.
-- Redacts recognized credential and contact fields.
+- Redacts recognised credential and contact fields.
 - Hides string-valued subject and body fields.
-- Applies the same filtering to nested errors and recognized fields and URLs in log text.
+- Applies the same filtering to nested errors and recognised fields and URLs in log text.
 
 Structured server response bodies and other diagnostic fields stay available. Normal browser-managed credentials sent to the API are unchanged.
 
-**Reports are not fully anonymous.** Device labels, URL paths, and unrecognized free text can still identify someone. Keep secrets out of custom logs.
+**Reports are not fully anonymous.** Device labels, URL paths, and unrecognised free text can still identify someone. Keep secrets out of custom logs.
 
 Local `ERROR` events and `getLogLines()` keep their original diagnostic content. Set `reportErrors: false` to handle errors locally only.
 

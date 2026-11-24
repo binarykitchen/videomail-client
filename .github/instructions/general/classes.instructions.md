@@ -19,9 +19,9 @@ Object-oriented programming (OOP) is welcome where it fits, although we prefer f
 
 ## Class constructor
 
-- Keep the constructor simple and focused on initializing the class attributes.
+- Keep the constructor simple and focused on initialising the class attributes.
 - Avoid putting complex logic or side effects in the constructor.
-- If initialization requires asynchronous operations, consider using an `init` method instead of doing it in the constructor.
+- If initialisation requires asynchronous operations, consider using an `init` method instead of doing it in the constructor.
 
 ## Class methods
 
@@ -30,4 +30,4 @@ Object-oriented programming (OOP) is welcome where it fits, although we prefer f
 - If there are functions, utilities doing the same job, ensure the method delegates to them rather than duplicating logic.
 - Extract complex conditional logic into private methods when that improves clarity. Keep straightforward conditions in place.
 - If a public method is nowhere else used, consider making it private to limit the class's public API surface.
-- Prefer composition over inheritance; favor small, focused classes that can be combined rather than large hierarchies.
+- Prefer composition over inheritance; favour small, focused classes that can be combined rather than large hierarchies.

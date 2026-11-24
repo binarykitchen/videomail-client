@@ -4,7 +4,9 @@ General instructions for AI coding agents working with this repository.
 
 ## Instruction Files
 
-This file is the tool-neutral entry point for AI agents working in this repository. [.github/copilot-instructions.md](.github/copilot-instructions.md) adds GitHub Copilot-specific context, while files under `.github/instructions/` provide scoped guidance.
+This file is the tool-neutral entry point for AI agents working in this repository. It is shared across projects, so keep it project-neutral, too.
+
+[.github/copilot-instructions.md](.github/copilot-instructions.md) describes the project itself, such as its purpose, structure, tooling and commands. Files under `.github/instructions/` provide scoped guidance.
 
 Use this precedence order for repository guidance:
 
@@ -34,12 +36,12 @@ If an instruction file is too large to load fully, tell the user and suggest spl
 
 If memory and repository instructions conflict, follow the current repository instructions.
 
-If AI-focused instructions contradict human documentation, stop relying on the disputed rule and report the contradiction to the user.
+The precedence order above decides how to work. For facts about the product, such as APIs, defaults and behaviour, the code is the source of truth. Whenever instructions, documentation and code contradict each other, report it to the user so the outdated part can be fixed.
 
 ## Skills
 
-We maintain various skills in [self-contained folders](.github/skills) with instructions available for specialized tasks that an AI agent can leverage to perform specific functions effectively.
+We maintain various skills in [self-contained folders](.github/skills) with instructions available for specialised tasks that an AI agent can leverage to perform specific functions effectively.
 
 ## Documentation
 
-Refer to [.github/instructions/documentation.instructions.md](.github/instructions/documentation.instructions.md) for documentation instructions.
+Refer to [.github/instructions/general/documentation.instructions.md](.github/instructions/general/documentation.instructions.md) for documentation instructions.

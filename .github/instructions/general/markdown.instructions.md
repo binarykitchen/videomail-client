@@ -14,4 +14,4 @@ applyTo: "**/*.md"
 
 ## Validation
 
-When changing markdown files, run markdown linting or the repo's markdown formatter before handover so documentation changes do not introduce markdownlint errors.
+When changing Markdown files, run the repository's Markdown linter or formatter before handover so documentation changes do not introduce lint or formatting errors.
