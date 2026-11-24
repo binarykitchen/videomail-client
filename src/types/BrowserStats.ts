@@ -1,10 +1,16 @@
+import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
+
+/*
+ * What the user agent parser found, as plain data. Videos and error reports carry it as
+ * JSON, which drops the parser's helper methods like is() or withClientHints().
+ */
 interface BrowserStats {
   ua: string;
-  browser: UAParser.IBrowser;
-  cpu: UAParser.ICPU;
-  device: UAParser.IDevice;
-  engine: UAParser.IEngine;
-  os: UAParser.IOS;
+  browser: Pick<IBrowser, "name" | "version" | "major" | "type">;
+  cpu: Pick<ICPU, "architecture">;
+  device: Pick<IDevice, "type" | "vendor" | "model">;
+  engine: Pick<IEngine, "name" | "version">;
+  os: Pick<IOS, "name" | "version">;
 }
 
 export type { BrowserStats };

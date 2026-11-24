@@ -1,6 +1,9 @@
 import getFormData from "get-form-data";
 
-import type { VideomailErrorParams, VideomailPreviewParams } from "../types/events/params";
+import type {
+  VideomailErrorParams,
+  VideomailPreviewParams,
+} from "../types/events/params";
 import type { VideomailClientOptions } from "../types/options";
 import type { PartialVideomail, Videomail } from "../types/Videomail";
 import type { DespotEmitter } from "../util/Despot";

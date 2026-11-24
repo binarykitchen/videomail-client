@@ -7,7 +7,11 @@ import Constants from "./constants";
 import type { FullVideomailErrorData } from "./types/error";
 import type { VideomailClientOptions } from "./types/options";
 import type { VideomailThread } from "./types/thread";
-import type { PartialVideomail, Videomail, VideomailIdentifierType } from "./types/Videomail";
+import type {
+  PartialVideomail,
+  Videomail,
+  VideomailIdentifierType,
+} from "./types/Videomail";
 import getBrowser from "./util/browser/getBrowser";
 import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";

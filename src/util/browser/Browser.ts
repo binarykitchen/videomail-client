@@ -1,4 +1,4 @@
-import type { IResult} from "ua-parser-js";
+import type { IResult } from "ua-parser-js";
 import { UAParser } from "ua-parser-js";
 
 import canPlayType from "../../media/video/canPlayType";

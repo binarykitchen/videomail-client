@@ -1,5 +1,4 @@
-import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
-
+import type { BrowserStats } from "../../types/BrowserStats";
 import type { VideomailErrorVersions } from "../../types/error";
 import type { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../browser/getBrowser";
@@ -22,11 +21,11 @@ class VideomailError extends HTTPVideomailError {
   public err?: Error | undefined;
   public promise?: Promise<any> | undefined;
   public reason?: any;
-  public browser: IBrowser;
-  public cpu?: ICPU | undefined;
-  public device?: IDevice | undefined;
-  public engine: IEngine;
-  public os?: IOS | undefined;
+  public browser: BrowserStats["browser"];
+  public cpu?: BrowserStats["cpu"] | undefined;
+  public device?: BrowserStats["device"] | undefined;
+  public engine: BrowserStats["engine"];
+  public os?: BrowserStats["os"] | undefined;
   public screen: string;
   public orientation?: string | undefined;
   public versions?: VideomailErrorVersions | undefined;

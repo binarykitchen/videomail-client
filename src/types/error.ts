@@ -1,5 +1,6 @@
 import type { ErrorObject } from "serialize-error";
-import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
+
+import type { BrowserStats } from "./BrowserStats";
 
 export interface VideomailErrorVersions {
   videomailNinjaFormPlugin?: string | undefined;
@@ -55,13 +56,13 @@ export interface VideomailNativeErrorData {
 export interface FullVideomailErrorData extends VideomailErrorData {
   diagnostics?: string[] | undefined;
   native?: VideomailNativeErrorData | undefined;
-  browser: IBrowser;
-  cpu?: ICPU | undefined;
-  device?: IDevice | undefined;
-  engine: IEngine;
+  browser: BrowserStats["browser"];
+  cpu?: BrowserStats["cpu"] | undefined;
+  device?: BrowserStats["device"] | undefined;
+  engine: BrowserStats["engine"];
   location: string;
   orientation?: string | undefined;
-  os?: IOS | undefined;
+  os?: BrowserStats["os"] | undefined;
   screen: string;
   clientIp?: string | null | undefined;
   userAgent?: string | null | undefined;

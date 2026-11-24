@@ -95,7 +95,6 @@
     "@tsconfig/strictest": "2.0.9",
     "@types/node": "26.6.6",
     "@types/superagent": "8.1.11",
-    "@types/ua-parser-js": "0.7.39",
     "@vitest/eslint-plugin": "1.6.28",
     "audit-ci": "7.1.0",
     "chromatic": "18.15.2",
