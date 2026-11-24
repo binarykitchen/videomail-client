@@ -1,4 +1,5 @@
 import { VideomailClientOptions } from "../../../../types/options";
+import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
 import Visuals from "../../../visuals";
@@ -74,20 +75,8 @@ class Countdown {
   }
 
   public build() {
-    this.countdownElement = this.visuals
-      .getElement()
-      ?.querySelector<HTMLElement>(".countdown");
-
-    if (!this.countdownElement) {
-      this.countdownElement = document.createElement("p");
-      this.countdownElement.className = "countdown";
-
-      this.hide();
-
-      this.visuals.appendChild(this.countdownElement);
-    } else {
-      this.hide();
-    }
+    this.countdownElement = getOrCreateChild(this.visuals.getElement(), "p", "countdown");
+    this.hide();
 
     // Lets screen readers follow "3, 2, 1" without moving focus.
     this.countdownElement.setAttribute("aria-live", "polite");

@@ -8,7 +8,9 @@ import { VideomailClientOptions } from "../../types/options";
 import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
+import setDimensionStyle from "../../util/html/dimensions/setDimensionStyle";
 import useFullWidth from "../../util/html/dimensions/useFullWidth";
+import getOrCreateChild from "../../util/html/getOrCreateChild";
 import hideElement from "../../util/html/hideElement";
 import isHidden from "../../util/html/isHidden";
 import showElement from "../../util/html/showElement";
@@ -198,17 +200,8 @@ class Notifier extends Despot {
         heightDimension = this.visuals.getRecorderHeight(true);
       }
 
-      if (widthDimension) {
-        this.notifyElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
-      } else {
-        this.notifyElement.style.removeProperty("width");
-      }
-
-      if (heightDimension) {
-        this.notifyElement.style.height = `${heightDimension.value}${heightDimension.unit}`;
-      } else {
-        this.notifyElement.style.removeProperty("height");
-      }
+      setDimensionStyle(this.notifyElement, "width", widthDimension);
+      setDimensionStyle(this.notifyElement, "height", heightDimension);
     }
   }
 
@@ -342,17 +335,8 @@ class Notifier extends Despot {
   public build() {
     this.options.logger.debug("Notifier: build()");
 
-    this.notifyElement = this.visuals.getElement()?.querySelector(".notifier");
-
-    if (!this.notifyElement) {
-      this.notifyElement = document.createElement("div");
-
-      this.hide();
-
-      this.visuals.appendChild(this.notifyElement);
-    } else {
-      this.hide();
-    }
+    this.notifyElement = getOrCreateChild(this.visuals.getElement(), "div", "notifier");
+    this.hide();
 
     // Live regions must exist before their content changes, or nothing gets read.
     this.setLiveRegion(false);
@@ -412,10 +396,6 @@ class Notifier extends Despot {
     }
 
     return Boolean(this.notifyElement && !isHidden(this.notifyElement));
-  }
-
-  public isBuilt() {
-    return this.built;
   }
 
   public notify(

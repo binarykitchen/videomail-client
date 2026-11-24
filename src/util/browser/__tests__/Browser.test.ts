@@ -21,14 +21,12 @@ describe("Browser class", () => {
       firefox: browser.isFirefox(),
       ios: browser.isIOS(),
       mobile: browser.isMobile(),
-      okSafari: browser.isOkSafari(),
     }).toEqual({
       android: false,
       chromeBased: false,
       firefox: false,
       ios: false,
       mobile: false,
-      okSafari: false,
     });
   });
 

@@ -67,15 +67,14 @@ describe("Visuals", () => {
     expect(element.querySelector("video.replay")).not.toBeNull();
   });
 
-  it("appends and removes visual children", () => {
+  it("appends visual children", () => {
     const { visuals } = createFixture();
     const child = document.createElement("p");
     visuals.build();
+
     visuals.appendChild(child);
 
-    visuals.removeChild(child);
-
-    expect(child.isConnected).toBe(false);
+    expect(visuals.getElement()?.contains(child)).toBe(true);
   });
 
   it("hides and shows its element", () => {
@@ -417,14 +416,6 @@ describe("Visuals", () => {
     vi.spyOn(visuals.getRecorder(), "validate").mockReturnValue(true);
 
     expect(visuals.validate()).toBe(true);
-  });
-
-  it("updates the recording time limit", () => {
-    const { options, visuals } = createFixture();
-
-    visuals.setLimitSeconds(45);
-
-    expect(options.video.limitSeconds).toBe(45);
   });
 
   it("returns to a hidden unbuilt state when unloaded", () => {

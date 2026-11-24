@@ -41,26 +41,12 @@ describe("Notifier", () => {
     vi.useRealTimers();
   });
 
-  it("reports an unbuilt state before building", () => {
-    const { notifier } = createFixture();
-
-    expect(notifier.isBuilt()).toBe(false);
-  });
-
   it("builds a hidden notifier element", () => {
     const { element, notifier } = createFixture();
 
     notifier.build();
 
     expect((element.firstElementChild as HTMLElement | null)?.style.display).toBe("none");
-  });
-
-  it("reports a built state after building", () => {
-    const { notifier } = createFixture();
-
-    notifier.build();
-
-    expect(notifier.isBuilt()).toBe(true);
   });
 
   it("shows a notification message", () => {

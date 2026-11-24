@@ -1,4 +1,3 @@
-import defined from "defined";
 import { IResult, UAParser } from "ua-parser-js";
 
 import canPlayType from "../../media/video/canPlayType";
@@ -18,7 +17,7 @@ class Browser {
   public constructor(options: VideomailClientOptions) {
     this.options = options;
 
-    const ua = defined(options.fakeUaString, window.navigator.userAgent, "");
+    const ua = options.fakeUaString ?? window.navigator.userAgent;
 
     const userAgentParser = new UAParser(ua);
 
@@ -38,10 +37,6 @@ class Browser {
     );
   }
 
-  private getBrowserVersion() {
-    return this.result.browser.version;
-  }
-
   private isChrome() {
     return this.result.browser.name === "Chrome";
   }
@@ -52,14 +47,6 @@ class Browser {
 
   public isFirefox() {
     return this.result.browser.name === "Firefox";
-  }
-
-  private isSafari() {
-    if (!this.result.browser.name) {
-      return false;
-    }
-
-    return this.result.browser.name.includes("Safari");
   }
 
   public isAndroid() {
@@ -79,16 +66,6 @@ class Browser {
     return this.isIOS() || this.isAndroid();
   }
 
-  public isOkSafari() {
-    const version = this.getBrowserVersion();
-
-    if (!version) {
-      return false;
-    }
-
-    return this.isSafari() && Number.parseFloat(version) >= 11;
-  }
-
   public getVideoType(video: HTMLVideoElement) {
     if (!this.videoType) {
       if (canPlayType(video, VideoType.MP4)) {
@@ -100,11 +77,6 @@ class Browser {
 
     if (!isSupportedVideoType(this.videoType)) {
       // Anything else defaults to the fallback
-      this.videoType = FALLBACK_VIDEO_TYPE;
-    }
-
-    if (this.videoType.trim() === "") {
-      // Just as a fallback
       this.videoType = FALLBACK_VIDEO_TYPE;
     }
 

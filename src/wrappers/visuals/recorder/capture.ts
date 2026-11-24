@@ -231,8 +231,6 @@ abstract class RecorderCapture extends RecorderMedia {
       options: this.options,
     });
 
-    this.frameProgress = this.calculateFrameProgress();
-
     this.updateOverallProgress();
   }
 

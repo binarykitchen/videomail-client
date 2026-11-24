@@ -1,15 +1,5 @@
-import Visuals from "../../../../visuals";
 import RecordNote from "../recordNote";
-
-function createVisuals() {
-  const element = document.createElement("div");
-  const visuals = {
-    appendChild: (child: HTMLElement) => element.appendChild(child),
-    getElement: () => element,
-  } as unknown as Visuals;
-
-  return { element, visuals };
-}
+import createVisuals from "./createVisuals";
 
 describe("RecordNote", () => {
   it("builds a hidden record note", () => {

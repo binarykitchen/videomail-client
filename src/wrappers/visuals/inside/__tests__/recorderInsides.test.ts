@@ -81,10 +81,10 @@ describe("RecorderInsides", () => {
     expect(element.querySelector(".recordTimer")?.textContent).toBe("0:30");
   });
 
-  it("applies an updated recording limit", () => {
-    const { element, recorderInsides } = createFixture();
+  it("follows a recording limit changed in the shared options", () => {
+    const { element, options, recorderInsides } = createFixture();
     recorderInsides.build();
-    recorderInsides.setLimitSeconds(45);
+    options.video.limitSeconds = 45;
 
     emitRecording(recorderInsides);
 

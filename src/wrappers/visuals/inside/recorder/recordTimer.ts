@@ -1,4 +1,5 @@
 import { VideomailClientOptions } from "../../../../types/options";
+import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
 import pad from "../../../../util/string/pad";
@@ -122,10 +123,6 @@ class RecordTimer {
     return this.options.video.limitSeconds;
   }
 
-  public setLimitSeconds(limitSeconds: number) {
-    this.options.video.limitSeconds = limitSeconds;
-  }
-
   public start() {
     this.countdown = this.getStartSeconds();
     this.nearComputed = this.endNighComputed = false;
@@ -163,18 +160,12 @@ class RecordTimer {
   }
 
   public build() {
-    this.recordTimerElement = this.visuals.getElement()?.querySelector(".recordTimer");
-
-    if (!this.recordTimerElement) {
-      this.recordTimerElement = document.createElement("p");
-      this.recordTimerElement.classList.add("recordTimer");
-
-      this.hide();
-
-      this.visuals.appendChild(this.recordTimerElement);
-    } else {
-      this.hide();
-    }
+    this.recordTimerElement = getOrCreateChild(
+      this.visuals.getElement(),
+      "p",
+      "recordTimer",
+    );
+    this.hide();
   }
 }
 

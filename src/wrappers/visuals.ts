@@ -5,6 +5,7 @@ import getBrowser from "../util/browser/getBrowser";
 import type { DespotEmitter } from "../util/Despot";
 import Despot from "../util/Despot";
 import VideomailError from "../util/error/VideomailError";
+import setDimensionStyle from "../util/html/dimensions/setDimensionStyle";
 import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import isHidden from "../util/html/isHidden";
@@ -165,18 +166,8 @@ class Visuals extends Despot {
         heightDimension = this.getRecorderHeight(true);
       }
 
-      if (widthDimension?.value) {
-        this.visualsElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
-      } else {
-        this.visualsElement.style.removeProperty("width");
-      }
-
-      if (heightDimension?.value) {
-        const height = `${heightDimension.value}${heightDimension.unit}`;
-        this.visualsElement.style.height = height;
-      } else {
-        this.visualsElement.style.removeProperty("height");
-      }
+      setDimensionStyle(this.visualsElement, "width", widthDimension);
+      setDimensionStyle(this.visualsElement, "height", heightDimension);
     }
   }
 
@@ -264,10 +255,6 @@ class Visuals extends Despot {
 
   public appendChild(child: HTMLElement) {
     this.visualsElement?.appendChild(child);
-  }
-
-  public removeChild(child: HTMLElement) {
-    child.remove();
   }
 
   public reset() {
@@ -558,10 +545,6 @@ class Visuals extends Despot {
     this.recorderInsides.checkTimer(elapsedTime);
   }
 
-  public isNotifierBuilt() {
-    return this.notifier.isBuilt();
-  }
-
   public isReplayShown() {
     return this.replay.isShown();
   }
@@ -593,11 +576,6 @@ class Visuals extends Despot {
     } else {
       this.recorder.record();
     }
-  }
-
-  public setLimitSeconds(limitSeconds: number) {
-    this.options.video.limitSeconds = limitSeconds;
-    this.recorderInsides.setLimitSeconds(limitSeconds);
   }
 
   public getElement() {

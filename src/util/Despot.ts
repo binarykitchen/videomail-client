@@ -126,14 +126,7 @@ class Despot {
   ) {
     const callback = (...params: Parameters<VideomailEvents[E]>) => {
       unbind();
-
-      if (params.length > 0) {
-        // Safely call listener with params
-        (listener as (...args: any[]) => void)(...params);
-      } else {
-        // Safely call listener with no params
-        (listener as () => void)();
-      }
+      (listener as (...args: Parameters<VideomailEvents[E]>) => void)(...params);
     };
 
     // TODO Fix force typing later

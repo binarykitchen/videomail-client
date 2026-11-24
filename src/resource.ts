@@ -13,8 +13,18 @@ import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
 import sanitizeErrorReport from "./util/error/sanitizeErrorReport";
 import VideomailError from "./util/error/VideomailError";
+import getVersions from "./util/getVersions";
 import sanitizeUrl from "./util/url/sanitizeUrl";
 import { FormMethod, FormMethodType } from "./wrappers/form";
+
+// Fields the host's defaults can fill in when its form leaves them empty.
+const DEFAULT_FIELDS: readonly string[] = ["from", "to", "cc", "bcc", "subject", "body"];
+
+// Superagent's names for the encodings a host form can use.
+const FORM_TYPES = new Map([
+  [Constants.public.ENC_TYPE_APP_JSON, "json"],
+  [Constants.public.ENC_TYPE_FORM, "form"],
+]);
 
 class Resource {
   private readonly options: VideomailClientOptions;
@@ -26,25 +36,29 @@ class Resource {
     this.timezoneId = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 
-  private applyDefaultValue(videomail: PartialVideomail, name: string) {
-    if (this.options.defaults[name] && !videomail[name]) {
-      videomail[name] = this.options.defaults[name];
+  private applyDefaultValues(videomail: PartialVideomail) {
+    const newVideomail = { ...videomail };
+
+    // TODO(types) Defaults are plain strings, but to, cc and bcc expect address lists.
+    for (const name of DEFAULT_FIELDS) {
+      const defaultValue = this.options.defaults[name];
+
+      if (defaultValue && !newVideomail[name]) {
+        newVideomail[name] = defaultValue;
+      }
     }
 
-    return videomail;
+    return newVideomail;
   }
 
-  private applyDefaultValues(videomail: PartialVideomail) {
-    let newVideomail = { ...videomail };
-
-    newVideomail = this.applyDefaultValue(newVideomail, "from");
-    newVideomail = this.applyDefaultValue(newVideomail, "to");
-    newVideomail = this.applyDefaultValue(newVideomail, "cc");
-    newVideomail = this.applyDefaultValue(newVideomail, "bcc");
-    newVideomail = this.applyDefaultValue(newVideomail, "subject");
-    newVideomail = this.applyDefaultValue(newVideomail, "body");
-
-    return newVideomail;
+  // Every write to the Videomail API identifies the site and the user's time zone.
+  private sendToApi(method: FormMethodType, url: string, body: object) {
+    return superagent(method, url)
+      .query({ [Constants.WHITELIST_KEY_LABEL]: this.options.whitelistKey })
+      .set("Timezone-Id", this.timezoneId)
+      .withCredentials()
+      .send(body)
+      .timeout(this.options.timeouts.connection);
   }
 
   private async get(
@@ -77,10 +91,6 @@ class Resource {
   }
 
   private async write(method: FormMethodType, videomail: PartialVideomail) {
-    const queryParams = {
-      [Constants.WHITELIST_KEY_LABEL]: this.options.whitelistKey,
-    };
-
     const path = videomail.public ? "wall" : "videomail";
     let url = `${this.options.apiUrl}/${path}/`;
 
@@ -103,14 +113,7 @@ class Resource {
     }
 
     try {
-      const request = await superagent(method, url)
-        .query(queryParams)
-        .set("Timezone-Id", this.timezoneId)
-        .withCredentials()
-        .send(videomail)
-        .timeout(this.options.timeouts.connection);
-
-      return request;
+      return await this.sendToApi(method, url, videomail);
     } catch (exc) {
       throw createError({ exc: findOriginalExc(exc), options: this.options });
     }
@@ -133,10 +136,6 @@ class Resource {
   }
 
   public async reportError(err: VideomailError) {
-    const queryParams = {
-      [Constants.WHITELIST_KEY_LABEL]: this.options.whitelistKey,
-    };
-
     const url = `${this.options.apiUrl}/client-error/`;
 
     let supportedConstraints: MediaTrackSupportedConstraints | undefined;
@@ -155,10 +154,7 @@ class Resource {
     }
 
     const fullVideomailErrorData: FullVideomailErrorData = {
-      versions: {
-        videomailClient: videomailClientVersion,
-        videomailNinjaFormPlugin: this.options.versions?.videomailNinjaFormPlugin,
-      },
+      versions: getVersions(this.options),
       browser: err.browser,
       code: err.code,
       cause: err.cause instanceof Error ? serializeError(err.cause) : err.cause,
@@ -182,13 +178,12 @@ class Resource {
       usedConstraints: err.usedConstraints,
     };
 
-    await superagent(FormMethod.POST, url)
-      .query(queryParams)
-      .set("Timezone-Id", this.timezoneId)
-      .withCredentials()
-      // Send plain JSON, not a live Error instance.
-      .send(sanitizeErrorReport(fullVideomailErrorData))
-      .timeout(this.options.timeouts.connection);
+    // Send plain JSON, not a live Error instance.
+    await this.sendToApi(
+      FormMethod.POST,
+      url,
+      sanitizeErrorReport(fullVideomailErrorData),
+    );
   }
 
   public async post(videomail: PartialVideomail) {
@@ -231,20 +226,13 @@ class Resource {
   }
 
   public async form(formData: Record<string, unknown>, url: string) {
-    let formType: string;
+    const formType = FORM_TYPES.get(this.options.enctype);
 
-    switch (this.options.enctype) {
-      case Constants.public.ENC_TYPE_APP_JSON:
-        formType = "json";
-        break;
-      case Constants.public.ENC_TYPE_FORM:
-        formType = "form";
-        break;
-      default:
-        throw createError({
-          err: new Error(`Invalid enctype given: ${this.options.enctype}`),
-          options: this.options,
-        });
+    if (!formType) {
+      throw createError({
+        err: new Error(`Invalid enctype given: ${this.options.enctype}`),
+        options: this.options,
+      });
     }
 
     try {

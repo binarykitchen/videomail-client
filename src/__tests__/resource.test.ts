@@ -334,4 +334,21 @@ describe("Resource class", () => {
       expect.objectContaining({ recordLocation: `${window.location.origin}/contact` }),
     );
   });
+
+  it("fills empty fields from the configured defaults but keeps entered ones", async () => {
+    const options = mergeWithDefaultOptions({
+      reportErrors: false,
+      defaults: { from: "default@example.com", subject: "Default subject" },
+    });
+    const resource = new Resource(options);
+
+    await resource.post({ subject: "Entered subject" });
+
+    expect(reportRequest.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: "default@example.com",
+        subject: "Entered subject",
+      }),
+    );
+  });
 });

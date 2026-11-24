@@ -140,14 +140,8 @@ class Recorder extends RecorderCapture {
     }
 
     const e = params?.e;
+    const prettyCause = e?.type ? `, cause: ${e.type}` : "";
 
-    let cause: string | undefined;
-
-    if (e) {
-      cause = e.type;
-    }
-
-    const prettyCause = cause ? `, cause: ${cause}` : "";
     this.options.logger.debug(`Recorder: unload()${prettyCause}`);
 
     this.recordingActive = false;

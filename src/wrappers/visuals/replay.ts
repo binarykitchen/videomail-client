@@ -232,13 +232,10 @@ class Replay extends Despot {
       if (hasMedia) {
         showElement(this.replayElement);
       }
-    } else {
-      showElement(this.replayElement);
-    }
 
-    if (playerOnly) {
       showElement(this.replayElement.parentElement);
     } else {
+      showElement(this.replayElement);
       this.visuals.show();
     }
 
@@ -348,27 +345,11 @@ class Replay extends Despot {
   }
 
   public getVideoSource(type: string) {
-    if (!this.replayElement) {
-      return;
-    }
-
-    const sources = this.replayElement.getElementsByTagName("source");
-    const l = sources.length;
-    const videoType = `video/${type}`;
-
-    let source: HTMLSourceElement | undefined;
-
-    if (l) {
-      let i;
-
-      for (i = 0; i < l && !source; i++) {
-        if (sources[i]?.getAttribute("type") === videoType) {
-          source = sources[i];
-        }
-      }
-    }
-
-    return source;
+    return (
+      this.replayElement?.querySelector<HTMLSourceElement>(
+        `source[type="video/${type}"]`,
+      ) ?? undefined
+    );
   }
 
   private setTrackSource(src: string) {
@@ -389,7 +370,6 @@ class Replay extends Despot {
     } else {
       const track = document.createElement("track");
 
-      track.setAttribute("src", src);
       track.src = src;
 
       // Use captions without requiring a subtitle language.
@@ -522,10 +502,6 @@ class Replay extends Despot {
     }
 
     return !isHidden(this.replayElement) && !this.visuals.isHidden();
-  }
-
-  public getVisuals() {
-    return this.visuals;
   }
 
   public getElement() {

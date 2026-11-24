@@ -1,5 +1,6 @@
 import type AudioSample from "audio-sample";
 
+import stopMediaStream from "../../../media/video/stopMediaStream";
 import type { VideomailUserMediaReadyParams } from "../../../types/events/params";
 import type { VideomailClientOptions } from "../../../types/options";
 import getBrowser from "../../../util/browser/getBrowser";
@@ -173,9 +174,7 @@ abstract class RecorderMedia extends RecorderConnection {
     params?: VideomailUserMediaReadyParams,
   ) {
     if (!this.userMedia) {
-      localStream.getTracks().forEach((track) => {
-        track.stop();
-      });
+      stopMediaStream(localStream);
 
       throw createError({ message: "No user media is defined", options: this.options });
     }
@@ -202,18 +201,14 @@ abstract class RecorderMedia extends RecorderConnection {
           params,
         );
       } catch (exc) {
-        localStream.getTracks().forEach((track) => {
-          track.stop();
-        });
+        stopMediaStream(localStream);
 
         this.userMediaLoading = false;
         this.clearUserMediaTimeout();
         this.userMediaErrorCallback(exc, { audio: isAudioEnabled(this.options) });
       }
     } else {
-      localStream.getTracks().forEach((track) => {
-        track.stop();
-      });
+      stopMediaStream(localStream);
       this.userMediaLoading = false;
       this.clearUserMediaTimeout();
       this.cancelCameraRecovery();

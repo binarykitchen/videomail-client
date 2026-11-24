@@ -14,7 +14,6 @@ interface ContainerInternals {
     pauseOrResume: () => void;
     recordOrStop: () => void;
     record: () => void;
-    setLimitSeconds: (limitSeconds: number) => void;
     show: () => void;
     getRecordingDimensions: () => { width: number; height: number } | undefined;
     getRecorderWidth: (responsive: boolean) => { unit: string; value: number };
@@ -928,21 +927,6 @@ describe("Container", () => {
     container.record();
 
     expect(record).toHaveBeenCalledOnce();
-  });
-
-  it("updates and delegates the recording limit", () => {
-    const container = new Container(mergeWithDefaultOptions());
-    const internals = getInternals(container);
-    const setLimit = vi
-      .spyOn(internals.visuals, "setLimitSeconds")
-      .mockImplementation(() => undefined);
-
-    container.setLimitSeconds(45);
-
-    expect([internals.options.video.limitSeconds, setLimit.mock.calls]).toEqual([
-      45,
-      [[45]],
-    ]);
   });
 
   it("shows the container without starting recorder work when visuals are stubbed", () => {

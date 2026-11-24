@@ -1,3 +1,4 @@
+import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
 import Visuals from "../../../visuals";
@@ -11,18 +12,12 @@ class RecordNote {
   }
 
   public build() {
-    this.recordNoteElement = this.visuals.getElement()?.querySelector(".recordNote");
-
-    if (!this.recordNoteElement) {
-      this.recordNoteElement = document.createElement("p");
-      this.recordNoteElement.classList.add("recordNote");
-
-      this.hide();
-
-      this.visuals.appendChild(this.recordNoteElement);
-    } else {
-      this.hide();
-    }
+    this.recordNoteElement = getOrCreateChild(
+      this.visuals.getElement(),
+      "p",
+      "recordNote",
+    );
+    this.hide();
   }
 
   public stop() {

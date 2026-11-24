@@ -107,12 +107,4 @@ describe("RecordTimer", () => {
 
     expect(recordTimer.isStopped()).toBe(true);
   });
-
-  it("updates the configured limit", () => {
-    const { options, recordTimer } = createFixture();
-
-    recordTimer.setLimitSeconds(45);
-
-    expect(options.video.limitSeconds).toBe(45);
-  });
 });

@@ -19,6 +19,7 @@ import VideomailError from "../util/error/VideomailError";
 import getValidity from "../util/getValidity";
 import limitHeight from "../util/html/dimensions/limitHeight";
 import limitWidth from "../util/html/dimensions/limitWidth";
+import setDimensionStyle from "../util/html/dimensions/setDimensionStyle";
 import useFullWidth from "../util/html/dimensions/useFullWidth";
 import hideElement from "../util/html/hideElement";
 import showElement from "../util/html/showElement";
@@ -411,11 +412,7 @@ class Container extends Despot {
         widthDimension = this.visuals.getRecorderWidth(true);
       }
 
-      if (widthDimension?.value) {
-        this.containerElement.style.width = `${widthDimension.value}${widthDimension.unit}`;
-      } else {
-        this.containerElement.style.removeProperty("width");
-      }
+      setDimensionStyle(this.containerElement, "width", widthDimension);
     }
   }
 
@@ -971,11 +968,6 @@ class Container extends Despot {
 
   public recordAgain() {
     this.visuals.recordAgain();
-  }
-
-  public setLimitSeconds(limitSeconds: number) {
-    this.options.video.limitSeconds = limitSeconds;
-    this.visuals.setLimitSeconds(limitSeconds);
   }
 }
 

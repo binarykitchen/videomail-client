@@ -10,6 +10,7 @@ import getValidity from "../util/getValidity";
 import getValidationEventType from "../util/html/getValidationEventType";
 import hideElement from "../util/html/hideElement";
 import isNotButton from "../util/html/isNotButton";
+import restoreAttribute from "../util/html/restoreAttribute";
 import showElement from "../util/html/showElement";
 import pretty from "../util/string/pretty";
 import Container from "./container";
@@ -42,7 +43,8 @@ class Form extends Despot {
   private submitButtonFormAttribute: string | null = null;
   private generatedFormId: string | undefined;
   private isSubmitting = false;
-  private readonly submissionDisabledStates = new Map<Element, boolean>();
+  // Each control's own disabled attribute, so a failed submission can put it back.
+  private readonly submissionDisabledStates = new Map<Element, string | null>();
 
   private readonly fieldMappings: FormFieldMappings;
 
@@ -157,19 +159,15 @@ class Form extends Despot {
     for (const formControl of this.formElement.elements) {
       this.submissionDisabledStates.set(
         formControl,
-        formControl.hasAttribute("disabled"),
+        formControl.getAttribute("disabled"),
       );
       formControl.setAttribute("disabled", "disabled");
     }
   }
 
   public restoreAfterFailedSubmission() {
-    for (const [formControl, wasDisabled] of this.submissionDisabledStates) {
-      if (wasDisabled) {
-        formControl.setAttribute("disabled", "disabled");
-      } else {
-        formControl.removeAttribute("disabled");
-      }
+    for (const [formControl, disabled] of this.submissionDisabledStates) {
+      restoreAttribute(formControl, "disabled", disabled);
     }
 
     this.submissionDisabledStates.clear();
@@ -277,8 +275,8 @@ class Form extends Despot {
 
   private resetForm() {
     // Undo a replay's PUT without wiping the host's method. A blank method would
-    // turn a later native submission into a GET.
-    this.restoreOriginalMethod();
+    // turn a later native submission into a GET, so a missing one stays missing.
+    restoreAttribute(this.formElement, "method", this.originalMethod);
 
     // This resets all except hidden inputs
     this.formElement.reset();
@@ -291,15 +289,6 @@ class Form extends Despot {
       if (type?.toLowerCase() === "hidden") {
         (inputElement as HTMLInputElement).value = "";
       }
-    }
-  }
-
-  private restoreOriginalMethod() {
-    // Without a method attribute in the host markup, leave none behind either.
-    if (this.originalMethod === null) {
-      this.formElement.removeAttribute("method");
-    } else {
-      this.formElement.setAttribute("method", this.originalMethod);
     }
   }
 
@@ -339,11 +328,7 @@ class Form extends Despot {
     this.formElement.removeEventListener("submit", this.handleSubmit);
 
     if (this.submitButton) {
-      if (this.submitButtonFormAttribute === null) {
-        this.submitButton.removeAttribute("form");
-      } else {
-        this.submitButton.setAttribute("form", this.submitButtonFormAttribute);
-      }
+      restoreAttribute(this.submitButton, "form", this.submitButtonFormAttribute);
 
       this.submitButton = undefined;
       this.submitButtonFormAttribute = null;
@@ -372,18 +357,8 @@ class Form extends Despot {
     const url = this.formElement.getAttribute("action") ?? this.options.apiUrl;
     const method = this.formElement.getAttribute("method");
 
-    let chosenMethod: FormMethodType;
-
-    switch (method) {
-      case FormMethod.POST:
-        chosenMethod = FormMethod.POST;
-        break;
-      case FormMethod.PUT:
-        chosenMethod = FormMethod.PUT;
-        break;
-      default:
-        chosenMethod = FormMethod.POST;
-    }
+    // Only a replay's PUT updates a video. Anything else creates one.
+    const chosenMethod = method === FormMethod.PUT ? FormMethod.PUT : FormMethod.POST;
 
     if (this.container.hasElement()) {
       this.isSubmitting = true;

@@ -252,10 +252,4 @@ describe("Replay", () => {
 
     expect(replay.getElement()).toBeUndefined();
   });
-
-  it("returns its visuals owner", () => {
-    const { replay, visuals } = createFixture();
-
-    expect(replay.getVisuals()).toBe(visuals);
-  });
 });

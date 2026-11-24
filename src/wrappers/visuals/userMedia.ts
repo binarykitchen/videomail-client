@@ -3,6 +3,7 @@ import getFirstVideoTrack from "../../media/video/getFirstVideoTrack";
 import isVirtualCamera from "../../media/video/isVirtualCamera";
 import requestMediaStreamWithPermissions from "../../media/video/requestMediaStream";
 import startCanvasCameraPreview from "../../media/video/startCanvasCameraPreview";
+import stopMediaStream from "../../media/video/stopMediaStream";
 import VIDEO_EVENTS from "../../media/video/VideoEvents";
 import watchCameraPlayback from "../../media/video/watchCameraPlayback";
 import { Dimension } from "../../types/dimension";
@@ -18,6 +19,11 @@ import pretty from "../../util/string/pretty";
 import Recorder from "./recorder";
 
 const EVENT_ASCII = "|—O—|";
+
+// An ended, disabled or muted track can sit inside an active stream without delivering media.
+function isLiveTrack(track: MediaStreamTrack) {
+  return track.readyState === "live" && track.enabled && !track.muted;
+}
 
 interface MediaAcquisitionOptions {
   timeout: number;
@@ -93,10 +99,8 @@ class UserMedia extends Despot {
       }
 
       // Release the old camera stream, but never stop the one we just attached.
-      if (previousStream && previousStream !== stream) {
-        previousStream.getTracks().forEach((track) => {
-          track.stop();
-        });
+      if (previousStream !== stream) {
+        stopMediaStream(previousStream);
       }
     } else {
       throw createError({
@@ -208,9 +212,7 @@ class UserMedia extends Despot {
       (stream) => {
         if (!this.isCurrentAcquisition(acquisitionId)) {
           // A reset or newer request can win while the browser prompt is open.
-          stream?.getTracks().forEach((track) => {
-            track.stop();
-          });
+          stopMediaStream(stream);
           return;
         }
 
@@ -231,21 +233,14 @@ class UserMedia extends Despot {
   }
 
   private isVideoReady() {
-    const videoReady = this.currentVisualStream
-      ?.getVideoTracks()
-      .some((track) => track.readyState === "live" && track.enabled && !track.muted);
-
-    return Boolean(videoReady);
+    return Boolean(this.currentVisualStream?.getVideoTracks().some(isLiveTrack));
   }
 
   private isAudioReady() {
-    const audioReady =
+    return (
       !isAudioEnabled(this.options) ||
-      this.currentVisualStream
-        ?.getAudioTracks()
-        .some((track) => track.readyState === "live" && track.enabled && !track.muted);
-
-    return Boolean(audioReady);
+      Boolean(this.currentVisualStream?.getAudioTracks().some(isLiveTrack))
+    );
   }
 
   // Async callbacks from replaced streams must not affect the current initialization.
@@ -512,12 +507,8 @@ class UserMedia extends Despot {
     const onPlaying = () => {
       try {
         this.logEvent("playing", {
-          readyState: this.rawVisualUserMedia?.readyState,
+          ...this.getVideoElementState(),
           audio: isAudioEnabled(this.options),
-          width: this.rawVisualUserMedia?.width,
-          height: this.rawVisualUserMedia?.height,
-          videoWidth: this.rawVisualUserMedia?.videoWidth,
-          videoHeight: this.rawVisualUserMedia?.videoHeight,
         });
 
         this.rawVisualUserMedia?.removeEventListener("playing", onPlaying);
@@ -544,12 +535,8 @@ class UserMedia extends Despot {
     // Wait for metadata before using the camera dimensions.
     const onLoadedMetaData = () => {
       this.logEvent("loadedmetadata", {
-        readyState: this.rawVisualUserMedia?.readyState,
+        ...this.getVideoElementState(),
         paused: this.rawVisualUserMedia?.paused,
-        width: this.rawVisualUserMedia?.width,
-        height: this.rawVisualUserMedia?.height,
-        videoWidth: this.rawVisualUserMedia?.videoWidth,
-        videoHeight: this.rawVisualUserMedia?.videoHeight,
       });
 
       this.rawVisualUserMedia?.removeEventListener("loadedmetadata", onLoadedMetaData);
@@ -629,21 +616,12 @@ class UserMedia extends Despot {
       this.removeListener("SENDING_FIRST_FRAME");
       this.stopWatchingPlayback?.();
       this.stopWatchingPlayback = undefined;
-      let chosenStream = visualStream;
 
       // Leave stream cleanup to the upcoming initialization when requested.
       if (!params?.aboutToInitialize) {
         this.initializationId++;
         this.clearInitializationListeners?.();
-        chosenStream ??= this.currentVisualStream;
-
-        const tracks = chosenStream?.getTracks();
-
-        if (tracks) {
-          tracks.forEach((track) => {
-            track.stop();
-          });
-        }
+        stopMediaStream(visualStream ?? this.currentVisualStream);
 
         this.setVisualStream();
 
@@ -729,56 +707,33 @@ class UserMedia extends Despot {
   }
 
   public getRawWidth(responsive: boolean) {
-    let rawWidth: number | undefined;
     const widthDimension: Dimension = { unit: "px" };
 
-    if (!responsive) {
-      if (this.options.video.width) {
-        rawWidth = this.options.video.width;
-      } else {
-        rawWidth = this.getVideoWidth();
-      }
-    } else {
-      rawWidth = this.getVideoWidth();
-    }
-
     if (responsive) {
-      const widthDimension = this.recorder.limitWidth(rawWidth);
-      rawWidth = widthDimension?.value;
+      widthDimension.value = this.recorder.limitWidth(this.getVideoWidth())?.value;
+    } else {
+      widthDimension.value = this.options.video.width || this.getVideoWidth();
     }
-
-    widthDimension.value = rawWidth;
 
     return widthDimension;
   }
 
   public getRawHeight(responsive: boolean) {
-    let rawHeight: number | undefined;
+    let rawHeight = this.options.video.height || this.getVideoHeight();
 
     if (!responsive) {
-      if (this.options.video.height) {
-        rawHeight = this.options.video.height;
-      } else {
-        rawHeight = this.getVideoHeight();
-      }
-    } else {
-      rawHeight = this.options.video.height || this.getVideoHeight();
-
-      // In that case we have to calculate it ourselves with the ratio
-      const ratio = this.recorder.getRatio();
-      const rawWidth = this.getRawWidth(responsive);
-
-      if (ratio !== undefined && rawWidth.value) {
-        rawHeight = rawWidth.value * ratio;
-      }
+      return rawHeight;
     }
 
-    if (responsive) {
-      const heightDimension = this.recorder.limitHeight(rawHeight);
-      rawHeight = heightDimension.value;
+    // In that case we have to calculate it ourselves with the ratio
+    const ratio = this.recorder.getRatio();
+    const rawWidth = this.getRawWidth(responsive);
+
+    if (ratio !== undefined && rawWidth.value) {
+      rawHeight = rawWidth.value * ratio;
     }
 
-    return rawHeight;
+    return this.recorder.limitHeight(rawHeight).value;
   }
 
   public getRawVisuals() {
@@ -809,11 +764,18 @@ class UserMedia extends Despot {
   }
 
   public getAudioSampleRate() {
-    if (this.audioRecorder) {
-      return this.audioRecorder.getSampleRate();
-    }
+    return this.audioRecorder?.getSampleRate() ?? -1;
+  }
 
-    return -1;
+  // What the camera preview element reports about its size and loading progress.
+  private getVideoElementState() {
+    return {
+      readyState: this.rawVisualUserMedia?.readyState,
+      width: this.rawVisualUserMedia?.width,
+      height: this.rawVisualUserMedia?.height,
+      videoWidth: this.rawVisualUserMedia?.videoWidth,
+      videoHeight: this.rawVisualUserMedia?.videoHeight,
+    };
   }
 
   public getCharacteristics() {
@@ -822,11 +784,7 @@ class UserMedia extends Despot {
       muted: this.rawVisualUserMedia?.muted,
       paused: this.rawVisualUserMedia?.paused,
       currentTime: this.rawVisualUserMedia?.currentTime,
-      readyState: this.rawVisualUserMedia?.readyState,
-      width: this.rawVisualUserMedia?.width,
-      height: this.rawVisualUserMedia?.height,
-      videoWidth: this.rawVisualUserMedia?.videoWidth,
-      videoHeight: this.rawVisualUserMedia?.videoHeight,
+      ...this.getVideoElementState(),
     };
   }
 }

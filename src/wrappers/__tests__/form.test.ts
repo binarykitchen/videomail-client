@@ -348,6 +348,20 @@ describe("Form", () => {
     ).toBe(true);
   });
 
+  it("restores each control's own disabled state after a failed submission", () => {
+    const { form, formElement } = createFixture(`
+      <input name="subject">
+      <input name="body" disabled="">
+    `);
+
+    form.disableForSubmission();
+    form.restoreAfterFailedSubmission();
+
+    expect(
+      Array.from(formElement.elements, (element) => element.getAttribute("disabled")),
+    ).toEqual([null, ""]);
+  });
+
   it("submits form data with the configured method and action", async () => {
     const { form, formElement, submitAll } = createFixture(
       `<input name="subject" value="Hello">`,

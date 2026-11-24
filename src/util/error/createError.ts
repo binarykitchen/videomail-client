@@ -1,8 +1,8 @@
 import { VideomailClientOptions } from "../../types/options";
+import getVersions from "../getVersions";
 import isObjectLike from "../isObjectLike";
 import { isAudioEnabled } from "../options/audio";
 import pretty from "../string/pretty";
-import { version as videomailClientVersion } from "./../../../package.json";
 import type { HTTPVideomailErrorLike } from "./HTTPVideomailError";
 import VideomailError, { ErrData } from "./VideomailError";
 
@@ -214,11 +214,7 @@ function createError(errorParams: ErrorParams) {
     }
   }
 
-  let logLines: string[] | undefined;
-
-  if (options.logger.getLines) {
-    logLines = options.logger.getLines();
-  }
+  const logLines = options.logger.getLines?.();
 
   const args = [message, explanation].filter(Boolean).join(", ");
 
@@ -246,10 +242,7 @@ function createError(errorParams: ErrorParams) {
     videomailError.usedConstraints = err.usedConstraints;
   }
 
-  videomailError.versions = {
-    videomailClient: videomailClientVersion,
-    videomailNinjaFormPlugin: options.versions?.videomailNinjaFormPlugin,
-  };
+  videomailError.versions = getVersions(options);
 
   return videomailError;
 }

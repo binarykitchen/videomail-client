@@ -1,16 +1,6 @@
 import mergeWithDefaultOptions from "../../../../../util/options/mergeWithDefaultOptions";
-import Visuals from "../../../../visuals";
 import FacingMode from "../facingMode";
-
-function createVisuals() {
-  const element = document.createElement("div");
-  const visuals = {
-    appendChild: (child: HTMLElement) => element.appendChild(child),
-    getElement: () => element,
-  } as unknown as Visuals;
-
-  return { element, visuals };
-}
+import createVisuals from "./createVisuals";
 
 describe("FacingMode", () => {
   it("builds a hidden camera-switch button", () => {

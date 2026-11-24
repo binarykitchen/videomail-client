@@ -110,11 +110,10 @@ class VideomailClient extends Despot {
       return;
     }
 
+    // Every component shares these options, so the record timer counts from here on.
     this.options.video.limitSeconds = limitSeconds;
 
     this.options.logger.debug(`Client: setLimitSeconds (limitSeconds = ${limitSeconds})`);
-
-    this.container.setLimitSeconds(limitSeconds);
   }
 
   public unload(startingOver = false) {
@@ -215,11 +214,7 @@ class VideomailClient extends Despot {
   }
 
   public getLogLines() {
-    if (this.options.logger.getLines) {
-      return this.options.logger.getLines();
-    }
-
-    return undefined;
+    return this.options.logger.getLines?.();
   }
 }
 
