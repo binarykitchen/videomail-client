@@ -72,7 +72,7 @@ class Recorder extends RecorderCapture {
         case "ready":
           this.emit("SERVER_READY");
 
-          if (!this.userMediaTimeout) {
+          if (!this.userMediaTimeout.isPending()) {
             if (this.options.loadUserMediaOnRecord) {
               // Keep the preview blank until the user chooses Record.
               this.show();
@@ -149,11 +149,11 @@ class Recorder extends RecorderCapture {
     this.reset();
     this.recordingDimensions = undefined;
 
-    this.clearUserMediaTimeout();
-    this.clearConnectionTimeout();
-    this.clearReconnectTimeout();
-    this.clearRetryTimeout();
-    this.clearStopTimeout();
+    this.userMediaTimeout.clear();
+    this.connectionTimeout.clear();
+    this.reconnectTimeout.clear();
+    this.retryTimeout.clear();
+    this.stopTimeout.clear();
     this.stopPings();
 
     this.userMediaLoading = false;
@@ -193,7 +193,7 @@ class Recorder extends RecorderCapture {
     this.on("BLOCKING", () => {
       this.cancelCameraRecovery();
       this.blocking = true;
-      this.clearUserMediaTimeout();
+      this.userMediaTimeout.clear();
       this.closeIdleConnection("blocking-error");
     });
 

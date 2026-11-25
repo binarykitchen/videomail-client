@@ -18,6 +18,7 @@ import createNoAccessError from "../../util/error/createNoAccessError";
 import isHidden from "../../util/html/isHidden";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/string/pretty";
+import Timeout from "../../util/Timeout";
 import type Recorder from "./recorder";
 
 const EVENT_ASCII = "|—O—|";
@@ -63,7 +64,7 @@ class UserMedia extends Despot {
   private stopCanvasPreview?: (() => void) | undefined;
   private initializationId = 0;
   private acquisitionId = 0;
-  private acquisitionTimeout?: number | undefined;
+  private readonly acquisitionTimeout = new Timeout();
 
   private readonly outputEvent = (e: Event) => {
     this.logEvent(e.type, { readyState: this.rawVisualUserMedia?.readyState });
@@ -177,18 +178,9 @@ class UserMedia extends Despot {
     }
   }
 
-  private clearAcquisitionTimeout() {
-    if (this.acquisitionTimeout === undefined) {
-      return;
-    }
-
-    window.clearTimeout(this.acquisitionTimeout);
-    this.acquisitionTimeout = undefined;
-  }
-
   private cancelAcquisition() {
     this.acquisitionId++;
-    this.clearAcquisitionTimeout();
+    this.acquisitionTimeout.clear();
   }
 
   private isCurrentAcquisition(acquisitionId: number) {
@@ -203,7 +195,7 @@ class UserMedia extends Despot {
     this.cancelAcquisition();
     const acquisitionId = ++this.acquisitionId;
 
-    this.acquisitionTimeout = window.setTimeout(() => {
+    this.acquisitionTimeout.start(() => {
       if (!this.isCurrentAcquisition(acquisitionId)) {
         return;
       }
@@ -225,7 +217,7 @@ class UserMedia extends Despot {
           return;
         }
 
-        this.clearAcquisitionTimeout();
+        this.acquisitionTimeout.clear();
         if (stream) {
           callbacks.onStream(stream);
         }
@@ -235,7 +227,7 @@ class UserMedia extends Despot {
           return;
         }
 
-        this.clearAcquisitionTimeout();
+        this.acquisitionTimeout.clear();
         callbacks.onError(reason);
       },
     );

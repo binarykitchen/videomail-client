@@ -161,7 +161,7 @@ abstract class RecorderCapture extends RecorderMedia {
 
       this.userMediaLoading = this.blocking = this.unloaded = this.submitting = false;
       this.userMediaLoaded = true;
-      this.clearUserMediaTimeout();
+      this.userMediaTimeout.clear();
 
       if (this.shouldCreateNewLoopForMediaReady(params)) {
         this.loop = this.createLoop();
@@ -384,9 +384,7 @@ abstract class RecorderCapture extends RecorderMedia {
     this.loop?.complete?.();
 
     // Let STOPPING handlers prepare the player before checking its video type.
-    this.stopTimeout = window.setTimeout(() => {
-      this.clearStopTimeout();
-
+    this.stopTimeout.start(() => {
       // Stop must follow the last captured frame on the same socket.
       if (this.frameEncoding) {
         this.stopAfterFrameEncoding = true;
@@ -451,7 +449,7 @@ abstract class RecorderCapture extends RecorderMedia {
   protected reInitializeAudio() {
     this.options.logger.debug("Recorder: reInitializeAudio()");
 
-    this.clearUserMediaTimeout();
+    this.userMediaTimeout.clear();
     this.userMediaLoading = false;
 
     // important to free memory
@@ -466,9 +464,9 @@ abstract class RecorderCapture extends RecorderMedia {
   public override reset() {
     this.captureGeneration++;
     this.stopAfterFrameEncoding = false;
-    this.clearStopTimeout();
+    this.stopTimeout.clear();
     this.cancelCameraRecovery();
-    this.clearUserMediaTimeout();
+    this.userMediaTimeout.clear();
     this.userMediaLoading = false;
     this.pauseRecordingClock();
     this.recordingActive = false;

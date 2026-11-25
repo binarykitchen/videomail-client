@@ -17,6 +17,7 @@ import showElement from "../../util/html/showElement";
 import { isAudioEnabled } from "../../util/options/audio";
 import hasFixedVideoFrame from "../../util/options/hasFixedVideoFrame";
 import pretty from "../../util/string/pretty";
+import Timeout from "../../util/Timeout";
 import type Visuals from "../visuals";
 
 const NOTIFIER_MESSAGE_CLASS = "notifierMessage";
@@ -46,7 +47,7 @@ class Notifier extends Despot {
   private messageElement?: HTMLHeadingElement | null | undefined;
 
   private explanationElement?: HTMLElement | null | undefined;
-  private entertainTimeoutId?: number | undefined;
+  private readonly entertainTimeout = new Timeout();
 
   private entertaining = false;
   private built = false;
@@ -220,7 +221,7 @@ class Notifier extends Despot {
           this.notifyElement.className = `notifier entertain ${this.options.notifier.entertainClass}${randomBackgroundClass}`;
         }
 
-        this.entertainTimeoutId = window.setTimeout(
+        this.entertainTimeout.start(
           this.runEntertainment.bind(this),
           this.options.notifier.entertainInterval,
         );
@@ -237,9 +238,7 @@ class Notifier extends Despot {
       this.notifyElement.classList.remove("entertain");
     }
 
-    clearTimeout(this.entertainTimeoutId);
-
-    this.entertainTimeoutId = undefined;
+    this.entertainTimeout.clear();
     this.entertaining = false;
   }
 

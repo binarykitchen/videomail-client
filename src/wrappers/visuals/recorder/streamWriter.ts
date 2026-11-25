@@ -9,6 +9,7 @@ import createError from "../../../util/error/createError";
 import type VideomailError from "../../../util/error/VideomailError";
 import getAutomationSignals from "../../../util/getAutomationSignals";
 import pretty from "../../../util/string/pretty";
+import Timeout from "../../../util/Timeout";
 
 export const PIPE_SYMBOL = "°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸ ";
 
@@ -30,7 +31,12 @@ abstract class RecorderStreamWriter extends Despot {
 
   protected confirmedSampleNumber = 0;
 
-  protected backpressureTimeout?: number | undefined;
+  protected readonly backpressureTimeout = new Timeout();
+
+  // Lives here, so a failed take can cancel a pending reconnect, too.
+  protected readonly reconnectTimeout = new Timeout(() => {
+    this.options.logger.debug("Recorder: reconnect timeout cleared");
+  });
 
   protected recordingDimensions?: Pick<HTMLCanvasElement, "width" | "height"> | undefined;
 
@@ -58,7 +64,6 @@ abstract class RecorderStreamWriter extends Despot {
   protected abstract stopCaptureLoop(): void;
   protected abstract startCaptureLoop(): void;
   protected abstract stopPings(): void;
-  protected abstract clearReconnectTimeout(): void;
   public abstract reset(): void;
 
   protected constructor(options: VideomailClientOptions, emitter?: DespotEmitter) {
@@ -156,7 +161,7 @@ abstract class RecorderStreamWriter extends Despot {
     }
 
     this.streamBackpressured = false;
-    this.clearBackpressureTimeout();
+    this.backpressureTimeout.clear();
 
     // Preserve media order and stop again if the writable fills during the flush.
     let pendingWrite = this.pendingWrites.dequeue();
@@ -233,8 +238,8 @@ abstract class RecorderStreamWriter extends Despot {
     this.connecting = false;
     this.reconnecting = false;
 
-    this.clearReconnectTimeout();
-    this.clearBackpressureTimeout();
+    this.reconnectTimeout.clear();
+    this.backpressureTimeout.clear();
     this.discardSocket();
     this.reset();
 
@@ -252,9 +257,7 @@ abstract class RecorderStreamWriter extends Despot {
     }
 
     // A stalled socket may never drain, so bound how long the take can wait.
-    this.backpressureTimeout = window.setTimeout(() => {
-      this.backpressureTimeout = undefined;
-
+    this.backpressureTimeout.start(() => {
       if (this.shouldIgnoreBackpressureTimeout()) {
         return;
       }
@@ -270,8 +273,9 @@ abstract class RecorderStreamWriter extends Despot {
     }, this.options.timeouts.connection);
   }
 
+  // Keep the first deadline, so further full writes can't keep pushing it back.
   private shouldStartBackpressureTimeout() {
-    return this.backpressureTimeout === undefined && this.mediaTransmissionStarted;
+    return !this.backpressureTimeout.isPending() && this.mediaTransmissionStarted;
   }
 
   private shouldIgnoreBackpressureTimeout() {
@@ -307,19 +311,10 @@ abstract class RecorderStreamWriter extends Despot {
     this.flushPendingWrites(stream);
   }
 
-  private clearBackpressureTimeout() {
-    if (this.backpressureTimeout === undefined) {
-      return;
-    }
-
-    window.clearTimeout(this.backpressureTimeout);
-    this.backpressureTimeout = undefined;
-  }
-
   protected discardSocket() {
     this.options.logger.debug(`Recorder: discarding socket stream ...`);
 
-    this.clearBackpressureTimeout();
+    this.backpressureTimeout.clear();
     this.pendingWrites.clear();
     this.streamBackpressured = false;
     this.resumeAfterDrain = false;

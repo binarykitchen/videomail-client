@@ -13,6 +13,7 @@ import showElement from "../../../util/html/showElement";
 import { isAudioEnabled } from "../../../util/options/audio";
 import pretty from "../../../util/string/pretty";
 import summarize from "../../../util/string/summarize";
+import Timeout from "../../../util/Timeout";
 import type Visuals from "../../visuals";
 import type UserMedia from "../userMedia";
 import RecorderConnection from "./connection";
@@ -25,11 +26,15 @@ abstract class RecorderMedia extends RecorderConnection {
 
   protected userMedia?: UserMedia;
 
-  protected userMediaTimeout?: number | undefined;
+  protected readonly userMediaTimeout = new Timeout(() => {
+    this.options.logger.debug("Recorder: user media timeout cleared");
+  });
 
-  protected retryTimeout?: number | undefined;
+  protected readonly retryTimeout = new Timeout(() => {
+    this.options.logger.debug("Recorder: retry timeout cleared");
+  });
 
-  protected stopTimeout?: number | undefined;
+  protected readonly stopTimeout = new Timeout();
 
   protected cameraRecovery?: Promise<boolean> | undefined;
 
@@ -71,17 +76,6 @@ abstract class RecorderMedia extends RecorderConnection {
     this.userMedia?.showCanvasPreview();
   }
 
-  protected clearRetryTimeout() {
-    if (this.retryTimeout === undefined) {
-      return;
-    }
-
-    this.options.logger.debug("Recorder: clearRetryTimeout()");
-
-    window.clearTimeout(this.retryTimeout);
-    this.retryTimeout = undefined;
-  }
-
   private showUserMedia() {
     // Wait for the connection before showing the camera.
     // See https://github.com/binarykitchen/videomail.io/issues/323.
@@ -119,7 +113,7 @@ abstract class RecorderMedia extends RecorderConnection {
     }
 
     this.userMediaLoading = false;
-    this.clearUserMediaTimeout();
+    this.userMediaTimeout.clear();
 
     const characteristics = this.userMedia?.getCharacteristics();
 
@@ -146,9 +140,7 @@ abstract class RecorderMedia extends RecorderConnection {
         // This can be a startup race. Retry instead of showing an error.
         this.options.logger.debug(`Recorder: ignore user media error ${pretty(err)}`);
 
-        this.retryTimeout = window.setTimeout(() => {
-          this.retryTimeout = undefined;
-
+        this.retryTimeout.start(() => {
           if (!this.unloaded) {
             this.loadUserMedia();
           }
@@ -204,13 +196,13 @@ abstract class RecorderMedia extends RecorderConnection {
         stopMediaStream(localStream);
 
         this.userMediaLoading = false;
-        this.clearUserMediaTimeout();
+        this.userMediaTimeout.clear();
         this.userMediaErrorCallback(exc, { audio: isAudioEnabled(this.options) });
       }
     } else {
       stopMediaStream(localStream);
       this.userMediaLoading = false;
-      this.clearUserMediaTimeout();
+      this.userMediaTimeout.clear();
       this.cancelCameraRecovery();
     }
   }
@@ -329,7 +321,7 @@ abstract class RecorderMedia extends RecorderConnection {
 
       this.loadGenuineUserMedia(params);
     } catch (exc) {
-      this.clearUserMediaTimeout();
+      this.userMediaTimeout.clear();
 
       this.options.logger.debug("Recorder: failed to load genuine user media");
 
@@ -372,30 +364,12 @@ abstract class RecorderMedia extends RecorderConnection {
     return !this.recorderElement || isHidden(this.recorderElement);
   }
 
-  protected clearUserMediaTimeout() {
-    if (this.userMediaTimeout !== undefined) {
-      this.options.logger.debug("Recorder: clearUserMediaTimeout()");
-
-      window.clearTimeout(this.userMediaTimeout);
-      this.userMediaTimeout = undefined;
-    }
-  }
-
-  protected clearStopTimeout() {
-    if (this.stopTimeout === undefined) {
-      return;
-    }
-
-    window.clearTimeout(this.stopTimeout);
-    this.stopTimeout = undefined;
-  }
-
   public isReady() {
     return this.userMedia?.isReady();
   }
 
   protected finishCameraRecovery(restored: boolean) {
-    this.clearUserMediaTimeout();
+    this.userMediaTimeout.clear();
     const resolve = this.resolveCameraRecovery;
     const resumeRequested = restored && this.resumeAfterCameraRecovery;
     this.cameraRecovery = undefined;
@@ -416,7 +390,7 @@ abstract class RecorderMedia extends RecorderConnection {
 
     this.userMediaLoading = false;
     this.userMediaLoaded = false;
-    this.clearUserMediaTimeout();
+    this.userMediaTimeout.clear();
     this.userMedia?.stop(undefined, { preserveRecordingState: true });
     this.finishCameraRecovery(false);
   }
@@ -453,7 +427,7 @@ abstract class RecorderMedia extends RecorderConnection {
       this.userMediaLoading ||
       this.submitting ||
       Boolean(this.key) ||
-      this.stopTimeout !== undefined ||
+      this.stopTimeout.isPending() ||
       this.recordingTransportFailed
     );
   }
@@ -523,7 +497,7 @@ abstract class RecorderMedia extends RecorderConnection {
 
     // Backgrounding can suspend playback without ending the camera tracks.
     if (liveStream) {
-      this.userMediaTimeout = window.setTimeout(() => {
+      this.userMediaTimeout.start(() => {
         this.failCameraRecovery(new Error("Camera playback recovery timed out."));
       }, this.options.timeouts.userMedia);
 
@@ -571,8 +545,8 @@ abstract class RecorderMedia extends RecorderConnection {
         hideElement(this.recorderElement);
       }
 
-      this.clearUserMediaTimeout();
-      this.clearRetryTimeout();
+      this.userMediaTimeout.clear();
+      this.retryTimeout.clear();
     }
   }
 

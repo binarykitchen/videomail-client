@@ -2,15 +2,16 @@ import type { VideomailClientOptions } from "../../../../types/options";
 import getOrCreateChild from "../../../../util/html/getOrCreateChild";
 import hideElement from "../../../../util/html/hideElement";
 import showElement from "../../../../util/html/showElement";
+import Timeout from "../../../../util/Timeout";
 import type Visuals from "../../../visuals";
 
 class Countdown {
   private readonly visuals: Visuals;
   private readonly options: VideomailClientOptions;
+  private readonly fireTimeout = new Timeout();
 
   private countdownElement?: HTMLElement | null | undefined;
   private intervalId?: number | undefined;
-  private fireTimeoutId?: number | undefined;
   private countdown?: number | undefined;
   private paused = false;
 
@@ -24,10 +25,7 @@ class Countdown {
     this.hide();
 
     // keep all callbacks async
-    this.fireTimeoutId = window.setTimeout(() => {
-      this.fireTimeoutId = undefined;
-      cb();
-    }, 0);
+    this.fireTimeout.start(cb, 0);
   }
 
   private countBackward(cb) {
@@ -95,13 +93,10 @@ class Countdown {
       window.clearInterval(this.intervalId);
     }
 
-    if (this.fireTimeoutId !== undefined) {
-      window.clearTimeout(this.fireTimeoutId);
-    }
+    this.fireTimeout.clear();
 
     this.paused = false;
     this.intervalId = undefined;
-    this.fireTimeoutId = undefined;
   }
 
   public hide() {

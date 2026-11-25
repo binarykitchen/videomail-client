@@ -13,15 +13,16 @@ import getAutomationSignals from "../../../util/getAutomationSignals";
 import isEvent from "../../../util/isEvent";
 import pretty from "../../../util/string/pretty";
 import summarize from "../../../util/string/summarize";
+import Timeout from "../../../util/Timeout";
 import RecorderStreamWriter, { PIPE_SYMBOL } from "./streamWriter";
 
 type ConnectionFailureReason = "timeout" | "closed" | "error";
 type RecorderOutgoingCommandArgs = VideomailCommandArgs | RecordingStats;
 
 abstract class RecorderConnection extends RecorderStreamWriter {
-  protected reconnectTimeout?: number | undefined;
-
-  protected connectionTimeout?: number | undefined;
+  protected readonly connectionTimeout = new Timeout(() => {
+    this.options.logger.debug("Recorder: connection timeout cleared");
+  });
 
   protected userMediaLoaded?: boolean | undefined;
 
@@ -125,8 +126,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       }),
     );
     this.connected = this.connecting = this.reconnecting = false;
-    this.clearConnectionTimeout();
-    this.clearReconnectTimeout();
+    this.connectionTimeout.clear();
+    this.reconnectTimeout.clear();
     this.stopPings();
     this.discardSocket();
   }
@@ -221,28 +222,6 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     this.pingInterval = undefined;
   }
 
-  protected clearConnectionTimeout() {
-    if (this.connectionTimeout === undefined) {
-      return;
-    }
-
-    this.options.logger.debug("Recorder: clearConnectionTimeout()");
-
-    window.clearTimeout(this.connectionTimeout);
-    this.connectionTimeout = undefined;
-  }
-
-  protected clearReconnectTimeout() {
-    if (this.reconnectTimeout === undefined) {
-      return;
-    }
-
-    this.options.logger.debug("Recorder: clearReconnectTimeout()");
-
-    window.clearTimeout(this.reconnectTimeout);
-    this.reconnectTimeout = undefined;
-  }
-
   private handleConnectionFailure(params: {
     url2Connect: string;
     cause: ConnectionFailureReason;
@@ -262,7 +241,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       return false;
     }
 
-    if (this.reconnectTimeout !== undefined) {
+    if (this.reconnectTimeout.isPending()) {
       return true;
     }
 
@@ -271,16 +250,14 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     this.reconnectAttempts++;
     this.connecting = false;
 
-    this.clearConnectionTimeout();
+    this.connectionTimeout.clear();
     this.discardSocket();
 
     this.options.logger.debug(
       `Recorder: retrying WebSocket connection in ${delayMs}ms (cause ${params.cause}).`,
     );
 
-    this.reconnectTimeout = window.setTimeout(() => {
-      this.reconnectTimeout = undefined;
-
+    this.reconnectTimeout.start(() => {
       if (this.shouldContinueReconnect()) {
         this.initSocket();
       }
@@ -322,8 +299,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     const reconnectAttempts = this.reconnectAttempts;
     this.reconnectAttempts = 0;
 
-    this.clearReconnectTimeout();
-    this.clearConnectionTimeout();
+    this.reconnectTimeout.clear();
+    this.connectionTimeout.clear();
 
     const { url2Connect, cause } = params;
 
@@ -422,7 +399,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       return;
     }
 
-    this.clearReconnectTimeout();
+    this.reconnectTimeout.clear();
 
     // Skip known crawlers to avoid connection reports from non-recording clients.
     const automation = getAutomationSignals();
@@ -586,7 +563,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
     if (stream) {
       const connectionTimeoutMs = this.options.timeouts.connection;
 
-      this.connectionTimeout = window.setTimeout(() => {
+      this.connectionTimeout.start(() => {
         if (this.isOnline() && this.isUserMediaLoaded()) {
           // Most likely because the Videomail server has restarted during a deployment.
           // In that case, reconnecting is the appropriate action.
@@ -621,7 +598,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
           `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
         );
 
-        this.clearConnectionTimeout();
+        this.connectionTimeout.clear();
 
         if (this.canAcceptOpenedSocket(stream.socket)) {
           this.connected = true;
@@ -629,7 +606,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
           this.connecting = this.unloaded = false;
           this.reconnecting = false;
           this.reconnectAttempts = 0;
-          this.clearReconnectTimeout();
+          this.reconnectTimeout.clear();
 
           this.emit("CONNECTED");
 
