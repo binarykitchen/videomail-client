@@ -419,8 +419,6 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
     this.emit("CONNECTING");
 
-    // https://github.com/maxogden/websocket-stream#binary-sockets
-
     /*
      * Browser WebSockets cannot send custom headers. Use a query parameter instead.
      * See https://github.com/websockets/ws/issues/467.
@@ -460,15 +458,10 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
     let nativeSocket: WebSocket;
 
-    /*
-     * Open the native socket before wrapping it as a stream.
-     * This avoids websocket-stream quirks when passing protocol arguments.
-     */
-
     try {
       nativeSocket = new WebSocket(url2Connect);
 
-      // Keep native close details before the stream wrapper hides them.
+      // The stream's close event carries no details, so keep the native ones.
       // Code 1006, for example, means an abnormal close.
       nativeSocket.addEventListener("close", (event) => {
         if (this.stream?.socket !== nativeSocket) {
