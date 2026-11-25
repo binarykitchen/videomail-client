@@ -1,27 +1,9 @@
-import type { VideomailClientOptions } from "../../types/options";
 import getVersions from "../getVersions";
-import isObjectLike from "../isObjectLike";
-import { isAudioEnabled } from "../options/audio";
-import pretty from "../string/pretty";
-import type { HTTPVideomailErrorLike } from "./HTTPVideomailError";
+import describeKnownProblem from "./problem/describeKnownProblem";
+import describeUnknownProblem from "./problem/describeUnknownProblem";
+import type { ErrorParams } from "./types";
 import type { ErrData } from "./VideomailError";
 import VideomailError from "./VideomailError";
-
-interface ErrorParams {
-  cause?: unknown;
-  err?: HTTPVideomailErrorLike;
-  exc?: unknown;
-  message?: string;
-  explanation?: string;
-  options: VideomailClientOptions;
-  classList?: string[];
-  usedConstraints?: MediaStreamConstraints;
-}
-
-// JavaScript can throw anything, e.g. a string. Those deserve a readable error, too.
-function isThrownNonError(exc: unknown) {
-  return exc !== undefined && !(exc instanceof Error);
-}
 
 /*
  * Turns whatever went wrong into a VideomailError with a friendly message.
@@ -42,178 +24,19 @@ function createError(errorParams: ErrorParams) {
     return err;
   }
 
-  let message = errorParams.message;
-  let explanation = errorParams.explanation;
-
-  const classList = errorParams.classList ?? [];
-
-  const audioEnabled = isAudioEnabled(options);
-
   const errName = err?.name ?? err?.constructor.name;
+  const knownProblem =
+    err && errName ? describeKnownProblem(errName, err, options) : undefined;
 
-  switch (errName) {
-    case VideomailError.SECURITY_ERROR:
-      message = "Your browser blocked this action";
-      explanation = "Check this page's camera permissions and security settings.";
-      classList.push(VideomailError.BROWSER_PROBLEM);
-      break;
-    case VideomailError.OVERCONSTRAINED:
-      message = "Your webcam cannot use these settings";
+  // Known problems without an explanation of their own keep the caller's one.
+  const { message, explanation = errorParams.explanation } =
+    knownProblem ?? describeUnknownProblem(errorParams, err, errName);
 
-      if (err && "constraint" in err) {
-        const overconstrainedError = err as unknown as OverconstrainedError;
-        const constraint = overconstrainedError.constraint;
-
-        if (constraint === "width") {
-          explanation = "Your webcam does not meet the width requirement.";
-        } else if (constraint) {
-          explanation = `Unmet constraint: ${constraint}`;
-        } else if (err.message) {
-          explanation = err.message;
-        }
-      } else if (err?.message) {
-        explanation = err.message;
-      }
-      break;
-    case "MediaDeviceFailedDueToShutdown":
-      message = "Webcam is shutting down";
-      explanation = "Wait for your webcam to finish switching off, then try again.";
-      break;
-    case "SourceUnavailableError":
-      message = "Cannot access your webcam";
-      explanation = "Another app may be using it, or there may be a hardware problem.";
-      break;
-    case "NO_DEVICES_FOUND":
-      if (audioEnabled) {
-        message = "No webcam or microphone found";
-        explanation = "Check that your webcam and microphone are connected.";
-      } else {
-        message = "No webcam found";
-        explanation = "Check that your webcam is connected.";
-      }
-
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case "PermissionDismissedError":
-      message = "Camera permission is needed";
-      // Notices render as plain text; "\n" becomes a line break (white-space: pre-line).
-      explanation =
-        "The camera permission prompt was closed.\n" +
-        "Please allow access when it appears again.";
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case VideomailError.NOT_ALLOWED_ERROR:
-    case VideomailError.PERMISSION_DENIED:
-    case "PermissionDeniedError":
-      message = "Permission denied";
-
-      explanation =
-        "We cannot access your webcam.\n" +
-        "Please allow camera access in your browser settings. " +
-        "Also check that no other app is using your webcam.";
-
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-
-      break;
-
-    case "HARDWARE_UNAVAILABLE":
-    case "AbortError": // That's for Firefox
-      message = "Webcam is unavailable";
-      explanation = "Another window may be using it. Close it and try again.";
-
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-
-      break;
-
-    case "NO_VIDEO_FEED":
-      message = "No video feed found";
-      explanation = "Another browser may be using your webcam.";
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case VideomailError.STARTING_FAILED:
-      message = "Could not start recording";
-      explanation = "Another browser may be using your webcam.";
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case "DevicesNotFoundError":
-      message = "No available webcam found";
-      explanation =
-        "Check that your webcam is connected and not being used by another app.";
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case VideomailError.NOT_READABLE_ERROR:
-    case VideomailError.TRACK_START_ERROR:
-      message = "Cannot access your webcam";
-      explanation = "Another browser may be using it. Close it and try again.";
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case VideomailError.INVALID_STATE_ERROR:
-      message = "Your camera stream has ended";
-      explanation = "The webcam stream is no longer active.";
-      classList.push(VideomailError.WEBCAM_PROBLEM);
-      break;
-
-    case VideomailError.DOM_EXCEPTION:
-      message = "DOM Exception";
-
-      if (err) {
-        explanation = pretty(err);
-      }
-
-      break;
-
-    // Chrome can report this if camera access starts too early.
-    // The recorder normally retries; reaching here needs investigation.
-    case VideomailError.MEDIA_DEVICE_NOT_SUPPORTED:
-      message = "Media device not supported";
-
-      if (err) {
-        explanation = pretty(err);
-      }
-
-      break;
-
-    default: {
-      const originalExplanation = explanation;
-
-      if (isObjectLike(explanation)) {
-        explanation = pretty(explanation);
-      }
-
-      // pretty() may return undefined for an error object.
-      if (!explanation && originalExplanation) {
-        explanation = `Inspected: ${originalExplanation}`;
-      }
-
-      // Fall back to the server's explanation.
-      if (!explanation && err?.explanation) {
-        explanation = err.explanation;
-      }
-
-      if (!message && err?.message) {
-        message = err.message;
-      }
-
-      // Keep a thrown string or object visible instead of "(undefined message)".
-      if (!message && isThrownNonError(exc)) {
-        message = "Unexpected error";
-        explanation ??= pretty(exc);
-      }
-
-      // Keep the error name if no message is available.
-      if (!message && errName) {
-        message = `${errName} (weird)`;
-      }
-
-      break;
-    }
-  }
+  // A fresh list, so the caller's classList never changes.
+  const classList = [
+    ...(errorParams.classList ?? []),
+    ...(knownProblem?.classList ?? []),
+  ];
 
   const logLines = options.logger.getLines?.();
 

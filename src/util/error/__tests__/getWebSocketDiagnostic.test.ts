@@ -1,4 +1,4 @@
-import getWebSocketDiagnostic from "../getWebSocketDiagnostic";
+import getWebSocketDiagnostic from "../socket/getWebSocketDiagnostic";
 
 describe("getWebSocketDiagnostic", () => {
   afterEach(() => {

@@ -8,7 +8,7 @@ import type { RecordingStats } from "../../../types/RecordingStats";
 import type { DespotEmitter } from "../../../util/Despot";
 import createError from "../../../util/error/createError";
 import getEventDetails from "../../../util/error/getEventDetails";
-import getWebSocketDiagnostic from "../../../util/error/getWebSocketDiagnostic";
+import getWebSocketDiagnostic from "../../../util/error/socket/getWebSocketDiagnostic";
 import getAutomationSignals from "../../../util/getAutomationSignals";
 import isEvent from "../../../util/isEvent";
 import pretty from "../../../util/string/pretty";

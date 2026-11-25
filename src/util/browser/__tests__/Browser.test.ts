@@ -136,16 +136,4 @@ describe("Browser class", () => {
       },
     );
   });
-
-  it("getNoAccessIssue returns error", () => {
-    const defaultOptions = mergeWithDefaultOptions({ reportErrors: false });
-    const browser = new Browser(defaultOptions);
-
-    const err = browser.getNoAccessIssue();
-
-    expect(err).toMatchObject({
-      explanation: "Your system does not let your browser access your webcam",
-      message: "Unable to access webcam",
-    });
-  });
 });

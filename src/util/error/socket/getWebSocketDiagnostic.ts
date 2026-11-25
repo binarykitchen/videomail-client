@@ -9,106 +9,12 @@
  * These probes test construction, not connectivity or the visitor's identity.
  */
 
-import getAutomationSignals from "../getAutomationSignals";
-
-function getEdgeCodes(value: string, amount: number, fromEnd?: boolean) {
-  const chars = fromEnd ? value.slice(-amount) : value.slice(0, amount);
-  const codes = Array.from(chars, (char) => String(char.codePointAt(0))).join(".");
-
-  return codes || "none";
-}
-
-function hasControlCharacters(value: string) {
-  return Array.from(value).some((char) => {
-    const code = char.codePointAt(0);
-
-    if (code === undefined) {
-      return false;
-    }
-
-    return code <= 31 || code === 127;
-  });
-}
-
-function probeWebSocketConstructor(url: string) {
-  // Test construction, not connectivity. Some crawlers fail even on a simple URL.
-  try {
-    const socket = new WebSocket(url);
-    socket.close();
-    return "ok";
-  } catch (exc) {
-    if (exc instanceof Error) {
-      return `${exc.name}:${exc.message}`;
-    }
-
-    return String(exc);
-  }
-}
-
-function getLanguagesValue() {
-  const languageList = navigator.languages;
-
-  if (languageList.length > 0) {
-    return languageList.join(",");
-  }
-
-  // navigator.languages is empty in some minimal/headless environments.
-  return navigator.language || "none";
-}
-
-function getDiagnosticSignals(probeBase: string, probeSimpleQuery: string) {
-  const reasons: string[] = [];
-  const automation = getAutomationSignals();
-
-  // Some crawlers hide webdriver, so false does not rule out automation.
-  if (automation.webdriver) {
-    reasons.push("webdriver=true");
-  }
-
-  // Some headless runtimes still leak their identity in the UA string.
-  if (automation.userAgentMatched) {
-    reasons.push("headless_ua_marker");
-  }
-
-  // Language settings are context, not proof of automation.
-  if (navigator.languages.length === 0) {
-    reasons.push("no_languages");
-  }
-
-  // A simple URL failing during construction points to a runtime problem.
-  if (probeBase !== "ok") {
-    reasons.push("probe_base_failed");
-  }
-
-  if (probeSimpleQuery !== "ok") {
-    reasons.push("probe_simple_query_failed");
-  }
-
-  return {
-    // Socket failures and language settings are diagnostics, not proof of a bot.
-    looksAutomated: automation.webdriver || automation.userAgentMatched,
-    reasons: reasons.length > 0 ? reasons.join(",") : "none",
-  };
-}
-
-function getConstructorDetails() {
-  const socketConstructor: unknown = globalThis.WebSocket;
-  const available = typeof socketConstructor === "function";
-  let name: string | undefined;
-  let arity: number | undefined;
-  let nativeLike = false;
-
-  if (available) {
-    name = socketConstructor.name.slice(0, 80);
-    arity = socketConstructor.length;
-    nativeLike = Function.prototype.toString
-      .call(socketConstructor)
-      .includes("[native code]");
-  }
-
-  // Native-looking functions can still be proxies; do not treat this as bot evidence.
-  return { available, name, arity, nativeLike };
-}
+import getConstructorDetails from "./util/getConstructorDetails";
+import getDiagnosticSignals from "./util/getDiagnosticSignals";
+import getEdgeCodes from "./util/getEdgeCodes";
+import getLanguagesValue from "./util/getLanguagesValue";
+import hasControlCharacters from "./util/hasControlCharacters";
+import probeWebSocketConstructor from "./util/probeWebSocketConstructor";
 
 function getWebSocketDiagnostic(url2Connect: string) {
   const constructor = getConstructorDetails();

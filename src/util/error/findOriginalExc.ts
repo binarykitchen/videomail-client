@@ -1,10 +1,6 @@
 import isRecord from "../isRecord";
 import HTTPVideomailError from "./HTTPVideomailError";
-
-// Superagent attaches the server's HTTP response to errors from failed requests.
-function hasResponse(exc: unknown): exc is Error & { response: unknown } {
-  return exc instanceof Error && "response" in exc;
-}
+import hasResponse from "./util/hasResponse";
 
 function findOriginalExc(exc: unknown) {
   if (!hasResponse(exc)) {

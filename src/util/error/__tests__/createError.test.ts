@@ -136,6 +136,27 @@ describe("createError fn", () => {
     expect(report).not.toHaveBeenCalled();
   });
 
+  it("adds the problem's class after the caller's classes", () => {
+    const options = mergeWithDefaultOptions({ reportErrors: false });
+    const err = new Error();
+    err.name = "NO_VIDEO_FEED";
+
+    const error = createError({ err, classList: ["custom"], options });
+
+    expect(error.getClassList()).toStrictEqual(["custom", VideomailError.WEBCAM_PROBLEM]);
+  });
+
+  it("leaves the caller's class list untouched", () => {
+    const options = mergeWithDefaultOptions({ reportErrors: false });
+    const classList = ["custom"];
+    const err = new Error();
+    err.name = "NO_VIDEO_FEED";
+
+    createError({ err, classList, options });
+
+    expect(classList).toStrictEqual(["custom"]);
+  });
+
   it("keeps a thrown string readable", () => {
     const options = mergeWithDefaultOptions({ reportErrors: false });
 

@@ -14,6 +14,7 @@ import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
 import createError from "../../util/error/createError";
+import createNoAccessError from "../../util/error/createNoAccessError";
 import isHidden from "../../util/html/isHidden";
 import { isAudioEnabled } from "../../util/options/audio";
 import pretty from "../../util/string/pretty";
@@ -208,7 +209,7 @@ class UserMedia extends Despot {
       }
 
       this.cancelAcquisition();
-      callbacks.onError(getBrowser(this.options).getNoAccessIssue());
+      callbacks.onError(createNoAccessError(this.options));
     }, options.timeout);
 
     requestMediaStreamWithPermissions({

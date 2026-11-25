@@ -15,7 +15,7 @@ import type {
 import getBrowser from "./util/browser/getBrowser";
 import createError from "./util/error/createError";
 import findOriginalExc from "./util/error/findOriginalExc";
-import sanitizeErrorReport from "./util/error/sanitizeErrorReport";
+import sanitizeErrorReport from "./util/error/sanitise/sanitizeErrorReport";
 import type VideomailError from "./util/error/VideomailError";
 import getVersions from "./util/getVersions";
 import sanitizeUrl from "./util/url/sanitizeUrl";

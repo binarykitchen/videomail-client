@@ -7,7 +7,6 @@ import type { BrowserStats } from "../../types/BrowserStats";
 import type { VideomailClientOptions } from "../../types/options";
 import type { VideoTypeType } from "../../types/VideoType";
 import { VideoType } from "../../types/VideoType";
-import createError from "../error/createError";
 
 const FALLBACK_VIDEO_TYPE = VideoType.MP4;
 
@@ -22,13 +21,10 @@ function hasWebKit27Features() {
 }
 
 class Browser {
-  private readonly options: VideomailClientOptions;
   private readonly result: IResult;
   private videoType: VideoTypeType | undefined;
 
   public constructor(options: VideomailClientOptions) {
-    this.options = options;
-
     const ua = options.fakeUaString ?? window.navigator.userAgent;
 
     const userAgentParser = new UAParser(ua);
@@ -110,22 +106,6 @@ class Browser {
     }
 
     return this.videoType;
-  }
-
-  public getNoAccessIssue() {
-    const message = "Unable to access webcam";
-
-    let explanation: string;
-
-    if (this.isChromeBased()) {
-      explanation = "Click on the allow button to grant access to your webcam";
-    } else if (this.isFirefox()) {
-      explanation = "Please grant Firefox access to your webcam";
-    } else {
-      explanation = "Your system does not let your browser access your webcam";
-    }
-
-    return createError({ message, explanation, options: this.options });
   }
 
   public getUsefulData() {
