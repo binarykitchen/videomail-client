@@ -214,23 +214,22 @@ describe("Replay", () => {
     expect(replay.isShown()).toBe(false);
   });
 
-  it("does not report an aborted play request after discarding the preview", async () => {
-    const { replay, visualsElement } = createFixture();
-    replay.build(visualsElement);
-    replay.setMp4Source("https://example.test/video.mp4");
-    replay.show(undefined, undefined);
-    const error = vi.fn();
-    replay.on("ERROR", error);
-    vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValue(
-      new DOMException("Playback was interrupted", "AbortError"),
-    );
-    replay.getElement()?.dispatchEvent(new Event("click"));
+  it.each(["touchstart", "click"])(
+    "keeps a replay playing which native controls just started, upon %s",
+    (type) => {
+      const { replay, visualsElement } = createFixture();
+      replay.build(visualsElement);
+      replay.show(undefined, undefined);
+      vi.spyOn(HTMLMediaElement.prototype, "paused", "get").mockReturnValue(false);
+      // Our test setup stubs pause(), and building the replay hides it with one call.
+      const pause = vi.spyOn(HTMLMediaElement.prototype, "pause");
+      pause.mockClear();
 
-    replay.hide({ discardPreview: true });
-    await Promise.resolve();
+      replay.getElement()?.dispatchEvent(new Event(type));
 
-    expect(error).not.toHaveBeenCalled();
-  });
+      expect(pause).not.toHaveBeenCalled();
+    },
+  );
 
   it("clears video sources when reset", () => {
     vi.useFakeTimers();

@@ -6,8 +6,6 @@ import { VideoType } from "../../types/VideoType";
 import getBrowser from "../../util/browser/getBrowser";
 import type { DespotEmitter } from "../../util/Despot";
 import Despot from "../../util/Despot";
-import createError from "../../util/error/createError";
-import isDOMExceptionNamed from "../../util/error/isDOMExceptionNamed";
 import calculateHeight from "../../util/html/dimensions/calculateHeight";
 import calculateWidth from "../../util/html/dimensions/calculateWidth";
 import canCalculateMissingDimension from "../../util/html/dimensions/canCalculateMissingDimension";
@@ -27,29 +25,6 @@ class Replay extends Despot {
   private replayElement?: HTMLVideoElement | undefined | null;
   private videomail?: Videomail | undefined;
   private canPlayThroughHandler?: (() => void) | undefined;
-
-  private readonly togglePlayback = (e: Event) => {
-    e.preventDefault();
-
-    if (this.replayElement?.paused) {
-      this.replayElement.play().catch((exc: unknown) => {
-        // Leaving the replay can abort a play request before it settles.
-        if (isDOMExceptionNamed(exc, "AbortError") && !this.isShown()) {
-          return;
-        }
-
-        const err = createError({
-          message: `Failed to play replay video upon ${e.type} event.`,
-          exc,
-          options: this.options,
-        });
-
-        this.emit("ERROR", { err });
-      });
-    } else {
-      this.replayElement?.pause();
-    }
-  };
 
   constructor(
     visuals: Visuals,
@@ -304,8 +279,12 @@ class Replay extends Despot {
         this.show(params?.width, params?.height, params?.hasAudio);
       });
 
-      this.replayElement.addEventListener("touchstart", this.togglePlayback);
-      this.replayElement.addEventListener("click", this.togglePlayback);
+      /*
+        No play/pause toggle on touchstart or click here: the native controls already
+        toggle on that very tap. WebKit's controls (iOS & Safari) act before any
+        preventDefault() of ours, so both together started playback and paused it
+        right away 🙃
+      */
     }
 
     this.built = true;
@@ -327,9 +306,6 @@ class Replay extends Despot {
     this.options.logger.debug("Replay: unload()");
 
     this.removeCanPlayThroughHandler();
-
-    this.replayElement?.removeEventListener("touchstart", this.togglePlayback);
-    this.replayElement?.removeEventListener("click", this.togglePlayback);
 
     this.removeAllListeners();
 
