@@ -2,7 +2,7 @@ import type websocket from "websocket-stream";
 
 import type { VideomailClientOptions } from "../../../types/options";
 import type { RecordingStats } from "../../../types/RecordingStats";
-import BoundedWriteQueue from "../../../util/boundedWriteQueue";
+import BoundedWriteQueue from "../../../util/BoundedWriteQueue";
 import type { DespotEmitter } from "../../../util/Despot";
 import Despot from "../../../util/Despot";
 import createError from "../../../util/error/createError";

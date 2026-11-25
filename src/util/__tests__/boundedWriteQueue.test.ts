@@ -1,4 +1,4 @@
-import BoundedWriteQueue from "../boundedWriteQueue";
+import BoundedWriteQueue from "../BoundedWriteQueue";
 
 describe("BoundedWriteQueue", () => {
   it("returns queued writes in order and releases their byte budget", () => {
