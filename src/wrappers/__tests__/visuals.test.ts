@@ -29,6 +29,31 @@ function createFixture(overrides = {}) {
   return { container, element, limitWidth, options, visuals };
 }
 
+// Visuals whose countdown the user paused before recording began.
+function createPausedCountdownFixture() {
+  // The countdown ticks on fake timers, so tests decide when time passes.
+  vi.useFakeTimers();
+  const fixture = createFixture({ video: { countdown: 3, stretch: true } });
+  const { visuals } = fixture;
+  visuals.build();
+  const recorder = visuals.getRecorder();
+  const recorderEvents = recorder as unknown as {
+    emit: (eventName: "PAUSED") => void;
+  };
+  // Pausing announces itself like the real recorder does, so the countdown pauses too.
+  vi.spyOn(recorder, "pause").mockImplementation(() => {
+    recorderEvents.emit("PAUSED");
+  });
+  const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
+  // Spy before record(): the countdown keeps a reference to the method it calls at zero.
+  const record = vi.spyOn(recorder, "record").mockImplementation(() => undefined);
+
+  visuals.record();
+  visuals.pause();
+
+  return { ...fixture, recorder, record, resumeMedia };
+}
+
 describe("Visuals", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -269,23 +294,10 @@ describe("Visuals", () => {
   });
 
   it("waits for camera recovery before resuming a paused countdown", async () => {
-    vi.useFakeTimers();
-    const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });
-    visuals.build();
-    const recorder = visuals.getRecorder();
+    const { visuals, recorder, record, resumeMedia } = createPausedCountdownFixture();
     const recovery = Promise.withResolvers<boolean>();
     vi.spyOn(recorder, "recoverCamera").mockReturnValue(recovery.promise);
-    const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
-    const record = vi.spyOn(recorder, "record").mockImplementation(() => undefined);
-    const recorderEvents = recorder as unknown as {
-      emit: (eventName: "PAUSED") => void;
-    };
-    vi.spyOn(recorder, "pause").mockImplementation(() => {
-      recorderEvents.emit("PAUSED");
-    });
 
-    visuals.record();
-    visuals.pause();
     const resume = visuals.resume();
     vi.advanceTimersByTime(1900);
     const countdownWhileRecovering = visuals
@@ -303,24 +315,11 @@ describe("Visuals", () => {
   });
 
   it("keeps a failed countdown resume paused and allows a recovery retry", async () => {
-    vi.useFakeTimers();
-    const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });
-    visuals.build();
-    const recorder = visuals.getRecorder();
+    const { visuals, recorder, record, resumeMedia } = createPausedCountdownFixture();
     vi.spyOn(recorder, "recoverCamera")
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
-    const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
-    const record = vi.spyOn(recorder, "record").mockImplementation(() => undefined);
-    const recorderEvents = recorder as unknown as {
-      emit: (eventName: "PAUSED") => void;
-    };
-    vi.spyOn(recorder, "pause").mockImplementation(() => {
-      recorderEvents.emit("PAUSED");
-    });
 
-    visuals.record();
-    visuals.pause();
     await visuals.resume();
     const recordingsAfterFailure = record.mock.calls.length;
     await visuals.resume();
@@ -334,22 +333,10 @@ describe("Visuals", () => {
   });
 
   it("does not resume a countdown if unload happens during camera recovery", async () => {
-    vi.useFakeTimers();
-    const { visuals } = createFixture({ video: { countdown: 3, stretch: true } });
-    visuals.build();
-    const recorder = visuals.getRecorder();
+    const { visuals, recorder, resumeMedia } = createPausedCountdownFixture();
     const recovery = Promise.withResolvers<boolean>();
     vi.spyOn(recorder, "recoverCamera").mockReturnValue(recovery.promise);
-    const resumeMedia = vi.spyOn(recorder, "resumeMediaForCountdown");
-    const recorderEvents = recorder as unknown as {
-      emit: (eventName: "PAUSED") => void;
-    };
-    vi.spyOn(recorder, "pause").mockImplementation(() => {
-      recorderEvents.emit("PAUSED");
-    });
 
-    visuals.record();
-    visuals.pause();
     const resume = visuals.resume();
     visuals.unload();
     recovery.resolve(true);

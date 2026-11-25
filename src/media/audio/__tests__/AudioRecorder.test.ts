@@ -101,6 +101,17 @@ function createAudioEvent(recordingId = 1, samples = new Float32Array([0.25])) {
   return new MessageEvent<unknown>("message", { data: { recordingId, samples } });
 }
 
+// Starts initialising while the worklet module is still loading, until the test settles it.
+function initWithPendingModule() {
+  const recorder = createRecorder();
+  const moduleLoad = Promise.withResolvers<undefined>();
+  // Asking for the sample rate creates the audio context early, so its module load can be held.
+  recorder.getSampleRate();
+  FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(moduleLoad.promise);
+
+  return { recorder, moduleLoad, initialization: recorder.init(STREAM) };
+}
+
 describe("AudioRecorder", () => {
   beforeEach(() => {
     FakeAudioContext.instances = [];
@@ -457,14 +468,10 @@ describe("AudioRecorder", () => {
   });
 
   it("waits for the module before constructing the audio graph", async () => {
-    const recorder = createRecorder();
-    const pending = Promise.withResolvers<undefined>();
-    recorder.getSampleRate();
-    FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
+    const { moduleLoad, initialization } = initWithPendingModule();
 
-    const initialization = recorder.init(STREAM);
     const nodesBeforeLoading = WORKLETS.length;
-    pending.resolve(undefined);
+    moduleLoad.resolve(undefined);
     await initialization;
 
     expect({ before: nodesBeforeLoading, after: WORKLETS.length }).toEqual({
@@ -545,42 +552,30 @@ describe("AudioRecorder", () => {
   });
 
   it("does not attach a late worklet after stopping", async () => {
-    const recorder = createRecorder();
-    const pending = Promise.withResolvers<undefined>();
-    recorder.getSampleRate();
-    FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
-    const initialization = recorder.init(STREAM);
+    const { recorder, moduleLoad, initialization } = initWithPendingModule();
 
     await recorder.stop();
-    pending.resolve(undefined);
+    moduleLoad.resolve(undefined);
     await initialization;
 
     expect(WORKLETS).toEqual([]);
   });
 
   it("releases a pending module URL as soon as recording is stopped", async () => {
-    const recorder = createRecorder();
-    const pending = Promise.withResolvers<undefined>();
-    recorder.getSampleRate();
-    FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
-    const initialization = recorder.init(STREAM);
+    const { recorder, moduleLoad, initialization } = initWithPendingModule();
 
     await recorder.stop();
-    pending.resolve(undefined);
+    moduleLoad.resolve(undefined);
     await initialization;
 
     expect(REVOKE_MODULE_URL).toHaveBeenCalledExactlyOnceWith("blob:videomail-audio");
   });
 
   it("ignores module load failures from a stopped initialization", async () => {
-    const recorder = createRecorder();
-    const pending = Promise.withResolvers<undefined>();
-    recorder.getSampleRate();
-    FakeAudioContext.latest.audioWorklet.addModule.mockReturnValue(pending.promise);
-    const initialization = recorder.init(STREAM);
+    const { recorder, moduleLoad, initialization } = initWithPendingModule();
 
     await recorder.stop();
-    pending.reject(new Error("cancelled module load"));
+    moduleLoad.reject(new Error("cancelled module load"));
 
     await expect(initialization).resolves.toBeUndefined();
   });
