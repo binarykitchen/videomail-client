@@ -112,8 +112,9 @@ class RecordTimer {
   }
 
   private getSecondsRecorded() {
+    // Without a countdown, no take is running, so nothing has been recorded yet.
     if (this.countdown === undefined) {
-      return this.getSecondsRecorded();
+      return 0;
     }
 
     return this.getStartSeconds() - this.countdown;
