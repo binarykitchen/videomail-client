@@ -1,5 +1,4 @@
 import { serializeError } from "serialize-error";
-import websocket from "websocket-stream";
 
 import Constants from "../../../constants";
 import type { VideomailCommand, VideomailCommandArgs } from "../../../types/command";
@@ -11,6 +10,10 @@ import getEventDetails from "../../../util/error/getEventDetails";
 import getWebSocketDiagnostic from "../../../util/error/socket/getWebSocketDiagnostic";
 import getAutomationSignals from "../../../util/getAutomationSignals";
 import isEvent from "../../../util/isEvent";
+import isVideomailCommand from "../../../util/isVideomailCommand";
+import SocketStream, {
+  type SocketCloseDetails,
+} from "../../../util/streams/SocketStream";
 import pretty from "../../../util/string/pretty";
 import summarize from "../../../util/string/summarize";
 import Timeout from "../../../util/Timeout";
@@ -38,8 +41,7 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
   protected connectingStartedAt?: number | undefined;
 
-  protected lastCloseEvent?:
-    { code: number; reason: string; wasClean: boolean } | undefined;
+  protected lastCloseEvent?: SocketCloseDetails | undefined;
 
   protected lastSocketError?: Record<string, unknown> | undefined;
 
@@ -334,6 +336,8 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       userMediaLoading: this.userMediaLoading,
       wasClean: closeEvent?.wasClean,
       socketError,
+      // Counters and buffer state of the failed socket, if it got that far.
+      socket: this.getSocketDiagnostics(),
       blocking: this.blocking,
       visibilityState: document.visibilityState,
     };
@@ -460,26 +464,6 @@ abstract class RecorderConnection extends RecorderStreamWriter {
 
     try {
       nativeSocket = new WebSocket(url2Connect);
-
-      // The stream's close event carries no details, so keep the native ones.
-      // Code 1006, for example, means an abnormal close.
-      nativeSocket.addEventListener("close", (event) => {
-        if (this.stream?.socket !== nativeSocket) {
-          return;
-        }
-        this.lastCloseEvent = {
-          code: event.code,
-          reason: event.reason,
-          wasClean: event.wasClean,
-        };
-      });
-
-      nativeSocket.addEventListener("error", (event) => {
-        if (this.stream?.socket !== nativeSocket) {
-          return;
-        }
-        this.lastSocketError = getEventDetails(event);
-      });
     } catch (exc) {
       this.connecting = this.connected = false;
 
@@ -531,118 +515,115 @@ abstract class RecorderConnection extends RecorderStreamWriter {
       return;
     }
 
+    // Handlers check against this stream, so a replaced one's late events are ignored.
+    const stream = new SocketStream(nativeSocket);
+    this.stream = stream;
+
+    this.startConnectionTimeout(url2Connect);
+    this.listenToStream(stream, url2Connect, cb);
+  }
+
+  private startConnectionTimeout(url2Connect: string) {
+    this.connectionTimeout.start(() => {
+      if (this.isOnline() && this.isUserMediaLoaded()) {
+        // Most likely because the Videomail server has restarted during a deployment.
+        // In that case, reconnecting is the appropriate action.
+
+        this.options.logger.debug(
+          `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
+        );
+
+        this.reconnecting = true;
+        this.handleConnectionFailure({ url2Connect, cause: "timeout" });
+      } else {
+        /*
+         * Covers the case where the connection stalls instead of being refused, for
+         * example when packets to the host are silently dropped. Then neither an error
+         * nor a close event ever arrives and only the OS level timeout would end it.
+         */
+        this.handleConnectionFailure({ url2Connect, cause: "timeout" });
+      }
+    }, this.options.timeouts.connection);
+  }
+
+  private listenToStream(stream: SocketStream, url2Connect: string, cb?: () => void) {
+    stream.on("close", (closeDetails) => {
+      if (this.stream === stream) {
+        // Keep the native details for reports. Code 1006, for example, means it dropped.
+        this.lastCloseEvent = closeDetails;
+        this.handleStreamClose(url2Connect);
+      }
+    });
+
+    stream.on("connect", () => {
+      if (this.stream === stream) {
+        this.handleStreamConnect(stream, cb);
+      }
+    });
+
+    stream.on("data", (text) => {
+      if (this.stream === stream) {
+        this.handleStreamData(text);
+      }
+    });
+
+    // Browsers close a socket right after an error, so its close details come along.
+    stream.on("error", (event, closeDetails) => {
+      if (this.stream === stream) {
+        this.lastCloseEvent = closeDetails;
+        this.handleStreamError(url2Connect, event);
+      }
+    });
+
+    stream.on("drain", () => {
+      if (this.stream === stream) {
+        this.handleStreamDrain(stream);
+      }
+    });
+  }
+
+  private handleStreamConnect(stream: SocketStream, cb?: () => void) {
+    this.options.logger.debug(`${PIPE_SYMBOL}Stream *connect* event emitted`);
+
+    this.connectionTimeout.clear();
+
+    if (this.canAcceptOpenedSocket(stream.socket)) {
+      this.connected = true;
+      this.connectionOpenedAt = Date.now();
+      this.connecting = this.unloaded = false;
+      this.reconnecting = false;
+      this.reconnectAttempts = 0;
+      this.reconnectTimeout.clear();
+
+      this.emit("CONNECTED");
+
+      cb?.();
+    }
+  }
+
+  private handleStreamData(text: string) {
+    // No log line: a confirmation arrives for every frame, and
+    // executeCommand() already logs everything else.
     try {
-      this.stream = websocket(nativeSocket);
+      const command: unknown = JSON.parse(text);
+
+      if (!isVideomailCommand(command)) {
+        throw new TypeError("The server message has no command name.");
+      }
+
+      this.executeCommand(command);
     } catch (exc) {
-      this.connecting = this.connected = false;
+      this.options.logger.error(`Failed to parse command: ${exc}`);
 
       const err = createError({
-        message: `Failed to create a stream to ${url2Connect}`,
-        explanation:
-          "Please check your connection and try again. If the problem persists, contact us.",
+        message: "Invalid server command",
+        // Show the raw text, see https://github.com/binarykitchen/videomail.io/issues/288
+        explanation: `Contact us. The invalid command was: ${text}.`,
         options: this.options,
         exc,
       });
 
       this.emit("ERROR", { err });
-    }
-
-    /*
-        Why this? Because it matters for event handlers.
-        Because it's a reference to the stream that matters for event handlers.
-      */
-    const stream = this.stream;
-
-    if (stream) {
-      const connectionTimeoutMs = this.options.timeouts.connection;
-
-      this.connectionTimeout.start(() => {
-        if (this.isOnline() && this.isUserMediaLoaded()) {
-          // Most likely because the Videomail server has restarted during a deployment.
-          // In that case, reconnecting is the appropriate action.
-
-          this.options.logger.debug(
-            `${PIPE_SYMBOL}Reconnecting due to connection timeout.`,
-          );
-
-          this.reconnecting = true;
-          this.handleConnectionFailure({ url2Connect, cause: "timeout" });
-        } else {
-          /*
-           * Covers the case where the connection stalls instead of being refused, for
-           * example when packets to the host are silently dropped. Then neither an error
-           * nor a close event ever arrives and only the OS level timeout would end it.
-           */
-          this.handleConnectionFailure({ url2Connect, cause: "timeout" });
-        }
-      }, connectionTimeoutMs);
-
-      stream.on("close", () => {
-        if (this.stream === stream) {
-          this.handleStreamClose(url2Connect);
-        }
-      });
-
-      stream.on("connect", (args) => {
-        if (this.stream !== stream) {
-          return;
-        }
-        this.options.logger.debug(
-          `${PIPE_SYMBOL}Stream *connect* event emitted with args: ${pretty(args)}`,
-        );
-
-        this.connectionTimeout.clear();
-
-        if (this.canAcceptOpenedSocket(stream.socket)) {
-          this.connected = true;
-          this.connectionOpenedAt = Date.now();
-          this.connecting = this.unloaded = false;
-          this.reconnecting = false;
-          this.reconnectAttempts = 0;
-          this.reconnectTimeout.clear();
-
-          this.emit("CONNECTED");
-
-          cb?.();
-        }
-      });
-
-      stream.on("data", (data: Uint8Array) => {
-        if (this.stream !== stream) {
-          return;
-        }
-
-        // No log line: a confirmation arrives for every frame, and
-        // executeCommand() already logs everything else.
-        try {
-          const command = JSON.parse(data.toString());
-          this.executeCommand(command);
-        } catch (exc) {
-          this.options.logger.error(`Failed to parse command: ${exc}`);
-
-          const err = createError({
-            message: "Invalid server command",
-            // toString() since https://github.com/binarykitchen/videomail.io/issues/288
-            explanation: `Contact us. The invalid command was: ${data.toString()}.`,
-            options: this.options,
-            exc,
-          });
-
-          this.emit("ERROR", { err });
-        }
-      });
-
-      stream.on("error", (err) => {
-        if (this.stream === stream) {
-          this.handleStreamError(url2Connect, err);
-        }
-      });
-
-      stream.on("drain", () => {
-        if (this.stream === stream) {
-          this.handleStreamDrain(stream);
-        }
-      });
     }
   }
 

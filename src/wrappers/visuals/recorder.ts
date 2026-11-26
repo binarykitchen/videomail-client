@@ -100,7 +100,12 @@ class Recorder extends RecorderCapture {
             options: this.options,
           });
 
-          this.emit("ERROR", { err });
+          /*
+           * The server rejects a take on its first bad message and closes the socket
+           * right after. Its reason is the real cause, so fail the take with it now.
+           * Otherwise that close would bury it under a vague "Recording interrupted".
+           */
+          this.handleTransportFailure(err);
           break;
         }
         case "confirmFrame":

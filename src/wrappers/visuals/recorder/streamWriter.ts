@@ -1,13 +1,12 @@
-import type websocket from "websocket-stream";
-
 import type { VideomailClientOptions } from "../../../types/options";
 import type { RecordingStats } from "../../../types/RecordingStats";
-import BoundedWriteQueue from "../../../util/BoundedWriteQueue";
 import type { DespotEmitter } from "../../../util/Despot";
 import Despot from "../../../util/Despot";
 import createError from "../../../util/error/createError";
 import type VideomailError from "../../../util/error/VideomailError";
 import getAutomationSignals from "../../../util/getAutomationSignals";
+import BoundedWriteQueue from "../../../util/streams/BoundedWriteQueue";
+import type SocketStream from "../../../util/streams/SocketStream";
 import pretty from "../../../util/string/pretty";
 import Timeout from "../../../util/Timeout";
 
@@ -40,7 +39,7 @@ abstract class RecorderStreamWriter extends Despot {
 
   protected recordingDimensions?: Pick<HTMLCanvasElement, "width" | "height"> | undefined;
 
-  protected stream?: websocket.WebSocketDuplex | undefined;
+  protected stream?: SocketStream | undefined;
 
   protected streamBackpressured = false;
 
@@ -70,11 +69,16 @@ abstract class RecorderStreamWriter extends Despot {
     super("Recorder", options, emitter);
   }
 
-  private hasExceededWebSocketSendBuffer(buffer: Buffer, opts?: WriteStreamParams) {
+  private hasExceededWebSocketSendBuffer(buffer: Uint8Array, opts?: WriteStreamParams) {
     return buffer.length > 0 && !this.pendingWrites.enqueue(buffer, opts);
   }
 
-  protected writeStream(buffer: Buffer, opts?: WriteStreamParams) {
+  // What the socket can tell about itself, so error reports show how far it got.
+  protected getSocketDiagnostics() {
+    return this.stream?.getDiagnostics();
+  }
+
+  protected writeStream(buffer: Uint8Array, opts?: WriteStreamParams) {
     if (this.stream) {
       if (this.stream.destroyed) {
         // prevents https://github.com/binarykitchen/videomail.io/issues/393
@@ -85,11 +89,12 @@ abstract class RecorderStreamWriter extends Despot {
           explanation:
             "Sorry, connection to the server has been destroyed. Please reload.",
           options: this.options,
+          cause: { socket: this.getSocketDiagnostics() },
         });
 
-        this.handleWriteFailure(err);
+        this.handleTransportFailure(err);
       } else if (this.streamBackpressured) {
-        // Keep extra chunks in our bounded queue, not the writable's buffer.
+        // Keep extra chunks in our bounded queue, not the socket's buffer.
         if (this.hasExceededWebSocketSendBuffer(buffer, opts)) {
           this.failMediaTransmission(
             createError({
@@ -97,6 +102,7 @@ abstract class RecorderStreamWriter extends Despot {
               explanation:
                 "The connection to the server is too slow to keep up with this recording. The recording has been stopped; please start a new one.",
               options: this.options,
+              cause: { socket: this.getSocketDiagnostics() },
             }),
           );
         }
@@ -106,35 +112,40 @@ abstract class RecorderStreamWriter extends Despot {
     }
   }
 
-  private writeToStream(
-    stream: websocket.WebSocketDuplex,
-    buffer: Buffer,
-    opts?: WriteStreamParams,
-  ) {
+  // Most chunks need no confirmation, so they skip the extra microtask.
+  private getFlushedCallback(opts?: WriteStreamParams) {
     const onFlushedCallback = opts?.onFlushedCallback;
 
+    if (!opts || !onFlushedCallback) {
+      return undefined;
+    }
+
+    return () => {
+      try {
+        onFlushedCallback(opts);
+      } catch (exc) {
+        const err = createError({
+          message: "Failed to write stream buffer",
+          explanation: `stream.write() failed because of ${pretty(exc)}`,
+          options: this.options,
+          exc,
+        });
+
+        this.emit("ERROR", { err });
+      }
+    };
+  }
+
+  private writeToStream(
+    stream: SocketStream,
+    buffer: Uint8Array,
+    opts?: WriteStreamParams,
+  ) {
     try {
-      const canContinue = stream.write(buffer, () => {
-        if (!onFlushedCallback) {
-          return;
-        }
-
-        try {
-          onFlushedCallback(opts);
-        } catch (exc) {
-          const err = createError({
-            message: "Failed to write stream buffer",
-            explanation: `stream.write() failed because of ${pretty(exc)}`,
-            options: this.options,
-            exc,
-          });
-
-          this.emit("ERROR", { err });
-        }
-      });
+      const canContinue = stream.write(buffer, this.getFlushedCallback(opts));
 
       if (!canContinue) {
-        // This chunk was accepted; wait for drain before submitting another.
+        // The socket took this chunk but is behind. Wait for drain before sending more.
         this.streamBackpressured = true;
         this.startBackpressureTimeout();
         this.pauseForBackpressure();
@@ -148,14 +159,15 @@ abstract class RecorderStreamWriter extends Despot {
         explanation: `stream.write() failed because of ${pretty(exc)}`,
         options: this.options,
         exc,
+        cause: { socket: this.getSocketDiagnostics() },
       });
 
-      this.handleWriteFailure(err);
+      this.handleTransportFailure(err);
       return false;
     }
   }
 
-  private flushPendingWrites(stream: websocket.WebSocketDuplex) {
+  private flushPendingWrites(stream: SocketStream) {
     if (this.isStaleStream(stream)) {
       return;
     }
@@ -163,7 +175,7 @@ abstract class RecorderStreamWriter extends Despot {
     this.streamBackpressured = false;
     this.backpressureTimeout.clear();
 
-    // Preserve media order and stop again if the writable fills during the flush.
+    // Preserve media order and stop again if the socket falls behind during the flush.
     let pendingWrite = this.pendingWrites.dequeue();
 
     while (pendingWrite) {
@@ -177,7 +189,7 @@ abstract class RecorderStreamWriter extends Despot {
     this.resumeRecordingAfterDrain();
   }
 
-  private isStaleStream(stream: websocket.WebSocketDuplex) {
+  private isStaleStream(stream: SocketStream) {
     return this.stream !== stream || stream.destroyed;
   }
 
@@ -213,7 +225,8 @@ abstract class RecorderStreamWriter extends Despot {
     return this.recordingActive && !this.isUserMediaPaused();
   }
 
-  private handleWriteFailure(err: VideomailError) {
+  // Once media flows, any transport failure ends the take. Before that, it's just reported.
+  protected handleTransportFailure(err: VideomailError) {
     if (this.mediaTransmissionStarted) {
       this.failMediaTransmission(err);
       return;
@@ -267,6 +280,7 @@ abstract class RecorderStreamWriter extends Despot {
         explanation:
           "The server stopped accepting recording data. The recording has been stopped; please check your connection and start a new one.",
         options: this.options,
+        cause: { socket: this.getSocketDiagnostics() },
       });
 
       this.failMediaTransmission(err);
@@ -297,16 +311,22 @@ abstract class RecorderStreamWriter extends Despot {
       cause: {
         transportPhase: "recording",
         mediaTransmissionStarted: true,
+        // False after Stop, while the take waited for the server's preview.
+        recordingActive: this.recordingActive,
         automation: getAutomationSignals(),
+        framesCount: this.framesCount,
+        samplesCount: this.samplesCount,
         unconfirmedFrames,
         unconfirmedSamples,
+        // Holds the close code and reason, e.g. 1006 when the network dropped.
+        socket: this.getSocketDiagnostics(),
       },
     });
 
     this.failMediaTransmission(err);
   }
 
-  protected handleStreamDrain(stream: websocket.WebSocketDuplex) {
+  protected handleStreamDrain(stream: SocketStream) {
     this.options.logger.debug(`${PIPE_SYMBOL}Stream *drain* event emitted`);
     this.flushPendingWrites(stream);
   }
@@ -322,9 +342,8 @@ abstract class RecorderStreamWriter extends Despot {
     const stream = this.stream;
     this.stream = undefined;
 
-    if (stream && !stream.destroyed) {
-      stream.destroy();
-    }
+    // Even after an error, the socket may still be open and keep its listeners.
+    stream?.destroy();
   }
 }
 

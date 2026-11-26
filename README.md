@@ -158,6 +158,8 @@ The client shows and reports errors by default, unexpected exceptions included. 
 
 Videomail errors extend the native `Error` class with details for troubleshooting.
 
+A take that has started streaming can't be resumed, so any connection problem stops it. When the Videomail server rejects a take, the `ERROR` explains the server's own reason. When the connection drops instead, the error says "Recording interrupted", and its `cause.socket` holds the close code and reason for troubleshooting 🔌
+
 ### videomailClient.show()
 
 Shows the recording form and returns its container element.

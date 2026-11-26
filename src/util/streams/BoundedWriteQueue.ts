@@ -8,7 +8,7 @@
 const DEFAULT_MAX_QUEUED_BYTES = 1_048_576;
 
 interface PendingWrite<T> {
-  buffer: Buffer;
+  buffer: Uint8Array;
   params: T | undefined;
 }
 
@@ -20,7 +20,7 @@ class BoundedWriteQueue<T> {
   constructor(private readonly maxBytes = DEFAULT_MAX_QUEUED_BYTES) {}
 
   // Reject writes that exceed the cap without changing the queue.
-  public enqueue(buffer: Buffer, params?: T) {
+  public enqueue(buffer: Uint8Array, params?: T) {
     if (this.queuedBytes + buffer.length > this.maxBytes) {
       return false;
     }

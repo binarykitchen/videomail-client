@@ -8,13 +8,15 @@ disable-model-invocation: true
 
 When analysing all tracked project files, like code, documentation, workflow, configuration, stories, instructions, basically _everything_ in this repository, follow these guidelines:
 
-1. Re-read the existing `TODO.md` document when it exists, to understand the current state of identified issues.
-2. Start the review by re-reading all relevant files and documentation to get a comprehensive understanding of the current state.
+1. (Optional) Re-read the existing `TODO.md` document when it exists, to understand the current state of identified issues.
+2. Start the review by re-reading all relevant files (like [AGENTS.md](./../../../AGENTS.md), [README.md](./../../../README.md)), code, instructions, documentation, latest Node.js API documentation and any related resources to get a comprehensive understanding of the current state.
 
    - to identify potential issues, including bugs, performance problems, accessibility issues, security vulnerabilities, and code smells.
    - figure if parts can be replaced with a well-maintained library
    - consider merging duplicate code to a new single function for reuse.
    - check for outdated dependencies and suggest updates if necessary.
+   - ensure [general instructions](./../../instructions/general/) are upheld throughout the codebase.
+   - avoid reinventing the wheel by leveraging existing libraries, public npm packages, and [Node.js API](https://nodejs.org/docs/latest/api/)
 
 3. Prioritise the issues based on their impact and severity.
 4. In a `TODO.md` document, which is ignored by git, document the identified issues following these guidelines:

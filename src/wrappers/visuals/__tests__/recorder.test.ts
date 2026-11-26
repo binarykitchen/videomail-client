@@ -1,4 +1,6 @@
+import type { VideomailCommand } from "../../../types/command";
 import mergeWithDefaultOptions from "../../../util/options/mergeWithDefaultOptions";
+import FakeWebSocket from "../../../util/streams/__tests__/FakeWebSocket";
 import type Visuals from "../../visuals";
 import Recorder from "../recorder";
 import type { RecorderLoop } from "../recorder/capture";
@@ -13,9 +15,9 @@ interface RecorderInternals {
   key?: string;
   stream?: {
     destroyed: boolean;
-    write(buffer: Buffer, callback: () => void): boolean;
+    write(buffer: Uint8Array, onFlushed?: () => void): boolean;
     destroy(): void;
-    emit?(event: string, ...args: unknown[]): boolean;
+    getDiagnostics?(): unknown;
   };
   streamBackpressured: boolean;
   mediaTransmissionStarted: boolean;
@@ -29,10 +31,11 @@ interface RecorderInternals {
   ctx?: CanvasRenderingContext2D | null;
   draw: (deltaTime: number, elapsedTime: number) => void;
   writeStream(buffer: Buffer): void;
+  executeCommand(command: VideomailCommand): void;
   onAudioSample(audioSample: { toBuffer: () => Buffer }): void;
   handleStreamDrain(stream: {
     destroyed: boolean;
-    write(buffer: Buffer, callback: () => void): boolean;
+    write(buffer: Uint8Array, onFlushed?: () => void): boolean;
   }): void;
   handleStreamClose(url2Connect: string): void;
   handleStreamError(url2Connect: string, err: unknown): void;
@@ -164,6 +167,39 @@ async function flushFrameEncoding() {
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
+}
+
+// Stands in for the recorder's SocketStream. write() decides whether the socket keeps up.
+function createFakeStream(
+  write: (buffer: Uint8Array, onFlushed?: () => void) => boolean = () => true,
+) {
+  const stream = {
+    destroyed: false,
+    destroy: vi.fn(() => {
+      stream.destroyed = true;
+    }),
+    write: vi.fn(write),
+    getDiagnostics: vi.fn(() => ({ readyState: 1 })),
+  };
+
+  return stream;
+}
+
+// Every WebSocket the recorder opens becomes a FakeWebSocket the test can drive.
+function stubWebSockets() {
+  const sockets: FakeWebSocket[] = [];
+
+  vi.stubGlobal(
+    "WebSocket",
+    class extends FakeWebSocket {
+      public constructor() {
+        super();
+        sockets.push(this);
+      }
+    },
+  );
+
+  return sockets;
 }
 
 function createRecoveryFixture() {
@@ -437,14 +473,7 @@ describe("Recorder", () => {
       on: vi.fn(),
       dispose: vi.fn(),
     };
-    const stream = {
-      destroyed: false,
-      destroy: vi.fn(),
-      write: vi.fn((_buffer: Buffer, callback: () => void) => {
-        callback();
-        return false;
-      }),
-    };
+    const stream = createFakeStream(() => false);
     internals.stream = stream;
     internals.framesCount = 145;
     clock.mockReturnValue(100);
@@ -1610,27 +1639,19 @@ describe("Recorder", () => {
     vi.useFakeTimers();
     const { options, recorder } = createFixture();
     options.reportErrors = false;
-    vi.stubGlobal(
-      "WebSocket",
-      vi.fn(function () {
-        return { readyState: 0, OPEN: 1, addEventListener: vi.fn(), close: vi.fn() };
-      }),
-    );
+    const sockets = stubWebSockets();
     const internals = recorder as unknown as RecorderInternals;
     const reported = vi.fn();
     recorder.on("ERROR", reported);
     internals.initSocket();
     const previous = internals.stream;
-    if (!previous?.emit) {
-      throw new Error("Expected a WebSocket stream");
-    }
     internals.closeIdleConnection("test-camera-denial");
     internals.initSocket();
 
-    previous.emit("error", new Error("Late transport error"));
-    previous.emit("close");
-    previous.emit("connect");
-    previous.emit("data", Buffer.from("invalid command"));
+    const discarded = sockets[0];
+    discarded?.receive("invalid command");
+    discarded?.open();
+    discarded?.fail();
 
     expect({
       errors: reported.mock.calls.length,
@@ -1680,7 +1701,7 @@ describe("Recorder", () => {
   it("pauses video writes under backpressure and resumes after queued writes drain", () => {
     const { recorder } = createFixture();
     const internals = recorder as unknown as RecorderInternals;
-    const writtenBuffers: Buffer[] = [];
+    const writtenBuffers: Uint8Array[] = [];
     let isRunning = true;
     let writeCount = 0;
     const loop = {
@@ -1692,16 +1713,11 @@ describe("Recorder", () => {
         isRunning = false;
       }),
     };
-    const stream = {
-      destroyed: false,
-      destroy: vi.fn(),
-      write: vi.fn((buffer: Buffer, callback: () => void) => {
-        writtenBuffers.push(buffer);
-        callback();
-        writeCount++;
-        return writeCount > 1;
-      }),
-    };
+    const stream = createFakeStream((buffer) => {
+      writtenBuffers.push(buffer);
+      writeCount++;
+      return writeCount > 1;
+    });
     internals.loop = { ...loop, on: vi.fn(), dispose: vi.fn() };
     internals.recordingActive = true;
     internals.stream = stream;
@@ -1733,18 +1749,13 @@ describe("Recorder", () => {
   it("queues audio samples in order while the socket is backpressured", () => {
     const { recorder } = createFixture();
     const internals = recorder as unknown as RecorderInternals;
-    const writtenBuffers: Buffer[] = [];
+    const writtenBuffers: Uint8Array[] = [];
     let writeCount = 0;
-    const stream = {
-      destroyed: false,
-      destroy: vi.fn(),
-      write: vi.fn((buffer: Buffer, callback: () => void) => {
-        writtenBuffers.push(buffer);
-        callback();
-        writeCount++;
-        return writeCount > 1;
-      }),
-    };
+    const stream = createFakeStream((buffer) => {
+      writtenBuffers.push(buffer);
+      writeCount++;
+      return writeCount > 1;
+    });
     internals.recordingActive = true;
     internals.stream = stream;
     const firstBuffer = Buffer.from("sample one");
@@ -1771,13 +1782,7 @@ describe("Recorder", () => {
   it("stops a recording when the bounded write queue fills", () => {
     const { options, recorder } = createFixture();
     const internals = recorder as unknown as RecorderInternals;
-    const stream = {
-      destroyed: false,
-      destroy: vi.fn(() => {
-        stream.destroyed = true;
-      }),
-      write: vi.fn(() => false),
-    };
+    const stream = createFakeStream(() => false);
     options.reportErrors = false;
     internals.stream = stream;
     internals.streamBackpressured = true;
@@ -1809,16 +1814,7 @@ describe("Recorder", () => {
     try {
       const { options, recorder } = createFixture();
       const internals = recorder as unknown as RecorderInternals;
-      const stream = {
-        destroyed: false,
-        destroy: vi.fn(() => {
-          stream.destroyed = true;
-        }),
-        write: vi.fn((_buffer: Buffer, callback: () => void) => {
-          callback();
-          return false;
-        }),
-      };
+      const stream = createFakeStream(() => false);
       options.reportErrors = false;
       options.timeouts.connection = 100;
       internals.stream = stream;
@@ -1874,6 +1870,75 @@ describe("Recorder", () => {
       failed: true,
       reconnecting: false,
     });
+  });
+
+  it("fails a take with the server's own reason, not with a later Recording interrupted", () => {
+    const { options, recorder } = createFixture();
+    const internals = recorder as unknown as RecorderInternals;
+    options.reportErrors = false;
+    internals.connected = true;
+    internals.mediaTransmissionStarted = true;
+    internals.stream = createFakeStream();
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+
+    // The server sends its reason, then closes the socket.
+    internals.executeCommand({
+      command: "error",
+      args: { err: { name: "ClientError", message: "Recording input was rejected." } },
+    });
+    internals.handleStreamClose(options.socketUrl);
+
+    expect(
+      reported.mock.calls.map(([{ err }]) => [err.message, err.explanation]),
+    ).toEqual([
+      ["WebSocket error from the Videomail server", "Recording input was rejected."],
+    ]);
+  });
+
+  it("reports the close code and reason when a take is interrupted", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const sockets = stubWebSockets();
+    const internals = recorder as unknown as RecorderInternals;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+    internals.initSocket();
+    sockets[0]?.open();
+    internals.mediaTransmissionStarted = true;
+
+    sockets[0]?.closeFromServer(1001, "Server shutting down.");
+
+    expect(reported).toHaveBeenCalledWith({
+      err: expect.objectContaining({
+        message: "Recording interrupted",
+        cause: expect.objectContaining({
+          socket: expect.objectContaining({
+            close: { code: 1001, reason: "Server shutting down.", wasClean: true },
+          }),
+        }),
+      }),
+    });
+  });
+
+  it("reports a server message without a command name as invalid", () => {
+    vi.useFakeTimers();
+    const { options, recorder } = createFixture();
+    options.reportErrors = false;
+    const sockets = stubWebSockets();
+    const internals = recorder as unknown as RecorderInternals;
+    const reported = vi.fn();
+    recorder.on("ERROR", reported);
+    internals.initSocket();
+    sockets[0]?.open();
+
+    sockets[0]?.receive("null");
+
+    expect(reported).toHaveBeenCalledWith({
+      err: expect.objectContaining({ message: "Invalid server command" }),
+    });
+    internals.closeIdleConnection("test-cleanup");
   });
 
   it("keeps an encoded preview usable after an abnormal socket close", () => {
