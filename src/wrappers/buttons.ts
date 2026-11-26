@@ -393,6 +393,14 @@ class Buttons extends Despot {
     this.renderControls();
   }
 
+  /*
+   * Our controls can sit inside the host's form, and unlocking that form unlocks them
+   * too. Put back what the take allows, so Record waits for the camera again.
+   */
+  public restoreControls() {
+    this.renderControls();
+  }
+
   public isReady() {
     if (!this.recordButton) {
       // Replay-only mode has no record button.

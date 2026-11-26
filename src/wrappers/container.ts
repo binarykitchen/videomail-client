@@ -785,6 +785,13 @@ class Container extends Despot {
 
   public enableForm(buttonsToo: boolean) {
     this.form?.enable(buttonsToo);
+
+    /*
+     * After a submission, "Start over" unlocks every form control, ours included.
+     * A quick click on Record then failed with "Load and enable your camera first",
+     * so the buttons decide about their own controls again.
+     */
+    this.buttons.restoreControls();
   }
 
   public hasForm() {

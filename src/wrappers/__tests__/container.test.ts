@@ -602,6 +602,22 @@ describe("Container", () => {
     ).toBe(true);
   });
 
+  it("keeps Record locked until the camera is ready when the form unlocks", () => {
+    const { container, formElement } = buildExternalSubmitFixture();
+    // A finished submission locks every control in the form, the recorder's too.
+    for (const control of formElement.elements) {
+      control.setAttribute("disabled", "disabled");
+    }
+
+    // Starting over unlocks the form again, long before the camera is back.
+    container.enableForm(true);
+
+    expect([
+      formElement.querySelector<HTMLInputElement>('input[name="subject"]')?.disabled,
+      formElement.querySelector<HTMLButtonElement>(".record")?.disabled,
+    ]).toEqual([false, true]);
+  });
+
   it.each([
     ["input", `<input id="external-submit" type="button" value="Submit">`],
     ["button", `<button id="external-submit" type="button">Submit</button>`],
