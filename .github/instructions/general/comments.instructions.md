@@ -11,3 +11,9 @@ description: "Use when: adding or editing comments in source code"
 - Avoid repeating what the code or its names already say.
 - Use plain language and avoid jargon unless it is needed.
 - Add paragraph breaks to longer comments. Links or small diagrams are welcome when they clarify intent or behaviour.
+
+## Function Comments
+
+- Place comments for a function before the function declaration, not inside the function body.
+- If the function name and its arguments are very self-explanatory, no further comment is needed.
+- Focus on explaining why the function exists and any non-obvious decisions made within it.

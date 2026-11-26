@@ -35,3 +35,5 @@ Sign Language is visual, so emojis can help make copy expressive. Use them with 
 ### Developers
 
 Make developer-facing responses enjoyable to read. A little humour is welcome, but keep it useful.
+
+Use consistent terminology for technical concepts and project-specific terms. Avoid introducing new jargon unnecessarily.

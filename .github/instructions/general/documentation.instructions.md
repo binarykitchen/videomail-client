@@ -1,6 +1,6 @@
 ---
-description: "Use when: creating or editing Markdown documentation, READMEs, or instructions"
 applyTo: "**/*.md"
+description: "Use when: creating or editing Markdown documentation, READMEs, or instructions"
 ---
 
 # Documentation 📚

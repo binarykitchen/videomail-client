@@ -1,6 +1,6 @@
 ---
-description: "Use when: managing npm dependencies, package manifests, or peer dependency conflicts"
 applyTo: "**/package.json"
+description: "Use when: managing npm dependencies, package manifests, or peer dependency conflicts"
 ---
 
 # Package management

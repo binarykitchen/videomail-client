@@ -1,6 +1,6 @@
 ---
-description: "Use when: editing Markdown structure, formatting, headings, lists, or validation"
 applyTo: "**/*.md"
+description: "Use when: editing Markdown structure, formatting, headings, lists, or validation"
 ---
 
 # Markdown

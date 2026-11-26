@@ -10,6 +10,7 @@ Object-oriented programming (OOP) is welcome where it fits, although we prefer f
 ## Class names
 
 - Name classes in PascalCase.
+  - And in their file names too.
 - Follow the existing file-naming convention; class and file names do not need to match.
 
 ## Class attributes
