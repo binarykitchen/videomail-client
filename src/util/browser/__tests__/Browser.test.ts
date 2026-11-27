@@ -136,4 +136,28 @@ describe("Browser class", () => {
       },
     );
   });
+
+  describe("useful data for videos and error reports", () => {
+    const ANDROID_CHROME =
+      "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
+
+    it("is plain data, free of any parser library", () => {
+      const options = mergeWithDefaultOptions({ fakeUaString: ANDROID_CHROME });
+
+      expect(new Browser(options).getUsefulData()).toStrictEqual({
+        ua: ANDROID_CHROME,
+        browser: { name: "Chrome", version: "140.0.0.0" },
+        // bowser leaves out what the user agent doesn't tell
+        device: { type: "mobile", vendor: undefined, model: undefined },
+        engine: { name: "Blink", version: undefined },
+        os: { name: "Android", version: "15" },
+      });
+    });
+
+    it("counts Chrome on Android as Chrome-based for camera hints", () => {
+      const options = mergeWithDefaultOptions({ fakeUaString: ANDROID_CHROME });
+
+      expect(new Browser(options).isChromeBased()).toBe(true);
+    });
+  });
 });

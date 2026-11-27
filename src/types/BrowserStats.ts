@@ -1,16 +1,30 @@
-import type { IBrowser, ICPU, IDevice, IEngine, IOS } from "ua-parser-js";
-
 /*
  * What the user agent parser found, as plain data. Videos and error reports carry it as
- * JSON, which drops the parser's helper methods like is() or withClientHints().
+ * JSON, so it stays free of any parser library's types and helper methods.
+ *
+ * The parser is bowser now (MIT). It replaced ua-parser-js, whose AGPL licence clashed
+ * with embedding this package in other websites and apps.
  */
 interface BrowserStats {
   ua: string;
-  browser: Pick<IBrowser, "name" | "version" | "major" | "type">;
-  cpu: Pick<ICPU, "architecture">;
-  device: Pick<IDevice, "type" | "vendor" | "model">;
-  engine: Pick<IEngine, "name" | "version">;
-  os: Pick<IOS, "name" | "version">;
+  browser: {
+    name?: string | undefined;
+    version?: string | undefined;
+  };
+  // Such as "mobile", "tablet", "desktop" or "tv"
+  device: {
+    type?: string | undefined;
+    vendor?: string | undefined;
+    model?: string | undefined;
+  };
+  engine: {
+    name?: string | undefined;
+    version?: string | undefined;
+  };
+  os: {
+    name?: string | undefined;
+    version?: string | undefined;
+  };
 }
 
 export type { BrowserStats };

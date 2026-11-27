@@ -57,7 +57,6 @@ export interface FullVideomailErrorData extends VideomailErrorData {
   diagnostics?: string[] | undefined;
   native?: VideomailNativeErrorData | undefined;
   browser: BrowserStats["browser"];
-  cpu?: BrowserStats["cpu"] | undefined;
   device?: BrowserStats["device"] | undefined;
   engine: BrowserStats["engine"];
   location: string;

@@ -1,5 +1,4 @@
-import type { IResult } from "ua-parser-js";
-import { UAParser } from "ua-parser-js";
+import Bowser from "bowser";
 
 import canPlayType from "../../media/video/canPlayType";
 import isSupportedVideoType from "../../media/video/isSupportedVideoType";
@@ -21,15 +20,17 @@ function hasWebKit27Features() {
 }
 
 class Browser {
-  private readonly result: IResult;
+  private readonly ua: string;
+  private readonly result: Bowser.Parser.ParsedResult;
   private videoType: VideoTypeType | undefined;
 
   public constructor(options: VideomailClientOptions) {
-    const ua = options.fakeUaString ?? window.navigator.userAgent;
+    this.ua = options.fakeUaString ?? window.navigator.userAgent;
 
-    const userAgentParser = new UAParser(ua);
-
-    this.result = userAgentParser.getResult();
+    // bowser reports the same OS & engine names as ua-parser-js did, such as "iOS",
+    // "macOS" or "WebKit". Browser names lose the "Mobile" prefix: Chrome on Android
+    // is plain "Chrome" now, so it gets Chrome's camera hints, too.
+    this.result = Bowser.parse(this.ua);
   }
 
   public isIOS() {
@@ -108,14 +109,17 @@ class Browser {
     return this.videoType;
   }
 
+  // Plain data for videos & error reports, see BrowserStats
   public getUsefulData() {
+    const { browser, engine, os, platform } = this.result;
+
     const data: BrowserStats = {
-      ua: this.result.ua,
-      browser: this.result.browser,
-      cpu: this.result.cpu,
-      device: this.result.device,
-      engine: this.result.engine,
-      os: this.result.os,
+      ua: this.ua,
+      browser: { name: browser.name, version: browser.version },
+      // bowser calls it platform, but it's the same idea as ua-parser-js' device
+      device: { type: platform.type, vendor: platform.vendor, model: platform.model },
+      engine: { name: engine.name, version: engine.version },
+      os: { name: os.name, version: os.version },
     };
 
     return data;

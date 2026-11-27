@@ -22,7 +22,6 @@ class VideomailError extends HTTPVideomailError {
   public promise?: Promise<any> | undefined;
   public reason?: any;
   public browser: BrowserStats["browser"];
-  public cpu?: BrowserStats["cpu"] | undefined;
   public device?: BrowserStats["device"] | undefined;
   public engine: BrowserStats["engine"];
   public os?: BrowserStats["os"] | undefined;
@@ -63,11 +62,6 @@ class VideomailError extends HTTPVideomailError {
     const usefulClientData = browser.getUsefulData();
 
     this.browser = usefulClientData.browser;
-
-    if (usefulClientData.cpu.architecture) {
-      this.cpu = usefulClientData.cpu;
-    }
-
     this.device = usefulClientData.device.type ? usefulClientData.device : undefined;
     this.engine = usefulClientData.engine;
     this.os = usefulClientData.os;

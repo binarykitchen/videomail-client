@@ -1,17 +1,11 @@
-import { UAParser } from "ua-parser-js";
-
 import type { FullVideomailErrorData } from "../../../types/error";
 import sanitizeErrorReport from "../sanitise/sanitizeErrorReport";
 
-const USER_AGENT =
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
-  "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
-
 function createReport(overrides?: Partial<FullVideomailErrorData>) {
-  const parser = new UAParser(USER_AGENT);
   const report: FullVideomailErrorData = {
-    browser: parser.getBrowser(),
-    engine: parser.getEngine(),
+    // What Browser.getUsefulData() reports for Chrome 140 on Linux
+    browser: { name: "Chrome", version: "140.0.0.0" },
+    engine: { name: "Blink", version: "140.0.0.0" },
     location: "https://www.videomail.io/record?token=page-secret#preview",
     message: "Recording failed",
     screen: "1920x1080x24",

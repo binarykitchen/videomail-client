@@ -62,6 +62,7 @@
   "dependencies": {
     "animitter": "3.0.0",
     "audio-sample": "8.0.1",
+    "bowser": "2.15.1",
     "deepmerge": "4.3.1",
     "document-visibility": "1.0.1",
     "dompurify": "3.5.0",
@@ -70,8 +71,7 @@
     "nanoevents": "10.0.0",
     "serialize-error": "13.1.0",
     "superagent": "10.4.2",
-    "type-fest": "5.10.0",
-    "ua-parser-js": "2.0.10"
+    "type-fest": "5.10.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "5.6.0",

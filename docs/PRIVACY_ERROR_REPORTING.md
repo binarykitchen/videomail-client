@@ -20,7 +20,7 @@ Reports keep these details for troubleshooting:
 - Error messages, stacks, causes, and diagnostic data structure.
 - The sanitised page location (origin and path), secure-context status, and whether the media capture API is available.
 - Recent logs, client/plugin versions, and the whitelist key.
-- Browser, OS, CPU, and device details.
+- Browser, OS, and device details.
 - Screen size, orientation, and supported/used media constraints.
 - Device labels, device IDs, and group IDs.
 

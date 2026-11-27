@@ -173,7 +173,6 @@ class Resource {
       browser: err.browser,
       code: err.code,
       cause: err.cause instanceof Error ? serializeError(err.cause) : err.cause,
-      cpu: err.cpu,
       device: err.device,
       engine: err.engine,
       err: err.err ? serializeError(err.err) : undefined,
