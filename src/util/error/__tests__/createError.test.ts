@@ -1,6 +1,7 @@
 import Resource from "../../../resource";
 import mergeWithDefaultOptions from "../../options/mergeWithDefaultOptions";
 import createError from "../createError";
+import type { ErrorParams } from "../types";
 import VideomailError from "../VideomailError";
 
 describe("createError fn", () => {
@@ -10,8 +11,19 @@ describe("createError fn", () => {
 
     expect(error).toMatchObject({
       explanation: undefined,
-      message: "(undefined message)",
+      message: "Unknown error",
     });
+  });
+
+  it.each([
+    [{ reason: "boom" }, 'Unexpected object as message: {"reason":"boom"}'],
+    [55296, "Unexpected number as message: 55296"],
+  ])("spells out the non-text message %j", (message, expected) => {
+    const options = mergeWithDefaultOptions({ reportErrors: false });
+    // Plain JavaScript can pass anything, whatever the types say.
+    const errorParams = { message, options } as unknown as ErrorParams;
+
+    expect(createError(errorParams).message).toBe(expected);
   });
 
   it("a videomail error with a custom message and explanation can be created", () => {

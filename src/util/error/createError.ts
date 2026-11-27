@@ -52,12 +52,7 @@ function createError(errorParams: ErrorParams) {
   };
 
   // This starts a new stack trace; errData keeps the original error.
-  const videomailError = new VideomailError(
-    message ?? "(undefined message)",
-    options,
-    classList,
-    errData,
-  );
+  const videomailError = new VideomailError(message, options, classList, errData);
 
   if (err) {
     videomailError.status = err.status;

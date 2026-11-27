@@ -1,7 +1,10 @@
 import Constants from "./constants";
 import Resource from "./resource";
 import type { VideomailEvents } from "./types/events";
-import type { PartialVideomailClientOptions } from "./types/options";
+import type {
+  PartialVideomailClientOptions,
+  VideomailClientOptions,
+} from "./types/options";
 import type { Videomail } from "./types/Videomail";
 import Despot from "./util/Despot";
 import createError from "./util/error/createError";
@@ -18,6 +21,38 @@ export interface StartOverParams {
 export interface ShowParams {
   goBack?: boolean | undefined;
   playerOnly?: boolean | undefined;
+}
+
+/*
+ * These two helpers live outside the class on purpose. 🔒
+ *
+ * TypeScript's `private` vanishes at runtime, so as methods anybody could call them with
+ * junk and mail us fake error reports. An npm package scanner fuzzing every method did
+ * exactly that, sending "[object Object]", 55296 and friends.
+ */
+function createReportedError(
+  message: string,
+  options: VideomailClientOptions,
+  errorReporter: ErrorReporter,
+) {
+  const err = createError({ message, options });
+  errorReporter.report(err);
+
+  return err;
+}
+
+// The host handles these rejections itself. We still report them, then pass them on.
+async function reportFailure<T>(
+  request: Promise<T>,
+  options: VideomailClientOptions,
+  errorReporter: ErrorReporter,
+) {
+  try {
+    return await request;
+  } catch (exc) {
+    errorReporter.report(createError({ exc, options }));
+    throw exc;
+  }
 }
 
 class VideomailClient extends Despot {
@@ -39,29 +74,19 @@ class VideomailClient extends Despot {
 
   private validateOptions() {
     if (isOddDimension(this.options.video.width)) {
-      throw this.createReportedError("Width must be divisible by two.");
+      throw createReportedError(
+        "Width must be divisible by two.",
+        this.options,
+        this.errorReporter,
+      );
     }
 
     if (isOddDimension(this.options.video.height)) {
-      throw this.createReportedError("Height must be divisible by two.");
-    }
-  }
-
-  private createReportedError(message: string) {
-    const err = createError({ message, options: this.options });
-    this.errorReporter.report(err);
-
-    return err;
-  }
-
-  // The host handles these rejections itself.
-  // We still report them, then pass them on.
-  private async reportFailure<T>(request: Promise<T>) {
-    try {
-      return await request;
-    } catch (exc) {
-      this.errorReporter.report(createError({ exc, options: this.options }));
-      throw exc;
+      throw createReportedError(
+        "Height must be divisible by two.",
+        this.options,
+        this.errorReporter,
+      );
     }
   }
 
@@ -163,22 +188,34 @@ class VideomailClient extends Despot {
 
   public async getByAlias(alias: string) {
     const resource = new Resource(this.options);
-    return await this.reportFailure(resource.getByAlias(alias));
+    return await reportFailure(
+      resource.getByAlias(alias),
+      this.options,
+      this.errorReporter,
+    );
   }
 
   public async getByKey(key: string) {
     const resource = new Resource(this.options);
-    return await this.reportFailure(resource.getByKey(key));
+    return await reportFailure(resource.getByKey(key), this.options, this.errorReporter);
   }
 
   public async getThreadByAlias(alias: string) {
     const resource = new Resource(this.options);
-    return await this.reportFailure(resource.getThreadByAlias(alias));
+    return await reportFailure(
+      resource.getThreadByAlias(alias),
+      this.options,
+      this.errorReporter,
+    );
   }
 
   public async getThreadByKey(key: string) {
     const resource = new Resource(this.options);
-    return await this.reportFailure(resource.getThreadByKey(key));
+    return await reportFailure(
+      resource.getThreadByKey(key),
+      this.options,
+      this.errorReporter,
+    );
   }
 
   public isDirty() {

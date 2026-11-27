@@ -1,4 +1,5 @@
 import { VideomailClient } from "../client";
+import Resource from "../resource";
 import Container from "../wrappers/container";
 
 vi.mock("../util/isAutomatedUserAgent", () => ({
@@ -24,6 +25,32 @@ describe("Client", () => {
     expect(() => {
       new VideomailClient({ reportErrors: false, video: { width: 99 } });
     }).toThrow(/Width must be divisible by two/u);
+  });
+
+  // An npm package scanner once called these with junk and flooded our inbox. 📮
+  it("keeps its error reporting helpers out of reach", () => {
+    const videomailClient = new VideomailClient({ reportErrors: false });
+    const helpers = ["createReportedError", "reportFailure"];
+
+    expect(helpers.filter((name) => name in videomailClient)).toEqual([]);
+  });
+
+  it("reports a failed lookup and still rejects for the host", async () => {
+    const failure = new Error("Lookup failed");
+    vi.spyOn(Resource.prototype, "getByAlias").mockRejectedValue(failure);
+    const report = vi
+      .spyOn(Resource.prototype, "reportError")
+      .mockResolvedValue(undefined);
+    const videomailClient = new VideomailClient();
+
+    const outcome = await videomailClient
+      .getByAlias("alias")
+      .catch((exc: unknown) => exc);
+
+    expect({ outcome, reports: report.mock.calls.length }).toEqual({
+      outcome: failure,
+      reports: 1,
+    });
   });
 
   it("showing it sets its built flag to true", () => {
